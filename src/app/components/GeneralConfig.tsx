@@ -1,4 +1,5 @@
 import React from 'react';
+import { Zap, Flame, Droplets } from 'lucide-react';
 import {
   NumberInput, SelectInput, FieldRow, FieldLabel,
   ConfigSection, ToggleSwitch, InlineStepper, InfoTip,
@@ -84,9 +85,35 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
   return (
     <div className="flex flex-col gap-2">
 
+      {/* ── Energy Demand Profile ── */}
+      <ConfigSection title="Energy Demand Profile" expanded={expanded.demand} onToggle={() => toggle('demand')}>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {([
+            { key: 'electricityDemand',  label: 'Electricity',   icon: <Zap     className="size-3.5 text-yellow-500 shrink-0" />, tip: undefined },
+            { key: 'spaceHeatingDemand', label: 'Space heating', icon: <Flame   className="size-3.5 text-orange-500 shrink-0" />, tip: undefined },
+            { key: 'dhwDemand',          label: 'DHW',           icon: <Droplets className="size-3.5 text-blue-500 shrink-0" />,  tip: 'Annual domestic hot water energy demand.' },
+          ] as const).map(({ key, label, icon, tip }) => (
+            <div key={key} className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-2.5">
+              <div className="mb-2 flex items-center gap-1.5">
+                {icon}
+                <span className="text-[11px] font-medium text-muted-foreground truncate">{label}</span>
+                {tip && <InfoTip tip={tip} />}
+              </div>
+              <NumberInput
+                value={general[key]}
+                onChange={(v) => setGen(key, Math.max(0, v))}
+                unit="kWh/year"
+                step={100}
+                min={0}
+              />
+            </div>
+          ))}
+        </div>
+      </ConfigSection>
+
       {/* ── Identity ── */}
       <ConfigSection title="Identity" expanded={expanded.identity} onToggle={() => toggle('identity')}>
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           <SelectInput
             label="Building type"
             value={general.buildingType}
@@ -99,12 +126,14 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
             onChange={(v) => setGen('constructionPeriod', v)}
             options={CONSTRUCTION_PERIODS}
           />
-          <SelectInput
-            label="Country / climate region"
-            value={general.country}
-            onChange={(v) => setGen('country', v)}
-            options={COUNTRIES}
-          />
+          <div className="lg:col-span-2">
+            <SelectInput
+              label="Country / climate region"
+              value={general.country}
+              onChange={(v) => setGen('country', v)}
+              options={COUNTRIES}
+            />
+          </div>
         </div>
       </ConfigSection>
 
@@ -157,7 +186,8 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
           {/* Ventilation */}
           <ConfigSection title="Ventilation" expanded={expanded.ventilation} onToggle={() => toggle('ventilation')}>
             <div className="flex flex-col gap-3">
-              <div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div>
                 <FieldLabel tip="Air changes per hour due to uncontrolled infiltration through the building envelope.">
                   Air infiltration rate
                 </FieldLabel>
@@ -166,8 +196,8 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
                   onChange={(v) => setGen('n_air_infiltration', Math.max(0, v))}
                   unit="h⁻¹" min={0} max={5} step={0.05}
                 />
-              </div>
-              <div>
+                </div>
+                <div>
                 <FieldLabel tip="Controlled ventilation air change rate due to occupant activity and mechanical systems.">
                   Ventilation use rate
                 </FieldLabel>
@@ -176,6 +206,7 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
                   onChange={(v) => setGen('n_air_use', Math.max(0, v))}
                   unit="h⁻¹" min={0} max={5} step={0.05}
                 />
+                </div>
               </div>
               <Divider />
               <InfoRow label="Total ACH">
@@ -190,7 +221,8 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
           {/* Internal loads */}
           <ConfigSection title="Internal Loads" expanded={expanded.internal} onToggle={() => toggle('internal')}>
             <div className="flex flex-col gap-3">
-              <div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div>
                 <FieldLabel tip="Mean internal heat gains from occupants, lighting and appliances per unit floor area.">
                   Internal gains φ_int
                 </FieldLabel>
@@ -199,8 +231,8 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
                   onChange={(v) => setGen('phi_int', Math.max(0, v))}
                   unit="W/m²" min={0} max={30} step={0.1}
                 />
-              </div>
-              <div>
+                </div>
+                <div>
                 <FieldLabel tip="Annual hot water energy demand per unit floor area (net energy needed).">
                   DHW demand q_w
                 </FieldLabel>
@@ -209,6 +241,7 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
                   onChange={(v) => setGen('q_w_nd', Math.max(0, v))}
                   unit="kWh/m²a" min={0} max={100} step={0.5}
                 />
+                </div>
               </div>
               <Divider />
               <InfoRow label="Annual internal gains">
@@ -223,24 +256,26 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
           {/* Thermal mass */}
           <ConfigSection title="Thermal Mass" expanded={expanded.thermal} onToggle={() => toggle('thermal')}>
             <div className="flex flex-col gap-3">
-              <SelectInput
-                label="Mass class"
-                value={general.massClass}
-                onChange={(v) => {
-                  setGen('massClass', v);
-                  setGen('c_m', MASS_DEFAULTS[v] ?? general.c_m);
-                }}
-                options={MASS_CLASSES}
-              />
-              <div>
-                <FieldLabel tip="Effective thermal capacity of the building per unit floor area. Auto-set from mass class but editable.">
-                  Thermal capacity c_m
-                </FieldLabel>
-                <NumberInput
-                  value={general.c_m}
-                  onChange={(v) => setGen('c_m', Math.max(10, v))}
-                  unit="kJ/m²K" min={10} max={500} step={5}
+              <div className="grid gap-3 lg:grid-cols-2">
+                <SelectInput
+                  label="Mass class"
+                  value={general.massClass}
+                  onChange={(v) => {
+                    setGen('massClass', v);
+                    setGen('c_m', MASS_DEFAULTS[v] ?? general.c_m);
+                  }}
+                  options={MASS_CLASSES}
                 />
+                <div>
+                  <FieldLabel tip="Effective thermal capacity of the building per unit floor area. Auto-set from mass class but editable.">
+                    Thermal capacity c_m
+                  </FieldLabel>
+                  <NumberInput
+                    value={general.c_m}
+                    onChange={(v) => setGen('c_m', Math.max(10, v))}
+                    unit="kJ/m²K" min={10} max={500} step={5}
+                  />
+                </div>
               </div>
               <Divider />
               <InfoRow label="Total thermal mass">

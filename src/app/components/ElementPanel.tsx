@@ -155,11 +155,11 @@ export function ElementPanel({
   const isWindow = el.type === 'window';
 
   return (
-    <div className="border border-border rounded-xl bg-card mb-3 overflow-hidden">
+    <div className="mb-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
       {/* Header */}
-      <div className="px-3 py-2 bg-input-background border-b border-border flex items-center gap-2">
+      <div className="flex items-center gap-2 border-b border-border/80 bg-slate-50 px-4 py-3">
         <TypeBadge type={el.type} />
-        <span className="text-[13px] font-semibold text-foreground flex-1">{el.label}</span>
+        <span className="flex-1 text-[13px] font-semibold text-foreground">{el.label}</span>
         <button
           type="button"
           onClick={onDeselect}
@@ -169,7 +169,7 @@ export function ElementPanel({
         </button>
       </div>
 
-      <div className="p-3 flex flex-col gap-3">
+      <div className="flex flex-col gap-4 p-4">
         {/* Quick stats */}
         <div className="flex gap-2">
           <StatChip label="Area"    value={el.area.toFixed(1)}    unit="m²"    />
@@ -191,7 +191,7 @@ export function ElementPanel({
         </div>
 
         {/* Thermal properties */}
-        <div className="bg-input-background border border-border rounded-lg p-3 flex flex-col gap-2">
+        <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,1))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">
             Thermal Properties
             <span
@@ -240,7 +240,7 @@ export function ElementPanel({
         </div>
 
         {/* Geometry */}
-        <div className="bg-input-background border border-border rounded-lg p-3 flex flex-col gap-3">
+        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,1))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">
             Geometry
           </p>
@@ -283,13 +283,13 @@ export function ElementPanel({
 
         {/* Roof configurator */}
         {isRoof && (
-          <div className="border border-border rounded-lg overflow-hidden">
-            <div className="px-3 py-2 bg-input-background border-b border-border">
+          <div className="overflow-hidden rounded-xl border border-slate-200 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
+            <div className="border-b border-border/80 bg-slate-50 px-3 py-2">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">
                 Roof Geometry &amp; PV Configuration
               </p>
             </div>
-            <div className="p-3">
+            <div className="bg-white p-3">
               <RoofConfigurator config={roofConfig} onChange={onRoofConfigChange} />
             </div>
           </div>

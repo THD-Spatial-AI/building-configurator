@@ -293,11 +293,11 @@ interface ConfigSectionProps {
 
 export function ConfigSection({ title, expanded, onToggle, children }: ConfigSectionProps) {
   return (
-    <div className="border border-border rounded-lg bg-card overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full h-11 px-3 flex items-center justify-between cursor-pointer select-none hover:bg-muted transition-colors duration-100"
+        className="flex h-11 w-full items-center justify-between bg-slate-50 px-3 cursor-pointer select-none transition-colors duration-100 hover:bg-muted"
       >
         <span className="text-[11px] font-semibold text-muted-foreground tracking-[0.08em] uppercase">
           {title}
@@ -314,7 +314,7 @@ export function ConfigSection({ title, expanded, onToggle, children }: ConfigSec
         className="overflow-hidden transition-[max-height] duration-200 ease-in-out"
         style={{ maxHeight: expanded ? 600 : 0 }}
       >
-        <div className={cn('px-3 pb-3 pt-1.5', expanded && 'border-t border-border')}>
+        <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
           {children}
         </div>
       </div>

@@ -1,8 +1,7 @@
 import { ThemeProvider, createTheme } from '@mui/material';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
-import { LoadProfileViewer } from './components/LoadProfileViewer';
 
 const theme = createTheme({
   palette: {
@@ -124,19 +123,15 @@ export default function App() {
       }}>
         <MapCanvas onBuildingClick={() => setShowConfigurator(true)} />
 
-        {/* Floating configurator panel + load profile below — top-right, 16 px inset */}
+        {/* Floating configurator panel — top-right, 16 px inset */}
         {showConfigurator && (
           <Box sx={{
             position: 'absolute',
             top:      16,
             right:    16,
             zIndex:   10,
-            display:  'flex',
-            flexDirection: 'column',
-            gap:      2,
           }}>
             <BuildingConfigurator onClose={() => setShowConfigurator(false)} />
-            <LoadProfileViewer buildingId="Building 3" />
           </Box>
         )}
       </Box>
