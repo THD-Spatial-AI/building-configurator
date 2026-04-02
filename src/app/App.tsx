@@ -1,6 +1,8 @@
 import { ThemeProvider, createTheme } from '@mui/material';
 import { Box, Typography } from '@mui/material';
+import { useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
+import { LoadProfileViewer } from './components/LoadProfileViewer';
 
 const theme = createTheme({
   palette: {
@@ -16,7 +18,7 @@ const theme = createTheme({
 
 // ─── Fake map canvas (dark GIS-style background) ──────────────────────────────
 
-function MapCanvas() {
+function MapCanvas({ onBuildingClick }: { onBuildingClick: () => void }) {
   return (
     <svg
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
@@ -65,9 +67,21 @@ function MapCanvas() {
         />
       ))}
 
-      {/* Highlighted building (the one being configured) */}
-      <rect x="66%" y="30%" width="7.5%" height="7%" fill="#2f5d8a" opacity="0.4" stroke="#2f5d8a" strokeWidth="1.5" rx="2" />
-      <rect x="66%" y="30%" width="7.5%" height="7%" fill="none" stroke="#5a8fc0" strokeWidth="1" strokeDasharray="4 3" rx="2" />
+      {/* Highlighted building (the one being configured) - now clickable */}
+      <g 
+        onClick={onBuildingClick} 
+        style={{ cursor: 'pointer' }}
+      >
+        <rect x="66%" y="30%" width="7.5%" height="7%" fill="#2f5d8a" opacity="0.4" stroke="#2f5d8a" strokeWidth="1.5" rx="2" />
+        <rect x="66%" y="30%" width="7.5%" height="7%" fill="none" stroke="#5a8fc0" strokeWidth="1" strokeDasharray="4 3" rx="2" />
+        {/* Click indicator */}
+        <text x="69.75%" y="33.5%" textAnchor="middle" fontSize="8" fill="#ffffff" opacity="0.8" style={{ userSelect: 'none', pointerEvents: 'none' }}>
+          Building 3
+        </text>
+        <text x="69.75%" y="35%" textAnchor="middle" fontSize="6" fill="#5a8fc0" opacity="0.9" style={{ userSelect: 'none', pointerEvents: 'none' }}>
+          Click to configure
+        </text>
+      </g>
 
       {/* Green area / park */}
       <rect x="4%" y="4%" width="18%" height="28%" fill="#1e3526" opacity="0.5" rx="3" />
@@ -96,6 +110,8 @@ function MapCanvas() {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [showConfigurator, setShowConfigurator] = useState(false);
+
   return (
     <ThemeProvider theme={theme}>
       {/* Map canvas */}
@@ -106,17 +122,23 @@ export default function App() {
         position: 'relative',
         overflow: 'auto',
       }}>
-        <MapCanvas />
+        <MapCanvas onBuildingClick={() => setShowConfigurator(true)} />
 
-        {/* Floating configurator panel — top-right, 16 px inset */}
-        <Box sx={{
-          position: 'absolute',
-          top:      16,
-          right:    16,
-          zIndex:   10,
-        }}>
-          <BuildingConfigurator />
-        </Box>
+        {/* Floating configurator panel + load profile below — top-right, 16 px inset */}
+        {showConfigurator && (
+          <Box sx={{
+            position: 'absolute',
+            top:      16,
+            right:    16,
+            zIndex:   10,
+            display:  'flex',
+            flexDirection: 'column',
+            gap:      2,
+          }}>
+            <BuildingConfigurator onClose={() => setShowConfigurator(false)} />
+            <LoadProfileViewer buildingId="Building 3" />
+          </Box>
+        )}
       </Box>
     </ThemeProvider>
   );

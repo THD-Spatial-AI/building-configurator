@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box } from '@mui/material';
 
 export interface BuildingElement {
   id: string;
@@ -81,15 +80,7 @@ interface Props {
 
 export function BuildingVisualization({ elements, selectedId, hoveredId, onSelect, onHover }: Props) {
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        width: '100%',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: `1px solid rgba(0,0,0,0.1)`,
-      }}
-    >
+    <div className="relative w-full rounded-lg overflow-hidden border border-border">
       <svg viewBox="0 0 455 320" width="100%" style={{ display: 'block' }}>
         <defs>
           <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
@@ -213,6 +204,6 @@ export function BuildingVisualization({ elements, selectedId, hoveredId, onSelec
           <text x={30} y={6} textAnchor="middle" fontSize="8" fill="#6b7a88" style={{ userSelect: 'none' }}>12 m</text>
         </g>
       </svg>
-    </Box>
+    </div>
   );
 }

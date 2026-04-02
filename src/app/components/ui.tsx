@@ -1,25 +1,31 @@
 /**
- * EnerPlanET — Building Configurator Design System
+ * Building Configurator Design System
  * Shared primitive components and design tokens.
+ *
+ * Styled with Tailwind CSS + CSS variables to match the EnerPlanET UI.
+ * Radix UI is used for Tooltip and Switch; all other components are plain HTML.
  */
 import React from 'react';
-import { Box, Typography, Tooltip, GlobalStyles } from '@mui/material';
-import { InfoOutlined, ExpandMore } from '@mui/icons-material';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import * as SwitchPrimitive from '@radix-ui/react-switch';
+import { Info, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// ─── Design tokens ─────────────────────────────────────────────────────────────
+// ─── Design tokens — CSS variable references for use in SVG attributes ─────────
+// SVG stroke/fill attributes accept var() directly, so these strings work as-is.
 
 export const T = {
-  card:        '#ffffff',
-  background:  '#f5f6f7',
-  foreground:  '#1f2933',
-  muted:       '#ececf0',
-  mutedFg:     '#717182',
-  border:      'rgba(0,0,0,0.1)',
-  primary:     '#2f5d8a',
-  primaryFg:   '#ffffff',
-  inputBg:     '#f3f3f5',
-  switchBg:    '#cbced4',
-  destructive: '#d4183d',
+  card:        'var(--color-card)',
+  background:  'var(--color-background)',
+  foreground:  'var(--color-foreground)',
+  muted:       'var(--color-muted)',
+  mutedFg:     'var(--color-muted-foreground)',
+  border:      'var(--color-border)',
+  primary:     'var(--color-primary)',
+  primaryFg:   'var(--color-primary-foreground)',
+  inputBg:     'var(--color-input-background)',
+  switchBg:    'var(--color-switch-background)',
+  destructive: 'var(--color-destructive)',
   warning:     '#92400e',
 };
 
@@ -43,98 +49,35 @@ export const ELEMENT_DOTS: Record<string, string> = {
   door:   '#8a5a38',
 };
 
-// ─── Global CSS — range slider styling ────────────────────────────────────────
+// ─── ConfiguratorStyles — no-op; styles are now in theme.css ──────────────────
 
+/** @deprecated Styles are now in theme.css. This component is kept for compatibility. */
 export function ConfiguratorStyles() {
+  return null;
+}
+
+// ─── InfoTip ──────────────────────────────────────────────────────────────────
+
+export function InfoTip({ tip }: { tip: string }) {
   return (
-    <GlobalStyles styles={{
-      // Apply Inter to the whole panel
-      '.cfg-panel, .cfg-panel *': {
-        fontFamily: "'Inter', system-ui, sans-serif",
-      },
-      // Range slider reset + theme
-      '.cfg-range': {
-        WebkitAppearance: 'none',
-        MozAppearance:    'none',
-        appearance:       'none',
-        width:            '100%',
-        height:           6,
-        background:       '#ececf0',
-        borderRadius:     3,
-        outline:          'none',
-        cursor:           'pointer',
-        padding:          0,
-        margin:           0,
-        border:           'none',
-        display:          'block',
-      },
-      '.cfg-range::-webkit-slider-thumb': {
-        WebkitAppearance: 'none',
-        width:            14,
-        height:           14,
-        borderRadius:     '50%',
-        background:       '#2f5d8a',
-        cursor:           'pointer',
-        border:           'none',
-        marginTop:        -4,
-      },
-      '.cfg-range::-webkit-slider-runnable-track': {
-        height:           6,
-        borderRadius:     3,
-        background:       '#ececf0',
-      },
-      '.cfg-range::-moz-range-thumb': {
-        width:            14,
-        height:           14,
-        borderRadius:     '50%',
-        background:       '#2f5d8a',
-        border:           'none',
-        cursor:           'pointer',
-      },
-      '.cfg-range::-moz-range-track': {
-        height:           6,
-        borderRadius:     3,
-        background:       '#ececf0',
-      },
-      // Select element clean styling
-      'select.cfg-select': {
-        width:            '100%',
-        padding:          '6px 28px 6px 10px',
-        fontSize:         14,
-        color:            '#1f2933',
-        background:       `#f3f3f5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23717182'/%3E%3C/svg%3E") no-repeat right 10px center`,
-        border:           '1px solid rgba(0,0,0,0.1)',
-        borderRadius:     '6px',
-        outline:          'none',
-        cursor:           'pointer',
-        fontFamily:       'inherit',
-        appearance:       'none',
-        WebkitAppearance: 'none',
-      },
-      'select.cfg-select:focus': {
-        boxShadow: '0 0 0 2px rgba(47,93,138,0.25)',
-      },
-      // Number input clean
-      'input.cfg-number': {
-        flex:             1,
-        border:           'none',
-        outline:          'none',
-        background:       'transparent',
-        padding:          '6px 10px',
-        fontSize:         14,
-        color:            '#1f2933',
-        fontFamily:       'inherit',
-        minWidth:         0,
-        width:            '100%',
-      },
-      'input.cfg-number::-webkit-inner-spin-button, input.cfg-number::-webkit-outer-spin-button': {
-        opacity: 0.4,
-      },
-      // Focus ring for container
-      '.cfg-input-wrap:focus-within': {
-        boxShadow: '0 0 0 2px rgba(47,93,138,0.25)',
-      },
-    }} />
+    <TooltipPrimitive.Provider delayDuration={0}>
+      <TooltipPrimitive.Root>
+        <TooltipPrimitive.Trigger asChild>
+          <span className="inline-flex items-center cursor-help shrink-0">
+            <Info className="size-3 text-muted-foreground" />
+          </span>
+        </TooltipPrimitive.Trigger>
+        <TooltipPrimitive.Portal>
+          <TooltipPrimitive.Content
+            sideOffset={4}
+            className="z-[9999] bg-foreground text-background text-[11px] leading-snug rounded-md px-2.5 py-1.5 max-w-[200px] shadow-md animate-in fade-in-0 zoom-in-95"
+          >
+            {tip}
+            <TooltipPrimitive.Arrow className="fill-foreground" />
+          </TooltipPrimitive.Content>
+        </TooltipPrimitive.Portal>
+      </TooltipPrimitive.Root>
+    </TooltipPrimitive.Provider>
   );
 }
 
@@ -158,26 +101,14 @@ export function NumberInput({
   tip, readOnly = false, width,
 }: NumberInputProps) {
   return (
-    <Box sx={{ width }}>
+    <div style={width !== undefined ? { width } : undefined}>
       {label && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: '4px' }}>
-          <Typography sx={{ fontSize: 11, fontWeight: 500, color: T.mutedFg, lineHeight: 1.2 }}>
-            {label}
-          </Typography>
+        <div className="flex items-center gap-1 mb-1">
+          <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
           {tip && <InfoTip tip={tip} />}
-        </Box>
+        </div>
       )}
-      <Box
-        className="cfg-input-wrap"
-        sx={{
-          display:       'flex',
-          bgcolor:        T.inputBg,
-          border:        `1px solid ${T.border}`,
-          borderRadius:  '6px',
-          overflow:      'hidden',
-          transition:    'box-shadow 0.15s',
-        }}
-      >
+      <div className="cfg-input-wrap">
         <input
           className="cfg-number"
           type="number"
@@ -193,24 +124,11 @@ export function NumberInput({
           }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
         />
-        <Box sx={{
-          px:           1.5,
-          display:      'flex',
-          alignItems:   'center',
-          justifyContent: 'center',
-          bgcolor:       T.muted,
-          borderLeft:   `1px solid ${T.border}`,
-          fontSize:      11,
-          color:         T.mutedFg,
-          whiteSpace:    'nowrap',
-          flexShrink:    0,
-          fontFamily:    'inherit',
-          userSelect:    'none',
-        }}>
+        <div className="px-2.5 flex items-center justify-center bg-muted border-l border-border text-[11px] text-muted-foreground whitespace-nowrap shrink-0 select-none">
           {unit}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -229,14 +147,12 @@ export function SelectInput({ label, value, onChange, options, tip }: SelectInpu
     typeof o === 'string' ? { value: o, label: o } : o
   );
   return (
-    <Box>
+    <div>
       {label && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: '4px' }}>
-          <Typography sx={{ fontSize: 11, fontWeight: 500, color: T.mutedFg, lineHeight: 1.2 }}>
-            {label}
-          </Typography>
+        <div className="flex items-center gap-1 mb-1">
+          <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
           {tip && <InfoTip tip={tip} />}
-        </Box>
+        </div>
       )}
       <select
         className="cfg-select"
@@ -247,7 +163,7 @@ export function SelectInput({ label, value, onChange, options, tip }: SelectInpu
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-    </Box>
+    </div>
   );
 }
 
@@ -264,41 +180,30 @@ interface SegmentedControlProps {
 
 export function SegmentedControl({ options, value, onChange, fullWidth }: SegmentedControlProps) {
   return (
-    <Box sx={{
-      display:      fullWidth ? 'flex' : 'inline-flex',
-      bgcolor:       T.muted,
-      borderRadius:  '6px',
-      p:             '2px',
-      gap:           '2px',
-    }}>
+    <div className={cn(
+      'inline-flex bg-muted rounded-md p-0.5 gap-0.5',
+      fullWidth && 'flex w-full',
+    )}>
       {options.map((opt) => {
         const active = value === opt.value;
         return (
-          <Box
+          <button
             key={opt.value}
+            type="button"
             onClick={() => onChange(opt.value)}
-            sx={{
-              flex:         fullWidth ? 1 : undefined,
-              px:           '12px',
-              py:           '5px',
-              borderRadius: '4px',
-              cursor:       'pointer',
-              textAlign:    'center',
-              fontSize:     12,
-              fontWeight:   active ? 600 : 400,
-              color:        active ? T.foreground : T.mutedFg,
-              bgcolor:      active ? T.card       : 'transparent',
-              boxShadow:    active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-              transition:   'all 0.15s ease',
-              userSelect:   'none',
-              whiteSpace:   'nowrap',
-            }}
+            className={cn(
+              'px-3 py-[5px] rounded text-xs select-none cursor-pointer transition-all duration-150 whitespace-nowrap',
+              fullWidth && 'flex-1',
+              active
+                ? 'bg-card text-foreground font-semibold shadow-sm'
+                : 'text-muted-foreground font-normal hover:text-foreground',
+            )}
           >
             {opt.label}
-          </Box>
+          </button>
         );
       })}
-    </Box>
+    </div>
   );
 }
 
@@ -317,7 +222,7 @@ interface RangeSliderProps {
 
 export function RangeSlider({ value, min, max, step = 1, marks, onChange }: RangeSliderProps) {
   return (
-    <Box>
+    <div>
       <input
         className="cfg-range"
         type="range"
@@ -328,15 +233,15 @@ export function RangeSlider({ value, min, max, step = 1, marks, onChange }: Rang
         onChange={(e) => onChange(parseFloat(e.target.value))}
       />
       {marks && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: '2px' }}>
+        <div className="flex justify-between mt-0.5">
           {marks.map((m) => (
-            <Typography key={m.value} sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1 }}>
+            <span key={m.value} className="text-[10px] text-muted-foreground leading-none">
               {m.label}
-            </Typography>
+            </span>
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
 
@@ -351,69 +256,19 @@ interface ToggleSwitchProps {
 
 export function ToggleSwitch({ checked, onChange, label, tip }: ToggleSwitchProps) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <Typography sx={{ fontSize: 12, color: T.foreground }}>
-          {label}
-        </Typography>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs text-foreground">{label}</span>
         {tip && <InfoTip tip={tip} />}
-      </Box>
-      <Box
-        onClick={() => onChange(!checked)}
-        sx={{
-          width:      36, height: 20,
-          borderRadius: 10,
-          bgcolor:    checked ? T.primary : T.switchBg,
-          position:   'relative',
-          cursor:     'pointer',
-          flexShrink: 0,
-          transition: 'background-color 200ms ease',
-        }}
+      </div>
+      <SwitchPrimitive.Root
+        checked={checked}
+        onCheckedChange={onChange}
+        className="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch-background inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Box sx={{
-          position:   'absolute',
-          top:        2,
-          left:       checked ? 18 : 2,
-          width:      16, height: 16,
-          borderRadius: '50%',
-          bgcolor:    'white',
-          transition: 'left 200ms ease',
-          boxShadow:  '0 1px 3px rgba(0,0,0,0.18)',
-        }} />
-      </Box>
-    </Box>
-  );
-}
-
-// ─── InfoTip ──────────────────────────────────────────────────────────────────
-
-export function InfoTip({ tip }: { tip: string }) {
-  return (
-    <Tooltip
-      title={
-        <Typography sx={{ fontSize: 11, lineHeight: 1.4, color: T.primaryFg }}>
-          {tip}
-        </Typography>
-      }
-      placement="top"
-      componentsProps={{
-        tooltip: {
-          sx: {
-            bgcolor:      T.foreground,
-            borderRadius: '6px',
-            maxWidth:     208,
-            p:            '6px 10px',
-            boxShadow:    '0 2px 8px rgba(0,0,0,0.22)',
-          },
-        },
-        arrow: { sx: { color: T.foreground } },
-      }}
-      arrow
-    >
-      <Box sx={{ display: 'inline-flex', alignItems: 'center', cursor: 'help', flexShrink: 0 }}>
-        <InfoOutlined sx={{ fontSize: '14px !important', color: T.mutedFg }} />
-      </Box>
-    </Tooltip>
+        <SwitchPrimitive.Thumb className="bg-background pointer-events-none block size-4 rounded-full shadow-sm ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0" />
+      </SwitchPrimitive.Root>
+    </div>
   );
 }
 
@@ -421,16 +276,9 @@ export function InfoTip({ tip }: { tip: string }) {
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Typography sx={{
-      fontSize:      11,
-      fontWeight:    600,
-      color:         T.mutedFg,
-      letterSpacing: '0.08em',
-      textTransform: 'uppercase',
-      display:       'block',
-    }}>
+    <span className="text-[11px] font-semibold text-muted-foreground tracking-[0.08em] uppercase block">
       {children}
-    </Typography>
+    </span>
   );
 }
 
@@ -445,108 +293,71 @@ interface ConfigSectionProps {
 
 export function ConfigSection({ title, expanded, onToggle, children }: ConfigSectionProps) {
   return (
-    <Box sx={{
-      border:       `1px solid ${T.border}`,
-      borderRadius: '8px',
-      bgcolor:       T.card,
-      overflow:     'hidden',
-    }}>
-      <Box
+    <div className="border border-border rounded-lg bg-card overflow-hidden">
+      <button
+        type="button"
         onClick={onToggle}
-        sx={{
-          height:        44,
-          px:            1.5,
-          display:       'flex',
-          alignItems:    'center',
-          justifyContent: 'space-between',
-          cursor:        'pointer',
-          userSelect:    'none',
-          '&:hover':     { bgcolor: T.muted },
-          transition:    'background-color 0.12s',
-        }}
+        className="w-full h-11 px-3 flex items-center justify-between cursor-pointer select-none hover:bg-muted transition-colors duration-100"
       >
-        <Typography sx={{
-          fontSize:      11,
-          fontWeight:    600,
-          color:         T.mutedFg,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}>
+        <span className="text-[11px] font-semibold text-muted-foreground tracking-[0.08em] uppercase">
           {title}
-        </Typography>
-        <Box sx={{
-          transform:  expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 200ms ease',
-          display:    'flex',
-          alignItems: 'center',
-          color:       T.mutedFg,
-        }}>
-          <ExpandMore sx={{ fontSize: 18 }} />
-        </Box>
-      </Box>
+        </span>
+        <ChevronDown
+          className={cn(
+            'size-4 text-muted-foreground transition-transform duration-200',
+            expanded && 'rotate-180',
+          )}
+        />
+      </button>
 
-      {/* Animated content */}
-      <Box sx={{
-        maxHeight:  expanded ? 600 : 0,
-        overflow:   'hidden',
-        transition: 'max-height 200ms ease',
-      }}>
-        <Box sx={{
-          px: 1.5, pb: 1.5, pt: 0.5,
-          borderTop: expanded ? `1px solid ${T.border}` : 'none',
-        }}>
+      <div
+        className="overflow-hidden transition-[max-height] duration-200 ease-in-out"
+        style={{ maxHeight: expanded ? 600 : 0 }}
+      >
+        <div className={cn('px-3 pb-3 pt-1.5', expanded && 'border-t border-border')}>
           {children}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ─── FieldRow — equal-width 2-column grid helper ─────────────────────────────
+// ─── FieldRow — 2-column grid ─────────────────────────────────────────────────
 
 export function FieldRow({ children }: { children: React.ReactNode }) {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+    <div className="grid grid-cols-2 gap-2">
       {children}
-    </Box>
+    </div>
   );
 }
 
-// ─── FieldLabel — label above a field ────────────────────────────────────────
+// ─── FieldLabel ───────────────────────────────────────────────────────────────
 
 export function FieldLabel({ children, tip }: { children: React.ReactNode; tip?: string }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: '4px' }}>
-      <Typography sx={{ fontSize: 11, fontWeight: 500, color: T.mutedFg, lineHeight: 1.2 }}>
-        {children}
-      </Typography>
+    <div className="flex items-center gap-1 mb-1">
+      <span className="text-[11px] font-medium text-muted-foreground leading-tight">{children}</span>
       {tip && <InfoTip tip={tip} />}
-    </Box>
+    </div>
   );
 }
 
 // ─── TypeBadge ────────────────────────────────────────────────────────────────
 
 export function TypeBadge({ type }: { type: string }) {
-  const b = TYPE_BADGES[type] ?? { bg: T.muted, fg: T.mutedFg, border: T.border };
+  const b = TYPE_BADGES[type] ?? { bg: 'var(--color-muted)', fg: 'var(--color-muted-foreground)', border: 'var(--color-border)' };
   return (
-    <Box sx={{
-      display:      'inline-flex',
-      alignItems:   'center',
-      px:           '6px',
-      py:           '2px',
-      borderRadius: '4px',
-      bgcolor:       b.bg,
-      border:       `1px solid ${b.border}`,
-    }}>
-      <Typography sx={{ fontSize: 10, fontWeight: 600, color: b.fg, textTransform: 'capitalize' }}>
-        {type}
-      </Typography>
-    </Box>
+    <span
+      className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize"
+      style={{ backgroundColor: b.bg, color: b.fg, border: `1px solid ${b.border}` }}
+    >
+      {type}
+    </span>
   );
 }
 
-// ─── InlineStepper — minus/number/plus counter ───────────────────────────────
+// ─── InlineStepper ────────────────────────────────────────────────────────────
 
 interface InlineStepperProps {
   label: string;
@@ -557,48 +368,28 @@ interface InlineStepperProps {
 }
 
 export function InlineStepper({ label, value, min = 1, onDecrement, onIncrement }: InlineStepperProps) {
+  const canDecrement = value > min;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-      <Typography sx={{ fontSize: 11, fontWeight: 500, color: T.mutedFg, flex: 1 }}>
-        {label}
-      </Typography>
-      <Box
-        onClick={() => value > min && onDecrement()}
-        sx={{
-          width:        28, height: 28,
-          border:       `1px solid ${T.border}`,
-          borderRadius: '6px',
-          display:      'flex', alignItems: 'center', justifyContent: 'center',
-          cursor:       value > min ? 'pointer' : 'not-allowed',
-          opacity:      value > min ? 1 : 0.4,
-          '&:hover':    { bgcolor: value > min ? T.muted : undefined },
-          userSelect:   'none',
-          fontSize:     18, color: T.foreground,
-        }}
+    <div className="flex items-center gap-1.5">
+      <span className="text-[11px] font-medium text-muted-foreground flex-1">{label}</span>
+      <button
+        type="button"
+        onClick={() => canDecrement && onDecrement()}
+        className={cn(
+          'size-7 border border-border rounded-md flex items-center justify-center text-lg text-foreground select-none transition-colors',
+          canDecrement ? 'cursor-pointer hover:bg-muted' : 'cursor-not-allowed opacity-40',
+        )}
       >
         −
-      </Box>
-      <Typography sx={{
-        fontSize:  14, fontWeight: 700, color: T.foreground,
-        width:     32, textAlign: 'center',
-      }}>
-        {value}
-      </Typography>
-      <Box
+      </button>
+      <span className="text-sm font-bold text-foreground w-8 text-center">{value}</span>
+      <button
+        type="button"
         onClick={onIncrement}
-        sx={{
-          width:        28, height: 28,
-          border:       `1px solid ${T.border}`,
-          borderRadius: '6px',
-          display:      'flex', alignItems: 'center', justifyContent: 'center',
-          cursor:       'pointer',
-          '&:hover':    { bgcolor: T.muted },
-          userSelect:   'none',
-          fontSize:     18, color: T.foreground,
-        }}
+        className="size-7 border border-border rounded-md flex items-center justify-center text-lg text-foreground cursor-pointer hover:bg-muted select-none transition-colors"
       >
         +
-      </Box>
-    </Box>
+      </button>
+    </div>
   );
 }

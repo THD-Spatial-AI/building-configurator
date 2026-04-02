@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Typography, Tooltip } from '@mui/material';
-import { VerifiedUser, CloudSync, WbSunny, Check, Add, Delete, RestartAlt, Warning } from '@mui/icons-material';
+import { ShieldCheck, CloudDownload, Sun, Check, Plus, Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
 import { T, NumberInput, RangeSlider, FieldRow, FieldLabel, SegmentedControl, SectionLabel } from './ui';
+import { cn } from '@/lib/utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,7 +30,7 @@ interface RoofTypeDef {
   id: RoofType;
   label: string;
   subtitle: string;
-  path: string; // SVG cross-section path
+  path: string;
 }
 
 const ROOF_TYPES: RoofTypeDef[] = [
@@ -46,26 +46,26 @@ const ROOF_TYPES: RoofTypeDef[] = [
 // ─── Default surfaces per roof type ──────────────────────────────────────────
 
 const DEFAULT_SURFACES: Record<RoofType, Omit<RoofSurface, 'id'>[]> = {
-  flat:        [{ name: 'Flat Roof',   tilt: 3,    azimuth: 180,   area: 90,   usefulArea: 76,   useForPV: true,  fromCityData: false }],
-  'mono-pitch':[{ name: 'Main Slope',  tilt: 15,   azimuth: 180,   area: 96,   usefulArea: 82,   useForPV: true,  fromCityData: false }],
+  flat:        [{ name: 'Flat Roof',   tilt: 3,  azimuth: 180, area: 90, usefulArea: 76, useForPV: true,  fromCityData: false }],
+  'mono-pitch':[{ name: 'Main Slope',  tilt: 15, azimuth: 180, area: 96, usefulArea: 82, useForPV: true,  fromCityData: false }],
   gabled: [
     { name: 'South Slope', tilt: 35, azimuth: 180, area: 52, usefulArea: 44, useForPV: true,  fromCityData: false },
     { name: 'North Slope', tilt: 35, azimuth: 0,   area: 52, usefulArea: 18, useForPV: false, fromCityData: false },
   ],
   hipped: [
-    { name: 'South Face',  tilt: 35, azimuth: 180, area: 44, usefulArea: 37, useForPV: true,  fromCityData: false },
-    { name: 'North Face',  tilt: 35, azimuth: 0,   area: 44, usefulArea: 12, useForPV: false, fromCityData: false },
-    { name: 'East Face',   tilt: 35, azimuth: 90,  area: 28, usefulArea: 20, useForPV: false, fromCityData: false },
-    { name: 'West Face',   tilt: 35, azimuth: 270, area: 28, usefulArea: 20, useForPV: false, fromCityData: false },
+    { name: 'South Face', tilt: 35, azimuth: 180, area: 44, usefulArea: 37, useForPV: true,  fromCityData: false },
+    { name: 'North Face', tilt: 35, azimuth: 0,   area: 44, usefulArea: 12, useForPV: false, fromCityData: false },
+    { name: 'East Face',  tilt: 35, azimuth: 90,  area: 28, usefulArea: 20, useForPV: false, fromCityData: false },
+    { name: 'West Face',  tilt: 35, azimuth: 270, area: 28, usefulArea: 20, useForPV: false, fromCityData: false },
   ],
   'v-shape': [
-    { name: 'East Wing',   tilt: 20, azimuth: 90,  area: 52, usefulArea: 0,  useForPV: false, fromCityData: false },
-    { name: 'West Wing',   tilt: 20, azimuth: 270, area: 52, usefulArea: 0,  useForPV: false, fromCityData: false },
+    { name: 'East Wing', tilt: 20, azimuth: 90,  area: 52, usefulArea: 0, useForPV: false, fromCityData: false },
+    { name: 'West Wing', tilt: 20, azimuth: 270, area: 52, usefulArea: 0, useForPV: false, fromCityData: false },
   ],
   'saw-tooth': [
-    { name: 'S-Slope 1',   tilt: 15, azimuth: 180, area: 30, usefulArea: 26, useForPV: true,  fromCityData: false },
-    { name: 'S-Slope 2',   tilt: 15, azimuth: 180, area: 30, usefulArea: 26, useForPV: true,  fromCityData: false },
-    { name: 'S-Slope 3',   tilt: 15, azimuth: 180, area: 30, usefulArea: 26, useForPV: true,  fromCityData: false },
+    { name: 'S-Slope 1', tilt: 15, azimuth: 180, area: 30, usefulArea: 26, useForPV: true, fromCityData: false },
+    { name: 'S-Slope 2', tilt: 15, azimuth: 180, area: 30, usefulArea: 26, useForPV: true, fromCityData: false },
+    { name: 'S-Slope 3', tilt: 15, azimuth: 180, area: 30, usefulArea: 26, useForPV: true, fromCityData: false },
   ],
   custom: [],
 };
@@ -93,9 +93,7 @@ const DEMO_3D: Partial<Record<RoofType, Demo3D>> = {
   },
   flat: {
     source: 'CityGML LoD2', buildingRef: 'DEBW_0123456789',
-    surfaces: [
-      { name: 'Flat Roof',  tilt: 2.8, azimuth: 0, area: 92.4, usefulArea: 78.6, useForPV: true,  fromCityData: true },
-    ],
+    surfaces: [{ name: 'Flat Roof', tilt: 2.8, azimuth: 0, area: 92.4, usefulArea: 78.6, useForPV: true, fromCityData: true }],
   },
 };
 
@@ -111,12 +109,10 @@ function buildSurfaces(type: RoofType, use3D: boolean): RoofSurface[] {
 
 /** PV yield score 0–100 based on tilt and azimuth (simplified). */
 function pvScore(tilt: number, az: number) {
-  const tiltOpt = 35;
-  const tiltS = Math.max(0, 1 - Math.abs(tilt - tiltOpt) / 50);
-  const azNorm = ((az % 360) + 360) % 360;
-  const azRad  = (azNorm - 180) * (Math.PI / 180);
-  const azS    = (Math.cos(azRad) + 1) / 2;
-  const score  = Math.round(tiltS * azS * 100);
+  const tiltS = Math.max(0, 1 - Math.abs(tilt - 35) / 50);
+  const azRad = (((az % 360) + 360) % 360 - 180) * (Math.PI / 180);
+  const azS   = (Math.cos(azRad) + 1) / 2;
+  const score = Math.round(tiltS * azS * 100);
 
   if (score >= 78) return { score, label: 'Excellent', color: '#16a34a', bg: '#dcfce7' };
   if (score >= 56) return { score, label: 'Good',      color: '#65a30d', bg: '#ecfccb' };
@@ -138,7 +134,7 @@ function tiltDesc(t: number) {
   return 'Very steep / near-vertical';
 }
 
-// ─── Mini visualisations ──────────────────────────────────────────────────────
+// ─── Mini compass SVG ─────────────────────────────────────────────────────────
 
 function MiniCompass({ azimuth }: { azimuth: number }) {
   const cx = 24, cy = 24, r = 16;
@@ -148,7 +144,7 @@ function MiniCompass({ azimuth }: { azimuth: number }) {
   return (
     <svg width={48} height={48} viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
       <circle cx={cx} cy={cy} r={22} fill={T.inputBg} stroke={T.border} strokeWidth={1} />
-      <circle cx={cx} cy={cy} r={r}  fill="none"    stroke={T.border} strokeWidth={0.6} strokeDasharray="2 3" />
+      <circle cx={cx} cy={cy} r={r}  fill="none" stroke={T.border} strokeWidth={0.6} strokeDasharray="2 3" />
       <line x1={cx} y1={cy} x2={ax} y2={ay} stroke={T.primary} strokeWidth={2} strokeLinecap="round" />
       <circle cx={ax} cy={ay} r={3} fill={T.primary} />
       <circle cx={cx} cy={cy} r={2.5} fill={T.foreground} />
@@ -157,6 +153,8 @@ function MiniCompass({ azimuth }: { azimuth: number }) {
     </svg>
   );
 }
+
+// ─── Tilt diagram SVG ─────────────────────────────────────────────────────────
 
 function TiltDiagram({ tilt }: { tilt: number }) {
   const rad = tilt * (Math.PI / 180);
@@ -179,32 +177,29 @@ function TiltDiagram({ tilt }: { tilt: number }) {
   );
 }
 
-// ─── Mini toggle switch (compact) ────────────────────────────────────────────
+// ─── Mini toggle switch ───────────────────────────────────────────────────────
 
 function MiniToggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <Box
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
       onClick={() => onChange(!checked)}
-      sx={{
-        width:      36, height: 20, borderRadius: 10, flexShrink: 0,
-        bgcolor:    checked ? T.primary : T.switchBg,
-        position:   'relative', cursor: 'pointer',
-        transition: 'background-color 200ms ease',
-      }}
+      className={cn(
+        'w-9 h-5 rounded-full shrink-0 relative cursor-pointer transition-colors duration-200',
+        checked ? 'bg-primary' : 'bg-switch-background',
+      )}
     >
-      <Box sx={{
-        position:   'absolute',
-        top:        2, left: checked ? 18 : 2,
-        width:      16, height: 16, borderRadius: '50%',
-        bgcolor:    'white',
-        transition: 'left 200ms ease',
-        boxShadow:  '0 1px 3px rgba(0,0,0,0.15)',
-      }} />
-    </Box>
+      <span
+        className="absolute top-0.5 size-4 rounded-full bg-background shadow-sm transition-[left] duration-200"
+        style={{ left: checked ? '18px' : '2px' }}
+      />
+    </button>
   );
 }
 
-// ─── Surface card ──────────────────────────────────────────────────────────────
+// ─── Surface card ─────────────────────────────────────────────────────────────
 
 interface SurfaceCardProps {
   surface: RoofSurface;
@@ -220,220 +215,180 @@ function SurfaceCard({ surface, index, canDelete, onChange, onDelete }: SurfaceC
 
   const update = (patch: Partial<RoofSurface>) => onChange({ ...surface, ...patch });
 
-  // Azimuth direction badge color
-  const dirBg    = dir === 'S' ? '#dcfce7' : ['SE', 'SW'].includes(dir) ? '#fef9c3' : T.muted;
-  const dirColor = dir === 'S' ? '#16a34a' : ['SE', 'SW'].includes(dir) ? '#92400e' : T.mutedFg;
+  const dirBg    = dir === 'S' ? '#dcfce7' : ['SE', 'SW'].includes(dir) ? '#fef9c3' : 'var(--color-muted)';
+  const dirColor = dir === 'S' ? '#16a34a' : ['SE', 'SW'].includes(dir) ? '#92400e' : 'var(--color-muted-foreground)';
 
   return (
-    <Box sx={{
-      border:       `1.5px solid`,
-      borderColor:  surface.useForPV ? `rgba(47,93,138,0.5)` : T.border,
-      borderRadius: '8px',
-      overflow:     'hidden',
-      bgcolor:       T.card,
-      transition:   'border-color 0.2s',
-    }}>
+    <div
+      className={cn(
+        'border-[1.5px] rounded-lg overflow-hidden bg-card transition-colors duration-200',
+        surface.useForPV ? 'border-primary/50' : 'border-border',
+      )}
+    >
       {/* Card header */}
-      <Box sx={{
-        px:         1.25, py: '8px',
-        bgcolor:    surface.useForPV ? 'rgba(47,93,138,0.05)' : T.inputBg,
-        borderBottom: `1px solid ${T.border}`,
-        display:    'flex', alignItems: 'center', gap: '6px',
-      }}>
+      <div
+        className="px-3 py-2 border-b border-border flex items-center gap-1.5"
+        style={{ backgroundColor: surface.useForPV ? 'rgba(47,93,138,0.05)' : 'var(--color-input-background)' }}
+      >
         {/* Editable name */}
-        <Box
-          component="input"
+        <input
           type="text"
           value={surface.name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => update({ name: e.target.value })}
-          sx={{
-            flex: 1, border: 'none', outline: 'none', bgcolor: 'transparent',
-            fontSize: 12, fontWeight: 600,
-            color: surface.useForPV ? T.primary : T.foreground,
-            fontFamily: 'inherit', minWidth: 0,
-          }}
+          onChange={(e) => update({ name: e.target.value })}
+          className={cn(
+            'flex-1 border-none outline-none bg-transparent text-xs font-semibold min-w-0',
+            surface.useForPV ? 'text-primary' : 'text-foreground',
+          )}
         />
 
-        {/* 3D city data badge */}
+        {/* 3D badge */}
         {surface.fromCityData && (
-          <Box sx={{
-            display: 'flex', alignItems: 'center', gap: '3px',
-            px: '5px', py: '2px', borderRadius: '4px',
-            bgcolor: '#eff6ff', border: '1px solid #bfdbfe',
-            flexShrink: 0,
-          }}>
-            <VerifiedUser sx={{ fontSize: '10px !important', color: '#1d4ed8' }} />
-            <Typography sx={{ fontSize: 9, fontWeight: 600, color: '#1d4ed8' }}>3D</Typography>
-          </Box>
+          <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200 shrink-0">
+            <ShieldCheck className="size-2.5 text-blue-700" />
+            <span className="text-[9px] font-semibold text-blue-700">3D</span>
+          </span>
         )}
 
-        {/* PV score badge */}
-        <Box sx={{
-          px: '5px', py: '2px', borderRadius: '4px', flexShrink: 0,
-          bgcolor: pv.bg,
-        }}>
-          <Typography sx={{ fontSize: 9, fontWeight: 600, color: pv.color }}>
-            {pv.label} {pv.score}%
-          </Typography>
-        </Box>
+        {/* PV score */}
+        <span
+          className="px-1.5 py-0.5 rounded text-[9px] font-semibold shrink-0"
+          style={{ backgroundColor: pv.bg, color: pv.color }}
+        >
+          {pv.label} {pv.score}%
+        </span>
 
         {/* Delete */}
         {canDelete && (
-          <Box
+          <button
+            type="button"
             onClick={onDelete}
-            sx={{
-              width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              borderRadius: '4px', cursor: 'pointer', flexShrink: 0,
-              color: T.mutedFg, '&:hover': { bgcolor: '#fee2e2', color: '#dc2626' },
-              '& svg': { fontSize: '14px !important' },
-            }}
+            className="size-5 flex items-center justify-center rounded cursor-pointer text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors shrink-0"
           >
-            <Delete />
-          </Box>
+            <Trash2 className="size-3.5" />
+          </button>
         )}
-      </Box>
+      </div>
 
       {/* Card body */}
-      <Box sx={{ p: 1.25, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+      <div className="p-3 flex flex-col gap-3">
 
-        {/* ── Pitch ── */}
-        <Box sx={{
-          bgcolor: T.inputBg, borderRadius: '6px', p: '10px',
-          border: `1px solid ${T.border}`,
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+        {/* Pitch */}
+        <div className="bg-input-background rounded-md p-2.5 border border-border">
+          <div className="flex items-start gap-2">
             <TiltDiagram tilt={Math.round(surface.tilt)} />
-            <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: '4px' }}>
-                <Typography sx={{ fontSize: 10, fontWeight: 600, color: T.mutedFg, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">
                   PITCH
-                </Typography>
+                </span>
                 <NumberInput
                   value={parseFloat(surface.tilt.toFixed(1))}
                   onChange={(v) => update({ tilt: Math.min(90, Math.max(0, v)), fromCityData: false })}
                   unit="°" min={0} max={90} step={0.5}
                   width={80}
                 />
-              </Box>
+              </div>
               <RangeSlider
                 value={surface.tilt}
                 min={0} max={90} step={0.5}
                 marks={[
-                  { value: 0,  label: '0° flat'  },
-                  { value: 15, label: '15°'       },
-                  { value: 30, label: '30°'       },
-                  { value: 45, label: '45°'       },
-                  { value: 90, label: '90° wall'  },
+                  { value: 0,  label: '0° flat' },
+                  { value: 15, label: '15°'      },
+                  { value: 30, label: '30°'      },
+                  { value: 45, label: '45°'      },
+                  { value: 90, label: '90° wall' },
                 ]}
                 onChange={(v) => update({ tilt: v, fromCityData: false })}
               />
-              <Typography sx={{ fontSize: 10, color: T.mutedFg, mt: '3px' }}>
-                {tiltDesc(surface.tilt)}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{tiltDesc(surface.tilt)}</p>
+            </div>
+          </div>
+        </div>
 
-        {/* ── Azimuth ── */}
-        <Box sx={{
-          bgcolor: T.inputBg, borderRadius: '6px', p: '10px',
-          border: `1px solid ${T.border}`,
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+        {/* Azimuth */}
+        <div className="bg-input-background rounded-md p-2.5 border border-border">
+          <div className="flex items-start gap-2">
             <MiniCompass azimuth={surface.azimuth} />
-            <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: '4px', gap: '6px' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <Typography sx={{ fontSize: 10, fontWeight: 600, color: T.mutedFg, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1 gap-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">
                     AZIMUTH
-                  </Typography>
-                  <Box sx={{ px: '5px', py: '2px', borderRadius: '4px', bgcolor: dirBg }}>
-                    <Typography sx={{ fontSize: 9, fontWeight: 700, color: dirColor }}>{dir}</Typography>
-                  </Box>
-                </Box>
+                  </span>
+                  <span
+                    className="px-1.5 py-0.5 rounded text-[9px] font-bold"
+                    style={{ backgroundColor: dirBg, color: dirColor }}
+                  >
+                    {dir}
+                  </span>
+                </div>
                 <NumberInput
                   value={parseFloat(surface.azimuth.toFixed(1))}
                   onChange={(v) => update({ azimuth: ((v % 360) + 360) % 360, fromCityData: false })}
                   unit="°" min={0} max={360} step={0.5}
                   width={80}
                 />
-              </Box>
+              </div>
               <RangeSlider
                 value={surface.azimuth}
                 min={0} max={360} step={1}
                 marks={[
-                  { value: 0,   label: 'N'  },
-                  { value: 90,  label: 'E'  },
-                  { value: 180, label: 'S ★' },
-                  { value: 270, label: 'W'  },
-                  { value: 360, label: 'N'  },
+                  { value: 0,   label: 'N'    },
+                  { value: 90,  label: 'E'    },
+                  { value: 180, label: 'S ★'  },
+                  { value: 270, label: 'W'    },
+                  { value: 360, label: 'N'    },
                 ]}
                 onChange={(v) => update({ azimuth: v, fromCityData: false })}
               />
-            </Box>
-          </Box>
-        </Box>
+            </div>
+          </div>
+        </div>
 
-        {/* ── Areas ── */}
+        {/* Areas */}
         <FieldRow>
-          <Tooltip
-            title={<Typography sx={{ fontSize: 11 }}>Total gross surface area of this roof face.</Typography>}
-            placement="top" arrow
-          >
-            <Box>
-              <NumberInput
-                label="Gross area"
-                value={surface.area}
-                onChange={(v) => update({ area: v, usefulArea: Math.min(surface.usefulArea, v) })}
-                unit="m²" step={0.1} min={0}
-              />
-            </Box>
-          </Tooltip>
-          <Tooltip
-            title={
-              <Typography sx={{ fontSize: 11 }}>
-                Net area usable for PV — after setbacks, chimneys, skylight exclusions. Max: {surface.area.toFixed(1)} m².
-              </Typography>
-            }
-            placement="top" arrow
-          >
-            <Box>
-              <NumberInput
-                label="Useful (PV)"
-                value={surface.usefulArea}
-                onChange={(v) => update({ usefulArea: Math.min(v, surface.area) })}
-                unit="m²" step={0.1} min={0}
-              />
-            </Box>
-          </Tooltip>
+          <div title="Total gross surface area of this roof face.">
+            <NumberInput
+              label="Gross area"
+              value={surface.area}
+              onChange={(v) => update({ area: v, usefulArea: Math.min(surface.usefulArea, v) })}
+              unit="m²" step={0.1} min={0}
+            />
+          </div>
+          <div title={`Net area usable for PV — after setbacks and exclusions. Max: ${surface.area.toFixed(1)} m².`}>
+            <NumberInput
+              label="Useful (PV)"
+              value={surface.usefulArea}
+              onChange={(v) => update({ usefulArea: Math.min(v, surface.area) })}
+              unit="m²" step={0.1} min={0}
+            />
+          </div>
         </FieldRow>
 
-        {/* ── PV toggle ── */}
-        <Box sx={{
-          px: '10px', py: '8px', borderRadius: '6px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
-          bgcolor:    surface.useForPV ? 'rgba(22,163,74,0.07)' : T.inputBg,
-          border:     `1px solid`,
-          borderColor: surface.useForPV ? 'rgba(22,163,74,0.35)' : T.border,
-          transition: 'all 0.2s',
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <WbSunny sx={{ fontSize: '14px !important', color: surface.useForPV ? '#ca8a04' : T.mutedFg }} />
-            <Box>
-              <Typography sx={{ fontSize: 11, color: surface.useForPV ? T.foreground : T.mutedFg, fontWeight: surface.useForPV ? 500 : 400 }}>
+        {/* PV toggle */}
+        <div
+          className={cn(
+            'px-2.5 py-2 rounded-md flex items-center justify-between gap-2 border transition-all duration-200',
+            surface.useForPV
+              ? 'bg-green-50/70 border-green-300/50'
+              : 'bg-input-background border-border',
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            <Sun className={cn('size-3.5', surface.useForPV ? 'text-amber-500' : 'text-muted-foreground')} />
+            <div>
+              <p className={cn('text-[11px]', surface.useForPV ? 'text-foreground font-medium' : 'text-muted-foreground')}>
                 Include in PV simulation
-              </Typography>
+              </p>
               {surface.useForPV && (
-                <Typography sx={{ fontSize: 10, color: '#16a34a' }}>
-                  {surface.usefulArea.toFixed(1)} m² contributing
-                </Typography>
+                <p className="text-[10px] text-green-600">{surface.usefulArea.toFixed(1)} m² contributing</p>
               )}
-            </Box>
-          </Box>
+            </div>
+          </div>
           <MiniToggle checked={surface.useForPV} onChange={(v) => update({ useForPV: v })} />
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -449,27 +404,25 @@ export function RoofConfigurator({ config, onChange }: RoofConfiguratorProps) {
   const has3D  = Boolean(demo3D);
   const [showWarning, setShowWarning] = useState(false);
 
-  // Check if any surfaces were modified from original 3D data
   const hasModifiedSurfaces = config.from3DData && config.surfaces.some((s) => !s.fromCityData);
 
-  // ── Roof type change ────────────────────────────────────────────────────────
   const handleTypeChange = (type: RoofType) => {
     const demo = DEMO_3D[type];
     onChange({ type, from3DData: Boolean(demo), surfaces: buildSurfaces(type, Boolean(demo)) });
     setShowWarning(false);
   };
 
-  const handleUse3D  = () => {
+  const handleUse3D = () => {
     if (!demo3D) return;
     onChange({ ...config, from3DData: true, surfaces: demo3D.surfaces.map((s) => ({ ...s, id: uid() })) });
     setShowWarning(false);
   };
+
   const handleManual = () => {
     onChange({ ...config, from3DData: false, surfaces: DEFAULT_SURFACES[config.type].map((s) => ({ ...s, id: uid() })) });
     setShowWarning(false);
   };
 
-  // ── Reset surfaces to original 3D or default ─────────────────────────────────
   const handleReset = () => {
     if (config.from3DData && demo3D) {
       onChange({ ...config, surfaces: demo3D.surfaces.map((s) => ({ ...s, id: uid() })) });
@@ -479,7 +432,6 @@ export function RoofConfigurator({ config, onChange }: RoofConfiguratorProps) {
     setShowWarning(false);
   };
 
-  // ── Surface CRUD ─────────────────────────────────────────────────────────────
   const updateSurface = (id: string, updated: RoofSurface) =>
     onChange({ ...config, surfaces: config.surfaces.map((s) => (s.id === id ? updated : s)) });
 
@@ -487,11 +439,7 @@ export function RoofConfigurator({ config, onChange }: RoofConfiguratorProps) {
     onChange({ ...config, surfaces: config.surfaces.filter((s) => s.id !== id) });
 
   const addSurface = () => {
-    // Show warning if trying to add surface when using 3D data
-    if (config.from3DData) {
-      setShowWarning(true);
-      return;
-    }
+    if (config.from3DData) { setShowWarning(true); return; }
     onChange({
       ...config,
       surfaces: [...config.surfaces, {
@@ -501,106 +449,80 @@ export function RoofConfigurator({ config, onChange }: RoofConfiguratorProps) {
     });
   };
 
-  // ── Summary ─────────────────────────────────────────────────────────────────
   const totalArea = config.surfaces.reduce((s, r) => s + r.area, 0);
   const pvSurfs   = config.surfaces.filter((s) => s.useForPV);
   const pvArea    = pvSurfs.reduce((s, r) => s + r.usefulArea, 0);
   const coverPct  = totalArea > 0 ? Math.round((pvArea / totalArea) * 100) : 0;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+    <div className="flex flex-col gap-3">
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <WbSunny sx={{ fontSize: '16px !important', color: '#ca8a04' }} />
-        <Typography sx={{ fontSize: 12, fontWeight: 600, color: T.foreground }}>
-          Roof Geometry &amp; PV Surfaces
-        </Typography>
-      </Box>
+      <div className="flex items-center gap-1.5">
+        <Sun className="size-4 text-amber-500" />
+        <span className="text-xs font-semibold text-foreground">Roof Geometry &amp; PV Surfaces</span>
+      </div>
 
-      {/* ── 3D data banner ── */}
+      {/* 3D data banner */}
       {has3D ? (
         config.from3DData ? (
-          <Box sx={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            bgcolor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px',
-            px: '10px', py: '7px',
-          }}>
-            <VerifiedUser sx={{ fontSize: '14px !important', color: '#1d4ed8', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: 11, color: '#1d4ed8', flex: 1 }}>
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-2.5 py-1.5">
+            <ShieldCheck className="size-3.5 text-blue-700 shrink-0" />
+            <span className="text-[11px] text-blue-700 flex-1">
               <strong>{demo3D!.source}</strong> · {demo3D!.buildingRef} · Inferred from 3D city model
-            </Typography>
-            <Box
+            </span>
+            <button
+              type="button"
               onClick={handleManual}
-              sx={{
-                px: '8px', py: '3px', borderRadius: '4px', cursor: 'pointer',
-                border: '1px solid #bfdbfe',
-                '&:hover': { bgcolor: '#dbeafe' },
-                flexShrink: 0,
-              }}
+              className="px-2 py-1 rounded border border-blue-200 text-[10px] font-semibold text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors shrink-0"
             >
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: '#1d4ed8' }}>Edit manually</Typography>
-            </Box>
-          </Box>
+              Edit manually
+            </button>
+          </div>
         ) : (
-          <Box sx={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            bgcolor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px',
-            px: '10px', py: '7px',
-          }}>
-            <Typography sx={{ fontSize: 11, color: '#92400e', flex: 1 }}>
+          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+            <span className="text-[11px] text-amber-800 flex-1">
               Manual mode — <strong>{demo3D!.source}</strong> data available for this roof type.
-            </Typography>
-            <Box
+            </span>
+            <button
+              type="button"
               onClick={handleUse3D}
-              sx={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                px: '8px', py: '3px', borderRadius: '4px', cursor: 'pointer',
-                border: '1px solid #fde68a',
-                '&:hover': { bgcolor: '#fef3c7' },
-                flexShrink: 0,
-              }}
+              className="flex items-center gap-1 px-2 py-1 rounded border border-amber-200 text-[10px] font-semibold text-amber-800 hover:bg-amber-100 cursor-pointer transition-colors shrink-0"
             >
-              <CloudSync sx={{ fontSize: '12px !important', color: '#92400e' }} />
-              <Typography sx={{ fontSize: 10, fontWeight: 600, color: '#92400e' }}>Use 3D data</Typography>
-            </Box>
-          </Box>
+              <CloudDownload className="size-3" />
+              Use 3D data
+            </button>
+          </div>
         )
       ) : (
-        <Box sx={{
-          bgcolor: T.inputBg, border: `1px solid ${T.border}`, borderRadius: '6px',
-          px: '10px', py: '7px',
-        }}>
-          <Typography sx={{ fontSize: 11, color: T.mutedFg }}>
+        <div className="bg-input-background border border-border rounded-md px-2.5 py-1.5">
+          <p className="text-[11px] text-muted-foreground">
             No 3D city data found for this building — define roof geometry manually below.
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
 
-      {/* ── Roof type picker ── */}
-      <Box>
-        <Typography sx={{ fontSize: 10, fontWeight: 600, color: T.mutedFg, letterSpacing: '0.08em', textTransform: 'uppercase', mb: '6px' }}>
+      {/* Roof type picker */}
+      <div>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-1.5">
           ROOF TYPE
-        </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+        </p>
+        <div className="grid grid-cols-2 gap-1.5">
           {ROOF_TYPES.map((rt) => {
             const sel = config.type === rt.id;
             return (
-              <Box
+              <button
                 key={rt.id}
+                type="button"
                 onClick={() => handleTypeChange(rt.id)}
-                sx={{
-                  cursor: 'pointer', borderRadius: '8px', p: '8px 10px',
-                  border: '1.5px solid',
-                  borderColor: sel ? T.primary : T.border,
-                  bgcolor:     sel ? 'rgba(47,93,138,0.06)' : T.card,
-                  transition:  'all 0.15s',
-                  display:     'flex', alignItems: 'center', gap: '8px',
-                  '&:hover':   { borderColor: T.primary, bgcolor: 'rgba(47,93,138,0.04)' },
-                }}
+                className={cn(
+                  'cursor-pointer rounded-lg p-2 border-[1.5px] flex items-center gap-2 text-left transition-all duration-150',
+                  sel
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-card hover:border-primary hover:bg-primary/[0.03]',
+                )}
               >
-                {/* Cross-section preview */}
                 <svg width={48} height={30} viewBox="0 0 80 50" style={{ flexShrink: 0 }}>
-                  <rect width={80} height={50} fill={sel ? 'rgba(47,93,138,0.1)' : T.inputBg} rx={4} />
+                  <rect width={80} height={50} fill={sel ? 'rgba(47,93,138,0.1)' : 'var(--color-input-background)'} rx={4} />
                   <line x1={8}  y1={36} x2={8}  y2={44} stroke={T.border} strokeWidth={1.5} />
                   <line x1={72} y1={36} x2={72} y2={44} stroke={T.border} strokeWidth={1.5} />
                   <line x1={8}  y1={44} x2={72} y2={44} stroke={T.border} strokeWidth={1.5} />
@@ -610,69 +532,74 @@ export function RoofConfigurator({ config, onChange }: RoofConfiguratorProps) {
                     strokeLinecap="round" strokeLinejoin="round"
                   />
                 </svg>
-                <Box>
-                  <Typography sx={{ fontSize: 11, fontWeight: sel ? 600 : 500, color: sel ? T.primary : T.foreground }}>
+                <div>
+                  <p className={cn('text-[11px]', sel ? 'font-semibold text-primary' : 'font-medium text-foreground')}>
                     {rt.label}
-                  </Typography>
-                  <Typography sx={{ fontSize: 9, color: T.mutedFg }}>
-                    {rt.subtitle}
-                  </Typography>
-                </Box>
-              </Box>
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">{rt.subtitle}</p>
+                </div>
+              </button>
             );
           })}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* ── Surfaces ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography sx={{ fontSize: 10, fontWeight: 600, color: T.mutedFg, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      {/* Warning banner */}
+      {showWarning && (
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-2">
+          <AlertTriangle className="size-3.5 text-amber-800 shrink-0 mt-px" />
+          <div className="flex-1">
+            <p className="text-[11px] text-amber-800 font-semibold mb-0.5">
+              Cannot add surfaces in 3D data mode
+            </p>
+            <p className="text-[10px] text-amber-800 leading-snug">
+              This roof geometry is inferred from 3D city data. Switch to manual mode first to add custom surfaces.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowWarning(false)}
+            className="text-amber-800 hover:text-amber-900 cursor-pointer text-base leading-none shrink-0"
+          >×</button>
+        </div>
+      )}
+
+      {/* Surfaces header */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em]">
           SURFACES ({config.surfaces.length})
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {/* Reset button - show if surfaces have been modified */}
+        </span>
+        <div className="flex items-center gap-1.5">
           {hasModifiedSurfaces && (
-            <Box
+            <button
+              type="button"
               onClick={handleReset}
-              sx={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                px: '8px', py: '3px', borderRadius: '4px', cursor: 'pointer',
-                border: `1px solid ${T.border}`,
-                '&:hover': { bgcolor: '#fef3c7' },
-                '& svg': { fontSize: '12px !important', color: T.foreground },
-              }}
+              className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[11px] font-semibold text-foreground hover:bg-amber-50 cursor-pointer transition-colors"
             >
-              <RestartAlt />
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: T.foreground }}>Reset</Typography>
-            </Box>
+              <RotateCcw className="size-3" />
+              Reset
+            </button>
           )}
-          <Box
+          <button
+            type="button"
             onClick={addSurface}
-            sx={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              px: '8px', py: '3px', borderRadius: '4px', cursor: 'pointer',
-              border: `1px solid ${T.border}`,
-              '&:hover': { bgcolor: T.muted },
-              '& svg': { fontSize: '12px !important', color: T.foreground },
-            }}
+            className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[11px] font-semibold text-foreground hover:bg-muted cursor-pointer transition-colors"
           >
-            <Add />
-            <Typography sx={{ fontSize: 11, fontWeight: 600, color: T.foreground }}>Add surface</Typography>
-          </Box>
-        </Box>
-      </Box>
+            <Plus className="size-3" />
+            Add surface
+          </button>
+        </div>
+      </div>
 
+      {/* Surface cards */}
       {config.surfaces.length === 0 ? (
-        <Box sx={{
-          border: `1px dashed ${T.border}`, borderRadius: '8px', p: 2,
-          textAlign: 'center',
-        }}>
-          <Typography sx={{ fontSize: 11, color: T.mutedFg }}>
+        <div className="border border-dashed border-border rounded-lg p-4 text-center">
+          <p className="text-[11px] text-muted-foreground">
             No surfaces — add one or select a roof type above.
-          </Typography>
-        </Box>
+          </p>
+        </div>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <div className="flex flex-col gap-2">
           {config.surfaces.map((surf, i) => (
             <SurfaceCard
               key={surf.id}
@@ -683,85 +610,53 @@ export function RoofConfigurator({ config, onChange }: RoofConfiguratorProps) {
               onDelete={() => deleteSurface(surf.id)}
             />
           ))}
-        </Box>
+        </div>
       )}
 
-      {/* ── PV summary ── */}
-      <Box sx={{
-        border:  `1.5px solid`,
-        borderColor: pvArea > 0 ? 'rgba(22,163,74,0.4)' : T.border,
-        bgcolor: pvArea > 0 ? 'rgba(22,163,74,0.05)' : T.inputBg,
-        borderRadius: '8px',
-        p: '10px 12px',
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', mb: 1 }}>
-          <WbSunny sx={{ fontSize: '13px !important', color: pvArea > 0 ? '#ca8a04' : T.mutedFg }} />
-          <Typography sx={{ fontSize: 10, fontWeight: 600, color: pvArea > 0 ? T.foreground : T.mutedFg, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+      {/* PV summary */}
+      <div
+        className={cn(
+          'border-[1.5px] rounded-lg p-3',
+          pvArea > 0 ? 'border-green-400/40 bg-green-50/50' : 'border-border bg-input-background',
+        )}
+      >
+        <div className="flex items-center gap-1.5 mb-2">
+          <Sun className={cn('size-3.5', pvArea > 0 ? 'text-amber-500' : 'text-muted-foreground')} />
+          <span className={cn(
+            'text-[10px] font-semibold uppercase tracking-[0.06em]',
+            pvArea > 0 ? 'text-foreground' : 'text-muted-foreground',
+          )}>
             PV Simulation Summary
-          </Typography>
-        </Box>
+          </span>
+        </div>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', mb: pvSurfs.length > 0 ? 1 : 0 }}>
+        <div className="grid grid-cols-3 gap-2 mb-2">
           {[
             { label: 'Total roof', value: `${totalArea.toFixed(1)} m²`, hl: false },
             { label: 'PV area',    value: `${pvArea.toFixed(1)} m²`,    hl: pvArea > 0 },
             { label: 'Coverage',   value: `${coverPct}%`,               hl: pvArea > 0 },
-          ].map((row) => (
-            <Box key={row.label}>
-              <Typography sx={{ fontSize: 10, color: T.mutedFg, display: 'block' }}>{row.label}</Typography>
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: row.hl ? '#16a34a' : T.foreground }}>
-                {row.value}
-              </Typography>
-            </Box>
+          ].map(({ label, value, hl }) => (
+            <div key={label}>
+              <p className="text-[10px] text-muted-foreground">{label}</p>
+              <p className={cn('text-[13px] font-bold', hl ? 'text-green-600' : 'text-foreground')}>
+                {value}
+              </p>
+            </div>
           ))}
-        </Box>
+        </div>
 
         {pvSurfs.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+          <div className="flex flex-wrap gap-1">
             {pvSurfs.map((s) => (
-              <Box key={s.id} sx={{
-                display: 'flex', alignItems: 'center', gap: '3px',
-                px: '6px', py: '3px', borderRadius: '4px',
-                bgcolor: '#dcfce7',
-              }}>
-                <Check sx={{ fontSize: '10px !important', color: '#16a34a' }} />
-                <Typography sx={{ fontSize: 10, fontWeight: 600, color: '#16a34a' }}>
-                  {s.name} · {s.usefulArea.toFixed(1)} m²
-                </Typography>
-              </Box>
+              <span key={s.id} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-green-100 text-[10px] font-semibold text-green-700">
+                <Check className="size-2.5" />
+                {s.name} · {s.usefulArea.toFixed(1)} m²
+              </span>
             ))}
-          </Box>
+          </div>
         )}
-      </Box>
-
-      {/* ── Warning for adding surfaces in 3D mode ── */}
-      {showWarning && (
-        <Box sx={{
-          border: `1px solid ${T.warning}`, borderRadius: '8px', p: 2,
-          textAlign: 'center',
-          mt: 1,
-        }}>
-          <Typography sx={{ fontSize: 11, color: T.warning }}>
-            <Warning sx={{ fontSize: '14px !important', color: T.warning, mr: 1 }} />
-            Adding surfaces in 3D mode will overwrite the original data. Consider switching to manual mode first.
-          </Typography>
-          <Box
-            onClick={handleReset}
-            sx={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              px: '8px', py: '3px', borderRadius: '4px', cursor: 'pointer',
-              border: `1px solid ${T.warning}`,
-              '&:hover': { bgcolor: '#fef3c7' },
-              flexShrink: 0,
-              mt: 1,
-            }}
-          >
-            <RestartAlt sx={{ fontSize: '12px !important', color: T.warning }} />
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: T.warning }}>Reset to original</Typography>
-          </Box>
-        </Box>
-      )}
-    </Box>
+      </div>
+    </div>
   );
 }
 
