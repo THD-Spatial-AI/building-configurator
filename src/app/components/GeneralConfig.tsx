@@ -7,10 +7,10 @@ import {
 // ─── Options ──────────────────────────────────────────────────────────────────
 
 const BUILDING_TYPES = [
-  { value: 'SFH',    label: 'SFH — Single-Family House'  },
-  { value: 'TH',     label: 'TH — Terraced House'        },
-  { value: 'MFH',    label: 'MFH — Multi-Family House'   },
-  { value: 'AB',     label: 'AB — Apartment Block'       },
+  { value: 'SFH',    label: 'SFH (Single-Family House)'  },
+  { value: 'TH',     label: 'TH (Terraced House)'        },
+  { value: 'MFH',    label: 'MFH (Multi-Family House)'   },
+  { value: 'AB',     label: 'AB (Apartment Block)'       },
   { value: 'Office', label: 'Office'                      },
   { value: 'School', label: 'School'                      },
   { value: 'Retail', label: 'Retail'                      },
@@ -18,33 +18,23 @@ const BUILDING_TYPES = [
 ];
 
 const CONSTRUCTION_PERIODS = [
-  { value: 'Pre-1919',   label: 'Pre-1919 — Historic stock'   },
-  { value: '1919–1948',  label: '1919–1948 — Interwar'        },
-  { value: '1949–1957',  label: '1949–1957 — Post-war'        },
-  { value: '1958–1968',  label: '1958–1968 — Post-war boom'   },
-  { value: '1969–1978',  label: '1969–1978 — Pre-oil crisis'  },
-  { value: '1979–1983',  label: '1979–1983 — Post-oil crisis' },
-  { value: '1984–1994',  label: '1984–1994 — Modern'          },
-  { value: '1995–2001',  label: '1995–2001 — EnEV era'        },
-  { value: '2002–2009',  label: '2002–2009 — EnEV 2002'       },
-  { value: 'Post-2010',  label: 'Post-2010 — EnEV 2009+'      },
+  { value: 'Pre-1919',   label: 'Pre-1919'   },
+  { value: '1919-1948',  label: '1919-1948'        },
+  { value: '1949-1957',  label: '1949-1957'        },
+  { value: '1958-1968',  label: '1958-1968'   },
+  { value: '1969-1978',  label: '1969-1978'  },
+  { value: '1979-1983',  label: '1979-1983' },
+  { value: '1984-1994',  label: '1984-1994'          },
+  { value: '1995-2001',  label: '1995-2001'        },
+  { value: '2002-2009',  label: '2002-2009'       },
+  { value: 'Post-2010',  label: 'Post-2010'      },
 ];
 
 const COUNTRIES = [
-  { value: 'DE', label: 'DE — Germany'        },
-  { value: 'AT', label: 'AT — Austria'         },
-  { value: 'CH', label: 'CH — Switzerland'     },
-  { value: 'FR', label: 'FR — France'          },
-  { value: 'GB', label: 'GB — United Kingdom'  },
-  { value: 'NL', label: 'NL — Netherlands'     },
-  { value: 'SE', label: 'SE — Sweden'          },
-  { value: 'NO', label: 'NO — Norway'          },
-  { value: 'DK', label: 'DK — Denmark'         },
-  { value: 'IT', label: 'IT — Italy'           },
-  { value: 'ES', label: 'ES — Spain'           },
-  { value: 'PL', label: 'PL — Poland'          },
-  { value: 'US', label: 'US — United States'   },
-];
+  { value: 'DE', label: 'DE (Germany)'        },
+  { value: 'AT', label: 'AT (Austria)'         },
+  { value: 'NL', label: 'NL (Netherlands)'     },
+  { value: 'CZ', label: 'CZ (Czechia)'         },];
 
 const MASS_CLASSES = [
   { value: 'VeryLight', label: 'Very Light — steel/timber frame'   },

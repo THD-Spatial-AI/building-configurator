@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { BuildingElement } from './BuildingVisualization';
 
-// ─── Default state ─────────────────────────────────────────────────────────────
+// --- Default state --------------------------------------------------------------
 
 const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
   south_wall:     { id: 'south_wall',     label: 'South Wall',     type: 'wall',   area: 56.0, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180 },
@@ -48,7 +48,7 @@ const DEFAULT_GENERAL = {
 
 const SVG_IDS = new Set(SVG_ELEMENTS.map((e) => e.id));
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers --------------------------------------------------------------
 
 function azimuthLabel(az: number) {
   if (az < 22.5 || az >= 337.5) return 'North-facing';
@@ -61,7 +61,7 @@ function azimuthLabel(az: number) {
   return 'NW-facing';
 }
 
-// ─── Header icon button ────────────────────────────────────────────────────────
+// --- Header icon button --------------------------------------------------------
 
 function HeaderBtn({
   onClick, children, tooltip,
@@ -79,7 +79,7 @@ function HeaderBtn({
   return btn;
 }
 
-// ─── Compact compass ──────────────────────────────────────────────────────────
+// --- Compact compass ----------------------------------------------------------
 
 function CompassWidget({ azimuth, onChange }: { azimuth: number; onChange: (v: number) => void }) {
   const cx = 38, cy = 38, r = 26;
@@ -142,7 +142,7 @@ function CompassWidget({ azimuth, onChange }: { azimuth: number; onChange: (v: n
   );
 }
 
-// ─── Element list ─────────────────────────────────────────────────────────────
+// --- Element list ------------------------------------------------------------
 
 interface ElementListProps {
   elements: Record<string, BuildingElement>;
@@ -259,7 +259,7 @@ function ElementList({ elements, selectedId, onSelect, roofConfig }: ElementList
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// --- Main component ----------------------------------------------------------
 
 interface BuildingConfiguratorProps {
   onClose?: () => void;
@@ -285,7 +285,7 @@ export function BuildingConfigurator({ onClose }: BuildingConfiguratorProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // --- Handlers ---------------------------------------------------------------
 
   const updateElement = (id: string, patch: Partial<BuildingElement>) =>
     setElements((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
@@ -309,7 +309,7 @@ export function BuildingConfigurator({ onClose }: BuildingConfiguratorProps) {
     setSavedState({ elements, general, roofConfig });
   };
 
-  // ── JSON export ──────────────────────────────────────────────────────────────
+  // --- JSON export ------------------------------------------------------------
 
   const handleDownload = () => {
     const payload = {
@@ -326,7 +326,7 @@ export function BuildingConfigurator({ onClose }: BuildingConfiguratorProps) {
     URL.revokeObjectURL(url);
   };
 
-  // ── JSON import ──────────────────────────────────────────────────────────────
+  // --- JSON import ------------------------------------------------------------
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
@@ -347,7 +347,7 @@ export function BuildingConfigurator({ onClose }: BuildingConfiguratorProps) {
     e.target.value = '';
   };
 
-  // ── Derived ──────────────────────────────────────────────────────────────────
+  // --- Derived ---------------------------------------------------------------
 
   const totalArea = Object.values(elements).reduce((sum, e) => sum + (e.area || 0), 0);
   const avgUValue = totalArea > 0

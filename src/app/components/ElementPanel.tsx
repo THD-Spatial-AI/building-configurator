@@ -5,7 +5,6 @@ import {
   TypeBadge, ConfigSection, SegmentedControl,
 } from './ui';
 import { RoofConfigurator } from './RoofConfigurator';
-import { cn } from '@/lib/utils';
 import type { BuildingElement } from './BuildingVisualization';
 import type { RoofConfig } from './RoofConfigurator';
 
@@ -195,6 +194,12 @@ export function ElementPanel({
         <div className="bg-input-background border border-border rounded-lg p-3 flex flex-col gap-2">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">
             Thermal Properties
+            <span
+              className="px-2 py-[5px] rounded text-[10px] font-semibold mb-px shrink-0"
+              style={{ backgroundColor: qual.bg, color: qual.color }}
+            >
+              {qual.label}
+            </span>
           </p>
 
           {/* U-value + quality badge */}
@@ -207,12 +212,6 @@ export function ElementPanel({
                 unit="W/m²K" min={0.01} max={10} step={0.01}
               />
             </div>
-            <span
-              className="px-2 py-[5px] rounded text-[10px] font-semibold mb-px shrink-0"
-              style={{ backgroundColor: qual.bg, color: qual.color }}
-            >
-              {qual.label}
-            </span>
           </div>
 
           {/* R-value */}
