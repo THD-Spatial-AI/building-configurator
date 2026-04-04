@@ -63,6 +63,13 @@ function clampSurfacePatch(
 
 const EMPTY_DRAFT: EditingDraft = { area: '', uValue: '', gValue: '', tilt: '', azimuth: '' };
 
+/** Maps an azimuth angle (0–360°) to the nearest 8-point compass direction. */
+function azimuthToDirection(deg: number): string {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const normalized = ((deg % 360) + 360) % 360;
+  return dirs[Math.round(normalized / 45) % 8];
+}
+
 /** Accordion of element groups with expandable tables and per-row inline editing. */
 export function ElementCompositionSection({
   elements,
@@ -119,8 +126,12 @@ export function ElementCompositionSection({
     const items         = grouped[type];
     const isExpanded    = expandedGroups[type] ?? false;
     const totalArea     = items.reduce((sum, el) => sum + el.area, 0);
-    const displayCount  = type === 'roof' ? roofInfo.count : items.length;
-    const description   = type === 'roof' ? roofInfo.description : `${totalArea.toFixed(1)} m²`;
+    const displayCount  = items.length;
+    // For roof, append the shape description after the area; for others just show area.
+    const areaStr       = `${totalArea.toFixed(1)} m²`;
+    const description   = type === 'roof' && roofInfo.description
+      ? `${areaStr} · ${roofInfo.description}`
+      : areaStr;
     const modifiedCount = items.filter((el) => getElementStatus(el) === 'modified').length;
     const groupStatus: SnapshotStatus = modifiedCount > 0 ? 'modified' : 'default';
 
@@ -129,26 +140,28 @@ export function ElementCompositionSection({
         type="button"
         onClick={() => toggleGroup(type)}
         className={cn(
-          'flex w-full items-center gap-3 px-3 text-left transition-colors hover:bg-slate-50',
+          'flex w-full flex-col px-3 text-left transition-colors hover:bg-slate-50',
           compact ? 'py-2.5' : 'py-3',
         )}
       >
-        <div className="min-w-0 flex-1">
+        {/* Top row: label left, badge + chevron right */}
+        <div className="flex w-full items-center justify-between gap-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-700 leading-tight">
             {ELEMENT_GROUP_LABELS[type]}
           </p>
-          {!compact && (
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {displayCount} surface{displayCount !== 1 ? 's' : ''} · {description}
-              {modifiedCount > 0 ? ` · ${modifiedCount} modified` : ''}
-            </p>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {!compact && <SnapshotStatusBadge status={groupStatus} />}
+            <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform duration-300', isExpanded && 'rotate-180')} />
+          </div>
         </div>
-        {!compact && <SnapshotStatusBadge status={groupStatus} />}
-        <div className="rounded-[6px] border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 shrink-0">
-          {displayCount}
-        </div>
-        <ChevronDown className={cn('size-3.5 shrink-0 text-muted-foreground transition-transform duration-300', isExpanded && 'rotate-180')} />
+
+        {/* Description row: full width, no crowding */}
+        {!compact && (
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {displayCount} surface{displayCount !== 1 ? 's' : ''} · {description}
+            {modifiedCount > 0 ? ` · ${modifiedCount} modified` : ''}
+          </p>
+        )}
       </button>
     );
   };
@@ -188,7 +201,7 @@ export function ElementCompositionSection({
                   <th className="w-[72px] border-l border-slate-100 px-2 py-1.5 font-semibold">U</th>
                   <th className="w-[72px] border-l border-slate-100 px-2 py-1.5 font-semibold">g</th>
                   <th className="w-20 border-l border-slate-100 px-2 py-1.5 font-semibold">Tilt</th>
-                  <th className="w-20 border-l border-slate-100 px-2 py-1.5 font-semibold">Az</th>
+                  <th className="w-24 border-l border-slate-100 px-2 py-1.5 font-semibold">Azimuth</th>
                   <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold text-right">Edit</th>
                 </tr>
               </thead>
@@ -250,7 +263,7 @@ export function ElementCompositionSection({
         <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">
           {isEditing
             ? <StepperNumberInput value={editingDraft.azimuth} onChange={patchField('azimuth')} step={1} min={0} max={360} />
-            : `${Math.round(el.azimuth)}°`}
+            : `${Math.round(el.azimuth)}° (${azimuthToDirection(el.azimuth)})`}
         </td>
         <td className="border-l border-slate-100 px-2 py-2.5 text-right">
           {isEditing ? (

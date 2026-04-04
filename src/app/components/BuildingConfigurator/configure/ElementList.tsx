@@ -38,7 +38,7 @@ export function ElementList({ elements, selectedId, onSelect, roofConfig }: Elem
 
         const isExpanded      = expandedGroups[type] ?? false;
         const totalTypeArea   = items.reduce((sum, item) => sum + item.area, 0);
-        const displayCount    = type === 'roof' ? roofInfo.count : items.length;
+        const displayCount    = items.length;
         const displayDesc     = type === 'roof' ? roofInfo.description : null;
 
         return (

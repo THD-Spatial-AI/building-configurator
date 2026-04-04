@@ -35,7 +35,8 @@ export function BuildingSnapshotAside({
   const [paramsOpen,   setParamsOpen]   = useState(false);
   const [editingKey,   setEditingKey]   = useState<string | null>(null);
   const [draft,        setDraft]        = useState('');
-  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
+  // A single ref used for both <input> and <select> edit widgets.
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const startEditing = (row: SnapshotRow) => {
     if (!row.editKey) return;
@@ -66,11 +67,14 @@ export function BuildingSnapshotAside({
 
   const cancelEditing = () => setEditingKey(null);
 
+  const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
+
   return (
-    <aside className="flex min-h-0 flex-col overflow-y-auto border-r border-border/80 bg-slate-100">
+    <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border/80 bg-slate-100 p-4">
 
       {/* ── Energy hero + thermal efficiency ── */}
-      <div className="bg-slate-800 px-5 py-5">
+      <div className="shrink-0 overflow-hidden rounded-xl border border-slate-700/60 shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]">
+        <div className="bg-slate-800 px-5 py-5">
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
           Annual energy demand
         </p>
@@ -112,13 +116,14 @@ export function BuildingSnapshotAside({
           </div>
         </div>
       </div>
+      </div>
 
       {/* ── Building parameters (collapsible) ── */}
-      <div className="border-b border-border/60">
+      <div className={cn(CARD, 'shrink-0')}>
         <button
           type="button"
           onClick={() => setParamsOpen((v) => !v)}
-          className="flex w-full cursor-pointer items-center justify-between bg-white px-5 py-3 text-left hover:bg-slate-50 transition-colors"
+          className="flex w-full cursor-pointer items-center justify-between px-5 py-3 text-left hover:bg-slate-50 transition-colors"
         >
           <span className="text-sm font-medium text-slate-700">Building parameters</span>
           <ChevronDown className={cn(
@@ -155,7 +160,7 @@ export function BuildingSnapshotAside({
                         <div className="flex items-center justify-end gap-1.5">
                           {row.editType === 'select' ? (
                             <select
-                              ref={inputRef as unknown as React.RefObject<HTMLSelectElement>}
+                              ref={inputRef as unknown as React.Ref<HTMLSelectElement>}
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
                               className="flex-1 max-w-[180px] rounded border border-blue-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 outline-none ring-1 ring-blue-200 focus:ring-blue-400"
@@ -210,7 +215,7 @@ export function BuildingSnapshotAside({
                     ) : (
                       /* Display: each element in its own column */
                       <>
-                        <td className="px-4 py-2 text-right font-medium text-slate-700 tabular-nums">
+                        <td className="px-4 py-2 text-right font-medium text-slate-700">
                           {row.value}
                         </td>
                         <td className="px-1 py-2 text-center">
@@ -237,20 +242,20 @@ export function BuildingSnapshotAside({
         )}
       </div>
 
-      {/* ── Technologies ── */}
-      <div className="flex-1 px-5 py-4">
+      {/* ── Technologies — no card wrapper; individual tech items are already cards ── */}
+      <div className="shrink-0 px-1 py-2">
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
           Technologies
         </p>
         <TechnologiesSection installedTechIds={installedTechIds} />
       </div>
 
-      {/* ── Data quality notice (demoted to footer) ── */}
-      <div className="border-t border-amber-200 bg-amber-50 px-5 py-2.5">
+      {/* ── Data quality notice ── */}
+      <div className="shrink-0 overflow-hidden rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
         <div className="flex items-center gap-2">
           <AlertTriangle className="size-3.5 shrink-0 text-amber-500" />
           <p className="text-[11px] text-amber-700">
-            Values based on public data estimates, values may vary. Feel free to adjust parameters and technologies to see how they impact the results.
+            Values based on public data estimates, values may vary.
           </p>
         </div>
       </div>

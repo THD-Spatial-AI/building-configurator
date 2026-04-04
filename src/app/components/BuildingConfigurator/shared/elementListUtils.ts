@@ -27,21 +27,22 @@ export function getGroupedElements(
   };
 }
 
-/** Returns the surface count and a short description string for a roof group. */
-export function getRoofGroupInfo(roofConfig: RoofConfig): { count: number; description: string } {
-  const count = roofConfig.surfaces.length;
+/**
+ * Returns a short shape description for the roof configuration.
+ * Does NOT include a surface count — callers should use the actual element count instead.
+ */
+export function getRoofGroupInfo(roofConfig: RoofConfig): { description: string } {
   const descriptions: Record<string, string> = {
-    flat:          '1 surface · low-slope',
-    'mono-pitch':  '1 surface · single slope',
-    gabled:        '2 surfaces · S + N',
-    hipped:        '4 surfaces · S/N/E/W',
-    'v-shape':     '2 surfaces · inward slopes',
-    'saw-tooth':   `${count} surfaces · S-facing`,
-    custom:        `${count} surface${count !== 1 ? 's' : ''} · custom`,
+    flat:         'low-slope',
+    'mono-pitch': 'single slope',
+    gabled:       'S + N',
+    hipped:       'S/N/E/W',
+    'v-shape':    'inward slopes',
+    'saw-tooth':  'S-facing',
+    custom:       'custom',
   };
 
   return {
-    count,
-    description: descriptions[roofConfig.type] ?? `${count} surfaces`,
+    description: descriptions[roofConfig.type] ?? roofConfig.type,
   };
 }
