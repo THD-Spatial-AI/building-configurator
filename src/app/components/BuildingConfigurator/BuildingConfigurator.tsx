@@ -219,6 +219,14 @@ export function BuildingConfigurator({ onClose }: BuildingConfiguratorProps) {
             // ── Configure layout: element helper sidebar + edit workspace ──
             <div className="grid h-full min-h-0 grid-cols-[340px_minmax(0,1fr)] overflow-hidden">
 
+              {/* Under development banner */}
+              <div className="col-span-2 flex items-center gap-3 border-b border-amber-200 bg-amber-50 px-5 py-3">
+                <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-700">Work in progress</span>
+                <p className="text-xs text-amber-800">
+                  The Configure view is still under development — please focus your feedback on the Overview for now.
+                </p>
+              </div>
+
               <aside className="min-h-0 border-r border-border/80 bg-slate-50/80 p-4">
                 <div className="flex h-full min-h-0 flex-col gap-4">
                   <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-[0_16px_32px_rgba(15,23,42,0.08)]">
