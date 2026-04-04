@@ -1,7 +1,8 @@
-// Left column of the Overview view: building identity, energy totals, key metrics.
+// Left column of the Overview view: building identity, energy hero, key metrics.
 
-import React from 'react';
-import { AlertTriangle, Zap, Flame, Droplets } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, Zap, Flame, Droplets, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { EnergyTotals } from './LoadProfileViewer';
 import { SnapshotStatus, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { TechnologiesSection } from './TechnologiesSection';
@@ -15,7 +16,13 @@ export interface BuildingSnapshotAsideProps {
   thermalEfficiencyStatus: SnapshotStatus;
 }
 
-/** Left panel of the overview: snapshot identity, energy summary, and installed technologies. */
+const ENERGY_ITEMS = [
+  { key: 'heating',     label: 'Heating',     Icon: Flame,    iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300'  },
+  { key: 'electricity', label: 'Electricity', Icon: Zap,      iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300'  },
+  { key: 'hotwater',    label: 'Hot Water',   Icon: Droplets, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
+] as const;
+
+/** Left panel of the overview: building identity, energy hero numbers, parameters, technologies. */
 export function BuildingSnapshotAside({
   mode,
   energyTotals,
@@ -24,105 +31,117 @@ export function BuildingSnapshotAside({
   avgUValue,
   thermalEfficiencyStatus,
 }: BuildingSnapshotAsideProps) {
+  const [paramsOpen, setParamsOpen] = useState(false);
+
   return (
-    <aside className="min-h-0 overflow-y-auto border-r border-border/80 bg-slate-200 p-4">
-      <div className="flex flex-col gap-4">
-        {/* Title */}
-        <div className="flex items-start justify-between gap-3 px-1 pt-1">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Building Snapshot</p>
-            <p className="mt-1 text-lg font-semibold text-foreground">Building 3</p>
-            <p className="text-sm text-slate-500">Multi-Family House</p>
-          </div>
-          <div className="rounded-md bg-slate-700 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
-            {mode}
-          </div>
-        </div>
+    <aside className="flex min-h-0 flex-col overflow-y-auto border-r border-border/80 bg-slate-100">
 
-        {/* Data-quality warning */}
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-3 shadow-[0_10px_24px_rgba(245,158,11,0.08)]">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-700">Public Data Estimate</p>
-              <p className="mt-1 text-[11px] leading-snug text-amber-900">
-                Current building information is based on publicly available data and may not reflect the real values. Use Configure mode to update this information and improve model quality.
-              </p>
-              <div className="mt-2 flex flex-col gap-1.5 text-[10px] text-amber-800">
-                <div className="flex items-center gap-2">
-                  <SnapshotStatusBadge status="default" />
-                  <span>Matches the default estimate</span>
+      {/* ── Building identity ── */}
+      <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-white px-5 py-4">
+        <div>
+          <p className="text-base font-semibold text-foreground">Building 3</p>
+          <p className="text-xs text-slate-500">Multi-Family House · 48.1351° N, 11.5820° E</p>
+        </div>
+        <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          {mode}
+        </span>
+      </div>
+
+      {/* ── Energy hero ── */}
+      <div className="bg-slate-800 px-5 py-5">
+        <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          Daily Energy Demand
+        </p>
+        <div className="flex flex-col gap-3">
+          {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
+            const value = energyTotals[key];
+            return (
+              <div key={key} className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className={cn('flex size-7 items-center justify-center rounded-md', iconBg)}>
+                    <Icon className={cn('size-4', iconColor)} />
+                  </div>
+                  <span className="text-sm text-slate-300">{label}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <SnapshotStatusBadge status="modified" />
-                  <span>Changed from the default estimate</span>
+                <div className="text-right">
+                  <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
+                    {value}
+                  </span>
+                  <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Energy consumption — icon-identified cards */}
-        <div className="grid grid-cols-3 gap-2">
-          {([
-            { label: 'Electricity', value: energyTotals.electricity, Icon: Zap      },
-            { label: 'Heating',     value: energyTotals.heating,     Icon: Flame     },
-            { label: 'Hot Water',   value: energyTotals.hotwater,    Icon: Droplets  },
-          ] as const).map(({ label, value, Icon }) => (
-            <div key={label} className="rounded-md border border-slate-200/60 bg-white px-3 py-2.5 shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.07)]">
-              <div className="mb-1 flex items-center gap-1.5">
-                <Icon className="size-3 shrink-0 text-slate-500" />
-                <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-              </div>
-              <p className="text-base font-bold leading-none text-foreground">{value}</p>
-              <p className="mt-0.5 text-[10px] text-slate-400">{energyTotals.unit}</p>
-            </div>
-          ))}
+      {/* ── Thermal efficiency ── */}
+      <div className="flex items-center justify-between border-b border-border/60 bg-white px-5 py-3.5">
+        <span className="text-sm text-slate-600">Thermal efficiency</span>
+        <div className="flex items-center gap-2">
+          {mode === 'expert' && (
+            <span className="text-xs text-slate-400">{avgUValue.toFixed(2)} W/m²K</span>
+          )}
+          <span
+            className="rounded-md px-2.5 py-1 text-xs font-semibold"
+            style={{ color: thermalRating.color, background: thermalRating.bg }}
+          >
+            {thermalRating.label}
+          </span>
+          <SnapshotStatusBadge status={thermalEfficiencyStatus} />
         </div>
+      </div>
 
-        {/* Building info table */}
-        <div className="overflow-hidden rounded-md border border-slate-200/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.07)]">
+      {/* ── Building parameters (collapsible) ── */}
+      <div className="border-b border-border/60 bg-white">
+        <button
+          type="button"
+          onClick={() => setParamsOpen((v) => !v)}
+          className="flex w-full cursor-pointer items-center justify-between px-5 py-3 text-left"
+        >
+          <span className="text-sm font-medium text-slate-600">Building parameters</span>
+          <ChevronDown className={cn(
+            'size-4 text-slate-400 transition-transform duration-150',
+            paramsOpen && 'rotate-180',
+          )} />
+        </button>
+        {paramsOpen && (
           <table className="w-full text-[11px]">
             <tbody className="divide-y divide-slate-100">
               {snapshotRows.map(({ label, value, status }) => (
                 <tr key={label}>
-                  <td className="px-3 py-1.5 text-slate-400">{label}</td>
-                  <td className="px-3 py-1.5 text-right font-medium text-foreground">
+                  <td className="px-5 py-1.5 text-slate-400">{label}</td>
+                  <td className="px-5 py-1.5 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <span>{value}</span>
+                      <span className="font-medium text-foreground">{value}</span>
                       <SnapshotStatusBadge status={status} />
                     </div>
                   </td>
                 </tr>
               ))}
-              {/* Thermal efficiency — value shown only in expert mode */}
-              <tr>
-                <td className="px-3 py-1.5 text-slate-400">Thermal efficiency</td>
-                <td className="px-3 py-1.5 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <span
-                      className="inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold"
-                      style={{ color: thermalRating.color, background: thermalRating.bg }}
-                    >
-                      {thermalRating.label}
-                    </span>
-                    <SnapshotStatusBadge status={thermalEfficiencyStatus} />
-                    {mode === 'expert' && (
-                      <span className="text-[10px] text-slate-400">{avgUValue.toFixed(2)} W/m²K</span>
-                    )}
-                  </div>
-                </td>
-              </tr>
             </tbody>
           </table>
-        </div>
+        )}
+      </div>
 
-        {/* Technologies */}
-        <div>
-          <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Technologies</p>
-          <TechnologiesSection />
+      {/* ── Technologies ── */}
+      <div className="flex-1 px-5 py-4">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          Technologies
+        </p>
+        <TechnologiesSection />
+      </div>
+
+      {/* ── Data quality notice (demoted to footer) ── */}
+      <div className="border-t border-amber-200 bg-amber-50 px-5 py-2.5">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="size-3.5 shrink-0 text-amber-500" />
+          <p className="text-[11px] text-amber-700">
+            Values based on public data estimates - if you have more accurate data, please configure to improve accuracy.
+          </p>
         </div>
       </div>
+
     </aside>
   );
 }

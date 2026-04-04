@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SectionLabel } from '../shared/ui';
 import { LoadProfileViewer, type EnergyTotals } from './LoadProfileViewer';
 import type { BuildingElement } from '../configure/BuildingVisualization';
 import type { RoofConfig } from '../configure/RoofConfigurator';
@@ -22,7 +21,7 @@ export interface EnergyEnvelopeColumnProps {
   isActive: boolean;
 }
 
-/** Right panel of the overview: energy chart, element composition accordion, scroll indicator. */
+/** Right panel of the overview: energy chart primary, element composition secondary. */
 export function EnergyEnvelopeColumn({
   uploadError,
   onClearError,
@@ -56,41 +55,45 @@ export function EnergyEnvelopeColumn({
           const el = e.currentTarget;
           setHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 8);
         }}
-        className="h-full overflow-y-auto bg-slate-200 p-4
+        className="h-full overflow-y-auto bg-slate-100
           [&::-webkit-scrollbar]:w-2.5
           [&::-webkit-scrollbar-track]:bg-transparent
           [&::-webkit-scrollbar-thumb]:rounded-full
-          [&::-webkit-scrollbar-thumb]:bg-slate-400
-          hover:[&::-webkit-scrollbar-thumb]:bg-slate-500"
+          [&::-webkit-scrollbar-thumb]:bg-slate-300
+          hover:[&::-webkit-scrollbar-thumb]:bg-slate-400"
       >
-        <div className="flex flex-col gap-4 pb-4">
-          {uploadError && (
-            <div className="flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 shadow-[0_10px_24px_rgba(239,68,68,0.08)]">
-              <p className="flex-1 text-[11px] leading-snug text-destructive">{uploadError}</p>
-              <button
-                type="button"
-                onClick={onClearError}
-                className="shrink-0 cursor-pointer text-sm leading-none text-destructive"
-              >×</button>
-            </div>
-          )}
-
-          <div className="px-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Energy &amp; Envelope</p>
-            <p className="mt-1 text-lg font-semibold text-foreground">Performance Overview</p>
+        {uploadError && (
+          <div className="mx-4 mt-4 flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
+            <p className="flex-1 text-[11px] leading-snug text-destructive">{uploadError}</p>
+            <button
+              type="button"
+              onClick={onClearError}
+              className="shrink-0 cursor-pointer text-sm leading-none text-destructive"
+            >×</button>
           </div>
+        )}
 
-          <div className="h-[300px] shrink-0">
+        {/* ── Load profile — primary focus ── */}
+        <div className="bg-white">
+          <div className="border-b border-border/60 px-5 py-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+              Hourly Load Profile
+            </p>
+            <p className="mt-0.5 text-base font-semibold text-foreground">Energy Performance</p>
+          </div>
+          <div className="h-[380px] px-2 py-4">
             <LoadProfileViewer buildingId="Building 3" onTotalsChange={onTotalsChange} />
           </div>
+        </div>
 
-          <div className="px-1">
-            <SectionLabel>Element Composition</SectionLabel>
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              Expand a group to inspect all surfaces and edit quick values inline. Switch to configure mode for detailed changes.
+        {/* ── Element composition — secondary, below the fold ── */}
+        <div className="px-4 pb-6 pt-5">
+          <div className="mb-3">
+            <p className="text-sm font-semibold text-foreground">Envelope Composition</p>
+            <p className="mt-0.5 text-[11px] text-slate-400">
+              Expand a group to inspect surfaces and edit values inline.
             </p>
           </div>
-
           <ElementCompositionSection
             elements={elements}
             selectedId={selectedId}

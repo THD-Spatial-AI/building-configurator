@@ -162,7 +162,7 @@ export function BuildingConfigurator({ onClose }: BuildingConfiguratorProps) {
             <Building2 className="size-4 text-primary-foreground" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground leading-tight">Building 3 · MFH</p>
+            <p className="text-sm font-semibold text-foreground leading-tight">Building 3 · Multi Family House</p>
             <p className="text-[11px] text-muted-foreground leading-tight">48.1351° N, 11.5820° E</p>
           </div>
         </div>

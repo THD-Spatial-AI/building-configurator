@@ -3,6 +3,7 @@
 
 import type { BuildingElement } from '../configure/BuildingVisualization';
 
+// TODO: 
 export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
   south_wall:     { id: 'south_wall',     label: 'South Wall',     type: 'wall',   area: 56.0, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180 },
   east_wall:      { id: 'east_wall',      label: 'East Wall',      type: 'wall',   area: 37.8, uValue: 0.24, gValue: null, tilt: 90, azimuth: 90  },
@@ -16,8 +17,9 @@ export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
   door:           { id: 'door',           label: 'Front Door',     type: 'door',   area: 2.1,  uValue: 1.80, gValue: null, tilt: 90, azimuth: 180 },
 };
 
+// TODO: These defaults are purely illustrative and should be replaced with real building data from the API.
 export const DEFAULT_GENERAL = {
-  buildingType:       'MFH',
+  buildingType:       'Multi-family House',
   constructionPeriod: 'Post-2010',
   country:            'DE',
   floorArea:          363.4,
