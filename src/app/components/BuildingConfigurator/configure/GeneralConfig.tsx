@@ -5,37 +5,18 @@ import {
   ConfigSection, ToggleSwitch, InlineStepper, InfoTip,
 } from '../shared/ui';
 
+import {
+  BUILDING_TYPE_OPTIONS,
+  CONSTRUCTION_PERIOD_OPTIONS,
+  COUNTRY_OPTIONS,
+} from '../shared/buildingOptions';
+
 // ─── Options ──────────────────────────────────────────────────────────────────
 
-const BUILDING_TYPES = [
-  { value: 'SFH',    label: 'SFH (Single-Family House)'  },
-  { value: 'TH',     label: 'TH (Terraced House)'        },
-  { value: 'MFH',    label: 'MFH (Multi-Family House)'   },
-  { value: 'AB',     label: 'AB (Apartment Block)'       },
-  { value: 'Office', label: 'Office'                      },
-  { value: 'School', label: 'School'                      },
-  { value: 'Retail', label: 'Retail'                      },
-  { value: 'Hotel',  label: 'Hotel'                       },
-];
-
-const CONSTRUCTION_PERIODS = [
-  { value: 'Pre-1919',   label: 'Pre-1919'   },
-  { value: '1919-1948',  label: '1919-1948'        },
-  { value: '1949-1957',  label: '1949-1957'        },
-  { value: '1958-1968',  label: '1958-1968'   },
-  { value: '1969-1978',  label: '1969-1978'  },
-  { value: '1979-1983',  label: '1979-1983' },
-  { value: '1984-1994',  label: '1984-1994'          },
-  { value: '1995-2001',  label: '1995-2001'        },
-  { value: '2002-2009',  label: '2002-2009'       },
-  { value: 'Post-2010',  label: 'Post-2010'      },
-];
-
-const COUNTRIES = [
-  { value: 'DE', label: 'DE (Germany)'        },
-  { value: 'AT', label: 'AT (Austria)'         },
-  { value: 'NL', label: 'NL (Netherlands)'     },
-  { value: 'CZ', label: 'CZ (Czechia)'         },];
+// Map shared options to the { value, label } shape expected by SelectInput in this view.
+const BUILDING_TYPES    = BUILDING_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
+const CONSTRUCTION_PERIODS = CONSTRUCTION_PERIOD_OPTIONS;
+const COUNTRIES         = COUNTRY_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
 
 const MASS_CLASSES = [
   { value: 'VeryLight', label: 'Very Light — steel/timber frame'   },
