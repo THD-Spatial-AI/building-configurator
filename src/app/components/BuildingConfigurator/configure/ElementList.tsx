@@ -71,8 +71,8 @@ export function ElementList({ elements, selectedId, onSelect, roofConfig }: Elem
                     <tr className="border-b border-slate-200/80">
                       <th className="px-2 py-1.5 font-semibold">Surface</th>
                       <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Area</th>
-                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">U</th>
-                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Az</th>
+                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">U-value</th>
+                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Azimuth</th>
                     </tr>
                   </thead>
                   <tbody className="text-[11px] divide-y divide-slate-100">
