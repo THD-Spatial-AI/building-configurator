@@ -300,6 +300,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                 avgUValue={avgUValue}
                 installedTechIds={buildingData?.installedTechIds ?? []}
                 onUpdateParam={setGen}
+                mode={mode}
               />
               <EnergyEnvelopeColumn
                 uploadError={uploadError}

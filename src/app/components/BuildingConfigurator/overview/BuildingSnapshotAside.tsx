@@ -15,6 +15,7 @@ export interface BuildingSnapshotAsideProps {
   avgUValue: number;
   installedTechIds: string[];
   onUpdateParam: (key: string, value: string | number) => void;
+  mode: 'basic' | 'expert';
 }
 
 const ENERGY_ITEMS = [
@@ -31,6 +32,7 @@ export function BuildingSnapshotAside({
   avgUValue,
   installedTechIds,
   onUpdateParam,
+  mode,
 }: BuildingSnapshotAsideProps) {
   const [paramsOpen,   setParamsOpen]   = useState(false);
   const [editingKey,   setEditingKey]   = useState<string | null>(null);
@@ -111,7 +113,9 @@ export function BuildingSnapshotAside({
               <span className="text-base font-bold leading-none" style={{ color: thermalRating.color }}>
                 {thermalRating.label}
               </span>
-              <span className="ml-1.5 text-[11px] text-slate-500">{avgUValue.toFixed(2)} W/m²K</span>
+              {mode === 'expert' && (
+                <span className="ml-1.5 text-[11px] text-slate-500">{avgUValue.toFixed(2)} W/m²K</span>
+              )}
             </div>
           </div>
         </div>
