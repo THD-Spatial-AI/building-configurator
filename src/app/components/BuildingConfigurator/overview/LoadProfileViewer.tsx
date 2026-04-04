@@ -11,7 +11,7 @@ type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'combined';
 type Resolution = 'hourly' | 'daily' | 'weekly' | 'monthly';
 type WindowMode = 'stepped' | 'free';
 
-interface LoadDataPoint {
+export interface LoadDataPoint {
   timestamp: string;
   electricity: number;
   heating: number;
@@ -439,18 +439,37 @@ export interface EnergyTotals {
 interface LoadProfileViewerProps {
   buildingId?: string;
   onTotalsChange?: (totals: EnergyTotals) => void;
+  /** Pre-seeds the hourly dataset from model output. Replaces any user-uploaded data. */
+  initialTimeseries?: LoadDataPoint[];
+  /** Controls UI complexity. Basic hides expert controls; defaults to basic. */
+  mode?: 'basic' | 'expert';
 }
 
-export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange }: LoadProfileViewerProps) {
-  const [energyType, setEnergyType] = useState<EnergyType>('electricity');
-  const [resolution, setResolution] = useState<Resolution>('daily');
-  const [windowMode, setWindowMode] = useState<WindowMode>('stepped');
-  const [dataset, setDataset] = useState<DatasetByResolution>(() => createDefaultDataset());
-  const [sourceLabel, setSourceLabel] = useState('No profile loaded');
+export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, initialTimeseries, mode = 'basic' }: LoadProfileViewerProps) {
+  const [energyType, setEnergyType] = useState<EnergyType>(mode === 'basic' ? 'combined' : 'electricity');
+  const [resolution, setResolution] = useState<Resolution>(mode === 'basic' ? 'monthly' : 'daily');
+  const [windowMode, setWindowMode] = useState<WindowMode>(mode === 'basic' ? 'free' : 'stepped');
+  const [dataset, setDataset] = useState<DatasetByResolution>(() => {
+    if (initialTimeseries && initialTimeseries.length > 0) {
+      return { ...createDefaultDataset(), hourly: initialTimeseries };
+    }
+    return createDefaultDataset();
+  });
+  const [sourceLabel, setSourceLabel] = useState(() =>
+    initialTimeseries && initialTimeseries.length > 0 ? 'BUEM model output' : 'No profile loaded',
+  );
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [brushRange, setBrushRange] = useState<BrushRange>({ startIndex: 0, endIndex: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset to simplified defaults whenever basic mode is (re-)applied.
+  useEffect(() => {
+    if (mode !== 'basic') return;
+    setResolution('monthly');
+    setWindowMode('free');
+    setEnergyType('combined');
+  }, [mode]);
 
   const derivedData = getDerivedData(dataset, resolution);
   const data = derivedData.rows;
@@ -464,7 +483,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange }:
 
   // Shorter labels that communicate "what time period each data point covers"
   const resolutionOptions = [
-    { value: 'hourly',  label: 'Hour'  },
+    ...(mode === 'expert' ? [{ value: 'hourly', label: 'Hour' }] : []),
     { value: 'daily',   label: 'Day'   },
     { value: 'weekly',  label: 'Week'  },
     { value: 'monthly', label: 'Month' },
@@ -678,38 +697,42 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange }:
         </div>
         {/* Resolution — labelled as the time period each point covers */}
         <SegmentedControl options={resolutionOptions} value={resolution} onChange={(v) => setResolution(v as Resolution)} />
-        {/* Graph-data import / export — distinct from the full-model import in the header */}
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            height: 26, padding: '0 9px', borderRadius: 5,
-            border: `1px solid ${T.border}`, background: 'transparent',
-            color: T.foreground, cursor: 'pointer', fontSize: 11, fontWeight: 600, flexShrink: 0,
-          }}
-        >
-          <Upload size={12} /> Upload load profile
-        </button>
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={!hasData}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            height: 26, padding: '0 9px', borderRadius: 5,
-            border: `1px solid ${T.border}`, background: 'transparent',
-            color: hasData ? T.foreground : T.mutedFg,
-            cursor: hasData ? 'pointer' : 'not-allowed',
-            fontSize: 11, fontWeight: 600, flexShrink: 0, opacity: hasData ? 1 : 0.5,
-          }}
-        >
-          <Download size={12} /> Download load profile
-        </button>
-        <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
+        {/* Graph-data import / export — expert mode only */}
+        {mode === 'expert' && (
+          <>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                height: 26, padding: '0 9px', borderRadius: 5,
+                border: `1px solid ${T.border}`, background: 'transparent',
+                color: T.foreground, cursor: 'pointer', fontSize: 11, fontWeight: 600, flexShrink: 0,
+              }}
+            >
+              <Upload size={12} /> Upload load profile
+            </button>
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={!hasData}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                height: 26, padding: '0 9px', borderRadius: 5,
+                border: `1px solid ${T.border}`, background: 'transparent',
+                color: hasData ? T.foreground : T.mutedFg,
+                cursor: hasData ? 'pointer' : 'not-allowed',
+                fontSize: 11, fontWeight: 600, flexShrink: 0, opacity: hasData ? 1 : 0.5,
+              }}
+            >
+              <Download size={12} /> Download load profile
+            </button>
+            <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
+          </>
+        )}
       </div>
 
-      {hasData && (
+      {hasData && mode === 'expert' && (
         <div style={{ padding: '8px 14px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <SegmentedControl options={windowModeOptions} value={windowMode} onChange={(value) => setWindowMode(value as WindowMode)} />
           {windowMode === 'stepped' && resolution === 'hourly' && availableHourlyDates.length > 0 && (
@@ -814,7 +837,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange }:
         </div>
       )}
 
-      {hasData && showBrush && (
+      {hasData && showBrush && mode === 'expert' && (
         <div style={{ padding: '6px 14px 0', flexShrink: 0 }}>
           <Typography sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.3 }}>
             Drag the handles below the chart to zoom. In stepped mode the window snaps to the active resolution; free range removes that constraint.
@@ -826,7 +849,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange }:
       <div style={{ flex: 1, minHeight: 0, padding: '8px 12px 4px' }}>
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart key={`${resolution}-${derivedData.sourceResolution ?? 'none'}-${data.length}`} data={data} margin={{ top: 4, right: 4, left: -12, bottom: showBrush ? 18 : 0 }}>
+            <LineChart key={`${resolution}-${derivedData.sourceResolution ?? 'none'}-${data.length}`} data={data} margin={{ top: 4, right: 4, left: -12, bottom: showBrush && mode === 'expert' ? 18 : 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
               <XAxis
                 dataKey="timestamp"
@@ -858,7 +881,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange }:
               {(energyType === 'hotwater' || energyType === 'combined') && (
                 <Line type="monotone" dataKey="hotwater" stroke="#f59e0b" strokeWidth={2} name="Hot Water" dot={false} activeDot={{ r: 4 }} />
               )}
-              {showBrush && (
+              {showBrush && mode === 'expert' && (
                 <Brush
                   dataKey="timestamp"
                   height={20}
