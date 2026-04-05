@@ -1,11 +1,17 @@
+# Building configurator GUI for EnerPlanET Frontend
 
-  # Building configurator_for_buem
+Initially designed using Figma Make tool and the original project is available [here](https://www.figma.com/make/pEolLUBa32IcVQP4t7PA49/Building-configurator_for_buem?fullscreen=1&t=61BMw2Y4ObTDiNp2-1).
 
-  This is a code bundle for Building configurator_for_buem. The original project is available at https://www.figma.com/design/pEolLUBa32IcVQP4t7PA49/Building-configurator_for_buem.
+## Running the code
 
-  ## Running the code
+Run `npm i` to install the dependencies.
 
-  Run `npm i` to install the dependencies.
+Run `npm run dev` to start the development server.
 
-  Run `npm run dev` to start the development server.
-  
+## Test version
+
+This react component has been deployed on Vercel for testing, try it out [here](https://building-configurator-gui.vercel.app/).
+
+## Contribution
+
+Desinged and and developed by [Jay Ravani](https://github.com/jravani)
