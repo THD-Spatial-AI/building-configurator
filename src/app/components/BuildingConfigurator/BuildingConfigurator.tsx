@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
   Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle,
-  Flame, Zap, Droplets,
+  Flame, Zap, Droplets, Gauge,
 } from 'lucide-react';
 
 import { BuildingVisualization, VIEW_ORDER } from './configure/BuildingVisualization';
@@ -27,7 +27,6 @@ import { BuildingSnapshotAside } from './overview/BuildingSnapshotAside';
 import { EnergyEnvelopeColumn } from './overview/EnergyEnvelopeColumn';
 import { SurfaceGroupSelector } from './configure/SurfaceGroupSelector';
 import { SurfaceGroupEditor } from './configure/SurfaceGroupEditor';
-import { getFaceGroups } from './shared/elementListUtils';
 
 // --- Energy totals helper -----------------------------------------------------
 
@@ -126,7 +125,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [general,       setGeneralRaw]    = useState(initialGeneral);
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
   const [selectedId,    setSelectedId]    = useState<string | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState<FaceGroup | null>(null);
   const [vizViewIndex,  setVizViewIndex]  = useState(0);
   const [uploadError,   setUploadError]   = useState<string | null>(null);
 
@@ -166,7 +164,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
     setEnergyTotals(nextTotals);
     setSelectedId(null);
-    setSelectedGroup(null);
     setUploadError(null);
   }, [buildingData]);
 
@@ -185,29 +182,32 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const setGen = (key: string, value: any) =>
     setGeneralRaw((prev) => ({ ...prev, [key]: value }));
 
-  /** Selects a face group from the viz or the group selector column.
-   *  Clears the per-element selection and rotates the 3D preview to front-face the group. */
+  /** Called when the user clicks a face in the 3D preview.
+   *  Selects the first element in that face group and rotates the preview to front-face it. */
   const handleGroupSelect = (group: FaceGroup) => {
-    setSelectedGroup(group);
-    setSelectedId(null);
+    const firstEl = Object.values(elements).find((e) => {
+      const g = elementToGroup(e);
+      return g.type === group.type && g.face === group.face;
+    });
+    if (firstEl) setSelectedId(firstEl.id);
     if (group.face !== 'roof' && group.face !== 'floor') {
       const idx = VIEW_ORDER.findIndex((v) => v.frontWallId === group.face);
       if (idx !== -1) setVizViewIndex(idx);
     }
   };
 
-  /** Applies a new U-value to every element belonging to the given face group. */
-  const updateGroup = (group: FaceGroup, uValue: number) => {
-    setElements((prev) => {
-      const next = { ...prev };
-      Object.entries(next).forEach(([id, el]) => {
-        const eg = elementToGroup(el);
-        if (eg.type === group.type && eg.face === group.face) {
-          next[id] = { ...el, uValue };
-        }
-      });
-      return next;
-    });
+  /** Called when the user clicks an element row in the surface selector.
+   *  Sets the selected element and rotates the 3D preview to its face direction. */
+  const handleElementSelect = (elementId: string) => {
+    setSelectedId(elementId);
+    const el = elements[elementId];
+    if (el) {
+      const g = elementToGroup(el);
+      if (g.face !== 'roof' && g.face !== 'floor') {
+        const idx = VIEW_ORDER.findIndex((v) => v.frontWallId === g.face);
+        if (idx !== -1) setVizViewIndex(idx);
+      }
+    }
   };
 
 
@@ -216,7 +216,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setGeneralRaw(initialGeneral);
     setRoofConfig(DEFAULT_ROOF_CONFIG);
     setSelectedId(null);
-    setSelectedGroup(null);
     setVizViewIndex(0);
     setUploadError(null);
   };
@@ -271,7 +270,14 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const buildingType  = identity?.buildingType ?? general.buildingType;
   const coordinates: [number, number] = identity?.coordinates ?? [11.5820, 48.1351];
 
-  const faceGroups  = useMemo(() => getFaceGroups(elements), [elements]);
+  // selectedGroup is derived from the selected element — no separate state needed.
+  // This ensures the 3D highlight always follows the element's actual face, even
+  // when azimuth changes move it to a different direction bucket.
+  const selectedGroup = useMemo((): FaceGroup | null => {
+    const el = selectedId ? elements[selectedId] : null;
+    return el ? elementToGroup(el) : null;
+  }, [selectedId, elements]);
+
   const totalArea   = Object.values(elements).reduce((sum, e) => sum + (e.area || 0), 0);
   const avgUValue   = totalArea > 0
     ? Object.values(elements).reduce((sum, e) => sum + e.uValue * e.area, 0) / totalArea
@@ -354,7 +360,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
             </div>
           ) : (
             // ── Configure layout: preview + demand (left) | group editor + selector (right) ──
-            <div className="grid h-full min-h-0 grid-cols-[2fr_3fr] overflow-hidden">
+            <div className="grid h-full min-h-0 grid-cols-[430px_minmax(0,1fr)] overflow-hidden">
 
               {/* ── Left column: 3D preview + preliminary energy demand ── */}
               <aside className="flex min-h-0 flex-col overflow-hidden border-r border-border/80 bg-slate-50/80">
@@ -375,35 +381,55 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                   </div>
                 </div>
 
-                {/* Preliminary energy demand mini panel */}
-                <div className="shrink-0 bg-slate-800 px-5 py-4">
-                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-                    Preliminary energy demand
-                  </p>
-                  <div className="flex flex-col gap-2.5">
-                    {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
-                      const value = energyTotals[key as keyof EnergyTotals];
-                      return (
-                        <div key={key} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={cn('flex size-6 shrink-0 items-center justify-center rounded-md', iconBg)}>
-                              <Icon className={cn('size-3.5', iconColor)} />
+                {/* Preliminary energy demand — card list matching overview style */}
+                <div className="shrink-0 p-3">
+                  <div className="overflow-hidden rounded-xl border border-slate-700/60 shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]">
+                    <div className="bg-slate-800 px-4 py-4">
+                      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                        Preliminary energy demand
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
+                          const value = energyTotals[key as keyof EnergyTotals];
+                          return (
+                            <div key={key} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={cn('flex size-6 shrink-0 items-center justify-center rounded-md', iconBg)}>
+                                  <Icon className={cn('size-3.5', iconColor)} />
+                                </div>
+                                <span className="text-xs text-slate-300">{label}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className={cn('text-lg font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
+                                  {value}
+                                </span>
+                                <span className="ml-1 text-[10px] text-slate-500">{energyTotals.unit}</span>
+                              </div>
                             </div>
-                            <span className="text-xs text-slate-300">{label}</span>
+                          );
+                        })}
+
+                        {/* Thermal efficiency — separated by subtle rule */}
+                        <div className="flex items-center justify-between border-t border-slate-700/60 pt-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-slate-600/50">
+                              <Gauge className="size-3.5 text-slate-300" />
+                            </div>
+                            <span className="text-xs text-slate-300">Thermal efficiency</span>
                           </div>
                           <div className="text-right">
-                            <span className={cn('text-base font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
-                              {value}
+                            <span className="text-base font-bold leading-none" style={{ color: thermalRating.color }}>
+                              {thermalRating.label}
                             </span>
-                            <span className="ml-1 text-[10px] text-slate-500">{energyTotals.unit}</span>
+                            <span className="ml-1 text-[10px] text-slate-500">{avgUValue.toFixed(2)} W/m²K</span>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                      <p className="mt-3 text-[9px] text-slate-600">
+                        Will update live as surface properties change
+                      </p>
+                    </div>
                   </div>
-                  <p className="mt-3 text-[9px] text-slate-600">
-                    Will update live as surface properties change
-                  </p>
                 </div>
               </aside>
 
@@ -423,9 +449,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                     </div>
                   )}
                   <SurfaceGroupEditor
-                    selectedGroup={selectedGroup}
-                    groups={faceGroups}
-                    onUpdateGroup={updateGroup}
+                    selectedElementId={selectedId}
+                    elements={elements}
+                    onUpdateElement={updateElement}
                   />
                 </div>
 
@@ -436,9 +462,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                   </p>
                   <div className="min-h-0 flex-1 overflow-y-auto">
                     <SurfaceGroupSelector
-                      groups={faceGroups}
-                      selectedGroup={selectedGroup}
-                      onSelect={handleGroupSelect}
+                      elements={elements}
+                      selectedElementId={selectedId}
+                      onSelect={handleElementSelect}
                     />
                   </div>
                 </div>
