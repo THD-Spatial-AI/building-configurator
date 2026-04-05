@@ -1,11 +1,17 @@
-// Compact read-only element list used in the Configure sidebar.
-// Shows surfaces grouped by type with area, U-value, and azimuth.
+// Sidebar element list for the Configure view.
+// Shows surface groups in a 2-column grid. Expanding one group collapses
+// the rest to compact chips at the top; the expanded group fills the
+// remaining height with a scrollable surface table.
+//
+// Bidirectional sync: when selectedGroup changes (from viz click) the matching
+// group type auto-expands and rows belonging to that face are highlighted.
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS } from '../shared/ui';
-import type { BuildingElement } from './BuildingVisualization';
+import type { BuildingElement, FaceGroup } from './BuildingVisualization';
+import { faceFromAzimuth } from './BuildingVisualization';
 import type { RoofConfig } from './RoofConfigurator';
 import {
   ElementGroupKey,
@@ -16,91 +22,194 @@ import {
 
 export interface ElementListProps {
   elements: Record<string, BuildingElement>;
+  /** Which specific element row is highlighted for the right panel. */
   selectedId: string | null;
+  /** Which group is highlighted from the viz — drives auto-expand and face highlighting. */
+  selectedGroup: FaceGroup | null;
+  /** Called when the user clicks a specific element row. */
   onSelect: (id: string) => void;
   roofConfig: RoofConfig;
 }
 
+/** 8-point direction label matching faceFromAzimuth — ensures list and 3D preview always agree. */
+function surfaceDirection(el: BuildingElement): string {
+  if (el.type === 'roof')  return 'Top';
+  if (el.type === 'floor') return 'Base';
+  const MAP: Record<string, string> = {
+    north_wall: 'N',  northeast_wall: 'NE',
+    east_wall:  'E',  southeast_wall: 'SE',
+    south_wall: 'S',  southwest_wall: 'SW',
+    west_wall:  'W',  northwest_wall: 'NW',
+  };
+  return MAP[faceFromAzimuth(el.azimuth)] ?? '—';
+}
+
+/** Returns true when an element belongs to the currently selected face group. */
+function elementMatchesGroup(el: BuildingElement, group: FaceGroup): boolean {
+  if (el.type !== group.type) return false;
+  if (group.type === 'roof' || group.type === 'floor') return true;
+  return faceFromAzimuth(el.azimuth) === group.face;
+}
+
 /** Grouped, collapsible list of building surfaces for quick selection. */
-export function ElementList({ elements, selectedId, onSelect, roofConfig }: ElementListProps) {
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    wall: true, roof: false, floor: false, window: false, door: false,
-  });
+export function ElementList({ elements, selectedId, selectedGroup, onSelect, roofConfig }: ElementListProps) {
+  const [activeType, setActiveType] = useState<ElementGroupKey | null>(null);
 
   const grouped  = getGroupedElements(elements);
   const roofInfo = getRoofGroupInfo(roofConfig);
+  const types    = (Object.keys(grouped) as ElementGroupKey[]).filter((t) => grouped[t].length > 0);
+
+  // Auto-expand the group type that matches an incoming viz selection
+  useEffect(() => {
+    if (!selectedGroup) return;
+    const incoming = selectedGroup.type as ElementGroupKey;
+    if (types.includes(incoming)) {
+      setActiveType(incoming);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroup]);
+
+  const toggleGroup = (type: ElementGroupKey) =>
+    setActiveType((prev) => (prev === type ? null : type));
+
+  const groupDesc = (type: ElementGroupKey) => {
+    const items     = grouped[type];
+    const totalArea = items.reduce((s, el) => s + el.area, 0).toFixed(1);
+    return type === 'roof' && roofInfo.description
+      ? `${totalArea} m² · ${roofInfo.description}`
+      : `${totalArea} m²`;
+  };
+
+  /** Whether a row should be highlighted — either directly selected or matches the active face group. */
+  const isRowHighlighted = (el: BuildingElement): boolean => {
+    if (selectedId === el.id) return true;
+    if (selectedGroup) return elementMatchesGroup(el, selectedGroup);
+    return false;
+  };
+
+  // ── When one group is active: chips + expanded card ──────────────────────────
+
+  if (activeType) {
+    const items     = grouped[activeType];
+    const chipTypes = types.filter((t) => t !== activeType);
+
+    return (
+      <div className="flex h-full flex-col gap-2">
+
+        {/* Inactive groups as compact chips */}
+        {chipTypes.length > 0 && (
+          <div className="shrink-0 flex flex-wrap gap-1.5">
+            {chipTypes.map((type) => {
+              const hasSelected = grouped[type].some((el) => el.id === selectedId);
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => toggleGroup(type)}
+                  className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+                >
+                  <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: ELEMENT_DOTS[type] }} />
+                  {ELEMENT_GROUP_LABELS[type]}
+                  <span className="rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500">
+                    {grouped[type].length}
+                  </span>
+                  {hasSelected && <span className="size-1.5 shrink-0 rounded-full bg-primary" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Expanded group — fills remaining height */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
+          <button
+            type="button"
+            onClick={() => toggleGroup(activeType)}
+            className="flex w-full shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2 text-left transition-colors hover:bg-slate-100/80"
+          >
+            <span className="size-2 shrink-0" style={{ backgroundColor: ELEMENT_DOTS[activeType] }} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+                {ELEMENT_GROUP_LABELS[activeType]}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {items.length} surface{items.length !== 1 ? 's' : ''} · {groupDesc(activeType)}
+              </p>
+            </div>
+            <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-200" />
+          </button>
+
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <table className="w-full table-fixed border-collapse bg-white text-left">
+              <thead className="sticky top-0 z-10 bg-white text-[10px] uppercase tracking-[0.05em] text-slate-400">
+                <tr className="border-b border-slate-200/80">
+                  <th className="px-3 py-1.5 font-semibold">Surface</th>
+                  <th className="w-12 border-l border-slate-100 px-2 py-1.5 font-semibold">Dir</th>
+                  <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Area</th>
+                  <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">U-value</th>
+                  <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Azimuth</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-[11px]">
+                {items.map((el) => (
+                  <tr
+                    key={el.id}
+                    className={cn(
+                      'cursor-pointer transition-colors',
+                      isRowHighlighted(el) ? 'bg-primary/10' : 'hover:bg-slate-50',
+                    )}
+                    onClick={() => onSelect(el.id)}
+                  >
+                    <td className="px-3 py-2.5 font-medium text-foreground">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: ELEMENT_DOTS[el.type] }} />
+                        <span className="truncate">{el.label}</span>
+                      </div>
+                    </td>
+                    <td className="border-l border-slate-100 px-2 py-2.5 font-semibold text-slate-600">{surfaceDirection(el)}</td>
+                    <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">{el.area.toFixed(1)}</td>
+                    <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">{el.uValue.toFixed(2)}</td>
+                    <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">{Math.round(el.azimuth)}°</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── No group active: 2-column grid of group cards ────────────────────────────
 
   return (
-    <div className="flex flex-col gap-2">
-      {(Object.keys(grouped) as ElementGroupKey[]).map((type) => {
-        const items = grouped[type];
-        if (items.length === 0) return null;
-
-        const isExpanded      = expandedGroups[type] ?? false;
-        const totalTypeArea   = items.reduce((sum, item) => sum + item.area, 0);
-        const displayCount    = items.length;
-        const displayDesc     = type === 'roof' ? roofInfo.description : null;
-
+    <div className="grid grid-cols-2 gap-1.5">
+      {types.map((type) => {
+        const items       = grouped[type];
+        const hasSelected = items.some((el) => el.id === selectedId);
         return (
-          <div key={type} className="overflow-hidden border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,1))] shadow-[0_10px_22px_rgba(15,23,42,0.05)]">
-            <button
-              type="button"
-              onClick={() => setExpandedGroups((prev) => ({ ...prev, [type]: !prev[type] }))}
-              className="flex w-full items-center gap-2 border-b border-border/70 bg-slate-50 px-3 py-2 text-left transition-colors hover:bg-slate-100/80"
-            >
-              <span className="size-2 shrink-0" style={{ backgroundColor: ELEMENT_DOTS[type] }} />
-              <div className="min-w-0 flex-1">
+          <button
+            key={type}
+            type="button"
+            onClick={() => toggleGroup(type)}
+            className="flex flex-col items-start rounded-md border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-slate-50"
+          >
+            <div className="flex w-full items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: ELEMENT_DOTS[type] }} />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
                   {ELEMENT_GROUP_LABELS[type]}
                 </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {displayCount} surface{displayCount !== 1 ? 's' : ''}
-                  {displayDesc ? ` · ${displayDesc}` : ` · ${totalTypeArea.toFixed(1)} m²`}
-                </p>
               </div>
-              <div className="rounded-[6px] border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                {displayCount}
-              </div>
-              <ChevronDown className={cn('size-4 shrink-0 text-muted-foreground transition-transform duration-200', isExpanded && 'rotate-180')} />
-            </button>
-
-            {isExpanded && (
-              <div className="px-2 py-2">
-                <table className="w-full table-fixed border-collapse text-left bg-white">
-                  <thead className="text-[10px] uppercase tracking-[0.05em] text-slate-400">
-                    <tr className="border-b border-slate-200/80">
-                      <th className="px-2 py-1.5 font-semibold">Surface</th>
-                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Area</th>
-                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">U-value</th>
-                      <th className="w-16 border-l border-slate-100 px-2 py-1.5 font-semibold">Azimuth</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-[11px] divide-y divide-slate-100">
-                    {items.map((el) => (
-                      <tr
-                        key={el.id}
-                        className={cn(
-                          'cursor-pointer transition-colors',
-                          selectedId === el.id ? 'bg-primary/10' : 'hover:bg-slate-50',
-                        )}
-                        onClick={() => onSelect(el.id)}
-                      >
-                        <td className="px-2 py-2.5 font-medium text-foreground">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: ELEMENT_DOTS[el.type] }} />
-                            <span className="truncate">{el.label}</span>
-                          </div>
-                        </td>
-                        <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">{el.area.toFixed(1)}</td>
-                        <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">{el.uValue.toFixed(2)}</td>
-                        <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">{Math.round(el.azimuth)}°</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                {items.length}
+              </span>
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">{groupDesc(type)}</p>
+            {hasSelected && (
+              <p className="mt-0.5 text-[10px] font-medium text-primary">Active</p>
             )}
-          </div>
+          </button>
         );
       })}
     </div>

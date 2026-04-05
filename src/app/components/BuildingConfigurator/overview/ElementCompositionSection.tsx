@@ -6,6 +6,7 @@ import { ChevronDown, Check, X, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS } from '../shared/ui';
 import type { BuildingElement } from '../configure/BuildingVisualization';
+import { isElementEditable, isUserDefinedElement } from '../configure/BuildingVisualization';
 import type { RoofConfig } from '../configure/RoofConfigurator';
 import {
   ElementGroupKey,
@@ -26,6 +27,7 @@ export interface ElementCompositionSectionProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onUpdate: (id: string, patch: Partial<BuildingElement>) => void;
+  onEnableCustomMode: (id: string) => void;
   roofConfig: RoofConfig;
   /** Switches to Configure view with the given element pre-selected. */
   onSwitchToConfigure: (elementId: string) => void;
@@ -76,6 +78,7 @@ export function ElementCompositionSection({
   selectedId,
   onSelect,
   onUpdate,
+  onEnableCustomMode,
   roofConfig,
   onSwitchToConfigure,
 }: ElementCompositionSectionProps) {
@@ -103,6 +106,7 @@ export function ElementCompositionSection({
   };
 
   const startEditing = (el: BuildingElement) => {
+    if (!isElementEditable(el)) return;
     setEditingId(el.id);
     setEditingDraft({
       area:    el.area.toFixed(1),
@@ -219,6 +223,8 @@ export function ElementCompositionSection({
     const isEditing    = editingId === el.id;
     const active       = selectedId === el.id || isEditing;
     const elementStatus = getElementStatus(el);
+    const editable     = isElementEditable(el);
+    const userDefined  = isUserDefinedElement(el);
 
     const patchField = (key: keyof EditingDraft) => (value: string) =>
       setEditingDraft((prev) => ({ ...prev, [key]: value }));
@@ -233,7 +239,14 @@ export function ElementCompositionSection({
         className="transition-colors hover:bg-slate-50"
       >
         <td className="px-2 py-2.5 font-medium text-foreground">
-          <span className="truncate">{el.label}</span>
+          <div className="flex items-center gap-2">
+            <span className="truncate">{el.label}</span>
+            {userDefined && (
+              <span className="shrink-0 rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[9px] font-semibold text-blue-700">
+                User
+              </span>
+            )}
+          </div>
         </td>
         <td className="border-l border-slate-100 px-2 py-2.5 text-muted-foreground">
           <SnapshotStatusBadge status={elementStatus} />
@@ -286,14 +299,25 @@ export function ElementCompositionSection({
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => startEditing(el)}
-              className="inline-flex size-6 items-center justify-center rounded-[4px] border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100"
-              aria-label={`Edit ${el.label}`}
-            >
-              <Pencil className="size-3" />
-            </button>
+            editable ? (
+              <button
+                type="button"
+                onClick={() => startEditing(el)}
+                className="inline-flex size-6 items-center justify-center rounded-[4px] border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100"
+                aria-label={`Edit ${el.label}`}
+              >
+                <Pencil className="size-3" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { onEnableCustomMode(el.id); onSwitchToConfigure(el.id); }}
+                className="inline-flex rounded-[4px] border border-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-600 transition-colors hover:bg-slate-100"
+                aria-label={`Enable custom mode for ${el.label}`}
+              >
+                Custom
+              </button>
+            )
           )}
         </td>
       </tr>

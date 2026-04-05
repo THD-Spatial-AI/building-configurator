@@ -15,6 +15,7 @@ export interface EnergyEnvelopeColumnProps {
   selectedId: string | null;
   onSelectElement: (id: string) => void;
   onUpdateElement: (id: string, patch: Partial<BuildingElement>) => void;
+  onEnableCustomMode: (id: string) => void;
   roofConfig: RoofConfig;
   /** Re-triggers the scroll indicator check when the panel becomes visible. */
   isActive: boolean;
@@ -33,6 +34,7 @@ export function EnergyEnvelopeColumn({
   selectedId,
   onSelectElement,
   onUpdateElement,
+  onEnableCustomMode,
   roofConfig,
   isActive,
   buildingId,
@@ -102,6 +104,7 @@ export function EnergyEnvelopeColumn({
             selectedId={selectedId}
             onSelect={onSelectElement}
             onUpdate={onUpdateElement}
+            onEnableCustomMode={onEnableCustomMode}
             roofConfig={roofConfig}
             onSwitchToConfigure={onSwitchToConfigure}
           />

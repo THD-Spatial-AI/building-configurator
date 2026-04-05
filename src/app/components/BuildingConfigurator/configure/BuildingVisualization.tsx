@@ -1,5 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { RotateCcw, RotateCw } from 'lucide-react';
+// 3D isometric building preview for the Configure view.
+// Surfaces operate at group level — clicking selects a FaceGroup (type + face),
+// not an individual element. Hover state is managed locally.
+
+import { useMemo, useState } from 'react'; // useState kept for hoveredGroup
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+export type BuildingElementSource = 'city' | 'default' | 'custom';
 
 export interface BuildingElement {
   id: string;
@@ -10,6 +16,8 @@ export interface BuildingElement {
   gValue: number | null;
   tilt: number;
   azimuth: number;
+  source?: BuildingElementSource;
+  customMode?: boolean;
 }
 
 export interface SvgElementDef {
@@ -20,63 +28,69 @@ export interface SvgElementDef {
   type: BuildingElement['type'];
 }
 
+/** A group selection: one surface type on one face of the building. */
+export interface FaceGroup {
+  type: BuildingElement['type'];
+  /** One of: 'south_wall' | 'north_wall' | 'east_wall' | 'west_wall' | 'roof' | 'floor' */
+  face: string;
+}
+
 export const SVG_ELEMENTS: SvgElementDef[] = [
   { id: 'floor', points: '58,296 298,296 385,246 145,246', label: 'Ground Floor', labelPos: [222, 261], type: 'floor' },
-  { id: 'roof', points: '58,116 298,116 385,66 145,66', label: 'Roof', labelPos: [222, 88], type: 'roof' },
+  { id: 'roof',  points: '58,116 298,116 385,66 145,66',   label: 'Roof',         labelPos: [222, 88],  type: 'roof'  },
 ];
 
 type Point = [number, number];
-type Quad = [Point, Point, Point, Point];
+type Quad  = [Point, Point, Point, Point];
 
 interface ViewConfig {
   frontWallId: string;
-  sideWallId: string;
-  hiddenLeftWallId: string;
-  hiddenBackWallId: string;
+  sideWallId:  string;
 }
 
-interface OpeningShape {
-  id: string;
-  label: string;
-  type: 'window' | 'door';
-  points: string;
-  labelPos: Point;
-  visible: boolean;
-}
+const FRONT_WALL_QUAD: Quad       = [[58, 116], [298, 116], [298, 296], [58, 296]];
+const SIDE_WALL_QUAD: Quad        = [[298, 116], [385, 66],  [385, 246], [298, 296]];
+// Static geometry for the two always-hidden faces — used only to close the box visually.
+const HIDDEN_LEFT_WALL_QUAD: Quad = [[58, 116],  [145, 66],  [145, 246], [58, 296]];
+const HIDDEN_BACK_WALL_QUAD: Quad = [[145, 66],  [385, 66],  [385, 246], [145, 246]];
 
-const FRONT_WALL_QUAD: Quad = [[58, 116], [298, 116], [298, 296], [58, 296]];
-const SIDE_WALL_QUAD: Quad = [[298, 116], [385, 66], [385, 246], [298, 296]];
-const HIDDEN_LEFT_WALL_QUAD: Quad = [[58, 116], [145, 66], [145, 246], [58, 296]];
-const HIDDEN_BACK_WALL_QUAD: Quad = [[145, 66], [385, 66], [385, 246], [145, 246]];
-
-const VIEW_ORDER: ViewConfig[] = [
-  { frontWallId: 'south_wall', sideWallId: 'east_wall', hiddenLeftWallId: 'west_wall', hiddenBackWallId: 'north_wall' },
-  { frontWallId: 'east_wall', sideWallId: 'north_wall', hiddenLeftWallId: 'south_wall', hiddenBackWallId: 'west_wall' },
-  { frontWallId: 'north_wall', sideWallId: 'west_wall', hiddenLeftWallId: 'east_wall', hiddenBackWallId: 'south_wall' },
-  { frontWallId: 'west_wall', sideWallId: 'south_wall', hiddenLeftWallId: 'north_wall', hiddenBackWallId: 'east_wall' },
+/**
+ * 8-view rotation cycle. Intermediate directions (NE/SE/SW/NW) are included so
+ * that diagonal walls, windows and doors are accessible in the preview.
+ * Views with no elements for either face are skipped at runtime.
+ */
+export const VIEW_ORDER: ViewConfig[] = [
+  { frontWallId: 'south_wall',     sideWallId: 'east_wall'      },
+  { frontWallId: 'southeast_wall', sideWallId: 'south_wall'     },
+  { frontWallId: 'east_wall',      sideWallId: 'north_wall'     },
+  { frontWallId: 'northeast_wall', sideWallId: 'east_wall'      },
+  { frontWallId: 'north_wall',     sideWallId: 'west_wall'      },
+  { frontWallId: 'northwest_wall', sideWallId: 'north_wall'     },
+  { frontWallId: 'west_wall',      sideWallId: 'south_wall'     },
+  { frontWallId: 'southwest_wall', sideWallId: 'west_wall'      },
 ];
 
 const FILL: Record<string, string> = {
-  floor:          '#608c4c',
-  wallFront:      '#c8d9e8',
-  wallSide:       '#a8bece',
-  roof:           '#c0b090',
-  door:           '#8a5a38',
-  windowFront:    'rgba(128,208,240,0.62)',
-  windowSide:     'rgba(128,208,240,0.56)',
+  floor:       '#608c4c',
+  wallFront:   '#b8cedf',
+  wallSide:    '#8aaac0',
+  roof:        '#c0b090',
+  door:        '#8a5a38',
+  windowFront: '#90cce8',
+  windowSide:  '#78b8d8',
 };
 
 const FILL_HOVER: Record<string, string> = {
-  floor:          '#486e38',
-  wallFront:      '#9ab8d2',
-  wallSide:       '#7898b2',
-  roof:           '#a09070',
-  door:           '#6a3818',
-  windowFront:    'rgba(60,168,220,0.82)',
-  windowSide:     'rgba(60,168,220,0.76)',
+  floor:       '#486e38',
+  wallFront:   '#8aaac4',
+  wallSide:    '#6090aa',
+  roof:        '#a09070',
+  door:        '#6a3818',
+  windowFront: '#50a8d0',
+  windowSide:  '#3c98c0',
 };
 
-// Edge lines [x1,y1,x2,y2]
+// Structural edge lines [x1, y1, x2, y2]
 const EDGES: [number, number, number, number][] = [
   [58,296, 298,296], [58,116, 298,116], [58,116, 58,296],
   [298,116, 298,296], [298,296, 385,246], [298,116, 385,66],
@@ -84,16 +98,19 @@ const EDGES: [number, number, number, number][] = [
   [145,66, 145,246], [145,246, 385,246],
 ];
 
-function pointsToString(points: Point[]) {
+// Fixed UV positions for the one representative opening per face
+const WINDOW_UV = { u0: 0.3, u1: 0.7, v0: 0.18, v1: 0.52 };
+const DOOR_UV   = { u0: 0.38, u1: 0.62, v0: 0.6, v1: 0.97 };
+
+function pointsToString(points: Point[]): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
 }
 
 function quadPoint([topLeft, topRight, bottomRight, bottomLeft]: Quad, u: number, v: number): Point {
-  const topX = topLeft[0] + (topRight[0] - topLeft[0]) * u;
-  const topY = topLeft[1] + (topRight[1] - topLeft[1]) * u;
+  const topX    = topLeft[0]    + (topRight[0]    - topLeft[0])    * u;
+  const topY    = topLeft[1]    + (topRight[1]    - topLeft[1])    * u;
   const bottomX = bottomLeft[0] + (bottomRight[0] - bottomLeft[0]) * u;
   const bottomY = bottomLeft[1] + (bottomRight[1] - bottomLeft[1]) * u;
-
   return [topX + (bottomX - topX) * v, topY + (bottomY - topY) * v];
 }
 
@@ -106,217 +123,264 @@ function quadRect(quad: Quad, u0: number, v0: number, u1: number, v1: number): P
   ];
 }
 
-function faceFromAzimuth(azimuth: number) {
-  const normalized = ((azimuth % 360) + 360) % 360;
-  if (normalized < 45 || normalized >= 315) return 'north_wall';
-  if (normalized < 135) return 'east_wall';
-  if (normalized < 225) return 'south_wall';
-  return 'west_wall';
-}
-
-function centers(count: number) {
-  return Array.from({ length: count }, (_, index) => (index + 1) / (count + 1));
-}
-
-function openingRects(count: number, type: 'window' | 'door', face: 'front' | 'side') {
-  if (count === 0) return [];
-
-  if (type === 'door') {
-    const width = face === 'front' ? 0.16 : 0.18;
-    return centers(count).map((center) => ({ u0: center - width / 2, u1: center + width / 2, v0: 0.58, v1: 0.98 }));
-  }
-
-  const columns = Math.min(face === 'front' ? 3 : 2, count);
-  const rows = Math.ceil(count / columns);
-  const columnCenters = centers(columns);
-  const rowTops = rows === 1 ? [0.24] : [0.18, 0.5];
-  const height = rows === 1 ? 0.34 : 0.24;
-  const width = face === 'front' ? 0.18 : 0.2;
-
-  return Array.from({ length: count }, (_, index) => {
-    const row = Math.floor(index / columns);
-    const column = index % columns;
-    const center = columnCenters[column];
-    const top = rowTops[Math.min(row, rowTops.length - 1)];
-    return { u0: center - width / 2, u1: center + width / 2, v0: top, v1: top + height };
-  });
-}
-
-function openingShapesForFace(
-  openings: BuildingElement[],
-  quad: Quad,
-  face: 'front' | 'side',
-): OpeningShape[] {
-  const doors = openings.filter((element) => element.type === 'door');
-  const windows = openings.filter((element) => element.type === 'window');
-
-  const doorRects = openingRects(doors.length, 'door', face);
-  const windowRects = openingRects(windows.length, 'window', face);
-
-  return [
-    ...doors.map((element, index) => {
-      const rect = doorRects[index];
-      const points = quadRect(quad, rect.u0, rect.v0, rect.u1, rect.v1);
-      return {
-        id: element.id,
-        label: element.label,
-        type: 'door' as const,
-        points: pointsToString(points),
-        labelPos: quadPoint(quad, (rect.u0 + rect.u1) / 2, rect.v0 + 0.62 * (rect.v1 - rect.v0)),
-        visible: true,
-      };
-    }),
-    ...windows.map((element, index) => {
-      const rect = windowRects[index];
-      const points = quadRect(quad, rect.u0, rect.v0, rect.u1, rect.v1);
-      return {
-        id: element.id,
-        label: element.label,
-        type: 'window' as const,
-        points: pointsToString(points),
-        labelPos: quadPoint(quad, (rect.u0 + rect.u1) / 2, (rect.v0 + rect.v1) / 2),
-        visible: true,
-      };
-    }),
+/** Maps a wall azimuth (degrees) to one of 8 canonical face id strings (45° buckets). */
+export function faceFromAzimuth(azimuth: number): string {
+  const faces = [
+    'north_wall', 'northeast_wall', 'east_wall', 'southeast_wall',
+    'south_wall', 'southwest_wall', 'west_wall', 'northwest_wall',
   ];
+  const normalized = ((azimuth % 360) + 360) % 360;
+  return faces[Math.round(normalized / 45) % 8];
 }
 
-function iconButton(disabled = false) {
-  return `flex size-7 items-center justify-center rounded-[6px] border border-border bg-card text-muted-foreground transition-colors ${disabled ? 'opacity-50' : 'hover:bg-muted hover:text-foreground'}`;
+/** Maps any building element to its FaceGroup for viz ↔ list synchronisation. */
+export function elementToGroup(el: BuildingElement): FaceGroup {
+  if (el.type === 'roof')  return { type: 'roof',  face: 'roof'  };
+  if (el.type === 'floor') return { type: 'floor', face: 'floor' };
+  return { type: el.type, face: faceFromAzimuth(el.azimuth) };
+}
+
+/** Ensures all elements carry explicit source and edit-mode metadata. */
+export function normalizeElementRecord(
+  elements: Record<string, BuildingElement>,
+  fallbackSource: BuildingElementSource,
+): Record<string, BuildingElement> {
+  return Object.fromEntries(
+    Object.entries(elements).map(([id, el]) => [
+      id,
+      {
+        ...el,
+        source: el.source ?? fallbackSource,
+        customMode: el.customMode ?? (el.source === 'custom'),
+      },
+    ]),
+  );
+}
+
+/** Source-derived elements are read-only until promoted into custom mode. */
+export function isElementEditable(el: BuildingElement): boolean {
+  return el.source === 'custom' || !!el.customMode;
+}
+
+/** Returns true when the element is either custom-created or custom-overridden. */
+export function isUserDefinedElement(el: BuildingElement): boolean {
+  return el.source === 'custom' || !!el.customMode;
+}
+
+const FACE_LABELS: Record<string, string> = {
+  north_wall:     'North',      northeast_wall: 'North East',
+  east_wall:      'East',       southeast_wall: 'South East',
+  south_wall:     'South',      southwest_wall: 'South West',
+  west_wall:      'West',       northwest_wall: 'North West',
+};
+
+/** Human-readable label for a face id string. */
+function wallFaceLabel(faceId: string): string {
+  return FACE_LABELS[faceId] ?? faceId.replace('_wall', '').replace(/^\w/, (c) => c.toUpperCase());
+}
+
+/** Human-readable compass direction from a raw azimuth value. */
+function compassLabel(azimuth: number): string {
+  const labels = [
+    'North', 'North East', 'East', 'South East',
+    'South', 'South West', 'West', 'North West',
+  ];
+  const normalized = ((azimuth % 360) + 360) % 360;
+  return labels[Math.round(normalized / 45) % 8];
+}
+
+/** True when two FaceGroup values refer to the same surface group. */
+function groupsMatch(a: FaceGroup | null, b: FaceGroup | null): boolean {
+  return a !== null && b !== null && a.type === b.type && a.face === b.face;
 }
 
 interface Props {
   elements: Record<string, BuildingElement>;
-  selectedId: string | null;
-  hoveredId: string | null;
-  onSelect: (id: string) => void;
-  onHover: (id: string | null) => void;
+  selectedGroup: FaceGroup | null;
+  onSelectGroup: (group: FaceGroup) => void;
+  /** Controlled view rotation index (0–7). */
+  viewIndex: number;
+  onViewChange: (index: number) => void;
 }
 
-export function BuildingVisualization({ elements, selectedId, hoveredId, onSelect, onHover }: Props) {
-  const [viewIndex, setViewIndex] = useState(0);
-  const view = VIEW_ORDER[viewIndex];
+/** Isometric 3D preview of a building. Clicking any surface selects a FaceGroup. */
+export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, viewIndex, onViewChange }: Props) {
+  const [hoveredGroup, setHoveredGroup] = useState<FaceGroup | null>(null);
 
-  const wallDefs = useMemo(() => ({
-    front: { id: view.frontWallId, quad: FRONT_WALL_QUAD, label: elements[view.frontWallId]?.label ?? 'Front Wall' },
-    side: { id: view.sideWallId, quad: SIDE_WALL_QUAD, label: elements[view.sideWallId]?.label ?? 'Side Wall' },
-    hiddenLeft: { id: view.hiddenLeftWallId, quad: HIDDEN_LEFT_WALL_QUAD, label: elements[view.hiddenLeftWallId]?.label ?? 'Hidden Wall' },
-    hiddenBack: { id: view.hiddenBackWallId, quad: HIDDEN_BACK_WALL_QUAD, label: elements[view.hiddenBackWallId]?.label ?? 'Hidden Wall' },
-  }), [elements, view]);
+  // Restrict to views that have at least one element on the front or side face.
+  const availableViewIndices = useMemo(() => {
+    const allEls = Object.values(elements);
+    // Use azimuth-based face mapping for all types — element IDs are not reliable face identifiers.
+    const faceHasAny = (faceId: string) =>
+      allEls.some((el) =>
+        (el.type === 'wall' || el.type === 'window' || el.type === 'door') &&
+        faceFromAzimuth(el.azimuth) === faceId,
+      );
+    const indices = VIEW_ORDER
+      .map((v, i) => (faceHasAny(v.frontWallId) || faceHasAny(v.sideWallId) ? i : -1))
+      .filter((i) => i !== -1);
+    return indices.length > 0 ? indices : [0];
+  }, [elements]);
 
-  const openingsByWall = useMemo(() => {
-    const allOpenings = Object.values(elements).filter((element) => element.type === 'window' || element.type === 'door');
+  // Clamp viewIndex to an available view (guards against stale index after element changes).
+  const safeViewIndex = availableViewIndices.includes(viewIndex)
+    ? viewIndex
+    : (availableViewIndices[0] ?? 0);
+  const view = VIEW_ORDER[safeViewIndex];
+
+  // Wall label: prefer the element's own azimuth; fall back to the face id.
+  const wallDefs = useMemo(() => {
+    const wallLabel = (id: string) => {
+      const az = elements[id]?.azimuth;
+      return az !== undefined ? `${compassLabel(az)} Wall` : `${wallFaceLabel(id)} Wall`;
+    };
     return {
-      front: openingShapesForFace(allOpenings.filter((element) => faceFromAzimuth(element.azimuth) === view.frontWallId), FRONT_WALL_QUAD, 'front'),
-      side: openingShapesForFace(allOpenings.filter((element) => faceFromAzimuth(element.azimuth) === view.sideWallId), SIDE_WALL_QUAD, 'side'),
-      hidden: allOpenings.filter((element) => {
-        const face = faceFromAzimuth(element.azimuth);
-        return face === view.hiddenLeftWallId || face === view.hiddenBackWallId;
-      }),
+      front: { id: view.frontWallId, quad: FRONT_WALL_QUAD, label: wallLabel(view.frontWallId) },
+      side:  { id: view.sideWallId,  quad: SIDE_WALL_QUAD,  label: wallLabel(view.sideWallId)  },
     };
   }, [elements, view]);
 
-  const visibleIds = new Set<string>([
-    'roof',
-    'floor',
-    wallDefs.front.id,
-    wallDefs.side.id,
-    ...openingsByWall.front.map((opening) => opening.id),
-    ...openingsByWall.side.map((opening) => opening.id),
-  ]);
+  // Whether a given face has any elements of the given opening type
+  const faceHasOpening = useMemo(() => {
+    const openings = Object.values(elements).filter(
+      (el) => el.type === 'window' || el.type === 'door',
+    );
+    return (faceId: string, type: 'window' | 'door') =>
+      openings.some((el) => el.type === type && faceFromAzimuth(el.azimuth) === faceId);
+  }, [elements]);
 
-  const selectedSurface = selectedId ? elements[selectedId] ?? null : null;
-  const hoveredSurface = hoveredId ? elements[hoveredId] ?? null : null;
+  // Count of elements matching a FaceGroup (used in the status badge)
+  const groupCount = (group: FaceGroup): number => {
+    return Object.values(elements).filter((el) => {
+      if (el.type !== group.type) return false;
+      if (group.type === 'roof')  return true;
+      if (group.type === 'floor') return true;
+      return faceFromAzimuth(el.azimuth) === group.face;
+    }).length;
+  };
 
-  const selectedHiddenWall = selectedId === wallDefs.hiddenLeft.id || selectedId === wallDefs.hiddenBack.id
-    ? (selectedId === wallDefs.hiddenLeft.id ? wallDefs.hiddenLeft : wallDefs.hiddenBack)
-    : null;
+  // Status badge text for the selected group
+  const badgeText = (group: FaceGroup): string => {
+    const visibleFaces = new Set([view.frontWallId, view.sideWallId, 'roof', 'floor']);
+    const isHidden = !visibleFaces.has(group.face);
+    const suffix = isHidden ? ' · rotate to view' : '';
 
-  const selectedHiddenOpening = selectedId
-    ? openingsByWall.hidden.find((element) => element.id === selectedId) ?? null
-    : null;
-  const hoveredHiddenWall = hoveredId === wallDefs.hiddenLeft.id || hoveredId === wallDefs.hiddenBack.id
-    ? (hoveredId === wallDefs.hiddenLeft.id ? wallDefs.hiddenLeft : wallDefs.hiddenBack)
-    : null;
-  const hoveredHiddenOpening = hoveredId
-    ? openingsByWall.hidden.find((element) => element.id === hoveredId) ?? null
-    : null;
+    if (group.type === 'roof')  return 'Roof';
+    if (group.type === 'floor') return 'Ground Floor';
 
+    const dir = wallFaceLabel(group.face);
+    if (group.type === 'wall')   return `${dir} Wall${suffix}`;
+    if (group.type === 'window') return `${dir} Windows · ${groupCount(group)}${suffix}`;
+    if (group.type === 'door')   return `${dir} Doors · ${groupCount(group)}${suffix}`;
+    return group.face;
+  };
+
+  // Render one visible wall polygon + its label
   const renderWall = (wall: { id: string; quad: Quad; label: string }, variant: 'front' | 'side') => {
-    const isSelected = selectedId === wall.id;
-    const isHovered = hoveredId === wall.id;
+    const group: FaceGroup = { type: 'wall', face: wall.id };
+    const isSelected = groupsMatch(selectedGroup, group);
+    const isHovered  = groupsMatch(hoveredGroup, group);
+    const fillKey    = variant === 'front' ? 'wallFront' : 'wallSide';
+    const lx         = variant === 'front' ? 178 : 342;
+    const ly         = variant === 'front' ? 133 : 178;
+
     return (
       <g key={wall.id}>
         <polygon
           points={pointsToString(wall.quad)}
-          fill={isHovered ? FILL_HOVER[variant === 'front' ? 'wallFront' : 'wallSide'] : FILL[variant === 'front' ? 'wallFront' : 'wallSide']}
+          fill={isHovered ? FILL_HOVER[fillKey] : FILL[fillKey]}
           stroke={isSelected ? '#2f5d8a' : '#7090a8'}
           strokeWidth={isSelected ? 2.5 : 0.7}
           style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
-          onClick={() => onSelect(wall.id)}
-          onMouseEnter={() => onHover(wall.id)}
-          onMouseLeave={() => onHover(null)}
+          onClick={() => onSelectGroup(group)}
+          onMouseEnter={() => setHoveredGroup(group)}
+          onMouseLeave={() => setHoveredGroup(null)}
         />
-        <text
-          x={variant === 'front' ? 178 : 352}
-          y={variant === 'front' ? 208 : 178}
-          textAnchor="middle"
-          fontSize="11"
-          fill="rgba(70,100,130,0.65)"
-          style={{ userSelect: 'none', pointerEvents: 'none' }}
-        >
-          {wall.label}
-        </text>
+        {variant === 'front' && (
+          <text
+            x={lx} y={ly}
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="700"
+            fill="#1e3a52"
+            stroke="rgba(255,255,255,0.6)"
+            strokeWidth="2.5"
+            paintOrder="stroke"
+            style={{ userSelect: 'none', pointerEvents: 'none' }}
+          >
+            {wall.label}
+          </text>
+        )}
       </g>
     );
   };
 
-  const renderOpening = (opening: OpeningShape, variant: 'front' | 'side') => {
-    const isSelected = selectedId === opening.id;
-    const isHovered = hoveredId === opening.id;
-    const fillKey = opening.type === 'door'
+  // Render a single representative opening on a face (window or door)
+  const renderRepresentativeOpening = (
+    faceId: string,
+    openingType: 'window' | 'door',
+    quad: Quad,
+    variant: 'front' | 'side',
+  ) => {
+    if (!faceHasOpening(faceId, openingType)) return null;
+
+    const group: FaceGroup = { type: openingType, face: faceId };
+    const isSelected = groupsMatch(selectedGroup, group);
+    const isHovered  = groupsMatch(hoveredGroup, group);
+    const uv         = openingType === 'window' ? WINDOW_UV : DOOR_UV;
+    const points     = quadRect(quad, uv.u0, uv.v0, uv.u1, uv.v1);
+
+    const fillKey = openingType === 'door'
       ? 'door'
       : variant === 'front' ? 'windowFront' : 'windowSide';
 
     return (
-      <g key={opening.id}>
-        <polygon
-          points={opening.points}
-          fill={isHovered ? FILL_HOVER[fillKey] : FILL[fillKey]}
-          stroke={isSelected ? '#2f5d8a' : 'rgba(64,86,108,0.6)'}
-          strokeWidth={isSelected ? 2.2 : 0.8}
-          style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
-          onClick={() => onSelect(opening.id)}
-          onMouseEnter={() => onHover(opening.id)}
-          onMouseLeave={() => onHover(null)}
-        />
-      </g>
+      <polygon
+        key={`${faceId}-${openingType}`}
+        points={pointsToString(points)}
+        fill={isHovered ? FILL_HOVER[fillKey] : FILL[fillKey]}
+        stroke={isSelected ? '#2f5d8a' : 'rgba(64,86,108,0.6)'}
+        strokeWidth={isSelected ? 2.2 : 0.8}
+        style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
+        onClick={() => onSelectGroup(group)}
+        onMouseEnter={() => setHoveredGroup(group)}
+        onMouseLeave={() => setHoveredGroup(null)}
+      />
     );
   };
 
+  const isFloorSelected = groupsMatch(selectedGroup, { type: 'floor', face: 'floor' });
+  const isFloorHovered  = groupsMatch(hoveredGroup,  { type: 'floor', face: 'floor' });
+  const isRoofSelected  = groupsMatch(selectedGroup, { type: 'roof',  face: 'roof'  });
+  const isRoofHovered   = groupsMatch(hoveredGroup,  { type: 'roof',  face: 'roof'  });
+
   return (
     <div className="relative h-full min-h-0 w-full rounded-lg overflow-hidden border border-border bg-slate-100/70">
-      <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-md border border-border bg-card/90 p-1 shadow-sm backdrop-blur">
-        <button
-          type="button"
-          onClick={() => setViewIndex((current) => (current + VIEW_ORDER.length - 1) % VIEW_ORDER.length)}
-          className={iconButton()}
-          title="Rotate left"
-        >
-          <RotateCcw className="size-3.5" />
-        </button>
-        <span className="px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-          Rotate
-        </span>
-        <button
-          type="button"
-          onClick={() => setViewIndex((current) => (current + 1) % VIEW_ORDER.length)}
-          className={iconButton()}
-          title="Rotate right"
-        >
-          <RotateCw className="size-3.5" />
-        </button>
-      </div>
+      {/* Rotate left — floats on the left edge, vertically centred */}
+      <button
+        type="button"
+        onClick={() => {
+          const pos = availableViewIndices.indexOf(safeViewIndex);
+          onViewChange(availableViewIndices[(pos + availableViewIndices.length - 1) % availableViewIndices.length]);
+        }}
+        title="Rotate left"
+        className="absolute left-2 top-1/2 z-10 -translate-y-1/2 flex size-8 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <ChevronLeft className="size-4" />
+      </button>
+      {/* Rotate right — floats on the right edge, vertically centred */}
+      <button
+        type="button"
+        onClick={() => {
+          const pos = availableViewIndices.indexOf(safeViewIndex);
+          onViewChange(availableViewIndices[(pos + 1) % availableViewIndices.length]);
+        }}
+        title="Rotate right"
+        className="absolute right-2 top-1/2 z-10 -translate-y-1/2 flex size-8 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <ChevronRight className="size-4" />
+      </button>
+
       <svg viewBox="-30 -20 520 380" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', inset: 0, position: 'absolute' }}>
         <defs>
           <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
@@ -325,71 +389,50 @@ export function BuildingVisualization({ elements, selectedId, hoveredId, onSelec
           </linearGradient>
         </defs>
 
-        {/* Sky */}
+        {/* Sky background */}
         <rect x={-30} y={-20} width={520} height={380} fill="url(#skyGrad)" />
 
         {/* Ground shadow */}
         <ellipse cx={222} cy={310} rx={200} ry={13} fill="rgba(0,0,0,0.08)" />
 
-        {[selectedHiddenWall || hoveredHiddenWall, selectedHiddenOpening || hoveredHiddenOpening].filter(Boolean).map((hiddenItem, index) => {
-          if (!hiddenItem) return null;
-          const quad = 'quad' in hiddenItem
-            ? hiddenItem.quad
-            : faceFromAzimuth(elements[hiddenItem.id]?.azimuth ?? 0) === view.hiddenLeftWallId
-              ? HIDDEN_LEFT_WALL_QUAD
-              : HIDDEN_BACK_WALL_QUAD;
-          const label = 'label' in hiddenItem ? hiddenItem.label : elements[hiddenItem.id]?.label ?? hiddenItem.id;
-          const labelPos = 'labelPos' in hiddenItem ? hiddenItem.labelPos : quadPoint(quad, 0.5, 0.45);
-          const isSelected = selectedId === hiddenItem.id;
-          return (
-            <g key={`${hiddenItem.id}-${index}`} style={{ pointerEvents: 'none' }}>
-              <polygon
-                points={pointsToString(quad)}
-                fill={isSelected ? 'rgba(47,93,138,0.18)' : 'rgba(47,93,138,0.10)'}
-                stroke="#2f5d8a"
-                strokeWidth={isSelected ? 2 : 1.4}
-                strokeDasharray={isSelected ? '8 5' : '5 4'}
-                opacity={0.95}
-              />
-              <text
-                x={labelPos[0]}
-                y={labelPos[1]}
-                textAnchor="middle"
-                fontSize="10"
-                fill="#1f4d75"
-                style={{ userSelect: 'none' }}
-              >
-                {label}
-              </text>
-            </g>
-          );
-        })}
+        {/* Hidden back faces — drawn first so visible walls fully occlude them */}
+        <polygon points={pointsToString(HIDDEN_BACK_WALL_QUAD)} fill="#6a8292" stroke="#5a7282" strokeWidth={0.7} />
+        <polygon points={pointsToString(HIDDEN_LEFT_WALL_QUAD)} fill="#7a92a4" stroke="#6a8292" strokeWidth={0.7} />
 
         <g>
+          {/* Ground floor */}
           <polygon
             points={SVG_ELEMENTS[0].points}
-            fill={hoveredId === 'floor' ? FILL_HOVER.floor : FILL.floor}
-            stroke={selectedId === 'floor' ? '#2f5d8a' : '#7090a8'}
-            strokeWidth={selectedId === 'floor' ? 2.5 : 0.7}
+            fill={isFloorHovered ? FILL_HOVER.floor : FILL.floor}
+            stroke={isFloorSelected ? '#2f5d8a' : '#7090a8'}
+            strokeWidth={isFloorSelected ? 2.5 : 0.7}
             style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
-            onClick={() => onSelect('floor')}
-            onMouseEnter={() => onHover('floor')}
-            onMouseLeave={() => onHover(null)}
+            onClick={() => onSelectGroup({ type: 'floor', face: 'floor' })}
+            onMouseEnter={() => setHoveredGroup({ type: 'floor', face: 'floor' })}
+            onMouseLeave={() => setHoveredGroup(null)}
           />
+
+          {/* Visible walls */}
           {renderWall(wallDefs.front, 'front')}
-          {renderWall(wallDefs.side, 'side')}
+          {renderWall(wallDefs.side,  'side')}
+
+          {/* Roof */}
           <polygon
             points={SVG_ELEMENTS[1].points}
-            fill={hoveredId === 'roof' ? FILL_HOVER.roof : FILL.roof}
-            stroke={selectedId === 'roof' ? '#2f5d8a' : '#7090a8'}
-            strokeWidth={selectedId === 'roof' ? 2.5 : 0.7}
+            fill={isRoofHovered ? FILL_HOVER.roof : FILL.roof}
+            stroke={isRoofSelected ? '#2f5d8a' : '#7090a8'}
+            strokeWidth={isRoofSelected ? 2.5 : 0.7}
             style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
-            onClick={() => onSelect('roof')}
-            onMouseEnter={() => onHover('roof')}
-            onMouseLeave={() => onHover(null)}
+            onClick={() => onSelectGroup({ type: 'roof', face: 'roof' })}
+            onMouseEnter={() => setHoveredGroup({ type: 'roof', face: 'roof' })}
+            onMouseLeave={() => setHoveredGroup(null)}
           />
-          {openingsByWall.front.map((opening) => renderOpening(opening, 'front'))}
-          {openingsByWall.side.map((opening) => renderOpening(opening, 'side'))}
+
+          {/* Representative openings: one window + one door per visible face */}
+          {renderRepresentativeOpening(view.frontWallId, 'window', FRONT_WALL_QUAD, 'front')}
+          {renderRepresentativeOpening(view.frontWallId, 'door',   FRONT_WALL_QUAD, 'front')}
+          {renderRepresentativeOpening(view.sideWallId,  'window', SIDE_WALL_QUAD,  'side')}
+          {renderRepresentativeOpening(view.sideWallId,  'door',   SIDE_WALL_QUAD,  'side')}
         </g>
 
         {/* Structural edges */}
@@ -397,31 +440,41 @@ export function BuildingVisualization({ elements, selectedId, hoveredId, onSelec
           <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#5c7888" strokeWidth={0.7} opacity={0.55} />
         ))}
 
-        <text x={222} y={86} textAnchor="middle" fontSize="10" fill="rgba(90,75,45,0.7)" style={{ userSelect: 'none', pointerEvents: 'none' }}>
+        <text
+          x={222} y={91}
+          textAnchor="middle"
+          fontSize="12"
+          fontWeight="700"
+          fill="#3d2e10"
+          stroke="rgba(255,255,255,0.6)"
+          strokeWidth="2.5"
+          paintOrder="stroke"
+          style={{ userSelect: 'none', pointerEvents: 'none' }}
+        >
           Roof
         </text>
 
-        {/* Selected label badge */}
-        {selectedSurface && (() => {
-          const isHiddenSurface = !visibleIds.has(selectedSurface.id);
+        {/* Selected group status badge — below ground shadow */}
+        {selectedGroup && (() => {
+          const text = badgeText(selectedGroup);
           return (
             <g>
-              <rect x={8} y={291} width={220} height={22} rx={5} fill="rgba(18,32,52,0.78)" />
-              <text x={118} y={306} textAnchor="middle" fontSize="10" fill="white" style={{ userSelect: 'none' }}>
-                ✎  {selectedSurface.label}{isHiddenSurface ? ' · rotate to view' : ''}
+              <rect x={8} y={330} width={220} height={22} rx={5} fill="rgba(18,32,52,0.78)" />
+              <text x={118} y={345} textAnchor="middle" fontSize="10" fill="white" style={{ userSelect: 'none' }}>
+                ✎  {text}
               </text>
             </g>
           );
         })()}
 
-        {/* Hover tooltip */}
-        {!selectedId && hoveredSurface && (() => {
-          const isHiddenSurface = !visibleIds.has(hoveredSurface.id);
+        {/* Hover tooltip — only shown when nothing is selected, below ground shadow */}
+        {!selectedGroup && hoveredGroup && (() => {
+          const text = badgeText(hoveredGroup);
           return (
             <g>
-              <rect x={8} y={291} width={250} height={22} rx={5} fill="rgba(18,32,52,0.72)" />
-              <text x={133} y={306} textAnchor="middle" fontSize="10" fill="white" style={{ userSelect: 'none' }}>
-                {hoveredSurface.label} · {isHiddenSurface ? 'rotate to view' : 'click to configure'}
+              <rect x={8} y={330} width={250} height={22} rx={5} fill="rgba(18,32,52,0.72)" />
+              <text x={133} y={345} textAnchor="middle" fontSize="10" fill="white" style={{ userSelect: 'none' }}>
+                {text} · click to configure
               </text>
             </g>
           );
@@ -433,16 +486,16 @@ export function BuildingVisualization({ elements, selectedId, hoveredId, onSelec
           <polygon points="0,-18 -3.5,-7 3.5,-7" fill="#c53030" />
           <polygon points="0,18 -3.5,7 3.5,7" fill="#8090a4" />
           <line x1={-16} y1={0} x2={16} y2={0} stroke="#8090a4" strokeWidth={1.5} strokeLinecap="round" />
-          <text x={0} y={-24} textAnchor="middle" fontSize="9" fill="#c53030" fontWeight="bold" style={{ userSelect: 'none' }}>N</text>
-          <text x={0} y={33} textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>S</text>
-          <text x={27} y={4} textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>E</text>
-          <text x={-27} y={4} textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>W</text>
+          <text x={0}   y={-24} textAnchor="middle" fontSize="9" fill="#c53030" fontWeight="bold" style={{ userSelect: 'none' }}>N</text>
+          <text x={0}   y={33}  textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>S</text>
+          <text x={27}  y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>E</text>
+          <text x={-27} y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>W</text>
         </g>
 
         {/* Scale bar */}
         <g transform="translate(8, 12)">
-          <line x1={0} y1={8} x2={60} y2={8} stroke="#8090a4" strokeWidth={1.5} />
-          <line x1={0} y1={4} x2={0} y2={12} stroke="#8090a4" strokeWidth={1.5} />
+          <line x1={0}  y1={8} x2={60} y2={8}  stroke="#8090a4" strokeWidth={1.5} />
+          <line x1={0}  y1={4} x2={0}  y2={12} stroke="#8090a4" strokeWidth={1.5} />
           <line x1={60} y1={4} x2={60} y2={12} stroke="#8090a4" strokeWidth={1.5} />
           <text x={30} y={6} textAnchor="middle" fontSize="8" fill="#6b7a88" style={{ userSelect: 'none' }}>12 m</text>
         </g>

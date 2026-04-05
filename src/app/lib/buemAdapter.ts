@@ -105,6 +105,8 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
       gValue:  gValue !== null && Number.isFinite(gValue) ? gValue : null,
       tilt:    qty(raw.tilt),
       azimuth: qty(raw.azimuth),
+      source: 'city',
+      customMode: false,
     };
   });
 
