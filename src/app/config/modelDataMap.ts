@@ -1,54 +1,80 @@
-// Authoritative registry that maps every UI data point to its source path in the
-// BUEM GeoJSON response. When the API schema changes, update the paths here only.
+// Authoritative registry that maps dashboard data domains to source paths in the
+// BUEM / EnerPlanET GeoJSON feature. When schema paths change, update them here
+// and keep extraction code generic.
 //
-// Format: dot-separated JSON path from the root of a GeoJSON Feature object.
-// Values marked { value, unit } in the schema are noted inline.
+// Each path is either:
+// - a dot-separated JSON path from the feature root
+// - or an ordered list of fallback paths when multiple source shapes are supported
 //
-// Two data classes are tracked separately:
-//   energy   — from the BUEM response (POST /api/process)
-//   geometry — from the separate GeoJSON building footprint layer
+// The dashboard is organised into three integration-facing domains:
+// - geometry      — physical building geometry and footprint sources
+// - thematic      — building identity, envelope and model outputs
+// - technologies  — installed technology configuration nodes
+
+export type ModelDataPath = string | readonly string[];
 
 export const MODEL_DATA_MAP = {
 
-  // ── Energy data ──────────────────────────────────────────────────────────────
+  // ── Thematic data ───────────────────────────────────────────────────────────
   // Source: BUEM GeoJSON FeatureCollection → features[n]
-  energy: {
-    // Identity
-    buildingId:         'id',
-    coordinates:        'geometry.coordinates',                            // [lon, lat] or [lon, lat, elevation]
+  thematic: {
+    // Identity available to the dashboard header and snapshot cards.
+    buildingId:  'id',
+    label:       'id',
+    coordinates: 'geometry.coordinates',                                  // [lon, lat] or [lon, lat, elevation]
 
-    // Building descriptor  (properties.buem.building.*)
-    buildingType:       'properties.buem.building.building_type',         // e.g. "MFH", "SFH"
-    constructionPeriod: 'properties.buem.building.construction_period',   // e.g. "1980-2000"
-    country:            'properties.buem.building.country',               // ISO 3166-1 alpha-2
-    floorArea:          'properties.buem.building.A_ref',                 // { value: number, unit: "m2" }
-    roomHeight:         'properties.buem.building.h_room',                // { value: number, unit: "m" }
-    storeys:            'properties.buem.building.n_storeys',
+    // Descriptor data  (properties.buem.building.*)
+    descriptor: {
+      buildingTypeCode: [
+        'properties.buem.building.building_type',                         // BUEM response shape
+        'properties.buem.building.type',                                  // EnerPlanET topology shape
+      ],
+      constructionPeriod: 'properties.buem.building.construction_period',
+      country:            'properties.buem.building.country',
+      floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
+      roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
+      storeys:            'properties.buem.building.n_storeys',
+    },
 
-    // Envelope elements  (properties.buem.building.envelope.elements[])
-    // Each element: { id, type, area, azimuth, tilt, U, g_gl? }
-    envelopeElements:   'properties.buem.building.envelope.elements',
+    // Envelope element list (properties.buem.building.envelope.elements[])
+    envelope: {
+      elements: 'properties.buem.building.envelope.elements',
+    },
 
-    // Thermal results summary  (properties.buem.thermal_load_profile.summary.*)
-    heatingTotal:       'properties.buem.thermal_load_profile.summary.heating.total',       // { value, unit: "kWh" }
-    coolingTotal:       'properties.buem.thermal_load_profile.summary.cooling.total',       // { value, unit: "kWh" }
-    electricityTotal:   'properties.buem.thermal_load_profile.summary.electricity.total',   // { value, unit: "kWh" }
-    peakHeatingLoad:    'properties.buem.thermal_load_profile.summary.peak_heating_load',   // { value, unit: "kW" }
-    peakCoolingLoad:    'properties.buem.thermal_load_profile.summary.peak_cooling_load',   // { value, unit: "kW" }
-    energyIntensity:    'properties.buem.thermal_load_profile.summary.energy_intensity',    // { value, unit: "kWh/m2" }
-
-    // Hourly timeseries  (properties.buem.thermal_load_profile.timeseries)
-    // Only present when ?include_timeseries=true was passed to the endpoint.
-    // Shape: { unit: "kW", timestamps: string[], heating: number[], cooling: number[], electricity: number[] }
-    timeseries:         'properties.buem.thermal_load_profile.timeseries',
+    // Thermal output from BUEM response.
+    results: {
+      heatingTotal:     'properties.buem.thermal_load_profile.summary.heating.total',
+      coolingTotal:     'properties.buem.thermal_load_profile.summary.cooling.total',
+      electricityTotal: 'properties.buem.thermal_load_profile.summary.electricity.total',
+      peakHeatingLoad:  'properties.buem.thermal_load_profile.summary.peak_heating_load',
+      peakCoolingLoad:  'properties.buem.thermal_load_profile.summary.peak_cooling_load',
+      energyIntensity:  'properties.buem.thermal_load_profile.summary.energy_intensity',
+      timeseries:       'properties.buem.thermal_load_profile.timeseries',
+    },
   },
 
   // ── Geometry data ─────────────────────────────────────────────────────────────
   // Source: separate GeoJSON building footprint layer
   geometry: {
-    buildingId:       'properties.id',
+    buildingId:        ['properties.id', 'id'],
     buildingFootprint: 'geometry',          // Polygon or MultiPolygon
-    buildingHeight:   'properties.height',  // metres above ground, if available
+    buildingHeight:    'properties.height', // metres above ground, if available
+  },
+
+  // ── Technology data ─────────────────────────────────────────────────────────
+  technologies: {
+    techRoot: ['techs', 'properties.techs'],
+    catalog: {
+      solar_pv: ['techs.pv_supply', 'properties.techs.pv_supply'],
+      battery: ['techs.battery_storage', 'properties.techs.battery_storage'],
+      heat_pump: [
+        'techs.heat_pump_supply',
+        'properties.techs.heat_pump_supply',
+        'techs.heat_pump',
+        'properties.techs.heat_pump',
+      ],
+      ev_charger: ['techs.ev_charger', 'properties.techs.ev_charger'],
+    },
   },
 
 } as const;

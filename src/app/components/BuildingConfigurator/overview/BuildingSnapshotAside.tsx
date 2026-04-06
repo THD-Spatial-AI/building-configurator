@@ -2,11 +2,17 @@
 
 import React, { useState, useRef } from 'react';
 import { AlertTriangle, Zap, Flame, Droplets, ChevronDown, Gauge, Pencil, Check, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../../../../lib/utils';
 import type { EnergyTotals } from './LoadProfileViewer';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { yearToConstructionPeriod } from '../shared/buildingOptions';
 import { TechnologiesSection } from './TechnologiesSection';
+
+interface PvSummary {
+  installed: boolean;
+  surfaceCount: number;
+  totalCapacityKw: number;
+}
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
@@ -14,7 +20,11 @@ export interface BuildingSnapshotAsideProps {
   thermalRating: { label: string; color: string; bg: string };
   avgUValue: number;
   installedTechIds: string[];
+  pvSummary: PvSummary;
   onUpdateParam: (key: string, value: string | number) => void;
+  onToggleTech?: (id: string, installed: boolean) => void;
+  /** Opens the matching technology flow in the Configure workspace. */
+  onOpenTech?: (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => void;
   mode: 'basic' | 'expert';
 }
 
@@ -31,7 +41,10 @@ export function BuildingSnapshotAside({
   thermalRating,
   avgUValue,
   installedTechIds,
+  pvSummary,
   onUpdateParam,
+  onToggleTech,
+  onOpenTech,
   mode,
 }: BuildingSnapshotAsideProps) {
   const [paramsOpen,   setParamsOpen]   = useState(false);
@@ -251,7 +264,12 @@ export function BuildingSnapshotAside({
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
           Technologies
         </p>
-        <TechnologiesSection installedTechIds={installedTechIds} />
+        <TechnologiesSection
+          installedTechIds={installedTechIds}
+          pvSummary={pvSummary}
+          onToggle={onToggleTech}
+          onOpen={onOpenTech}
+        />
       </div>
 
       {/* ── Data quality notice ── */}

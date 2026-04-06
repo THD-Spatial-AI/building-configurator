@@ -1,7 +1,84 @@
-// Default seed data for the building configurator.
+// Default seed data and shared type definitions for the building configurator.
 // These values are placeholders until real building data is loaded from the API.
 
 import type { BuildingElement } from '../configure/BuildingVisualization';
+
+// ─── Technology types ─────────────────────────────────────────────────────────
+
+/**
+ * Configuration for a PV system. Field names match the EnerPlanET topology
+ * `techs.pv_supply` object so they can be forwarded directly to the parent app.
+ */
+export interface PvConfig {
+  /** Whether the system is included in the model. */
+  installed: boolean;
+  /**
+   * Controls where tilt and azimuth come from.
+   * 'surface' = inherit from the host building element; 'manual' = use the values below.
+   */
+  geometryMode: 'surface' | 'manual';
+  /** Nameplate rated capacity (kWp). */
+  system_capacity: number;
+  /** Panel tilt from horizontal (deg). */
+  tilt: number;
+  /** Panel compass azimuth — 0 = North, 180 = South (deg). */
+  azimuth: number;
+  /** Maximum installable capacity (kWp). */
+  cont_energy_cap_max: number;
+  /** Minimum installable capacity (kWp). */
+  cont_energy_cap_min: number;
+  /** Combined panel + wiring efficiency (0–1). */
+  cont_energy_eff: number;
+  /** DC-to-AC inverter efficiency (0–1). */
+  inv_eff: number;
+  /** DC rated capacity / AC inverter rating. */
+  dc_ac_ratio: number;
+  /** Total system losses fraction (0–1). */
+  losses: number;
+  /** Expected system lifetime (years). */
+  cont_lifetime: number;
+  /** Capital cost per kWp (€/kWp). */
+  cost_energy_cap: number;
+  /** Annual operation and maintenance cost per kWp (€/kWp/year). */
+  cost_om_annual: number;
+  /** Discount rate for financial calculations (0–1). */
+  cost_interest_rate: number;
+  /** Whether the optimiser should auto-orient panels. */
+  optimize_orientation: boolean;
+}
+
+export const DEFAULT_PV_CONFIG: PvConfig = {
+  installed:            false,
+  geometryMode:         'surface',
+  system_capacity:      8,
+  tilt:                 35,
+  azimuth:              180,
+  cont_energy_cap_max:  8,
+  cont_energy_cap_min:  0,
+  cont_energy_eff:      0.9,
+  inv_eff:              0.96,
+  dc_ac_ratio:          1.1,
+  losses:               0.14,
+  cont_lifetime:        25,
+  cost_energy_cap:      575,
+  cost_om_annual:       8,
+  cost_interest_rate:   0.02,
+  optimize_orientation: false,
+};
+
+/**
+ * Returns a per-surface PV configuration seeded from the host surface geometry.
+ * This avoids repeating the same PV defaults across overview and configure flows.
+ */
+export function createSurfacePvConfig(
+  element?: Pick<BuildingElement, 'tilt' | 'azimuth'> | null,
+): PvConfig {
+  return {
+    ...DEFAULT_PV_CONFIG,
+    tilt: element?.tilt ?? DEFAULT_PV_CONFIG.tilt,
+    azimuth: element?.azimuth ?? DEFAULT_PV_CONFIG.azimuth,
+  };
+}
 
 // TODO: 
 export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
@@ -35,6 +112,12 @@ export const DEFAULT_GENERAL = {
   electricityDemand:  4000,
   spaceHeatingDemand: 15000,
   dhwDemand:          2500,
+  // HDCP building-level condition codes (from TABULA)
+  Code_AttachedNeighbours: 'B_Alone',
+  Code_AtticCond:          'N',
+  Code_CellarCond:         'N',
+  Code_ComplexFootprint:   'Standard',
+  Code_ComplexRoof:        'no',
 };
 
 export const DEFAULT_TOTAL_AREA = Object.values(DEFAULT_ELEMENTS).reduce(

@@ -250,7 +250,7 @@ export function RangeSlider({ value, min, max, step = 1, marks, onChange }: Rang
 interface ToggleSwitchProps {
   checked: boolean;
   onChange: (v: boolean) => void;
-  label: string;
+  label?: string;
   tip?: string;
 }
 
