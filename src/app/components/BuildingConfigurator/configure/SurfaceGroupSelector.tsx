@@ -3,7 +3,7 @@
 // as card-like clickable elements with visual depth.
 // Each item gives a clear affordance that it is selectable.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Building2, Sun, Plus, X, Trash2 } from 'lucide-react';
 import type { PvConfig } from '../shared/buildingDefaults';
 import { cn } from '../../../../lib/utils';
@@ -101,6 +101,9 @@ export function SurfaceGroupSelector({
   );
   const [showCreate, setShowCreate] = useState(false);
 
+  // Refs to each group's root div — used to scroll the opened group into view.
+  const groupRefs = useRef<Partial<Record<ElementGroupKey, HTMLDivElement | null>>>({});
+
   // Auto-expand the group containing the selected element.
   useEffect(() => {
     if (selectedElementId) {
@@ -108,6 +111,16 @@ export function SurfaceGroupSelector({
       if (el) setActiveType(el.type as ElementGroupKey);
     }
   }, [selectedElementId, elements]);
+
+  // After the expand CSS transition finishes, scroll the opened group into view
+  // so that its content stays visible within the panel's scroll area.
+  useEffect(() => {
+    if (!activeType) return;
+    const timer = setTimeout(() => {
+      groupRefs.current[activeType]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 310); // just after the 300 ms CSS transition
+    return () => clearTimeout(timer);
+  }, [activeType]);
 
   const toggle = (type: ElementGroupKey) =>
     setActiveType((prev) => (prev === type ? null : type));
@@ -185,6 +198,7 @@ export function SurfaceGroupSelector({
         return (
           <div
             key={type}
+            ref={(el) => { groupRefs.current[type] = el; }}
             className={cn(
               'overflow-hidden rounded-lg border transition-all',
               isOpen ? 'border-slate-200 shadow-sm' : 'border-slate-200',
@@ -230,14 +244,14 @@ export function SurfaceGroupSelector({
                 <span className="size-1.5 shrink-0 rounded-full bg-primary" />
               )}
               <ChevronRight className={cn(
-                'size-3 shrink-0 text-slate-400 transition-transform duration-200',
+                'size-3 shrink-0 text-slate-400 transition-transform duration-300 ease-out',
                 isOpen && 'rotate-90',
               )} />
             </button>
 
             {/* Individual surface rows — animated expand */}
             <div className={cn(
-              'grid transition-all duration-200 ease-in-out',
+              'grid transition-all duration-300 ease-out',
               isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
             )}>
               <div className="overflow-hidden">

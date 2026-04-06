@@ -304,18 +304,21 @@ export function ConfigSection({ title, expanded, onToggle, children }: ConfigSec
         </span>
         <ChevronDown
           className={cn(
-            'size-4 text-muted-foreground transition-transform duration-200',
+            'size-4 text-muted-foreground transition-transform duration-300 ease-out',
             expanded && 'rotate-180',
           )}
         />
       </button>
 
-      <div
-        className="overflow-hidden transition-[max-height] duration-200 ease-in-out"
-        style={{ maxHeight: expanded ? 600 : 0 }}
-      >
-        <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
-          {children}
+      {/* grid-rows-[0fr→1fr] animates to the real content height — no hardcoded max. */}
+      <div className={cn(
+        'grid transition-all duration-300 ease-out',
+        expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+      )}>
+        <div className="overflow-hidden">
+          <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
+            {children}
+          </div>
         </div>
       </div>
     </div>

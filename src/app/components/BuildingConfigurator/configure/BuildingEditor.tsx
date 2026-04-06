@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Check } from 'lucide-react';
 import {
-  ConfigSection, SelectInput, NumberInput, FieldLabel,
+  SelectInput, NumberInput, FieldLabel,
   ToggleSwitch, FieldRow, InfoTip,
 } from '../shared/ui';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,8 @@ import {
   CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
 } from '../shared/buildingOptions';
+
+type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver';
 
 // ─── Attached-neighbours visual picker ────────────────────────────────────────
 
@@ -505,6 +507,61 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
   );
 }
 
+// ─── Section metadata ─────────────────────────────────────────────────────────
+
+/** Colour dot for each section — mirrors the element-dot pattern used in surfaces. */
+const SECTION_COLORS: Record<SectionKey, string> = {
+  identity:    '#2f5d8a',
+  conditions:  '#64748b',
+  ventilation: '#0891b2',
+  loads:       '#d97706',
+  thermal:     '#dc2626',
+  solver:      '#7c3aed',
+};
+
+const SECTION_LABELS: Record<SectionKey, string> = {
+  identity:    'Identity',
+  conditions:  'Conditions',
+  ventilation: 'Ventilation',
+  loads:       'Internal Loads',
+  thermal:     'Thermal Mass',
+  solver:      'Solver',
+};
+
+/** One-line value summary shown on the grid card and chip. */
+function sectionSummary(key: SectionKey, general: Record<string, any>): string {
+  switch (key) {
+    case 'identity':    return `${general.buildingType} · ${general.floorArea} m²`;
+    case 'conditions': {
+      const map: Record<string, string> = { B_Alone: 'Detached', B_N1: 'Semi-detached', B_N2: 'Terraced' };
+      return map[general.Code_AttachedNeighbours] ?? general.Code_AttachedNeighbours;
+    }
+    case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
+    case 'loads':       return `φ_int ${general.phi_int} W/m²`;
+    case 'thermal':     return general.massClass ?? '—';
+    case 'solver':      return general.use_milp ? 'MILP' : 'Rule-based';
+  }
+}
+
+/** Renders the content body for a given section key. */
+function SectionBody({
+  id, general, setGen, mode,
+}: {
+  id: SectionKey;
+  general: Record<string, any>;
+  setGen: (k: string, v: any) => void;
+  mode: string;
+}) {
+  switch (id) {
+    case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
+    case 'conditions':  return <ConditionsSection  general={general} setGen={setGen} mode={mode} />;
+    case 'ventilation': return <VentilationSection general={general} setGen={setGen} />;
+    case 'loads':       return <InternalLoadsSection general={general} setGen={setGen} />;
+    case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
+    case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
+  }
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface BuildingEditorProps {
@@ -513,68 +570,119 @@ interface BuildingEditorProps {
   mode: 'basic' | 'expert';
 }
 
-/** Building-level parameter editor shown when "Building" is selected in the panel. */
+/**
+ * Building-level parameter editor shown when "Building" is selected in the panel.
+ *
+ * Layout mirrors the surface ElementList pattern:
+ *  - No section active → 2-column grid of summary cards.
+ *  - Section active → inactive sections collapse to compact chips at the top;
+ *    the active section fills the remaining height with a scrollable body.
+ */
 export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
-  const [expanded, setExpanded] = useState({
-    identity:    true,
-    conditions:  false,
-    ventilation: false,
-    loads:       false,
-    thermal:     false,
-    solver:      false,
-  });
+  const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const toggle = (id: keyof typeof expanded) =>
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions'];
+  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver'];
+  const visibleSections = mode === 'expert'
+    ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
+    : ALL_SECTIONS;
 
-  return (
-    <div className="flex h-full flex-col overflow-y-auto p-5">
+  const toggle = (id: SectionKey) =>
+    setActiveSection((prev) => (prev === id ? null : id));
 
-      {/* Header */}
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-          <Building2 className="size-5 text-slate-500" />
+  // ── Shared header ────────────────────────────────────────────────────────────
+  const header = (
+    <div className="flex shrink-0 items-center gap-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+        <Building2 className="size-4 text-slate-500" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-slate-800">Building</p>
+        <p className="truncate text-[11px] text-muted-foreground">
+          {general.buildingType} · {general.constructionPeriod} · {general.floorArea} m²
+        </p>
+      </div>
+    </div>
+  );
+
+  // ── Active section: chips row + expanded card ─────────────────────────────────
+  if (activeSection) {
+    const chips = visibleSections.filter((k) => k !== activeSection);
+    const dotColor = SECTION_COLORS[activeSection];
+
+    return (
+      <div className="flex h-full flex-col gap-3 overflow-hidden p-4">
+        {header}
+
+        {/* Inactive sections as compact chips */}
+        <div className="shrink-0 flex flex-wrap gap-1.5">
+          {chips.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => toggle(key)}
+              className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+            >
+              <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
+              {SECTION_LABELS[key]}
+            </button>
+          ))}
         </div>
-        <div>
-          <p className="text-base font-bold text-slate-800">Building</p>
-          <p className="text-[11px] text-muted-foreground">
-            {general.buildingType} · {general.constructionPeriod} · {general.floorArea} m²
-          </p>
+
+        {/* Expanded section — fills remaining height */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          {/* Card header — click to collapse */}
+          <button
+            type="button"
+            onClick={() => toggle(activeSection)}
+            className="flex w-full shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2.5 text-left transition-colors hover:bg-slate-100/80"
+          >
+            <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+                {SECTION_LABELS[activeSection]}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {sectionSummary(activeSection, general)}
+              </p>
+            </div>
+            <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
+          </button>
+
+          {/* Scrollable content */}
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <SectionBody id={activeSection} general={general} setGen={setGen} mode={mode} />
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="flex flex-col gap-2">
+  // ── No section active: 2-column grid of summary cards ────────────────────────
+  return (
+    <div className="flex h-full flex-col gap-3 overflow-y-auto p-4">
+      {header}
 
-        {/* Identity — building type, construction, dimensions */}
-        <ConfigSection title="Identity" expanded={expanded.identity} onToggle={() => toggle('identity')}>
-          <IdentitySection general={general} setGen={setGen} />
-        </ConfigSection>
-
-        {/* Conditions — adjacency and attic/cellar */}
-        <ConfigSection title="Conditions" expanded={expanded.conditions} onToggle={() => toggle('conditions')}>
-          <ConditionsSection general={general} setGen={setGen} mode={mode} />
-        </ConfigSection>
-
-        {/* Expert-only sections */}
-        {mode === 'expert' && (
-          <>
-            <ConfigSection title="Ventilation" expanded={expanded.ventilation} onToggle={() => toggle('ventilation')}>
-              <VentilationSection general={general} setGen={setGen} />
-            </ConfigSection>
-
-            <ConfigSection title="Internal Loads" expanded={expanded.loads} onToggle={() => toggle('loads')}>
-              <InternalLoadsSection general={general} setGen={setGen} />
-            </ConfigSection>
-
-            <ConfigSection title="Thermal Mass" expanded={expanded.thermal} onToggle={() => toggle('thermal')}>
-              <ThermalMassSection general={general} setGen={setGen} />
-            </ConfigSection>
-
-            <ConfigSection title="Solver" expanded={expanded.solver} onToggle={() => toggle('solver')}>
-              <SolverSection general={general} setGen={setGen} />
-            </ConfigSection>
-          </>
-        )}
+      <div className="grid grid-cols-2 gap-1.5">
+        {visibleSections.map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => toggle(key)}
+            className="flex flex-col items-start rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-slate-50"
+          >
+            <div className="flex w-full items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+                  {SECTION_LABELS[key]}
+                </p>
+              </div>
+              <ChevronDown className="size-3 shrink-0 text-slate-400" />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general)}</p>
+          </button>
+        ))}
       </div>
     </div>
   );
