@@ -4,8 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LoadProfileViewer, type LoadDataPoint } from './LoadProfileViewer';
-import type { BuildingElement } from '../configure/BuildingVisualization';
-import type { RoofConfig } from '../configure/RoofConfigurator';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import { ElementCompositionSection } from './ElementCompositionSection';
 
 export interface EnergyEnvelopeColumnProps {

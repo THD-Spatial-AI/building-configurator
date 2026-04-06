@@ -4,10 +4,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Wand2, Sun } from 'lucide-react';
-import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel } from '../shared/ui';
-import { createSurfacePvConfig, type PvConfig } from '../shared/buildingDefaults';
-import type { BuildingElement } from './BuildingVisualization';
-import { elementToGroup, isElementEditable, isUserDefinedElement } from './BuildingVisualization';
+import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel } from '@/app/components/BuildingConfigurator/shared/ui';
+import { createSurfacePvConfig, type PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { elementToGroup, isElementEditable, isUserDefinedElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 // ─── Exported patch type ───────────────────────────────────────────────────────
 

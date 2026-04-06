@@ -3,13 +3,13 @@ import { Zap, Flame, Droplets } from 'lucide-react';
 import {
   NumberInput, SelectInput, FieldRow, FieldLabel,
   ConfigSection, ToggleSwitch, InlineStepper, InfoTip,
-} from '../shared/ui';
+} from '@/app/components/BuildingConfigurator/shared/ui';
 
 import {
   BUILDING_TYPE_OPTIONS,
   CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
-} from '../shared/buildingOptions';
+} from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 
 // ─── Options ──────────────────────────────────────────────────────────────────
 

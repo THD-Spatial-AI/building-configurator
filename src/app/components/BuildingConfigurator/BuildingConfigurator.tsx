@@ -8,15 +8,15 @@ import {
   Flame, Zap, Droplets, Gauge,
 } from 'lucide-react';
 
-import { BuildingVisualization, VIEW_ORDER } from './configure/BuildingVisualization';
-import type { BuildingElement, FaceGroup } from './configure/BuildingVisualization';
+import { BuildingVisualization, VIEW_ORDER } from './configure/visualization/BuildingVisualization';
+import type { BuildingElement, FaceGroup } from './configure/model/buildingElements';
 import {
   elementToGroup,
   isElementEditable,
   normalizeElementRecord,
-} from './configure/BuildingVisualization';
+} from './configure/model/buildingElements';
 import { type EnergyTotals, type LoadDataPoint } from './overview/LoadProfileViewer';
-import { RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/RoofConfigurator';
+import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { SegmentedControl, ConfiguratorStyles } from './shared/ui';
 import { cn } from '../../../lib/utils';
 
@@ -33,11 +33,11 @@ import {
 } from './shared/snapshotUtils';
 import { BuildingSnapshotAside } from './overview/BuildingSnapshotAside';
 import { EnergyEnvelopeColumn } from './overview/EnergyEnvelopeColumn';
-import { SurfaceGroupSelector } from './configure/SurfaceGroupSelector';
-import { SurfaceGroupEditor } from './configure/SurfaceGroupEditor';
-import { BuildingEditor } from './configure/BuildingEditor';
-import { PvSurfaceManager } from './configure/PvSurfaceManager';
-import { RoofTypeGallery } from './configure/RoofTypeGallery';
+import { SurfaceGroupSelector } from './configure/surfaces/SurfaceGroupSelector';
+import { SurfaceGroupEditor } from './configure/surfaces/SurfaceGroupEditor';
+import { BuildingEditor } from './configure/building/BuildingEditor';
+import { PvSurfaceManager } from './configure/pv/PvSurfaceManager';
+import { RoofTypeGallery } from './configure/roof/RoofTypeGallery';
 import { createSurfacePvConfig, DEFAULT_PV_CONFIG } from './shared/buildingDefaults';
 import type { PvConfig } from './shared/buildingDefaults';
 

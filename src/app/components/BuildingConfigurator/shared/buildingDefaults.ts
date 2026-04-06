@@ -1,7 +1,7 @@
 // Default seed data and shared type definitions for the building configurator.
 // These values are placeholders until real building data is loaded from the API.
 
-import type { BuildingElement } from '../configure/BuildingVisualization';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 // ─── Technology types ─────────────────────────────────────────────────────────
 

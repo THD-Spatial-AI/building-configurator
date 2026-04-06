@@ -5,12 +5,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Building2, Sun, Plus, X, Trash2 } from 'lucide-react';
-import type { PvConfig } from '../shared/buildingDefaults';
-import { cn } from '../../../../lib/utils';
-import { ELEMENT_DOTS } from '../shared/ui';
-import type { BuildingElement } from './BuildingVisualization';
-import { faceFromAzimuth, isUserDefinedElement } from './BuildingVisualization';
-import { ELEMENT_GROUP_LABELS, type ElementGroupKey } from '../shared/elementListUtils';
+import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import { cn } from '@/lib/utils';
+import { ELEMENT_DOTS } from '@/app/components/BuildingConfigurator/shared/ui';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { faceFromAzimuth, isUserDefinedElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { ELEMENT_GROUP_LABELS, type ElementGroupKey } from '@/app/components/BuildingConfigurator/shared/elementListUtils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

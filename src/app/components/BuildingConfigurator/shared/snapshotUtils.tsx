@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import type { BuildingElement } from '../configure/BuildingVisualization';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import {
   DEFAULT_ELEMENTS,
   DEFAULT_GENERAL,

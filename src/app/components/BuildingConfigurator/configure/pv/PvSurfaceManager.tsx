@@ -1,7 +1,7 @@
 import { ChevronRight, Sun } from 'lucide-react';
 
-import type { PvConfig } from '../shared/buildingDefaults';
-import type { BuildingElement } from './BuildingVisualization';
+import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 interface PvSurfaceEntry {
   element: BuildingElement;

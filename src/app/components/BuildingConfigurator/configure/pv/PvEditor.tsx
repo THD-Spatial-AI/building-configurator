@@ -7,9 +7,9 @@ import { useState } from 'react';
 import { Sun } from 'lucide-react';
 import {
   ConfigSection, NumberInput, FieldLabel, ToggleSwitch, FieldRow,
-} from '../shared/ui';
+} from '@/app/components/BuildingConfigurator/shared/ui';
 import { cn } from '@/lib/utils';
-import type { PvConfig } from '../shared/buildingDefaults';
+import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

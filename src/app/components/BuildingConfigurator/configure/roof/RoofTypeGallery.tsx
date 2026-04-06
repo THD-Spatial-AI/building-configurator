@@ -4,7 +4,7 @@
 // preserving total area and U-value from the existing roof elements.
 
 import { cn } from '@/lib/utils';
-import type { BuildingElement } from './BuildingVisualization';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 // ─── Roof type definitions ────────────────────────────────────────────────────
 

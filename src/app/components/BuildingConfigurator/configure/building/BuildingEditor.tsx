@@ -6,14 +6,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Check } from 'lucide-react';
 import {
   SelectInput, NumberInput, FieldLabel,
-  ToggleSwitch, FieldRow, InfoTip,
-} from '../shared/ui';
+  ToggleSwitch, FieldRow,
+} from '@/app/components/BuildingConfigurator/shared/ui';
 import { cn } from '@/lib/utils';
 import {
   BUILDING_TYPE_OPTIONS,
   CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
-} from '../shared/buildingOptions';
+} from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 
 type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver';
 

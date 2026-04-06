@@ -1,8 +1,8 @@
 // Utilities for grouping and describing building envelope elements.
 // Used by ElementCompositionSection (overview) and surface group editing (configure).
 
-import type { BuildingElement } from '../configure/BuildingVisualization';
-import type { RoofConfig } from '../configure/RoofConfigurator';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 
 // ─── Face group ───────────────────────────────────────────────────────────────
 

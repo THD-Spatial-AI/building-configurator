@@ -3,10 +3,10 @@ import { X } from 'lucide-react';
 import {
   T, NumberInput, RangeSlider, FieldRow, FieldLabel,
   TypeBadge, ConfigSection, SegmentedControl,
-} from '../shared/ui';
-import { RoofConfigurator } from './RoofConfigurator';
-import type { BuildingElement } from './BuildingVisualization';
-import type { RoofConfig } from './RoofConfigurator';
+} from '@/app/components/BuildingConfigurator/shared/ui';
+import { RoofConfigurator } from '@/app/components/BuildingConfigurator/configure/roof/RoofConfigurator';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

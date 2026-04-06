@@ -8,17 +8,17 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { ELEMENT_DOTS } from '../shared/ui';
-import type { BuildingElement, FaceGroup } from './BuildingVisualization';
-import { faceFromAzimuth } from './BuildingVisualization';
-import type { RoofConfig } from './RoofConfigurator';
+import { cn } from '@/lib/utils';
+import { ELEMENT_DOTS } from '@/app/components/BuildingConfigurator/shared/ui';
+import type { BuildingElement, FaceGroup } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { faceFromAzimuth } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import {
   ElementGroupKey,
   ELEMENT_GROUP_LABELS,
   getGroupedElements,
   getRoofGroupInfo,
-} from '../shared/elementListUtils';
+} from '@/app/components/BuildingConfigurator/shared/elementListUtils';
 
 export interface ElementListProps {
   elements: Record<string, BuildingElement>;
