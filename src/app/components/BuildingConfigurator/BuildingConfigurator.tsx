@@ -16,10 +16,10 @@ import {
   normalizeElementRecord,
   faceFromAzimuth,
 } from './configure/model/buildingElements';
-import { type EnergyTotals, type LoadDataPoint } from './overview/LoadProfileViewer';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer, ELEMENT_DOTS } from './shared/ui';
 import { cn } from '../../../lib/utils';
+import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
