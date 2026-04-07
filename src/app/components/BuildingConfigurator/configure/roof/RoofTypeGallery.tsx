@@ -92,7 +92,7 @@ const ROOF_DEFINITIONS: RoofTypeDefinition[] = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Infers the current roof type from the existing set of roof elements. */
-function detectRoofType(roofElements: BuildingElement[]): RoofType | null {
+export function detectRoofType(roofElements: BuildingElement[]): RoofType | null {
   const count = roofElements.length;
   if (count === 0) return null;
   if (count === 1) {
@@ -276,6 +276,70 @@ interface RoofTypeGalleryProps {
   elements: Record<string, BuildingElement>;
   /** Called with updated roof elements when the user selects a type. */
   onApplyRoofType: (newRoofElements: Record<string, BuildingElement>) => void;
+}
+
+interface RoofTypeCardsProps {
+  elements: Record<string, BuildingElement>;
+  onApplyRoofType: (newRoofElements: Record<string, BuildingElement>) => void;
+}
+
+/** Inline roof-type card grid — no outer scroll wrapper, for embedding inside another panel. */
+export function RoofTypeCards({ elements, onApplyRoofType }: RoofTypeCardsProps) {
+  const roofElements = Object.values(elements).filter((e) => e.type === 'roof');
+  const currentType  = detectRoofType(roofElements);
+  const totalArea    = roofElements.reduce((s, e) => s + e.area, 0) || 90;
+  const uValue       = roofElements[0]?.uValue ?? 0.18;
+
+  const handleSelect = (roofType: RoofType) => {
+    if (roofType === currentType) return;
+    onApplyRoofType(generateRoofElements(roofType, totalArea, uValue));
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {roofElements.length > 0 && (
+        <p className="text-[11px] text-blue-600">
+          Total area <strong>{totalArea.toFixed(1)} m²</strong> and U-value <strong>{uValue} W/m²K</strong> are preserved when switching types.
+        </p>
+      )}
+      <div className="grid grid-cols-3 gap-2">
+        {ROOF_DEFINITIONS.map((def) => {
+          const isSelected = currentType === def.id;
+          return (
+            <button
+              key={def.id}
+              type="button"
+              onClick={() => handleSelect(def.id)}
+              className={cn(
+                'flex flex-col gap-2 rounded-xl border p-3 text-left transition-all duration-150 cursor-pointer',
+                isSelected
+                  ? 'border-primary/60 bg-primary/5 shadow-sm ring-1 ring-primary/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80',
+              )}
+            >
+              <div className="flex w-full gap-1.5">
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <span className="text-center text-[8px] font-medium text-slate-400">Side</span>
+                  <ElevationSvg type={def.id} selected={isSelected} />
+                </div>
+                <div className="w-px self-stretch bg-slate-100" />
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <span className="text-center text-[8px] font-medium text-slate-400">Top</span>
+                  <PlanSvg type={def.id} selected={isSelected} />
+                </div>
+              </div>
+              <div>
+                <p className={cn('text-[11px] font-semibold leading-tight', isSelected ? 'text-primary' : 'text-slate-800')}>
+                  {def.label}
+                </p>
+                <p className="mt-0.5 text-[9px] leading-snug text-slate-500">{def.description}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /** Visual roof-type picker. Regenerates roof elements on selection. */
