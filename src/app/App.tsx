@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { Box } from '@mui/material';
 import { useState, useMemo } from 'react';
@@ -130,6 +131,7 @@ export default function App() {
   }, []);
 
   return (
+    <>
     <ThemeProvider theme={theme}>
       {/* Map canvas */}
       <Box sx={{
@@ -154,5 +156,7 @@ export default function App() {
         )}
       </Box>
     </ThemeProvider>
+    <Analytics />
+    </>
   );
 }
