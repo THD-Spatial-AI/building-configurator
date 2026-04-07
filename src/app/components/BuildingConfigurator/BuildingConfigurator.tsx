@@ -17,7 +17,7 @@ import {
 } from './configure/model/buildingElements';
 import { type EnergyTotals, type LoadDataPoint } from './overview/LoadProfileViewer';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
-import { SegmentedControl, ConfiguratorStyles } from './shared/ui';
+import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer } from './shared/ui';
 import { cn } from '../../../lib/utils';
 
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL } from './shared/buildingDefaults';
@@ -37,9 +37,10 @@ import { SurfaceGroupSelector } from './configure/surfaces/SurfaceGroupSelector'
 import { SurfaceGroupEditor } from './configure/surfaces/SurfaceGroupEditor';
 import { BuildingEditor } from './configure/building/BuildingEditor';
 import { PvSurfaceManager } from './configure/pv/PvSurfaceManager';
+import { BatteryEditor } from './configure/pv/BatteryEditor';
 import { RoofTypeGallery } from './configure/roof/RoofTypeGallery';
-import { createSurfacePvConfig, DEFAULT_PV_CONFIG } from './shared/buildingDefaults';
-import type { PvConfig } from './shared/buildingDefaults';
+import { createSurfacePvConfig, DEFAULT_PV_CONFIG, DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
+import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -182,6 +183,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // Merge model identity fields into general config, keeping defaults for any missing fields.
   const initialGeneral = buildingData ? {
     ...DEFAULT_GENERAL,
+    buildingName:       identityData?.label ?? DEFAULT_GENERAL.buildingName,
     buildingType:       identityData?.buildingType ?? DEFAULT_GENERAL.buildingType,
     constructionPeriod: identityData?.constructionPeriod ?? DEFAULT_GENERAL.constructionPeriod,
     country:            identityData?.country ?? DEFAULT_GENERAL.country,
@@ -209,15 +211,40 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
   const [selectedId,    setSelectedId]    = useState<string | null>(null);
   const [surfaceEditorTab, setSurfaceEditorTab] = useState<'geometry' | 'thermal' | 'pv'>('geometry');
-  const [panelView,     setPanelView]     = useState<'building' | 'surface' | 'roof-type' | 'technology-pv'>('building');
+  const [panelView,     setPanelView]     = useState<'building' | 'surface' | 'roof-type' | 'technology-pv' | 'technology-battery'>('building');
   // Per-surface PV configurations — keyed by element ID.
   const [surfacePvConfigs, setSurfacePvConfigs] = useState<Record<string, PvConfig>>({});
   // True when a roof-type change removed surfaces that had PV installed.
   const [pvInvalidated,  setPvInvalidated]  = useState(false);
-  // Non-PV technology IDs (battery, heat_pump, ev_charger) toggled by the user.
+  // Non-PV technology IDs (heat_pump, ev_charger) toggled by the overview panel.
   const [otherTechIds,   setOtherTechIds]   = useState<string[]>(() =>
-    (technologyData?.installedTechIds ?? buildingData?.installedTechIds ?? []).filter((id) => id !== 'solar_pv'),
+    (technologyData?.installedTechIds ?? buildingData?.installedTechIds ?? []).filter((id) => id !== 'solar_pv' && id !== 'battery'),
   );
+  // Battery configuration — owned as dedicated state so BatteryEditor has full control.
+  const [batteryConfig,  setBatteryConfig]  = useState<BatteryConfig>(() => {
+    const raw = technologyData?.rawTechs?.battery_storage ?? buildingData?.technologies?.rawTechs?.battery_storage;
+    if (raw && typeof raw === 'object') {
+      const r = raw as Record<string, any>;
+      return {
+        ...DEFAULT_BATTERY_CONFIG,
+        installed:                    (buildingData?.installedTechIds ?? []).includes('battery'),
+        cont_energy_cap_max:          r.cont_energy_cap_max          ?? DEFAULT_BATTERY_CONFIG.cont_energy_cap_max,
+        cont_energy_cap_min:          r.cont_energy_cap_min          ?? DEFAULT_BATTERY_CONFIG.cont_energy_cap_min,
+        cont_storage_cap_max:         r.cont_storage_cap_max         ?? DEFAULT_BATTERY_CONFIG.cont_storage_cap_max,
+        cont_storage_cap_min:         r.cont_storage_cap_min         ?? DEFAULT_BATTERY_CONFIG.cont_storage_cap_min,
+        cont_energy_eff:              r.cont_energy_eff              ?? DEFAULT_BATTERY_CONFIG.cont_energy_eff,
+        cont_storage_loss:            r.cont_storage_loss            ?? DEFAULT_BATTERY_CONFIG.cont_storage_loss,
+        cont_storage_discharge_depth: r.cont_storage_discharge_depth ?? DEFAULT_BATTERY_CONFIG.cont_storage_discharge_depth,
+        cont_storage_initial:         r.cont_storage_initial         ?? DEFAULT_BATTERY_CONFIG.cont_storage_initial,
+        cont_lifetime:                r.cont_lifetime                ?? DEFAULT_BATTERY_CONFIG.cont_lifetime,
+        cost_energy_cap:              r.cost_energy_cap              ?? DEFAULT_BATTERY_CONFIG.cost_energy_cap,
+        cost_storage_cap:             r.cost_storage_cap             ?? DEFAULT_BATTERY_CONFIG.cost_storage_cap,
+        cost_om_annual:               r.cost_om_annual               ?? DEFAULT_BATTERY_CONFIG.cost_om_annual,
+        cost_interest_rate:           r.cost_interest_rate           ?? DEFAULT_BATTERY_CONFIG.cost_interest_rate,
+      };
+    }
+    return DEFAULT_BATTERY_CONFIG;
+  });
   const [vizViewIndex,  setVizViewIndex]  = useState(0);
   const [uploadError,   setUploadError]   = useState<string | null>(null);
 
@@ -265,7 +292,8 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setUploadError(null);
     setSurfacePvConfigs({});
     setPvInvalidated(false);
-    setOtherTechIds(buildingData.technologies.installedTechIds.filter((id) => id !== 'solar_pv'));
+    setOtherTechIds(buildingData.technologies.installedTechIds.filter((id) => id !== 'solar_pv' && id !== 'battery'));
+    setBatteryConfig(DEFAULT_BATTERY_CONFIG);
   }, [buildingData]);
 
   const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig }) !== JSON.stringify(savedState);
@@ -277,6 +305,14 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       const current = prev[id];
       if (!current || !isElementEditable(current)) return prev;
       return { ...prev, [id]: { ...current, ...patch } };
+    });
+
+  // Label is display-only — rename is always allowed regardless of custom mode.
+  const renameElement = (id: string, label: string) =>
+    setElements((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+      return { ...prev, [id]: { ...current, label } };
     });
 
   const enableCustomMode = (id: string) =>
@@ -351,15 +387,34 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   /** Handles technology toggle from the overview panel for non-PV techs. */
   const handleTechToggle = (id: string, installed: boolean) => {
+    if (id === 'battery') {
+      setBatteryConfig((prev) => ({ ...prev, installed }));
+      return;
+    }
     setOtherTechIds((prev) =>
       installed ? [...prev.filter((i) => i !== id), id] : prev.filter((i) => i !== id),
     );
   };
 
+  /** Navigates to the battery editor panel. */
+  const handleTechnologyBatterySelect = () => {
+    setPanelView('technology-battery');
+    setSelectedId(null);
+    setWorkspaceView('configure');
+  };
+
+  /** Updates a subset of the battery configuration. */
+  const updateBattery = (patch: Partial<BatteryConfig>) =>
+    setBatteryConfig((prev) => ({ ...prev, ...patch }));
+
   /** Opens the configure workspace for a specific technology card from the overview. */
   const handleTechnologyOpen = (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => {
     if (id === 'solar_pv') {
       handleTechnologyPvSelect();
+      return;
+    }
+    if (id === 'battery') {
+      handleTechnologyBatterySelect();
       return;
     }
     handleBuildingSelect();
@@ -477,7 +532,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       };
 
       // Generate BUEM API GeoJSON FeatureCollection
-      const buemJson = exportToBuemGeojson(identity, elements, general);
+      const buemJson = exportToBuemGeojson(identity, elements, general, undefined, undefined, batteryConfig);
       const blob = new Blob([buemJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -533,8 +588,8 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // --- Derived ---------------------------------------------------------------
 
   const identity = identityData;
-  const buildingLabel = identity?.label ?? 'Building';
-  const buildingType  = identity?.buildingType ?? general.buildingType;
+  const buildingLabel = general.buildingName || identity?.label || 'Building';
+  const buildingType  = general.buildingType || identity?.buildingType || '';
   const coordinates: [number, number] = geometryData?.coordinates ?? identity?.coordinates ?? [11.5820, 48.1351];
 
   // selectedGroup is derived from the selected element — no separate state needed.
@@ -566,8 +621,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     totalCapacityKw: totalPvCapacityKw,
   };
 
-  // Installed tech IDs — solar_pv is now per-surface, not building-level.
-  const installedTechIds = otherTechIds;
+  // Installed tech IDs — solar_pv is per-surface; battery has its own config state.
+  const installedTechIds = batteryConfig.installed
+    ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
+    : otherTechIds.filter((id) => id !== 'battery');
 
   return (
     <div className="cfg-panel mr-[10px] h-[min(920px,calc(100vh-24px))] w-[min(1540px,calc(100vw-60px))] rounded-lg shadow-2xl flex flex-col bg-card overflow-hidden">
@@ -761,6 +818,14 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       totalCapacityKw={totalPvCapacityKw}
                       mode={mode}
                       onEditSurface={handleEditPvSurface}
+                      allElements={elements}
+                      onEnableSurface={handleEditPvSurface}
+                    />
+                  ) : panelView === 'technology-battery' ? (
+                    <BatteryEditor
+                      battery={batteryConfig}
+                      onUpdate={updateBattery}
+                      mode={mode}
                     />
                   ) : (
                     <SurfaceGroupEditor
@@ -768,6 +833,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       elements={elements}
                       onUpdateElement={updateElement}
                       onEnableCustomMode={enableCustomMode}
+                      onRenameElement={renameElement}
                       preferredTab={surfaceEditorTab}
                       surfacePvConfig={selectedId ? (surfacePvConfigs[selectedId] ?? null) : null}
                       onUpdatePv={(patch) => { if (selectedId) updateSurfacePv(selectedId, patch); }}
@@ -778,7 +844,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
                 {/* Panel selector column */}
                 <div className="flex w-56 shrink-0 flex-col overflow-hidden border-l border-border/60 bg-slate-50/60">
-                  <div className="min-h-0 flex-1 overflow-y-auto">
+                  <ScrollHintContainer>
                     <SurfaceGroupSelector
                       elements={elements}
                       selectedElementId={selectedId}
@@ -794,8 +860,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       pvCapacityKw={pvSummary.totalCapacityKw}
                       onSelectTechnologyPv={handleTechnologyPvSelect}
                       surfacePvConfigs={surfacePvConfigs}
+                      batterySelected={panelView === 'technology-battery'}
+                      batteryInstalled={batteryConfig.installed}
+                      onSelectTechnologyBattery={handleTechnologyBatterySelect}
                     />
-                  </div>
+                  </ScrollHintContainer>
                 </div>
 
               </section>

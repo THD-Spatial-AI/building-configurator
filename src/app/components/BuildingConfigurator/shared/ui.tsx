@@ -5,7 +5,7 @@
  * Styled with Tailwind CSS + CSS variables to match the EnerPlanET UI.
  * Radix UI is used for Tooltip and Switch; all other components are plain HTML.
  */
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { Info, ChevronDown } from 'lucide-react';
@@ -393,6 +393,99 @@ export function InlineStepper({ label, value, min = 1, onDecrement, onIncrement 
       >
         +
       </button>
+    </div>
+  );
+}
+
+// ─── Scroll hint container ────────────────────────────────────────────────────
+
+/**
+ * Wraps a scrollable content area and shows a gradient fade + chevron arrow at
+ * the bottom whenever the content overflows below the visible edge.
+ * The hint fades out smoothly once the user scrolls to the bottom.
+ *
+ * Usage: replace the scrollable outer div of a panel with this component.
+ * The `className` prop is forwarded to the inner scrollable div (use it for
+ * padding, flex direction, etc. — the outer div fills the available space).
+ */
+export function ScrollHintContainer({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const scrollRef  = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const rafRef     = useRef<number | null>(null);
+  const [showHint, setShowHint] = useState(false);
+
+  const check = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowHint(el.scrollHeight - el.clientHeight - el.scrollTop > 8);
+  }, []);
+
+  // Debounce via rAF so the check always runs after the browser has painted.
+  const scheduleCheck = useCallback(() => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => { rafRef.current = null; check(); });
+  }, [check]);
+
+  useEffect(() => {
+    const el      = scrollRef.current;
+    const content = contentRef.current;
+    if (!el) return;
+
+    // Scroll events — immediate is fine here; layout is already done.
+    el.addEventListener('scroll', check, { passive: true });
+
+    // Observe the outer container (catches window resize).
+    const roOuter = new ResizeObserver(scheduleCheck);
+    roOuter.observe(el);
+
+    // Observe the inner content wrapper (catches content additions / accordion opens).
+    const roInner = new ResizeObserver(scheduleCheck);
+    if (content) roInner.observe(content);
+
+    // Initial check — deferred so the browser has finished its first layout pass.
+    scheduleCheck();
+
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      el.removeEventListener('scroll', check);
+      roOuter.disconnect();
+      roInner.disconnect();
+    };
+  }, [check, scheduleCheck]);
+
+  return (
+    <div className="relative h-full min-h-0 overflow-hidden">
+      <div ref={scrollRef} className={cn('h-full overflow-y-auto', className)}>
+        {/* Content wrapper — observed so the hint reacts when sections expand */}
+        <div ref={contentRef}>
+          {children}
+        </div>
+      </div>
+
+      {/* Scroll hint — visible whenever content overflows below the fold */}
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-3 transition-opacity duration-200',
+          showHint ? 'opacity-100' : 'opacity-0',
+        )}
+        style={{
+          height: 80,
+          background: 'linear-gradient(to top, rgba(241,245,249,1) 0%, rgba(241,245,249,0.85) 40%, transparent 100%)',
+        }}
+      >
+        {/* Pill badge — clearly visible against the gradient */}
+        <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 shadow-sm">
+          <ChevronDown className="size-3.5 text-slate-500" />
+          <span className="text-[10px] font-semibold text-slate-500">scroll</span>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,8 +3,8 @@
 // The custom-mode toggle lives in the header — no separate banner row.
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Wand2, Sun } from 'lucide-react';
-import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel } from '@/app/components/BuildingConfigurator/shared/ui';
+import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Wand2, Sun, Pencil, Check, X } from 'lucide-react';
+import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { createSurfacePvConfig, type PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import { elementToGroup, isElementEditable, isUserDefinedElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -537,22 +537,77 @@ function PvTab({
 
           {/* Capacity */}
           <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
-            <div>
-              <FieldLabel tip="Nameplate DC rated capacity of the PV system installed on this surface.">
+
+            {/* Usable area */}
+            <div className="mb-3">
+              <FieldLabel tip="Percentage of the surface area that can be covered with panels. Reduce this to account for obstructions such as chimneys, skylights, vents, or required edge clearances.">
+                Usable area
+              </FieldLabel>
+              <div className="mt-1.5 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={10} max={100} step={5}
+                  value={pvConfig.usable_area_pct ?? 80}
+                  onChange={(e) => {
+                    const pct = Number(e.target.value);
+                    const usableM2 = el.area * pct / 100;
+                    // ~6.5 m² per kWp for standard silicon panels
+                    const derivedMaxKwp = usableM2 / 6.5;
+                    onUpdate({
+                      usable_area_pct: pct,
+                      cont_energy_cap_max: +derivedMaxKwp.toFixed(2),
+                      // Cap system_capacity if it now exceeds the available area
+                      system_capacity: Math.min(pvConfig.system_capacity, +derivedMaxKwp.toFixed(2)),
+                    });
+                  }}
+                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-primary"
+                />
+                <span className="w-10 shrink-0 text-right text-sm font-bold text-slate-800">
+                  {pvConfig.usable_area_pct ?? 80}%
+                </span>
+              </div>
+              {/* Derived stats row */}
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="rounded-md border border-slate-100 bg-white px-3 py-1.5">
+                  <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Usable area</p>
+                  <p className="mt-0.5 text-xs font-bold text-slate-700">
+                    {(el.area * (pvConfig.usable_area_pct ?? 80) / 100).toFixed(1)} m²
+                    <span className="ml-1 text-[9px] font-normal text-slate-400">
+                      of {el.area.toFixed(1)} m²
+                    </span>
+                  </p>
+                </div>
+                <div className="rounded-md border border-slate-100 bg-white px-3 py-1.5">
+                  <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Max capacity</p>
+                  <p className="mt-0.5 text-xs font-bold text-slate-700">
+                    {(el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5).toFixed(1)} kWp
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-200 pt-3">
+              <FieldLabel tip="Nameplate DC rated capacity of the PV system installed on this surface. Cannot exceed the max capacity derived from usable area.">
                 System capacity
               </FieldLabel>
               <NumberInput
                 value={pvConfig.system_capacity}
-                onChange={(v) => onUpdate({
-                  system_capacity: Math.max(0, v),
-                  cont_energy_cap_max: Math.max(v, pvConfig.cont_energy_cap_max),
-                })}
+                onChange={(v) => {
+                  const maxKwp = el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5;
+                  onUpdate({
+                    system_capacity: Math.max(0, Math.min(v, maxKwp)),
+                    cont_energy_cap_max: Math.max(Math.min(v, maxKwp), pvConfig.cont_energy_cap_max),
+                  });
+                }}
                 unit="kWp"
-                min={0} max={500} step={0.5}
+                min={0}
+                max={+(el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5).toFixed(2)}
+                step={0.5}
               />
             </div>
+
             <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2">
-              <span className="text-[11px] text-muted-foreground">Estimated roof area needed</span>
+              <span className="text-[11px] text-muted-foreground">Estimated panel area needed</span>
               <span className="text-xs font-semibold text-foreground">
                 {(pvConfig.system_capacity * 6.5).toFixed(1)}{' '}
                 <span className="text-[10px] font-normal text-muted-foreground">m²</span>
@@ -592,6 +647,75 @@ function PvTab({
   );
 }
 
+// ─── Inline label editor ──────────────────────────────────────────────────────
+
+/**
+ * Displays a surface label inline. Clicking the pencil icon (or double-clicking
+ * the text) activates an input. Enter or blur commits the new name; Escape cancels.
+ */
+function InlineLabel({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft,   setDraft]   = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (editing) inputRef.current?.select(); }, [editing]);
+
+  const commit = () => {
+    const trimmed = draft.trim();
+    if (trimmed) onChange(trimmed);
+    else setDraft(value);
+    setEditing(false);
+  };
+
+  const cancel = () => { setDraft(value); setEditing(false); };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1">
+        <input
+          ref={inputRef}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter')  { e.preventDefault(); commit(); }
+            if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+          }}
+          className="min-w-0 flex-1 rounded border border-blue-300 bg-white px-2 py-0.5 text-sm font-bold text-slate-800 outline-none ring-1 ring-blue-200 focus:ring-blue-400"
+        />
+        <button type="button" onClick={commit}
+          className="flex size-5 shrink-0 items-center justify-center rounded bg-emerald-500 text-white hover:bg-emerald-600 cursor-pointer">
+          <Check className="size-3" />
+        </button>
+        <button type="button" onClick={cancel}
+          className="flex size-5 shrink-0 items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 cursor-pointer">
+          <X className="size-3" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="group flex items-center gap-1.5">
+      <span
+        className="text-base font-bold text-slate-800 cursor-text"
+        onDoubleClick={() => setEditing(true)}
+      >
+        {value}
+      </span>
+      <button
+        type="button"
+        title="Rename surface"
+        onClick={() => setEditing(true)}
+        className="invisible size-5 shrink-0 flex items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition-colors group-hover:visible"
+      >
+        <Pencil className="size-3" />
+      </button>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface SurfaceGroupEditorProps {
@@ -599,6 +723,8 @@ interface SurfaceGroupEditorProps {
   elements: Record<string, BuildingElement>;
   onUpdateElement: (id: string, patch: Partial<BuildingElement>) => void;
   onEnableCustomMode: (id: string) => void;
+  /** Renames a surface label without requiring custom mode — display-only field. */
+  onRenameElement?: (id: string, label: string) => void;
   /** Which tab to open when a surface is selected from another workflow. */
   preferredTab?: 'geometry' | 'thermal' | 'pv';
   /** Per-surface PV config for the selected element, or null if none exists yet. */
@@ -610,7 +736,7 @@ interface SurfaceGroupEditorProps {
 
 export function SurfaceGroupEditor({
   selectedElementId, elements, onUpdateElement, onEnableCustomMode,
-  preferredTab = 'geometry', surfacePvConfig, onUpdatePv, mode = 'basic',
+  onRenameElement, preferredTab = 'geometry', surfacePvConfig, onUpdatePv, mode = 'basic',
 }: SurfaceGroupEditorProps) {
   const [activeTab, setActiveTab] = useState<'geometry' | 'thermal' | 'pv'>('geometry');
 
@@ -649,7 +775,7 @@ export function SurfaceGroupEditor({
   const rValue = el.uValue > 0 ? (1 / el.uValue).toFixed(3) : '∞';
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-5">
+    <ScrollHintContainer className="flex flex-col p-5">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="mb-4 flex items-start gap-3">
@@ -660,7 +786,10 @@ export function SurfaceGroupEditor({
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-base font-bold text-slate-800">{el.label}</p>
+            <InlineLabel
+              value={el.label}
+              onChange={(v) => onRenameElement?.(selectedElementId!, v)}
+            />
 
             {/* Source badges */}
             {userDefined && (
@@ -828,6 +957,6 @@ export function SurfaceGroupEditor({
         />
       )}
 
-    </div>
+    </ScrollHintContainer>
   );
 }

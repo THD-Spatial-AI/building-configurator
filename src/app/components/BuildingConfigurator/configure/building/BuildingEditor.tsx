@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Check } from 'lucide-react';
 import {
   SelectInput, NumberInput, FieldLabel,
-  ToggleSwitch, FieldRow,
+  ToggleSwitch, FieldRow, ScrollHintContainer,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import { cn } from '@/lib/utils';
 import {
@@ -297,6 +297,19 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
   const volume = (general.floorArea * general.roomHeight).toFixed(0);
   return (
     <div className="flex flex-col gap-3">
+      <div>
+        <FieldLabel tip="Human-readable name for this building. Included in exported files.">
+          Building name
+        </FieldLabel>
+        <input
+          type="text"
+          value={general.buildingName ?? ''}
+          onChange={(e) => setGen('buildingName', e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+          placeholder="e.g. 3434 · Single-family House"
+          className="cfg-input w-full"
+        />
+      </div>
       <SelectInput
         label="Building type"
         value={general.buildingType}
@@ -597,7 +610,7 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
         <Building2 className="size-4 text-slate-500" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-bold text-slate-800">Building</p>
+        <p className="text-sm font-bold text-slate-800">{general.buildingName || 'Building'}</p>
         <p className="truncate text-[11px] text-muted-foreground">
           {general.buildingType} · {general.constructionPeriod} · {general.floorArea} m²
         </p>
@@ -650,9 +663,9 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
           </button>
 
           {/* Scrollable content */}
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <ScrollHintContainer className="p-4">
             <SectionBody id={activeSection} general={general} setGen={setGen} mode={mode} />
-          </div>
+          </ScrollHintContainer>
         </div>
       </div>
     );
@@ -660,7 +673,7 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
 
   // ── No section active: 2-column grid of summary cards ────────────────────────
   return (
-    <div className="flex h-full flex-col gap-3 overflow-y-auto p-4">
+    <ScrollHintContainer className="flex flex-col gap-3 p-4">
       {header}
 
       <div className="grid grid-cols-2 gap-1.5">
@@ -684,6 +697,6 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
           </button>
         ))}
       </div>
-    </div>
+    </ScrollHintContainer>
   );
 }

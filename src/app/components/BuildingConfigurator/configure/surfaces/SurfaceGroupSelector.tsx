@@ -4,7 +4,7 @@
 // Each item gives a clear affordance that it is selectable.
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Building2, Sun, Plus, X, Trash2 } from 'lucide-react';
+import { ChevronRight, Building2, Sun, Battery, Plus, X, Trash2 } from 'lucide-react';
 import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS } from '@/app/components/BuildingConfigurator/shared/ui';
@@ -67,6 +67,12 @@ interface SurfaceGroupSelectorProps {
   onSelectTechnologyPv?: () => void;
   /** Per-surface PV configurations — used to render the PV badge on surfaces. */
   surfacePvConfigs?: Record<string, PvConfig>;
+  /** Whether the configure center panel is showing the battery editor. */
+  batterySelected?: boolean;
+  /** Whether a battery system is marked as installed. */
+  batteryInstalled?: boolean;
+  /** Called when the user selects the Battery technology entry. */
+  onSelectTechnologyBattery?: () => void;
 }
 
 /** Card-style panel selector listing Building and surface groups. */
@@ -85,6 +91,9 @@ export function SurfaceGroupSelector({
   pvCapacityKw = 0,
   onSelectTechnologyPv,
   surfacePvConfigs = {},
+  batterySelected = false,
+  batteryInstalled = false,
+  onSelectTechnologyBattery,
 }: SurfaceGroupSelectorProps) {
 
   const typeGroups = TYPE_ORDER
@@ -365,6 +374,39 @@ export function SurfaceGroupSelector({
               pvSelected ? 'text-primary rotate-90' : 'text-slate-400',
             )} />
           </button>
+
+          {onSelectTechnologyBattery && (
+            <button
+              type="button"
+              onClick={onSelectTechnologyBattery}
+              className={cn(
+                'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-all cursor-pointer',
+                batterySelected
+                  ? 'border-primary/40 bg-primary/10 shadow-sm shadow-primary/10'
+                  : 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow',
+              )}
+            >
+              <Battery className={cn('size-3.5 shrink-0', batterySelected ? 'text-primary' : 'text-blue-500')} />
+
+              <div className="min-w-0 flex-1">
+                <p className={cn('text-[11px] font-semibold', batterySelected ? 'text-primary' : 'text-slate-700')}>
+                  Battery Storage
+                </p>
+                <p className="text-[9px] text-slate-400">
+                  {batteryInstalled ? 'Installed' : 'Not configured'}
+                </p>
+              </div>
+
+              {batteryInstalled && (
+                <span className="shrink-0 size-2 rounded-full bg-blue-400" />
+              )}
+
+              <ChevronRight className={cn(
+                'size-3 shrink-0 transition-transform',
+                batterySelected ? 'text-primary rotate-90' : 'text-slate-400',
+              )} />
+            </button>
+          )}
         </>
       )}
 

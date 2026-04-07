@@ -4,6 +4,7 @@
 // preserving total area and U-value from the existing roof elements.
 
 import { cn } from '@/lib/utils';
+import { ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 // ─── Roof type definitions ────────────────────────────────────────────────────
@@ -290,7 +291,7 @@ export function RoofTypeGallery({ elements, onApplyRoofType }: RoofTypeGalleryPr
   };
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-5">
+    <ScrollHintContainer className="flex flex-col p-5">
 
       {/* Header */}
       <div className="mb-5 flex items-center gap-3">
@@ -360,6 +361,6 @@ export function RoofTypeGallery({ elements, onApplyRoofType }: RoofTypeGalleryPr
           );
         })}
       </div>
-    </div>
+    </ScrollHintContainer>
   );
 }

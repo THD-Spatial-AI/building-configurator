@@ -367,6 +367,9 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
         type: String(el.type ?? ''),
       };
 
+      // Human-readable display label — echoed by the server, not used in simulation.
+      if (el.label) base.name = el.label;
+
       // Geometry fields: required for non-ventilation elements
       if (el.type !== 'ventilation') {
         base.area = { value: Number(el.area ?? 0), unit: 'm2' };
@@ -394,6 +397,9 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
  */
 function generalConfigToBuemBuilding(general: Record<string, any>): Record<string, any> {
   const building: Record<string, any> = {};
+
+  // Human-readable building label — display only, not used in simulation.
+  if (general.buildingName) building.name = general.buildingName;
 
   // Building classification
   if (general.buildingType) building.building_type = general.buildingType.replace(/\s+/g, '_').toUpperCase();
@@ -449,23 +455,14 @@ function generalConfigToBuemBuilding(general: Record<string, any>): Record<strin
  * @returns A BUEM GeoJSON Feature ready for export or API submission
  */
 export function serializeToBuemFeature(
-  identity: {
-    id: string;
-    label: string;
-    coordinates: [number, number];
-    buildingType?: string;
-    constructionPeriod?: string;
-    country?: string;
-    floorArea?: number;
-    roomHeight?: number;
-    storeys?: number;
-  },
+  identity: BuildingIdentity,
   elements: Record<string, any>,
   general: Record<string, any>,
   startTime: string = '2018-01-01T00:00:00Z',
   endTime: string = '2018-12-31T23:00:00Z',
   resolution: string | number = '60',
   resolutionUnit: string = 'minutes',
+  batteryConfig?: Record<string, any>,
 ): Record<string, any> {
   const [lon, lat] = identity.coordinates;
 
@@ -521,6 +518,32 @@ export function serializeToBuemFeature(
     building.thermal = thermal;
   }
 
+  // Build the techs block — battery_storage included when installed
+  const techs: Record<string, any> = {};
+  if (batteryConfig?.installed) {
+    const b = batteryConfig;
+    techs.battery_storage = {
+      cont_energy_cap_max:                  b.cont_energy_cap_max,
+      cont_energy_cap_min:                  b.cont_energy_cap_min,
+      cont_storage_cap_max:                 b.cont_storage_cap_max,
+      cont_storage_cap_min:                 b.cont_storage_cap_min,
+      cont_energy_eff:                      b.cont_energy_eff,
+      cont_storage_loss:                    b.cont_storage_loss,
+      cont_storage_discharge_depth:         b.cont_storage_discharge_depth,
+      cont_storage_initial:                 b.cont_storage_initial,
+      cont_lifetime:                        b.cont_lifetime,
+      cost_energy_cap:                      b.cost_energy_cap,
+      cost_storage_cap:                     b.cost_storage_cap,
+      cost_om_annual:                       b.cost_om_annual,
+      cost_om_annual_investment_fraction:   0,
+      cost_interest_rate:                   b.cost_interest_rate,
+      cost_purchase:                        0,
+      cost_export:                          0,
+      cont_energy_cap_max_systemwide:       'inf',
+      cont_export_cap:                      'inf',
+    };
+  }
+
   // Build the complete feature
   const feature: Record<string, any> = {
     type: 'Feature',
@@ -540,6 +563,7 @@ export function serializeToBuemFeature(
           use_milp: general.use_milp ?? false,
         },
       },
+      ...(Object.keys(techs).length > 0 ? { techs } : {}),
     },
   };
 
@@ -551,13 +575,14 @@ export function serializeToBuemFeature(
  * This is the format expected by the BUEM microservice.
  */
 export function exportToBuemGeojson(
-  identity: Record<string, any>,
+  identity: BuildingIdentity,
   elements: Record<string, any>,
   general: Record<string, any>,
   startTime?: string,
   endTime?: string,
+  batteryConfig?: Record<string, any>,
 ): string {
-  const feature = serializeToBuemFeature(identity, elements, general, startTime, endTime);
+  const feature = serializeToBuemFeature(identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig);
   const featureCollection = {
     type: 'FeatureCollection',
     features: [feature],

@@ -1,8 +1,8 @@
 // Right column of the Overview view: load profile chart and element composition accordion.
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React from 'react';
 import { cn } from '@/lib/utils';
+import { ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { LoadProfileViewer, type LoadDataPoint } from './LoadProfileViewer';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
@@ -42,35 +42,14 @@ export function EnergyEnvelopeColumn({
   onSwitchToConfigure,
   mode,
 }: EnergyEnvelopeColumnProps) {
-  const scrollRef = useRef<HTMLElement>(null);
-  const [hasMore, setHasMore] = useState(false);
-
-  // Recheck scroll indicator whenever content height changes (accordion expand/collapse).
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const check = () => setHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 8);
-    check();
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isActive]);
-
   return (
-    <div className="relative min-h-0 overflow-hidden">
-      <section
-        ref={scrollRef}
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          setHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 8);
-        }}
-        className="flex h-full flex-col overflow-y-auto bg-slate-100
-          [&::-webkit-scrollbar]:w-2.5
-          [&::-webkit-scrollbar-track]:bg-transparent
-          [&::-webkit-scrollbar-thumb]:rounded-full
-          [&::-webkit-scrollbar-thumb]:bg-slate-300
-          hover:[&::-webkit-scrollbar-thumb]:bg-slate-400"
-      >
+    <ScrollHintContainer className="flex flex-col bg-slate-100
+        [&::-webkit-scrollbar]:w-2.5
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        [&::-webkit-scrollbar-thumb]:bg-slate-300
+        hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
+      <section>
         {uploadError && (
           <div className="mx-4 mt-4 flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
             <p className="flex-1 text-[11px] leading-snug text-destructive">{uploadError}</p>
@@ -111,23 +90,6 @@ export function EnergyEnvelopeColumn({
         </div>
       </section>
 
-      {/* Floating scroll-down indicator */}
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-end transition-opacity duration-300',
-          hasMore ? 'opacity-100' : 'opacity-0',
-        )}
-      >
-        <div className="h-16 w-full bg-gradient-to-t from-white/80 to-transparent" />
-        <button
-          type="button"
-          aria-label="Scroll down"
-          onClick={() => scrollRef.current?.scrollBy({ top: 200, behavior: 'smooth' })}
-          className="pointer-events-auto absolute bottom-4 right-5 flex size-7 items-center justify-center rounded-md border border-slate-200 bg-white shadow-md text-muted-foreground transition-colors hover:bg-slate-50 hover:text-foreground [&_svg]:size-4"
-        >
-          <ChevronDown />
-        </button>
-      </div>
-    </div>
+    </ScrollHintContainer>
   );
 }

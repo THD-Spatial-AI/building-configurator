@@ -45,6 +45,12 @@ export interface PvConfig {
   cost_interest_rate: number;
   /** Whether the optimiser should auto-orient panels. */
   optimize_orientation: boolean;
+  /**
+   * Fraction of the host surface area that can realistically be covered by panels (%).
+   * Accounts for obstructions (vents, chimneys, skylights), structural exclusions, and
+   * required edge clearances. UI-only — used to derive cont_energy_cap_max.
+   */
+  usable_area_pct: number;
 }
 
 export const DEFAULT_PV_CONFIG: PvConfig = {
@@ -64,6 +70,7 @@ export const DEFAULT_PV_CONFIG: PvConfig = {
   cost_om_annual:       8,
   cost_interest_rate:   0.02,
   optimize_orientation: false,
+  usable_area_pct:      80,
 };
 
 /**
@@ -80,7 +87,61 @@ export function createSurfacePvConfig(
   };
 }
 
-// TODO: 
+// ─── Battery storage type ─────────────────────────────────────────────────────
+
+/**
+ * Configuration for a battery storage system.
+ * Field names match the EnerPlanET topology `techs.battery_storage` object.
+ */
+export interface BatteryConfig {
+  /** Whether the system is included in the model. */
+  installed: boolean;
+  /** Maximum charge/discharge power capacity (kW). */
+  cont_energy_cap_max: number;
+  /** Minimum charge/discharge power capacity (kW). */
+  cont_energy_cap_min: number;
+  /** Maximum storage capacity (kWh). */
+  cont_storage_cap_max: number;
+  /** Minimum storage capacity (kWh). */
+  cont_storage_cap_min: number;
+  /** One-way charge/discharge efficiency (0–1). Round-trip = eff². */
+  cont_energy_eff: number;
+  /** Hourly self-discharge rate as a fraction of stored energy (0–1). */
+  cont_storage_loss: number;
+  /** Minimum state of charge — 0 means fully dischargeable (0–1). */
+  cont_storage_discharge_depth: number;
+  /** Initial state of charge at start of simulation (0–1). */
+  cont_storage_initial: number;
+  /** Expected system lifetime (years). */
+  cont_lifetime: number;
+  /** Capital cost per kW of power capacity (€/kW). */
+  cost_energy_cap: number;
+  /** Capital cost per kWh of storage capacity (€/kWh). */
+  cost_storage_cap: number;
+  /** Annual operation and maintenance cost per kW (€/kW/year). */
+  cost_om_annual: number;
+  /** Discount rate for financial calculations (0–1). */
+  cost_interest_rate: number;
+}
+
+export const DEFAULT_BATTERY_CONFIG: BatteryConfig = {
+  installed:                    false,
+  cont_energy_cap_max:          10,
+  cont_energy_cap_min:          0,
+  cont_storage_cap_max:         20,
+  cont_storage_cap_min:         0,
+  cont_energy_eff:              0.97,
+  cont_storage_loss:            0,
+  cont_storage_discharge_depth: 0,
+  cont_storage_initial:         0,
+  cont_lifetime:                11,
+  cost_energy_cap:              1028,
+  cost_storage_cap:             1007.93,
+  cost_om_annual:               25.19,
+  cost_interest_rate:           0.02,
+};
+
+// TODO:
 export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
   south_wall:     { id: 'south_wall',     label: 'South Wall',     type: 'wall',   area: 56.0, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'default', customMode: false },
   east_wall:      { id: 'east_wall',      label: 'East Wall',      type: 'wall',   area: 37.8, uValue: 0.24, gValue: null, tilt: 90, azimuth: 90,  source: 'default', customMode: false },
@@ -96,6 +157,7 @@ export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
 
 // TODO: These defaults are purely illustrative and should be replaced with real building data from the API.
 export const DEFAULT_GENERAL = {
+  buildingName:       '',
   buildingType:       'Multi-family House',
   constructionPeriod: 'Post-2010',
   country:            'DE',

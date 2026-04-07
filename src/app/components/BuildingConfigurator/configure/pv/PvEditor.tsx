@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Sun } from 'lucide-react';
 import {
-  ConfigSection, NumberInput, FieldLabel, ToggleSwitch, FieldRow,
+  ConfigSection, NumberInput, FieldLabel, ToggleSwitch, FieldRow, ScrollHintContainer,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import { cn } from '@/lib/utils';
 import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
@@ -157,6 +157,52 @@ function EfficiencySection({ pv, update }: {
   );
 }
 
+/**
+ * Simplified cost section for basic-mode users.
+ * The user enters a total quote they received from an installer (€).
+ * Internally this converts to cost_energy_cap (€/kWp) which is the Calliope field.
+ * Conversion: cost_energy_cap = totalCost / system_capacity
+ */
+function BasicCostSection({ pv, update }: {
+  pv: PvConfig;
+  update: (patch: Partial<PvConfig>) => void;
+}) {
+  const totalCost = Math.round(pv.cost_energy_cap * pv.system_capacity);
+  const perKwp = pv.cost_energy_cap.toFixed(0);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <FieldLabel tip="The total price you expect to pay for the installed system — as quoted by an installer. Used to calculate whether the investment is worthwhile.">
+          Installer quote (total)
+        </FieldLabel>
+        <NumberInput
+          value={totalCost}
+          onChange={(v) => {
+            const cost = pv.system_capacity > 0 ? Math.max(0, v) / pv.system_capacity : 0;
+            update({ cost_energy_cap: cost });
+          }}
+          unit="€" min={0} max={500000} step={100}
+        />
+      </div>
+      <div>
+        <FieldLabel tip="How many years before the system needs replacing. Typical solar panels last 25–30 years.">
+          How long will it last?
+        </FieldLabel>
+        <NumberInput
+          value={pv.cont_lifetime}
+          onChange={(v) => update({ cont_lifetime: Math.max(1, Math.round(v)) })}
+          unit="years" min={1} max={50} step={1}
+        />
+      </div>
+      <div className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 border border-border/60">
+        <span className="text-[11px] text-muted-foreground">Equivalent cost per kWp</span>
+        <span className="text-xs font-semibold text-foreground">€{perKwp}/kWp</span>
+      </div>
+    </div>
+  );
+}
+
 function EconomicsSection({ pv, update }: {
   pv: PvConfig;
   update: (patch: Partial<PvConfig>) => void;
@@ -166,7 +212,7 @@ function EconomicsSection({ pv, update }: {
     <div className="flex flex-col gap-3">
       <FieldRow>
         <div>
-          <FieldLabel tip="Capital expenditure per kWp of installed capacity.">
+          <FieldLabel tip="Capital expenditure per kWp of installed capacity (Calliope: cost_energy_cap).">
             CapEx
           </FieldLabel>
           <NumberInput
@@ -176,7 +222,7 @@ function EconomicsSection({ pv, update }: {
           />
         </div>
         <div>
-          <FieldLabel tip="Annual operation and maintenance cost per kWp installed.">
+          <FieldLabel tip="Annual operation and maintenance cost per kWp installed (Calliope: cost_om_annual).">
             Annual O&M
           </FieldLabel>
           <NumberInput
@@ -188,7 +234,7 @@ function EconomicsSection({ pv, update }: {
       </FieldRow>
       <FieldRow>
         <div>
-          <FieldLabel tip="Expected useful lifetime of the system.">
+          <FieldLabel tip="Expected useful lifetime of the system (Calliope: cont_lifetime).">
             Lifetime
           </FieldLabel>
           <NumberInput
@@ -198,7 +244,7 @@ function EconomicsSection({ pv, update }: {
           />
         </div>
         <div>
-          <FieldLabel tip="Annual discount rate used in net-present-value calculations.">
+          <FieldLabel tip="Annual discount rate used in net-present-value calculations (Calliope: cost_interest_rate).">
             Interest rate
           </FieldLabel>
           <NumberInput
@@ -233,15 +279,15 @@ export function PvEditor({ pvConfig, onUpdate, mode, roofInferred }: PvEditorPro
   const [expanded, setExpanded] = useState({
     orientation: true,
     sizing:      true,
+    cost:        true,
     efficiency:  false,
-    economics:   false,
   });
 
   const toggle = (id: keyof typeof expanded) =>
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-5">
+    <ScrollHintContainer className="flex flex-col p-5">
 
       {/* Header */}
       <div className="mb-5 flex items-center gap-3">
@@ -288,18 +334,20 @@ export function PvEditor({ pvConfig, onUpdate, mode, roofInferred }: PvEditorPro
           <SizingSection pv={pvConfig} update={onUpdate} />
         </ConfigSection>
 
-        {mode === 'expert' && (
-          <>
-            <ConfigSection title="Efficiency" expanded={expanded.efficiency} onToggle={() => toggle('efficiency')}>
-              <EfficiencySection pv={pvConfig} update={onUpdate} />
-            </ConfigSection>
+        {/* Cost — simplified in basic mode, full Calliope fields in expert mode */}
+        <ConfigSection title="Cost" expanded={expanded.cost} onToggle={() => toggle('cost')}>
+          {mode === 'basic'
+            ? <BasicCostSection pv={pvConfig} update={onUpdate} />
+            : <EconomicsSection pv={pvConfig} update={onUpdate} />
+          }
+        </ConfigSection>
 
-            <ConfigSection title="Economics" expanded={expanded.economics} onToggle={() => toggle('economics')}>
-              <EconomicsSection pv={pvConfig} update={onUpdate} />
-            </ConfigSection>
-          </>
+        {mode === 'expert' && (
+          <ConfigSection title="Efficiency" expanded={expanded.efficiency} onToggle={() => toggle('efficiency')}>
+            <EfficiencySection pv={pvConfig} update={onUpdate} />
+          </ConfigSection>
         )}
       </div>
-    </div>
+    </ScrollHintContainer>
   );
 }

@@ -1,6 +1,7 @@
 // Left column of the Overview view: building identity, energy hero, key metrics.
 
 import React, { useState, useRef } from 'react';
+import { ScrollHintContainer } from '../shared/ui';
 import { AlertTriangle, Zap, Flame, Droplets, ChevronDown, Gauge, Pencil, Check, X } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import type { EnergyTotals } from './LoadProfileViewer';
@@ -85,7 +86,8 @@ export function BuildingSnapshotAside({
   const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
 
   return (
-    <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border/80 bg-slate-100 p-4">
+    <ScrollHintContainer className="flex flex-col gap-3 border-r border-border/80 bg-slate-100 p-4">
+    <aside>
 
       {/* ── Energy hero + thermal efficiency ── */}
       <div className="shrink-0 overflow-hidden rounded-xl border border-slate-700/60 shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]">
@@ -283,5 +285,6 @@ export function BuildingSnapshotAside({
       </div>
 
     </aside>
+    </ScrollHintContainer>
   );
 }
