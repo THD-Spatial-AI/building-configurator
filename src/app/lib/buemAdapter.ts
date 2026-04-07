@@ -165,11 +165,13 @@ function adaptTimeseries(ts: unknown): LoadDataPoint[] | null {
 
   if (timestamps.length === 0) return null;
 
+  // BUEM convention: demand is negative. Store as positive magnitudes so that
+  // future production series (e.g. PV) can be overlaid on the same positive axis.
   return timestamps.map((timestamp, i) => ({
     timestamp,
-    heating:     Number.isFinite(heating[i])     ? heating[i]     : 0,
-    hotwater:    0,    // BUEM does not model DHW in the hourly timeseries
-    electricity: Number.isFinite(electricity[i]) ? electricity[i] : 0,
+    heating:     Number.isFinite(heating[i])     ? Math.abs(heating[i])     : 0,
+    hotwater:    0,
+    electricity: Number.isFinite(electricity[i]) ? Math.abs(electricity[i]) : 0,
   }));
 }
 
@@ -312,15 +314,18 @@ export function parseLoadProfileCsv(csv: string): LoadDataPoint[] {
 
   if (tsIdx === -1) return [];
 
+  // BUEM convention: demand is negative. Negate here so all values are positive
+  // magnitudes. When PV production is added it will also be stored as positive,
+  // so overlapping lines on the chart directly show demand coverage.
   return lines.slice(1).flatMap((line) => {
     const cols = line.split(',');
     const timestamp = cols[tsIdx]?.trim() ?? '';
     if (!timestamp) return [];
     return [{
       timestamp,
-      electricity: elIdx >= 0 ? (Number(cols[elIdx]) || 0) : 0,
-      heating:     htIdx >= 0 ? (Number(cols[htIdx]) || 0) : 0,
-      hotwater:    hwIdx >= 0 ? (Number(cols[hwIdx]) || 0) : 0,
+      electricity: elIdx >= 0 ? Math.abs(Number(cols[elIdx]) || 0) : 0,
+      heating:     htIdx >= 0 ? Math.abs(Number(cols[htIdx]) || 0) : 0,
+      hotwater:    hwIdx >= 0 ? Math.abs(Number(cols[hwIdx]) || 0) : 0,
     }];
   });
 }

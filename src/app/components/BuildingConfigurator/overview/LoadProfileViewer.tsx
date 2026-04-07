@@ -265,8 +265,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
                 tick={{ fontSize: 10, fill: T.mutedFg }}
                 stroke={T.border}
                 width={52}
-                domain={["auto", "auto"]}
-                allowDataOverflow
+                domain={[0, 'auto']}
               />
               <ChartTooltip
                 labelFormatter={(v) => `Time: ${String(v)}`}
