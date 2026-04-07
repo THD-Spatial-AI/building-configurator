@@ -176,10 +176,13 @@ export function ElementCompositionSection({
     const editingInGroup = editingId !== null && items.some((el) => el.id === editingId);
 
     return (
-      <div className={cn(
-        'overflow-hidden transition-[max-height] duration-300 ease-in-out',
-        isExpanded ? 'max-h-[500px]' : 'max-h-0',
-      )}>
+      <div
+        className="overflow-hidden"
+        style={{
+          maxHeight: isExpanded ? '500px' : '0px',
+          transition: 'max-height 300ms ease-in-out',
+        }}
+      >
         <div>
           {editingInGroup && (
             <div className="flex items-center justify-between gap-3 border-t border-amber-200 bg-amber-50 px-3 py-2">
