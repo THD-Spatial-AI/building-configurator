@@ -861,6 +861,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                     </div>
                   )}
 
+                  <div key={`${panelView}-${selectedId ?? ''}`} className="flex min-h-0 flex-1 flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                   {panelView === 'building' ? (
                     <BuildingEditor general={general} setGen={setGen} mode={mode} />
                   ) : panelView === 'surface-group' && activeGroupType ? (
@@ -950,26 +951,31 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                             <button
                               type="button"
                               onClick={() => setRoofTypeOpen((v) => !v)}
-                              className="flex w-full items-center justify-between px-4 py-2.5 text-left transition-colors hover:bg-slate-50 cursor-pointer"
+                              className="flex w-full items-center justify-between bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100 cursor-pointer"
                             >
                               <div className="flex items-center gap-2">
-                                <p className="text-[11px] font-semibold text-slate-700">Roof Type</p>
+                                <svg className="size-3.5 text-amber-600" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg>
+                                <p className="text-sm font-semibold text-amber-900">Roof Type</p>
                                 {typeLabel && (
-                                  <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                                  <span className="rounded-md border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                                     {typeLabel}
                                   </span>
                                 )}
+                                <span className="text-[10px] text-amber-600">· click to change</span>
                               </div>
                               <ChevronDown className={cn(
-                                'size-3.5 shrink-0 text-slate-400 transition-transform duration-200',
+                                'size-3.5 shrink-0 text-amber-500 transition-transform duration-200',
                                 roofTypeOpen && 'rotate-180',
                               )} />
                             </button>
-                            {roofTypeOpen && (
+                            <div className={cn(
+                              'overflow-hidden transition-[max-height] duration-300 ease-in-out',
+                              roofTypeOpen ? 'max-h-[400px]' : 'max-h-0',
+                            )}>
                               <div className="border-t border-slate-100 px-4 pb-4 pt-3">
                                 <RoofTypeCards elements={elements} onApplyRoofType={handleApplyRoofType} />
                               </div>
-                            )}
+                            </div>
                           </div>
                         );
                       })()}
@@ -986,6 +992,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       />
                     </>
                   )}
+                  </div>
                 </div>
 
                 {/* Panel selector column */}
