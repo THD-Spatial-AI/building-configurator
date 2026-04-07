@@ -1,12 +1,18 @@
 // Right column of the Overview view: load profile chart and element composition accordion.
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { LoadProfileViewer, type LoadDataPoint } from './LoadProfileViewer';
-import type { BuildingElement } from '../configure/BuildingVisualization';
-import type { RoofConfig } from '../configure/RoofConfigurator';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import { ElementCompositionSection } from './ElementCompositionSection';
+import { TechnologiesSection } from './TechnologiesSection';
+
+interface PvSummary {
+  installed: boolean;
+  surfaceCount: number;
+  totalCapacityKw: number;
+}
 
 export interface EnergyEnvelopeColumnProps {
   uploadError: string | null;
@@ -24,9 +30,13 @@ export interface EnergyEnvelopeColumnProps {
   initialTimeseries: LoadDataPoint[] | null;
   onSwitchToConfigure: (elementId: string) => void;
   mode: 'basic' | 'expert';
+  installedTechIds?: string[];
+  pvSummary: PvSummary;
+  onToggleTech?: (id: string, installed: boolean) => void;
+  onOpenTech?: (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => void;
 }
 
-/** Right panel of the overview: energy chart primary, element composition secondary. */
+/** Right panel of the overview: energy chart primary, element composition secondary, technologies tertiary. */
 export function EnergyEnvelopeColumn({
   uploadError,
   onClearError,
@@ -41,36 +51,19 @@ export function EnergyEnvelopeColumn({
   initialTimeseries,
   onSwitchToConfigure,
   mode,
+  installedTechIds,
+  pvSummary,
+  onToggleTech,
+  onOpenTech,
 }: EnergyEnvelopeColumnProps) {
-  const scrollRef = useRef<HTMLElement>(null);
-  const [hasMore, setHasMore] = useState(false);
-
-  // Recheck scroll indicator whenever content height changes (accordion expand/collapse).
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const check = () => setHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 8);
-    check();
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isActive]);
-
   return (
-    <div className="relative min-h-0 overflow-hidden">
-      <section
-        ref={scrollRef}
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          setHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 8);
-        }}
-        className="flex h-full flex-col overflow-y-auto bg-slate-100
-          [&::-webkit-scrollbar]:w-2.5
-          [&::-webkit-scrollbar-track]:bg-transparent
-          [&::-webkit-scrollbar-thumb]:rounded-full
-          [&::-webkit-scrollbar-thumb]:bg-slate-300
-          hover:[&::-webkit-scrollbar-thumb]:bg-slate-400"
-      >
+    <ScrollHintContainer className="flex flex-col bg-slate-100
+        [&::-webkit-scrollbar]:w-2.5
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        [&::-webkit-scrollbar-thumb]:bg-slate-300
+        hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
+      <section>
         {uploadError && (
           <div className="mx-4 mt-4 flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
             <p className="flex-1 text-[11px] leading-snug text-destructive">{uploadError}</p>
@@ -82,19 +75,17 @@ export function EnergyEnvelopeColumn({
           </div>
         )}
 
-        {/* ── Load profile — grows to fill available space ── */}
-        <div className="min-h-[240px] flex-1 bg-white px-2 pb-3 pt-2">
-          <div className="h-full">
-            <LoadProfileViewer
-              buildingId={buildingId}
-              initialTimeseries={initialTimeseries ?? undefined}
-              mode={mode}
-            />
-          </div>
+        {/* ── Load profile — fixed height; ResponsiveContainer requires an explicit parent height ── */}
+        <div className="bg-white px-2 pb-3 pt-2" style={{ height: 340 }}>
+          <LoadProfileViewer
+            buildingId={buildingId}
+            initialTimeseries={initialTimeseries ?? undefined}
+            mode={mode}
+          />
         </div>
 
         {/* ── Element composition — fixed size, scrolls when a group expands ── */}
-        <div className="shrink-0 border-t border-border/60 px-4 pb-6 pt-4">
+        <div className="shrink-0 border-t border-border/60 px-4 pb-4 pt-4">
           <div className="mb-3 flex items-baseline justify-between">
             <p className="text-sm font-semibold text-foreground">Envelope Composition</p>
             <p className="text-[11px] text-slate-400">Click a group to expand</p>
@@ -109,25 +100,22 @@ export function EnergyEnvelopeColumn({
             onSwitchToConfigure={onSwitchToConfigure}
           />
         </div>
+
+        {/* ── Technologies ── */}
+        <div className="shrink-0 border-t border-border/60 px-4 pb-6 pt-4">
+          <div className="mb-3 flex items-baseline justify-between">
+            <p className="text-sm font-semibold text-foreground">Technologies</p>
+            <p className="text-[11px] text-slate-400">Configure in workspace</p>
+          </div>
+          <TechnologiesSection
+            installedTechIds={installedTechIds}
+            pvSummary={pvSummary}
+            onToggle={onToggleTech}
+            onOpen={onOpenTech}
+          />
+        </div>
       </section>
 
-      {/* Floating scroll-down indicator */}
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-end transition-opacity duration-300',
-          hasMore ? 'opacity-100' : 'opacity-0',
-        )}
-      >
-        <div className="h-16 w-full bg-gradient-to-t from-white/80 to-transparent" />
-        <button
-          type="button"
-          aria-label="Scroll down"
-          onClick={() => scrollRef.current?.scrollBy({ top: 200, behavior: 'smooth' })}
-          className="pointer-events-auto absolute bottom-4 right-5 flex size-7 items-center justify-center rounded-md border border-slate-200 bg-white shadow-md text-muted-foreground transition-colors hover:bg-slate-50 hover:text-foreground [&_svg]:size-4"
-        >
-          <ChevronDown />
-        </button>
-      </div>
-    </div>
+    </ScrollHintContainer>
   );
 }

@@ -4,33 +4,43 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
-  Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle, Plus,
+  Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle,
   Flame, Zap, Droplets, Gauge,
 } from 'lucide-react';
 
-import { BuildingVisualization, VIEW_ORDER } from './configure/BuildingVisualization';
-import type { BuildingElement, FaceGroup } from './configure/BuildingVisualization';
+import { BuildingVisualization, VIEW_ORDER } from './configure/visualization/BuildingVisualization';
+import type { BuildingElement, FaceGroup } from './configure/model/buildingElements';
 import {
   elementToGroup,
   isElementEditable,
   normalizeElementRecord,
-} from './configure/BuildingVisualization';
+} from './configure/model/buildingElements';
 import { type EnergyTotals, type LoadDataPoint } from './overview/LoadProfileViewer';
-import { RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/RoofConfigurator';
-import { SegmentedControl, ConfiguratorStyles } from './shared/ui';
+import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
+import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer } from './shared/ui';
 import { cn } from '../../../lib/utils';
 
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
-import { formatCoordinates } from '../../lib/buemAdapter';
+import {
+  formatCoordinates,
+  exportToBuemGeojson,
+  importBuildingData,
+} from '../../lib/buemAdapter';
 import {
   getThermalRating,
   buildSnapshotRows,
 } from './shared/snapshotUtils';
 import { BuildingSnapshotAside } from './overview/BuildingSnapshotAside';
 import { EnergyEnvelopeColumn } from './overview/EnergyEnvelopeColumn';
-import { SurfaceGroupSelector } from './configure/SurfaceGroupSelector';
-import { SurfaceGroupEditor } from './configure/SurfaceGroupEditor';
+import { SurfaceGroupSelector } from './configure/surfaces/SurfaceGroupSelector';
+import { SurfaceGroupEditor } from './configure/surfaces/SurfaceGroupEditor';
+import { BuildingEditor } from './configure/building/BuildingEditor';
+import { PvSurfaceManager } from './configure/pv/PvSurfaceManager';
+import { BatteryEditor } from './configure/pv/BatteryEditor';
+import { RoofTypeGallery } from './configure/roof/RoofTypeGallery';
+import { createSurfacePvConfig, DEFAULT_PV_CONFIG, DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
+import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -83,13 +93,16 @@ function buildNewSurface(type: BuildingElement['type'], elements: Record<string,
   };
 }
 
-const NEW_SURFACE_OPTIONS: Array<{ type: BuildingElement['type']; label: string; detail: string }> = [
-  { type: 'wall', label: 'Wall', detail: 'Vertical opaque surface' },
-  { type: 'window', label: 'Window', detail: 'Transparent facade opening' },
-  { type: 'door', label: 'Door', detail: 'Opaque entrance opening' },
-  { type: 'roof', label: 'Roof', detail: 'Top envelope surface' },
-  { type: 'floor', label: 'Floor', detail: 'Ground-contact surface' },
-];
+function isRoofConfig(value: unknown): value is RoofConfig {
+  return !!value
+    && typeof value === 'object'
+    && 'type' in value
+    && 'surfaces' in value
+    && Array.isArray((value as RoofConfig).surfaces)
+    && 'from3DData' in value;
+}
+
+
 
 // --- Energy totals helper -----------------------------------------------------
 
@@ -162,27 +175,33 @@ interface BuildingConfiguratorProps {
 
 /** Full-screen panel for inspecting and editing a building's energy model configuration. */
 export function BuildingConfigurator({ onClose, buildingData }: BuildingConfiguratorProps) {
+  const thematicData = buildingData?.thematic;
+  const geometryData = buildingData?.geometry;
+  const technologyData = buildingData?.technologies;
+  const identityData = thematicData?.identity ?? buildingData?.identity;
+
   // Merge model identity fields into general config, keeping defaults for any missing fields.
   const initialGeneral = buildingData ? {
     ...DEFAULT_GENERAL,
-    buildingType:       buildingData.identity.buildingType,
-    constructionPeriod: buildingData.identity.constructionPeriod,
-    country:            buildingData.identity.country,
-    floorArea:          buildingData.identity.floorArea || DEFAULT_GENERAL.floorArea,
-    roomHeight:         buildingData.identity.roomHeight || DEFAULT_GENERAL.roomHeight,
-    storeys:            buildingData.identity.storeys    || DEFAULT_GENERAL.storeys,
+    buildingName:       identityData?.label ?? DEFAULT_GENERAL.buildingName,
+    buildingType:       identityData?.buildingType ?? DEFAULT_GENERAL.buildingType,
+    constructionPeriod: identityData?.constructionPeriod ?? DEFAULT_GENERAL.constructionPeriod,
+    country:            identityData?.country ?? DEFAULT_GENERAL.country,
+    floorArea:          identityData?.floorArea || DEFAULT_GENERAL.floorArea,
+    roomHeight:         identityData?.roomHeight || DEFAULT_GENERAL.roomHeight,
+    storeys:            identityData?.storeys || DEFAULT_GENERAL.storeys,
   } : DEFAULT_GENERAL;
 
   const initialElements = normalizeElementRecord(
-    buildingData && Object.keys(buildingData.envelope).length > 0
-      ? buildingData.envelope
+    thematicData && Object.keys(thematicData.envelope).length > 0
+      ? thematicData.envelope
       : DEFAULT_ELEMENTS,
-    buildingData && Object.keys(buildingData.envelope).length > 0 ? 'city' : 'default',
+    thematicData && Object.keys(thematicData.envelope).length > 0 ? 'city' : 'default',
   );
 
   const initialEnergyTotals = computeEnergyTotals(
-    buildingData?.timeseries ?? null,
-    buildingData?.thermalSummary ?? null,
+    thematicData?.timeseries ?? buildingData?.timeseries ?? null,
+    thematicData?.thermalSummary ?? buildingData?.thermalSummary ?? null,
   );
 
   const [workspaceView, setWorkspaceView] = useState<'overview' | 'configure'>('overview');
@@ -191,9 +210,43 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [general,       setGeneralRaw]    = useState(initialGeneral);
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
   const [selectedId,    setSelectedId]    = useState<string | null>(null);
+  const [surfaceEditorTab, setSurfaceEditorTab] = useState<'geometry' | 'thermal' | 'pv'>('geometry');
+  const [panelView,     setPanelView]     = useState<'building' | 'surface' | 'roof-type' | 'technology-pv' | 'technology-battery'>('building');
+  // Per-surface PV configurations — keyed by element ID.
+  const [surfacePvConfigs, setSurfacePvConfigs] = useState<Record<string, PvConfig>>({});
+  // True when a roof-type change removed surfaces that had PV installed.
+  const [pvInvalidated,  setPvInvalidated]  = useState(false);
+  // Non-PV technology IDs (heat_pump, ev_charger) toggled by the overview panel.
+  const [otherTechIds,   setOtherTechIds]   = useState<string[]>(() =>
+    (technologyData?.installedTechIds ?? buildingData?.installedTechIds ?? []).filter((id) => id !== 'solar_pv' && id !== 'battery'),
+  );
+  // Battery configuration — owned as dedicated state so BatteryEditor has full control.
+  const [batteryConfig,  setBatteryConfig]  = useState<BatteryConfig>(() => {
+    const raw = technologyData?.rawTechs?.battery_storage ?? buildingData?.technologies?.rawTechs?.battery_storage;
+    if (raw && typeof raw === 'object') {
+      const r = raw as Record<string, any>;
+      return {
+        ...DEFAULT_BATTERY_CONFIG,
+        installed:                    (buildingData?.installedTechIds ?? []).includes('battery'),
+        cont_energy_cap_max:          r.cont_energy_cap_max          ?? DEFAULT_BATTERY_CONFIG.cont_energy_cap_max,
+        cont_energy_cap_min:          r.cont_energy_cap_min          ?? DEFAULT_BATTERY_CONFIG.cont_energy_cap_min,
+        cont_storage_cap_max:         r.cont_storage_cap_max         ?? DEFAULT_BATTERY_CONFIG.cont_storage_cap_max,
+        cont_storage_cap_min:         r.cont_storage_cap_min         ?? DEFAULT_BATTERY_CONFIG.cont_storage_cap_min,
+        cont_energy_eff:              r.cont_energy_eff              ?? DEFAULT_BATTERY_CONFIG.cont_energy_eff,
+        cont_storage_loss:            r.cont_storage_loss            ?? DEFAULT_BATTERY_CONFIG.cont_storage_loss,
+        cont_storage_discharge_depth: r.cont_storage_discharge_depth ?? DEFAULT_BATTERY_CONFIG.cont_storage_discharge_depth,
+        cont_storage_initial:         r.cont_storage_initial         ?? DEFAULT_BATTERY_CONFIG.cont_storage_initial,
+        cont_lifetime:                r.cont_lifetime                ?? DEFAULT_BATTERY_CONFIG.cont_lifetime,
+        cost_energy_cap:              r.cost_energy_cap              ?? DEFAULT_BATTERY_CONFIG.cost_energy_cap,
+        cost_storage_cap:             r.cost_storage_cap             ?? DEFAULT_BATTERY_CONFIG.cost_storage_cap,
+        cost_om_annual:               r.cost_om_annual               ?? DEFAULT_BATTERY_CONFIG.cost_om_annual,
+        cost_interest_rate:           r.cost_interest_rate           ?? DEFAULT_BATTERY_CONFIG.cost_interest_rate,
+      };
+    }
+    return DEFAULT_BATTERY_CONFIG;
+  });
   const [vizViewIndex,  setVizViewIndex]  = useState(0);
   const [uploadError,   setUploadError]   = useState<string | null>(null);
-  const [showCreateSurfaceMenu, setShowCreateSurfaceMenu] = useState(false);
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
@@ -207,25 +260,25 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     if (!buildingData) return;
 
     const nextElements = normalizeElementRecord(
-      Object.keys(buildingData.envelope).length > 0
-        ? buildingData.envelope
+      Object.keys(buildingData.thematic.envelope).length > 0
+        ? buildingData.thematic.envelope
         : DEFAULT_ELEMENTS,
-      Object.keys(buildingData.envelope).length > 0 ? 'city' : 'default',
+      Object.keys(buildingData.thematic.envelope).length > 0 ? 'city' : 'default',
     );
 
     const nextGeneral = {
       ...DEFAULT_GENERAL,
-      buildingType:       buildingData.identity.buildingType,
-      constructionPeriod: buildingData.identity.constructionPeriod,
-      country:            buildingData.identity.country,
-      floorArea:          buildingData.identity.floorArea || DEFAULT_GENERAL.floorArea,
-      roomHeight:         buildingData.identity.roomHeight || DEFAULT_GENERAL.roomHeight,
-      storeys:            buildingData.identity.storeys    || DEFAULT_GENERAL.storeys,
+      buildingType:       buildingData.thematic.identity.buildingType,
+      constructionPeriod: buildingData.thematic.identity.constructionPeriod,
+      country:            buildingData.thematic.identity.country,
+      floorArea:          buildingData.thematic.identity.floorArea || DEFAULT_GENERAL.floorArea,
+      roomHeight:         buildingData.thematic.identity.roomHeight || DEFAULT_GENERAL.roomHeight,
+      storeys:            buildingData.thematic.identity.storeys || DEFAULT_GENERAL.storeys,
     };
 
     const nextTotals = computeEnergyTotals(
-      buildingData.timeseries ?? null,
-      buildingData.thermalSummary ?? null,
+      buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
+      buildingData.thematic.thermalSummary ?? buildingData.thermalSummary ?? null,
     );
 
     setElements(nextElements);
@@ -234,8 +287,13 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
     setEnergyTotals(nextTotals);
     setSelectedId(null);
+    setSurfaceEditorTab('geometry');
+    setPanelView('building');
     setUploadError(null);
-    setShowCreateSurfaceMenu(false);
+    setSurfacePvConfigs({});
+    setPvInvalidated(false);
+    setOtherTechIds(buildingData.technologies.installedTechIds.filter((id) => id !== 'solar_pv' && id !== 'battery'));
+    setBatteryConfig(DEFAULT_BATTERY_CONFIG);
   }, [buildingData]);
 
   const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig }) !== JSON.stringify(savedState);
@@ -249,19 +307,47 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       return { ...prev, [id]: { ...current, ...patch } };
     });
 
-  const enableCustomMode = (id: string) =>
+  // Label is display-only — rename is always allowed regardless of custom mode.
+  const renameElement = (id: string, label: string) =>
+    setElements((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+      return { ...prev, [id]: { ...current, label } };
+    });
+
+  const enableCustomMode = (id: string) => {
     setElements((prev) => {
       const current = prev[id];
       if (!current || isElementEditable(current)) return prev;
       return { ...prev, [id]: { ...current, customMode: true } };
     });
+    // Also switch PV geometry to manual so tilt/azimuth inputs appear in the PV tab.
+    setSurfacePvConfigs((prev) => {
+      const el = elements[id];
+      if (!el) return prev;
+      const existing = prev[id] ?? createSurfacePvConfig(el);
+      return { ...prev, [id]: { ...existing, geometryMode: 'manual' } };
+    });
+  };
+
+  const deleteSurface = (id: string) => {
+    setElements((prev) => {
+      const { [id]: _, ...rest } = prev;
+      return rest;
+    });
+    if (selectedId === id) {
+      setSelectedId(null);
+      setPanelView('building');
+    }
+  };
 
   const createSurface = (type: BuildingElement['type']) => {
     const next = buildNewSurface(type, elements);
     setElements((prev) => ({ ...prev, [next.id]: next }));
     setSelectedId(next.id);
+    setSurfaceEditorTab('geometry');
+    setPanelView('surface');
     setWorkspaceView('configure');
-    setShowCreateSurfaceMenu(false);
 
     const group = elementToGroup(next);
     if (group.face !== 'roof' && group.face !== 'floor') {
@@ -272,7 +358,113 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   const handleSelectElement = (id: string) => {
     setSelectedId(id);
+    setSurfaceEditorTab('geometry');
+    setPanelView('surface');
     setWorkspaceView('configure');
+  };
+
+  const handleBuildingSelect = () => {
+    setSelectedId(null);
+    setSurfaceEditorTab('geometry');
+    setPanelView('building');
+    setWorkspaceView('configure');
+  };
+
+  const handleRoofTypeSelect = () => {
+    setSelectedId(null);
+    setSurfaceEditorTab('geometry');
+    setPanelView('roof-type');
+    setWorkspaceView('configure');
+  };
+
+  const handleTechnologyPvSelect = () => {
+    setSelectedId(null);
+    setSurfaceEditorTab('pv');
+    setPanelView('technology-pv');
+    setWorkspaceView('configure');
+  };
+
+  /** Updates the PV config for a single surface. Creates a new entry if none exists. */
+  const updateSurfacePv = (surfaceId: string, patch: Partial<PvConfig>) => {
+    setSurfacePvConfigs((prev) => {
+      const el = elements[surfaceId];
+      const existing = prev[surfaceId] ?? createSurfacePvConfig(el);
+      return { ...prev, [surfaceId]: { ...existing, ...patch } };
+    });
+  };
+
+  /** Handles technology toggle from the overview panel for non-PV techs. */
+  const handleTechToggle = (id: string, installed: boolean) => {
+    if (id === 'battery') {
+      setBatteryConfig((prev) => ({ ...prev, installed }));
+      return;
+    }
+    setOtherTechIds((prev) =>
+      installed ? [...prev.filter((i) => i !== id), id] : prev.filter((i) => i !== id),
+    );
+  };
+
+  /** Navigates to the battery editor panel. */
+  const handleTechnologyBatterySelect = () => {
+    setPanelView('technology-battery');
+    setSelectedId(null);
+    setWorkspaceView('configure');
+  };
+
+  /** Updates a subset of the battery configuration. */
+  const updateBattery = (patch: Partial<BatteryConfig>) =>
+    setBatteryConfig((prev) => ({ ...prev, ...patch }));
+
+  /** Opens the configure workspace for a specific technology card from the overview. */
+  const handleTechnologyOpen = (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => {
+    if (id === 'solar_pv') {
+      handleTechnologyPvSelect();
+      return;
+    }
+    if (id === 'battery') {
+      handleTechnologyBatterySelect();
+      return;
+    }
+    handleBuildingSelect();
+  };
+
+  /** Opens a specific surface directly on its PV configuration tab. */
+  const handleEditPvSurface = (surfaceId: string) => {
+    setSelectedId(surfaceId);
+    setSurfaceEditorTab('pv');
+    setPanelView('surface');
+    setWorkspaceView('configure');
+
+    const el = elements[surfaceId];
+    if (el) {
+      const g = elementToGroup(el);
+      if (g.face !== 'roof' && g.face !== 'floor') {
+        const idx = VIEW_ORDER.findIndex((v) => v.frontWallId === g.face);
+        if (idx !== -1) setVizViewIndex(idx);
+      }
+    }
+  };
+
+  /** Replaces roof elements from a new type template.
+   *  If any replaced surface had PV installed, sets the invalidation warning. */
+  const handleApplyRoofType = (newRoofElements: Record<string, BuildingElement>) => {
+    setElements((prev) => {
+      const oldRoofIds = Object.keys(prev).filter((id) => prev[id].type === 'roof');
+      const hadPv = oldRoofIds.some((id) => surfacePvConfigs[id]?.installed);
+      if (hadPv) {
+        setPvInvalidated(true);
+        // Remove PV configs for the replaced surfaces
+        setSurfacePvConfigs((pv) => {
+          const next = { ...pv };
+          oldRoofIds.forEach((id) => { delete next[id]; });
+          return next;
+        });
+      }
+      const withoutRoofs = Object.fromEntries(
+        Object.entries(prev).filter(([, el]) => el.type !== 'roof'),
+      );
+      return { ...withoutRoofs, ...newRoofElements };
+    });
   };
 
   const setGen = (key: string, value: any) =>
@@ -281,11 +473,17 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   /** Called when the user clicks a face in the 3D preview.
    *  Selects the first element in that face group and rotates the preview to front-face it. */
   const handleGroupSelect = (group: FaceGroup) => {
-    const firstEl = Object.values(elements).find((e) => {
-      const g = elementToGroup(e);
-      return g.type === group.type && g.face === group.face;
-    });
-    if (firstEl) setSelectedId(firstEl.id);
+    const firstEl = group.elementId
+      ? elements[group.elementId]
+      : Object.values(elements).find((e) => {
+          const g = elementToGroup(e);
+          return g.type === group.type && g.face === group.face;
+        });
+    if (firstEl) {
+      setSelectedId(firstEl.id);
+      setSurfaceEditorTab('geometry');
+      setPanelView('surface');
+    }
     if (group.face !== 'roof' && group.face !== 'floor') {
       const idx = VIEW_ORDER.findIndex((v) => v.frontWallId === group.face);
       if (idx !== -1) setVizViewIndex(idx);
@@ -293,9 +491,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   };
 
   /** Called when the user clicks an element row in the surface selector.
-   *  Sets the selected element and rotates the 3D preview to its face direction. */
+   *  Sets the selected element, switches to surface panel, and rotates the 3D preview to its face direction. */
   const handleElementSelect = (elementId: string) => {
     setSelectedId(elementId);
+    setSurfaceEditorTab('geometry');
+    setPanelView('surface');
     const el = elements[elementId];
     if (el) {
       const g = elementToGroup(el);
@@ -314,7 +514,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setSelectedId(null);
     setVizViewIndex(0);
     setUploadError(null);
-    setShowCreateSurfaceMenu(false);
   };
 
   const handleApply = () => {
@@ -322,43 +521,72 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setSavedState({ elements, general, roofConfig });
   };
 
-  // --- JSON export ------------------------------------------------------------
+  // --- JSON export to BUEM API format ----------------------------------------
 
   const handleDownload = () => {
-    const payload = {
-      version: '1.0',
-      exported: new Date().toISOString(),
-      elements,
-      generalConfig: general,
-      roofConfig,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = 'building-config.json'; a.click();
-    URL.revokeObjectURL(url);
+    try {
+      // Prepare building identity from current state
+      const coordinates: [number, number] = geometryData?.coordinates ?? identityData?.coordinates ?? [11.5820, 48.1351];
+      const identity = {
+        id: identityData?.id ?? 'building-1',
+        label: identityData?.label ?? buildingLabel,
+        coordinates,
+        buildingType: general.buildingType,
+        constructionPeriod: general.constructionPeriod,
+        country: general.country,
+        floorArea: general.floorArea,
+        roomHeight: general.roomHeight,
+        storeys: general.storeys,
+      };
+
+      // Generate BUEM API GeoJSON FeatureCollection
+      const buemJson = exportToBuemGeojson(identity, elements, general, undefined, undefined, batteryConfig);
+      const blob = new Blob([buemJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `building-${identity.id}-buem.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
   };
 
-  // --- JSON import ------------------------------------------------------------
+  // --- JSON import (both BUEM API and legacy formats) -------------------------
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
-        const cfg = JSON.parse(ev.target?.result as string);
-        if (cfg.elements) {
-          setElements(normalizeElementRecord(
-            { ...DEFAULT_ELEMENTS, ...cfg.elements },
-            buildingData && Object.keys(buildingData.envelope).length > 0 ? 'city' : 'default',
-          ));
+        const parsed = JSON.parse(ev.target?.result as string);
+        const imported = importBuildingData(parsed);
+
+        // Normalize and apply imported elements
+        const normalizedElements = normalizeElementRecord(
+          { ...DEFAULT_ELEMENTS, ...imported.elements },
+          imported.isBuemFormat ? 'city' : 'default',
+        );
+        setElements(normalizedElements);
+
+        // Apply imported general config
+        const mergedGeneral = { ...DEFAULT_GENERAL, ...imported.general };
+        setGeneralRaw(mergedGeneral);
+
+        // Apply roof config if available (legacy format)
+        if (isRoofConfig(imported.roofConfig)) {
+          setRoofConfig(imported.roofConfig);
         }
-        if (cfg.generalConfig) setGeneralRaw({ ...DEFAULT_GENERAL, ...cfg.generalConfig });
-        if (cfg.roofConfig)    setRoofConfig(cfg.roofConfig);
-      } catch {
-        setUploadError('Could not parse JSON — ensure the file was exported from this configurator.');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setUploadError(
+          `Could not parse file: ${msg}. `
+          + 'Ensure it is a valid BUEM GeoJSON, legacy configurator export, or EnerPlanET config.json.',
+        );
       }
     };
     reader.readAsText(file);
@@ -367,10 +595,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   // --- Derived ---------------------------------------------------------------
 
-  const identity = buildingData?.identity;
-  const buildingLabel = identity?.label ?? 'Building';
-  const buildingType  = identity?.buildingType ?? general.buildingType;
-  const coordinates: [number, number] = identity?.coordinates ?? [11.5820, 48.1351];
+  const identity = identityData;
+  const buildingLabel = general.buildingName || identity?.label || 'Building';
+  const buildingType  = general.buildingType || identity?.buildingType || '';
+  const coordinates: [number, number] = geometryData?.coordinates ?? identity?.coordinates ?? [11.5820, 48.1351];
 
   // selectedGroup is derived from the selected element — no separate state needed.
   // This ensures the 3D highlight always follows the element's actual face, even
@@ -386,6 +614,25 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     : 0;
   const thermalRating = getThermalRating(avgUValue);
   const snapshotRows  = buildSnapshotRows(general, elements, totalArea);
+  const pvInstalledSurfaces = useMemo(() => (
+    Object.values(elements)
+      .filter((element) => surfacePvConfigs[element.id]?.installed)
+      .map((element) => ({
+        element,
+        pv: surfacePvConfigs[element.id] ?? createSurfacePvConfig(element),
+      }))
+  ), [elements, surfacePvConfigs]);
+  const totalPvCapacityKw = pvInstalledSurfaces.reduce((sum, entry) => sum + entry.pv.system_capacity, 0);
+  const pvSummary = {
+    installed: pvInstalledSurfaces.length > 0,
+    surfaceCount: pvInstalledSurfaces.length,
+    totalCapacityKw: totalPvCapacityKw,
+  };
+
+  // Installed tech IDs — solar_pv is per-surface; battery has its own config state.
+  const installedTechIds = batteryConfig.installed
+    ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
+    : otherTechIds.filter((id) => id !== 'battery');
 
   return (
     <div className="cfg-panel mr-[10px] h-[min(920px,calc(100vh-24px))] w-[min(1540px,calc(100vw-60px))] rounded-lg shadow-2xl flex flex-col bg-card overflow-hidden">
@@ -403,7 +650,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
           </div>
           {workspaceView === 'configure' && (
             <span className="shrink-0 rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-700">
-              Under Construction (Alpha Preview)
+              Alpha version - work in progress
             </span>
           )}
         </div>
@@ -419,8 +666,8 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
             value={mode}
             onChange={(v) => setMode(v as 'basic' | 'expert')}
           />
-          <HeaderBtn onClick={handleDownload} tooltip="Export JSON"><Download /></HeaderBtn>
-          <HeaderBtn onClick={() => fileInputRef.current?.click()} tooltip="Import JSON"><Upload /></HeaderBtn>
+          <HeaderBtn onClick={handleDownload} tooltip="Export as BUEM GeoJSON"><Download /></HeaderBtn>
+          <HeaderBtn onClick={() => fileInputRef.current?.click()} tooltip="Import BUEM or legacy JSON"><Upload /></HeaderBtn>
           <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleUpload} />
           <div className="w-px h-5 bg-border shrink-0 mx-1" />
           {onClose && (
@@ -430,7 +677,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       </div>
 
       {/* ── Content ── */}
-      <div className="min-h-0 flex-1 overflow-hidden bg-white flex flex-col">
+      <div className="min-h-0 flex-1 overflow-hidden bg-slate-50 flex flex-col">
         <div className="min-h-0 flex-1 overflow-hidden">
 
           {workspaceView === 'overview' ? (
@@ -441,8 +688,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                 snapshotRows={snapshotRows}
                 thermalRating={thermalRating}
                 avgUValue={avgUValue}
-                installedTechIds={buildingData?.installedTechIds ?? []}
+                installedTechIds={installedTechIds}
+                pvSummary={pvSummary}
                 onUpdateParam={setGen}
+                onToggleTech={handleTechToggle}
+                onOpenTech={handleTechnologyOpen}
                 mode={mode}
               />
               <EnergyEnvelopeColumn
@@ -456,9 +706,13 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                 roofConfig={roofConfig}
                 isActive={workspaceView === 'overview'}
                 buildingId={buildingLabel}
-                initialTimeseries={buildingData?.timeseries ?? null}
+                initialTimeseries={thematicData?.timeseries ?? buildingData?.timeseries ?? null}
                 onSwitchToConfigure={handleSelectElement}
                 mode={mode}
+                installedTechIds={installedTechIds}
+                pvSummary={pvSummary}
+                onToggleTech={handleTechToggle}
+                onOpenTech={handleTechnologyOpen}
               />
             </div>
           ) : (
@@ -469,7 +723,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               <aside className="flex min-h-0 flex-col overflow-hidden border-r border-border/80 bg-slate-50/80">
 
                 {/* 3D preview — takes all remaining vertical space */}
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border/60 bg-white">
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border/60 bg-slate-50">
                   <p className="shrink-0 px-4 pt-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     3D Preview
                   </p>
@@ -539,8 +793,8 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               {/* ── Right column: group editor (main) + group selector (narrow sidebar) ── */}
               <section className="flex min-h-0 flex-row overflow-hidden">
 
-                {/* Surface group editor — fills available width */}
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+                {/* Center panel — building editor or surface editor */}
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-50">
                   {uploadError && (
                     <div className="m-3 mb-0 flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
                       <p className="flex-1 text-[11px] leading-snug text-destructive">{uploadError}</p>
@@ -551,53 +805,78 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       >×</button>
                     </div>
                   )}
-                  <SurfaceGroupEditor
-                    selectedElementId={selectedId}
-                    elements={elements}
-                    onUpdateElement={updateElement}
-                    onEnableCustomMode={enableCustomMode}
-                  />
-                </div>
-
-                {/* Group selector column — narrow, scrollable */}
-                <div className="flex w-44 shrink-0 flex-col overflow-hidden border-l border-border/60 bg-slate-50/60">
-                  <div className="sticky top-0 z-10 shrink-0 border-b border-border/60 bg-slate-50/95 backdrop-blur">
-                    <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                        Surfaces
+                  {/* PV invalidation warning — shown after a roof type change removes PV surfaces */}
+                  {pvInvalidated && (
+                    <div className="m-3 mb-0 flex items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+                      <p className="flex-1 text-[11px] leading-snug text-amber-700">
+                        One or more roof surfaces with PV installed were replaced by the new roof type.
+                        Please reassign PV to the updated roof surfaces.
                       </p>
                       <button
                         type="button"
-                        onClick={() => setShowCreateSurfaceMenu((prev) => !prev)}
-                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-[10px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-                      >
-                        <Plus className="size-3" />
-                        New
-                      </button>
+                        onClick={() => setPvInvalidated(false)}
+                        className="shrink-0 cursor-pointer text-sm leading-none text-amber-600"
+                      >×</button>
                     </div>
-                    {showCreateSurfaceMenu && (
-                      <div className="grid gap-1 border-t border-border/60 px-2 py-2">
-                        {NEW_SURFACE_OPTIONS.map((option) => (
-                          <button
-                            key={option.type}
-                            type="button"
-                            onClick={() => createSurface(option.type)}
-                            className="rounded-md border border-slate-200 bg-white px-2.5 py-2 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
-                          >
-                            <p className="text-[10px] font-semibold text-slate-700">{option.label}</p>
-                            <p className="mt-0.5 text-[9px] leading-snug text-slate-500">{option.detail}</p>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-h-0 flex-1 overflow-y-auto">
+                  )}
+
+                  {panelView === 'building' ? (
+                    <BuildingEditor general={general} setGen={setGen} mode={mode} />
+                  ) : panelView === 'roof-type' ? (
+                    <RoofTypeGallery elements={elements} onApplyRoofType={handleApplyRoofType} />
+                  ) : panelView === 'technology-pv' ? (
+                    <PvSurfaceManager
+                      surfaces={pvInstalledSurfaces}
+                      totalCapacityKw={totalPvCapacityKw}
+                      mode={mode}
+                      onEditSurface={handleEditPvSurface}
+                      allElements={elements}
+                      onEnableSurface={handleEditPvSurface}
+                    />
+                  ) : panelView === 'technology-battery' ? (
+                    <BatteryEditor
+                      battery={batteryConfig}
+                      onUpdate={updateBattery}
+                      mode={mode}
+                    />
+                  ) : (
+                    <SurfaceGroupEditor
+                      selectedElementId={selectedId}
+                      elements={elements}
+                      onUpdateElement={updateElement}
+                      onEnableCustomMode={enableCustomMode}
+                      onRenameElement={renameElement}
+                      preferredTab={surfaceEditorTab}
+                      surfacePvConfig={selectedId ? (surfacePvConfigs[selectedId] ?? null) : null}
+                      onUpdatePv={(patch) => { if (selectedId) updateSurfacePv(selectedId, patch); }}
+                      mode={mode}
+                    />
+                  )}
+                </div>
+
+                {/* Panel selector column */}
+                <div className="flex w-56 shrink-0 flex-col overflow-hidden border-l border-border/60 bg-slate-50/60">
+                  <ScrollHintContainer>
                     <SurfaceGroupSelector
                       elements={elements}
                       selectedElementId={selectedId}
                       onSelect={handleElementSelect}
+                      onDeleteSurface={deleteSurface}
+                      onCreateSurface={createSurface}
+                      buildingSelected={panelView === 'building'}
+                      onSelectBuilding={handleBuildingSelect}
+                      roofTypeSelected={panelView === 'roof-type'}
+                      onSelectRoofType={handleRoofTypeSelect}
+                      pvSelected={panelView === 'technology-pv'}
+                      pvSurfaceCount={pvSummary.surfaceCount}
+                      pvCapacityKw={pvSummary.totalCapacityKw}
+                      onSelectTechnologyPv={handleTechnologyPvSelect}
+                      surfacePvConfigs={surfacePvConfigs}
+                      batterySelected={panelView === 'technology-battery'}
+                      batteryInstalled={batteryConfig.installed}
+                      onSelectTechnologyBattery={handleTechnologyBatterySelect}
                     />
-                  </div>
+                  </ScrollHintContainer>
                 </div>
 
               </section>
@@ -608,7 +887,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         </div>
 
         {/* ── Footer: reset / apply ── */}
-        <div className="border-t border-border/80 bg-white px-4 py-3 shadow-[0_-8px_20px_rgba(15,23,42,0.04)]">
+        <div className="border-t border-border/80 bg-slate-50 px-4 py-3 shadow-[0_-8px_20px_rgba(15,23,42,0.04)]">
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"

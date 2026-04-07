@@ -4,7 +4,15 @@
 // and never access raw BUEM JSON directly. The paths themselves are documented in
 // src/app/config/modelDataMap.ts.
 
-import type { BuildingElement } from '../components/BuildingConfigurator/configure/BuildingVisualization';
+import { MODEL_DATA_MAP } from '../config/modelDataMap';
+import {
+  getMappedArray,
+  getMappedNumber,
+  getMappedRecord,
+  getMappedValue,
+  hasMappedValue,
+} from '../config/modelDataResolver';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { LoadDataPoint } from '../components/BuildingConfigurator/overview/LoadProfileViewer';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -32,7 +40,34 @@ export interface ThermalSummary {
   energyIntensityKwhM2: number;
 }
 
+export interface GeometryData {
+  buildingId: string;
+  coordinates: [number, number];
+  buildingFootprint: unknown | null;
+  buildingHeight: number | null;
+}
+
+export interface ThematicData {
+  identity: BuildingIdentity;
+  envelope: Record<string, BuildingElement>;
+  thermalSummary: ThermalSummary | null;
+  timeseries: LoadDataPoint[] | null;
+}
+
+export type InstalledTechnologyId = keyof typeof MODEL_DATA_MAP.technologies.catalog;
+
+export interface TechnologyData {
+  rawTechs: Record<string, unknown>;
+  installedTechIds: InstalledTechnologyId[];
+}
+
 export interface BuildingState {
+  /** Centralised geometry domain for embedding this dashboard in external apps. */
+  geometry: GeometryData;
+  /** Centralised thematic domain for identity, envelope and results. */
+  thematic: ThematicData;
+  /** Centralised technology domain for installed tech discovery. */
+  technologies: TechnologyData;
   identity: BuildingIdentity;
   /** Envelope surfaces keyed by element id — same shape as the configurator UI. */
   envelope: Record<string, BuildingElement>;
@@ -138,25 +173,89 @@ function adaptTimeseries(ts: unknown): LoadDataPoint[] | null {
   }));
 }
 
-/** Maps EnerPlanET/Calliope tech keys to the UI technology IDs in TechnologiesSection. */
-const TECH_KEY_TO_UI_ID: Record<string, string> = {
-  pv_supply:        'solar_pv',
-  battery_storage:  'battery',
-  heat_pump_supply: 'heat_pump',
-  heat_pump:        'heat_pump',
-  ev_charger:       'ev_charger',
-};
+function coordsFromFeature(feature: unknown): [number, number] {
+  const coords = getMappedValue<unknown[]>(feature, MODEL_DATA_MAP.thematic.coordinates) ?? [];
+  const lon = Number(coords[0] ?? 0);
+  const lat = Number(coords[1] ?? 0);
+  return [lon, lat];
+}
 
-/**
- * Returns the list of UI technology IDs that are present in a `techs` object.
- * A technology is considered installed if its key appears in the object (regardless of values).
- */
-function extractInstalledTechIds(techs: unknown): string[] {
-  if (!techs || typeof techs !== 'object') return [];
+function adaptGeometryData(feature: unknown): GeometryData {
+  const [lon, lat] = coordsFromFeature(feature);
+  const buildingHeight = getMappedValue<unknown>(feature, MODEL_DATA_MAP.geometry.buildingHeight);
 
-  return Object.keys(techs as Record<string, unknown>)
-    .map((key) => TECH_KEY_TO_UI_ID[key])
-    .filter((id): id is string => !!id);
+  return {
+    buildingId: String(getMappedValue(feature, MODEL_DATA_MAP.geometry.buildingId) ?? ''),
+    coordinates: [lon, lat],
+    buildingFootprint: getMappedValue(feature, MODEL_DATA_MAP.geometry.buildingFootprint) ?? null,
+    buildingHeight: typeof buildingHeight === 'number' && Number.isFinite(buildingHeight)
+      ? buildingHeight
+      : null,
+  };
+}
+
+function adaptThematicData(feature: unknown): ThematicData {
+  const descriptor = MODEL_DATA_MAP.thematic.descriptor;
+  const results = MODEL_DATA_MAP.thematic.results;
+  const [lon, lat] = coordsFromFeature(feature);
+  const rawId = String(getMappedValue(feature, MODEL_DATA_MAP.thematic.buildingId) ?? '');
+
+  const typeCode = String(getMappedValue(feature, descriptor.buildingTypeCode) ?? '');
+  const buildingType = BUILDING_TYPE_LABELS[typeCode] ?? typeCode;
+  const identity: BuildingIdentity = {
+    id: rawId,
+    label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
+    coordinates: [lon, lat],
+    buildingType,
+    constructionPeriod: String(getMappedValue(feature, descriptor.constructionPeriod) ?? ''),
+    country: String(getMappedValue(feature, descriptor.country) ?? ''),
+    floorArea: getMappedNumber(feature, descriptor.floorArea),
+    roomHeight: getMappedNumber(feature, descriptor.roomHeight),
+    storeys: getMappedNumber(feature, descriptor.storeys),
+  };
+
+  const envelope = adaptEnvelope(getMappedArray(feature, MODEL_DATA_MAP.thematic.envelope.elements));
+  const hasSummary = [
+    results.heatingTotal,
+    results.coolingTotal,
+    results.electricityTotal,
+    results.peakHeatingLoad,
+    results.peakCoolingLoad,
+    results.energyIntensity,
+  ].some((path) => hasMappedValue(feature, path));
+  const thermalSummary: ThermalSummary | null = hasSummary ? {
+    heatingKwh: getMappedNumber(feature, results.heatingTotal),
+    coolingKwh: getMappedNumber(feature, results.coolingTotal),
+    electricityKwh: getMappedNumber(feature, results.electricityTotal),
+    peakHeatingKw: getMappedNumber(feature, results.peakHeatingLoad),
+    peakCoolingKw: getMappedNumber(feature, results.peakCoolingLoad),
+    energyIntensityKwhM2: getMappedNumber(feature, results.energyIntensity),
+  } : null;
+
+  return {
+    identity,
+    envelope,
+    thermalSummary,
+    timeseries: adaptTimeseries(getMappedValue(feature, results.timeseries) ?? null),
+  };
+}
+
+function adaptTechnologyData(feature: unknown): TechnologyData {
+  const rawTechs = getMappedRecord(feature, MODEL_DATA_MAP.technologies.techRoot);
+  const installedTechIds = Object.entries(MODEL_DATA_MAP.technologies.catalog)
+    .filter(([, path]) => hasMappedValue(feature, path))
+    .map(([id]) => id as InstalledTechnologyId);
+
+  return { rawTechs, installedTechIds };
+}
+
+/** Extracts the three dashboard integration domains from a single feature. */
+export function extractBuildingDashboardData(feature: unknown): Pick<BuildingState, 'geometry' | 'thematic' | 'technologies'> {
+  return {
+    geometry: adaptGeometryData(feature),
+    thematic: adaptThematicData(feature),
+    technologies: adaptTechnologyData(feature),
+  };
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -170,60 +269,18 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     throw new Error('adaptBuemFeature: expected a GeoJSON Feature object.');
   }
 
-  const f   = feature as Record<string, unknown>;
-  const geo = f.geometry as { coordinates?: unknown[] } | undefined;
-  const props = (f.properties ?? {}) as Record<string, unknown>;
-  const buem  = (props.buem ?? {}) as Record<string, unknown>;
-  // techs is a sibling of properties in the EnerPlanET topology node
-  const techs = f.techs ?? props.techs;
-  const bldg  = (buem.building ?? {}) as Record<string, unknown>;
-  const tlp   = (buem.thermal_load_profile ?? {}) as Record<string, unknown>;
-  const summary = (tlp.summary ?? {}) as Record<string, unknown>;
+  const { geometry, thematic, technologies } = extractBuildingDashboardData(feature);
 
-  // ── Identity ────────────────────────────────────────────────────────────────
-  const rawId = String(f.id ?? '');
-  const coords = Array.isArray(geo?.coordinates) ? geo!.coordinates as number[] : [0, 0];
-  const lon = Number(coords[0] ?? 0);
-  const lat = Number(coords[1] ?? 0);
-
-  // Support both BUEM response field name (building_type) and EnerPlanET config field name (type).
-  const typeCode = String(bldg.building_type ?? bldg.type ?? '');
-  const buildingType = BUILDING_TYPE_LABELS[typeCode] ?? typeCode;
-
-  const identity: BuildingIdentity = {
-    id:                 rawId,
-    label:              rawId,
-    coordinates:        [lon, lat],
-    buildingType,
-    constructionPeriod: String(bldg.construction_period ?? ''),
-    country:            String(bldg.country ?? ''),
-    floorArea:          qty(bldg.A_ref),
-    roomHeight:         qty(bldg.h_room),
-    storeys:            Number(bldg.n_storeys ?? 0),
+  return {
+    geometry,
+    thematic,
+    technologies,
+    identity: thematic.identity,
+    envelope: thematic.envelope,
+    thermalSummary: thematic.thermalSummary,
+    timeseries: thematic.timeseries,
+    installedTechIds: technologies.installedTechIds,
   };
-
-  // ── Envelope ────────────────────────────────────────────────────────────────
-  const envelopeEl = (bldg.envelope as Record<string, unknown>)?.elements;
-  const envelope = adaptEnvelope(Array.isArray(envelopeEl) ? envelopeEl : []);
-
-  // ── Thermal summary ─────────────────────────────────────────────────────────
-  const hasSummary = Object.keys(summary).length > 0;
-  const thermalSummary: ThermalSummary | null = hasSummary ? {
-    heatingKwh:           qty((summary.heating     as Record<string, unknown>)?.total),
-    coolingKwh:           qty((summary.cooling     as Record<string, unknown>)?.total),
-    electricityKwh:       qty((summary.electricity as Record<string, unknown>)?.total),
-    peakHeatingKw:        qty(summary.peak_heating_load),
-    peakCoolingKw:        qty(summary.peak_cooling_load),
-    energyIntensityKwhM2: qty(summary.energy_intensity),
-  } : null;
-
-  // ── Timeseries ──────────────────────────────────────────────────────────────
-  const timeseries = adaptTimeseries(tlp.timeseries);
-
-  // ── Technologies ─────────────────────────────────────────────────────────────
-  const installedTechIds = extractInstalledTechIds(techs);
-
-  return { identity, envelope, thermalSummary, timeseries, installedTechIds };
 }
 
 /**
@@ -293,4 +350,369 @@ export function extractFeaturesFromConfig(config: unknown): unknown[] {
       const props = (node as Record<string, unknown>).properties as Record<string, unknown> | undefined;
       return !!props?.buem;
     });
+}
+
+// ─── Export to BUEM API schema ─────────────────────────────────────────────────
+
+/**
+ * Serializes UI building element data to BUEM envelope element format.
+ * Maps BuildingElement[] to BUEM's envelope.elements[] schema.
+ */
+function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Record<string, any>> {
+  return Object.values(elements)
+    .filter((el) => el && typeof el === 'object')
+    .map((el) => {
+      const base: Record<string, any> = {
+        id: String(el.id ?? ''),
+        type: String(el.type ?? ''),
+      };
+
+      // Human-readable display label — echoed by the server, not used in simulation.
+      if (el.label) base.name = el.label;
+
+      // Geometry fields: required for non-ventilation elements
+      if (el.type !== 'ventilation') {
+        base.area = { value: Number(el.area ?? 0), unit: 'm2' };
+        base.azimuth = { value: Number(el.azimuth ?? 0), unit: 'deg' };
+        base.tilt = { value: Number(el.tilt ?? 0), unit: 'deg' };
+      }
+
+      // Thermal properties
+      if (typeof el.uValue === 'number') {
+        base.U = { value: el.uValue, unit: 'W/(m2K)' };
+      }
+
+      // Solar gain (window-specific)
+      if (el.type === 'window' && typeof el.gValue === 'number') {
+        base.g_gl = { value: el.gValue, unit: '-' };
+      }
+
+      return base;
+    });
+}
+
+/**
+ * Serializes UI general config to BUEM building and thermal blocks.
+ * Maps UI fields (buildingType, floorArea, etc.) to BUEM schema.
+ */
+function generalConfigToBuemBuilding(general: Record<string, any>): Record<string, any> {
+  const building: Record<string, any> = {};
+
+  // Human-readable building label — display only, not used in simulation.
+  if (general.buildingName) building.name = general.buildingName;
+
+  // Building classification
+  if (general.buildingType) building.building_type = general.buildingType.replace(/\s+/g, '_').toUpperCase();
+  if (general.constructionPeriod) building.construction_period = general.constructionPeriod;
+  if (general.country) building.country = general.country;
+
+  // Floor area and room height
+  if (typeof general.floorArea === 'number') {
+    building.A_ref = { value: general.floorArea, unit: 'm2' };
+  }
+  if (typeof general.roomHeight === 'number') {
+    building.h_room = { value: general.roomHeight, unit: 'm' };
+  }
+  if (typeof general.storeys === 'number') {
+    building.n_storeys = general.storeys;
+  }
+
+  // Thermal parameters (ISO 52016-1 / TABULA aligned)
+  const thermal: Record<string, any> = {};
+  if (typeof general.n_air_infiltration === 'number') {
+    thermal.n_air_infiltration = { value: general.n_air_infiltration, unit: '1/h' };
+  }
+  if (typeof general.n_air_use === 'number') {
+    thermal.n_air_use = { value: general.n_air_use, unit: '1/h' };
+  }
+  if (typeof general.c_m === 'number') {
+    thermal.c_m = { value: general.c_m, unit: 'kJ/(m2K)' };
+  }
+  if (general.massClass) {
+    thermal.thermal_class =
+      general.massClass === 'Medium' ? 'medium' :
+      general.massClass === 'Heavy' ? 'heavy' : 'light';
+  }
+
+  if (Object.keys(thermal).length > 0) {
+    building.thermal = thermal;
+  }
+
+  return building;
+}
+
+/**
+ * Converts the current UI state (elements + general config) to a complete BUEM GeoJSON Feature.
+ * The feature can be exported and sent to the BUEM API for processing.
+ *
+ * @param identity - Building identity (id, coordinates, etc.)
+ * @param elements - UI element record
+ * @param general - General building config
+ * @param startTime - ISO 8601 start time (e.g. "2018-01-01T00:00:00Z")
+ * @param endTime - ISO 8601 end time
+ * @param resolution - Time resolution value (default: 60)
+ * @param resolutionUnit - Time resolution unit (default: "minutes")
+ * @returns A BUEM GeoJSON Feature ready for export or API submission
+ */
+export function serializeToBuemFeature(
+  identity: BuildingIdentity,
+  elements: Record<string, any>,
+  general: Record<string, any>,
+  startTime: string = '2018-01-01T00:00:00Z',
+  endTime: string = '2018-12-31T23:00:00Z',
+  resolution: string | number = '60',
+  resolutionUnit: string = 'minutes',
+  batteryConfig?: Record<string, any>,
+): Record<string, any> {
+  const [lon, lat] = identity.coordinates;
+
+  // Build the building block, preferring passed identity over general config
+  const building: Record<string, any> = {};
+  if (identity.buildingType) building.building_type = identity.buildingType;
+  else if (general.buildingType) building.building_type = general.buildingType.replace(/\s+/g, '_').toUpperCase();
+
+  if (identity.constructionPeriod) building.construction_period = identity.constructionPeriod;
+  else if (general.constructionPeriod) building.construction_period = general.constructionPeriod;
+
+  if (identity.country) building.country = identity.country;
+  else if (general.country) building.country = general.country;
+
+  if (typeof identity.floorArea === 'number') {
+    building.A_ref = { value: identity.floorArea, unit: 'm2' };
+  } else if (typeof general.floorArea === 'number') {
+    building.A_ref = { value: general.floorArea, unit: 'm2' };
+  }
+
+  if (typeof identity.roomHeight === 'number') {
+    building.h_room = { value: identity.roomHeight, unit: 'm' };
+  } else if (typeof general.roomHeight === 'number') {
+    building.h_room = { value: general.roomHeight, unit: 'm' };
+  }
+
+  if (typeof identity.storeys === 'number') {
+    building.n_storeys = identity.storeys;
+  } else if (typeof general.storeys === 'number') {
+    building.n_storeys = general.storeys;
+  }
+
+  // Envelope
+  building.envelope = { elements: buildElementsToBuemEnvelope(elements) };
+
+  // Thermal parameters
+  const thermal: Record<string, any> = {};
+  if (typeof general.n_air_infiltration === 'number') {
+    thermal.n_air_infiltration = { value: general.n_air_infiltration, unit: '1/h' };
+  }
+  if (typeof general.n_air_use === 'number') {
+    thermal.n_air_use = { value: general.n_air_use, unit: '1/h' };
+  }
+  if (typeof general.c_m === 'number') {
+    thermal.c_m = { value: general.c_m, unit: 'kJ/(m2K)' };
+  }
+  if (general.massClass) {
+    thermal.thermal_class =
+      general.massClass === 'Medium' ? 'medium' :
+      general.massClass === 'Heavy' ? 'heavy' : 'light';
+  }
+  if (Object.keys(thermal).length > 0) {
+    building.thermal = thermal;
+  }
+
+  // Build the techs block — battery_storage included when installed
+  const techs: Record<string, any> = {};
+  if (batteryConfig?.installed) {
+    const b = batteryConfig;
+    techs.battery_storage = {
+      cont_energy_cap_max:                  b.cont_energy_cap_max,
+      cont_energy_cap_min:                  b.cont_energy_cap_min,
+      cont_storage_cap_max:                 b.cont_storage_cap_max,
+      cont_storage_cap_min:                 b.cont_storage_cap_min,
+      cont_energy_eff:                      b.cont_energy_eff,
+      cont_storage_loss:                    b.cont_storage_loss,
+      cont_storage_discharge_depth:         b.cont_storage_discharge_depth,
+      cont_storage_initial:                 b.cont_storage_initial,
+      cont_lifetime:                        b.cont_lifetime,
+      cost_energy_cap:                      b.cost_energy_cap,
+      cost_storage_cap:                     b.cost_storage_cap,
+      cost_om_annual:                       b.cost_om_annual,
+      cost_om_annual_investment_fraction:   0,
+      cost_interest_rate:                   b.cost_interest_rate,
+      cost_purchase:                        0,
+      cost_export:                          0,
+      cont_energy_cap_max_systemwide:       'inf',
+      cont_export_cap:                      'inf',
+    };
+  }
+
+  // Build the complete feature
+  const feature: Record<string, any> = {
+    type: 'Feature',
+    id: identity.id,
+    geometry: {
+      type: 'Point',
+      coordinates: [lon, lat],
+    },
+    properties: {
+      start_time: startTime,
+      end_time: endTime,
+      resolution: String(resolution),
+      resolution_unit: resolutionUnit,
+      buem: {
+        building,
+        solver: {
+          use_milp: general.use_milp ?? false,
+        },
+      },
+      ...(Object.keys(techs).length > 0 ? { techs } : {}),
+    },
+  };
+
+  return feature;
+}
+
+/**
+ * Exports the current UI state as a BUEM API-compliant GeoJSON FeatureCollection.
+ * This is the format expected by the BUEM microservice.
+ */
+export function exportToBuemGeojson(
+  identity: BuildingIdentity,
+  elements: Record<string, any>,
+  general: Record<string, any>,
+  startTime?: string,
+  endTime?: string,
+  batteryConfig?: Record<string, any>,
+): string {
+  const feature = serializeToBuemFeature(identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig);
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [feature],
+  };
+  return JSON.stringify(featureCollection, null, 2);
+}
+
+// ─── Import from BUEM API schema ──────────────────────────────────────────────
+
+/**
+ * Represents both legacy export format and new BUEM API format.
+ */
+export interface ImportedBuildingData {
+  elements: Record<string, any>;
+  general: Record<string, any>;
+  roofConfig?: Record<string, any>;
+  isBuemFormat: boolean;
+}
+
+/**
+ * Parses a BUEM API Feature into the UI's element and general config format.
+ * Handles both v3 unified building type codes and legacy separate fields.
+ *
+ * Throws if the input is not a valid BUEM Feature.
+ */
+export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingData {
+  if (!feature || typeof feature !== 'object') {
+    throw new Error('parseBuemFeatureForImport: expected a GeoJSON Feature object.');
+  }
+
+  const f = feature as Record<string, unknown>;
+  const props = (f.properties ?? {}) as Record<string, unknown>;
+  const buem = (props.buem ?? {}) as Record<string, unknown>;
+  const bldg = (buem.building ?? {}) as Record<string, unknown>;
+  const thermalBlk = (bldg.thermal ?? {}) as Record<string, unknown>;
+  const envelopeBlk = (bldg.envelope ?? {}) as Record<string, unknown>;
+  const elements: Record<string, any> = {};
+
+  // Parse envelope elements
+  if (Array.isArray(envelopeBlk.elements)) {
+    envelopeBlk.elements.forEach((el: any) => {
+      if (!el || typeof el !== 'object') return;
+      const id = String(el.id ?? '');
+      if (!id) return;
+
+      elements[id] = {
+        id,
+        label: id.replace(/_/g, ' '),
+        type: String(el.type ?? ''),
+        area: qty(el.area),
+        uValue: qty(el.U),
+        gValue: (el.g_gl && typeof el.g_gl === 'object' && 'value' in el.g_gl)
+          ? Number((el.g_gl as any).value)
+          : null,
+        tilt: qty(el.tilt),
+        azimuth: qty(el.azimuth),
+        source: 'city',
+        customMode: false,
+      };
+    });
+  }
+
+  // Parse general config
+  const general: Record<string, any> = {
+    buildingType: String(bldg.building_type ?? bldg.type ?? ''),
+    constructionPeriod: String(bldg.construction_period ?? ''),
+    country: String(bldg.country ?? ''),
+    floorArea: qty(bldg.A_ref),
+    roomHeight: qty(bldg.h_room),
+    storeys: Number(bldg.n_storeys ?? 0),
+    n_air_infiltration: qty(thermalBlk.n_air_infiltration, 0.5),
+    n_air_use: qty(thermalBlk.n_air_use, 0.5),
+    c_m: qty(thermalBlk.c_m, 165),
+    massClass: (thermalBlk.thermal_class === 'medium' ? 'Medium' :
+                thermalBlk.thermal_class === 'heavy' ? 'Heavy' : 'Light'),
+    use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,
+  };
+
+  return { elements, general, isBuemFormat: true };
+}
+
+/**
+ * Imports building data from either:
+ * 1. Legacy configurator export format (with 'elements', 'generalConfig', 'roofConfig')
+ * 2. BUEM API GeoJSON Feature or FeatureCollection
+ * 3. EnerPlanET config.json topology
+ *
+ * Returns parsed element and general config, ignoring unrecognized fields.
+ */
+export function importBuildingData(json: unknown): ImportedBuildingData {
+  if (!json || typeof json !== 'object') {
+    throw new Error('importBuildingData: expected a JSON object.');
+  }
+
+  const data = json as Record<string, unknown>;
+
+  // Check for legacy configurator format first
+  if ('elements' in data || 'generalConfig' in data) {
+    return {
+      elements: (data.elements ?? {}) as Record<string, any>,
+      general: (data.generalConfig ?? data.general ?? {}) as Record<string, any>,
+      roofConfig: (data.roofConfig ?? {}) as Record<string, any>,
+      isBuemFormat: false,
+    };
+  }
+
+  // Check for BUEM FeatureCollection
+  if (data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+    const features = data.features as unknown[];
+    if (features.length > 0) {
+      return parseBuemFeatureForImport(features[0]);
+    }
+    throw new Error('importBuildingData: FeatureCollection contains no features.');
+  }
+
+  // Check for single BUEM Feature
+  if (data.type === 'Feature') {
+    return parseBuemFeatureForImport(data);
+  }
+
+  // Check for EnerPlanET config with topology
+  if ('topology' in data && Array.isArray(data.topology)) {
+    const features = extractFeaturesFromConfig(data);
+    if (features.length > 0 && features[0]) {
+      return parseBuemFeatureForImport(features[0]);
+    }
+  }
+
+  throw new Error(
+    'importBuildingData: unrecognized format. '
+    + 'Expected legacy configurator JSON, BUEM GeoJSON Feature, FeatureCollection, or EnerPlanET config.json.',
+  );
 }

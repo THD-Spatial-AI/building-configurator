@@ -27,10 +27,10 @@ export const CONSTRUCTION_PERIOD_OPTIONS = [
 ];
 
 export const COUNTRY_OPTIONS = [
-  { value: 'DE', label: 'DE — Germany'     },
-  { value: 'AT', label: 'AT — Austria'     },
-  { value: 'NL', label: 'NL — Netherlands' },
-  { value: 'CZ', label: 'CZ — Czechia'     },
+  { value: 'DE', label: 'DE - Germany'     },
+  { value: 'AT', label: 'AT - Austria'     },
+  { value: 'NL', label: 'NL - Netherlands' },
+  { value: 'CZ', label: 'CZ - Czechia'     },
 ];
 
 /**

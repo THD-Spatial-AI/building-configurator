@@ -9,16 +9,16 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ELEMENT_DOTS } from '../shared/ui';
-import type { BuildingElement, FaceGroup } from './BuildingVisualization';
-import { faceFromAzimuth } from './BuildingVisualization';
-import type { RoofConfig } from './RoofConfigurator';
+import { ELEMENT_DOTS, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
+import type { BuildingElement, FaceGroup } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { faceFromAzimuth } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import {
   ElementGroupKey,
   ELEMENT_GROUP_LABELS,
   getGroupedElements,
   getRoofGroupInfo,
-} from '../shared/elementListUtils';
+} from '@/app/components/BuildingConfigurator/shared/elementListUtils';
 
 export interface ElementListProps {
   elements: Record<string, BuildingElement>;
@@ -33,7 +33,7 @@ export interface ElementListProps {
 
 /** 8-point direction label matching faceFromAzimuth — ensures list and 3D preview always agree. */
 function surfaceDirection(el: BuildingElement): string {
-  if (el.type === 'roof')  return 'Top';
+  if (el.type === 'roof' && el.tilt <= 10) return 'Top';
   if (el.type === 'floor') return 'Base';
   const MAP: Record<string, string> = {
     north_wall: 'N',  northeast_wall: 'NE',
@@ -47,7 +47,11 @@ function surfaceDirection(el: BuildingElement): string {
 /** Returns true when an element belongs to the currently selected face group. */
 function elementMatchesGroup(el: BuildingElement, group: FaceGroup): boolean {
   if (el.type !== group.type) return false;
-  if (group.type === 'roof' || group.type === 'floor') return true;
+  if (group.type === 'roof') {
+    if (group.elementId) return el.id === group.elementId;
+    return (el.tilt <= 10 ? 'roof' : faceFromAzimuth(el.azimuth)) === group.face;
+  }
+  if (group.type === 'floor') return true;
   return faceFromAzimuth(el.azimuth) === group.face;
 }
 
@@ -139,7 +143,7 @@ export function ElementList({ elements, selectedId, selectedGroup, onSelect, roo
             <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-200" />
           </button>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <ScrollHintContainer>
             <table className="w-full table-fixed border-collapse bg-white text-left">
               <thead className="sticky top-0 z-10 bg-white text-[10px] uppercase tracking-[0.05em] text-slate-400">
                 <tr className="border-b border-slate-200/80">
@@ -174,7 +178,7 @@ export function ElementList({ elements, selectedId, selectedGroup, onSelect, roo
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollHintContainer>
         </div>
       </div>
     );

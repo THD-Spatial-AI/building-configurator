@@ -1,8 +1,8 @@
 // Utilities for grouping and describing building envelope elements.
 // Used by ElementCompositionSection (overview) and surface group editing (configure).
 
-import type { BuildingElement } from '../configure/BuildingVisualization';
-import type { RoofConfig } from '../configure/RoofConfigurator';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 
 // ─── Face group ───────────────────────────────────────────────────────────────
 
@@ -38,8 +38,16 @@ function azimuthToFace(azimuth: number): string {
   return FACE_ORDER[Math.round(normalized / 45) % 8];
 }
 
+function roofToFace(el: Pick<BuildingElement, 'tilt' | 'azimuth'>): string {
+  return el.tilt <= 10 ? 'roof' : azimuthToFace(el.azimuth);
+}
+
 function faceGroupLabel(type: BuildingElement['type'], face: string): string {
-  if (type === 'roof')  return 'Roof';
+  if (type === 'roof') {
+    if (face === 'roof') return 'Roof';
+    const dir = DIRECTION_LABELS[face] ?? face;
+    return `${dir} Roof`;
+  }
   if (type === 'floor') return 'Floor';
   const dir = DIRECTION_LABELS[face] ?? face;
   if (type === 'wall')   return `${dir} Wall`;
@@ -57,7 +65,7 @@ export function getFaceGroups(elements: Record<string, BuildingElement>): FaceGr
 
   for (const el of Object.values(elements)) {
     let face: string;
-    if (el.type === 'roof')       face = 'roof';
+    if (el.type === 'roof')       face = roofToFace(el);
     else if (el.type === 'floor') face = 'floor';
     else                          face = azimuthToFace(el.azimuth);
 

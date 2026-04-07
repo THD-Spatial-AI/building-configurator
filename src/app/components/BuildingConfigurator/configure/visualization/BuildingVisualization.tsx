@@ -1,6 +1,7 @@
 // 3D isometric building preview for the Configure view.
-// Surfaces operate at group level — clicking selects a FaceGroup (type + face),
-// not an individual element. Hover state is managed locally.
+// Walls, windows and doors still select by face group, while pitched roof
+// surfaces select the specific roof element so multi-slope roofs can be edited
+// directly from the preview. Hover state is managed locally.
 
 import { useMemo, useState } from 'react'; // useState kept for hoveredGroup
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -18,6 +19,11 @@ export interface BuildingElement {
   azimuth: number;
   source?: BuildingElementSource;
   customMode?: boolean;
+  /** Expert thermal fields — sourced from TABULA via hdcp node */
+  dInsulation?: number;        // Insulation thickness (m)
+  bTransmission?: number;      // Heat loss correction factor for adjacent unheated space (0–1)
+  measureType?: string;        // TABULA Code_MeasureType value
+  measureTypeOptions?: string[]; // Valid options from _val_data column
 }
 
 export interface SvgElementDef {
@@ -33,6 +39,8 @@ export interface FaceGroup {
   type: BuildingElement['type'];
   /** One of: 'south_wall' | 'north_wall' | 'east_wall' | 'west_wall' | 'roof' | 'floor' */
   face: string;
+  /** Used for exact roof-surface selection when a roof has multiple slopes. */
+  elementId?: string;
 }
 
 export const SVG_ELEMENTS: SvgElementDef[] = [
@@ -90,6 +98,43 @@ const FILL_HOVER: Record<string, string> = {
   windowSide:  '#3c98c0',
 };
 
+const SELECTED_FILL: Record<string, string> = {
+  floor:       '#4ade80',
+  wallFront:   '#60a5fa',
+  wallSide:    '#3b82f6',
+  roof:        '#f59e0b',
+  door:        '#fb7185',
+  windowFront: '#22d3ee',
+  windowSide:  '#06b6d4',
+};
+
+function getSurfacePaint(fillKey: keyof typeof FILL, selected: boolean, hovered: boolean) {
+  if (selected) {
+    return {
+      fill: SELECTED_FILL[fillKey],
+      stroke: '#0f3fb8',
+      strokeWidth: 3.4,
+      filter: 'url(#surfaceSelectedGlow)',
+    };
+  }
+
+  if (hovered) {
+    return {
+      fill: FILL_HOVER[fillKey],
+      stroke: '#2563eb',
+      strokeWidth: 2.1,
+      filter: 'url(#surfaceHoverGlow)',
+    };
+  }
+
+  return {
+    fill: FILL[fillKey],
+    stroke: '#6f8798',
+    strokeWidth: 1.1,
+    filter: undefined,
+  };
+}
+
 // Structural edge lines [x1, y1, x2, y2]
 const EDGES: [number, number, number, number][] = [
   [58,296, 298,296], [58,116, 298,116], [58,116, 58,296],
@@ -133,9 +178,36 @@ export function faceFromAzimuth(azimuth: number): string {
   return faces[Math.round(normalized / 45) % 8];
 }
 
+const FACE_ANGLES: Record<string, number> = {
+  north_wall: 0,
+  northeast_wall: 45,
+  east_wall: 90,
+  southeast_wall: 135,
+  south_wall: 180,
+  southwest_wall: 225,
+  west_wall: 270,
+  northwest_wall: 315,
+};
+
+function circularAngleDistance(a: number, b: number): number {
+  const diff = Math.abs(a - b) % 360;
+  return diff > 180 ? 360 - diff : diff;
+}
+
+function oppositeFace(faceId: string): string {
+  const angle = FACE_ANGLES[faceId];
+  if (angle === undefined) return faceId;
+  const oppositeAngle = (angle + 180) % 360;
+  return Object.entries(FACE_ANGLES).find(([, value]) => value === oppositeAngle)?.[0] ?? faceId;
+}
+
+export function roofFaceFromElement(el: Pick<BuildingElement, 'tilt' | 'azimuth'>): string {
+  return el.tilt <= 10 ? 'roof' : faceFromAzimuth(el.azimuth);
+}
+
 /** Maps any building element to its FaceGroup for viz ↔ list synchronisation. */
 export function elementToGroup(el: BuildingElement): FaceGroup {
-  if (el.type === 'roof')  return { type: 'roof',  face: 'roof'  };
+  if (el.type === 'roof')  return { type: 'roof',  face: roofFaceFromElement(el), elementId: el.id };
   if (el.type === 'floor') return { type: 'floor', face: 'floor' };
   return { type: el.type, face: faceFromAzimuth(el.azimuth) };
 }
@@ -191,7 +263,286 @@ function compassLabel(azimuth: number): string {
 
 /** True when two FaceGroup values refer to the same surface group. */
 function groupsMatch(a: FaceGroup | null, b: FaceGroup | null): boolean {
-  return a !== null && b !== null && a.type === b.type && a.face === b.face;
+  if (a === null || b === null || a.type !== b.type || a.face !== b.face) return false;
+  if (a.type === 'roof' && (a.elementId || b.elementId)) return a.elementId === b.elementId;
+  return true;
+}
+
+// ─── Isometric roof shape renderer ───────────────────────────────────────────
+
+/** Visual roof categories used for 3D preview rendering. */
+type RoofType = 'flat' | 'shed' | 'gable' | 'hip' | 'pyramid' | 'mansard';
+
+/**
+ * Infers the visual roof shape from the current roof elements.
+ * Uses the same count+tilt heuristic as RoofTypeGallery — kept local
+ * to avoid a circular import (RoofTypeGallery imports BuildingElement from here).
+ */
+function inferRoofShape(roofs: BuildingElement[]): RoofType {
+  if (roofs.length === 0) return 'flat';
+  if (roofs.length === 1) return roofs[0].tilt <= 5 ? 'flat' : 'shed';
+  if (roofs.length === 2) return 'gable';
+  if (roofs.length === 4) {
+    const avg = roofs.reduce((s, e) => s + e.tilt, 0) / 4;
+    return avg > 40 ? 'pyramid' : 'hip';
+  }
+  if (roofs.length >= 5) return 'mansard';
+  return 'flat';
+}
+
+/**
+ * Box wall-top corners (isometric SVG coordinates):
+ *   A = [58, 116]  front-left (SW)
+ *   B = [298, 116] front-right (SE)
+ *   C = [385, 66]  back-right (NE)
+ *   D = [145, 66]  back-left (NW)
+ *
+ * ROOF_H = 42 px above wall-top (= subtract 42 from y in SVG).
+ * Derived ridge / apex points carry the _up suffix.
+ */
+const ROOF_H = 42;
+
+// Ridge midpoints (between opposite wall-top edges, then elevated)
+const midE_up = '341.5,49';  // midpoint(B,C) + H
+const midW_up = '101.5,49';  // midpoint(A,D) + H
+const apex_up = '221.5,49';  // center of all four + H
+const hipL    = '161.5,49';  // 25 % along E-W + 50 % depth + H
+const hipR    = '281.5,49';  // 75 % along E-W + 50 % depth + H
+
+// Shed: back edge (north) fully elevated
+const shedDu = '145,24';
+const shedCu = '385,24';
+
+// Mansard upper ring: H=32, 20 % plan inset from each corner
+const mansFL = '123,74';
+const mansFR = '268,74';
+const mansBL = '176,44';
+const mansBR = '320,44';
+const A_up = '58,74';
+const B_up = '298,74';
+const C_up = '385,24';
+const D_up = '145,24';
+const midS_up = '178,74';
+const midN_up = '265,24';
+
+type RoofSlot = 'front' | 'side' | 'back' | 'left' | 'top';
+
+interface RoofSurfacePolygon {
+  key: string;
+  points: string;
+  fill: string;
+  group?: FaceGroup;
+}
+
+interface RoofPolygonsResult {
+  polygons: RoofSurfacePolygon[];
+  ridge?: { x1: number; y1: number; x2: number; y2: number };
+}
+
+function slotFill(slot: RoofSlot, active: boolean): string {
+  if (slot === 'front') return active ? '#f59e0b' : '#c0b090';
+  if (slot === 'side') return active ? '#d97706' : '#a89878';
+  if (slot === 'back') return active ? '#b45309' : '#b0a080';
+  if (slot === 'left') return active ? '#c2410c' : '#a39379';
+  return active ? '#fbbf24' : '#cfc0a4';
+}
+
+function chooseNearestRoofSlot(face: string, slotFaces: Record<Exclude<RoofSlot, 'top'>, string>): Exclude<RoofSlot, 'top'> {
+  const faceAngle = FACE_ANGLES[face] ?? 180;
+  return (Object.entries(slotFaces) as Array<[Exclude<RoofSlot, 'top'>, string]>).reduce((best, [slot, slotFace]) => {
+    const distance = circularAngleDistance(faceAngle, FACE_ANGLES[slotFace] ?? 180);
+    if (distance < best.distance) return { slot, distance };
+    return best;
+  }, { slot: 'front' as Exclude<RoofSlot, 'top'>, distance: Number.POSITIVE_INFINITY }).slot;
+}
+
+function dominantRoofAxis(slotAreas: Partial<Record<Exclude<RoofSlot, 'top'>, number>>): 'front-back' | 'side-left' {
+  const frontBack = (slotAreas.front ?? 0) + (slotAreas.back ?? 0);
+  const sideLeft = (slotAreas.side ?? 0) + (slotAreas.left ?? 0);
+  return sideLeft > frontBack ? 'side-left' : 'front-back';
+}
+
+function buildRoofPolygons(
+  shape: RoofType,
+  roofs: BuildingElement[],
+  slotFaces: Record<Exclude<RoofSlot, 'top'>, string>,
+): RoofPolygonsResult {
+  const slotElements: Partial<Record<RoofSlot, BuildingElement>> = {};
+  const slotAreas: Partial<Record<Exclude<RoofSlot, 'top'>, number>> = {};
+
+  for (const roof of roofs) {
+    const group = elementToGroup(roof);
+    if (group.face === 'roof') {
+      slotElements.top = roof;
+      continue;
+    }
+
+    const slot = chooseNearestRoofSlot(group.face, slotFaces);
+    slotAreas[slot] = (slotAreas[slot] ?? 0) + roof.area;
+    if (!slotElements[slot] || roof.area > slotElements[slot]!.area) {
+      slotElements[slot] = roof;
+    }
+  }
+
+  const polygon = (key: string, points: string, slot: RoofSlot): RoofSurfacePolygon => {
+    const roof = slotElements[slot];
+    return {
+      key,
+      points,
+      fill: slotFill(slot, false),
+      group: roof ? elementToGroup(roof) : undefined,
+    };
+  };
+
+  if (shape === 'flat') {
+    return { polygons: [{ ...polygon('flat', '58,116 298,116 385,66 145,66', 'top') }] };
+  }
+
+  if (shape === 'shed') {
+    const roof = roofs[0];
+    const slot = roof ? (roofFaceFromElement(roof) === 'roof' ? 'top' : chooseNearestRoofSlot(roofFaceFromElement(roof), slotFaces)) : 'front';
+    const pointsBySlot: Record<Exclude<RoofSlot, 'top'>, string> = {
+      front: '58,116 298,116 385,24 145,24',
+      back: '58,74 298,74 385,66 145,66',
+      side: '58,74 298,116 385,66 145,24',
+      left: '58,116 298,74 385,24 145,66',
+    };
+
+    return {
+      polygons: [
+        {
+          ...polygon('shed', pointsBySlot[slot === 'top' ? 'front' : slot], slot === 'top' ? 'top' : slot),
+          group: roof ? elementToGroup(roof) : undefined,
+        },
+      ],
+    };
+  }
+
+  if (shape === 'gable') {
+    const axis = dominantRoofAxis(slotAreas);
+    if (axis === 'side-left') {
+      return {
+        polygons: [
+          { ...polygon('gable-left-end', `58,116 298,116 ${midS_up}`, 'front'), group: undefined, fill: slotFill('front', false) },
+          { ...polygon('gable-west', `58,116 145,66 ${midN_up} ${midS_up}`, 'left') },
+          { ...polygon('gable-east', `298,116 385,66 ${midN_up} ${midS_up}`, 'side') },
+          { ...polygon('gable-back-end', `145,66 385,66 ${midN_up}`, 'back'), group: undefined, fill: slotFill('back', false) },
+        ],
+        ridge: { x1: 178, y1: 74, x2: 265, y2: 24 },
+      };
+    }
+
+    return {
+      polygons: [
+        { ...polygon('gable-west-end', `58,116 145,66 ${midW_up}`, 'left'), group: undefined, fill: slotFill('left', false) },
+        { ...polygon('gable-back', `145,66 385,66 ${midE_up} ${midW_up}`, 'back') },
+        { ...polygon('gable-front', `58,116 298,116 ${midE_up} ${midW_up}`, 'front') },
+        { ...polygon('gable-east-end', `298,116 385,66 ${midE_up}`, 'side'), group: undefined, fill: slotFill('side', false) },
+      ],
+      ridge: { x1: 101.5, y1: 49, x2: 341.5, y2: 49 },
+    };
+  }
+
+  if (shape === 'hip') {
+    return {
+      polygons: [
+        polygon('hip-back', `${'145,66'} ${'385,66'} ${hipR} ${hipL}`, 'back'),
+        polygon('hip-left', `${'58,116'} ${'145,66'} ${hipL}`, 'left'),
+        polygon('hip-front', `${'58,116'} ${'298,116'} ${hipR} ${hipL}`, 'front'),
+        polygon('hip-side', `${'298,116'} ${'385,66'} ${hipR}`, 'side'),
+      ],
+      ridge: { x1: 161.5, y1: 49, x2: 281.5, y2: 49 },
+    };
+  }
+
+  if (shape === 'pyramid') {
+    return {
+      polygons: [
+        polygon('pyr-back', `${'145,66'} ${'385,66'} ${apex_up}`, 'back'),
+        polygon('pyr-left', `${'58,116'} ${'145,66'} ${apex_up}`, 'left'),
+        polygon('pyr-front', `${'58,116'} ${'298,116'} ${apex_up}`, 'front'),
+        polygon('pyr-side', `${'298,116'} ${'385,66'} ${apex_up}`, 'side'),
+      ],
+    };
+  }
+
+  return {
+    polygons: [
+      polygon('mansard-back', `${'145,66'} ${'385,66'} ${mansBR} ${mansBL}`, 'back'),
+      polygon('mansard-left', `${'58,116'} ${'145,66'} ${mansBL} ${mansFL}`, 'left'),
+      polygon('mansard-top', `${mansFL} ${mansFR} ${mansBR} ${mansBL}`, 'top'),
+      polygon('mansard-front', `${'58,116'} ${'298,116'} ${mansFR} ${mansFL}`, 'front'),
+      polygon('mansard-side', `${'298,116'} ${'385,66'} ${mansBR} ${mansFR}`, 'side'),
+    ],
+  };
+}
+
+/** Renders the roof above the isometric building box in the detected shape. */
+function Roof3D({
+  shape,
+  roofs,
+  selectedGroup,
+  hoveredGroup,
+  slotFaces,
+  onClick,
+  onEnter,
+  onLeave,
+}: {
+  shape: RoofType;
+  roofs: BuildingElement[];
+  selectedGroup: FaceGroup | null;
+  hoveredGroup: FaceGroup | null;
+  slotFaces: Record<Exclude<RoofSlot, 'top'>, string>;
+  onClick: (group: FaceGroup) => void;
+  onEnter: (group: FaceGroup) => void;
+  onLeave: () => void;
+}) {
+  const { polygons, ridge } = buildRoofPolygons(shape, roofs, slotFaces);
+
+  return (
+    <>
+      {polygons.map(({ key, points, fill, group }) => {
+        const isSelected = group ? groupsMatch(selectedGroup, group) : false;
+        const isHovered = group ? groupsMatch(hoveredGroup, group) : false;
+        const stroke = isSelected ? '#2f5d8a' : '#7090a8';
+        const strokeWidth = isSelected ? 2.5 : 0.7;
+        const finalFill = group
+          ? slotFill(
+              group.face === 'roof'
+                ? 'top'
+                : (chooseNearestRoofSlot(group.face, slotFaces) as RoofSlot),
+              isSelected || isHovered,
+            )
+          : fill;
+
+        return (
+          <polygon
+            key={key}
+            points={points}
+            fill={finalFill}
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            filter={isSelected ? 'url(#surfaceSelectedGlow)' : isHovered ? 'url(#surfaceHoverGlow)' : undefined}
+            style={{ cursor: group ? 'pointer' : 'default', transition: 'fill 0.13s ease, stroke-width 0.13s ease' }}
+            onClick={group ? () => onClick(group) : undefined}
+            onMouseEnter={group ? () => onEnter(group) : undefined}
+            onMouseLeave={group ? onLeave : undefined}
+          />
+        );
+      })}
+      {ridge && (
+        <line
+          x1={ridge.x1}
+          y1={ridge.y1}
+          x2={ridge.x2}
+          y2={ridge.y2}
+          stroke="#607888"
+          strokeWidth={0.8}
+          opacity={0.75}
+        />
+      )}
+    </>
+  );
 }
 
 interface Props {
@@ -206,6 +557,12 @@ interface Props {
 /** Isometric 3D preview of a building. Clicking any surface selects a FaceGroup. */
 export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, viewIndex, onViewChange }: Props) {
   const [hoveredGroup, setHoveredGroup] = useState<FaceGroup | null>(null);
+  const roofElements = useMemo(() => Object.values(elements).filter((e) => e.type === 'roof'), [elements]);
+
+  // Infer roof shape from current roof elements so the 3D preview matches the applied type.
+  const roofShape = useMemo((): RoofType => {
+    return inferRoofShape(roofElements);
+  }, [roofElements]);
 
   // Restrict to views that have at least one element on the front or side face.
   const availableViewIndices = useMemo(() => {
@@ -227,6 +584,12 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
     ? viewIndex
     : (availableViewIndices[0] ?? 0);
   const view = VIEW_ORDER[safeViewIndex];
+  const roofSlotFaces = useMemo(() => ({
+    front: view.frontWallId,
+    side: view.sideWallId,
+    back: oppositeFace(view.frontWallId),
+    left: oppositeFace(view.sideWallId),
+  }), [view]);
 
   // Wall label: prefer the element's own azimuth; fall back to the face id.
   const wallDefs = useMemo(() => {
@@ -253,7 +616,10 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
   const groupCount = (group: FaceGroup): number => {
     return Object.values(elements).filter((el) => {
       if (el.type !== group.type) return false;
-      if (group.type === 'roof')  return true;
+      if (group.type === 'roof') {
+        if (group.elementId) return el.id === group.elementId;
+        return roofFaceFromElement(el) === group.face;
+      }
       if (group.type === 'floor') return true;
       return faceFromAzimuth(el.azimuth) === group.face;
     }).length;
@@ -265,7 +631,14 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
     const isHidden = !visibleFaces.has(group.face);
     const suffix = isHidden ? ' · rotate to view' : '';
 
-    if (group.type === 'roof')  return 'Roof';
+    if (group.type === 'roof') {
+      const roof = group.elementId ? elements[group.elementId] : null;
+      if (roof) {
+        const roofDir = roofFaceFromElement(roof) === 'roof' ? 'Top' : compassLabel(roof.azimuth);
+        return `${roof.label} · ${roofDir}${suffix}`;
+      }
+      return group.face === 'roof' ? `Roof${suffix}` : `${wallFaceLabel(group.face)} Roof${suffix}`;
+    }
     if (group.type === 'floor') return 'Ground Floor';
 
     const dir = wallFaceLabel(group.face);
@@ -281,6 +654,7 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
     const isSelected = groupsMatch(selectedGroup, group);
     const isHovered  = groupsMatch(hoveredGroup, group);
     const fillKey    = variant === 'front' ? 'wallFront' : 'wallSide';
+    const paint      = getSurfacePaint(fillKey, isSelected, isHovered);
     const lx         = variant === 'front' ? 178 : 342;
     const ly         = variant === 'front' ? 133 : 178;
 
@@ -288,10 +662,11 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
       <g key={wall.id}>
         <polygon
           points={pointsToString(wall.quad)}
-          fill={isHovered ? FILL_HOVER[fillKey] : FILL[fillKey]}
-          stroke={isSelected ? '#2f5d8a' : '#7090a8'}
-          strokeWidth={isSelected ? 2.5 : 0.7}
-          style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
+          fill={paint.fill}
+          stroke={paint.stroke}
+          strokeWidth={paint.strokeWidth}
+          filter={paint.filter}
+          style={{ cursor: 'pointer', transition: 'fill 0.13s ease, stroke-width 0.13s ease' }}
           onClick={() => onSelectGroup(group)}
           onMouseEnter={() => setHoveredGroup(group)}
           onMouseLeave={() => setHoveredGroup(null)}
@@ -333,15 +708,17 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
     const fillKey = openingType === 'door'
       ? 'door'
       : variant === 'front' ? 'windowFront' : 'windowSide';
+    const paint = getSurfacePaint(fillKey, isSelected, isHovered);
 
     return (
       <polygon
         key={`${faceId}-${openingType}`}
         points={pointsToString(points)}
-        fill={isHovered ? FILL_HOVER[fillKey] : FILL[fillKey]}
-        stroke={isSelected ? '#2f5d8a' : 'rgba(64,86,108,0.6)'}
-        strokeWidth={isSelected ? 2.2 : 0.8}
-        style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
+        fill={paint.fill}
+        stroke={paint.stroke}
+        strokeWidth={paint.strokeWidth}
+        filter={paint.filter}
+        style={{ cursor: 'pointer', transition: 'fill 0.13s ease, stroke-width 0.13s ease' }}
         onClick={() => onSelectGroup(group)}
         onMouseEnter={() => setHoveredGroup(group)}
         onMouseLeave={() => setHoveredGroup(null)}
@@ -351,9 +728,6 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
 
   const isFloorSelected = groupsMatch(selectedGroup, { type: 'floor', face: 'floor' });
   const isFloorHovered  = groupsMatch(hoveredGroup,  { type: 'floor', face: 'floor' });
-  const isRoofSelected  = groupsMatch(selectedGroup, { type: 'roof',  face: 'roof'  });
-  const isRoofHovered   = groupsMatch(hoveredGroup,  { type: 'roof',  face: 'roof'  });
-
   return (
     <div className="relative h-full min-h-0 w-full rounded-lg overflow-hidden border border-border bg-slate-100/70">
       {/* Rotate left — floats on the left edge, vertically centred */}
@@ -387,6 +761,12 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
             <stop offset="0%" stopColor="#d8e8f4" />
             <stop offset="100%" stopColor="#ecf2f8" />
           </linearGradient>
+          <filter id="surfaceSelectedGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#2563eb" floodOpacity="0.45" />
+          </filter>
+          <filter id="surfaceHoverGlow" x="-15%" y="-15%" width="130%" height="130%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#60a5fa" floodOpacity="0.28" />
+          </filter>
         </defs>
 
         {/* Sky background */}
@@ -396,36 +776,42 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
         <ellipse cx={222} cy={310} rx={200} ry={13} fill="rgba(0,0,0,0.08)" />
 
         {/* Hidden back faces — drawn first so visible walls fully occlude them */}
-        <polygon points={pointsToString(HIDDEN_BACK_WALL_QUAD)} fill="#6a8292" stroke="#5a7282" strokeWidth={0.7} />
-        <polygon points={pointsToString(HIDDEN_LEFT_WALL_QUAD)} fill="#7a92a4" stroke="#6a8292" strokeWidth={0.7} />
+        <polygon points={pointsToString(HIDDEN_BACK_WALL_QUAD)} fill="#64748b" fillOpacity={0.28} stroke="#64748b" strokeOpacity={0.25} strokeWidth={0.7} />
+        <polygon points={pointsToString(HIDDEN_LEFT_WALL_QUAD)} fill="#64748b" fillOpacity={0.18} stroke="#64748b" strokeOpacity={0.18} strokeWidth={0.7} />
 
         <g>
           {/* Ground floor */}
+          {(() => {
+            const paint = getSurfacePaint('floor', isFloorSelected, isFloorHovered);
+            return (
           <polygon
             points={SVG_ELEMENTS[0].points}
-            fill={isFloorHovered ? FILL_HOVER.floor : FILL.floor}
-            stroke={isFloorSelected ? '#2f5d8a' : '#7090a8'}
-            strokeWidth={isFloorSelected ? 2.5 : 0.7}
-            style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
+            fill={paint.fill}
+            stroke={paint.stroke}
+            strokeWidth={paint.strokeWidth}
+            filter={paint.filter}
+            style={{ cursor: 'pointer', transition: 'fill 0.13s ease, stroke-width 0.13s ease' }}
             onClick={() => onSelectGroup({ type: 'floor', face: 'floor' })}
             onMouseEnter={() => setHoveredGroup({ type: 'floor', face: 'floor' })}
             onMouseLeave={() => setHoveredGroup(null)}
           />
+            );
+          })()}
 
           {/* Visible walls */}
           {renderWall(wallDefs.front, 'front')}
           {renderWall(wallDefs.side,  'side')}
 
-          {/* Roof */}
-          <polygon
-            points={SVG_ELEMENTS[1].points}
-            fill={isRoofHovered ? FILL_HOVER.roof : FILL.roof}
-            stroke={isRoofSelected ? '#2f5d8a' : '#7090a8'}
-            strokeWidth={isRoofSelected ? 2.5 : 0.7}
-            style={{ cursor: 'pointer', transition: 'fill 0.13s ease' }}
-            onClick={() => onSelectGroup({ type: 'roof', face: 'roof' })}
-            onMouseEnter={() => setHoveredGroup({ type: 'roof', face: 'roof' })}
-            onMouseLeave={() => setHoveredGroup(null)}
+          {/* Roof — shape matches the detected roof type */}
+          <Roof3D
+            shape={roofShape}
+            roofs={roofElements}
+            selectedGroup={selectedGroup}
+            hoveredGroup={hoveredGroup}
+            slotFaces={roofSlotFaces}
+            onClick={onSelectGroup}
+            onEnter={setHoveredGroup}
+            onLeave={() => setHoveredGroup(null)}
           />
 
           {/* Representative openings: one window + one door per visible face */}
@@ -440,8 +826,10 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
           <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#5c7888" strokeWidth={0.7} opacity={0.55} />
         ))}
 
+        {/* Roof label — float above ridge for pitched shapes */}
         <text
-          x={222} y={91}
+          x={222}
+          y={roofShape === 'flat' || roofShape === 'shed' ? 91 : 43}
           textAnchor="middle"
           fontSize="12"
           fontWeight="700"

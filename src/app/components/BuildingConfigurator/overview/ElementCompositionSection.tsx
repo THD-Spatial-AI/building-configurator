@@ -5,9 +5,9 @@ import React, { useState, useRef } from 'react';
 import { ChevronDown, Check, X, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS } from '../shared/ui';
-import type { BuildingElement } from '../configure/BuildingVisualization';
-import { isElementEditable, isUserDefinedElement } from '../configure/BuildingVisualization';
-import type { RoofConfig } from '../configure/RoofConfigurator';
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { isElementEditable, isUserDefinedElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import {
   ElementGroupKey,
   ELEMENT_GROUP_LABELS,
