@@ -310,15 +310,12 @@ export function ConfigSection({ title, expanded, onToggle, children }: ConfigSec
         />
       </button>
 
-      {/* grid-rows-[0fr→1fr] animates to the real content height — no hardcoded max. */}
       <div className={cn(
-        'grid transition-all duration-300 ease-out',
-        expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        'overflow-hidden transition-[max-height] duration-300 ease-in-out',
+        expanded ? 'max-h-[600px]' : 'max-h-0',
       )}>
-        <div className="overflow-hidden">
-          <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
-            {children}
-          </div>
+        <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
+          {children}
         </div>
       </div>
     </div>

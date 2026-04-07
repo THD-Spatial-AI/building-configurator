@@ -177,10 +177,10 @@ export function ElementCompositionSection({
 
     return (
       <div className={cn(
-        'grid transition-[grid-template-rows] duration-300 ease-in-out',
-        isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        'overflow-hidden transition-[max-height] duration-300 ease-in-out',
+        isExpanded ? 'max-h-[500px]' : 'max-h-0',
       )}>
-        <div className="overflow-hidden">
+        <div>
           {editingInGroup && (
             <div className="flex items-center justify-between gap-3 border-t border-amber-200 bg-amber-50 px-3 py-2">
               <p className="text-[11px] text-amber-700">

@@ -730,6 +730,14 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
   const isFloorHovered  = groupsMatch(hoveredGroup,  { type: 'floor', face: 'floor' });
   return (
     <div className="relative h-full min-h-0 w-full rounded-lg overflow-hidden border border-border bg-slate-100/70">
+      {/* Instruction chip — top-centre */}
+      <div className="pointer-events-none absolute top-3 left-1/2 z-10 -translate-x-1/2">
+        <div className="flex items-center gap-1.5 rounded-full border border-slate-300/70 bg-white/70 px-3 py-1 shadow-sm backdrop-blur-sm">
+          <span className="whitespace-nowrap text-[10px] font-medium text-slate-500">
+            Click a surface to select · arrows to rotate view
+          </span>
+        </div>
+      </div>
       {/* Rotate left — floats on the left edge, vertically centred */}
       <button
         type="button"
@@ -868,17 +876,46 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
           );
         })()}
 
-        {/* Compass rose */}
-        <g transform="translate(422, 44)">
-          <circle cx={0} cy={0} r={22} fill="rgba(255,255,255,0.9)" stroke="#c0ccd8" strokeWidth={1.2} />
-          <polygon points="0,-18 -3.5,-7 3.5,-7" fill="#c53030" />
-          <polygon points="0,18 -3.5,7 3.5,7" fill="#8090a4" />
-          <line x1={-16} y1={0} x2={16} y2={0} stroke="#8090a4" strokeWidth={1.5} strokeLinecap="round" />
-          <text x={0}   y={-24} textAnchor="middle" fontSize="9" fill="#c53030" fontWeight="bold" style={{ userSelect: 'none' }}>N</text>
-          <text x={0}   y={33}  textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>S</text>
-          <text x={27}  y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>E</text>
-          <text x={-27} y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>W</text>
-        </g>
+        {/* Compass rose with front-face indicator */}
+        {(() => {
+          const frontAzimuth = FACE_ANGLES[view.frontWallId] ?? 0;
+          const frontRad = (frontAzimuth * Math.PI) / 180;
+          // Tip of the front-face arrow just outside the compass circle
+          const arrowR = 28;
+          const arrowTipX  =  Math.sin(frontRad) * arrowR;
+          const arrowTipY  = -Math.cos(frontRad) * arrowR;
+          // Two base points of the small arrowhead (perpendicular, inside the circle)
+          const baseR = 20;
+          const bx = Math.sin(frontRad) * baseR;
+          const by = -Math.cos(frontRad) * baseR;
+          const perpX = -Math.cos(frontRad) * 4;
+          const perpY = -Math.sin(frontRad) * 4;
+          const frontShort = compassLabel(frontAzimuth).split(' ').map(w => w[0]).join(''); // "S", "SE", etc.
+          return (
+            <g transform="translate(422, 44)">
+              {/* Front-face arrow outside the circle */}
+              <polygon
+                points={`${arrowTipX},${arrowTipY} ${bx + perpX},${by + perpY} ${bx - perpX},${by - perpY}`}
+                fill="#2563eb"
+                opacity={0.85}
+              />
+              <circle cx={0} cy={0} r={22} fill="rgba(255,255,255,0.9)" stroke="#c0ccd8" strokeWidth={1.2} />
+              <polygon points="0,-18 -3.5,-7 3.5,-7" fill="#c53030" />
+              <polygon points="0,18 -3.5,7 3.5,7" fill="#8090a4" />
+              <line x1={-16} y1={0} x2={16} y2={0} stroke="#8090a4" strokeWidth={1.5} strokeLinecap="round" />
+              <text x={0}   y={-24} textAnchor="middle" fontSize="9" fill="#c53030" fontWeight="bold" style={{ userSelect: 'none' }}>N</text>
+              <text x={0}   y={33}  textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>S</text>
+              <text x={27}  y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>E</text>
+              <text x={-27} y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>W</text>
+              {/* "Front: XX" label below compass */}
+              <rect x={-22} y={38} width={44} height={13} rx={3} fill="rgba(37,99,235,0.12)" />
+              <text x={0} y={48} textAnchor="middle" fontSize="8" fill="#2563eb" fontWeight="700" style={{ userSelect: 'none' }}>
+                Front: {frontShort}
+              </text>
+            </g>
+          );
+        })()}
+
 
         {/* Scale bar */}
         <g transform="translate(8, 12)">
