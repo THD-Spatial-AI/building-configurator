@@ -1,12 +1,18 @@
 // Right column of the Overview view: load profile chart and element composition accordion.
 
 import React from 'react';
-import { cn } from '@/lib/utils';
 import { ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { LoadProfileViewer, type LoadDataPoint } from './LoadProfileViewer';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import { ElementCompositionSection } from './ElementCompositionSection';
+import { TechnologiesSection } from './TechnologiesSection';
+
+interface PvSummary {
+  installed: boolean;
+  surfaceCount: number;
+  totalCapacityKw: number;
+}
 
 export interface EnergyEnvelopeColumnProps {
   uploadError: string | null;
@@ -24,9 +30,13 @@ export interface EnergyEnvelopeColumnProps {
   initialTimeseries: LoadDataPoint[] | null;
   onSwitchToConfigure: (elementId: string) => void;
   mode: 'basic' | 'expert';
+  installedTechIds?: string[];
+  pvSummary: PvSummary;
+  onToggleTech?: (id: string, installed: boolean) => void;
+  onOpenTech?: (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => void;
 }
 
-/** Right panel of the overview: energy chart primary, element composition secondary. */
+/** Right panel of the overview: energy chart primary, element composition secondary, technologies tertiary. */
 export function EnergyEnvelopeColumn({
   uploadError,
   onClearError,
@@ -41,6 +51,10 @@ export function EnergyEnvelopeColumn({
   initialTimeseries,
   onSwitchToConfigure,
   mode,
+  installedTechIds,
+  pvSummary,
+  onToggleTech,
+  onOpenTech,
 }: EnergyEnvelopeColumnProps) {
   return (
     <ScrollHintContainer className="flex flex-col bg-slate-100
@@ -61,19 +75,17 @@ export function EnergyEnvelopeColumn({
           </div>
         )}
 
-        {/* ── Load profile — grows to fill available space ── */}
-        <div className="min-h-[240px] flex-1 bg-white px-2 pb-3 pt-2">
-          <div className="h-full">
-            <LoadProfileViewer
-              buildingId={buildingId}
-              initialTimeseries={initialTimeseries ?? undefined}
-              mode={mode}
-            />
-          </div>
+        {/* ── Load profile — fixed height; ResponsiveContainer requires an explicit parent height ── */}
+        <div className="bg-white px-2 pb-3 pt-2" style={{ height: 340 }}>
+          <LoadProfileViewer
+            buildingId={buildingId}
+            initialTimeseries={initialTimeseries ?? undefined}
+            mode={mode}
+          />
         </div>
 
         {/* ── Element composition — fixed size, scrolls when a group expands ── */}
-        <div className="shrink-0 border-t border-border/60 px-4 pb-6 pt-4">
+        <div className="shrink-0 border-t border-border/60 px-4 pb-4 pt-4">
           <div className="mb-3 flex items-baseline justify-between">
             <p className="text-sm font-semibold text-foreground">Envelope Composition</p>
             <p className="text-[11px] text-slate-400">Click a group to expand</p>
@@ -86,6 +98,20 @@ export function EnergyEnvelopeColumn({
             onEnableCustomMode={onEnableCustomMode}
             roofConfig={roofConfig}
             onSwitchToConfigure={onSwitchToConfigure}
+          />
+        </div>
+
+        {/* ── Technologies ── */}
+        <div className="shrink-0 border-t border-border/60 px-4 pb-6 pt-4">
+          <div className="mb-3 flex items-baseline justify-between">
+            <p className="text-sm font-semibold text-foreground">Technologies</p>
+            <p className="text-[11px] text-slate-400">Configure in workspace</p>
+          </div>
+          <TechnologiesSection
+            installedTechIds={installedTechIds}
+            pvSummary={pvSummary}
+            onToggle={onToggleTech}
+            onOpen={onOpenTech}
           />
         </div>
       </section>

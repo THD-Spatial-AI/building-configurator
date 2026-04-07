@@ -315,12 +315,20 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       return { ...prev, [id]: { ...current, label } };
     });
 
-  const enableCustomMode = (id: string) =>
+  const enableCustomMode = (id: string) => {
     setElements((prev) => {
       const current = prev[id];
       if (!current || isElementEditable(current)) return prev;
       return { ...prev, [id]: { ...current, customMode: true } };
     });
+    // Also switch PV geometry to manual so tilt/azimuth inputs appear in the PV tab.
+    setSurfacePvConfigs((prev) => {
+      const el = elements[id];
+      if (!el) return prev;
+      const existing = prev[id] ?? createSurfacePvConfig(el);
+      return { ...prev, [id]: { ...existing, geometryMode: 'manual' } };
+    });
+  };
 
   const deleteSurface = (id: string) => {
     setElements((prev) => {
@@ -701,6 +709,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                 initialTimeseries={thematicData?.timeseries ?? buildingData?.timeseries ?? null}
                 onSwitchToConfigure={handleSelectElement}
                 mode={mode}
+                installedTechIds={installedTechIds}
+                pvSummary={pvSummary}
+                onToggleTech={handleTechToggle}
+                onOpenTech={handleTechnologyOpen}
               />
             </div>
           ) : (

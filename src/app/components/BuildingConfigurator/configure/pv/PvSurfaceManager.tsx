@@ -81,7 +81,7 @@ const MAX_RECOMMENDATIONS = 4;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function RecommendationCard({
+function RecommendationRow({
   element,
   score,
   onEnable,
@@ -92,33 +92,25 @@ function RecommendationCard({
 }) {
   const suit = suitabilityLabel(score);
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-yellow-50">
-          <Sun className="size-4 text-yellow-400" />
+    <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <p className="text-[11px] font-semibold text-slate-700">{element.label}</p>
+          <span className={`rounded border px-1 py-px text-[9px] font-semibold ${suit.bg} ${suit.color}`}>
+            {suit.text}
+          </span>
         </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <p className="text-sm font-semibold text-slate-800">{element.label}</p>
-            <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${suit.bg} ${suit.color}`}>
-              {suit.text}
-            </span>
-          </div>
-          <p className="mt-0.5 text-[10px] text-slate-400">
-            {element.area.toFixed(1)} m² · {element.tilt}° tilt · {compassDir(element.azimuth)} ({element.azimuth}°)
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onEnable}
-          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-1.5 text-[11px] font-semibold text-yellow-700 transition-colors hover:bg-yellow-100"
-        >
-          Enable PV
-          <ChevronRight className="size-3" />
-        </button>
+        <p className="text-[10px] text-slate-400">
+          {element.area.toFixed(1)} m² · {element.tilt}° · {compassDir(element.azimuth)}
+        </p>
       </div>
+      <button
+        type="button"
+        onClick={onEnable}
+        className="shrink-0 rounded border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-600 transition-colors hover:border-slate-400 hover:bg-slate-100"
+      >
+        + Enable PV
+      </button>
     </div>
   );
 }
@@ -249,22 +241,19 @@ export function PvSurfaceManager({
 
       {/* Recommendations section */}
       {recommendations.length > 0 && (
-        <div>
-          <div className="mb-2.5 flex items-center gap-2">
-            <Sparkles className="size-3.5 text-yellow-500" />
-            <p className="text-[11px] font-semibold text-slate-600">
-              {surfaces.length === 0 ? 'Recommended surfaces for PV' : 'More surfaces you could add'}
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 p-3">
+          <div className="mb-2 flex items-center gap-1.5">
+            <Sparkles className="size-3 text-slate-400" />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+              Suggestions — not yet installed
             </p>
           </div>
-          {surfaces.length === 0 && (
-            <p className="mb-3 text-[11px] leading-snug text-slate-400">
-              Scored by orientation, tilt, and area. South-facing roofs at 30–40° work best.
-              Click <strong>Enable PV</strong> to configure a surface.
-            </p>
-          )}
-          <div className="flex flex-col gap-2">
+          <p className="mb-2.5 text-[10px] leading-snug text-slate-400">
+            Ranked by orientation, tilt, and area. Click <strong>+ Enable PV</strong> to start configuring a surface.
+          </p>
+          <div className="flex flex-col gap-1.5">
             {recommendations.map(({ element, score }) => (
-              <RecommendationCard
+              <RecommendationRow
                 key={element.id}
                 element={element}
                 score={score}

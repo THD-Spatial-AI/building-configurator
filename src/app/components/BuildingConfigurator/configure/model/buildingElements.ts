@@ -17,6 +17,11 @@ export interface BuildingElement {
   bTransmission?: number;
   measureType?: string;
   measureTypeOptions?: string[];
+  /** Snapshot of the imported/default values — stamped once, never changed. Used to show reset buttons. */
+  defaultTilt?: number;
+  defaultAzimuth?: number;
+  defaultArea?: number;
+  defaultUValue?: number;
 }
 
 /** A group selection: one surface type on one face of the building. */
@@ -60,6 +65,11 @@ export function normalizeElementRecord(
         ...el,
         source: el.source ?? fallbackSource,
         customMode: el.customMode ?? (el.source === 'custom'),
+        // Stamp defaults once — preserve any already-set snapshot (e.g. from a loaded file).
+        defaultTilt:    el.defaultTilt    ?? el.tilt,
+        defaultAzimuth: el.defaultAzimuth ?? el.azimuth,
+        defaultArea:    el.defaultArea    ?? el.area,
+        defaultUValue:  el.defaultUValue  ?? el.uValue,
       },
     ]),
   );

@@ -3,7 +3,7 @@
 // The custom-mode toggle lives in the header — no separate banner row.
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Wand2, Sun, Pencil, Check, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Wand2, Sun, Pencil, Check, X, RotateCcw } from 'lucide-react';
 import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { createSurfacePvConfig, type PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -457,8 +457,13 @@ function PvTab({
   onUpdate: (patch: Partial<PvConfig>) => void;
   mode?: 'basic' | 'expert';
 }) {
-  const effectiveTilt    = pvConfig.geometryMode === 'surface' ? el.tilt    : pvConfig.tilt;
-  const effectiveAzimuth = pvConfig.geometryMode === 'surface' ? el.azimuth : pvConfig.azimuth;
+  const isCustomGeom     = pvConfig.geometryMode === 'manual';
+  const effectiveTilt    = isCustomGeom ? pvConfig.tilt    : el.tilt;
+  const effectiveAzimuth = isCustomGeom ? pvConfig.azimuth : el.azimuth;
+
+  /** Switch to manual on first edit, seeding the other value from the surface so there's no jump. */
+  const setPvTilt    = (v: number) => onUpdate({ tilt: v, azimuth: isCustomGeom ? pvConfig.azimuth : el.azimuth, geometryMode: 'manual' });
+  const setPvAzimuth = (v: number) => onUpdate({ azimuth: v, tilt: isCustomGeom ? pvConfig.tilt : el.tilt, geometryMode: 'manual' });
 
   return (
     <div className="flex flex-col gap-3">
@@ -480,58 +485,35 @@ function PvTab({
           {/* Geometry mode */}
           <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
             <div className="mb-3">
-              <FieldLabel tip="'From surface' inherits tilt and azimuth from the surface geometry. 'Custom' lets you override them for the PV panels specifically.">
+              <FieldLabel tip="Panel tilt and azimuth are pre-filled from the surface geometry. Edit them to set custom values for the PV panels specifically.">
                 Panel geometry
               </FieldLabel>
-              <div className="mt-1.5">
-                <SegmentedControl
-                  options={[
-                    { value: 'surface', label: 'From surface' },
-                    { value: 'manual',  label: 'Custom'        },
-                  ]}
-                  value={pvConfig.geometryMode}
-                  onChange={(v) => onUpdate({ geometryMode: v as 'surface' | 'manual' })}
-                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <TiltControl value={effectiveTilt} onChange={setPvTilt} />
+              <div className="border-l border-slate-200 pl-4">
+                <AzimuthControl value={effectiveAzimuth} onChange={setPvAzimuth} />
               </div>
             </div>
 
-            {pvConfig.geometryMode === 'surface' ? (
-              /* Read-only surface geometry display */
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Tilt</p>
-                  <p className="mt-0.5 text-sm font-bold text-slate-700">{el.tilt}°</p>
-                </div>
-                <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Azimuth</p>
-                  <p className="mt-0.5 text-sm font-bold text-slate-700">
-                    {el.azimuth}°
-                    <span className="ml-1 text-[10px] font-normal text-slate-400">{compassDir(el.azimuth)}</span>
-                  </p>
-                </div>
-              </div>
-            ) : (
-              /* Editable custom geometry */
-              <div className="grid grid-cols-2 gap-4">
-                <TiltControl
-                  value={pvConfig.tilt}
-                  onChange={(v) => onUpdate({ tilt: v })}
-                />
-                <div className="border-l border-slate-200 pl-4">
-                  <AzimuthControl
-                    value={pvConfig.azimuth}
-                    onChange={(v) => onUpdate({ azimuth: v })}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Effective summary */}
-            <div className="mt-3 flex items-center gap-1.5 border-t border-slate-200 pt-2">
-              <span className="text-[10px] text-slate-400">Effective:</span>
-              <span className="text-[10px] font-semibold text-slate-600">
-                {effectiveTilt}° tilt · {effectiveAzimuth}° ({compassDir(effectiveAzimuth)})
+            {/* Footer: infer-from-surface reset (only when user has set custom values) */}
+            <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2">
+              <span className="text-[10px] text-slate-400">
+                {isCustomGeom
+                  ? `Custom · was ${el.tilt}° / ${el.azimuth}° (${compassDir(el.azimuth)})`
+                  : `Inferred from surface · ${effectiveTilt}° / ${effectiveAzimuth}° (${compassDir(effectiveAzimuth)})`}
               </span>
+              {isCustomGeom && (
+                <button
+                  type="button"
+                  onClick={() => onUpdate({ geometryMode: 'surface' })}
+                  className="flex items-center gap-1 text-[10px] font-medium text-slate-400 transition-colors hover:text-slate-600"
+                >
+                  <RotateCcw className="size-3" />
+                  Infer from surface
+                </button>
+              )}
             </div>
           </div>
 
@@ -856,6 +838,25 @@ export function SurfaceGroupEditor({
               <span className="mb-2 block text-[12px] font-semibold text-slate-700">Area</span>
               <AreaSpinner value={el.area} disabled={!editable} onChange={(v) => save({ area: v })} />
             </div>
+
+            {/* Reset to imported values — only when custom mode is on and something has drifted */}
+            {editable && el.defaultTilt !== undefined && (
+              el.tilt !== el.defaultTilt || el.azimuth !== el.defaultAzimuth || el.area !== el.defaultArea
+            ) && (
+              <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2">
+                <span className="text-[10px] text-slate-400">
+                  Imported: {el.defaultTilt}° / {el.defaultAzimuth}° · {el.defaultArea?.toFixed(1)} m²
+                </span>
+                <button
+                  type="button"
+                  onClick={() => save({ tilt: el.defaultTilt ?? el.tilt, azimuth: el.defaultAzimuth ?? el.azimuth, area: el.defaultArea ?? el.area })}
+                  className="flex items-center gap-1 text-[10px] font-medium text-slate-400 transition-colors hover:text-slate-600"
+                >
+                  <RotateCcw className="size-3" />
+                  Reset to imported
+                </button>
+              </div>
+            )}
           </div>
 
           {warnings.length > 0 && (
