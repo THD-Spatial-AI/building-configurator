@@ -132,11 +132,14 @@ export function SurfaceGroupGrid({
               )} />
             </button>
 
-            {roofGalleryOpen && (
+            <div className={cn(
+              'overflow-hidden transition-[max-height] duration-300 ease-in-out',
+              roofGalleryOpen ? 'max-h-[400px]' : 'max-h-0',
+            )}>
               <div className="border-t border-slate-100 px-4 pb-4 pt-3">
                 <RoofTypeCards elements={elements} onApplyRoofType={onApplyRoofType} />
               </div>
-            )}
+            </div>
           </div>
         )}
 

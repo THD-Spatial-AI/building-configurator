@@ -3,6 +3,7 @@
 // The custom-mode toggle lives in the header — no separate banner row.
 
 import React, { useState, useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
 import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Sun, Pencil, Check, X, RotateCcw, Trash2 } from 'lucide-react';
 import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { createSurfacePvConfig, type PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
@@ -444,8 +445,11 @@ function PvTab({
         />
       </div>
 
-      {pvConfig.installed && (
-        <>
+      <div className={cn(
+        'overflow-hidden transition-[max-height] duration-300 ease-in-out',
+        pvConfig.installed ? 'max-h-[1200px]' : 'max-h-0',
+      )}>
+        <div className="flex flex-col gap-3 pt-0.5">
           {/* Geometry mode */}
           <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
             <div className="mb-3">
@@ -587,8 +591,8 @@ function PvTab({
               </div>
             </div>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
