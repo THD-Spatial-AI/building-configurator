@@ -1,6 +1,6 @@
 # Building Configurator
 
-A React component for modelling building properties within the [EnerPlanET](https://github.com/THD-Spatial-AI) platform. It provides a reusable configuration interface for energy simulation workflows, including annual heat demand estimation (HDCP) and thermal load profiling (BUEM), with the intent to support additional simulation services over time.
+A React component for modelling building properties within the [EnerPlanET](https://enerplanet.th-deg.de/) platform. It provides a reusable configuration interface for energy simulation workflows, including annual heat demand estimation (HDCP) and thermal load profiling (BUEM), with the intent to support additional simulation services over time.
 
 ## Features
 
