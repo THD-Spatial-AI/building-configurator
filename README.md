@@ -1,7 +1,7 @@
 # Building Configurator
 
 [![MkDocs](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/docs.yml/badge.svg)](https://THD-Spatial-AI.github.io/building-configurator/)
-
+&nbsp;
 [![CodeQL](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/github-code-scanning/codeql)
 
 A React component for modelling building properties within the [EnerPlanET](https://enerplanet.th-deg.de/) platform. It provides a reusable configuration interface for energy simulation workflows, including annual heat demand estimation (HDCP) and thermal load profiling (BUEM), with the intent to support additional simulation services over time.
@@ -23,7 +23,7 @@ npm run dev
 
 ## Try it out
 
-Deployed on Vercel: [building-configurator-gui.vercel.app](https://building-configurator-phi.vercel.app/)
+Deployed on Vercel: [building-configurator.vercel.app](https://building-configurator-phi.vercel.app/)
 
 ## Contributing
 
