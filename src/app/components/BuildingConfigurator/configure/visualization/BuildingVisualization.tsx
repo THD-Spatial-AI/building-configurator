@@ -730,14 +730,6 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
   const isFloorHovered  = groupsMatch(hoveredGroup,  { type: 'floor', face: 'floor' });
   return (
     <div className="relative h-full min-h-0 w-full rounded-lg overflow-hidden border border-border bg-slate-100/70">
-      {/* Instruction chip — top-centre */}
-      <div className="pointer-events-none absolute top-3 left-1/2 z-10 -translate-x-1/2">
-        <div className="flex items-center gap-1.5 rounded-full border border-slate-300/70 bg-white/70 px-3 py-1 shadow-sm backdrop-blur-sm">
-          <span className="whitespace-nowrap text-[10px] font-medium text-slate-500">
-            Click a surface to select · arrows to rotate view
-          </span>
-        </div>
-      </div>
       {/* Rotate left — floats on the left edge, vertically centred */}
       <button
         type="button"
@@ -763,7 +755,7 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
         <ChevronRight className="size-4" />
       </button>
 
-      <svg viewBox="-30 -20 520 380" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', inset: 0, position: 'absolute' }}>
+      <svg viewBox="-30 -80 520 480" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', inset: 0, position: 'absolute' }}>
         <defs>
           <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#d8e8f4" />
@@ -778,7 +770,7 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
         </defs>
 
         {/* Sky background */}
-        <rect x={-30} y={-20} width={520} height={380} fill="url(#skyGrad)" />
+        <rect x={-30} y={-80} width={520} height={480} fill="url(#skyGrad)" />
 
         {/* Ground shadow */}
         <ellipse cx={222} cy={310} rx={200} ry={13} fill="rgba(0,0,0,0.08)" />
@@ -855,10 +847,9 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
           const text = badgeText(selectedGroup);
           return (
             <g>
-              <rect x={8} y={330} width={220} height={22} rx={5} fill="rgba(18,32,52,0.78)" />
-              <text x={118} y={345} textAnchor="middle" fontSize="10" fill="white" style={{ userSelect: 'none' }}>
-                ✎  {text}
-              </text>
+              <rect x={8} y={352} width={280} height={30} rx={6} fill="rgba(18,32,52,0.85)" />
+              <text x={18} y={364} fontSize="9" fill="rgba(255,255,255,0.55)" fontWeight="600" style={{ userSelect: 'none' }}>CURRENTLY EDITING</text>
+              <text x={18} y={377} fontSize="12" fontWeight="700" fill="white" style={{ userSelect: 'none' }}>{text}</text>
             </g>
           );
         })()}
@@ -868,10 +859,9 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
           const text = badgeText(hoveredGroup);
           return (
             <g>
-              <rect x={8} y={330} width={250} height={22} rx={5} fill="rgba(18,32,52,0.72)" />
-              <text x={133} y={345} textAnchor="middle" fontSize="10" fill="white" style={{ userSelect: 'none' }}>
-                {text} · click to configure
-              </text>
+              <rect x={8} y={352} width={280} height={30} rx={6} fill="rgba(18,32,52,0.75)" />
+              <text x={18} y={364} fontSize="9" fill="rgba(255,255,255,0.55)" fontWeight="600" style={{ userSelect: 'none' }}>CLICK TO EDIT</text>
+              <text x={18} y={377} fontSize="12" fontWeight="700" fill="white" style={{ userSelect: 'none' }}>{text}</text>
             </g>
           );
         })()}
@@ -880,36 +870,33 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
         {(() => {
           const frontAzimuth = FACE_ANGLES[view.frontWallId] ?? 0;
           const frontRad = (frontAzimuth * Math.PI) / 180;
-          // Tip of the front-face arrow just outside the compass circle
-          const arrowR = 28;
+          const arrowR = 40;
           const arrowTipX  =  Math.sin(frontRad) * arrowR;
           const arrowTipY  = -Math.cos(frontRad) * arrowR;
-          // Two base points of the small arrowhead (perpendicular, inside the circle)
-          const baseR = 20;
+          const baseR = 30;
           const bx = Math.sin(frontRad) * baseR;
           const by = -Math.cos(frontRad) * baseR;
-          const perpX = -Math.cos(frontRad) * 4;
-          const perpY = -Math.sin(frontRad) * 4;
-          const frontShort = compassLabel(frontAzimuth).split(' ').map(w => w[0]).join(''); // "S", "SE", etc.
+          const perpX = -Math.cos(frontRad) * 5.5;
+          const perpY = -Math.sin(frontRad) * 5.5;
+          const frontShort = compassLabel(frontAzimuth).split(' ').map(w => w[0]).join('');
           return (
-            <g transform="translate(422, 44)">
-              {/* Front-face arrow outside the circle */}
+            <g transform="translate(430, -20)">
               <polygon
                 points={`${arrowTipX},${arrowTipY} ${bx + perpX},${by + perpY} ${bx - perpX},${by - perpY}`}
                 fill="#2563eb"
                 opacity={0.85}
               />
-              <circle cx={0} cy={0} r={22} fill="rgba(255,255,255,0.9)" stroke="#c0ccd8" strokeWidth={1.2} />
-              <polygon points="0,-18 -3.5,-7 3.5,-7" fill="#c53030" />
-              <polygon points="0,18 -3.5,7 3.5,7" fill="#8090a4" />
-              <line x1={-16} y1={0} x2={16} y2={0} stroke="#8090a4" strokeWidth={1.5} strokeLinecap="round" />
-              <text x={0}   y={-24} textAnchor="middle" fontSize="9" fill="#c53030" fontWeight="bold" style={{ userSelect: 'none' }}>N</text>
-              <text x={0}   y={33}  textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>S</text>
-              <text x={27}  y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>E</text>
-              <text x={-27} y={4}   textAnchor="middle" fontSize="9" fill="#6b7a88" style={{ userSelect: 'none' }}>W</text>
+              <circle cx={0} cy={0} r={32} fill="rgba(255,255,255,0.92)" stroke="#c0ccd8" strokeWidth={1.5} />
+              <polygon points="0,-26 -5,-10 5,-10" fill="#c53030" />
+              <polygon points="0,26 -5,10 5,10" fill="#8090a4" />
+              <line x1={-23} y1={0} x2={23} y2={0} stroke="#8090a4" strokeWidth={1.5} strokeLinecap="round" />
+              <text x={0}   y={-35} textAnchor="middle" fontSize="12" fill="#c53030" fontWeight="bold" style={{ userSelect: 'none' }}>N</text>
+              <text x={0}   y={47}  textAnchor="middle" fontSize="12" fill="#6b7a88" style={{ userSelect: 'none' }}>S</text>
+              <text x={39}  y={5}   textAnchor="middle" fontSize="12" fill="#6b7a88" style={{ userSelect: 'none' }}>E</text>
+              <text x={-39} y={5}   textAnchor="middle" fontSize="12" fill="#6b7a88" style={{ userSelect: 'none' }}>W</text>
               {/* "Front: XX" label below compass */}
-              <rect x={-22} y={38} width={44} height={13} rx={3} fill="rgba(37,99,235,0.12)" />
-              <text x={0} y={48} textAnchor="middle" fontSize="8" fill="#2563eb" fontWeight="700" style={{ userSelect: 'none' }}>
+              <rect x={-30} y={52} width={60} height={17} rx={4} fill="rgba(37,99,235,0.12)" />
+              <text x={0} y={64} textAnchor="middle" fontSize="11" fill="#2563eb" fontWeight="700" style={{ userSelect: 'none' }}>
                 Front: {frontShort}
               </text>
             </g>
@@ -918,11 +905,12 @@ export function BuildingVisualization({ elements, selectedGroup, onSelectGroup, 
 
 
         {/* Scale bar */}
-        <g transform="translate(8, 12)">
-          <line x1={0}  y1={8} x2={60} y2={8}  stroke="#8090a4" strokeWidth={1.5} />
-          <line x1={0}  y1={4} x2={0}  y2={12} stroke="#8090a4" strokeWidth={1.5} />
-          <line x1={60} y1={4} x2={60} y2={12} stroke="#8090a4" strokeWidth={1.5} />
-          <text x={30} y={6} textAnchor="middle" fontSize="8" fill="#6b7a88" style={{ userSelect: 'none' }}>12 m</text>
+        <g transform="translate(8, -62)">
+          <line x1={0}   y1={10} x2={90} y2={10}  stroke="#8090a4" strokeWidth={2} />
+          <line x1={0}   y1={4}  x2={0}  y2={16}  stroke="#8090a4" strokeWidth={2} />
+          <line x1={90}  y1={4}  x2={90} y2={16}  stroke="#8090a4" strokeWidth={2} />
+          <text x={45} y={8}  textAnchor="middle" fontSize="11" fontWeight="600" fill="#4b5a6a" style={{ userSelect: 'none' }}>12 m</text>
+          <text x={45} y={26} textAnchor="middle" fontSize="10" fill="#8090a4" style={{ userSelect: 'none' }}>building width</text>
         </g>
       </svg>
     </div>

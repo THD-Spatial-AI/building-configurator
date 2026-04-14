@@ -77,7 +77,7 @@ export function EnergyEnvelopeColumn({
         )}
 
         {/* ── Load profile — fixed height; ResponsiveContainer requires an explicit parent height ── */}
-        <div className="bg-white px-2 pb-3 pt-2" style={{ height: 340 }}>
+        <div className="bg-white px-2 pb-3 pt-2" style={{ height: mode === 'expert' ? 440 : 340 }}>
           <LoadProfileViewer
             buildingId={buildingId}
             initialTimeseries={initialTimeseries ?? undefined}
@@ -88,7 +88,7 @@ export function EnergyEnvelopeColumn({
         {/* ── Element composition — fixed size, scrolls when a group expands ── */}
         <div className="shrink-0 border-t border-border/60 px-4 pb-4 pt-4">
           <div className="mb-3 flex items-baseline justify-between">
-            <p className="text-sm font-semibold text-foreground">Envelope Composition</p>
+            <p className="text-sm font-semibold text-foreground">Building Surfaces</p>
             <p className="text-[11px] text-slate-400">Click a group to expand</p>
           </div>
           <ElementCompositionSection
