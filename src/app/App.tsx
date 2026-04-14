@@ -1,7 +1,7 @@
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { Box } from '@mui/material';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { FeedbackWidget } from './components/FeedbackWidget';
 import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from './lib/buemAdapter';
@@ -137,6 +137,16 @@ function Kbd({ children }: { children: React.ReactNode }) {
 }
 
 function ZoomTip() {
+  // Track browser zoom so we can apply an inverse scale, keeping the tip a fixed visual size.
+  const baseRatio = useRef(window.devicePixelRatio);
+  const [inverseScale, setInverseScale] = useState(1);
+
+  useEffect(() => {
+    const update = () => setInverseScale(baseRatio.current / window.devicePixelRatio);
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   return (
     <Box sx={{
       position:      'fixed',
@@ -146,15 +156,17 @@ function ZoomTip() {
       pointerEvents: 'none',
     }}>
       <Box sx={{
-        px:           2.5,
-        py:           0.75,
-        bgcolor:      'rgba(0,0,0,0.45)',
-        borderRadius: '8px',
-        color:        'rgba(255,255,255,0.5)',
-        fontSize:     '11px',
-        lineHeight:   '1.6',
-        userSelect:   'none',
-        textAlign:    'left',
+        px:              2.5,
+        py:              0.75,
+        bgcolor:         'rgba(0,0,0,0.45)',
+        borderRadius:    '8px',
+        color:           'rgba(255,255,255,0.5)',
+        fontSize:        '11px',
+        lineHeight:      '1.6',
+        userSelect:      'none',
+        textAlign:       'left',
+        transform:       `scale(${inverseScale})`,
+        transformOrigin: 'bottom left',
       }}>
         <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 500 }}>
           Tip: if the page feels too small or too large, adjust the zoom level in your browser.
