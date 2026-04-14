@@ -23,7 +23,7 @@ npm run dev
 
 ## Try it out
 
-Deployed on Vercel: [building-configurator.vercel.app](https://building-configurator-phi.vercel.app/)
+Deployed on Vercel: [building-configurator.vercel.app](https://building-configurator-enerplanet.vercel.app/)
 
 ## Contributing
 
