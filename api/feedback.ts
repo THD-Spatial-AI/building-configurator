@@ -1,5 +1,5 @@
-// Vercel serverless function — receives feedback from the in-app widget and
-// creates a GitHub issue so every submission is immediately actionable.
+// Vercel serverless function — receives feedback from the in-app widget,
+// optionally uploads a screenshot to the repo, and creates a GitHub issue.
 //
 // Required environment variables (set in Vercel project settings):
 //   GITHUB_TOKEN  — Personal Access Token with `repo` scope
@@ -8,40 +8,77 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+interface ScreenshotPayload {
+  name:     string;   // original filename
+  data:     string;   // base64-encoded image content
+  mimeType: string;   // image/png | image/jpeg | image/webp
+}
+
 interface FeedbackPayload {
-  /** What the user was trying to accomplish. */
-  goal: string;
-  /** What actually happened (or what they expected instead). */
-  result: string;
-  /** 1–5 difficulty rating (1 = very easy, 5 = very hard / blocked). */
-  rating: number;
-  /** Current workspace view at time of submission. */
-  view: string;
-  /** Free-form context string (e.g. "Configure › Walls › Wall 2"). */
-  context: string;
-  /** Full page URL. */
-  url: string;
-  /** ISO timestamp from the client. */
-  timestamp: string;
+  goal:         string;
+  result:       string;
+  rating:       number;
+  view:         string;
+  context:      string;
+  url:          string;
+  timestamp:    string;
+  screenshots:  ScreenshotPayload[];
 }
 
-/** Maps a 1–5 difficulty rating to a human-readable label and GitHub label. */
 function ratingMeta(r: number): { label: string; ghLabel: string } {
-  if (r <= 1) return { label: '1 – Very easy',        ghLabel: 'feedback: easy'    };
-  if (r <= 2) return { label: '2 – Easy',              ghLabel: 'feedback: easy'    };
-  if (r <= 3) return { label: '3 – Moderate',          ghLabel: 'feedback: moderate'};
-  if (r <= 4) return { label: '4 – Difficult',         ghLabel: 'feedback: hard'    };
-               return { label: '5 – Blocked / broken', ghLabel: 'feedback: blocked' };
+  if (r <= 2) return { label: `${r} – Easy`,        ghLabel: 'feedback: easy'    };
+  if (r === 3) return { label: '3 – Moderate',       ghLabel: 'feedback: moderate'};
+  if (r === 4) return { label: '4 – Difficult',      ghLabel: 'feedback: hard'    };
+               return { label: '5 – Blocked/broken', ghLabel: 'feedback: blocked' };
 }
 
-/** Formats the payload into a GitHub issue body. */
-function buildIssueBody(p: FeedbackPayload): string {
+/** Uploads a base64-encoded image to feedback-screenshots/ in the repo.
+ *  Returns the raw CDN URL (cdn.jsdelivr.net mirrors raw.githubusercontent.com
+ *  and serves images correctly in GitHub issue markdown). */
+async function uploadScreenshot(
+  owner: string,
+  repo:  string,
+  token: string,
+  shot:  ScreenshotPayload,
+): Promise<string> {
+  // Sanitise filename and make it unique
+  const safeName = shot.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path     = `feedback-screenshots/${Date.now()}-${safeName}`;
+
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization:        `Bearer ${token}`,
+        Accept:               'application/vnd.github+json',
+        'Content-Type':       'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: JSON.stringify({
+        message: `chore: add feedback screenshot ${path}`,
+        content: shot.data,   // GitHub Contents API expects raw base64
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Screenshot upload failed: ${err}`);
+  }
+
+  const json = await res.json() as { content: { html_url: string; download_url: string } };
+  // Use the raw download URL — renders inline in GitHub markdown
+  return json.content.download_url;
+}
+
+function buildIssueBody(p: FeedbackPayload, screenshotUrls: string[]): string {
   const { label } = ratingMeta(p.rating);
-  return [
+  const lines = [
     '## User Feedback',
     '',
-    `| Field | Value |`,
-    `|---|---|`,
+    '| Field | Value |',
+    '|---|---|',
     `| **Screen** | ${p.view} |`,
     `| **Context** | ${p.context || '—'} |`,
     `| **Difficulty** | ${label} |`,
@@ -55,56 +92,72 @@ function buildIssueBody(p: FeedbackPayload): string {
     '',
     '### What happened / what did you expect?',
     p.result,
+  ];
+
+  if (screenshotUrls.length > 0) {
+    lines.push('', `### Screenshots (${screenshotUrls.length})`);
+    screenshotUrls.forEach((url, i) => {
+      lines.push('', `**Screenshot ${i + 1}**`, `![Screenshot ${i + 1}](${url})`);
+    });
+  }
+
+  lines.push(
     '',
     '---',
-    '*Auto-generated from the in-app feedback widget. Review and add implementation detail before assigning.*',
-  ].join('\n');
+    '*Auto-generated from the in-app feedback widget.*',
+    '*A GitHub Copilot agent can use the screenshot and context above to refine this into a concrete implementation issue.*',
+  );
+
+  return lines.join('\n');
 }
 
-/** Derives a concise issue title from the user's goal (max 72 chars). */
 function buildIssueTitle(p: FeedbackPayload): string {
-  const prefix = `[Feedback] `;
-  const max    = 72 - prefix.length;
-  const goal   = p.goal.replace(/\n/g, ' ').trim();
-  const trimmed = goal.length > max ? goal.slice(0, max - 1) + '…' : goal;
-  return `${prefix}${trimmed}`;
+  const prefix  = '[Feedback] ';
+  const max     = 72 - prefix.length;
+  const goal    = p.goal.replace(/\n/g, ' ').trim();
+  return `${prefix}${goal.length > max ? goal.slice(0, max - 1) + '…' : goal}`;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Only accept POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Validate env
   const { GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO } = process.env;
   if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
     console.error('Missing GitHub env vars');
     return res.status(500).json({ error: 'Server misconfiguration' });
   }
 
-  // Validate payload
   const payload = req.body as FeedbackPayload;
   if (!payload?.goal?.trim() || !payload?.result?.trim()) {
     return res.status(400).json({ error: 'goal and result are required' });
   }
 
+  // Upload all screenshots (non-fatal if any fail)
+  const screenshotUrls: string[] = [];
+  for (const shot of payload.screenshots ?? []) {
+    if (!shot?.data) continue;
+    try {
+      screenshotUrls.push(await uploadScreenshot(GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN, shot));
+    } catch (e) {
+      console.error('Screenshot upload error:', e);
+    }
+  }
+
   const { ghLabel } = ratingMeta(payload.rating ?? 3);
 
-  // Create GitHub issue
   const ghRes = await fetch(
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`,
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
+        Authorization:          `Bearer ${GITHUB_TOKEN}`,
+        Accept:                 'application/vnd.github+json',
+        'Content-Type':         'application/json',
         'X-GitHub-Api-Version': '2022-11-28',
       },
       body: JSON.stringify({
         title:  buildIssueTitle(payload),
-        body:   buildIssueBody(payload),
+        body:   buildIssueBody(payload, screenshotUrls),
         labels: ['user-feedback', 'ux', ghLabel],
       }),
     },
@@ -112,7 +165,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!ghRes.ok) {
     const err = await ghRes.text();
-    console.error('GitHub API error:', err);
+    console.error('GitHub Issues API error:', err);
     return res.status(502).json({ error: 'Failed to create issue' });
   }
 
