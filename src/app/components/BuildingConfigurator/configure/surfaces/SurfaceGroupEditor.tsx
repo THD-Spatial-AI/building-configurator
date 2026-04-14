@@ -431,167 +431,145 @@ function PvTab({
   const setPvAzimuth = (v: number) => onUpdate({ azimuth: v, tilt: isCustomGeom ? pvConfig.tilt : el.tilt, geometryMode: 'manual' });
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={cn(
+      'overflow-hidden transition-[max-height] duration-300 ease-in-out',
+      pvConfig.installed ? 'max-h-[1200px]' : 'max-h-0',
+    )}>
+      <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
 
-      {/* Toggle */}
-      <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Sun className="size-4 text-yellow-500" />
-          <span className="text-[12px] font-semibold text-slate-700">PV on this surface</span>
+        {/* ── Panel geometry ── */}
+        <FieldLabel tip="Panel tilt and azimuth are pre-filled from the surface geometry. Edit them to set custom values for the PV panels specifically.">
+          Panel geometry
+        </FieldLabel>
+        <div className="mt-3 grid grid-cols-2 gap-4">
+          <TiltControl value={effectiveTilt} onChange={setPvTilt} />
+          <div className="border-l border-slate-200 pl-4">
+            <AzimuthControl value={effectiveAzimuth} onChange={setPvAzimuth} />
+          </div>
         </div>
-        <ToggleSwitch
-          checked={pvConfig.installed}
-          onChange={(v) => onUpdate({ installed: v })}
-        />
-      </div>
-
-      <div className={cn(
-        'overflow-hidden transition-[max-height] duration-300 ease-in-out',
-        pvConfig.installed ? 'max-h-[1200px]' : 'max-h-0',
-      )}>
-        <div className="flex flex-col gap-3 pt-0.5">
-          {/* Geometry mode */}
-          <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
-            <div className="mb-3">
-              <FieldLabel tip="Panel tilt and azimuth are pre-filled from the surface geometry. Edit them to set custom values for the PV panels specifically.">
-                Panel geometry
-              </FieldLabel>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <TiltControl value={effectiveTilt} onChange={setPvTilt} />
-              <div className="border-l border-slate-200 pl-4">
-                <AzimuthControl value={effectiveAzimuth} onChange={setPvAzimuth} />
-              </div>
-            </div>
-
-            {/* Footer: infer-from-surface reset (only when user has set custom values) */}
-            <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2">
-              <span className="text-[10px] text-slate-400">
-                {isCustomGeom
-                  ? `Custom · was ${el.tilt}° / ${el.azimuth}° (${compassDir(el.azimuth)})`
-                  : `Inferred from surface · ${effectiveTilt}° / ${effectiveAzimuth}° (${compassDir(effectiveAzimuth)})`}
-              </span>
-              {isCustomGeom && (
-                <button
-                  type="button"
-                  onClick={() => onUpdate({ geometryMode: 'surface' })}
-                  className="flex items-center gap-1 text-[10px] font-medium text-slate-400 transition-colors hover:text-slate-600"
-                >
-                  <RotateCcw className="size-3" />
-                  Infer from surface
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Capacity */}
-          <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
-
-            {/* Usable area */}
-            <div className="mb-3">
-              <FieldLabel tip="Percentage of the surface area that can be covered with panels. Reduce this to account for obstructions such as chimneys, skylights, vents, or required edge clearances.">
-                Usable area
-              </FieldLabel>
-              <div className="mt-1.5 flex items-center gap-3">
-                <input
-                  type="range"
-                  min={10} max={100} step={5}
-                  value={pvConfig.usable_area_pct ?? 80}
-                  onChange={(e) => {
-                    const pct = Number(e.target.value);
-                    const usableM2 = el.area * pct / 100;
-                    // ~6.5 m² per kWp for standard silicon panels
-                    const derivedMaxKwp = usableM2 / 6.5;
-                    onUpdate({
-                      usable_area_pct: pct,
-                      cont_energy_cap_max: +derivedMaxKwp.toFixed(2),
-                      // Cap system_capacity if it now exceeds the available area
-                      system_capacity: Math.min(pvConfig.system_capacity, +derivedMaxKwp.toFixed(2)),
-                    });
-                  }}
-                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-primary"
-                />
-                <span className="w-10 shrink-0 text-right text-sm font-bold text-slate-800">
-                  {pvConfig.usable_area_pct ?? 80}%
-                </span>
-              </div>
-              {/* Derived stats row */}
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <div className="rounded-md border border-slate-100 bg-white px-3 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Usable area</p>
-                  <p className="mt-0.5 text-xs font-bold text-slate-700">
-                    {(el.area * (pvConfig.usable_area_pct ?? 80) / 100).toFixed(1)} m²
-                    <span className="ml-1 text-[9px] font-normal text-slate-400">
-                      of {el.area.toFixed(1)} m²
-                    </span>
-                  </p>
-                </div>
-                <div className="rounded-md border border-slate-100 bg-white px-3 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Max capacity</p>
-                  <p className="mt-0.5 text-xs font-bold text-slate-700">
-                    {(el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5).toFixed(1)} kWp
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-200 pt-3">
-              <FieldLabel tip="Nameplate DC rated capacity of the PV system installed on this surface. Cannot exceed the max capacity derived from usable area.">
-                System capacity
-              </FieldLabel>
-              <NumberInput
-                value={pvConfig.system_capacity}
-                onChange={(v) => {
-                  const maxKwp = el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5;
-                  onUpdate({
-                    system_capacity: Math.max(0, Math.min(v, maxKwp)),
-                    cont_energy_cap_max: Math.max(Math.min(v, maxKwp), pvConfig.cont_energy_cap_max),
-                  });
-                }}
-                unit="kWp"
-                min={0}
-                max={+(el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5).toFixed(2)}
-                step={0.5}
-              />
-            </div>
-
-            <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2">
-              <span className="text-[11px] text-muted-foreground">Estimated panel area needed</span>
-              <span className="text-xs font-semibold text-foreground">
-                {(pvConfig.system_capacity * 6.5).toFixed(1)}{' '}
-                <span className="text-[10px] font-normal text-muted-foreground">m²</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Expert: efficiency + economics */}
-          {mode === 'expert' && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-4 shadow-sm">
-              <p className="mb-3 text-[11px] font-semibold text-slate-600">Efficiency</p>
-              <div className="flex flex-col gap-2.5">
-                <div className="flex items-center justify-between">
-                  <FieldLabel tip="Combined panel and wiring efficiency (0–1).">Panel efficiency</FieldLabel>
-                  <div className="w-28">
-                    <NumberInput value={pvConfig.cont_energy_eff} onChange={(v) => onUpdate({ cont_energy_eff: Math.max(0, Math.min(1, v)) })} unit="–" min={0} max={1} step={0.01} />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <FieldLabel tip="DC-to-AC inverter efficiency (0–1).">Inverter efficiency</FieldLabel>
-                  <div className="w-28">
-                    <NumberInput value={pvConfig.inv_eff} onChange={(v) => onUpdate({ inv_eff: Math.max(0, Math.min(1, v)) })} unit="–" min={0} max={1} step={0.01} />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <FieldLabel tip="System losses fraction (dust, temperature, wiring).">System losses</FieldLabel>
-                  <div className="w-28">
-                    <NumberInput value={+(pvConfig.losses * 100).toFixed(1)} onChange={(v) => onUpdate({ losses: v / 100 })} unit="%" min={0} max={50} step={0.5} />
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-[10px] text-slate-400">
+            {isCustomGeom
+              ? `Custom · was ${el.tilt}° / ${el.azimuth}° (${compassDir(el.azimuth)})`
+              : `Inferred from surface · ${effectiveTilt}° / ${effectiveAzimuth}° (${compassDir(effectiveAzimuth)})`}
+          </span>
+          {isCustomGeom && (
+            <button
+              type="button"
+              onClick={() => onUpdate({ geometryMode: 'surface' })}
+              className="flex items-center gap-1 text-[10px] font-medium text-slate-400 transition-colors hover:text-slate-600"
+            >
+              <RotateCcw className="size-3" />
+              Infer from surface
+            </button>
           )}
         </div>
+
+        <div className="my-4 border-t border-slate-200" />
+
+        {/* ── Usable area ── */}
+        <FieldLabel tip="Percentage of the surface area that can be covered with panels. Reduce this to account for obstructions such as chimneys, skylights, vents, or required edge clearances.">
+          Usable area
+        </FieldLabel>
+        <div className="mt-1.5 flex items-center gap-3">
+          <input
+            type="range" min={10} max={100} step={5}
+            value={pvConfig.usable_area_pct ?? 80}
+            onChange={(e) => {
+              const pct = Number(e.target.value);
+              const derivedMaxKwp = (el.area * pct / 100) / 6.5;
+              onUpdate({
+                usable_area_pct: pct,
+                cont_energy_cap_max: +derivedMaxKwp.toFixed(2),
+                system_capacity: Math.min(pvConfig.system_capacity, +derivedMaxKwp.toFixed(2)),
+              });
+            }}
+            className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-primary"
+          />
+          <span className="w-10 shrink-0 text-right text-sm font-bold text-slate-800">
+            {pvConfig.usable_area_pct ?? 80}%
+          </span>
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="rounded-md border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Usable area</p>
+            <p className="mt-0.5 text-xs font-bold text-slate-700">
+              {(el.area * (pvConfig.usable_area_pct ?? 80) / 100).toFixed(1)} m²
+              <span className="ml-1 text-[9px] font-normal text-slate-400">of {el.area.toFixed(1)} m²</span>
+            </p>
+          </div>
+          <div className="rounded-md border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Max capacity</p>
+            <p className="mt-0.5 text-xs font-bold text-slate-700">
+              {(el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5).toFixed(1)} kWp
+            </p>
+          </div>
+        </div>
+
+        <div className="my-4 border-t border-slate-200" />
+
+        {/* ── System capacity ── */}
+        <FieldLabel tip="Nameplate DC rated capacity of the PV system installed on this surface. Cannot exceed the max capacity derived from usable area.">
+          System capacity
+        </FieldLabel>
+        <div className="mt-1.5">
+          <NumberInput
+            value={pvConfig.system_capacity}
+            onChange={(v) => {
+              const maxKwp = el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5;
+              onUpdate({
+                system_capacity: Math.max(0, Math.min(v, maxKwp)),
+                cont_energy_cap_max: Math.max(Math.min(v, maxKwp), pvConfig.cont_energy_cap_max),
+              });
+            }}
+            unit="kWp" min={0}
+            max={+(el.area * (pvConfig.usable_area_pct ?? 80) / 100 / 6.5).toFixed(2)}
+            step={0.5}
+          />
+        </div>
+        <div className="mt-3 flex items-center justify-between">
+          <FieldLabel tip="Calculated as: system capacity (kWp) × 6.5 m²/kWp — the standard area assumption for typical silicon panels. Reduce system capacity or usable area % to fit panels within the available roof or wall space.">
+            Estimated panel area needed
+          </FieldLabel>
+          <span className="text-sm font-bold text-foreground">
+            {(pvConfig.system_capacity * 6.5).toFixed(1)}{' '}
+            <span className="text-[10px] font-normal text-muted-foreground">m²</span>
+          </span>
+        </div>
+        {pvConfig.system_capacity * 6.5 > el.area * (pvConfig.usable_area_pct ?? 80) / 100 && (
+          <p className="mt-1 text-[10px] text-amber-600 leading-snug">
+            ⚠ Exceeds usable area — reduce system capacity or increase the usable area %.
+          </p>
+        )}
+
+        {/* ── Expert: efficiency ── */}
+        {mode === 'expert' && (
+          <>
+            <div className="my-4 border-t border-slate-200" />
+            <p className="mb-3 text-[11px] font-semibold text-slate-600">Efficiency</p>
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <FieldLabel tip="Combined panel and wiring efficiency (0–1).">Panel efficiency</FieldLabel>
+                <div className="w-28">
+                  <NumberInput value={pvConfig.cont_energy_eff} onChange={(v) => onUpdate({ cont_energy_eff: Math.max(0, Math.min(1, v)) })} unit="–" min={0} max={1} step={0.01} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <FieldLabel tip="DC-to-AC inverter efficiency (0–1).">Inverter efficiency</FieldLabel>
+                <div className="w-28">
+                  <NumberInput value={pvConfig.inv_eff} onChange={(v) => onUpdate({ inv_eff: Math.max(0, Math.min(1, v)) })} unit="–" min={0} max={1} step={0.01} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <FieldLabel tip="System losses fraction (dust, temperature, wiring).">System losses</FieldLabel>
+                <div className="w-28">
+                  <NumberInput value={+(pvConfig.losses * 100).toFixed(1)} onChange={(v) => onUpdate({ losses: v / 100 })} unit="%" min={0} max={50} step={0.5} />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
       </div>
     </div>
   );
@@ -787,18 +765,84 @@ export function SurfaceGroupEditor({
         </div>
       )}
 
-      {/* ── Tab bar ─────────────────────────────────────────────────────────── */}
-      <div className="mb-3">
-        <SegmentedControl
-          fullWidth
-          options={[
-            { value: 'properties', label: 'Properties' },
-            { value: 'pv',         label: 'PV'         },
-          ]}
-          value={activeTab}
-          onChange={(v) => setActiveTab(v as 'properties' | 'pv')}
-        />
-      </div>
+      {/* ── View selector cards ──────────────────────────────────────────────── */}
+      {(() => {
+        const pvInstalled = surfacePvConfig?.installed ?? false;
+        return (
+          <div className="mb-3 grid grid-cols-2 gap-2">
+
+            {/* Properties card */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('properties')}
+              className={cn(
+                'flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all duration-150 cursor-pointer',
+                activeTab === 'properties'
+                  ? 'border-slate-700 bg-slate-800 shadow-md'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+              )}
+            >
+              <span className={cn('text-xs font-bold uppercase tracking-wider', activeTab === 'properties' ? 'text-slate-400' : 'text-slate-400')}>
+                Surface
+              </span>
+              <span className={cn('text-sm font-semibold', activeTab === 'properties' ? 'text-white' : 'text-slate-700')}>
+                Properties
+              </span>
+            </button>
+
+            {/* Solar PV card — disabled until installed */}
+            {pvInstalled ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('pv')}
+                className={cn(
+                  'flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all duration-150 cursor-pointer',
+                  activeTab === 'pv'
+                    ? 'border-amber-500 bg-amber-500 shadow-md'
+                    : 'border-amber-200 bg-amber-50 hover:border-amber-300 hover:bg-amber-100',
+                )}
+              >
+                <div className="flex w-full items-center justify-between">
+                  <span className={cn('text-xs font-bold uppercase tracking-wider', activeTab === 'pv' ? 'text-amber-100' : 'text-amber-500')}>
+                    Installed
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setActiveTab('properties'); onUpdatePv({ installed: false }); }}
+                    className={cn(
+                      'text-[10px] font-semibold px-2 py-0.5 rounded cursor-pointer transition-colors',
+                      activeTab === 'pv'
+                        ? 'bg-white text-amber-600 hover:bg-amber-50'
+                        : 'bg-amber-200 text-amber-700 hover:bg-amber-300',
+                    )}
+                  >
+                    Remove
+                  </button>
+                </div>
+                <span className={cn('flex items-center gap-1.5 text-sm font-semibold', activeTab === 'pv' ? 'text-white' : 'text-amber-700')}>
+                  <Sun className="size-4" /> Solar PV
+                </span>
+              </button>
+            ) : (
+              <div className="flex flex-col items-start gap-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Not installed</span>
+                <div className="flex w-full items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 opacity-50">
+                    <Sun className="size-4" /> Solar PV
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTab('pv'); onUpdatePv({ installed: true }); }}
+                    className="flex items-center gap-1 rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 cursor-pointer transition-colors"
+                  >
+                    <Sun className="size-3" /> Install
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Properties tab — geometry + thermal combined ─────────────────── */}
       {activeTab === 'properties' && (

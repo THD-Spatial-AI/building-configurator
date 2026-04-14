@@ -324,12 +324,12 @@ export function RoofTypeCards({ elements, onApplyRoofType }: RoofTypeCardsProps)
               )}
               <div className="flex w-full gap-1">
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[7px] font-medium text-slate-400">Side</span>
+                  <span className="text-center text-[11px] font-semibold text-slate-600">Side</span>
                   <ElevationSvg type={def.id} selected={isSelected} />
                 </div>
-                <div className="w-px self-stretch bg-slate-100" />
+                <div className="w-px self-stretch bg-slate-300" />
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[7px] font-medium text-slate-400">Top</span>
+                  <span className="text-center text-[11px] font-semibold text-slate-600">Top</span>
                   <PlanSvg type={def.id} selected={isSelected} />
                 </div>
               </div>
@@ -403,12 +403,12 @@ export function RoofTypeGallery({ elements, onApplyRoofType }: RoofTypeGalleryPr
               {/* Side elevation + plan view, side by side */}
               <div className="flex w-full gap-1.5">
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[8px] font-medium text-slate-400">Side</span>
+                  <span className="text-center text-[12px] font-semibold text-slate-600">Side</span>
                   <ElevationSvg type={def.id} selected={isSelected} />
                 </div>
                 <div className="w-px self-stretch bg-slate-100" />
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[8px] font-medium text-slate-400">Top</span>
+                  <span className="text-center text-[12px] font-semibold text-slate-600">Top</span>
                   <PlanSvg type={def.id} selected={isSelected} />
                 </div>
               </div>
