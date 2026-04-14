@@ -39,31 +39,6 @@
         "panel": "dedicated",
         "clear": true
       }
-    },
-    {
-      "label": "Run dev server",
-      "type": "shell",
-      "command": "npm",
-      "args": [
-        "install",
-        "&&",
-        "npm",
-        "run",
-        "dev"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "isBackground": true,
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
     }
   ]
 }
