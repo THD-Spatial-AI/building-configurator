@@ -533,12 +533,12 @@ const SECTION_COLORS: Record<SectionKey, string> = {
 };
 
 const SECTION_LABELS: Record<SectionKey, string> = {
-  identity:    'Identity',
-  conditions:  'Conditions',
-  ventilation: 'Ventilation',
-  loads:       'Internal Loads',
-  thermal:     'Thermal Mass',
-  solver:      'Solver',
+  identity:    'Building Type & Size',
+  conditions:  'Site & Surroundings',
+  ventilation: 'Air & Ventilation',
+  loads:       'Appliances & Occupancy',
+  thermal:     'Heat Storage Capacity',
+  solver:      'Calculation Method',
 };
 
 /** One-line value summary shown on the grid card and chip. */
