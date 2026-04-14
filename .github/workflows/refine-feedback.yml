@@ -19,11 +19,9 @@ on:
 
 jobs:
   refine:
-    # Only run for [Feedback] issues opened by a human / the widget bot — not
-    # by github-actions[bot] itself (which creates the refined [Issue] issues).
-    if: >
-      startsWith(github.event.issue.title, '[Feedback]') &&
-      github.actor != 'github-actions[bot]'
+    # Only run for [Feedback] issues opened by a human / the widget — not by
+    # github-actions[bot] itself (which opens the refined [Issue] issues).
+    if: "startsWith(github.event.issue.title, '[Feedback]') && github.actor != 'github-actions[bot]'"
     runs-on: ubuntu-latest
 
     permissions:
