@@ -1,14 +1,15 @@
 // Vercel serverless function — receives feedback from the in-app widget,
-// uploads screenshots directly to the GitHub issue as assets, and creates
-// a GitHub issue with the screenshots embedded in the body.
+// uploads screenshots to Vercel Blob storage, and creates a GitHub issue
+// with the screenshots embedded in the body.
 //
 // Required environment variables (set in Vercel project settings):
-//   GITHUB_TOKEN  — Personal Access Token with `repo` scope OR fine-grained
-//                   token with Issues: Read and write
-//   GITHUB_OWNER  — repository owner (e.g. "your-org")
-//   GITHUB_REPO   — repository name (e.g. "building-configurator")
+//   GITHUB_TOKEN       — PAT with Issues: read/write (or classic repo scope)
+//   GITHUB_OWNER       — repository owner  (e.g. "your-org")
+//   GITHUB_REPO        — repository name   (e.g. "building-configurator")
+//   BLOB_READ_WRITE_TOKEN — auto-set by Vercel when a Blob store is linked
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { put } from '@vercel/blob';
 
 interface ScreenshotPayload {
   name:     string;   // original filename
@@ -17,14 +18,14 @@ interface ScreenshotPayload {
 }
 
 interface FeedbackPayload {
-  goal:         string;
-  result:       string;
-  rating:       number;
-  view:         string;
-  context:      string;
-  url:          string;
-  timestamp:    string;
-  screenshots:  ScreenshotPayload[];
+  goal:        string;
+  result:      string;
+  rating:      number;
+  view:        string;
+  context:     string;
+  url:         string;
+  timestamp:   string;
+  screenshots: ScreenshotPayload[];
 }
 
 function ratingMeta(r: number): { label: string; ghLabel: string } {
@@ -34,42 +35,18 @@ function ratingMeta(r: number): { label: string; ghLabel: string } {
                return { label: '5 – Blocked/broken', ghLabel: 'feedback: blocked' };
 }
 
-/** Uploads a base64-encoded image as an asset attached to an existing issue.
- *  Uses uploads.github.com which only requires Issues: write permission.
- *  Returns a GitHub CDN URL (github.com/user-attachments/assets/...) that
- *  renders correctly in GitHub markdown regardless of repo visibility. */
-async function uploadIssueAsset(
-  owner:       string,
-  repo:        string,
-  issueNumber: number,
-  token:       string,
-  shot:        ScreenshotPayload,
-): Promise<string> {
+/** Uploads a base64-encoded image to Vercel Blob and returns a public CDN URL. */
+async function uploadScreenshot(shot: ScreenshotPayload): Promise<string> {
   const binary   = Buffer.from(shot.data, 'base64');
   const safeName = shot.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path     = `feedback-screenshots/${Date.now()}-${safeName}`;
 
-  const res = await fetch(
-    `https://uploads.github.com/repos/${owner}/${repo}/issues/${issueNumber}/assets?name=${encodeURIComponent(safeName)}`,
-    {
-      method:  'POST',
-      headers: {
-        Authorization:          `Bearer ${token}`,
-        Accept:                 'application/vnd.github+json',
-        'Content-Type':         shot.mimeType || 'image/png',
-        'Content-Length':       String(binary.length),
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-      body: binary,
-    },
-  );
+  const { url } = await put(path, binary, {
+    access:      'public',
+    contentType: shot.mimeType || 'image/png',
+  });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Asset upload failed (HTTP ${res.status}): ${err}`);
-  }
-
-  const json = await res.json() as { url: string };
-  return json.url;
+  return url;
 }
 
 function buildIssueBody(p: FeedbackPayload, screenshotUrls: string[]): string {
@@ -105,7 +82,6 @@ function buildIssueBody(p: FeedbackPayload, screenshotUrls: string[]): string {
     '',
     '---',
     '*Auto-generated from the in-app feedback widget.*',
-    '*A GitHub Copilot agent can use the screenshot and context above to refine this into a concrete implementation issue.*',
   );
 
   return lines.join('\n');
@@ -132,9 +108,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'goal and result are required' });
   }
 
+  // ── Upload screenshots to Vercel Blob ─────────────────────────────────────
+  const screenshotUrls: string[] = [];
+  for (const shot of payload.screenshots ?? []) {
+    if (!shot?.data) continue;
+    try {
+      screenshotUrls.push(await uploadScreenshot(shot));
+    } catch (e) {
+      console.error('Screenshot upload error:', e);
+      // Non-fatal — issue is still created without this screenshot
+    }
+  }
+
+  // ── Create GitHub issue ───────────────────────────────────────────────────
   const { ghLabel } = ratingMeta(payload.rating ?? 3);
 
-  // ── Step 1: Create the issue (without screenshots — we don't have URLs yet) ──
   const ghRes = await fetch(
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`,
     {
@@ -147,7 +135,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       body: JSON.stringify({
         title:  buildIssueTitle(payload),
-        body:   buildIssueBody(payload, []),
+        body:   buildIssueBody(payload, screenshotUrls),
         labels: ['user-feedback', 'ux', ghLabel],
       }),
     },
@@ -160,41 +148,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const issue = await ghRes.json() as { number: number; html_url: string };
-
-  // ── Step 2: Upload screenshots as issue assets ────────────────────────────
-  const screenshotUrls: string[] = [];
-  for (const shot of payload.screenshots ?? []) {
-    if (!shot?.data) continue;
-    try {
-      const url = await uploadIssueAsset(GITHUB_OWNER, GITHUB_REPO, issue.number, GITHUB_TOKEN, shot);
-      screenshotUrls.push(url);
-    } catch (e) {
-      // Non-fatal: log the error but continue — the issue already exists
-      console.error(`Screenshot upload failed for issue #${issue.number}:`, e);
-    }
-  }
-
-  // ── Step 3: Patch issue body to include screenshot URLs ───────────────────
-  if (screenshotUrls.length > 0) {
-    const patchRes = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${issue.number}`,
-      {
-        method: 'PATCH',
-        headers: {
-          Authorization:          `Bearer ${GITHUB_TOKEN}`,
-          Accept:                 'application/vnd.github+json',
-          'Content-Type':         'application/json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-        body: JSON.stringify({ body: buildIssueBody(payload, screenshotUrls) }),
-      },
-    );
-
-    if (!patchRes.ok) {
-      console.error('Failed to patch issue with screenshot URLs:', await patchRes.text());
-      // Issue already created — still return success
-    }
-  }
-
   return res.status(201).json({ issueNumber: issue.number, issueUrl: issue.html_url });
 }

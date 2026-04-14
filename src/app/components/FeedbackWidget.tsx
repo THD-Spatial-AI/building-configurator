@@ -189,18 +189,32 @@ async function captureScreen(): Promise<string> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
     video.srcObject = stream;
-    video.muted     = true;
+    video.muted = true;
+
+    const cleanup = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      video.srcObject = null;
+    };
+
+    // If the user stops sharing before the first frame arrives (e.g. pressing
+    // Escape after selecting a window), the track ends without onplaying ever
+    // firing — reject so the caller's finally block can reset state.
+    const track = stream.getVideoTracks()[0];
+    track?.addEventListener('ended', () => {
+      cleanup();
+      reject(new DOMException('Screen share ended before capture', 'AbortError'));
+    }, { once: true });
+
     video.onloadedmetadata = () => video.play();
     video.onplaying = () => {
       const canvas = document.createElement('canvas');
       canvas.width  = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d')!.drawImage(video, 0, 0);
-      stream.getTracks().forEach((t) => t.stop());
-      video.srcObject = null;
+      cleanup();
       resolve(canvas.toDataURL('image/png'));
     };
-    video.onerror = (e) => { stream.getTracks().forEach((t) => t.stop()); reject(e); };
+    video.onerror = (e) => { cleanup(); reject(e); };
   });
 }
 
