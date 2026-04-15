@@ -4,7 +4,9 @@
 &nbsp;
 [![CodeQL](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/github-code-scanning/codeql)
 
-A React component for modelling building properties within the [EnerPlanET](https://enerplanet.th-deg.de/) platform. It provides a reusable configuration interface for energy simulation workflows, including annual heat demand estimation (HDCP) and thermal load profiling (BUEM), with the intent to support additional simulation services over time.
+A practical research project exploring AI-assisted UI development workflows. The focus is on methods for generating, iterating, and evaluating UI components using AI tools, with a structured feedback loop that converts user observations into tracked issues — giving developers a clear, prioritised backlog to decide how to handle each item.
+
+The UI itself is a building property configurator for the [EnerPlanET](https://enerplanet.th-deg.de/) platform, covering energy simulation workflows [HDCP](https://github.com/THD-Spatial-AI/hdcp-go), [BUEM](https://github.com/THD-Spatial-AI/buem), and serves as the test subject for these development methods.
 
 ## Features
 
@@ -30,6 +32,10 @@ Deployed on Vercel: [building-configurator.vercel.app](https://building-configur
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, request features, and submit pull requests.
 
 Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
+## AI Disclaimer
+
+This project is itself an experiment in AI-assisted development. The initial UI prototype was generated with [Figma Make](https://www.figma.com/make/), and the majority of the implementation code was written using [Claude Code](https://claude.ai/code) (Anthropic Claude Sonnet 4.6). The feedback pipeline — which captures user observations and converts them into GitHub issues — is part of the methodology being developed and tested here. All AI-generated output was reviewed, directed, and adapted by the human author.
 
 ## Designed and developed by
 
