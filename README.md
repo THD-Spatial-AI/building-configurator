@@ -35,7 +35,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ## AI Disclaimer
 
-This project is itself an experiment in AI-assisted development. The initial UI prototype was generated with [Figma Make](https://www.figma.com/make/), and the majority of the implementation code was written using [Claude Code](https://claude.ai/code) (Anthropic Claude Sonnet 4.6). The feedback pipeline — which captures user observations and converts them into GitHub issues — is part of the methodology being developed and tested here. All AI-generated output was reviewed, directed, and adapted by the human author.
+This project is itself an experiment in AI-assisted development. The concept, design decisions, and development methodology are the author's own. AI tools were used for implementation: the initial UI prototype was generated with [Figma Make](https://www.figma.com/make/), and the majority of the code was written using [Claude Code](https://claude.ai/code) (Anthropic Claude Sonnet 4.6). The feedback pipeline — which captures user observations and converts them into GitHub issues — is part of the methodology being developed and tested here. All AI-generated output was reviewed, directed, and adapted by the author throughout.
 
 ## Designed and developed by
 
