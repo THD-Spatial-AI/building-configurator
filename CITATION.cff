@@ -6,7 +6,7 @@ authors:
   - family-names: "Ravani"
     given-names: "Jay"
     orcid: "https://orcid.org/0009-0008-1307-6983"
-    affiliation: "THD-Spatial-AI"
+    affiliation: "BigGeoData & Spatial AI, Technische Hochschule Deggendorf"
 repository-code: "https://github.com/THD-Spatial-AI/building-configurator"
 url: "https://building-configurator-gui.vercel.app/"
 license: MIT
