@@ -21,30 +21,33 @@ interface ScreenshotPayload {
 }
 
 interface SubtaskResult {
-  type:      'todo' | 'question' | 'yesno';
+  type:      'todo' | 'question' | 'yesno' | 'rating';
   step:      string;
   // todo
   status?:   'done' | 'couldnt_finish' | 'pending';
   comment?:  string;
   // question
   response?: string;
-  // yes/no
+  // yesno
   answer?:   'yes' | 'no' | null;
+  // rating
+  rating?:   number | null;
 }
 
 interface FeedbackPayload {
-  goal:           string;
-  result:         string;
-  rating:         number;
-  view:           string;
-  context:        string;
-  url:            string;
-  timestamp:      string;
-  screenshots:    ScreenshotPayload[];
-  taskId?:        string | null;
-  taskTitle?:     string | null;
-  feedbackType?:  'issue' | 'session';
-  subtaskResults?: SubtaskResult[];
+  goal:              string;
+  result:            string;
+  rating:            number;
+  view:              string;
+  context:           string;
+  url:               string;
+  timestamp:         string;
+  screenshots:       ScreenshotPayload[];
+  taskId?:           string | null;
+  taskTitle?:        string | null;
+  feedbackType?:     'issue' | 'session';
+  subtaskResults?:   SubtaskResult[];
+  additionalComment?: string;
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
@@ -117,7 +120,12 @@ function buildSessionTitle(p: FeedbackPayload): string {
 
 function buildSessionBody(p: FeedbackPayload): string {
   const statusIcon = (s: SubtaskResult['status']) =>
-    s === 'done' ? '✅ Done' : s === 'couldnt_finish' ? '❌ Couldn\'t finish' : '— Skipped';
+    s === 'done' ? '✅ Done' : s === 'couldnt_finish' ? '❌ Could not finish' : '— Skipped';
+
+  const ratingBar = (n: number | null | undefined) => {
+    if (!n) return '—';
+    return '⬛'.repeat(n) + '⬜'.repeat(5 - n) + ` ${n}/5`;
+  };
 
   const lines = [
     '## Session Observation',
@@ -131,12 +139,29 @@ function buildSessionBody(p: FeedbackPayload): string {
   ];
 
   if (p.subtaskResults && p.subtaskResults.length > 0) {
-    const done    = p.subtaskResults.filter(s => s.status === 'done').length;
-    const total   = p.subtaskResults.length;
-    lines.push('', '---', '', `### Steps (${done} / ${total} completed)`, '', '| Step | Status | Comment |', '|---|---|---|');
+    const todoSteps   = p.subtaskResults.filter(s => s.type === 'todo');
+    const doneCount   = todoSteps.filter(s => s.status === 'done').length;
+    lines.push('', '---', '', `### Steps (${doneCount} / ${todoSteps.length} action steps completed)`);
+
     for (const r of p.subtaskResults) {
-      lines.push(`| ${r.step} | ${statusIcon(r.status)} | ${r.comment || '—'} |`);
+      lines.push('');
+      if (r.type === 'todo') {
+        lines.push(`**☑ ${r.step}**  →  ${statusIcon(r.status)}`);
+        if (r.comment) lines.push(`> ${r.comment}`);
+      } else if (r.type === 'yesno') {
+        lines.push(`**? ${r.step}**  →  ${r.answer === 'yes' ? '✅ Yes' : r.answer === 'no' ? '❌ No' : '— Not answered'}`);
+        if (r.comment) lines.push(`> ${r.comment}`);
+      } else if (r.type === 'rating') {
+        lines.push(`**★ ${r.step}**  →  ${ratingBar(r.rating)}`);
+      } else if (r.type === 'question') {
+        lines.push(`**💬 ${r.step}**`);
+        if (r.response) lines.push(`> ${r.response}`);
+      }
     }
+  }
+
+  if (p.additionalComment?.trim()) {
+    lines.push('', '---', '', '### Additional comments', '', `> ${p.additionalComment.trim()}`);
   }
 
   lines.push('', '---', '*Auto-recorded from the in-app session panel.*');

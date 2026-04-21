@@ -449,11 +449,11 @@ export function SessionPanel({
 
   // ── Task body ─────────────────────────────────────────────────────────────
 
-  const taskBody = (
+  const taskBody = !task ? null : (
     <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4 flex flex-col gap-3">
       <div className="border-t border-slate-700/60" />
       <div className="flex flex-col gap-3">
-        {task!.steps.map((step, i) => {
+        {task.steps.map((step, i) => {
           const s = stepStates[i] ?? { status: 'pending', comment: '', response: '', answer: null };
 
           // ── Todo card ─────────────────────────────────────────────────
