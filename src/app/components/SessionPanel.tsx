@@ -529,7 +529,9 @@ export function SessionPanel({
             return (
               <div key={i} className={cn(
                 'rounded-lg border p-3 flex flex-col gap-2.5 transition-colors',
-                s.answer !== null ? 'border-slate-600 bg-slate-700/50' : 'border-slate-700 bg-slate-800',
+                s.answer === 'yes' ? 'border-green-700 bg-green-900/30'
+                : s.answer === 'no'  ? 'border-red-700 bg-red-900/30'
+                :                      'border-slate-700 bg-slate-800',
               )}>
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Step {i + 1}</span>
                 <div className="flex items-start gap-2 -mt-1">
@@ -542,8 +544,8 @@ export function SessionPanel({
                     className={cn(
                       'flex-1 rounded-lg border py-1.5 text-xs font-semibold cursor-pointer transition-colors',
                       s.answer === 'yes'
-                        ? 'border-slate-400 bg-slate-600 text-slate-100'
-                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-slate-100',
+                        ? 'border-green-500 bg-green-600 text-white'
+                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:border-green-700 hover:bg-green-900/40 hover:text-green-300',
                     )}>
                     Yes
                   </button>
@@ -552,8 +554,8 @@ export function SessionPanel({
                     className={cn(
                       'flex-1 rounded-lg border py-1.5 text-xs font-semibold cursor-pointer transition-colors',
                       s.answer === 'no'
-                        ? 'border-slate-400 bg-slate-600 text-slate-100'
-                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-slate-100',
+                        ? 'border-red-500 bg-red-600 text-white'
+                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:border-red-700 hover:bg-red-900/40 hover:text-red-300',
                     )}>
                     No
                   </button>
