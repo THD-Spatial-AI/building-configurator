@@ -322,20 +322,20 @@ export function RoofTypeCards({ elements, onApplyRoofType }: RoofTypeCardsProps)
                   <svg className="size-2 text-white" viewBox="0 0 8 8" fill="currentColor"><path d="M1 4l2 2 4-4"/></svg>
                 </span>
               )}
+              <p className={cn('text-center text-[12px] font-bold leading-tight', isSelected ? 'text-primary' : 'text-slate-800')}>
+                {def.label}
+              </p>
               <div className="flex w-full gap-1">
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[11px] font-semibold text-slate-600">Side</span>
                   <ElevationSvg type={def.id} selected={isSelected} />
+                  <span className="text-center text-[9px] text-slate-400">Side</span>
                 </div>
                 <div className="w-px self-stretch bg-slate-300" />
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[11px] font-semibold text-slate-600">Top</span>
                   <PlanSvg type={def.id} selected={isSelected} />
+                  <span className="text-center text-[9px] text-slate-400">Top</span>
                 </div>
               </div>
-              <p className={cn('text-[10px] font-semibold leading-tight', isSelected ? 'text-slate-700' : 'text-slate-700')}>
-                {def.label}
-              </p>
             </button>
           );
         })}
@@ -400,28 +400,25 @@ export function RoofTypeGallery({ elements, onApplyRoofType }: RoofTypeGalleryPr
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80',
               )}
             >
-              {/* Side elevation + plan view, side by side */}
+              {/* Roof type name — top centre, prominent */}
+              <p className={cn(
+                'text-center text-[13px] font-bold leading-tight',
+                isSelected ? 'text-primary' : 'text-slate-800',
+              )}>
+                {def.label}
+              </p>
+
+              {/* Side elevation + plan view, labels below each figure */}
               <div className="flex w-full gap-1.5">
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[12px] font-semibold text-slate-600">Side</span>
                   <ElevationSvg type={def.id} selected={isSelected} />
+                  <span className="text-center text-[10px] text-slate-400">Side</span>
                 </div>
                 <div className="w-px self-stretch bg-slate-100" />
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-center text-[12px] font-semibold text-slate-600">Top</span>
                   <PlanSvg type={def.id} selected={isSelected} />
+                  <span className="text-center text-[10px] text-slate-400">Top</span>
                 </div>
-              </div>
-              <div>
-                <p className={cn(
-                  'text-[11px] font-semibold leading-tight',
-                  isSelected ? 'text-primary' : 'text-slate-800',
-                )}>
-                  {def.label}
-                </p>
-                <p className="mt-0.5 text-[9px] leading-snug text-slate-500">
-                  {def.description}
-                </p>
               </div>
             </button>
           );

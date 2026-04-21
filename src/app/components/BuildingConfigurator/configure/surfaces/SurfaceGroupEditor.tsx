@@ -796,30 +796,25 @@ export function SurfaceGroupEditor({
                 type="button"
                 onClick={() => setActiveTab('pv')}
                 className={cn(
-                  'flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all duration-150 cursor-pointer',
+                  'flex flex-col items-start gap-1 rounded-xl border-2 bg-white px-4 py-3 text-left transition-all duration-150 cursor-pointer',
                   activeTab === 'pv'
-                    ? 'border-amber-500 bg-amber-500 shadow-md'
-                    : 'border-amber-200 bg-amber-50 hover:border-amber-300 hover:bg-amber-100',
+                    ? 'border-amber-400 shadow-md shadow-amber-100'
+                    : 'border-amber-300 hover:border-amber-400 hover:shadow-sm hover:shadow-amber-100',
                 )}
               >
                 <div className="flex w-full items-center justify-between">
-                  <span className={cn('text-xs font-bold uppercase tracking-wider', activeTab === 'pv' ? 'text-amber-100' : 'text-amber-500')}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                     Installed
                   </span>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setActiveTab('properties'); onUpdatePv({ installed: false }); }}
-                    className={cn(
-                      'text-[10px] font-semibold px-2 py-0.5 rounded cursor-pointer transition-colors',
-                      activeTab === 'pv'
-                        ? 'bg-white text-amber-600 hover:bg-amber-50'
-                        : 'bg-amber-200 text-amber-700 hover:bg-amber-300',
-                    )}
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded cursor-pointer transition-colors border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
                   >
                     Remove
                   </button>
                 </div>
-                <span className={cn('flex items-center gap-1.5 text-sm font-semibold', activeTab === 'pv' ? 'text-white' : 'text-amber-700')}>
+                <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-600">
                   <Sun className="size-4" /> Solar PV
                 </span>
               </button>
@@ -860,14 +855,18 @@ export function SurfaceGroupEditor({
             {/* Area + U-value */}
             <div className="mt-4 border-t border-slate-200 pt-4 grid grid-cols-2 gap-4">
               <div className="flex items-center justify-center gap-4">
-                <span className="text-sm font-semibold text-slate-700">Area</span>
+                <FieldLabel tip="Total surface area in square metres. Used to calculate heat loss through this element.">
+                  Area
+                </FieldLabel>
                 <NumberSpinner
                   value={el.area} min={0.1} max={100000} step={1} decimals={1} unit="m²"
                   onChange={(v) => save({ area: Math.max(0.1, v) })}
                 />
               </div>
               <div className="border-l border-slate-200 pl-4 flex items-center justify-center gap-4">
-                <span className="text-sm font-semibold text-slate-700">U-value</span>
+                <FieldLabel tip="Thermal transmittance — lower values mean better insulation. Typical values: wall 0.2–0.5, window 0.8–2.0, roof 0.15–0.35 W/m²K.">
+                  U-value
+                </FieldLabel>
                 <NumberSpinner
                   value={el.uValue} min={0.01} max={10} step={0.01} decimals={2} unit="W/m²K"
                   onChange={(v) => save({ uValue: Math.max(0.01, v) })}

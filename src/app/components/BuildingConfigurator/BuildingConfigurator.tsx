@@ -699,6 +699,21 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
             value={mode}
             onChange={(v) => setMode(v as 'basic' | 'expert')}
           />
+          <button
+            type="button"
+            onClick={() => setWorkspaceView(workspaceView === 'overview' ? 'configure' : 'overview')}
+            className={cn(
+              'flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-semibold transition-all duration-150 cursor-pointer shadow-sm',
+              workspaceView === 'overview'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'bg-slate-700 text-white hover:bg-slate-600',
+            )}
+          >
+            {workspaceView === 'overview'
+              ? <><SlidersHorizontal className="size-3.5" /> Open Configurator</>
+              : <><LayoutDashboard className="size-3.5" /> Back to Overview</>}
+          </button>
+          <div className="w-px h-5 bg-border shrink-0 mx-1" />
           <HeaderBtn onClick={handleDownload} tooltip="Export as BUEM GeoJSON"><Download /></HeaderBtn>
           <HeaderBtn onClick={() => fileInputRef.current?.click()} tooltip="Import BUEM or legacy JSON"><Upload /></HeaderBtn>
           <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleUpload} />
@@ -863,30 +878,55 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                   {panelView === 'building' ? (
                     <BuildingEditor general={general} setGen={setGen} mode={mode} />
                   ) : panelView === 'surface-group' && activeGroupType ? (
-                    <SurfaceGroupGrid
-                      groupType={activeGroupType}
-                      elements={elements}
-                      selectedElementId={selectedId}
-                      onSelect={handleElementSelect}
-                      onDeleteSurface={deleteSurface}
-                      onApplyRoofType={activeGroupType === 'roof' ? handleApplyRoofType : undefined}
-                      onCreateSurface={createSurface}
-                      surfacePvConfigs={surfacePvConfigs}
-                      editorSlot={selectedId ? (
-                        <SurfaceGroupEditor
-                          selectedElementId={selectedId}
-                          elements={elements}
-                          onUpdateElement={updateElement}
-                          onRenameElement={renameElement}
-                          preferredTab={surfaceEditorTab}
-                          surfacePvConfig={surfacePvConfigs[selectedId] ?? null}
-                          onUpdatePv={(patch) => updateSurfacePv(selectedId, patch)}
-                          onDeleteSurface={deleteSurface}
-                          mode={mode}
-                          embedded
-                        />
-                      ) : undefined}
-                    />
+                    activeGroupType === 'roof' ? (
+                      // Roof: type picker (no card grid) + embedded editor when selected
+                      <SurfaceGroupGrid
+                        groupType="roof"
+                        elements={elements}
+                        selectedElementId={selectedId}
+                        onSelect={handleElementSelect}
+                        onDeleteSurface={deleteSurface}
+                        onApplyRoofType={handleApplyRoofType}
+                        onCreateSurface={createSurface}
+                        surfacePvConfigs={surfacePvConfigs}
+                        hideCardGrid
+                        editorSlot={selectedId ? (
+                          <SurfaceGroupEditor
+                            selectedElementId={selectedId}
+                            elements={elements}
+                            onUpdateElement={updateElement}
+                            onRenameElement={renameElement}
+                            preferredTab={surfaceEditorTab}
+                            surfacePvConfig={surfacePvConfigs[selectedId] ?? null}
+                            onUpdatePv={(patch) => updateSurfacePv(selectedId, patch)}
+                            onDeleteSurface={deleteSurface}
+                            mode={mode}
+                            embedded
+                          />
+                        ) : undefined}
+                      />
+                    ) : selectedId ? (
+                      // Non-roof with surface selected: pure editor, no card grid
+                      <SurfaceGroupEditor
+                        selectedElementId={selectedId}
+                        elements={elements}
+                        onUpdateElement={updateElement}
+                        onRenameElement={renameElement}
+                        preferredTab={surfaceEditorTab}
+                        surfacePvConfig={surfacePvConfigs[selectedId] ?? null}
+                        onUpdatePv={(patch) => updateSurfacePv(selectedId, patch)}
+                        onDeleteSurface={deleteSurface}
+                        mode={mode}
+                      />
+                    ) : (
+                      // No surface selected yet — prompt
+                      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center p-8">
+                        <p className="text-sm font-semibold text-slate-500">Select a surface</p>
+                        <p className="text-[11px] text-slate-400 leading-snug">
+                          Pick a surface from the list on the right to configure it.
+                        </p>
+                      </div>
+                    )
                   ) : panelView === 'technology-pv' ? (
                     <PvSurfaceManager
                       surfaces={pvInstalledSurfaces}
@@ -907,7 +947,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                 </div>
 
                 {/* Panel selector column */}
-                <div className="flex w-56 shrink-0 flex-col overflow-hidden border-l border-border/60 bg-slate-50/60">
+                <div className="flex w-72 shrink-0 flex-col overflow-hidden border-l border-border/60 bg-slate-50/60">
                   <ScrollHintContainer>
                     <SurfaceGroupSelector
                       elements={elements}
@@ -917,6 +957,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       buildingSubtitle={`${general.buildingType || buildingType}${general.floorArea ? ` · ${general.floorArea} m²` : ''}`}
                       buildingSelected={panelView === 'building'}
                       onSelectBuilding={handleBuildingSelect}
+                      selectedSurfaceId={selectedId}
+                      onSelectSurface={handleElementSelect}
+                      onDeleteSurface={deleteSurface}
+                      surfacePvConfigs={surfacePvConfigs}
                       pvSelected={panelView === 'technology-pv'}
                       pvSurfaceCount={pvSummary.surfaceCount}
                       pvCapacityKw={pvSummary.totalCapacityKw}
@@ -937,22 +981,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
         {/* ── Footer: reset / apply ── */}
         <div className="border-t border-border/80 bg-slate-50 px-4 py-3 shadow-[0_-8px_20px_rgba(15,23,42,0.04)]">
-          <div className="flex items-center justify-between gap-2">
-            {/* View toggle FAB */}
-            <button
-              type="button"
-              onClick={() => setWorkspaceView(workspaceView === 'overview' ? 'configure' : 'overview')}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 cursor-pointer shadow-md',
-                workspaceView === 'overview'
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/30'
-                  : 'bg-slate-700 text-white hover:bg-slate-600 shadow-slate-700/30',
-              )}
-            >
-              {workspaceView === 'overview'
-                ? <><SlidersHorizontal className="size-4" /> Configure Building</>
-                : <><LayoutDashboard className="size-4" /> Back to Overview</>}
-            </button>
+          <div className="flex items-center justify-end gap-2">
             <div className="flex items-center gap-2">
             <button
               type="button"

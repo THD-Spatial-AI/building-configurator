@@ -4,7 +4,7 @@
 // For the Roof group, the roof-type gallery expands inline — no separate navigation.
 
 import React, { useState } from 'react';
-import { Sun, Trash2, ChevronDown, Plus } from 'lucide-react';
+import { Sun, Trash2, ChevronDown, Plus, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -52,6 +52,8 @@ interface SurfaceGroupGridProps {
   surfacePvConfigs?: Record<string, PvConfig>;
   /** Optional editor rendered below the surface cards when a surface is selected. */
   editorSlot?: React.ReactNode;
+  /** When true, hides the surface card grid (surface selection moves to sidebar). */
+  hideCardGrid?: boolean;
 }
 
 /** Grid of surface cards for a single element group, shown in the center panel.
@@ -66,6 +68,7 @@ export function SurfaceGroupGrid({
   onCreateSurface,
   surfacePvConfigs = {},
   editorSlot,
+  hideCardGrid = false,
 }: SurfaceGroupGridProps) {
   const [roofGalleryOpen, setRoofGalleryOpen] = useState(false);
 
@@ -182,62 +185,75 @@ export function SurfaceGroupGrid({
     <ScrollHintContainer className="flex-1 overflow-y-auto bg-slate-50">
       <div className="p-5 flex flex-col gap-5">
 
-        {/* ── Section header ── */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: dotColor }} />
-            <h2 className="text-sm font-semibold text-slate-700">
-              {ELEMENT_GROUP_LABELS[groupType]}
-            </h2>
-            {roofTypeLabel && (
-              <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                {roofTypeLabel}
+        {/* ── Section header — hidden when card grid is suppressed (sidebar shows this info) ── */}
+        {!hideCardGrid && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="size-2.5 rounded-full" style={{ backgroundColor: dotColor }} />
+              <h2 className="text-sm font-semibold text-slate-700">
+                {ELEMENT_GROUP_LABELS[groupType]}
+              </h2>
+              {roofTypeLabel && (
+                <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                  {roofTypeLabel}
+                </span>
+              )}
+              <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                {items.length}
               </span>
-            )}
-            <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
-              {items.length}
-            </span>
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-slate-400">
+              <span>{totalArea.toFixed(1)} m² total</span>
+              <span>avg U {avgUValue.toFixed(2)} W/m²K</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-slate-400">
-            <span>{totalArea.toFixed(1)} m² total</span>
-            <span>avg U {avgUValue.toFixed(2)} W/m²K</span>
-          </div>
-        </div>
+        )}
 
         {/* ── Roof type section — expandable, Roof group only ── */}
         {groupType === 'roof' && onApplyRoofType && (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border-2 border-primary/25 bg-primary/5 shadow-sm">
             <button
               type="button"
               onClick={() => setRoofGalleryOpen((v) => !v)}
-              className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-slate-50 cursor-pointer"
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-primary/8 cursor-pointer"
             >
-              <div>
-                <p className="text-sm font-semibold text-slate-700">Roof Type</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">
-                  {roofTypeLabel
-                    ? `Current: ${roofTypeLabel} · click to change`
-                    : 'Flat, mono-pitch, gabled, hipped and more'}
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                <Home className="size-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-slate-800">Roof Shape</p>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  {roofTypeLabel ? `Currently: ${roofTypeLabel}` : 'Select roof geometry'}
                 </p>
               </div>
-              <ChevronDown className={cn(
-                'size-4 shrink-0 text-slate-400 transition-transform duration-200',
-                roofGalleryOpen && 'rotate-180',
-              )} />
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={cn(
+                  'rounded-md px-2.5 py-1 text-[10px] font-semibold transition-colors',
+                  roofGalleryOpen
+                    ? 'bg-primary/15 text-primary'
+                    : 'bg-primary text-white',
+                )}>
+                  {roofGalleryOpen ? 'Collapse' : 'Change Type'}
+                </span>
+                <ChevronDown className={cn(
+                  'size-4 shrink-0 text-primary transition-transform duration-200',
+                  roofGalleryOpen && 'rotate-180',
+                )} />
+              </div>
             </button>
 
             <div
               className="overflow-hidden"
-              style={{ maxHeight: roofGalleryOpen ? '400px' : '0px', transition: 'max-height 300ms ease-in-out' }}
+              style={{ maxHeight: roofGalleryOpen ? '600px' : '0px', transition: 'max-height 300ms ease-in-out' }}
             >
-              <div className="border-t border-slate-100 px-4 pb-4 pt-3">
+              <div className="border-t border-primary/15 px-4 pb-4 pt-3 bg-white/60">
                 <RoofTypeCards elements={elements} onApplyRoofType={onApplyRoofType} />
               </div>
             </div>
           </div>
         )}
 
-        {showRoofSurfaceGrid && (
+        {!hideCardGrid && showRoofSurfaceGrid && (
           <div className="grid grid-cols-4 gap-3">
             {items.map((el) => renderSurfaceCard(el, true))}
             {renderAddSurfaceButton(true)}
@@ -250,10 +266,19 @@ export function SurfaceGroupGrid({
           </div>
         )}
 
-        {!showRoofSurfaceGrid && (
+        {!hideCardGrid && !showRoofSurfaceGrid && (
           <div className="grid grid-cols-3 gap-3">
             {items.map((el) => renderSurfaceCard(el))}
             {renderAddSurfaceButton()}
+          </div>
+        )}
+
+        {hideCardGrid && !selectedElementId && groupType === 'roof' && (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white/60 py-10 text-center">
+            <p className="text-sm font-semibold text-slate-400">No surface selected</p>
+            <p className="text-[11px] text-slate-400 leading-snug">
+              Pick a roof surface from the list on the right to edit it.
+            </p>
           </div>
         )}
 
