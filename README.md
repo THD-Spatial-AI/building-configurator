@@ -23,10 +23,6 @@ npm install
 npm run dev
 ```
 
-## Try it out
-
-Deployed on Vercel: [building-configurator.vercel.app](https://building-configurator-enerplanet.vercel.app/)
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, request features, and submit pull requests.
