@@ -461,11 +461,9 @@ export function SessionPanel({
             return (
               <div key={i} className={cn(
                 'rounded-lg border p-3 flex flex-col gap-2.5 transition-colors',
-                s.status === 'done'
-                  ? 'border-slate-600 bg-slate-700/50'
-                  : s.status === 'couldnt_finish'
-                  ? 'border-slate-600 bg-slate-700/50'
-                  : 'border-slate-700 bg-slate-800',
+                s.status === 'done'           ? 'border-green-700 bg-green-900/30'
+                : s.status === 'couldnt_finish' ? 'border-red-700 bg-red-900/30'
+                :                                 'border-slate-700 bg-slate-800',
               )}>
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Step {i + 1}</span>
                 <p className={cn(
@@ -480,8 +478,8 @@ export function SessionPanel({
                     className={cn(
                       'flex-1 rounded-lg border py-1.5 text-xs font-semibold cursor-pointer transition-colors',
                       s.status === 'done'
-                        ? 'border-slate-400 bg-slate-600 text-slate-100'
-                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-slate-100',
+                        ? 'border-green-500 bg-green-600 text-white'
+                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:border-green-700 hover:bg-green-900/40 hover:text-green-300',
                     )}>
                     Yes, done ✓
                   </button>
@@ -489,8 +487,8 @@ export function SessionPanel({
                     className={cn(
                       'flex-1 rounded-lg border py-1.5 text-xs font-semibold cursor-pointer transition-colors',
                       s.status === 'couldnt_finish'
-                        ? 'border-slate-400 bg-slate-600 text-slate-100'
-                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-slate-100',
+                        ? 'border-red-500 bg-red-600 text-white'
+                        : 'border-slate-600 bg-slate-700 text-slate-300 hover:border-red-700 hover:bg-red-900/40 hover:text-red-300',
                     )}>
                     No, I couldn't
                   </button>
@@ -499,7 +497,7 @@ export function SessionPanel({
                   <textarea rows={2} value={s.comment}
                     onChange={e => updateStep(i, { comment: e.target.value })}
                     placeholder="What went wrong, or what stopped you?"
-                    className="w-full resize-none rounded-lg border border-slate-600 bg-slate-700 px-2.5 py-1.5 text-[11px] text-slate-300 placeholder:text-slate-600 focus:border-slate-400 focus:outline-none"
+                    className="w-full resize-none rounded-lg border border-slate-600 bg-slate-700 px-2.5 py-1.5 text-[11px] text-slate-300 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
                   />
                 )}
               </div>
@@ -564,7 +562,7 @@ export function SessionPanel({
                   <input type="text" value={s.comment}
                     onChange={e => updateStep(i, { comment: e.target.value })}
                     placeholder="What was confusing or missing? (optional)"
-                    className="w-full rounded-lg border border-slate-600 bg-slate-700 px-2.5 py-1.5 text-[11px] text-slate-300 placeholder:text-slate-600 focus:border-slate-400 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-600 bg-slate-700 px-2.5 py-1.5 text-[11px] text-slate-300 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
                   />
                 )}
               </div>
@@ -601,7 +599,7 @@ export function SessionPanel({
           value={taskComment}
           onChange={e => setTaskComment(e.target.value)}
           placeholder="Optional comments or observations…"
-          className="w-full resize-none rounded-lg border border-slate-600 bg-slate-700 px-2.5 py-1.5 text-[11px] text-slate-300 placeholder:text-slate-600 focus:border-slate-400 focus:outline-none"
+          className="w-full resize-none rounded-lg border border-slate-600 bg-slate-700 px-2.5 py-1.5 text-[11px] text-slate-300 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
         />
       </div>
 
