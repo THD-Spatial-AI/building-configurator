@@ -62,18 +62,5 @@ export const TESTING_TASKS: TestingTask[] = [
       { type: 'rating', text: 'How easy was this task overall?', lowLabel: 'Very difficult', highLabel: 'Very easy' },
     ],
     feedbackGoalHint: 'I was trying to set the roof type and add solar panels to the south-facing slope.',
-  },
-  {
-    id:           'task-4',
-    title:        'Get the result out',
-    timeEstimate: '3–5 min',
-    description:  "You've set up your building and added solar panels. Now try to export or save the configuration.",
-    steps: [
-      { type: 'todo',     text: 'Find and use the export option' },
-      { type: 'question', text: 'Where would you expect to find the file on your computer?' },
-      { type: 'question', text: 'What would you do with it next in your usual workflow?' },
-      { type: 'rating',   text: 'How easy was it to find and use the export?', lowLabel: 'Very difficult', highLabel: 'Very easy' },
-    ],
-    feedbackGoalHint: 'I was trying to export or save the building configuration I had set up.',
-  },
+  }
 ];
