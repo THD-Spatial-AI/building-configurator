@@ -26,9 +26,16 @@ export function isCloseTo(a: number, b: number, epsilon = 1e-6): boolean {
   return Math.abs(a - b) <= epsilon;
 }
 
-/** Returns 'modified' if any property of `element` differs from its default. */
-export function getElementStatus(element: BuildingElement): SnapshotStatus {
-  const def = DEFAULT_ELEMENTS[element.id];
+/**
+ * Returns 'modified' if any property of `element` differs from its baseline.
+ * When `baselineElement` is provided it is used directly; otherwise falls back
+ * to the static DEFAULT_ELEMENTS lookup (used when no building has been loaded).
+ */
+export function getElementStatus(
+  element: BuildingElement,
+  baselineElement?: BuildingElement,
+): SnapshotStatus {
+  const def = baselineElement ?? DEFAULT_ELEMENTS[element.id];
 
   if (!def) return 'modified';
 
@@ -86,17 +93,33 @@ export interface SnapshotRow {
   rawValue?: string | number;
 }
 
-/** Builds the rows for the building info table, flagging each value against the default. */
+export interface SnapshotBaseline {
+  general: typeof DEFAULT_GENERAL;
+  elements: Record<string, BuildingElement>;
+  totalArea: number;
+  elementCount: number;
+}
+
+/**
+ * Builds the rows for the building info table, flagging each value against the
+ * baseline. When `baseline` is omitted the static defaults are used as the
+ * reference point (no building data loaded yet).
+ */
 export function buildSnapshotRows(
   general: typeof DEFAULT_GENERAL,
   elements: Record<string, BuildingElement>,
   totalArea: number,
+  baseline?: SnapshotBaseline,
 ): SnapshotRow[] {
+  const baseGeneral      = baseline?.general      ?? DEFAULT_GENERAL;
+  const baseTotalArea    = baseline?.totalArea    ?? DEFAULT_TOTAL_AREA;
+  const baseElementCount = baseline?.elementCount ?? Object.keys(DEFAULT_ELEMENTS).length;
+
   return [
     {
       label: 'Type',
       value: general.buildingType,
-      status: general.buildingType === DEFAULT_GENERAL.buildingType ? 'default' : 'modified',
+      status: general.buildingType === baseGeneral.buildingType ? 'default' : 'modified',
       editKey: 'buildingType',
       editType: 'select',
       options: BUILDING_TYPE_OPTIONS,
@@ -105,7 +128,7 @@ export function buildSnapshotRows(
     {
       label: 'Construction',
       value: general.constructionPeriod,
-      status: general.constructionPeriod === DEFAULT_GENERAL.constructionPeriod ? 'default' : 'modified',
+      status: general.constructionPeriod === baseGeneral.constructionPeriod ? 'default' : 'modified',
       editKey: 'constructionPeriod',
       editType: 'year-to-period',
       rawValue: general.constructionPeriod,
@@ -113,7 +136,7 @@ export function buildSnapshotRows(
     {
       label: 'Country',
       value: general.country,
-      status: general.country === DEFAULT_GENERAL.country ? 'default' : 'modified',
+      status: general.country === baseGeneral.country ? 'default' : 'modified',
       editKey: 'country',
       editType: 'select',
       options: COUNTRY_OPTIONS,
@@ -122,7 +145,7 @@ export function buildSnapshotRows(
     {
       label: 'Floor area',
       value: `${general.floorArea.toFixed(1)} m²`,
-      status: isCloseTo(general.floorArea, DEFAULT_GENERAL.floorArea) ? 'default' : 'modified',
+      status: isCloseTo(general.floorArea, baseGeneral.floorArea) ? 'default' : 'modified',
       editKey: 'floorArea',
       editType: 'number',
       rawValue: general.floorArea,
@@ -130,7 +153,7 @@ export function buildSnapshotRows(
     {
       label: 'Storeys',
       value: `${general.storeys}`,
-      status: general.storeys === DEFAULT_GENERAL.storeys ? 'default' : 'modified',
+      status: general.storeys === baseGeneral.storeys ? 'default' : 'modified',
       editKey: 'storeys',
       editType: 'number',
       rawValue: general.storeys,
@@ -138,7 +161,7 @@ export function buildSnapshotRows(
     {
       label: 'Room height',
       value: `${general.roomHeight.toFixed(1)} m`,
-      status: isCloseTo(general.roomHeight, DEFAULT_GENERAL.roomHeight) ? 'default' : 'modified',
+      status: isCloseTo(general.roomHeight, baseGeneral.roomHeight) ? 'default' : 'modified',
       editKey: 'roomHeight',
       editType: 'number',
       rawValue: general.roomHeight,
@@ -146,20 +169,18 @@ export function buildSnapshotRows(
     {
       label: 'Volume',
       value: `${(general.floorArea * general.roomHeight).toFixed(0)} m³`,
-      status: isCloseTo(general.floorArea, DEFAULT_GENERAL.floorArea)
-        && isCloseTo(general.roomHeight, DEFAULT_GENERAL.roomHeight)
+      status: isCloseTo(general.floorArea, baseGeneral.floorArea)
+        && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
         ? 'default'
         : 'modified',
-      // Derived from floor area × room height — not directly editable.
     },
     {
       label: 'Envelope',
       value: `${totalArea.toFixed(1)} m²  ·  ${Object.keys(elements).length} surfaces`,
-      status: isCloseTo(totalArea, DEFAULT_TOTAL_AREA)
-        && Object.keys(elements).length === Object.keys(DEFAULT_ELEMENTS).length
+      status: isCloseTo(totalArea, baseTotalArea)
+        && Object.keys(elements).length === baseElementCount
         ? 'default'
         : 'modified',
-      // Envelope is computed from elements — not directly editable here.
     },
   ];
 }
