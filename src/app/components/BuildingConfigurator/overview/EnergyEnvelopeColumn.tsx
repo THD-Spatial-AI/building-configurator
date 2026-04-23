@@ -20,17 +20,13 @@ export interface EnergyEnvelopeColumnProps {
   uploadError: string | null;
   onClearError: () => void;
   elements: Record<string, BuildingElement>;
-  selectedId: string | null;
-  onSelectElement: (id: string) => void;
-  onUpdateElement: (id: string, patch: Partial<BuildingElement>) => void;
-  onEnableCustomMode: (id: string) => void;
+  baselineElements?: Record<string, BuildingElement>;
   roofConfig: RoofConfig;
   /** Re-triggers the scroll indicator check when the panel becomes visible. */
   isActive: boolean;
   buildingId: string;
   /** Pre-seeded hourly timeseries from the model. Null means no model data yet. */
   initialTimeseries: LoadDataPoint[] | null;
-  onSwitchToConfigure: (elementId: string) => void;
   mode: 'basic' | 'expert';
   installedTechIds?: string[];
   pvSummary: PvSummary;
@@ -43,15 +39,11 @@ export function EnergyEnvelopeColumn({
   uploadError,
   onClearError,
   elements,
-  selectedId,
-  onSelectElement,
-  onUpdateElement,
-  onEnableCustomMode,
+  baselineElements,
   roofConfig,
   isActive,
   buildingId,
   initialTimeseries,
-  onSwitchToConfigure,
   mode,
   installedTechIds,
   pvSummary,
@@ -99,12 +91,8 @@ export function EnergyEnvelopeColumn({
           </div>
           <ElementCompositionSection
             elements={elements}
-            selectedId={selectedId}
-            onSelect={onSelectElement}
-            onUpdate={onUpdateElement}
-            onEnableCustomMode={onEnableCustomMode}
+            baselineElements={baselineElements}
             roofConfig={roofConfig}
-            onSwitchToConfigure={onSwitchToConfigure}
           />
         </div>
 
