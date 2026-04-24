@@ -81,10 +81,10 @@ export interface SnapshotRow {
   editKey?: string;
   /**
    * Controls the edit widget rendered for this row:
-   * - 'text'           → free-text input
-   * - 'number'         → numeric input; saved as Number(draft)
-   * - 'select'         → dropdown; requires `options`
-   * - 'year-to-period' → year number input that saves the derived construction period string
+   * - 'text'           -> free-text input
+   * - 'number'         -> numeric input; saved as Number(draft)
+   * - 'select'         -> dropdown; requires `options`
+   * - 'year-to-period' -> year number input that saves the derived construction period string
    */
   editType?: 'text' | 'number' | 'select' | 'year-to-period';
   /** Option list for 'select' rows. */

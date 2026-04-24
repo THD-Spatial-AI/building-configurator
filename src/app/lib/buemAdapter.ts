@@ -91,7 +91,7 @@ const BUILDING_TYPE_LABELS: Record<string, string> = {
 
 /**
  * Converts a BUEM element id to a readable label.
- * e.g. "Wall_1" → "Wall 1", "Window_S" → "Window S".
+ * e.g. "Wall_1" -> "Wall 1", "Window_S" -> "Window S".
  */
 function labelFromId(id: string): string {
   return id.replace(/_/g, ' ');
@@ -287,7 +287,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
 
 /**
  * Formats a coordinate pair as a display string.
- * e.g. [11.582, 48.135] → "48.1350° N, 11.5820° E"
+ * e.g. [11.582, 48.135] -> "48.1350° N, 11.5820° E"
  */
 export function formatCoordinates(lon: number, lat: number): string {
   const latStr = `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}`;

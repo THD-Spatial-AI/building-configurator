@@ -587,8 +587,8 @@ interface BuildingEditorProps {
  * Building-level parameter editor shown when "Building" is selected in the panel.
  *
  * Layout mirrors the surface ElementList pattern:
- *  - No section active → 2-column grid of summary cards.
- *  - Section active → inactive sections collapse to compact chips at the top;
+ *  - No section active -> 2-column grid of summary cards.
+ *  - Section active -> inactive sections collapse to compact chips at the top;
  *    the active section fills the remaining height with a scrollable body.
  */
 export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {

@@ -16,7 +16,7 @@ export type ModelDataPath = string | readonly string[];
 export const MODEL_DATA_MAP = {
 
   // ── Thematic data ───────────────────────────────────────────────────────────
-  // Source: BUEM GeoJSON FeatureCollection → features[n]
+  // Source: BUEM GeoJSON FeatureCollection -> features[n]
   thematic: {
     // Identity available to the dashboard header and snapshot cards.
     buildingId:  'id',
