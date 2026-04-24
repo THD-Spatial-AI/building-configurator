@@ -200,11 +200,11 @@ jobs:
                 '',
                 'This original feedback issue is preserved as-is for reference.',
                 '',
-                '_To hand the refined issue to a Copilot agent: open it, click **Copilot** → **Fix issue**._',
+                '_To hand the refined issue to a Copilot agent: open it, click **Copilot** -> **Fix issue**._',
               ].join('\n'),
             });
 
-            core.info(`Feedback #${issue.number} → refined issue #${newIssue.data.number}`);
+            core.info(`Feedback #${issue.number} -> refined issue #${newIssue.data.number}`);
 
             // ── Add refined issue to org project ──────────────────────────────
             // The GITHUB_TOKEN cannot trigger other workflows, so we use the

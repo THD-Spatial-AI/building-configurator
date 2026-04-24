@@ -83,7 +83,7 @@ Then commit `.gitattributes` and your files as usual.
 !!! note
     If you publish releases and want Git LFS files included in release archives, enable:
 
-    **Settings → Archives → Include Git LFS objects in archives**
+    **Settings -> Archives -> Include Git LFS objects in archives**
 
     ![GitHub release archives setting](../assets/getting-started/archives_setting_screenshot.png)
 
