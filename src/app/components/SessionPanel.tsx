@@ -1,12 +1,12 @@
 // Unified session panel — slides in/out from the right edge.
 // Dark background separates it visually from the white configurator UI.
 // Step types:
-//   'todo'     → completion card with Yes/No + optional reason
-//   'question' → open-ended textarea
-//   'yesno'    → binary Yes/No + optional follow-up if No
+//   'todo'     -> completion card with Yes/No + optional reason
+//   'question' -> open-ended textarea
+//   'yesno'    -> binary Yes/No + optional follow-up if No
 // Submission types:
-//   'session'  → step responses on Next/Finish (session-data label, aggregated later)
-//   'issue'    → explicit UI bug report (user-feedback label, actionable immediately)
+//   'session'  -> step responses on Next/Finish (session-data label, aggregated later)
+//   'issue'    -> explicit UI bug report (user-feedback label, actionable immediately)
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -61,7 +61,7 @@ function deriveRating(states: StepState[], types: StepType[]): number {
     .filter((v): v is number => v !== null);
   if (ratingVals.length > 0) {
     const avg = ratingVals.reduce((a, b) => a + b, 0) / ratingVals.length;
-    // Map 1–5 (easy) to GitHub issue severity 1–5 (bad): invert so 5=easy → rating 1
+    // Map 1–5 (easy) to GitHub issue severity 1–5 (bad): invert so 5=easy -> rating 1
     return Math.round(6 - avg);
   }
   const todos = types.map((t, i) => t === 'todo' ? states[i] : null).filter(Boolean) as StepState[];
