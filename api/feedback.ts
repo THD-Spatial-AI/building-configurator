@@ -120,7 +120,7 @@ function buildSessionTitle(p: FeedbackPayload): string {
 
 function buildSessionBody(p: FeedbackPayload): string {
   const statusIcon = (s: SubtaskResult['status']) =>
-    s === 'done' ? '✅ Done' : s === 'couldnt_finish' ? '❌ Could not finish' : '— Skipped';
+    s === 'done' ? 'Done' : s === 'couldnt_finish' ? ' Could not finish' : '— Skipped';
 
   const ratingBar = (n: number | null | undefined) => {
     if (!n) return '—';
@@ -146,13 +146,13 @@ function buildSessionBody(p: FeedbackPayload): string {
     for (const r of p.subtaskResults) {
       lines.push('');
       if (r.type === 'todo') {
-        lines.push(`**☑ ${r.step}**  →  ${statusIcon(r.status)}`);
+        lines.push(`**☑ ${r.step}**  ->  ${statusIcon(r.status)}`);
         if (r.comment) lines.push(`> ${r.comment}`);
       } else if (r.type === 'yesno') {
-        lines.push(`**? ${r.step}**  →  ${r.answer === 'yes' ? '✅ Yes' : r.answer === 'no' ? '❌ No' : '— Not answered'}`);
+        lines.push(`**? ${r.step}**  ->  ${r.answer === 'yes' ? 'Yes' : r.answer === 'no' ? ' No' : '— Not answered'}`);
         if (r.comment) lines.push(`> ${r.comment}`);
       } else if (r.type === 'rating') {
-        lines.push(`**★ ${r.step}**  →  ${ratingBar(r.rating)}`);
+        lines.push(`**★ ${r.step}**  ->  ${ratingBar(r.rating)}`);
       } else if (r.type === 'question') {
         lines.push(`**💬 ${r.step}**`);
         if (r.response) lines.push(`> ${r.response}`);
