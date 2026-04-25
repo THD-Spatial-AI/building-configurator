@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { Box } from '@mui/material';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
-import { FeedbackKitProvider, SessionPanel, FeedbackWidget } from '@thd-spatial-ai/feedback-kit';
+import { FeedbackKitProvider, SessionPanel } from '@thd-spatial-ai/feedback-kit';
 import { TESTING_TASKS } from './config/testingTasks';
 import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
@@ -262,7 +262,6 @@ export default function App() {
       onPrevTask={() => setTaskIndex((i) => Math.max(0, i - 1))}
       view={showConfigurator ? 'Configure' : 'Map'}
     />
-    <FeedbackWidget view={showConfigurator ? 'Configure' : 'Map'} />
     <Analytics />
     </FeedbackKitProvider>
   );

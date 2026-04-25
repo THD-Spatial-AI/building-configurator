@@ -17,6 +17,8 @@ export default defineConfig({
     alias: {
       // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
+      // Point to local feedback-kit source in dev; the installed dist is used in CI/prod
+      '@thd-spatial-ai/feedback-kit': path.resolve(__dirname, '../feedback-kit/src/index.ts'),
     },
   },
 
