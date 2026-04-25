@@ -124,7 +124,7 @@ function buildSessionBody(p: FeedbackPayload): string {
 
   const ratingBar = (n: number | null | undefined) => {
     if (!n) return '—';
-    return '⬛'.repeat(n) + '⬜'.repeat(5 - n) + ` ${n}/5`;
+    return '+'.repeat(n) + '-'.repeat(5 - n) + ` ${n}/5`;
   };
 
   const lines = [
@@ -154,7 +154,7 @@ function buildSessionBody(p: FeedbackPayload): string {
       } else if (r.type === 'rating') {
         lines.push(`**★ ${r.step}**  ->  ${ratingBar(r.rating)}`);
       } else if (r.type === 'question') {
-        lines.push(`**💬 ${r.step}**`);
+        lines.push(`**% ${r.step}**`);
         if (r.response) lines.push(`> ${r.response}`);
       }
     }

@@ -3,7 +3,8 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { Box } from '@mui/material';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
-import { SessionPanel } from './components/SessionPanel';
+import { FeedbackKitProvider, SessionPanel, FeedbackWidget } from '@thd-spatial-ai/feedback-kit';
+import { TESTING_TASKS } from './config/testingTasks';
 import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
 import demoConfig from '../assets/data/demo_config.json';
@@ -220,7 +221,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <FeedbackKitProvider apiEndpoint="/api/feedback">
     <ZoomTip />
     <ThemeProvider theme={theme}>
       {/* Map canvas */}
@@ -253,6 +254,7 @@ export default function App() {
       </Box>
     </ThemeProvider>
     <SessionPanel
+      tasks={TESTING_TASKS}
       taskIndex={taskIndex}
       collapsed={taskCollapsed}
       onToggleCollapsed={() => setTaskCollapsed((c) => !c)}
@@ -260,7 +262,8 @@ export default function App() {
       onPrevTask={() => setTaskIndex((i) => Math.max(0, i - 1))}
       view={showConfigurator ? 'Configure' : 'Map'}
     />
+    <FeedbackWidget view={showConfigurator ? 'Configure' : 'Map'} />
     <Analytics />
-    </>
+    </FeedbackKitProvider>
   );
 }

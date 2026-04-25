@@ -167,7 +167,7 @@ Set in the Vercel project dashboard — never committed to the repo.
 ```mermaid
 flowchart TD
     NEW["New issue opened"]
-    NEW --> CHECK{Title starts with\n[Feedback]?}
+    NEW --> CHECK{"Title starts with [Feedback]?"}
 
     CHECK -- Yes --> RF["refine-feedback.yml"]
     CHECK -- No --> AP["add-to-org-project.yml"]
