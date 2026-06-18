@@ -38,6 +38,8 @@ jobs:
           # models: read — only user PATs can. ISSUE_BOT_PAT must have Models: read
           # enabled under Account permissions in the fine-grained token settings.
           MODELS_TOKEN:        ${{ secrets.MODELS_PAT }}
+          # Same PAT used by add-to-org-project.yml — adds generated issues to the board.
+          ADD_TO_PROJECT_PAT:  ${{ secrets.ADD_TO_PROJECT_PAT }}
           GITHUB_REPOSITORY:   ${{ github.repository }}
           PHASE:               ${{ inputs.phase }}
           SINCE:               ${{ inputs.since }}

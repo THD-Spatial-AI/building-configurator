@@ -73,7 +73,7 @@ async function uploadScreenshot(shot: ScreenshotPayload): Promise<string> {
 
 function buildIssueTitle(p: FeedbackPayload): string {
   const taskPart = p.taskTitle ? `[${p.taskTitle}] ` : '';
-  const prefix   = `[Feedback] ${taskPart}`;
+  const prefix   = `[Bug] ${taskPart}`;
   const max      = 72 - prefix.length;
   const goal     = p.goal.replace(/\n/g, ' ').trim();
   return `${prefix}${goal.length > max ? goal.slice(0, max - 1) + '…' : goal}`;
@@ -204,7 +204,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const body   = isSession ? buildSessionBody(payload)   : buildIssueBody(payload, screenshotUrls);
   const labels = isSession
     ? ['session-data', ...(payload.taskId ? [payload.taskId] : [])]
-    : ['user-feedback', 'ux', ratingMeta(payload.rating ?? 3).ghLabel, ...(payload.taskId ? [payload.taskId] : [])];
+    : ['bug', 'ux', ratingMeta(payload.rating ?? 3).ghLabel, ...(payload.taskId ? [payload.taskId] : [])];
 
   // ── Create GitHub issue ───────────────────────────────────────────────────
   const ghRes = await fetch(

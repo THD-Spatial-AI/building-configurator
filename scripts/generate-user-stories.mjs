@@ -11,12 +11,16 @@
 //                For fine-grained PATs, enable Models: read under Account permissions.
 //                For classic PATs, no specific scope is needed.
 
-const REPO         = process.env.GITHUB_REPOSITORY;
-const TOKEN        = process.env.GH_TOKEN;
-const MODELS_TOKEN = process.env.MODELS_TOKEN;
-const PHASE        = process.env.PHASE;
-const SINCE        = process.env.SINCE || null;
-const UNTIL        = process.env.UNTIL || null;
+const REPO           = process.env.GITHUB_REPOSITORY;
+const TOKEN          = process.env.GH_TOKEN;
+const MODELS_TOKEN   = process.env.MODELS_TOKEN;
+const PHASE          = process.env.PHASE;
+const SINCE          = process.env.SINCE || null;
+const UNTIL          = process.env.UNTIL || null;
+// Project board — optional; set ADD_TO_PROJECT_PAT to enable auto-assignment.
+const PROJECT_PAT    = process.env.ADD_TO_PROJECT_PAT || null;
+const PROJECT_ORG    = process.env.PROJECT_ORG    || (REPO ? REPO.split('/')[0] : '');
+const PROJECT_NUMBER = parseInt(process.env.PROJECT_NUMBER || '7', 10);
 
 if (!REPO || !TOKEN || !PHASE) {
   console.error('Missing required env vars: GITHUB_REPOSITORY, GH_TOKEN, PHASE');
@@ -257,6 +261,83 @@ ${sessions}`;
   return JSON.parse(content);
 }
 
+// ─── Project board ────────────────────────────────────────────────────────────
+
+let _projectId = null;
+
+async function getProjectId() {
+  if (_projectId) return _projectId;
+  if (!PROJECT_PAT) return null;
+
+  const res = await fetch('https://api.github.com/graphql', {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${PROJECT_PAT}`, 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ query: `query { organization(login: "${PROJECT_ORG}") { projectV2(number: ${PROJECT_NUMBER}) { id } } }` }),
+  });
+  const data = await res.json();
+  _projectId = data.data?.organization?.projectV2?.id ?? null;
+  return _projectId;
+}
+
+async function addToProjectBoard(nodeId) {
+  const projectId = await getProjectId();
+  if (!projectId) return;
+
+  await fetch('https://api.github.com/graphql', {
+    method:  'POST',
+    headers: { 'Authorization': `Bearer ${PROJECT_PAT}`, 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      query: `mutation { addProjectV2ItemById(input: { projectId: "${projectId}", contentId: "${nodeId}" }) { item { id } } }`,
+    }),
+  });
+}
+
+// ─── Developer issue ──────────────────────────────────────────────────────────
+
+/** Extracts the Acceptance Criteria block from a user story body. */
+function extractCriteria(body) {
+  const match = body.match(/## Acceptance Criteria\n([\s\S]*?)(?=\n## |\n---\n|$)/);
+  return match ? match[1].trim() : '- [ ] See linked user story';
+}
+
+/** Extracts the Priority line from a user story body. */
+function extractPriority(body) {
+  const match = body.match(/## Priority\n(\*\*(?:Low|Medium|High)\*\*[^\n]*)/);
+  return match ? match[1].trim() : '**Medium**';
+}
+
+/** Creates a developer-facing task issue derived from a user story. */
+async function createDevIssue(storyNumber, storyTitle, storyBody, taskKey) {
+  const taskTitle = storyTitle.replace(/^User story:\s*/i, '').trim();
+  const criteria  = extractCriteria(storyBody);
+  const priority  = extractPriority(storyBody);
+
+  await ensureLabel('needs-triage', 'e4e669', 'Awaiting triage');
+
+  const body = [
+    '## Task',
+    '',
+    `Implement improvements to address: **${taskTitle}**`,
+    '',
+    `> Based on user research (${PHASE}). Full context and session evidence: user story #${storyNumber}.`,
+    '',
+    '## Acceptance Criteria',
+    '',
+    criteria,
+    '',
+    '## Priority',
+    priority,
+  ].join('\n');
+
+  const issue = await ghRequest('POST', '/issues', {
+    title:  `[Dev] ${taskTitle}`,
+    body,
+    labels: ['needs-triage', PHASE, taskKey],
+  });
+
+  return issue;
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -323,14 +404,25 @@ async function main() {
     }
     console.log('done');
 
-    // Create the new issue
-    const issue = await ghRequest('POST', '/issues', {
+    // Create the user story issue
+    const storyIssue = await ghRequest('POST', '/issues', {
       title:  story.title,
       body:   story.body,
       labels: ['user-story', PHASE, taskKey],
     });
-    console.log(`  Created #${issue.number}: ${issue.html_url}`);
-    created.push({ number: issue.number, url: issue.html_url, task: taskKey });
+    console.log(`  User story  #${storyIssue.number}: ${storyIssue.html_url}`);
+    await addToProjectBoard(storyIssue.node_id);
+
+    // Create the linked developer task issue
+    const devIssue = await createDevIssue(storyIssue.number, story.title, story.body, taskKey);
+    console.log(`  Dev task    #${devIssue.number}: ${devIssue.html_url}`);
+    await addToProjectBoard(devIssue.node_id);
+
+    created.push({
+      storyNumber: storyIssue.number, storyUrl: storyIssue.html_url,
+      devNumber:   devIssue.number,   devUrl:   devIssue.html_url,
+      task: taskKey,
+    });
 
     // Tag session issues with the phase label
     for (const session of issues) {
@@ -346,8 +438,12 @@ async function main() {
   if (created.length === 0) {
     console.log('No user stories created.');
   } else {
-    for (const { task, number, url } of created) {
-      console.log(`[${task}] #${number}  ${url}`);
+    for (const { task, storyNumber, storyUrl, devNumber, devUrl } of created) {
+      console.log(`[${task}]  user-story #${storyNumber}  ${storyUrl}`);
+      console.log(`       dev-task   #${devNumber}  ${devUrl}`);
+    }
+    if (!PROJECT_PAT) {
+      console.log('\nTip: set ADD_TO_PROJECT_PAT to automatically add issues to the project board.');
     }
   }
 }

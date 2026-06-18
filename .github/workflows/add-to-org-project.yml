@@ -1,5 +1,9 @@
 name: Add to organisation project
 
+# Adds every new issue and PR to the project board, except raw [Bug] reports
+# (those are closed and replaced by refined [Issue] tickets via refine-feedback.yml,
+# which handles project board placement itself).
+
 on:
   issues:
     types: [opened, reopened]
@@ -8,12 +12,55 @@ on:
 
 jobs:
   add-to-project:
-    # Skip raw [Feedback] issues — they are closed and superseded by a refined
-    # [Issue] which gets added to the project directly by refine-feedback.yml.
-    if: "!startsWith(github.event.issue.title, '[Feedback]')"
+    if: |
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'issues' && !startsWith(github.event.issue.title, '[Bug]'))
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v1.0.2
+      - name: Add to project board
+        uses: actions/github-script@v7
+        env:
+          ADD_TO_PROJECT_PAT: ${{ secrets.ADD_TO_PROJECT_PAT }}
         with:
-          project-url: https://github.com/orgs/THD-Spatial-AI/projects/7
-          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          script: |
+            const pat = process.env.ADD_TO_PROJECT_PAT;
+            if (!pat) {
+              core.warning('ADD_TO_PROJECT_PAT secret not set — skipping project assignment.');
+              return;
+            }
+
+            const nodeId =
+              context.payload.issue?.node_id ??
+              context.payload.pull_request?.node_id;
+
+            if (!nodeId) {
+              core.warning('No node_id found on event payload.');
+              return;
+            }
+
+            const gql = async (query) => {
+              const r = await fetch('https://api.github.com/graphql', {
+                method:  'POST',
+                headers: {
+                  'Authorization': `Bearer ${pat}`,
+                  'Content-Type':  'application/json',
+                },
+                body: JSON.stringify({ query }),
+              });
+              return r.json();
+            };
+
+            const projectData = await gql(
+              `query { organization(login: "THD-Spatial-AI") { projectV2(number: 7) { id } } }`
+            );
+            const projectId = projectData.data?.organization?.projectV2?.id;
+
+            if (!projectId) {
+              core.warning('Could not resolve project ID — check ADD_TO_PROJECT_PAT has Projects: read/write.');
+              return;
+            }
+
+            await gql(
+              `mutation { addProjectV2ItemById(input: { projectId: "${projectId}", contentId: "${nodeId}" }) { item { id } } }`
+            );
+            core.info(`Added ${nodeId} to project board.`);
