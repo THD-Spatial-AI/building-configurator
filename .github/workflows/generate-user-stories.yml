@@ -21,8 +21,9 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     permissions:
-      issues: write
-      contents: read
+      issues: write    # create and update issues
+      contents: read   # checkout repo to run the script
+      models: read     # GitHub Models API (gpt-4o)
     steps:
       - uses: actions/checkout@v4
 
@@ -33,11 +34,6 @@ jobs:
       - name: Generate user stories
         env:
           GH_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
-          # GitHub Models requires a classic PAT from an account enrolled in the beta.
-          # Fine-grained PATs (like ISSUE_BOT_PAT) need an explicit "models" permission.
-          # Create a classic PAT at github.com/settings/tokens (no scope needed) and
-          # add it as repository secret MODELS_PAT.
-          MODELS_TOKEN:        ${{ secrets.MODELS_PAT }}
           GITHUB_REPOSITORY:   ${{ github.repository }}
           PHASE:               ${{ inputs.phase }}
           SINCE:               ${{ inputs.since }}

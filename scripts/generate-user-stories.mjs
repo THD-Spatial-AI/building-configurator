@@ -2,27 +2,21 @@
 // generates one user story per task via GitHub Models API, and creates GitHub issues.
 //
 // Run via: .github/workflows/generate-user-stories.yml (workflow_dispatch)
-// Required env vars: GH_TOKEN (GitHub REST API), MODELS_TOKEN (GitHub Models API), GITHUB_REPOSITORY, PHASE
+// Required env vars: GH_TOKEN, GITHUB_REPOSITORY, PHASE
 // Optional env vars: SINCE (YYYY-MM-DD), UNTIL (YYYY-MM-DD)
 //
-// GH_TOKEN    — GITHUB_TOKEN from Actions (issues: write). Used for all REST calls.
-// MODELS_TOKEN — A classic PAT or fine-grained PAT with GitHub Models access.
-//                Set as MODELS_PAT repository secret. Cannot be GITHUB_TOKEN because
-//                the auto-provided Actions token does not include GitHub Models access.
+// GH_TOKEN is the auto-provided GITHUB_TOKEN from Actions. It covers both the
+// GitHub REST API and the GitHub Models API when the workflow declares
+// `permissions: models: read`.
 
-const REPO         = process.env.GITHUB_REPOSITORY;
-const TOKEN        = process.env.GH_TOKEN;
-const MODELS_TOKEN = process.env.MODELS_TOKEN;
-const PHASE        = process.env.PHASE;
-const SINCE        = process.env.SINCE || null;
-const UNTIL        = process.env.UNTIL || null;
+const REPO  = process.env.GITHUB_REPOSITORY;
+const TOKEN = process.env.GH_TOKEN;
+const PHASE = process.env.PHASE;
+const SINCE = process.env.SINCE || null;
+const UNTIL = process.env.UNTIL || null;
 
 if (!REPO || !TOKEN || !PHASE) {
   console.error('Missing required env vars: GITHUB_REPOSITORY, GH_TOKEN, PHASE');
-  process.exit(1);
-}
-if (!MODELS_TOKEN) {
-  console.error('Missing MODELS_TOKEN. Add a MODELS_PAT repository secret (classic PAT with GitHub Models access).');
   process.exit(1);
 }
 
@@ -235,7 +229,7 @@ ${sessions}`;
   const res = await fetch(GH_MODELS_API, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${MODELS_TOKEN}`,
+      'Authorization': `Bearer ${TOKEN}`,
       'Content-Type':  'application/json',
     },
     body: JSON.stringify({
