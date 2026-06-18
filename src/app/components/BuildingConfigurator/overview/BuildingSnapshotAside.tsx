@@ -24,7 +24,7 @@ export interface BuildingSnapshotAsideProps {
   pvSummary: PvSummary;
   onToggleTech?: (id: string, installed: boolean) => void;
   /** Opens the matching technology flow in the Configure workspace. */
-  onOpenTech?: (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => void;
+  onOpenTech?: (id: string) => void;
   mode: 'basic' | 'expert';
 }
 

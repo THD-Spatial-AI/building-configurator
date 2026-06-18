@@ -44,6 +44,8 @@ import { PvSurfaceManager } from './configure/pv/PvSurfaceManager';
 import { BatteryEditor } from './configure/pv/BatteryEditor';
 import { createSurfacePvConfig, DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
 import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
+import { TECH_REGISTRY, VISIBLE_TECHS } from '../../config/techRegistry';
+import type { TechNavItem } from '../../config/techRegistry';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -217,7 +219,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
   const [selectedId,    setSelectedId]    = useState<string | null>(null);
   const [surfaceEditorTab, setSurfaceEditorTab] = useState<'properties' | 'pv'>('properties');
-  const [panelView,     setPanelView]     = useState<'building' | 'surface' | 'surface-group' | 'technology-pv' | 'technology-battery'>('building');
+  const [panelView,     setPanelView]     = useState<string>('building');
   /** The group type currently driving the surface-group grid in the center panel. */
   const [activeGroupType, setActiveGroupType] = useState<ElementGroupKey | null>(null);
   /** Whether the roof-type accordion is expanded while editing a roof surface. */
@@ -432,14 +434,16 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const updateBattery = (patch: Partial<BatteryConfig>) =>
     setBatteryConfig((prev) => ({ ...prev, ...patch }));
 
-  /** Opens the configure workspace for a specific technology card from the overview. */
-  const handleTechnologyOpen = (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => {
-    if (id === 'solar_pv') {
-      handleTechnologyPvSelect();
-      return;
-    }
-    if (id === 'battery') {
-      handleTechnologyBatterySelect();
+  /** Opens the configure workspace for a technology card, using the registry to resolve the panel. */
+  const handleTechnologyOpen = (id: string) => {
+    if (id === 'solar_pv') { handleTechnologyPvSelect(); return; }
+    if (id === 'battery')  { handleTechnologyBatterySelect(); return; }
+    const tech = TECH_REGISTRY.find((t) => t.id === id);
+    if (tech?.panelView) {
+      setPanelView(tech.panelView);
+      setSelectedId(null);
+      setActiveGroupType(null);
+      setWorkspaceView('configure');
       return;
     }
     handleBuildingSelect();
@@ -659,6 +663,52 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const installedTechIds = batteryConfig.installed
     ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
     : otherTechIds.filter((id) => id !== 'battery');
+
+  /** Builds the tech nav item list for SurfaceGroupSelector from the registry + current state. */
+  function buildTechNavItems(): TechNavItem[] {
+    return VISIBLE_TECHS
+      .filter((tech) => tech.panelView !== undefined)
+      .map((tech): TechNavItem => {
+        if (tech.id === 'solar_pv') {
+          return {
+            id:           tech.id,
+            label:        tech.label,
+            Icon:         tech.Icon,
+            selected:     panelView === tech.panelView,
+            badge:        pvSummary.surfaceCount > 0 ? String(pvSummary.surfaceCount) : undefined,
+            subtitle:     pvSummary.surfaceCount > 0
+              ? `${pvSummary.surfaceCount} ${pvSummary.surfaceCount === 1 ? 'surface' : 'surfaces'} · ${pvSummary.totalCapacityKw.toFixed(1)} kWp`
+              : 'No surfaces configured',
+            onSelect:     handleTechnologyPvSelect,
+            navIconColor: tech.navIconColor,
+          };
+        }
+        if (tech.id === 'battery') {
+          return {
+            id:           tech.id,
+            label:        tech.label,
+            Icon:         tech.Icon,
+            selected:     panelView === tech.panelView,
+            badge:        batteryConfig.installed ? '●' : undefined,
+            subtitle:     batteryConfig.installed ? 'Installed' : 'Not configured',
+            onSelect:     handleTechnologyBatterySelect,
+            navIconColor: tech.navIconColor,
+          };
+        }
+        // Generic building-scope tech with a panelView
+        const installed = otherTechIds.includes(tech.id);
+        return {
+          id:           tech.id,
+          label:        tech.label,
+          Icon:         tech.Icon,
+          selected:     panelView === tech.panelView,
+          badge:        installed ? '●' : undefined,
+          subtitle:     installed ? 'Installed' : 'Not configured',
+          onSelect:     () => handleTechnologyOpen(tech.id),
+          navIconColor: tech.navIconColor,
+        };
+      });
+  }
 
   return (
     <div className="cfg-panel w-[80vw] h-[88vh] rounded-lg shadow-2xl flex flex-col bg-card overflow-hidden">
@@ -950,13 +1000,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       onSelectSurface={handleElementSelect}
                       onDeleteSurface={deleteSurface}
                       surfacePvConfigs={surfacePvConfigs}
-                      pvSelected={panelView === 'technology-pv'}
-                      pvSurfaceCount={pvSummary.surfaceCount}
-                      pvCapacityKw={pvSummary.totalCapacityKw}
-                      onSelectTechnologyPv={handleTechnologyPvSelect}
-                      batterySelected={panelView === 'technology-battery'}
-                      batteryInstalled={batteryConfig.installed}
-                      onSelectTechnologyBattery={handleTechnologyBatterySelect}
+                      techNavItems={buildTechNavItems()}
                     />
                   </ScrollHintContainer>
                 </div>

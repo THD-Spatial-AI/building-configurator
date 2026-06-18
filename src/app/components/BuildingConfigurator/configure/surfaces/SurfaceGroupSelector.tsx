@@ -4,7 +4,7 @@
 // center panel can stay as a pure editor without a surface-selection grid.
 
 import { useState } from 'react';
-import { ChevronLeft, Building2, Sun, Battery, Plus, X, Trash2 } from 'lucide-react';
+import { ChevronLeft, Building2, Plus, X, Trash2, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS } from '@/app/components/BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -15,6 +15,7 @@ import {
 } from '@/app/components/BuildingConfigurator/shared/elementListUtils';
 import { detectRoofType } from '@/app/components/BuildingConfigurator/configure/roof/RoofTypeGallery';
 import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import type { TechNavItem } from '@/app/config/techRegistry';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -58,13 +59,8 @@ interface SurfaceGroupSelectorProps {
   onDeleteSurface?: (id: string) => void;
   /** Per-surface PV configs — used to show a PV badge on surface items. */
   surfacePvConfigs?: Record<string, PvConfig>;
-  pvSelected?: boolean;
-  pvSurfaceCount?: number;
-  pvCapacityKw?: number;
-  onSelectTechnologyPv?: () => void;
-  batterySelected?: boolean;
-  batteryInstalled?: boolean;
-  onSelectTechnologyBattery?: () => void;
+  /** Technology nav items built from the registry + current state by BuildingConfigurator. */
+  techNavItems?: TechNavItem[];
 }
 
 export function SurfaceGroupSelector({
@@ -79,13 +75,7 @@ export function SurfaceGroupSelector({
   onSelectSurface,
   onDeleteSurface,
   surfacePvConfigs = {},
-  pvSelected = false,
-  pvSurfaceCount = 0,
-  pvCapacityKw = 0,
-  onSelectTechnologyPv,
-  batterySelected = false,
-  batteryInstalled = false,
-  onSelectTechnologyBattery,
+  techNavItems = [],
 }: SurfaceGroupSelectorProps) {
   const [showCreate, setShowCreate] = useState(false);
 
@@ -270,68 +260,41 @@ export function SurfaceGroupSelector({
         );
       })}
 
-      {/* ── Technologies ── */}
-      {onSelectTechnologyPv && (
+      {/* ── Technologies — rendered from TECH_REGISTRY via techNavItems ── */}
+      {techNavItems.length > 0 && (
         <>
           <div className="px-1 pt-2">
             <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">Technologies</p>
           </div>
 
-          <button
-            type="button"
-            onClick={onSelectTechnologyPv}
-            className={cn(
-              'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-all cursor-pointer',
-              pvSelected
-                ? 'border-primary/40 bg-primary/10 shadow-sm shadow-primary/10'
-                : 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow',
-            )}
-          >
-            <ChevronLeft className={cn('size-3 shrink-0', pvSelected ? 'text-primary' : 'text-slate-300')} />
-            {pvSurfaceCount > 0 && (
-              <span className={cn(
-                'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold',
-                pvSelected ? 'bg-primary/15 text-primary' : 'bg-slate-100 text-slate-500',
-              )}>
-                {pvSurfaceCount}
-              </span>
-            )}
-            <Sun className={cn('size-3.5 shrink-0', pvSelected ? 'text-primary' : 'text-yellow-500')} />
-            <div className="min-w-0 flex-1">
-              <p className={cn('text-[11px] font-semibold', pvSelected ? 'text-primary' : 'text-slate-700')}>Solar PV</p>
-              <p className="text-[9px] text-slate-400">
-                {pvSurfaceCount > 0
-                  ? `${pvSurfaceCount} ${pvSurfaceCount === 1 ? 'surface' : 'surfaces'} · ${pvCapacityKw.toFixed(1)} kWp`
-                  : 'No surfaces configured'}
-              </p>
-            </div>
-          </button>
-
-          {onSelectTechnologyBattery && (
+          {techNavItems.map((item) => (
             <button
+              key={item.id}
               type="button"
-              onClick={onSelectTechnologyBattery}
+              onClick={item.onSelect}
               className={cn(
                 'flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-all cursor-pointer',
-                batterySelected
+                item.selected
                   ? 'border-primary/40 bg-primary/10 shadow-sm shadow-primary/10'
                   : 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow',
               )}
             >
-              <ChevronLeft className={cn('size-3 shrink-0', batterySelected ? 'text-primary' : 'text-slate-300')} />
-              {batteryInstalled && (
+              <ChevronLeft className={cn('size-3 shrink-0', item.selected ? 'text-primary' : 'text-slate-300')} />
+              {item.badge && (
                 <span className={cn(
                   'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold',
-                  batterySelected ? 'bg-primary/15 text-primary' : 'bg-slate-100 text-slate-500',
-                )}>●</span>
+                  item.selected ? 'bg-primary/15 text-primary' : 'bg-slate-100 text-slate-500',
+                )}>
+                  {item.badge}
+                </span>
               )}
-              <Battery className={cn('size-3.5 shrink-0', batterySelected ? 'text-primary' : 'text-blue-500')} />
+              <item.Icon className={cn('size-3.5 shrink-0', item.selected ? 'text-primary' : (item.navIconColor ?? 'text-slate-500'))} />
               <div className="min-w-0 flex-1">
-                <p className={cn('text-[11px] font-semibold', batterySelected ? 'text-primary' : 'text-slate-700')}>Battery Storage</p>
-                <p className="text-[9px] text-slate-400">{batteryInstalled ? 'Installed' : 'Not configured'}</p>
+                <p className={cn('text-[11px] font-semibold', item.selected ? 'text-primary' : 'text-slate-700')}>{item.label}</p>
+                <p className="text-[9px] text-slate-400">{item.subtitle}</p>
               </div>
             </button>
-          )}
+          ))}
         </>
       )}
 

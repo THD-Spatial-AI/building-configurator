@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { FeedbackKitProvider, SessionPanel } from '@thd-spatial-ai/feedback-kit';
 import { TESTING_TASKS } from './config/testingTasks';
@@ -102,88 +102,6 @@ function MapCanvas({ onBuildingClick }: { onBuildingClick: () => void }) {
   );
 }
 
-// ─── Zoom tip banner ──────────────────────────────────────────────────────────
-
-// Kbd renders a single key label in a subtle "keycap" style.
-function Kbd({ children }: { children: React.ReactNode }) {
-  return (
-    <span style={{
-      display:       'inline-block',
-      padding:       '0 5px',
-      marginLeft:    2,
-      marginRight:   2,
-      background:    'rgba(255,255,255,0.12)',
-      border:        '1px solid rgba(255,255,255,0.2)',
-      borderRadius:  '4px',
-      color:         'rgba(255,255,255,0.8)',
-      fontWeight:    600,
-      fontSize:      '10.5px',
-      lineHeight:    '16px',
-      letterSpacing: '0.02em',
-    }}>
-      {children}
-    </span>
-  );
-}
-
-function ZoomTip() {
-  // Track browser zoom so we can apply an inverse scale, keeping the tip a fixed visual size.
-  const baseRatio = useRef(window.devicePixelRatio);
-  const [inverseScale, setInverseScale] = useState(1);
-
-  useEffect(() => {
-    const update = () => {
-      const raw = baseRatio.current / window.devicePixelRatio;
-      setInverseScale(Math.max(0.5, Math.min(2.5, raw)));
-    };
-    window.addEventListener('resize', update);
-    // matchMedia reliably detects zoom changes (resize alone misses many browsers)
-    let mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-    const onMqChange = () => {
-      update();
-      mq.removeEventListener('change', onMqChange);
-      mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-      mq.addEventListener('change', onMqChange);
-    };
-    mq.addEventListener('change', onMqChange);
-    return () => {
-      window.removeEventListener('resize', update);
-      mq.removeEventListener('change', onMqChange);
-    };
-  }, []);
-
-  return (
-    <div style={{
-      position:      'fixed',
-      bottom:        12,
-      left:          12,
-      zIndex:        9999,
-      pointerEvents: 'none',
-    }}>
-      <div style={{
-        padding:         '6px 20px',
-        background:      'rgba(0,0,0,0.45)',
-        borderRadius:    '8px',
-        color:           'rgba(255,255,255,0.5)',
-        fontSize:        '11px',
-        lineHeight:      '1.6',
-        userSelect:      'none',
-        textAlign:       'left',
-        transform:       `scale(${inverseScale})`,
-        transformOrigin: 'bottom left',
-      }}>
-        <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 500 }}>
-          Tip: if the page feels too small or too large, adjust the zoom level in your browser.
-        </span>
-        <br />
-        Hold <Kbd>Ctrl</Kbd> and press <Kbd>+</Kbd> to zoom in &nbsp;·&nbsp; <Kbd>Ctrl</Kbd> <Kbd>−</Kbd> to zoom out &nbsp;·&nbsp; <Kbd>Ctrl</Kbd> <Kbd>0</Kbd> to reset
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        or hold <Kbd>Ctrl</Kbd> and scroll the mouse wheel up / down
-      </div>
-    </div>
-  );
-}
-
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -207,7 +125,6 @@ export default function App() {
 
   return (
     <FeedbackKitProvider apiEndpoint="/api/feedback">
-    <ZoomTip />
       {/* Map canvas */}
       <div style={{
         width:    '100vw',

@@ -31,7 +31,7 @@ export interface EnergyEnvelopeColumnProps {
   installedTechIds?: string[];
   pvSummary: PvSummary;
   onToggleTech?: (id: string, installed: boolean) => void;
-  onOpenTech?: (id: 'solar_pv' | 'battery' | 'heat_pump' | 'ev_charger') => void;
+  onOpenTech?: (id: string) => void;
 }
 
 /** Right panel of the overview: energy chart primary, element composition secondary, technologies tertiary. */

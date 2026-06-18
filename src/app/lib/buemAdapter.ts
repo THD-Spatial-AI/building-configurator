@@ -4,6 +4,7 @@
 // and never access raw BUEM JSON directly. The paths themselves are documented in
 // src/app/config/modelDataMap.ts.
 
+import { TECH_REGISTRY } from '../config/techRegistry';
 import { MODEL_DATA_MAP } from '../config/modelDataMap';
 import {
   getMappedArray,
@@ -523,9 +524,12 @@ export function serializeToBuemFeature(
     building.thermal = thermal;
   }
 
-  // Build the techs block — battery_storage included when installed
+  // Build the techs block.
+  // Battery is included when installed, or when the registry marks it includeInModel = true
+  // (e.g. when the card is hidden but the simulation engine still needs the params).
+  const batteryDef = TECH_REGISTRY.find((t) => t.id === 'battery');
   const techs: Record<string, any> = {};
-  if (batteryConfig?.installed) {
+  if (batteryConfig && (batteryConfig.installed || batteryDef?.includeInModel)) {
     const b = batteryConfig;
     techs.battery_storage = {
       cont_energy_cap_max:                  b.cont_energy_cap_max,

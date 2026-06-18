@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 // Center-panel surface grid for a single element group type.
 // Shown when the user selects a group card in the right-column overview panel.
 // Surfaces are displayed as cards in a 3-column grid.
