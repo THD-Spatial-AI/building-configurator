@@ -33,9 +33,11 @@ jobs:
       - name: Generate user stories
         env:
           GH_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
-          # ISSUE_BOT_PAT is a real PAT and includes GitHub Models API access.
-          # The auto-provided GITHUB_TOKEN does not.
-          MODELS_TOKEN:        ${{ secrets.ISSUE_BOT_PAT }}
+          # GitHub Models requires a classic PAT from an account enrolled in the beta.
+          # Fine-grained PATs (like ISSUE_BOT_PAT) need an explicit "models" permission.
+          # Create a classic PAT at github.com/settings/tokens (no scope needed) and
+          # add it as repository secret MODELS_PAT.
+          MODELS_TOKEN:        ${{ secrets.MODELS_PAT }}
           GITHUB_REPOSITORY:   ${{ github.repository }}
           PHASE:               ${{ inputs.phase }}
           SINCE:               ${{ inputs.since }}
