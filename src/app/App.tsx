@@ -1,7 +1,8 @@
 import { Analytics } from '@vercel/analytics/react';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { FeedbackKitProvider, SessionPanel } from '@thd-spatial-ai/feedback-kit';
+import type { SubmitResult } from '@thd-spatial-ai/feedback-kit';
 import { TESTING_TASKS } from './config/testingTasks';
 import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
@@ -184,12 +185,110 @@ function ZoomTip() {
   );
 }
 
+// ─── Submission toast notification ────────────────────────────────────────────
+
+interface ToastState {
+  type: 'success' | 'error';
+  message: string;
+  issueUrl?: string;
+}
+
+function SubmissionToast({ toast, onDismiss }: { toast: ToastState; onDismiss: () => void }) {
+  useEffect(() => {
+    const id = setTimeout(onDismiss, 6000);
+    return () => clearTimeout(id);
+  }, [onDismiss]);
+
+  const isSuccess = toast.type === 'success';
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position:     'fixed',
+        bottom:       56,
+        left:         '50%',
+        transform:    'translateX(-50%)',
+        zIndex:       10000,
+        display:      'flex',
+        alignItems:   'center',
+        gap:          8,
+        padding:      '10px 16px',
+        borderRadius: 10,
+        background:   isSuccess ? 'rgba(20,83,45,0.95)' : 'rgba(127,29,29,0.95)',
+        border:       `1px solid ${isSuccess ? 'rgba(134,239,172,0.3)' : 'rgba(252,165,165,0.3)'}`,
+        boxShadow:    '0 4px 20px rgba(0,0,0,0.35)',
+        color:        isSuccess ? '#bbf7d0' : '#fecaca',
+        fontSize:     13,
+        fontWeight:   500,
+        maxWidth:     420,
+        pointerEvents: 'auto',
+      }}
+    >
+      <span style={{ fontSize: 15 }}>{isSuccess ? '✓' : '✕'}</span>
+      <span style={{ flex: 1 }}>{toast.message}</span>
+      {isSuccess && toast.issueUrl && (
+        <a
+          href={toast.issueUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color:          '#4ade80',
+            fontWeight:     600,
+            fontSize:       12,
+            textDecoration: 'underline',
+            whiteSpace:     'nowrap',
+          }}
+        >
+          View →
+        </a>
+      )}
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        style={{
+          background:   'none',
+          border:       'none',
+          cursor:       'pointer',
+          color:        'inherit',
+          opacity:      0.6,
+          fontSize:     16,
+          lineHeight:   1,
+          padding:      '0 2px',
+          marginLeft:   4,
+        }}
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
   const [showConfigurator, setShowConfigurator] = useState(false);
   const [taskIndex,     setTaskIndex]     = useState(0);
   const [taskCollapsed, setTaskCollapsed] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
+
+  const dismissToast = useCallback(() => setToast(null), []);
+
+  const handleSubmitSuccess = useCallback((result: SubmitResult) => {
+    setToast({
+      type:     'success',
+      message:  'Your feedback was saved.',
+      issueUrl: result.issueUrl,
+    });
+  }, []);
+
+  const handleSubmitError = useCallback((_error: Error) => {
+    setToast({
+      type:    'error',
+      message: 'Could not save feedback — please try again.',
+    });
+  }, []);
 
   // Extract the first building feature from the EnerPlanET demo config once on mount.
   // The demo CSV is used as fallback timeseries until a real model response is available.
@@ -206,7 +305,11 @@ export default function App() {
   }, []);
 
   return (
-    <FeedbackKitProvider apiEndpoint="/api/feedback">
+    <FeedbackKitProvider
+      apiEndpoint="/api/feedback"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
     <ZoomTip />
       {/* Map canvas */}
       <div style={{
@@ -245,6 +348,7 @@ export default function App() {
       onPrevTask={() => setTaskIndex((i) => Math.max(0, i - 1))}
       view={showConfigurator ? 'Configure' : 'Map'}
     />
+    {toast && <SubmissionToast toast={toast} onDismiss={dismissToast} />}
     <Analytics />
     </FeedbackKitProvider>
   );
