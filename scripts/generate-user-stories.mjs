@@ -2,21 +2,28 @@
 // generates one user story per task via GitHub Models API, and creates GitHub issues.
 //
 // Run via: .github/workflows/generate-user-stories.yml (workflow_dispatch)
-// Required env vars: GH_TOKEN, GITHUB_REPOSITORY, PHASE
+// Required env vars: GH_TOKEN, MODELS_TOKEN, GITHUB_REPOSITORY, PHASE
 // Optional env vars: SINCE (YYYY-MM-DD), UNTIL (YYYY-MM-DD)
 //
-// GH_TOKEN is the auto-provided GITHUB_TOKEN from Actions. It covers both the
-// GitHub REST API and the GitHub Models API when the workflow declares
-// `permissions: models: read`.
+// GH_TOKEN     — GITHUB_TOKEN from Actions (issues: write). GitHub REST API calls.
+// MODELS_TOKEN — a PAT with Models: read permission. GITHUB_TOKEN cannot call the
+//                GitHub Models inference endpoint even with `permissions: models: read`.
+//                For fine-grained PATs, enable Models: read under Account permissions.
+//                For classic PATs, no specific scope is needed.
 
-const REPO  = process.env.GITHUB_REPOSITORY;
-const TOKEN = process.env.GH_TOKEN;
-const PHASE = process.env.PHASE;
-const SINCE = process.env.SINCE || null;
-const UNTIL = process.env.UNTIL || null;
+const REPO         = process.env.GITHUB_REPOSITORY;
+const TOKEN        = process.env.GH_TOKEN;
+const MODELS_TOKEN = process.env.MODELS_TOKEN;
+const PHASE        = process.env.PHASE;
+const SINCE        = process.env.SINCE || null;
+const UNTIL        = process.env.UNTIL || null;
 
 if (!REPO || !TOKEN || !PHASE) {
   console.error('Missing required env vars: GITHUB_REPOSITORY, GH_TOKEN, PHASE');
+  process.exit(1);
+}
+if (!MODELS_TOKEN) {
+  console.error('Missing MODELS_TOKEN. Provide a PAT with Models: read permission (fine-grained) or any classic PAT.');
   process.exit(1);
 }
 
@@ -229,7 +236,7 @@ ${sessions}`;
   const res = await fetch(GH_MODELS_API, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${TOKEN}`,
+      'Authorization': `Bearer ${MODELS_TOKEN}`,
       'Content-Type':  'application/json',
     },
     body: JSON.stringify({
