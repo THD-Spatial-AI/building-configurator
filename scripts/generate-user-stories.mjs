@@ -21,7 +21,7 @@ if (!REPO || !TOKEN || !PHASE) {
 }
 
 const GH_API        = `https://api.github.com/repos/${REPO}`;
-const GH_MODELS_API = 'https://models.github.ai/inference/chat/completions';
+const GH_MODELS_API = 'https://models.inference.ai.azure.com/chat/completions';
 
 // Task descriptions — update this map when tasks change between testing phases.
 const TASKS = {
@@ -233,7 +233,7 @@ ${sessions}`;
       'Content-Type':  'application/json',
     },
     body: JSON.stringify({
-      model:           'openai/gpt-4o',
+      model:           'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userMessage },
