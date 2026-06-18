@@ -1,0 +1,40 @@
+name: Generate user stories from session feedback
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: >
+          Phase identifier — used as a label on user story issues, e.g. "phase-1-onboarding".
+          Must be unique per testing round. Re-using the same name re-generates the stories for that phase.
+        required: true
+      since:
+        description: 'Only include sessions created on or after this date (YYYY-MM-DD). Leave blank for all time.'
+        required: false
+        default: ''
+      until:
+        description: 'Only include sessions created before this date (YYYY-MM-DD). Leave blank for today.'
+        required: false
+        default: ''
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate user stories
+        env:
+          GH_TOKEN:            ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY:   ${{ github.repository }}
+          PHASE:               ${{ inputs.phase }}
+          SINCE:               ${{ inputs.since }}
+          UNTIL:               ${{ inputs.until }}
+        run: node scripts/generate-user-stories.mjs

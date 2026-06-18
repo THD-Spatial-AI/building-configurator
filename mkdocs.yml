@@ -113,7 +113,7 @@ markdown_extensions:
 # Page tree
 nav:
   - Home: index.md
-  - Feedback Pipeline: feedback-pipeline.md
+  - Architecture: architecture.md
 
 # Mermaid — load explicitly so diagrams render on GitHub Pages.
 # Material for MkDocs attempts a dynamic import at runtime which can silently
