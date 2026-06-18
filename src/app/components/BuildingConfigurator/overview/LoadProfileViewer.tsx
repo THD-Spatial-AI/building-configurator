@@ -1,7 +1,5 @@
 import { useRef, type ElementType } from 'react';
-import { Box, Typography } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
-import { BoltOutlined } from '@mui/icons-material';
 import { Download, Upload, Zap, Flame, Droplets, Layers3 } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
@@ -82,20 +80,19 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
 
       {/* ── Header ── */}
       <div style={{ padding: '10px 14px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <Box sx={{
-          width: 22, height: 22, bgcolor: '#10b981', borderRadius: '4px',
+        <div style={{
+          width: 22, height: 22, background: '#10b981', borderRadius: '4px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          '& svg': { fontSize: '13px !important', color: '#ffffff' },
         }}>
-          <BoltOutlined />
-        </Box>
+          <Zap size={13} color="#ffffff" strokeWidth={2} />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 700, color: T.foreground, lineHeight: 1.2 }}>
+          <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: T.foreground, lineHeight: 1.2 }}>
             Energy Usage
-          </Typography>
-          <Typography sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
+          </span>
+          <span style={{ display: 'block', fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
             {buildingId} · {sourceCaption}
-          </Typography>
+          </span>
         </div>
         {/* Resolution — labelled as the time period each point covers */}
         <SegmentedControl options={resolutionOptions} value={resolution} onChange={(v) => setResolution(v as Resolution)} />
@@ -193,9 +190,9 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
               >
                 Prev
               </button>
-              <Typography sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
+              <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
                 {stepLabel}
-              </Typography>
+              </span>
               <button
                 type="button"
                 onClick={() => shiftSteppedWindow(1)}
@@ -222,28 +219,28 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
           >
             Show All
           </button>
-          <Typography sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
+          <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
             {visibleRangeLabel}
-          </Typography>
+          </span>
           {windowMode === 'free' && (
-            <Typography sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
+            <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
               Free range removes fixed steps. Switch to hourly for the finest time selection.
-            </Typography>
+            </span>
           )}
         </div>
       )}
 
       {uploadError && (
         <div style={{ margin: '6px 14px 0', border: '1px solid #fecaca', background: '#fef2f2', borderRadius: 6, padding: '4px 8px', flexShrink: 0 }}>
-          <Typography sx={{ fontSize: 10, color: '#b91c1c' }}>{uploadError}</Typography>
+          <span style={{ fontSize: 10, color: '#b91c1c' }}>{uploadError}</span>
         </div>
       )}
 
       {hasData && showBrush && mode === 'expert' && (
         <div style={{ padding: '6px 14px 0', flexShrink: 0 }}>
-          <Typography sx={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.3 }}>
+          <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.3 }}>
             Drag the handles below the chart to zoom. In stepped mode the window snaps to the active resolution; free range removes that constraint.
-          </Typography>
+          </span>
         </div>
       )}
 
@@ -299,10 +296,10 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
         ) : (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px dashed ${T.border}`, borderRadius: 6, background: T.inputBg, padding: '0 24px', textAlign: 'center' }}>
             <div>
-              <Typography sx={{ fontSize: 13, fontWeight: 600, color: T.foreground, mb: 0.5 }}>No usage data loaded</Typography>
-              <Typography sx={{ fontSize: 11, color: T.mutedFg, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: T.foreground, margin: '0 0 4px' }}>No usage data loaded</p>
+              <p style={{ fontSize: 11, color: T.mutedFg, lineHeight: 1.6, margin: 0 }}>
                 Use "Import Data" to load an energy profile, or connect to the backend.
-              </Typography>
+              </p>
             </div>
           </div>
         )}

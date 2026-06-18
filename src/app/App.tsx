@@ -1,6 +1,4 @@
 import { Analytics } from '@vercel/analytics/react';
-import { ThemeProvider, createTheme } from '@mui/material';
-import { Box } from '@mui/material';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { FeedbackKitProvider, SessionPanel } from '@thd-spatial-ai/feedback-kit';
@@ -9,18 +7,6 @@ import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from
 import type { BuildingState } from './lib/buemAdapter';
 import demoConfig from '../assets/data/demo_config.json';
 import demoLoadProfileCsv from '../assets/data/demo_load_profile.csv?raw';
-
-const theme = createTheme({
-  palette: {
-    primary:    { main: '#2f5d8a' },
-    text:       { primary: '#1f2933', secondary: '#717182' },
-    divider:    'rgba(0,0,0,0.1)',
-    background: { default: '#f5f6f7', paper: '#ffffff' },
-  },
-  typography: {
-    fontFamily: "'Inter', system-ui, sans-serif",
-  },
-});
 
 // ─── Fake map canvas (dark GIS-style background) ──────────────────────────────
 
@@ -167,17 +153,16 @@ function ZoomTip() {
   }, []);
 
   return (
-    <Box sx={{
+    <div style={{
       position:      'fixed',
       bottom:        12,
       left:          12,
       zIndex:        9999,
       pointerEvents: 'none',
     }}>
-      <Box sx={{
-        px:              2.5,
-        py:              0.75,
-        bgcolor:         'rgba(0,0,0,0.45)',
+      <div style={{
+        padding:         '6px 20px',
+        background:      'rgba(0,0,0,0.45)',
         borderRadius:    '8px',
         color:           'rgba(255,255,255,0.5)',
         fontSize:        '11px',
@@ -194,8 +179,8 @@ function ZoomTip() {
         Hold <Kbd>Ctrl</Kbd> and press <Kbd>+</Kbd> to zoom in &nbsp;·&nbsp; <Kbd>Ctrl</Kbd> <Kbd>−</Kbd> to zoom out &nbsp;·&nbsp; <Kbd>Ctrl</Kbd> <Kbd>0</Kbd> to reset
         &nbsp;&nbsp;|&nbsp;&nbsp;
         or hold <Kbd>Ctrl</Kbd> and scroll the mouse wheel up / down
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
@@ -223,12 +208,11 @@ export default function App() {
   return (
     <FeedbackKitProvider apiEndpoint="/api/feedback">
     <ZoomTip />
-    <ThemeProvider theme={theme}>
       {/* Map canvas */}
-      <Box sx={{
+      <div style={{
         width:    '100vw',
         height:   '100vh',
-        bgcolor:  '#dce5ea',
+        background: '#dce5ea',
         position: 'relative',
         overflow: 'auto',
       }}>
@@ -236,23 +220,22 @@ export default function App() {
 
         {/* Floating configurator panel — right padding keeps it clear of the session panel */}
         {showConfigurator && (
-          <Box sx={{
-            position:  'absolute',
-            inset:     0,
-            display:   'flex',
-            alignItems: 'center',
+          <div style={{
+            position:       'absolute',
+            inset:          0,
+            display:        'flex',
+            alignItems:     'center',
             justifyContent: 'center',
-            zIndex:    10,
-            p:         2,
+            zIndex:         10,
+            padding:        16,
             // 352px = w-80 panel (320) + w-8 tab (32); 40px when only the tab is visible
-            pr:        taskCollapsed ? '40px' : '360px',
-            transition: 'padding-right 300ms ease-in-out',
+            paddingRight:   taskCollapsed ? '40px' : '360px',
+            transition:     'padding-right 300ms ease-in-out',
           }}>
             <BuildingConfigurator onClose={() => setShowConfigurator(false)} buildingData={demoBuilding} />
-          </Box>
+          </div>
         )}
-      </Box>
-    </ThemeProvider>
+      </div>
     <SessionPanel
       tasks={TESTING_TASKS}
       taskIndex={taskIndex}
