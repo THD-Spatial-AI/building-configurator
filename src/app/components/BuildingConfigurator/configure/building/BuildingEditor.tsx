@@ -3,7 +3,8 @@
 // Edits the same `general` state as GeneralConfig in the Overview view.
 
 import { useState, useEffect, useRef } from 'react';
-import { Building2, ChevronDown, Check } from 'lucide-react';
+import { Building2, ChevronDown, Check, RotateCcw, Loader2, Flame } from 'lucide-react';
+import type { HdcpState, HdcpInputs } from '@/app/lib/hdcpAdapter';
 import {
   SelectInput, NumberInput, FieldLabel,
   ToggleSwitch, FieldRow, ScrollHintContainer,
@@ -15,7 +16,7 @@ import {
   COUNTRY_OPTIONS,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 
-type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver';
+type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver' | 'hdcp';
 
 // ─── Attached-neighbours visual picker ────────────────────────────────────────
 
@@ -520,6 +521,154 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
   );
 }
 
+// ─── HDCP section ─────────────────────────────────────────────────────────────
+
+interface HdcpSectionProps {
+  hdcp: HdcpState;
+  onFieldChange: (changes: Partial<HdcpInputs>) => void;
+  onVariantSelect: (index: number) => void;
+  onReset: () => void;
+}
+
+function HdcpSection({ hdcp, onFieldChange, onVariantSelect, onReset }: HdcpSectionProps) {
+  const { variants, selectedVariantIndex, calcDemand, isDirty, result, loading, error } = hdcp;
+
+  return (
+    <div className="flex flex-col gap-4">
+
+      {/* Refurbishment level selector */}
+      {variants.length > 1 && (
+        <div className="flex flex-col gap-1.5">
+          <FieldLabel tip="Pre-defined renovation states from the TABULA building typology. Selecting a level reloads the default physics values.">
+            Refurbishment state
+          </FieldLabel>
+          <div className="flex gap-1">
+            {variants.map((v, i) => (
+              <button
+                key={v.code}
+                type="button"
+                onClick={() => onVariantSelect(i)}
+                className={[
+                  'flex-1 rounded-[6px] border px-2 py-1.5 text-[11px] font-medium transition-colors',
+                  i === selectedVariantIndex
+                    ? 'border-[#2f5d8a] bg-[#2f5d8a]/8 text-[#2f5d8a]'
+                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
+                ].join(' ')}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+          {variants[selectedVariantIndex] && (
+            <p className="text-[10px] text-muted-foreground">
+              Code: {variants[selectedVariantIndex].code}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Result badge */}
+      <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+        <div className="flex items-center gap-2">
+          <Flame className="size-3.5 text-orange-500" />
+          <span className="text-[11px] font-semibold text-slate-700">Annual heat demand</span>
+        </div>
+        {loading ? (
+          <Loader2 className="size-3.5 animate-spin text-slate-400" />
+        ) : error ? (
+          <span className="text-[11px] text-red-500">Unavailable</span>
+        ) : result ? (
+          <span className="text-[11px] font-bold text-orange-600">
+            {result.qHnd.toFixed(1)} kWh/(m²·a)
+          </span>
+        ) : (
+          <span className="text-[10px] text-muted-foreground">—</span>
+        )}
+      </div>
+
+      {/* Climate inputs */}
+      <div className="flex flex-col gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Climate</p>
+        <FieldRow>
+          <FieldLabel tip="Number of heating degree days per year.">Heating days</FieldLabel>
+          <NumberInput
+            value={calcDemand.HeatingDays ?? 0}
+            onChange={(v) => onFieldChange({ HeatingDays: v })}
+            step={1} min={0} max={365}
+          />
+        </FieldRow>
+        <FieldRow>
+          <FieldLabel tip="External design temperature (°C).">Outside temp θ_e</FieldLabel>
+          <NumberInput
+            value={calcDemand.Theta_e ?? 0}
+            onChange={(v) => onFieldChange({ Theta_e: v })}
+            step={0.5}
+          />
+        </FieldRow>
+        <FieldRow>
+          <FieldLabel tip="Internal design temperature (°C).">Inside temp θ_i</FieldLabel>
+          <NumberInput
+            value={calcDemand.Theta_i ?? 20}
+            onChange={(v) => onFieldChange({ Theta_i: v })}
+            step={0.5} min={0} max={30}
+          />
+        </FieldRow>
+      </div>
+
+      {/* Solar irradiance */}
+      <div className="flex flex-col gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Solar irradiance (Wh/m²·a)</p>
+        {(['South', 'East', 'West', 'North', 'Horizontal'] as const).map((dir) => {
+          const key = `I_Sol_${dir}` as keyof HdcpInputs;
+          return (
+            <FieldRow key={dir}>
+              <FieldLabel>{dir}</FieldLabel>
+              <NumberInput
+                value={(calcDemand[key] as number | undefined) ?? 0}
+                onChange={(v) => onFieldChange({ [key]: v })}
+                step={10} min={0}
+              />
+            </FieldRow>
+          );
+        })}
+      </div>
+
+      {/* Thermal bridging */}
+      <div className="flex flex-col gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Thermal bridging (W/m²K)</p>
+        <FieldRow>
+          <FieldLabel tip="Additional heat loss due to thermal bridges in the original building fabric.">Original ΔU_tb</FieldLabel>
+          <NumberInput
+            value={calcDemand.Delta_U_ThermalBridging_Original ?? 0}
+            onChange={(v) => onFieldChange({ Delta_U_ThermalBridging_Original: v })}
+            step={0.01} min={0}
+          />
+        </FieldRow>
+        <FieldRow>
+          <FieldLabel tip="Additional heat loss due to thermal bridges after refurbishment.">Refurbished ΔU_tb</FieldLabel>
+          <NumberInput
+            value={calcDemand.Delta_U_ThermalBridging_Refurbished ?? 0}
+            onChange={(v) => onFieldChange({ Delta_U_ThermalBridging_Refurbished: v })}
+            step={0.01} min={0}
+          />
+        </FieldRow>
+      </div>
+
+      {/* Reset button */}
+      {isDirty && (
+        <button
+          type="button"
+          onClick={onReset}
+          className="flex items-center gap-1.5 self-start rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 transition-colors"
+        >
+          <RotateCcw className="size-3" />
+          Reset to defaults
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── Section metadata ─────────────────────────────────────────────────────────
 
 /** Colour dot for each section — mirrors the element-dot pattern used in surfaces. */
@@ -530,6 +679,7 @@ const SECTION_COLORS: Record<SectionKey, string> = {
   loads:       '#d97706',
   thermal:     '#dc2626',
   solver:      '#7c3aed',
+  hdcp:        '#ea580c',
 };
 
 const SECTION_LABELS: Record<SectionKey, string> = {
@@ -539,10 +689,11 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   loads:       'Appliances & Occupancy',
   thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
+  hdcp:        'Annual Heat Demand',
 };
 
 /** One-line value summary shown on the grid card and chip. */
-function sectionSummary(key: SectionKey, general: Record<string, any>): string {
+function sectionSummary(key: SectionKey, general: Record<string, any>, hdcp?: HdcpState | null): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${general.floorArea} m²`;
     case 'conditions': {
@@ -553,17 +704,22 @@ function sectionSummary(key: SectionKey, general: Record<string, any>): string {
     case 'loads':       return `φ_int ${general.phi_int} W/m²`;
     case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Rule-based';
+    case 'hdcp':        return hdcp?.result ? `${hdcp.result.qHnd.toFixed(0)} kWh/(m²·a)` : 'Not calculated';
   }
 }
 
 /** Renders the content body for a given section key. */
 function SectionBody({
-  id, general, setGen, mode,
+  id, general, setGen, mode, hdcp, onHdcpFieldChange, onHdcpVariantSelect, onHdcpReset,
 }: {
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
   mode: string;
+  hdcp?: HdcpState | null;
+  onHdcpFieldChange?: (changes: Partial<HdcpInputs>) => void;
+  onHdcpVariantSelect?: (index: number) => void;
+  onHdcpReset?: () => void;
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
@@ -572,6 +728,16 @@ function SectionBody({
     case 'loads':       return <InternalLoadsSection general={general} setGen={setGen} />;
     case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
+    case 'hdcp':
+      if (!hdcp) return <p className="text-[11px] text-muted-foreground">Loading TABULA data…</p>;
+      return (
+        <HdcpSection
+          hdcp={hdcp}
+          onFieldChange={onHdcpFieldChange ?? (() => {})}
+          onVariantSelect={onHdcpVariantSelect ?? (() => {})}
+          onReset={onHdcpReset ?? (() => {})}
+        />
+      );
   }
 }
 
@@ -581,6 +747,11 @@ interface BuildingEditorProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
   mode: 'basic' | 'expert';
+  /** HDCP state — only rendered in expert mode when a TABULA variant is loaded. */
+  hdcp?: HdcpState | null;
+  onHdcpFieldChange?: (changes: Partial<HdcpInputs>) => void;
+  onHdcpVariantSelect?: (index: number) => void;
+  onHdcpReset?: () => void;
 }
 
 /**
@@ -591,11 +762,18 @@ interface BuildingEditorProps {
  *  - Section active -> inactive sections collapse to compact chips at the top;
  *    the active section fills the remaining height with a scrollable body.
  */
-export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
+export function BuildingEditor({
+  general, setGen, mode,
+  hdcp, onHdcpFieldChange, onHdcpVariantSelect, onHdcpReset,
+}: BuildingEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
   const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions'];
-  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver'];
+  const EXPERT_SECTIONS: SectionKey[] = [
+    'ventilation', 'loads', 'thermal', 'solver',
+    // HDCP section only shown when a TABULA variant has been loaded
+    ...(hdcp !== undefined && hdcp !== null ? ['hdcp' as SectionKey] : []),
+  ];
   const visibleSections = mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
     : ALL_SECTIONS;
@@ -656,7 +834,7 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
                 {SECTION_LABELS[activeSection]}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {sectionSummary(activeSection, general)}
+                {sectionSummary(activeSection, general, hdcp)}
               </p>
             </div>
             <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
@@ -664,7 +842,13 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
 
           {/* Scrollable content */}
           <ScrollHintContainer className="p-4">
-            <SectionBody id={activeSection} general={general} setGen={setGen} mode={mode} />
+            <SectionBody
+              id={activeSection} general={general} setGen={setGen} mode={mode}
+              hdcp={hdcp}
+              onHdcpFieldChange={onHdcpFieldChange}
+              onHdcpVariantSelect={onHdcpVariantSelect}
+              onHdcpReset={onHdcpReset}
+            />
           </ScrollHintContainer>
         </div>
       </div>
@@ -693,7 +877,7 @@ export function BuildingEditor({ general, setGen, mode }: BuildingEditorProps) {
               </div>
               <ChevronDown className="size-3 shrink-0 text-slate-400" />
             </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general)}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general, hdcp)}</p>
           </button>
         ))}
       </div>

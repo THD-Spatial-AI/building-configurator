@@ -78,6 +78,12 @@ export interface BuildingState {
   timeseries: LoadDataPoint[] | null;
   /** UI technology IDs that are installed according to the model config. */
   installedTechIds: string[];
+  /**
+   * HDCP (ISO 13790 annual heat demand) state.
+   * Null until the building's country + type + construction period resolve
+   * to at least one TABULA variant in the HDCP service.
+   */
+  hdcp: import('./hdcpAdapter').HdcpState | null;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -283,6 +289,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     thermalSummary: thematic.thermalSummary,
     timeseries: thematic.timeseries,
     installedTechIds: technologies.installedTechIds,
+    hdcp: null,
   };
 }
 

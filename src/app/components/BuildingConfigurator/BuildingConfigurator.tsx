@@ -28,6 +28,17 @@ import {
   exportToBuemGeojson,
   importBuildingData,
 } from '../../lib/buemAdapter';
+import type { HdcpState, HdcpInputs } from '../../lib/hdcpAdapter';
+import {
+  initHdcpState,
+  selectVariantLevel,
+  updateCalcDemand,
+  resetCalcDemand,
+} from '../../lib/hdcpAdapter';
+import {
+  loadVariantLevels,
+  calculateHeatDemand,
+} from '../../lib/hdcpApi';
 import {
   getThermalRating,
   buildSnapshotRows,
@@ -259,6 +270,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [vizViewIndex,  setVizViewIndex]  = useState(0);
   const [uploadError,   setUploadError]   = useState<string | null>(null);
 
+  // HDCP annual heat demand state — null until the building's country/type/period
+  // resolve to at least one TABULA variant in the HDCP service.
+  const [hdcp, setHdcp] = useState<HdcpState | null>(null);
+
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
@@ -325,6 +340,107 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   }, [buildingData]);
 
   const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig }) !== JSON.stringify(savedState);
+
+  // ── HDCP: reload variant levels when building classification changes ───────────
+  // Triggered by country, building type, or construction period changes.
+  // Resets HDCP state so stale results are not shown for a different building.
+  useEffect(() => {
+    const country = general.country as string | undefined;
+    const type    = general.buildingType as string | undefined;
+    const period  = general.constructionPeriod as string | undefined;
+
+    if (!country || !type || !period) {
+      setHdcp(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const variants = await loadVariantLevels(country, type, period);
+      if (cancelled || variants.length === 0) {
+        if (!cancelled) setHdcp(null);
+        return;
+      }
+
+      const building: BuildingState = {
+        geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+        technologies: { rawTechs: {}, installedTechIds: [] },
+        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+        envelope: elements,
+        thermalSummary: null,
+        timeseries: null,
+        installedTechIds: [],
+        hdcp: null,
+      };
+
+      const state = initHdcpState(country, type, period, variants, building);
+      if (!cancelled) setHdcp(state);
+    })();
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [general.country, general.buildingType, general.constructionPeriod]);
+
+  // ── HDCP: auto-recalculate (debounced) when calcDemand changes ────────────────
+  useEffect(() => {
+    if (!hdcp) return;
+
+    const variant = hdcp.variants[hdcp.selectedVariantIndex];
+    if (!variant) return;
+
+    setHdcp((prev) => prev ? { ...prev, loading: true, error: null } : prev);
+
+    const timer = setTimeout(async () => {
+      const result = await calculateHeatDemand(variant.code, hdcp.calcDemand);
+      setHdcp((prev) => {
+        if (!prev) return prev;
+        if (result) return { ...prev, loading: false, result: { qHnd: result.q_h_nd, unit: 'kWh/(m2.a)' } };
+        return { ...prev, loading: false, error: 'HDCP service unavailable' };
+      });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hdcp?.calcDemand, hdcp?.selectedVariantIndex]);
+
+  // ── HDCP handlers ─────────────────────────────────────────────────────────────
+
+  const handleHdcpFieldChange = (changes: Partial<HdcpInputs>) =>
+    setHdcp((prev) => prev ? updateCalcDemand(prev, changes) : prev);
+
+  const handleHdcpVariantSelect = (index: number) => {
+    if (!hdcp) return;
+    const building: BuildingState = {
+      geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+      technologies: { rawTechs: {}, installedTechIds: [] },
+      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+      envelope: elements,
+      thermalSummary: null,
+      timeseries: null,
+      installedTechIds: [],
+      hdcp: null,
+    };
+    setHdcp(selectVariantLevel(hdcp, index, building));
+  };
+
+  const handleHdcpReset = () => {
+    if (!hdcp) return;
+    const building: BuildingState = {
+      geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+      technologies: { rawTechs: {}, installedTechIds: [] },
+      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+      envelope: elements,
+      thermalSummary: null,
+      timeseries: null,
+      installedTechIds: [],
+      hdcp: null,
+    };
+    setHdcp(resetCalcDemand(hdcp, building));
+  };
 
   // --- Handlers ---------------------------------------------------------------
 
@@ -915,7 +1031,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
                   <div key={`${panelView}-${selectedId ?? ''}`} className="flex min-h-0 flex-1 flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
                   {panelView === 'building' ? (
-                    <BuildingEditor general={general} setGen={setGen} mode={mode} />
+                    <BuildingEditor
+                      general={general}
+                      setGen={setGen}
+                      mode={mode}
+                      hdcp={hdcp}
+                      onHdcpFieldChange={handleHdcpFieldChange}
+                      onHdcpVariantSelect={handleHdcpVariantSelect}
+                      onHdcpReset={handleHdcpReset}
+                    />
                   ) : panelView === 'surface-group' && activeGroupType ? (
                     activeGroupType === 'roof' ? (
                       // Roof: type picker (no card grid) + embedded editor when selected
