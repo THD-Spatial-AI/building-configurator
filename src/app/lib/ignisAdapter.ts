@@ -1,10 +1,10 @@
 /**
- * HDCP (Heat Demand Calculation Pipeline) data model and adapter functions.
+ * ignis data model and adapter functions.
  *
  * HDCP uses ISO 13790 / TABULA building-level scalar inputs — one value per
  * element type across the whole building — whereas BuEM uses per-surface arrays.
  * This module defines the HDCP state shape, derives aggregate HDCP inputs from
- * BuEM surface data, and produces the payload sent to the HDCP API.
+ * BuEM surface data, and produces the payload sent to the ignis API.
  *
  * The HDCP state lives alongside BuEM state in BuildingState; neither overwrites
  * the other. Shared fields (floor area, infiltration rates, thermal mass, etc.)
@@ -21,7 +21,7 @@ import type { BuildingState } from './buemAdapter';
  * All fields are optional so partial objects can be merged progressively
  * (TABULA DB defaults → BuEM-derived values → user overrides).
  */
-export interface HdcpInputs {
+export interface IgnisInputs {
   // Reference floor area (m²) — synced with BuEM floorArea
   A_C_Ref_Input?: number;
 
@@ -79,15 +79,15 @@ export interface HdcpInputs {
 
 /**
  * One pre-defined refurbishment level loaded from the TABULA DB.
- * The data object is read-only — user edits go into HdcpState.calcDemand.
+ * The data object is read-only — user edits go into IgnisState.calcDemand.
  */
-export interface HdcpVariantLevel {
+export interface IgnisVariantLevel {
   /** Full TABULA variant code, e.g. "DE.N.SFH.01.Gen". */
   code: string;
   /** Human-readable label: "Existing state" | "Medium refurbishment" | "Advanced refurbishment". */
   label: string;
   /** TABULA scalar values for this refurbishment level. Never mutated after load. */
-  data: HdcpInputs;
+  data: IgnisInputs;
 }
 
 // ─── HDCP state ───────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ export interface HdcpVariantLevel {
  * Attached to BuildingState.hdcp; null until the user's building classification
  * resolves to at least one TABULA variant.
  */
-export interface HdcpState {
+export interface IgnisState {
   /** ISO 3166-1 alpha-2 country code, e.g. "DE". */
   countryIso2: string;
   /** TABULA building type code, e.g. "SFH", "MFH". */
@@ -109,7 +109,7 @@ export interface HdcpState {
    * Pre-defined refurbishment levels from the TABULA DB, ordered from
    * existing state to most-refurbished. Never mutated after load.
    */
-  variants: HdcpVariantLevel[];
+  variants: IgnisVariantLevel[];
 
   /** Index into variants[] for the currently selected refurbishment level. */
   selectedVariantIndex: number;
@@ -118,10 +118,10 @@ export interface HdcpState {
    * Working copy of the selected variant's data, augmented with values
    * derived from BuEM surfaces and any user edits.
    *
-   * This is what gets sent to the HDCP API. Reset to the selected
+   * This is what gets sent to the ignis API. Reset to the selected
    * variant's data (plus BuEM-derived geometry) at any time.
    */
-  calcDemand: HdcpInputs;
+  calcDemand: IgnisInputs;
 
   /**
    * True when calcDemand differs from the selected variant's data.
@@ -129,33 +129,33 @@ export interface HdcpState {
    */
   isDirty: boolean;
 
-  /** Latest heat demand result from the HDCP API, or null. */
+  /** Latest heat demand result from the ignis API, or null. */
   result: { qHnd: number; unit: 'kWh/(m2.a)' } | null;
 
-  /** True while an HDCP API call is in flight. */
+  /** True while an ignis API call is in flight. */
   loading: boolean;
 
-  /** Error message from the last failed HDCP API call, or null. */
+  /** Error message from the last failed ignis API call, or null. */
   error: string | null;
 }
 
 // ─── API response types ───────────────────────────────────────────────────────
 
 /** Shape of one entry in the /variants/:country/match response. */
-export interface HdcpVariantEntry {
+export interface IgnisVariantEntry {
   code: string;
   label: string;
 }
 
 /** Shape of /variants/:country/match response body. */
-export interface HdcpMatchResponse {
+export interface IgnisMatchResponse {
   country: string;
   prefix: string;
-  data: HdcpVariantEntry[];
+  data: IgnisVariantEntry[];
 }
 
 /** Shape of /data/:code response body. */
-export interface HdcpDataResponse {
+export interface IgnisDataResponse {
   country: string;
   variant_code: string;
   tabula_data: Record<string, unknown>;
@@ -163,7 +163,7 @@ export interface HdcpDataResponse {
 }
 
 /** Shape of /calculate/:code response body. */
-export interface HdcpCalculateResponse {
+export interface IgnisCalculateResponse {
   variant_code: string;
   q_h_nd: number;
   unit: string;
@@ -184,14 +184,14 @@ function cardinalFromAzimuth(azimuth: number): 'South' | 'East' | 'West' | 'Nort
  * Derives HDCP aggregate inputs from BuEM surface-level data.
  * Called when a TABULA variant is first loaded to pre-fill geometry fields.
  *
- * Returns a partial HdcpInputs — only the fields that can be computed from
+ * Returns a partial IgnisInputs — only the fields that can be computed from
  * BuEM surfaces. Climate, solar, and thermal-bridging fields are left for
  * the TABULA DB record to supply.
  */
-export function deriveHdcpInputsFromBuem(building: BuildingState): Partial<HdcpInputs> {
+export function deriveIgnisInputsFromBuem(building: BuildingState): Partial<IgnisInputs> {
   const elements = Object.values(building.envelope) as BuildingElement[];
 
-  const derived: Partial<HdcpInputs> = {};
+  const derived: Partial<IgnisInputs> = {};
 
   // ── Envelope areas and area-weighted U-values by element type ──────────────
 
@@ -239,14 +239,14 @@ export function deriveHdcpInputsFromBuem(building: BuildingState): Partial<HdcpI
   return derived;
 }
 
-// ─── TABULA data → HdcpInputs ─────────────────────────────────────────────────
+// ─── TABULA data → IgnisInputs ─────────────────────────────────────────────────
 
 /**
  * Extracts HDCP scalar inputs from the raw TABULA API data record.
  * Only the fields relevant to the UI are extracted; internal TABULA fields
  * (measure codes, plausibility thresholds, etc.) are left in the DB.
  */
-export function hdcpInputsFromTabulaData(tabula: Record<string, unknown>): HdcpInputs {
+export function ignisInputsFromTabulaData(tabula: Record<string, unknown>): IgnisInputs {
   const num = (key: string): number | undefined => {
     const v = tabula[key];
     return typeof v === 'number' ? v : undefined;
@@ -301,7 +301,7 @@ export function hdcpInputsFromTabulaData(tabula: Record<string, unknown>): HdcpI
  * Currently only A_ref can be passed as an override; the rest of calcDemand
  * is used for display and export but does not yet flow into the pipeline.
  */
-export function toHdcpApiPayload(calcDemand: HdcpInputs): Record<string, unknown> | undefined {
+export function toIgnisApiPayload(calcDemand: IgnisInputs): Record<string, unknown> | undefined {
   if (calcDemand.A_C_Ref_Input !== undefined) {
     return { A_ref: calcDemand.A_C_Ref_Input };
   }
@@ -311,21 +311,21 @@ export function toHdcpApiPayload(calcDemand: HdcpInputs): Record<string, unknown
 // ─── State initialiser ────────────────────────────────────────────────────────
 
 /**
- * Builds the initial HdcpState after the variant match API call returns results.
+ * Builds the initial IgnisState after the variant match API call returns results.
  * Selects the first variant (existing state) and pre-fills geometry from BuEM data.
  */
-export function initHdcpState(
+export function initIgnisState(
   countryIso2: string,
   buildingTypeCode: string,
   constructionPeriod: string,
-  variants: HdcpVariantLevel[],
+  variants: IgnisVariantLevel[],
   building: BuildingState,
-): HdcpState {
-  const buemDerived = deriveHdcpInputsFromBuem(building);
+): IgnisState {
+  const buemDerived = deriveIgnisInputsFromBuem(building);
   const baseData = variants[0]?.data ?? {};
 
   // Merge: TABULA defaults first, BuEM geometry on top (geometry is more accurate)
-  const calcDemand: HdcpInputs = { ...baseData, ...buemDerived };
+  const calcDemand: IgnisInputs = { ...baseData, ...buemDerived };
 
   return {
     countryIso2,
@@ -342,28 +342,28 @@ export function initHdcpState(
 }
 
 /**
- * Returns updated HdcpState after the user switches refurbishment level.
+ * Returns updated IgnisState after the user switches refurbishment level.
  * Resets calcDemand to the new variant's data merged with the current BuEM geometry.
  */
 export function selectVariantLevel(
-  state: HdcpState,
+  state: IgnisState,
   index: number,
   building: BuildingState,
-): HdcpState {
+): IgnisState {
   const variant = state.variants[index];
   if (!variant) return state;
 
-  const buemDerived = deriveHdcpInputsFromBuem(building);
-  const calcDemand: HdcpInputs = { ...variant.data, ...buemDerived };
+  const buemDerived = deriveIgnisInputsFromBuem(building);
+  const calcDemand: IgnisInputs = { ...variant.data, ...buemDerived };
 
   return { ...state, selectedVariantIndex: index, calcDemand, isDirty: false, result: null };
 }
 
 /**
- * Returns updated HdcpState after a field edit.
+ * Returns updated IgnisState after a field edit.
  * Merges the changed fields into calcDemand and marks the state as dirty.
  */
-export function updateCalcDemand(state: HdcpState, changes: Partial<HdcpInputs>): HdcpState {
+export function updateCalcDemand(state: IgnisState, changes: Partial<IgnisInputs>): IgnisState {
   return {
     ...state,
     calcDemand: { ...state.calcDemand, ...changes },
@@ -374,12 +374,12 @@ export function updateCalcDemand(state: HdcpState, changes: Partial<HdcpInputs>)
 /**
  * Resets calcDemand to the selected variant's defaults merged with BuEM geometry.
  */
-export function resetCalcDemand(state: HdcpState, building: BuildingState): HdcpState {
+export function resetCalcDemand(state: IgnisState, building: BuildingState): IgnisState {
   const variant = state.variants[state.selectedVariantIndex];
   if (!variant) return state;
 
-  const buemDerived = deriveHdcpInputsFromBuem(building);
-  const calcDemand: HdcpInputs = { ...variant.data, ...buemDerived };
+  const buemDerived = deriveIgnisInputsFromBuem(building);
+  const calcDemand: IgnisInputs = { ...variant.data, ...buemDerived };
 
   return { ...state, calcDemand, isDirty: false, result: null };
 }

@@ -6,7 +6,7 @@
 
 A practical research project exploring AI-assisted UI development workflows. The focus is on methods for generating, iterating, and evaluating UI components using AI tools, with a structured feedback loop that converts user observations into tracked issues — giving developers a clear, prioritised backlog to decide how to handle each item.
 
-The UI itself is a building property configurator for the [EnerPlanET](https://enerplanet.th-deg.de/) platform, covering energy simulation workflows [HDCP](https://github.com/THD-Spatial-AI/hdcp-go), [BUEM](https://github.com/THD-Spatial-AI/buem), and serves as the test subject for these development methods.
+The UI itself is a building property configurator for the [EnerPlanET](https://enerplanet.th-deg.de/) platform, covering energy simulation workflows [ignis](https://github.com/thd-spatial-ai/ignis), [BUEM](https://github.com/THD-Spatial-AI/buem), and serves as the test subject for these development methods.
 
 ## Features
 

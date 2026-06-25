@@ -28,17 +28,17 @@ import {
   exportToBuemGeojson,
   importBuildingData,
 } from '../../lib/buemAdapter';
-import type { HdcpState, HdcpInputs } from '../../lib/hdcpAdapter';
+import type { IgnisState, IgnisInputs } from '../../lib/ignisAdapter';
 import {
-  initHdcpState,
+  initIgnisState,
   selectVariantLevel,
   updateCalcDemand,
   resetCalcDemand,
-} from '../../lib/hdcpAdapter';
+} from '../../lib/ignisAdapter';
 import {
   loadVariantLevels,
   calculateHeatDemand,
-} from '../../lib/hdcpApi';
+} from '../../lib/ignisApi';
 import {
   getThermalRating,
   buildSnapshotRows,
@@ -272,7 +272,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   // HDCP annual heat demand state — null until the building's country/type/period
   // resolve to at least one TABULA variant in the HDCP service.
-  const [hdcp, setHdcp] = useState<HdcpState | null>(null);
+  const [ignis, setHdcp] = useState<IgnisState | null>(null);
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
@@ -372,10 +372,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         thermalSummary: null,
         timeseries: null,
         installedTechIds: [],
-        hdcp: null,
+        ignis: null,
       };
 
-      const state = initHdcpState(country, type, period, variants, building);
+      const state = initIgnisState(country, type, period, variants, building);
       if (!cancelled) setHdcp(state);
     })();
 
@@ -385,15 +385,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   // ── HDCP: auto-recalculate (debounced) when calcDemand changes ────────────────
   useEffect(() => {
-    if (!hdcp) return;
+    if (!ignis) return;
 
-    const variant = hdcp.variants[hdcp.selectedVariantIndex];
+    const variant = ignis.variants[ignis.selectedVariantIndex];
     if (!variant) return;
 
     setHdcp((prev) => prev ? { ...prev, loading: true, error: null } : prev);
 
     const timer = setTimeout(async () => {
-      const result = await calculateHeatDemand(variant.code, hdcp.calcDemand);
+      const result = await calculateHeatDemand(variant.code, ignis.calcDemand);
       setHdcp((prev) => {
         if (!prev) return prev;
         if (result) return { ...prev, loading: false, result: { qHnd: result.q_h_nd, unit: 'kWh/(m2.a)' } };
@@ -403,15 +403,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hdcp?.calcDemand, hdcp?.selectedVariantIndex]);
+  }, [ignis?.calcDemand, ignis?.selectedVariantIndex]);
 
   // ── HDCP handlers ─────────────────────────────────────────────────────────────
 
-  const handleHdcpFieldChange = (changes: Partial<HdcpInputs>) =>
+  const handleIgnisFieldChange = (changes: Partial<IgnisInputs>) =>
     setHdcp((prev) => prev ? updateCalcDemand(prev, changes) : prev);
 
-  const handleHdcpVariantSelect = (index: number) => {
-    if (!hdcp) return;
+  const handleIgnisVariantSelect = (index: number) => {
+    if (!ignis) return;
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
       thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
@@ -421,13 +421,40 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       thermalSummary: null,
       timeseries: null,
       installedTechIds: [],
-      hdcp: null,
+      ignis: null,
     };
-    setHdcp(selectVariantLevel(hdcp, index, building));
+    setHdcp(selectVariantLevel(ignis, index, building));
   };
 
-  const handleHdcpReset = () => {
-    if (!hdcp) return;
+  const handleIgnisPeriodOverride = (period: string) => {
+    const country = general.country as string | undefined;
+    const type    = general.buildingType as string | undefined;
+    if (!country || !type) return;
+
+    setHdcp(null);
+
+    (async () => {
+      const variants = await loadVariantLevels(country, type, general.constructionPeriod, period);
+      if (variants.length === 0) return;
+
+      const building: BuildingState = {
+        geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+        technologies: { rawTechs: {}, installedTechIds: [] },
+        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+        envelope: elements,
+        thermalSummary: null,
+        timeseries: null,
+        installedTechIds: [],
+        ignis: null,
+      };
+
+      setHdcp(initIgnisState(country, type, period, variants, building));
+    })();
+  };
+
+  const handleIgnisReset = () => {
+    if (!ignis) return;
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
       thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
@@ -437,9 +464,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       thermalSummary: null,
       timeseries: null,
       installedTechIds: [],
-      hdcp: null,
+      ignis: null,
     };
-    setHdcp(resetCalcDemand(hdcp, building));
+    setHdcp(resetCalcDemand(ignis, building));
   };
 
   // --- Handlers ---------------------------------------------------------------
@@ -1035,10 +1062,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       general={general}
                       setGen={setGen}
                       mode={mode}
-                      hdcp={hdcp}
-                      onHdcpFieldChange={handleHdcpFieldChange}
-                      onHdcpVariantSelect={handleHdcpVariantSelect}
-                      onHdcpReset={handleHdcpReset}
+                      ignis={ignis}
+                      onIgnisFieldChange={handleIgnisFieldChange}
+                      onIgnisVariantSelect={handleIgnisVariantSelect}
+                      onIgnisReset={handleIgnisReset}
+                      onIgnisPeriodOverride={handleIgnisPeriodOverride}
                     />
                   ) : panelView === 'surface-group' && activeGroupType ? (
                     activeGroupType === 'roof' ? (

@@ -14,7 +14,7 @@
     "feature_type": "BasePOI",
     "osm_id": "332876541",
     "country_iso2": "DE",
-    "hdcp": {
+    "ignis": {
       "_comment": "Source values from TABULA DE variant. All editable fields map 1-to-1 with tabula.go model fields. Code_*_val arrays are the valid options for that field as stored in the DB _val_data columns. When building_type or construction_period changes, the whole hdcp node is replaced with the newly fetched variant data.",
       "variant_code": "DE.N.SFH.05.Gen.ReEx.001.001",
       "building": {

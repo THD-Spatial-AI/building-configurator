@@ -1,21 +1,21 @@
 /**
- * HDCP API client.
+ * ignis API client.
  *
- * Calls hdcp-go endpoints to load TABULA variant lists and run the annual
+ * Calls ignis endpoints to load TABULA variant lists and run the annual
  * heat demand calculation pipeline. The base URL is configured via the
- * VITE_HDCP_API_URL environment variable (default: http://localhost:8080).
+ * VITE_IGNIS_API_URL environment variable (default: http://localhost:8080).
  */
 
 import type {
-  HdcpCalculateResponse,
-  HdcpDataResponse,
-  HdcpInputs,
-  HdcpMatchResponse,
-  HdcpVariantLevel,
-} from './hdcpAdapter';
-import { hdcpInputsFromTabulaData, toHdcpApiPayload } from './hdcpAdapter';
+  IgnisCalculateResponse,
+  IgnisDataResponse,
+  IgnisInputs,
+  IgnisMatchResponse,
+  IgnisVariantLevel,
+} from './ignisAdapter';
+import { ignisInputsFromTabulaData, toIgnisApiPayload } from './ignisAdapter';
 
-const BASE_URL = (import.meta.env.VITE_HDCP_API_URL as string | undefined) ?? 'http://localhost:8080';
+const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://localhost:8080';
 
 // ─── TABULA code mappings ─────────────────────────────────────────────────────
 
@@ -47,6 +47,9 @@ const CONSTRUCTION_PERIOD_TO_TABULA: Record<string, string> = {
   'Post-2010': '10',
 };
 
+/** All TABULA period options, for use in the period override picker. */
+export const TABULA_PERIOD_OPTIONS = Object.keys(CONSTRUCTION_PERIOD_TO_TABULA);
+
 /** Converts a UI building type label to the TABULA code, or null if unsupported. */
 export function toBuildingTypeCode(label: string): string | null {
   return BUILDING_TYPE_TO_TABULA[label] ?? null;
@@ -55,6 +58,16 @@ export function toBuildingTypeCode(label: string): string | null {
 /** Converts a UI construction period string to the TABULA period index, or null. */
 export function toConstructionPeriodCode(period: string): string | null {
   return CONSTRUCTION_PERIOD_TO_TABULA[period] ?? null;
+}
+
+/** Returns true if the building type is supported by TABULA. */
+export function isBuildingTypeSupported(label: string): boolean {
+  return label in BUILDING_TYPE_TO_TABULA;
+}
+
+/** Returns true if the construction period maps directly to a TABULA period code. */
+export function isConstructionPeriodRecognised(period: string): boolean {
+  return period in CONSTRUCTION_PERIOD_TO_TABULA;
 }
 
 // ─── API calls ────────────────────────────────────────────────────────────────
@@ -70,7 +83,7 @@ export async function fetchMatchingVariants(
   countryIso2: string,
   buildingTypeLabel: string,
   constructionPeriod: string,
-): Promise<HdcpMatchResponse | null> {
+): Promise<IgnisMatchResponse | null> {
   const typeCode   = toBuildingTypeCode(buildingTypeLabel);
   const periodCode = toConstructionPeriodCode(constructionPeriod);
 
@@ -82,7 +95,7 @@ export async function fetchMatchingVariants(
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
-    return (await res.json()) as HdcpMatchResponse;
+    return (await res.json()) as IgnisMatchResponse;
   } catch {
     return null;
   }
@@ -92,12 +105,12 @@ export async function fetchMatchingVariants(
  * Fetches the full TABULA record for a given variant code.
  * Returns null on error so callers can skip gracefully.
  */
-export async function fetchVariantData(variantCode: string): Promise<HdcpDataResponse | null> {
+export async function fetchVariantData(variantCode: string): Promise<IgnisDataResponse | null> {
   const url = `${BASE_URL}/api/v1/data/${encodeURIComponent(variantCode)}`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
-    return (await res.json()) as HdcpDataResponse;
+    return (await res.json()) as IgnisDataResponse;
   } catch {
     return null;
   }
@@ -107,23 +120,28 @@ export async function fetchVariantData(variantCode: string): Promise<HdcpDataRes
  * Loads all refurbishment levels for a building classification.
  * Calls /match to get the list of codes, then /data for each code.
  * Returns an empty array if the service is unreachable or no variants exist.
+ *
+ * periodOverride lets callers supply a known TABULA period string when the
+ * building's own constructionPeriod doesn't map directly (e.g. "1980-2000").
  */
 export async function loadVariantLevels(
   countryIso2: string,
   buildingTypeLabel: string,
   constructionPeriod: string,
-): Promise<HdcpVariantLevel[]> {
-  const matchRes = await fetchMatchingVariants(countryIso2, buildingTypeLabel, constructionPeriod);
+  periodOverride?: string,
+): Promise<IgnisVariantLevel[]> {
+  const effectivePeriod = periodOverride ?? constructionPeriod;
+  const matchRes = await fetchMatchingVariants(countryIso2, buildingTypeLabel, effectivePeriod);
   if (!matchRes || matchRes.data.length === 0) return [];
 
-  const levels: HdcpVariantLevel[] = [];
+  const levels: IgnisVariantLevel[] = [];
 
   await Promise.all(
     matchRes.data.map(async (entry) => {
       const dataRes = await fetchVariantData(entry.code);
       if (!dataRes) return;
 
-      const inputs: HdcpInputs = hdcpInputsFromTabulaData(
+      const inputs: IgnisInputs = ignisInputsFromTabulaData(
         dataRes.tabula_data as Record<string, unknown>,
       );
       levels.push({ code: entry.code, label: entry.label, data: inputs });
@@ -133,7 +151,7 @@ export async function loadVariantLevels(
   // Restore original order (Promise.all may resolve out of order).
   return matchRes.data
     .map((entry) => levels.find((l) => l.code === entry.code))
-    .filter((l): l is HdcpVariantLevel => l !== undefined);
+    .filter((l): l is IgnisVariantLevel => l !== undefined);
 }
 
 /**
@@ -142,10 +160,10 @@ export async function loadVariantLevels(
  */
 export async function calculateHeatDemand(
   variantCode: string,
-  calcDemand: HdcpInputs,
-): Promise<HdcpCalculateResponse | null> {
+  calcDemand: IgnisInputs,
+): Promise<IgnisCalculateResponse | null> {
   const url     = `${BASE_URL}/api/v1/calculate/${encodeURIComponent(variantCode)}`;
-  const payload = toHdcpApiPayload(calcDemand);
+  const payload = toIgnisApiPayload(calcDemand);
 
   try {
     const res = await fetch(url, {
@@ -155,7 +173,7 @@ export async function calculateHeatDemand(
       signal:  AbortSignal.timeout(10000),
     });
     if (!res.ok) return null;
-    return (await res.json()) as HdcpCalculateResponse;
+    return (await res.json()) as IgnisCalculateResponse;
   } catch {
     return null;
   }

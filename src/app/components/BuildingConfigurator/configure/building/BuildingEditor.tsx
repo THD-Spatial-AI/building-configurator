@@ -4,7 +4,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Check, RotateCcw, Loader2, Flame } from 'lucide-react';
-import type { HdcpState, HdcpInputs } from '@/app/lib/hdcpAdapter';
+import type { IgnisState, IgnisInputs } from '@/app/lib/ignisAdapter';
+import {
+  TABULA_PERIOD_OPTIONS,
+  isBuildingTypeSupported,
+  isConstructionPeriodRecognised,
+} from '@/app/lib/ignisApi';
 import {
   SelectInput, NumberInput, FieldLabel,
   ToggleSwitch, FieldRow, ScrollHintContainer,
@@ -16,7 +21,7 @@ import {
   COUNTRY_OPTIONS,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 
-type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver' | 'hdcp';
+type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver' | 'ignis';
 
 // ─── Attached-neighbours visual picker ────────────────────────────────────────
 
@@ -521,17 +526,80 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
   );
 }
 
+// ─── HDCP status section (shown when ignis state is null) ─────────────────────
+
+function IgnisStatusSection({
+  general,
+  onPeriodOverride,
+}: {
+  general: Record<string, any>;
+  onPeriodOverride?: (period: string) => void;
+}) {
+  const country = general.country as string | undefined;
+  const type    = general.buildingType as string | undefined;
+  const period  = general.constructionPeriod as string | undefined;
+
+  if (!country) {
+    return (
+      <p className="text-[11px] text-muted-foreground">
+        Set a country in <strong>Basic Info</strong> to enable heat demand calculation.
+      </p>
+    );
+  }
+
+  if (type && !isBuildingTypeSupported(type)) {
+    return (
+      <p className="text-[11px] text-muted-foreground">
+        Building type <strong>{type}</strong> is not in the TABULA database.
+        Supported types: Single-family House, Multi-family House, Terraced House, Apartment Block.
+      </p>
+    );
+  }
+
+  if (period && !isConstructionPeriodRecognised(period)) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-[11px] text-muted-foreground">
+          Construction period <strong>{period}</strong> does not match a TABULA period.
+          Select the closest period to load TABULA defaults:
+        </p>
+        <div className="flex flex-col gap-1.5">
+          {TABULA_PERIOD_OPTIONS.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onPeriodOverride?.(opt)}
+              className="rounded-[6px] border border-slate-200 bg-white px-3 py-2 text-left text-[11px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Service is running and period/type are valid but no variants were found,
+  // or the service is unreachable.
+  return (
+    <p className="text-[11px] text-muted-foreground">
+      No TABULA data found for this building. Check that the ignis-go service is running
+      at <code className="rounded bg-slate-100 px-1">localhost:8080</code>.
+    </p>
+  );
+}
+
 // ─── HDCP section ─────────────────────────────────────────────────────────────
 
-interface HdcpSectionProps {
-  hdcp: HdcpState;
-  onFieldChange: (changes: Partial<HdcpInputs>) => void;
+interface IgnisSectionProps {
+  ignis: IgnisState;
+  onFieldChange: (changes: Partial<IgnisInputs>) => void;
   onVariantSelect: (index: number) => void;
   onReset: () => void;
 }
 
-function HdcpSection({ hdcp, onFieldChange, onVariantSelect, onReset }: HdcpSectionProps) {
-  const { variants, selectedVariantIndex, calcDemand, isDirty, result, loading, error } = hdcp;
+function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisSectionProps) {
+  const { variants, selectedVariantIndex, calcDemand, isDirty, result, loading, error } = ignis;
 
   return (
     <div className="flex flex-col gap-4">
@@ -619,7 +687,7 @@ function HdcpSection({ hdcp, onFieldChange, onVariantSelect, onReset }: HdcpSect
       <div className="flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Solar irradiance (Wh/m²·a)</p>
         {(['South', 'East', 'West', 'North', 'Horizontal'] as const).map((dir) => {
-          const key = `I_Sol_${dir}` as keyof HdcpInputs;
+          const key = `I_Sol_${dir}` as keyof IgnisInputs;
           return (
             <FieldRow key={dir}>
               <FieldLabel>{dir}</FieldLabel>
@@ -679,7 +747,7 @@ const SECTION_COLORS: Record<SectionKey, string> = {
   loads:       '#d97706',
   thermal:     '#dc2626',
   solver:      '#7c3aed',
-  hdcp:        '#ea580c',
+  ignis:        '#ea580c',
 };
 
 const SECTION_LABELS: Record<SectionKey, string> = {
@@ -689,11 +757,11 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   loads:       'Appliances & Occupancy',
   thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
-  hdcp:        'Annual Heat Demand',
+  ignis:        'Annual Heat Demand',
 };
 
 /** One-line value summary shown on the grid card and chip. */
-function sectionSummary(key: SectionKey, general: Record<string, any>, hdcp?: HdcpState | null): string {
+function sectionSummary(key: SectionKey, general: Record<string, any>, ignis?: IgnisState | null): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${general.floorArea} m²`;
     case 'conditions': {
@@ -704,22 +772,23 @@ function sectionSummary(key: SectionKey, general: Record<string, any>, hdcp?: Hd
     case 'loads':       return `φ_int ${general.phi_int} W/m²`;
     case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Rule-based';
-    case 'hdcp':        return hdcp?.result ? `${hdcp.result.qHnd.toFixed(0)} kWh/(m²·a)` : 'Not calculated';
+    case 'ignis':        return ignis?.result ? `${ignis.result.qHnd.toFixed(0)} kWh/(m²·a)` : 'Not calculated';
   }
 }
 
 /** Renders the content body for a given section key. */
 function SectionBody({
-  id, general, setGen, mode, hdcp, onHdcpFieldChange, onHdcpVariantSelect, onHdcpReset,
+  id, general, setGen, mode, ignis, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
 }: {
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
   mode: string;
-  hdcp?: HdcpState | null;
-  onHdcpFieldChange?: (changes: Partial<HdcpInputs>) => void;
-  onHdcpVariantSelect?: (index: number) => void;
-  onHdcpReset?: () => void;
+  ignis?: IgnisState | null;
+  onIgnisFieldChange?: (changes: Partial<IgnisInputs>) => void;
+  onIgnisVariantSelect?: (index: number) => void;
+  onIgnisReset?: () => void;
+  onIgnisPeriodOverride?: (period: string) => void;
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
@@ -728,14 +797,21 @@ function SectionBody({
     case 'loads':       return <InternalLoadsSection general={general} setGen={setGen} />;
     case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
-    case 'hdcp':
-      if (!hdcp) return <p className="text-[11px] text-muted-foreground">Loading TABULA data…</p>;
+    case 'ignis':
+      if (!ignis) {
+        return (
+          <IgnisStatusSection
+            general={general}
+            onPeriodOverride={onIgnisPeriodOverride}
+          />
+        );
+      }
       return (
-        <HdcpSection
-          hdcp={hdcp}
-          onFieldChange={onHdcpFieldChange ?? (() => {})}
-          onVariantSelect={onHdcpVariantSelect ?? (() => {})}
-          onReset={onHdcpReset ?? (() => {})}
+        <IgnisSection
+          ignis={ignis}
+          onFieldChange={onIgnisFieldChange ?? (() => {})}
+          onVariantSelect={onIgnisVariantSelect ?? (() => {})}
+          onReset={onIgnisReset ?? (() => {})}
         />
       );
   }
@@ -747,11 +823,13 @@ interface BuildingEditorProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
   mode: 'basic' | 'expert';
-  /** HDCP state — only rendered in expert mode when a TABULA variant is loaded. */
-  hdcp?: HdcpState | null;
-  onHdcpFieldChange?: (changes: Partial<HdcpInputs>) => void;
-  onHdcpVariantSelect?: (index: number) => void;
-  onHdcpReset?: () => void;
+  /** HDCP state — null while loading or when the service has no data for this building. */
+  ignis?: IgnisState | null;
+  onIgnisFieldChange?: (changes: Partial<IgnisInputs>) => void;
+  onIgnisVariantSelect?: (index: number) => void;
+  onIgnisReset?: () => void;
+  /** Called when the user manually selects a TABULA period to override an unrecognised one. */
+  onIgnisPeriodOverride?: (period: string) => void;
 }
 
 /**
@@ -764,16 +842,13 @@ interface BuildingEditorProps {
  */
 export function BuildingEditor({
   general, setGen, mode,
-  hdcp, onHdcpFieldChange, onHdcpVariantSelect, onHdcpReset,
+  ignis, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
 }: BuildingEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
   const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions'];
-  const EXPERT_SECTIONS: SectionKey[] = [
-    'ventilation', 'loads', 'thermal', 'solver',
-    // HDCP section only shown when a TABULA variant has been loaded
-    ...(hdcp !== undefined && hdcp !== null ? ['hdcp' as SectionKey] : []),
-  ];
+  // 'ignis' is always shown in expert mode so failures are visible, not silent.
+  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver', 'ignis'];
   const visibleSections = mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
     : ALL_SECTIONS;
@@ -834,7 +909,7 @@ export function BuildingEditor({
                 {SECTION_LABELS[activeSection]}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {sectionSummary(activeSection, general, hdcp)}
+                {sectionSummary(activeSection, general, ignis)}
               </p>
             </div>
             <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
@@ -844,10 +919,11 @@ export function BuildingEditor({
           <ScrollHintContainer className="p-4">
             <SectionBody
               id={activeSection} general={general} setGen={setGen} mode={mode}
-              hdcp={hdcp}
-              onHdcpFieldChange={onHdcpFieldChange}
-              onHdcpVariantSelect={onHdcpVariantSelect}
-              onHdcpReset={onHdcpReset}
+              ignis={ignis}
+              onIgnisFieldChange={onIgnisFieldChange}
+              onIgnisVariantSelect={onIgnisVariantSelect}
+              onIgnisReset={onIgnisReset}
+              onIgnisPeriodOverride={onIgnisPeriodOverride}
             />
           </ScrollHintContainer>
         </div>
@@ -877,7 +953,7 @@ export function BuildingEditor({
               </div>
               <ChevronDown className="size-3 shrink-0 text-slate-400" />
             </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general, hdcp)}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general, ignis)}</p>
           </button>
         ))}
       </div>

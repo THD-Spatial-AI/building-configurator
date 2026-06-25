@@ -174,7 +174,7 @@ export const DEFAULT_GENERAL = {
   electricityDemand:  4000,
   spaceHeatingDemand: 15000,
   dhwDemand:          2500,
-  // HDCP building-level condition codes (from TABULA)
+  // ignis building-level condition codes (from TABULA)
   Code_AttachedNeighbours: 'B_Alone',
   Code_AtticCond:          'N',
   Code_CellarCond:         'N',

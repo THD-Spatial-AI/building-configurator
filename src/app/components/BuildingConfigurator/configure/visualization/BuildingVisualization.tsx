@@ -19,7 +19,7 @@ export interface BuildingElement {
   azimuth: number;
   source?: BuildingElementSource;
   customMode?: boolean;
-  /** Expert thermal fields — sourced from TABULA via hdcp node */
+  /** Expert thermal fields — sourced from TABULA via ignis node */
   dInsulation?: number;        // Insulation thickness (m)
   bTransmission?: number;      // Heat loss correction factor for adjacent unheated space (0–1)
   measureType?: string;        // TABULA Code_MeasureType value

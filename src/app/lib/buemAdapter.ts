@@ -83,7 +83,7 @@ export interface BuildingState {
    * Null until the building's country + type + construction period resolve
    * to at least one TABULA variant in the HDCP service.
    */
-  hdcp: import('./hdcpAdapter').HdcpState | null;
+  ignis: import('./ignisAdapter').IgnisState | null;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -289,7 +289,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     thermalSummary: thematic.thermalSummary,
     timeseries: thematic.timeseries,
     installedTechIds: technologies.installedTechIds,
-    hdcp: null,
+    ignis: null,
   };
 }
 
