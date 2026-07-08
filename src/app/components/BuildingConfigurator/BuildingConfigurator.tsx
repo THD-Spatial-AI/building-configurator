@@ -28,7 +28,7 @@ import {
   exportToBuemGeojson,
   importBuildingData,
 } from '../../lib/buemAdapter';
-import type { IgnisState, IgnisInputs } from '../../lib/ignisAdapter';
+import type { IgnisState, IgnisInputs, IgnisFieldMetadata } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
   selectVariantLevel,
@@ -38,6 +38,7 @@ import {
 import {
   loadVariantLevels,
   calculateHeatDemand,
+  fetchFieldMetadata,
 } from '../../lib/ignisApi';
 import {
   getThermalRating,
@@ -273,6 +274,13 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // HDCP annual heat demand state — null until the building's country/type/period
   // resolve to at least one TABULA variant in the HDCP service.
   const [ignis, setHdcp] = useState<IgnisState | null>(null);
+
+  // ignis field descriptions (labels/tooltips), fetched once. Empty until it
+  // resolves; IgnisSection falls back to its own hardcoded tooltip text until then.
+  const [ignisFieldMetadata, setIgnisFieldMetadata] = useState<IgnisFieldMetadata[]>([]);
+  useEffect(() => {
+    fetchFieldMetadata().then(setIgnisFieldMetadata);
+  }, []);
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
@@ -1063,6 +1071,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       setGen={setGen}
                       mode={mode}
                       ignis={ignis}
+                      ignisFieldMetadata={ignisFieldMetadata}
                       onIgnisFieldChange={handleIgnisFieldChange}
                       onIgnisVariantSelect={handleIgnisVariantSelect}
                       onIgnisReset={handleIgnisReset}

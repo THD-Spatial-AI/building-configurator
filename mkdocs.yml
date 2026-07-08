@@ -114,6 +114,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Architecture: architecture.md
+  - ignis field mapping: ignis-field-mapping.md
 
 # Mermaid — load explicitly so diagrams render on GitHub Pages.
 # Material for MkDocs attempts a dynamic import at runtime which can silently

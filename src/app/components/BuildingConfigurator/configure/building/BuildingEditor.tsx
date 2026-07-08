@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Check, RotateCcw, Loader2, Flame } from 'lucide-react';
-import type { IgnisState, IgnisInputs } from '@/app/lib/ignisAdapter';
+import type { IgnisState, IgnisInputs, IgnisFieldMetadata } from '@/app/lib/ignisAdapter';
 import {
   TABULA_PERIOD_OPTIONS,
   isBuildingTypeSupported,
@@ -596,10 +596,17 @@ interface IgnisSectionProps {
   onFieldChange: (changes: Partial<IgnisInputs>) => void;
   onVariantSelect: (index: number) => void;
   onReset: () => void;
+  /** ignis field descriptions, fetched from GET /api/v1/fields. May be empty while loading. */
+  fieldMetadata: IgnisFieldMetadata[];
 }
 
-function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisSectionProps) {
+function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset, fieldMetadata }: IgnisSectionProps) {
   const { variants, selectedVariantIndex, calcDemand, isDirty, result, loading, error } = ignis;
+
+  // Prefers ignis's own field description; falls back to the given hardcoded
+  // text if the metadata fetch hasn't resolved yet (or the key isn't found).
+  const tipFor = (key: string, fallback?: string): string | undefined =>
+    fieldMetadata.find((f) => f.key === key)?.simple_description ?? fallback;
 
   return (
     <div className="flex flex-col gap-4">
@@ -658,7 +665,7 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisS
       <div className="flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Climate</p>
         <FieldRow>
-          <FieldLabel tip="Number of heating degree days per year.">Heating days</FieldLabel>
+          <FieldLabel tip={tipFor('HeatingDays', 'Number of heating degree days per year.')}>Heating days</FieldLabel>
           <NumberInput
             value={calcDemand.HeatingDays ?? 0}
             onChange={(v) => onFieldChange({ HeatingDays: v })}
@@ -666,7 +673,7 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisS
           />
         </FieldRow>
         <FieldRow>
-          <FieldLabel tip="External design temperature (°C).">Outside temp θ_e</FieldLabel>
+          <FieldLabel tip={tipFor('Theta_e', 'External design temperature (°C).')}>Outside temp θ_e</FieldLabel>
           <NumberInput
             value={calcDemand.Theta_e ?? 0}
             onChange={(v) => onFieldChange({ Theta_e: v })}
@@ -674,7 +681,7 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisS
           />
         </FieldRow>
         <FieldRow>
-          <FieldLabel tip="Internal design temperature (°C).">Inside temp θ_i</FieldLabel>
+          <FieldLabel tip={tipFor('theta_i', 'Internal design temperature (°C).')}>Inside temp θ_i</FieldLabel>
           <NumberInput
             value={calcDemand.Theta_i ?? 20}
             onChange={(v) => onFieldChange({ Theta_i: v })}
@@ -688,9 +695,10 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisS
         <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Solar irradiance (Wh/m²·a)</p>
         {(['South', 'East', 'West', 'North', 'Horizontal'] as const).map((dir) => {
           const key = `I_Sol_${dir}` as keyof IgnisInputs;
+          const metadataKey = dir === 'Horizontal' ? 'I_Sol_Hor' : `I_Sol_${dir}`;
           return (
             <FieldRow key={dir}>
-              <FieldLabel>{dir}</FieldLabel>
+              <FieldLabel tip={tipFor(metadataKey)}>{dir}</FieldLabel>
               <NumberInput
                 value={(calcDemand[key] as number | undefined) ?? 0}
                 onChange={(v) => onFieldChange({ [key]: v })}
@@ -705,7 +713,7 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisS
       <div className="flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Thermal bridging (W/m²K)</p>
         <FieldRow>
-          <FieldLabel tip="Additional heat loss due to thermal bridges in the original building fabric.">Original ΔU_tb</FieldLabel>
+          <FieldLabel tip={tipFor('delta_U_ThermalBridging_Original', 'Additional heat loss due to thermal bridges in the original building fabric.')}>Original ΔU_tb</FieldLabel>
           <NumberInput
             value={calcDemand.Delta_U_ThermalBridging_Original ?? 0}
             onChange={(v) => onFieldChange({ Delta_U_ThermalBridging_Original: v })}
@@ -713,7 +721,7 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset }: IgnisS
           />
         </FieldRow>
         <FieldRow>
-          <FieldLabel tip="Additional heat loss due to thermal bridges after refurbishment.">Refurbished ΔU_tb</FieldLabel>
+          <FieldLabel tip={tipFor('delta_U_ThermalBridging_Refurbished', 'Additional heat loss due to thermal bridges after refurbishment.')}>Refurbished ΔU_tb</FieldLabel>
           <NumberInput
             value={calcDemand.Delta_U_ThermalBridging_Refurbished ?? 0}
             onChange={(v) => onFieldChange({ Delta_U_ThermalBridging_Refurbished: v })}
@@ -778,13 +786,14 @@ function sectionSummary(key: SectionKey, general: Record<string, any>, ignis?: I
 
 /** Renders the content body for a given section key. */
 function SectionBody({
-  id, general, setGen, mode, ignis, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
+  id, general, setGen, mode, ignis, ignisFieldMetadata, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
 }: {
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
   mode: string;
   ignis?: IgnisState | null;
+  ignisFieldMetadata?: IgnisFieldMetadata[];
   onIgnisFieldChange?: (changes: Partial<IgnisInputs>) => void;
   onIgnisVariantSelect?: (index: number) => void;
   onIgnisReset?: () => void;
@@ -812,6 +821,7 @@ function SectionBody({
           onFieldChange={onIgnisFieldChange ?? (() => {})}
           onVariantSelect={onIgnisVariantSelect ?? (() => {})}
           onReset={onIgnisReset ?? (() => {})}
+          fieldMetadata={ignisFieldMetadata ?? []}
         />
       );
   }
@@ -825,6 +835,8 @@ interface BuildingEditorProps {
   mode: 'basic' | 'expert';
   /** HDCP state — null while loading or when the service has no data for this building. */
   ignis?: IgnisState | null;
+  /** ignis field descriptions from GET /api/v1/fields, used for tooltips. May be empty while loading. */
+  ignisFieldMetadata?: IgnisFieldMetadata[];
   onIgnisFieldChange?: (changes: Partial<IgnisInputs>) => void;
   onIgnisVariantSelect?: (index: number) => void;
   onIgnisReset?: () => void;
@@ -842,7 +854,7 @@ interface BuildingEditorProps {
  */
 export function BuildingEditor({
   general, setGen, mode,
-  ignis, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
+  ignis, ignisFieldMetadata, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
 }: BuildingEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
@@ -920,6 +932,7 @@ export function BuildingEditor({
             <SectionBody
               id={activeSection} general={general} setGen={setGen} mode={mode}
               ignis={ignis}
+              ignisFieldMetadata={ignisFieldMetadata}
               onIgnisFieldChange={onIgnisFieldChange}
               onIgnisVariantSelect={onIgnisVariantSelect}
               onIgnisReset={onIgnisReset}

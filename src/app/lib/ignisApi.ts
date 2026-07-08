@@ -9,6 +9,8 @@
 import type {
   IgnisCalculateResponse,
   IgnisDataResponse,
+  IgnisFieldMetadata,
+  IgnisFieldMetadataResponse,
   IgnisInputs,
   IgnisMatchResponse,
   IgnisVariantLevel,
@@ -152,6 +154,23 @@ export async function loadVariantLevels(
   return matchRes.data
     .map((entry) => levels.find((l) => l.code === entry.code))
     .filter((l): l is IgnisVariantLevel => l !== undefined);
+}
+
+/**
+ * Fetches ignis's static field-metadata list (labels + descriptions for every
+ * TABULA input field), used to enrich form tooltips. Returns an empty array
+ * on any error so callers can fall back to their own hardcoded text.
+ */
+export async function fetchFieldMetadata(): Promise<IgnisFieldMetadata[]> {
+  const url = `${BASE_URL}/api/v1/fields`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return [];
+    const body = (await res.json()) as IgnisFieldMetadataResponse;
+    return body.data ?? [];
+  } catch {
+    return [];
+  }
 }
 
 /**
