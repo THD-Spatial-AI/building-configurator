@@ -8,6 +8,7 @@ import { AlertTriangle, Zap, Flame, Droplets, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { EnergyTotals } from '../../../lib/loadProfile';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
+import { HeatingDeltaBadge } from '../shared/ui';
 
 interface PvSummary {
   installed: boolean;
@@ -80,6 +81,9 @@ export function BuildingSnapshotAside({
                       {value}
                     </span>
                     <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
+                    {key === 'heating' && (
+                      <HeatingDeltaBadge deltaPercent={energyTotals.heatingDeltaPercent} />
+                    )}
                   </div>
                 </div>
               );

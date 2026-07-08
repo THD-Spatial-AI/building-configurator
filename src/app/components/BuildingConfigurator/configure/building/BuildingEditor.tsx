@@ -858,9 +858,10 @@ export function BuildingEditor({
 }: BuildingEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions'];
-  // 'ignis' is always shown in expert mode so failures are visible, not silent.
-  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver', 'ignis'];
+  // 'ignis' (Annual Heat Demand) is shown in both modes — it's the building's
+  // headline result, not an expert-only diagnostic.
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions', 'ignis'];
+  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver'];
   const visibleSections = mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
     : ALL_SECTIONS;

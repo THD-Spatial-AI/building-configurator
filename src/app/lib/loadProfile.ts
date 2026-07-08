@@ -16,6 +16,10 @@ export interface EnergyTotals {
   heating: string;
   hotwater: string;
   unit: string;
+  /** Set when 'heating' is a live ignis calculation rather than the BuEM baseline. */
+  heatingSource?: 'ignis' | 'buem';
+  /** % change of the live ignis heating figure vs. the BuEM baseline, when both exist. */
+  heatingDeltaPercent?: number | null;
 }
 
 export type DatasetByResolution = Record<Resolution, LoadDataPoint[]>;

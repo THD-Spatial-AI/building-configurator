@@ -81,6 +81,31 @@ export function InfoTip({ tip }: { tip: string }) {
   );
 }
 
+// ─── HeatingDeltaBadge ────────────────────────────────────────────────────────
+
+/**
+ * Small "▲/▼ N%" pill showing how a live ignis heating figure compares to the
+ * last full BuEM simulation. Lower demand is good (green); higher is a
+ * regression to flag (red). Renders nothing if there's no baseline to compare
+ * against, or the values are effectively unchanged.
+ */
+export function HeatingDeltaBadge({ deltaPercent }: { deltaPercent: number | null | undefined }) {
+  if (deltaPercent === null || deltaPercent === undefined || Math.abs(deltaPercent) < 0.5) return null;
+
+  const isIncrease = deltaPercent > 0;
+  return (
+    <span
+      className={cn(
+        'ml-1.5 text-[10px] font-semibold',
+        isIncrease ? 'text-red-400' : 'text-emerald-400',
+      )}
+      title="vs. last full simulation"
+    >
+      {isIncrease ? '▲' : '▼'} {Math.abs(deltaPercent).toFixed(0)}%
+    </span>
+  );
+}
+
 // ─── NumberInput ──────────────────────────────────────────────────────────────
 
 interface NumberInputProps {

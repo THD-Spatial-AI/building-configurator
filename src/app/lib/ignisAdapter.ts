@@ -310,6 +310,17 @@ const TABULA_FIELD_PATHS: Record<keyof IgnisInputs, string> = {
   Delta_U_ThermalBridging_Refurbished: 'AdvancedParameters.ThermalBridges.delta_U_ThermalBridging_Refurbished',
 };
 
+/**
+ * Rounds away float32-to-float64 widening noise (e.g. 4.599999904632568 for 4.6).
+ * ignis stores these TABULA columns as Postgres `REAL` (single precision) but
+ * reads them into Go `float64`, so the extra digits are precision artifacts,
+ * not real data — 4 decimal places keeps all meaningful precision for every
+ * field here (areas, U-values, temperatures, thermal bridging deltas).
+ */
+function roundToStoredPrecision(value: number): number {
+  return Math.round(value * 10000) / 10000;
+}
+
 /** Reads a numeric value from `root` by walking a dotted path; undefined if any segment is missing or not a number. */
 function numAtPath(root: Record<string, unknown>, path: string): number | undefined {
   let current: unknown = root;
@@ -317,7 +328,7 @@ function numAtPath(root: Record<string, unknown>, path: string): number | undefi
     if (typeof current !== 'object' || current === null) return undefined;
     current = (current as Record<string, unknown>)[segment];
   }
-  return typeof current === 'number' ? current : undefined;
+  return typeof current === 'number' ? roundToStoredPrecision(current) : undefined;
 }
 
 /**

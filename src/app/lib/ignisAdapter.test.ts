@@ -120,6 +120,27 @@ describe('ignisInputsFromTabulaData', () => {
     );
   });
 
+  it('rounds away float32-to-float64 widening noise from ignis Postgres REAL columns', () => {
+    // These exact values reproduce what ignis actually returns: Postgres REAL
+    // (single precision) read into Go float64, e.g. 4.6 becomes 4.599999904632568.
+    const tabula = tabulaDataFixture({
+      heatingDays: 216,
+      thetaE: 4.599999904632568,
+      thetaI: 20,
+      aRoof1: 80,
+      uRoof1: 0.3,
+      iSolSouth: 400,
+      deltaUOriginal: 0.10000000149011612,
+    });
+    tabula.AdvancedParameters.ThermalBridges.delta_U_ThermalBridging_Refurbished = 0.05000000074505806;
+
+    const result = ignisInputsFromTabulaData(tabula);
+
+    expect(result.Theta_e).toBe(4.6);
+    expect(result.Delta_U_ThermalBridging_Original).toBe(0.1);
+    expect(result.Delta_U_ThermalBridging_Refurbished).toBe(0.05);
+  });
+
   it('returns undefined (not 0) for fields missing from a flat/malformed object, instead of silently matching the wrong shape', () => {
     // Regression guard for the original bug: a flat object (pre-fix assumption)
     // must not accidentally satisfy the nested lookup.

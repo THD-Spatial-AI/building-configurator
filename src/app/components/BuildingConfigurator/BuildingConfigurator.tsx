@@ -17,7 +17,7 @@ import {
   faceFromAzimuth,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
-import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer } from './shared/ui';
+import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer, HeatingDeltaBadge } from './shared/ui';
 import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
@@ -123,6 +123,14 @@ function isRoofConfig(value: unknown): value is RoofConfig {
 
 // --- Energy totals helper -----------------------------------------------------
 
+/** Formats a kWh figure with precision scaled to its magnitude. */
+function formatKwh(v: number): string {
+  const abs = Math.abs(v);
+  if (abs >= 100) return abs.toFixed(0);
+  if (abs >= 1)   return abs.toFixed(1);
+  return abs.toFixed(2);
+}
+
 /**
  * Computes fixed annual energy totals from the full hourly timeseries.
  * Falls back to the model thermal summary, then to placeholder dashes.
@@ -133,16 +141,10 @@ function computeEnergyTotals(
   thermalSummary: ThermalSummary | null,
 ): EnergyTotals {
   if (timeseries && timeseries.length > 0) {
-    const fmt = (v: number) => {
-      const abs = Math.abs(v);
-      if (abs >= 100)  return abs.toFixed(0);
-      if (abs >= 1)    return abs.toFixed(1);
-      return abs.toFixed(2);
-    };
     return {
-      heating:     fmt(timeseries.reduce((s, p) => s + p.heating,     0)),
-      electricity: fmt(timeseries.reduce((s, p) => s + p.electricity, 0)),
-      hotwater:    fmt(timeseries.reduce((s, p) => s + p.hotwater,    0)),
+      heating:     formatKwh(timeseries.reduce((s, p) => s + p.heating,     0)),
+      electricity: formatKwh(timeseries.reduce((s, p) => s + p.electricity, 0)),
+      hotwater:    formatKwh(timeseries.reduce((s, p) => s + p.hotwater,    0)),
       unit: 'kWh',
     };
   }
@@ -155,6 +157,23 @@ function computeEnergyTotals(
     };
   }
   return { electricity: '—', heating: '—', hotwater: '—', unit: 'kWh' };
+}
+
+/**
+ * Raw (unformatted) BuEM baseline annual heating figure, in kWh — the "last
+ * full simulation" reference point that a live ignis recalculation is
+ * compared against. Same source priority as computeEnergyTotals, but returns
+ * a number for arithmetic rather than a display string.
+ */
+function baselineHeatingKwh(
+  timeseries: LoadDataPoint[] | null,
+  thermalSummary: ThermalSummary | null,
+): number | null {
+  if (timeseries && timeseries.length > 0) {
+    return timeseries.reduce((s, p) => s + p.heating, 0);
+  }
+  if (thermalSummary) return thermalSummary.heatingKwh;
+  return null;
 }
 
 // --- Energy items config (used in the configure view's demand mini panel) -----
@@ -224,6 +243,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     thematicData?.thermalSummary ?? buildingData?.thermalSummary ?? null,
   );
 
+  const initialBaselineHeatingKwh = baselineHeatingKwh(
+    thematicData?.timeseries ?? buildingData?.timeseries ?? null,
+    thematicData?.thermalSummary ?? buildingData?.thermalSummary ?? null,
+  );
+
   const [workspaceView, setWorkspaceView] = useState<'overview' | 'configure'>('overview');
   const [mode,          setMode]          = useState<'basic' | 'expert'>('basic');
   const [elements,      setElements]      = useState(initialElements);
@@ -285,6 +309,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
+  // The last full BuEM simulation's annual heating figure — a fixed reference point.
+  // Set once per loaded building; does not change as the user edits ignis inputs.
+  const [buemBaselineHeatingKwh, setBuemBaselineHeatingKwh] = useState<number | null>(initialBaselineHeatingKwh);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -324,6 +351,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
       buildingData.thematic.thermalSummary ?? buildingData.thermalSummary ?? null,
     );
+    const nextBaselineHeatingKwh = baselineHeatingKwh(
+      buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
+      buildingData.thematic.thermalSummary ?? buildingData.thermalSummary ?? null,
+    );
 
     baselineRef.current = {
       general:      nextGeneral,
@@ -336,6 +367,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setRoofConfig(DEFAULT_ROOF_CONFIG);
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
     setEnergyTotals(nextTotals);
+    setBuemBaselineHeatingKwh(nextBaselineHeatingKwh);
     setSelectedId(null);
     setActiveGroupType(null);
     setSurfaceEditorTab('properties');
@@ -795,6 +827,29 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     : 0;
   const thermalRating = getThermalRating(avgUValue);
   const snapshotRows  = buildSnapshotRows(general, elements, totalArea, baselineRef.current);
+
+  // Live ignis heating figure (kWh/(m²·a) × floor area), compared against the
+  // last full BuEM simulation. Lets the user see how their edits (refurbishment
+  // level, field changes) move heating demand before deciding to save or revert.
+  const displayEnergyTotals: EnergyTotals = useMemo(() => {
+    const floorArea = Number(general.floorArea) || 0;
+    const ignisHeatingKwh = ignis?.result && floorArea > 0
+      ? ignis.result.qHnd * floorArea
+      : null;
+
+    if (ignisHeatingKwh === null) return energyTotals;
+
+    const heatingDeltaPercent = buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0
+      ? ((ignisHeatingKwh - buemBaselineHeatingKwh) / buemBaselineHeatingKwh) * 100
+      : null;
+
+    return {
+      ...energyTotals,
+      heating: formatKwh(ignisHeatingKwh),
+      heatingSource: 'ignis',
+      heatingDeltaPercent,
+    };
+  }, [energyTotals, ignis?.result, general.floorArea, buemBaselineHeatingKwh]);
   const pvInstalledSurfaces = useMemo(() => (
     Object.values(elements)
       .filter((element) => surfacePvConfigs[element.id]?.installed)
@@ -927,7 +982,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
             // ── Overview layout: snapshot sidebar + energy/envelope column ──
             <div className="grid h-full min-h-0 grid-cols-[430px_minmax(0,1fr)] overflow-hidden">
               <BuildingSnapshotAside
-                energyTotals={energyTotals}
+                energyTotals={displayEnergyTotals}
                 snapshotRows={snapshotRows}
                 thermalRating={thermalRating}
                 avgUValue={avgUValue}
@@ -991,7 +1046,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       </p>
                       <div className="flex flex-col gap-3">
                         {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
-                          const value = energyTotals[key as keyof EnergyTotals];
+                          const value = displayEnergyTotals[key as keyof EnergyTotals];
                           return (
                             <div key={key} className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -1004,7 +1059,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                                 <span className={cn('text-lg font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
                                   {value}
                                 </span>
-                                <span className="ml-1 text-[10px] text-slate-500">{energyTotals.unit}</span>
+                                <span className="ml-1 text-[10px] text-slate-500">{displayEnergyTotals.unit}</span>
+                                {key === 'heating' && (
+                                  <HeatingDeltaBadge deltaPercent={displayEnergyTotals.heatingDeltaPercent} />
+                                )}
                               </div>
                             </div>
                           );
