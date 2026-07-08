@@ -34,6 +34,8 @@ import {
   selectVariantLevel,
   updateCalcDemand,
   resetCalcDemand,
+  syncElementsWithVariantLevel,
+  restoreDefaultUValues,
 } from '../../lib/ignisAdapter';
 import {
   loadVariantLevels,
@@ -45,6 +47,7 @@ import {
   buildSnapshotRows,
   type SnapshotBaseline,
 } from './shared/snapshotUtils';
+import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 import type { ElementGroupKey } from './shared/elementListUtils';
 import { BuildingSnapshotAside } from './overview/BuildingSnapshotAside';
 import { EnergyEnvelopeColumn } from './overview/EnergyEnvelopeColumn';
@@ -403,12 +406,17 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         return;
       }
 
+      // New classification always starts at "existing state" — restore any
+      // surface U-values a previous refurbishment-level selection may have applied.
+      const nextElements = restoreDefaultUValues(elements);
+      if (!cancelled && nextElements !== elements) setElements(nextElements);
+
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
         technologies: { rawTechs: {}, installedTechIds: [] },
         identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
-        envelope: elements,
+        envelope: nextElements,
         thermalSummary: null,
         timeseries: null,
         installedTechIds: [],
@@ -452,12 +460,23 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   const handleIgnisVariantSelect = (index: number) => {
     if (!ignis) return;
+    const targetVariant = ignis.variants[index];
+    // Refurbished levels apply the TABULA archetype's own U-values per surface
+    // category (roof/wall/floor/window/door); "existing state" restores each
+    // surface's real, as-measured U-value. Without this, refurbishment-level
+    // selection cannot change thermal efficiency or heat demand at all — BuEM's
+    // real per-surface U-values would otherwise always win.
+    const nextElements = targetVariant
+      ? syncElementsWithVariantLevel(elements, index, targetVariant.data)
+      : elements;
+    if (nextElements !== elements) setElements(nextElements);
+
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
       technologies: { rawTechs: {}, installedTechIds: [] },
       identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
-      envelope: elements,
+      envelope: nextElements,
       thermalSummary: null,
       timeseries: null,
       installedTechIds: [],
@@ -477,12 +496,16 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       const variants = await loadVariantLevels(country, type, general.constructionPeriod, period);
       if (variants.length === 0) return;
 
+      // Always restarts at "existing state" — restore any archetype U-values applied earlier.
+      const nextElements = restoreDefaultUValues(elements);
+      if (nextElements !== elements) setElements(nextElements);
+
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
         technologies: { rawTechs: {}, installedTechIds: [] },
         identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
-        envelope: elements,
+        envelope: nextElements,
         thermalSummary: null,
         timeseries: null,
         installedTechIds: [],
@@ -495,12 +518,18 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   const handleIgnisReset = () => {
     if (!ignis) return;
+    const selectedVariant = ignis.variants[ignis.selectedVariantIndex];
+    const nextElements = selectedVariant
+      ? syncElementsWithVariantLevel(elements, ignis.selectedVariantIndex, selectedVariant.data)
+      : elements;
+    if (nextElements !== elements) setElements(nextElements);
+
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: elements, thermalSummary: null, timeseries: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
       technologies: { rawTechs: {}, installedTechIds: [] },
       identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
-      envelope: elements,
+      envelope: nextElements,
       thermalSummary: null,
       timeseries: null,
       installedTechIds: [],
@@ -825,7 +854,12 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const avgUValue   = totalArea > 0
     ? Object.values(elements).reduce((sum, e) => sum + e.uValue * e.area, 0) / totalArea
     : 0;
-  const thermalRating = getThermalRating(avgUValue);
+  // Prefer a demand-based rating (kWh/(m²·a), matching real EPC-style classification —
+  // see thermalRatingStandards.ts for the country-configurable band source) once ignis
+  // has a result; fall back to the simpler U-value-based rating otherwise.
+  const thermalRating = ignis?.result
+    ? getThermalRatingFromDemand(ignis.result.qHnd, general.country as string | undefined)
+    : getThermalRating(avgUValue);
   const snapshotRows  = buildSnapshotRows(general, elements, totalArea, baselineRef.current);
 
   // Live ignis heating figure (kWh/(m²·a) × floor area), compared against the
@@ -833,12 +867,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // level, field changes) move heating demand before deciding to save or revert.
   const displayEnergyTotals: EnergyTotals = useMemo(() => {
     const floorArea = Number(general.floorArea) || 0;
-    const ignisHeatingKwh = ignis?.result && floorArea > 0
-      ? ignis.result.qHnd * floorArea
-      : null;
+    const ignisResult = ignis?.result;
+    if (!ignisResult || floorArea <= 0) return energyTotals;
 
-    if (ignisHeatingKwh === null) return energyTotals;
-
+    const ignisHeatingKwh = ignisResult.qHnd * floorArea;
     const heatingDeltaPercent = buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0
       ? ((ignisHeatingKwh - buemBaselineHeatingKwh) / buemBaselineHeatingKwh) * 100
       : null;
@@ -848,6 +880,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       heating: formatKwh(ignisHeatingKwh),
       heatingSource: 'ignis',
       heatingDeltaPercent,
+      heatingPerM2: ignisResult.qHnd.toFixed(1),
     };
   }, [energyTotals, ignis?.result, general.floorArea, buemBaselineHeatingKwh]);
   const pvInstalledSurfaces = useMemo(() => (
@@ -1056,12 +1089,17 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                                 <span className="text-xs text-slate-300">{label}</span>
                               </div>
                               <div className="text-right">
-                                <span className={cn('text-lg font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
-                                  {value}
-                                </span>
-                                <span className="ml-1 text-[10px] text-slate-500">{displayEnergyTotals.unit}</span>
-                                {key === 'heating' && (
-                                  <HeatingDeltaBadge deltaPercent={displayEnergyTotals.heatingDeltaPercent} />
+                                <div>
+                                  <span className={cn('text-lg font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
+                                    {value}
+                                  </span>
+                                  <span className="ml-1 text-[10px] text-slate-500">{displayEnergyTotals.unit}</span>
+                                  {key === 'heating' && (
+                                    <HeatingDeltaBadge deltaPercent={displayEnergyTotals.heatingDeltaPercent} />
+                                  )}
+                                </div>
+                                {key === 'heating' && displayEnergyTotals.heatingPerM2 && (
+                                  <p className="text-[10px] text-slate-500">{displayEnergyTotals.heatingPerM2} kWh/m²·a</p>
                                 )}
                               </div>
                             </div>

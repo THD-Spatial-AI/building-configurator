@@ -88,11 +88,20 @@ export function InfoTip({ tip }: { tip: string }) {
  * last full BuEM simulation. Lower demand is good (green); higher is a
  * regression to flag (red). Renders nothing if there's no baseline to compare
  * against, or the values are effectively unchanged.
+ *
+ * Percentages beyond DELTA_DISPLAY_CAP are shown as ">300%" rather than the
+ * raw figure — while BuEM and the building's data are still placeholders, a
+ * comparison between two disconnected estimates can produce swings in the
+ * thousands of percent, which is noise, not a real signal, and reads as broken.
  */
+const DELTA_DISPLAY_CAP = 300;
+
 export function HeatingDeltaBadge({ deltaPercent }: { deltaPercent: number | null | undefined }) {
   if (deltaPercent === null || deltaPercent === undefined || Math.abs(deltaPercent) < 0.5) return null;
 
   const isIncrease = deltaPercent > 0;
+  const magnitude = Math.abs(deltaPercent);
+  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}%` : `${magnitude.toFixed(0)}%`;
   return (
     <span
       className={cn(
@@ -101,7 +110,7 @@ export function HeatingDeltaBadge({ deltaPercent }: { deltaPercent: number | nul
       )}
       title="vs. last full simulation"
     >
-      {isIncrease ? '▲' : '▼'} {Math.abs(deltaPercent).toFixed(0)}%
+      {isIncrease ? '▲' : '▼'} {displayValue}
     </span>
   );
 }

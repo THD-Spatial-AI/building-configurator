@@ -77,12 +77,17 @@ export function BuildingSnapshotAside({
                     <span className="text-sm text-slate-300">{label}</span>
                   </div>
                   <div className="text-right">
-                    <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
-                      {value}
-                    </span>
-                    <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
-                    {key === 'heating' && (
-                      <HeatingDeltaBadge deltaPercent={energyTotals.heatingDeltaPercent} />
+                    <div>
+                      <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
+                        {value}
+                      </span>
+                      <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
+                      {key === 'heating' && (
+                        <HeatingDeltaBadge deltaPercent={energyTotals.heatingDeltaPercent} />
+                      )}
+                    </div>
+                    {key === 'heating' && energyTotals.heatingPerM2 && (
+                      <p className="text-[11px] text-slate-500">{energyTotals.heatingPerM2} kWh/m²·a</p>
                     )}
                   </div>
                 </div>

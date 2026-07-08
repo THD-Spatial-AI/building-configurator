@@ -260,6 +260,85 @@ export function deriveIgnisInputsFromBuem(building: BuildingState): Partial<Igni
   return derived;
 }
 
+/** Per-category TABULA U-value field for each BuEM surface element type. */
+const TABULA_UVALUE_FIELD_BY_TYPE: Record<BuildingElement['type'], keyof IgnisInputs> = {
+  roof:   'U_Roof_1',
+  wall:   'U_Wall_1',
+  floor:  'U_Floor_1',
+  window: 'U_Window_1',
+  door:   'U_Door_1',
+};
+
+/**
+ * Applies a refurbishment level's per-category TABULA U-values onto every
+ * matching BuEM surface element (by type — roof/wall/floor/window/door).
+ *
+ * This is the reverse direction of deriveIgnisInputsFromBuem: without it,
+ * BuEM's real per-surface U-values always win, so selecting a different
+ * refurbishment level cannot change the modelled insulation — thermal
+ * efficiency and the heat-demand calculation would stay frozen at whatever
+ * the building's original surfaces were, regardless of level chosen.
+ * Returns the same object reference if nothing actually changed.
+ */
+export function applyTabulaUValuesToElements(
+  elements: Record<string, BuildingElement>,
+  variantData: IgnisInputs,
+): Record<string, BuildingElement> {
+  let changed = false;
+  const next: Record<string, BuildingElement> = {};
+
+  for (const [id, el] of Object.entries(elements)) {
+    const uValue = variantData[TABULA_UVALUE_FIELD_BY_TYPE[el.type]] as number | undefined;
+    if (uValue !== undefined && uValue !== el.uValue) {
+      next[id] = { ...el, uValue };
+      changed = true;
+    } else {
+      next[id] = el;
+    }
+  }
+
+  return changed ? next : elements;
+}
+
+/**
+ * Restores every element's `uValue` to its stamped `defaultUValue` — the
+ * real, as-measured/configured value from before any refurbishment-level
+ * override. Used when the user switches back to "existing state."
+ * Returns the same object reference if nothing actually changed.
+ */
+export function restoreDefaultUValues(
+  elements: Record<string, BuildingElement>,
+): Record<string, BuildingElement> {
+  let changed = false;
+  const next: Record<string, BuildingElement> = {};
+
+  for (const [id, el] of Object.entries(elements)) {
+    if (el.defaultUValue !== undefined && el.defaultUValue !== el.uValue) {
+      next[id] = { ...el, uValue: el.defaultUValue };
+      changed = true;
+    } else {
+      next[id] = el;
+    }
+  }
+
+  return changed ? next : elements;
+}
+
+/**
+ * Syncs surface U-values with the given refurbishment level: the real
+ * (defaultUValue) values for "existing state" (index 0), or that level's
+ * TABULA archetype U-values for any refurbished level.
+ */
+export function syncElementsWithVariantLevel(
+  elements: Record<string, BuildingElement>,
+  variantIndex: number,
+  variantData: IgnisInputs,
+): Record<string, BuildingElement> {
+  return variantIndex === 0
+    ? restoreDefaultUValues(elements)
+    : applyTabulaUValuesToElements(elements, variantData);
+}
+
 // ─── TABULA data → IgnisInputs ─────────────────────────────────────────────────
 
 /**
