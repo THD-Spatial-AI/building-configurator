@@ -19,6 +19,15 @@ import { ignisInputsFromTabulaData, toIgnisApiPayload } from './ignisAdapter';
 
 const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://localhost:8080';
 
+/**
+ * Identifies this app to the reverse proxy sitting in front of ignis.
+ * Prototype-stage credential only — see the orchestration-layer decision
+ * note before this pattern is carried into production.
+ */
+const AUTH_HEADERS: Record<string, string> = import.meta.env.VITE_IGNIS_API_KEY
+  ? { 'X-Api-Key': import.meta.env.VITE_IGNIS_API_KEY as string }
+  : {};
+
 // ─── TABULA code mappings ─────────────────────────────────────────────────────
 
 /**
@@ -95,7 +104,7 @@ export async function fetchMatchingVariants(
     + `?type=${encodeURIComponent(typeCode)}&period=${encodeURIComponent(periodCode)}`;
 
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     return (await res.json()) as IgnisMatchResponse;
   } catch {
@@ -110,7 +119,7 @@ export async function fetchMatchingVariants(
 export async function fetchVariantData(variantCode: string): Promise<IgnisDataResponse | null> {
   const url = `${BASE_URL}/api/v1/data/${encodeURIComponent(variantCode)}`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     return (await res.json()) as IgnisDataResponse;
   } catch {
@@ -164,7 +173,7 @@ export async function loadVariantLevels(
 export async function fetchFieldMetadata(): Promise<IgnisFieldMetadata[]> {
   const url = `${BASE_URL}/api/v1/fields`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
     if (!res.ok) return [];
     const body = (await res.json()) as IgnisFieldMetadataResponse;
     return body.data ?? [];
@@ -187,7 +196,7 @@ export async function calculateHeatDemand(
   try {
     const res = await fetch(url, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...AUTH_HEADERS, 'Content-Type': 'application/json' },
       body:    payload ? JSON.stringify(payload) : undefined,
       signal:  AbortSignal.timeout(10000),
     });
