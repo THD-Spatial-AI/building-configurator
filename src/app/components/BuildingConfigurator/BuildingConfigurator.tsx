@@ -28,6 +28,7 @@ import {
   exportToBuemGeojson,
   importBuildingData,
 } from '../../lib/buemAdapter';
+import { runBuildingSimulation } from '../../lib/buemApi';
 import type { IgnisState, IgnisInputs, IgnisFieldMetadata } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
@@ -315,6 +316,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // The last full BuEM simulation's annual heating figure — a fixed reference point.
   // Set once per loaded building; does not change as the user edits ignis inputs.
   const [buemBaselineHeatingKwh, setBuemBaselineHeatingKwh] = useState<number | null>(initialBaselineHeatingKwh);
+  // Hourly timeseries from the most recent live buem-gateway run this session — takes
+  // priority over whatever timeseries the buildingData prop originally carried.
+  const [modelTimeseries, setModelTimeseries] = useState<LoadDataPoint[] | null>(null);
+  const [isRunningSimulation, setIsRunningSimulation] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -758,9 +763,42 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setUploadError(null);
   };
 
-  const handleApply = () => {
-    console.log('Apply:', { elements, general, roofConfig });
+  /**
+   * Commits the working draft, then runs a full BuEM simulation via
+   * buem-gateway and feeds the resulting load profile into the overview
+   * chart. Demo-only wiring — see buemApi.ts's module doc for why this is
+   * a direct call rather than going through a backend/orchestration layer.
+   */
+  const handleApply = async () => {
     setSavedState({ elements, general, roofConfig });
+
+    const coordinates: [number, number] = geometryData?.coordinates ?? identityData?.coordinates ?? [11.5820, 48.1351];
+    const identity = {
+      id: identityData?.id ?? 'building-1',
+      label: identityData?.label ?? buildingLabel,
+      coordinates,
+      buildingType: general.buildingType,
+      constructionPeriod: general.constructionPeriod,
+      country: general.country,
+      floorArea: general.floorArea,
+      roomHeight: general.roomHeight,
+      storeys: general.storeys,
+    };
+
+    setIsRunningSimulation(true);
+    setUploadError(null);
+    try {
+      const result = await runBuildingSimulation(identity, elements, general, identity.id, batteryConfig);
+      if (!result) {
+        setUploadError('Simulation failed — buem-gateway is unreachable or rejected the request.');
+        return;
+      }
+      setModelTimeseries(result.timeseries);
+      setEnergyTotals(computeEnergyTotals(result.timeseries, result.thermalSummary));
+      setBuemBaselineHeatingKwh(baselineHeatingKwh(result.timeseries, result.thermalSummary));
+    } finally {
+      setIsRunningSimulation(false);
+    }
   };
 
   // --- JSON export to BUEM API format ----------------------------------------
@@ -1033,7 +1071,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                 roofConfig={roofConfig}
                 isActive={workspaceView === 'overview'}
                 buildingId={buildingLabel}
-                initialTimeseries={thematicData?.timeseries ?? buildingData?.timeseries ?? null}
+                initialTimeseries={modelTimeseries ?? thematicData?.timeseries ?? buildingData?.timeseries ?? null}
                 mode={mode}
                 installedTechIds={installedTechIds}
                 pvSummary={pvSummary}
@@ -1284,10 +1322,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
             <button
               type="button"
               onClick={handleApply}
-              className="flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors duration-100 hover:bg-primary/90 shadow-[0_10px_20px_rgba(47,93,138,0.22)]"
+              disabled={isRunningSimulation}
+              className="flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors duration-100 hover:bg-primary/90 shadow-[0_10px_20px_rgba(47,93,138,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check className="size-3.5" />
-              Apply
+              {isRunningSimulation ? 'Running simulation…' : 'Apply'}
             </button>
             </div>
           </div>
