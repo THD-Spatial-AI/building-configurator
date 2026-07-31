@@ -4,6 +4,7 @@ import {
   applyTabulaUValuesToElements,
   restoreDefaultUValues,
   syncElementsWithVariantLevel,
+  toIgnisApiPayload,
   type IgnisInputs,
 } from './ignisAdapter';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -227,5 +228,37 @@ describe('applyTabulaUValuesToElements / restoreDefaultUValues / syncElementsWit
     const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 1.5, defaultUValue: 1.5 }) };
     const result = syncElementsWithVariantLevel(elements, 1, variantData);
     expect(result.wall1.uValue).toBe(0.25);
+  });
+});
+
+describe('toIgnisApiPayload', () => {
+  it('returns undefined when calcDemand has no overridable fields set', () => {
+    expect(toIgnisApiPayload({})).toBeUndefined();
+  });
+
+  it('includes only the fields that are present, using ignis\'s exact JSON keys', () => {
+    const payload = toIgnisApiPayload({
+      A_C_Ref_Input: 150,
+      HeatingDays: 0,
+      Theta_e: -5,
+      Theta_i: 20,
+      I_Sol_South: 400,
+      I_Sol_Horizontal: 800,
+      Delta_U_ThermalBridging_Original: 0.1,
+    });
+    expect(payload).toEqual({
+      A_ref: 150,
+      HeatingDays: 0,
+      Theta_e: -5,
+      theta_i: 20,
+      I_Sol_South: 400,
+      I_Sol_Hor: 800,
+      delta_U_ThermalBridging_Original: 0.1,
+    });
+  });
+
+  it('omits fields the user has not touched rather than sending zeros for them', () => {
+    const payload = toIgnisApiPayload({ HeatingDays: 200 });
+    expect(payload).toEqual({ HeatingDays: 200 });
   });
 });

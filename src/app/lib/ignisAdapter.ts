@@ -426,16 +426,35 @@ export function ignisInputsFromTabulaData(tabula: Record<string, unknown>): Igni
 
 // ─── API payload ──────────────────────────────────────────────────────────────
 
+/** Maps each overridable IgnisInputs field to its POST /calculate JSON key. */
+const IGNIS_OVERRIDE_FIELD_KEYS: [keyof IgnisInputs, string][] = [
+  ['A_C_Ref_Input', 'A_ref'],
+  ['HeatingDays', 'HeatingDays'],
+  ['Theta_e', 'Theta_e'],
+  ['Theta_i', 'theta_i'],
+  ['I_Sol_South', 'I_Sol_South'],
+  ['I_Sol_East', 'I_Sol_East'],
+  ['I_Sol_West', 'I_Sol_West'],
+  ['I_Sol_North', 'I_Sol_North'],
+  ['I_Sol_Horizontal', 'I_Sol_Hor'],
+  ['Delta_U_ThermalBridging_Original', 'delta_U_ThermalBridging_Original'],
+  ['Delta_U_ThermalBridging_Refurbished', 'delta_U_ThermalBridging_Refurbished'],
+];
+
 /**
- * Produces the request body for POST /api/v1/calculate/:code.
- * Currently only A_ref can be passed as an override; the rest of calcDemand
- * is used for display and export but does not yet flow into the pipeline.
+ * Produces the request body for POST /api/v1/calculate/:code — every field
+ * ignis's handler accepts as an override (see internal/api/handler/calculation.go)
+ * is included when present on calcDemand, so editing "Advanced parameters"
+ * (heating days, design temperatures, solar irradiance, thermal bridging)
+ * actually changes the returned q_h_nd, not just the local UI state.
  */
 export function toIgnisApiPayload(calcDemand: IgnisInputs): Record<string, unknown> | undefined {
-  if (calcDemand.A_C_Ref_Input !== undefined) {
-    return { A_ref: calcDemand.A_C_Ref_Input };
+  const payload: Record<string, unknown> = {};
+  for (const [inputKey, jsonKey] of IGNIS_OVERRIDE_FIELD_KEYS) {
+    const value = calcDemand[inputKey];
+    if (value !== undefined) payload[jsonKey] = value;
   }
-  return undefined;
+  return Object.keys(payload).length > 0 ? payload : undefined;
 }
 
 // ─── State initialiser ────────────────────────────────────────────────────────
