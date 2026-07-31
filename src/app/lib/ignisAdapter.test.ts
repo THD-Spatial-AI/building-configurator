@@ -150,6 +150,25 @@ describe('ignisInputsFromTabulaData', () => {
     expect(result.Delta_U_ThermalBridging_Refurbished).toBe(0.05);
   });
 
+  it('falls back to A_C_Ref_Estim when A_C_Ref_Input is 0 (generic TABULA archetype rows, not a measured building)', () => {
+    const tabula = tabulaDataFixture({ heatingDays: 216, thetaE: 4.6, thetaI: 20, aRoof1: 80, uRoof1: 0.3, iSolSouth: 400, deltaUOriginal: 0.1 });
+    tabula.BasicParameters.Envelope.A_C_Ref_Input = 0;
+    (tabula.BasicParameters.Envelope as any).A_C_Ref_Estim = 2190.1;
+
+    const result = ignisInputsFromTabulaData(tabula);
+
+    expect(result.A_C_Ref_Input).toBe(2190.1);
+  });
+
+  it('keeps a real, non-zero A_C_Ref_Input rather than overriding it with A_C_Ref_Estim', () => {
+    const tabula = tabulaDataFixture({ heatingDays: 216, thetaE: 4.6, thetaI: 20, aRoof1: 80, uRoof1: 0.3, iSolSouth: 400, deltaUOriginal: 0.1 });
+    (tabula.BasicParameters.Envelope as any).A_C_Ref_Estim = 999;
+
+    const result = ignisInputsFromTabulaData(tabula);
+
+    expect(result.A_C_Ref_Input).toBe(150.0);
+  });
+
   it('returns undefined (not 0) for fields missing from a flat/malformed object, instead of silently matching the wrong shape', () => {
     // Regression guard for the original bug: a flat object (pre-fix assumption)
     // must not accidentally satisfy the nested lookup.

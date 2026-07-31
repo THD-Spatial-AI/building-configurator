@@ -453,6 +453,15 @@ export function ignisInputsFromTabulaData(tabula: Record<string, unknown>): Igni
   for (const key of Object.keys(TABULA_FIELD_PATHS) as (keyof IgnisInputs)[]) {
     result[key] = numAtPath(tabula, TABULA_FIELD_PATHS[key]);
   }
+
+  // Generic TABULA archetype rows (as opposed to a specific real building) carry
+  // A_C_Ref_Input as 0/unset — the archetype's reference floor area lives in
+  // A_C_Ref_Estim instead. Fall back to it so "existing state" defaults still
+  // have a usable floor area.
+  if (!result.A_C_Ref_Input) {
+    result.A_C_Ref_Input = numAtPath(tabula, 'BasicParameters.Envelope.A_C_Ref_Estim');
+  }
+
   return result as IgnisInputs;
 }
 
