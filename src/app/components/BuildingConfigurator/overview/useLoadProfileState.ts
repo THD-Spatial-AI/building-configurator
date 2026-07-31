@@ -13,7 +13,7 @@ import {
   mergeUploadedData,
   parseCsv,
   rangeEquals,
-  toCsv,
+  toProfileZip,
   toUtcDateKey,
   type BrushRange,
   type DatasetByResolution,
@@ -230,11 +230,11 @@ export function useLoadProfileState({
 
   const handleDownload = () => {
     if (!hasData) return;
-    const blob = new Blob([toCsv(data, resolution)], { type: 'text/csv;charset=utf-8' });
+    const blob = new Blob([toProfileZip(data, resolution)], { type: 'application/zip' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${buildingId.toLowerCase().replace(/\s+/g, '-')}-load-profile-${resolution}.csv`;
+    link.download = `${buildingId.toLowerCase().replace(/\s+/g, '-')}-load-profiles-${resolution}.zip`;
     link.click();
     URL.revokeObjectURL(url);
   };

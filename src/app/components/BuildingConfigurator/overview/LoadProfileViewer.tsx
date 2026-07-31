@@ -124,7 +124,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
                 fontSize: 11, fontWeight: 600, flexShrink: 0, opacity: hasData ? 1 : 0.5,
               }}
             >
-              <Download size={12} /> Download load profile
+              <Download size={12} /> Download profiles (.zip)
             </button>
             <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
           </>
