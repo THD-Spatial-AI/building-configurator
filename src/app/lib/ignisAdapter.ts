@@ -301,6 +301,38 @@ export function applyTabulaUValuesToElements(
 }
 
 /**
+ * Rebases every element's `uValue` AND its stamped `defaultUValue` ("existing
+ * state" baseline) onto the new building type/period/country's own TABULA
+ * "existing state" archetype (variant index 0).
+ *
+ * Unlike applyTabulaUValuesToElements (a temporary refurbishment-level
+ * preview that leaves defaultUValue untouched so "existing state" can be
+ * restored later), this is a permanent rebase: switching building type is a
+ * different building, so its own "existing state" TABULA values become the
+ * new baseline, not just a preview layered on top of the previous type's
+ * values. Returns the same object reference if nothing actually changed.
+ */
+export function resetElementsToVariantDefaults(
+  elements: Record<string, BuildingElement>,
+  existingStateData: IgnisInputs,
+): Record<string, BuildingElement> {
+  let changed = false;
+  const next: Record<string, BuildingElement> = {};
+
+  for (const [id, el] of Object.entries(elements)) {
+    const uValue = existingStateData[TABULA_UVALUE_FIELD_BY_TYPE[el.type]] as number | undefined;
+    if (uValue !== undefined && (uValue !== el.uValue || uValue !== el.defaultUValue)) {
+      next[id] = { ...el, uValue, defaultUValue: uValue };
+      changed = true;
+    } else {
+      next[id] = el;
+    }
+  }
+
+  return changed ? next : elements;
+}
+
+/**
  * Restores every element's `uValue` to its stamped `defaultUValue` — the
  * real, as-measured/configured value from before any refurbishment-level
  * override. Used when the user switches back to "existing state."

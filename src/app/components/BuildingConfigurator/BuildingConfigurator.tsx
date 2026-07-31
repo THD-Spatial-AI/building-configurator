@@ -37,6 +37,7 @@ import {
   resetCalcDemand,
   syncElementsWithVariantLevel,
   restoreDefaultUValues,
+  resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
 import {
   loadVariantLevels,
@@ -327,6 +328,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Guards the classification-change effect below from re-deriving floor area/envelope
+  // defaults on the load of a new building (whose own data should win), while still
+  // applying that reload when the *same* building's type/period/country is edited by hand.
+  const isFirstClassificationLoad = useRef(true);
+
   // Baseline for "Modified" comparisons — updated whenever a new building is loaded.
   // This records the state as it was when first loaded so the badges reflect user
   // edits only, not differences from the static DEFAULT_* constants.
@@ -341,6 +347,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // selected, or the source JSON is updated during development).
   useEffect(() => {
     if (!buildingData) return;
+
+    // A new building just loaded with its own data — the next classification-change
+    // effect run is that load settling in, not a hand-edit, so it must not reload
+    // TABULA defaults on top of what this building just brought with it.
+    isFirstClassificationLoad.current = true;
 
     const nextElements = normalizeElementRecord(
       Object.keys(buildingData.thematic.envelope).length > 0
@@ -419,10 +430,22 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         return;
       }
 
-      // New classification always starts at "existing state" — restore any
-      // surface U-values a previous refurbishment-level selection may have applied.
-      const nextElements = restoreDefaultUValues(elements);
+      // Only reload TABULA defaults (envelope U-values, floor area) when the user hand-edits
+      // type/period/country for a building that's already loaded — not for the load itself,
+      // which should keep whatever envelope/floor-area that building's own data brought.
+      const isReload = !isFirstClassificationLoad.current;
+      isFirstClassificationLoad.current = false;
+
+      const existingStateData = variants[0]?.data ?? {};
+      const nextElements = isReload
+        ? resetElementsToVariantDefaults(elements, existingStateData)
+        : restoreDefaultUValues(elements);
       if (!cancelled && nextElements !== elements) setElements(nextElements);
+
+      if (isReload && existingStateData.A_C_Ref_Input) {
+        const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
+        if (!cancelled) setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
+      }
 
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
@@ -509,9 +532,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       const variants = await loadVariantLevels(country, type, general.constructionPeriod, period);
       if (variants.length === 0) return;
 
-      // Always restarts at "existing state" — restore any archetype U-values applied earlier.
-      const nextElements = restoreDefaultUValues(elements);
+      // A period override is always a deliberate reclassification — reload this variant's
+      // own "existing state" TABULA envelope and floor area, same as a type/country change.
+      const existingStateData = variants[0]?.data ?? {};
+      const nextElements = resetElementsToVariantDefaults(elements, existingStateData);
       if (nextElements !== elements) setElements(nextElements);
+      if (existingStateData.A_C_Ref_Input) {
+        const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
+        setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
+      }
 
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },

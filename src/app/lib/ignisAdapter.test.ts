@@ -4,6 +4,7 @@ import {
   applyTabulaUValuesToElements,
   restoreDefaultUValues,
   syncElementsWithVariantLevel,
+  resetElementsToVariantDefaults,
   toIgnisApiPayload,
   type IgnisInputs,
 } from './ignisAdapter';
@@ -228,6 +229,26 @@ describe('applyTabulaUValuesToElements / restoreDefaultUValues / syncElementsWit
     const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 1.5, defaultUValue: 1.5 }) };
     const result = syncElementsWithVariantLevel(elements, 1, variantData);
     expect(result.wall1.uValue).toBe(0.25);
+  });
+
+  it('resetElementsToVariantDefaults rebases both uValue and defaultUValue to the new archetype', () => {
+    // Simulates switching building type: the previous type's real/stamped values (2.0)
+    // must not survive as the new type's "existing state" baseline.
+    const elements = {
+      wall1: element({ id: 'wall1', type: 'wall', uValue: 2.0, defaultUValue: 2.0 }),
+      roof1: element({ id: 'roof1', type: 'roof', uValue: 2.0, defaultUValue: 2.0 }),
+    };
+    const result = resetElementsToVariantDefaults(elements, variantData);
+    expect(result.wall1.uValue).toBe(0.25);
+    expect(result.wall1.defaultUValue).toBe(0.25);
+    expect(result.roof1.uValue).toBe(0.2);
+    expect(result.roof1.defaultUValue).toBe(0.2);
+  });
+
+  it('resetElementsToVariantDefaults returns the same reference when nothing changes', () => {
+    const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 0.25, defaultUValue: 0.25 }) };
+    const result = resetElementsToVariantDefaults(elements, variantData);
+    expect(result).toBe(elements);
   });
 });
 
