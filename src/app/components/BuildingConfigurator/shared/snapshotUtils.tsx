@@ -9,6 +9,7 @@ import {
   DEFAULT_GENERAL,
   DEFAULT_TOTAL_AREA,
   DEFAULT_AVG_U_VALUE,
+  computeVolume,
 } from './buildingDefaults';
 import { BUILDING_TYPE_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
 
@@ -143,7 +144,7 @@ export function buildSnapshotRows(
       rawValue: general.country,
     },
     {
-      label: 'Floor area',
+      label: 'Floor area (per storey)',
       value: `${general.floorArea.toFixed(1)} m²`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea) ? 'default' : 'modified',
       editKey: 'floorArea',
@@ -168,8 +169,9 @@ export function buildSnapshotRows(
     },
     {
       label: 'Volume',
-      value: `${(general.floorArea * general.roomHeight).toFixed(0)} m³`,
+      value: `${computeVolume(general.floorArea, general.storeys, general.roomHeight).toFixed(0)} m³`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea)
+        && general.storeys === baseGeneral.storeys
         && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
         ? 'default'
         : 'modified',

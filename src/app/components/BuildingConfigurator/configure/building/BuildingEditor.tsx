@@ -20,6 +20,7 @@ import {
   CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 
 type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver' | 'ignis';
 
@@ -300,7 +301,7 @@ const MASS_DEFAULTS: Record<string, number> = {
 
 /** Building identity fields — synced with the overview snapshot panel. */
 function IdentitySection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const volume = (general.floorArea * general.roomHeight).toFixed(0);
+  const volume = computeVolume(general.floorArea, general.storeys, general.roomHeight).toFixed(0);
   return (
     <div className="flex flex-col gap-3">
       <div>
@@ -341,8 +342,8 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
       </FieldRow>
       <FieldRow>
         <div>
-          <FieldLabel tip="Conditioned floor area of the building (all storeys combined).">
-            Floor area
+          <FieldLabel tip="Footprint area of a single storey — total conditioned floor area is this × storeys.">
+            Floor area (per storey)
           </FieldLabel>
           <NumberInput
             value={general.floorArea}
@@ -449,7 +450,7 @@ function VentilationSection({ general, setGen }: { general: Record<string, any>;
 }
 
 function InternalLoadsSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const annualGains = (general.phi_int * general.floorArea * 8760 / 1000).toFixed(0);
+  const annualGains = (general.phi_int * computeTotalFloorArea(general.floorArea, general.storeys) * 8760 / 1000).toFixed(0);
   return (
     <div className="flex flex-col gap-3">
       <FieldRow>
@@ -475,7 +476,7 @@ function InternalLoadsSection({ general, setGen }: { general: Record<string, any
 }
 
 function ThermalMassSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const totalMass = (general.c_m * general.floorArea / 1000).toFixed(1);
+  const totalMass = (general.c_m * computeTotalFloorArea(general.floorArea, general.storeys) / 1000).toFixed(1);
   return (
     <div className="flex flex-col gap-3">
       <FieldRow>
@@ -771,7 +772,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
 /** One-line value summary shown on the grid card and chip. */
 function sectionSummary(key: SectionKey, general: Record<string, any>, ignis?: IgnisState | null): string {
   switch (key) {
-    case 'identity':    return `${general.buildingType} · ${general.floorArea} m²`;
+    case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
     case 'conditions': {
       const map: Record<string, string> = { B_Alone: 'Detached', B_N1: 'Semi-detached', B_N2: 'Terraced' };
       return map[general.Code_AttachedNeighbours] ?? general.Code_AttachedNeighbours;
@@ -878,7 +879,7 @@ export function BuildingEditor({
       <div className="min-w-0">
         <p className="text-sm font-bold text-slate-800">{general.buildingName || 'Building'}</p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {general.buildingType} · {general.constructionPeriod} · {general.floorArea} m²
+          {general.buildingType} · {general.constructionPeriod} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
         </p>
       </div>
     </div>

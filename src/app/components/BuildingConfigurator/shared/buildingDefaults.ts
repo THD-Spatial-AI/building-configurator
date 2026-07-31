@@ -161,7 +161,7 @@ export const DEFAULT_GENERAL = {
   buildingType:       'Multi-family House',
   constructionPeriod: 'Post-2010',
   country:            'DE',
-  floorArea:          363.4,
+  floorArea:          90.9, // per-storey footprint; 4 storeys ≈ 363.4 m² total
   roomHeight:         2.7,
   storeys:            4,
   n_air_infiltration: 0.4,
@@ -181,6 +181,22 @@ export const DEFAULT_GENERAL = {
   Code_ComplexFootprint:   'Standard',
   Code_ComplexRoof:        'no',
 };
+
+// ─── Floor area / volume ──────────────────────────────────────────────────────
+// `floorArea` (general state) is the per-storey footprint, not the whole
+// building's total — the total conditioned floor area (used for ignis's A_ref
+// override, BuEM's A_ref, and any kWh/m²·a normalization) is always
+// `floorArea × storeys`.
+
+/** Total conditioned floor area (m²) across all storeys. */
+export function computeTotalFloorArea(floorArea: number, storeys: number): number {
+  return floorArea * Math.max(1, storeys);
+}
+
+/** Building volume (m³) from per-storey floor area, storeys, and room height. */
+export function computeVolume(floorArea: number, storeys: number, roomHeight: number): number {
+  return computeTotalFloorArea(floorArea, storeys) * roomHeight;
+}
 
 export const DEFAULT_TOTAL_AREA = Object.values(DEFAULT_ELEMENTS).reduce(
   (sum, el) => sum + el.area,

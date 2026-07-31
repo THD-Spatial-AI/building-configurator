@@ -405,56 +405,6 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
 }
 
 /**
- * Serializes UI general config to BUEM building and thermal blocks.
- * Maps UI fields (buildingType, floorArea, etc.) to BUEM schema.
- */
-function generalConfigToBuemBuilding(general: Record<string, any>): Record<string, any> {
-  const building: Record<string, any> = {};
-
-  // Human-readable building label — display only, not used in simulation.
-  if (general.buildingName) building.name = general.buildingName;
-
-  // Building classification
-  if (general.buildingType) building.building_type = general.buildingType.replace(/\s+/g, '_').toUpperCase();
-  if (general.constructionPeriod) building.construction_period = general.constructionPeriod;
-  if (general.country) building.country = general.country;
-
-  // Floor area and room height
-  if (typeof general.floorArea === 'number') {
-    building.A_ref = { value: general.floorArea, unit: 'm2' };
-  }
-  if (typeof general.roomHeight === 'number') {
-    building.h_room = { value: general.roomHeight, unit: 'm' };
-  }
-  if (typeof general.storeys === 'number') {
-    building.n_storeys = general.storeys;
-  }
-
-  // Thermal parameters (ISO 52016-1 / TABULA aligned)
-  const thermal: Record<string, any> = {};
-  if (typeof general.n_air_infiltration === 'number') {
-    thermal.n_air_infiltration = { value: general.n_air_infiltration, unit: '1/h' };
-  }
-  if (typeof general.n_air_use === 'number') {
-    thermal.n_air_use = { value: general.n_air_use, unit: '1/h' };
-  }
-  if (typeof general.c_m === 'number') {
-    thermal.c_m = { value: general.c_m, unit: 'kJ/(m2K)' };
-  }
-  if (general.massClass) {
-    thermal.thermal_class =
-      general.massClass === 'Medium' ? 'medium' :
-      general.massClass === 'Heavy' ? 'heavy' : 'light';
-  }
-
-  if (Object.keys(thermal).length > 0) {
-    building.thermal = thermal;
-  }
-
-  return building;
-}
-
-/**
  * Converts the current UI state (elements + general config) to a complete BUEM GeoJSON Feature.
  * The feature can be exported and sent to the BUEM API for processing.
  *
@@ -491,9 +441,11 @@ export function serializeToBuemFeature(
   else if (general.country) building.country = general.country;
 
   if (typeof identity.floorArea === 'number') {
+    // identity.floorArea is already the total conditioned floor area (BuEM A_ref semantics).
     building.A_ref = { value: identity.floorArea, unit: 'm2' };
   } else if (typeof general.floorArea === 'number') {
-    building.A_ref = { value: general.floorArea, unit: 'm2' };
+    // general.floorArea is per-storey; A_ref needs the whole-building total.
+    building.A_ref = { value: general.floorArea * (Number(general.storeys) || 1), unit: 'm2' };
   }
 
   if (typeof identity.roomHeight === 'number') {
@@ -661,14 +613,16 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     });
   }
 
-  // Parse general config
+  // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
+  // is per-storey, so divide by the building's own storey count.
+  const importedStoreys = Number(bldg.n_storeys ?? 0);
   const general: Record<string, any> = {
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
     constructionPeriod: String(bldg.construction_period ?? ''),
     country: String(bldg.country ?? ''),
-    floorArea: qty(bldg.A_ref),
+    floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
     roomHeight: qty(bldg.h_room),
-    storeys: Number(bldg.n_storeys ?? 0),
+    storeys: importedStoreys,
     n_air_infiltration: qty(thermalBlk.n_air_infiltration, 0.5),
     n_air_use: qty(thermalBlk.n_air_use, 0.5),
     c_m: qty(thermalBlk.c_m, 165),

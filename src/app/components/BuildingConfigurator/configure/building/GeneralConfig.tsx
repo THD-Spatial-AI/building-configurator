@@ -10,6 +10,7 @@ import {
   CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 
 // ─── Options ──────────────────────────────────────────────────────────────────
 
@@ -58,10 +59,11 @@ interface GeneralConfigProps {
 }
 
 export function GeneralConfig({ mode, general, setGen, expanded, toggle }: GeneralConfigProps) {
-  const floorArea  = general.floorArea  as number;
-  const roomHeight = general.roomHeight as number;
-  const storeys    = general.storeys    as number;
-  const volume     = floorArea * roomHeight;
+  const floorArea      = general.floorArea  as number;
+  const roomHeight     = general.roomHeight as number;
+  const storeys        = general.storeys    as number;
+  const totalFloorArea = computeTotalFloorArea(floorArea, storeys);
+  const volume         = computeVolume(floorArea, storeys, roomHeight);
 
   return (
     <div className="flex flex-col gap-2">
@@ -123,7 +125,8 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
         <div className="flex flex-col gap-3">
           <FieldRow>
             <NumberInput
-              label="Floor area"
+              label="Floor area (per storey)"
+              tip="Footprint area of a single storey — total conditioned floor area is this × storeys."
               value={floorArea}
               onChange={(v) => setGen('floorArea', Math.max(1, v))}
               unit="m²" min={1} step={0.5}
@@ -152,9 +155,9 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
               <span className="text-[10px] text-muted-foreground font-normal">m³</span>
             </span>
           </InfoRow>
-          <InfoRow label="Per storey area">
+          <InfoRow label="Total floor area">
             <span className="text-xs font-semibold text-foreground">
-              {(floorArea / Math.max(1, storeys)).toFixed(1)}{' '}
+              {totalFloorArea.toFixed(1)}{' '}
               <span className="text-[10px] text-muted-foreground font-normal">m²</span>
             </span>
           </InfoRow>
@@ -227,7 +230,7 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
               <Divider />
               <InfoRow label="Annual internal gains">
                 <span className="text-xs font-semibold text-foreground">
-                  {(general.phi_int * floorArea * 8760 / 1000).toFixed(0)}{' '}
+                  {(general.phi_int * totalFloorArea * 8760 / 1000).toFixed(0)}{' '}
                   <span className="text-[10px] text-muted-foreground font-normal">kWh/a</span>
                 </span>
               </InfoRow>
@@ -261,7 +264,7 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
               <Divider />
               <InfoRow label="Total thermal mass">
                 <span className="text-xs font-semibold text-foreground">
-                  {(general.c_m * floorArea / 1000).toFixed(1)}{' '}
+                  {(general.c_m * totalFloorArea / 1000).toFixed(1)}{' '}
                   <span className="text-[10px] text-muted-foreground font-normal">MJ/K</span>
                 </span>
               </InfoRow>

@@ -21,7 +21,7 @@ import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer, HeatingDelta
 import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
-import { DEFAULT_ELEMENTS, DEFAULT_GENERAL } from './shared/buildingDefaults';
+import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea } from './shared/buildingDefaults';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
 import {
   formatCoordinates,
@@ -224,13 +224,17 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const identityData = thematicData?.identity ?? buildingData?.identity;
 
   // Merge model identity fields into general config, keeping defaults for any missing fields.
+  // identity.floorArea is the source data's total conditioned floor area (BuEM A_ref); general.floorArea
+  // is per-storey, so divide by storeys when seeding it.
   const initialGeneral = buildingData ? {
     ...DEFAULT_GENERAL,
     buildingName:       identityData?.label ?? DEFAULT_GENERAL.buildingName,
     buildingType:       identityData?.buildingType ?? DEFAULT_GENERAL.buildingType,
     constructionPeriod: identityData?.constructionPeriod ?? DEFAULT_GENERAL.constructionPeriod,
     country:            identityData?.country ?? DEFAULT_GENERAL.country,
-    floorArea:          identityData?.floorArea || DEFAULT_GENERAL.floorArea,
+    floorArea:          identityData?.floorArea
+      ? identityData.floorArea / Math.max(1, identityData?.storeys || DEFAULT_GENERAL.storeys)
+      : DEFAULT_GENERAL.floorArea,
     roomHeight:         identityData?.roomHeight || DEFAULT_GENERAL.roomHeight,
     storeys:            identityData?.storeys || DEFAULT_GENERAL.storeys,
   } : DEFAULT_GENERAL;
@@ -345,14 +349,18 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       Object.keys(buildingData.thematic.envelope).length > 0 ? 'city' : 'default',
     );
 
+    const nextStoreys = buildingData.thematic.identity.storeys || DEFAULT_GENERAL.storeys;
     const nextGeneral = {
       ...DEFAULT_GENERAL,
       buildingType:       buildingData.thematic.identity.buildingType,
       constructionPeriod: buildingData.thematic.identity.constructionPeriod,
       country:            buildingData.thematic.identity.country,
-      floorArea:          buildingData.thematic.identity.floorArea || DEFAULT_GENERAL.floorArea,
+      // identity.floorArea is the total conditioned floor area (BuEM A_ref); general.floorArea is per-storey.
+      floorArea:          buildingData.thematic.identity.floorArea
+        ? buildingData.thematic.identity.floorArea / Math.max(1, nextStoreys)
+        : DEFAULT_GENERAL.floorArea,
       roomHeight:         buildingData.thematic.identity.roomHeight || DEFAULT_GENERAL.roomHeight,
-      storeys:            buildingData.thematic.identity.storeys || DEFAULT_GENERAL.storeys,
+      storeys:            nextStoreys,
     };
 
     const nextTotals = computeEnergyTotals(
@@ -418,9 +426,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
         technologies: { rawTechs: {}, installedTechIds: [] },
-        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
         envelope: nextElements,
         thermalSummary: null,
         timeseries: null,
@@ -478,9 +486,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
       technologies: { rawTechs: {}, installedTechIds: [] },
-      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
       envelope: nextElements,
       thermalSummary: null,
       timeseries: null,
@@ -507,9 +515,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
         technologies: { rawTechs: {}, installedTechIds: [] },
-        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
         envelope: nextElements,
         thermalSummary: null,
         timeseries: null,
@@ -531,9 +539,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
       technologies: { rawTechs: {}, installedTechIds: [] },
-      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: general.floorArea ?? 0, roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
       envelope: nextElements,
       thermalSummary: null,
       timeseries: null,
@@ -780,7 +788,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       buildingType: general.buildingType,
       constructionPeriod: general.constructionPeriod,
       country: general.country,
-      floorArea: general.floorArea,
+      floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
       roomHeight: general.roomHeight,
       storeys: general.storeys,
     };
@@ -814,7 +822,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         buildingType: general.buildingType,
         constructionPeriod: general.constructionPeriod,
         country: general.country,
-        floorArea: general.floorArea,
+        floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
         roomHeight: general.roomHeight,
         storeys: general.storeys,
       };
@@ -904,11 +912,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // last full BuEM simulation. Lets the user see how their edits (refurbishment
   // level, field changes) move heating demand before deciding to save or revert.
   const displayEnergyTotals: EnergyTotals = useMemo(() => {
-    const floorArea = Number(general.floorArea) || 0;
+    const totalFloorArea = computeTotalFloorArea(Number(general.floorArea) || 0, Number(general.storeys) || 1);
     const ignisResult = ignis?.result;
-    if (!ignisResult || floorArea <= 0) return energyTotals;
+    if (!ignisResult || totalFloorArea <= 0) return energyTotals;
 
-    const ignisHeatingKwh = ignisResult.qHnd * floorArea;
+    const ignisHeatingKwh = ignisResult.qHnd * totalFloorArea;
     const heatingDeltaPercent = buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0
       ? ((ignisHeatingKwh - buemBaselineHeatingKwh) / buemBaselineHeatingKwh) * 100
       : null;
@@ -920,7 +928,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       heatingDeltaPercent,
       heatingPerM2: ignisResult.qHnd.toFixed(1),
     };
-  }, [energyTotals, ignis?.result, general.floorArea, buemBaselineHeatingKwh]);
+  }, [energyTotals, ignis?.result, general.floorArea, general.storeys, buemBaselineHeatingKwh]);
   const pvInstalledSurfaces = useMemo(() => (
     Object.values(elements)
       .filter((element) => surfacePvConfigs[element.id]?.installed)
@@ -1288,7 +1296,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                       activeGroupType={activeGroupType}
                       onSelectGroupType={handleGroupTypeSelect}
                       onCreateSurface={createSurface}
-                      buildingSubtitle={`${general.buildingType || buildingType}${general.floorArea ? ` · ${general.floorArea} m²` : ''}`}
+                      buildingSubtitle={`${general.buildingType || buildingType}${general.floorArea ? ` · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²` : ''}`}
                       buildingSelected={panelView === 'building'}
                       onSelectBuilding={handleBuildingSelect}
                       selectedSurfaceId={selectedId}
