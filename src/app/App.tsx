@@ -1,10 +1,9 @@
 import { Analytics } from '@vercel/analytics/react';
 import React, { useMemo, useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
-import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from './lib/buemAdapter';
+import { adaptBuemFeature, extractFeaturesFromConfig } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
 import demoConfig from '../assets/data/demo_config.json';
-import demoLoadProfileCsv from '../assets/data/demo_load_profile.csv?raw';
 
 // ─── Fake map canvas (dark GIS-style background) ──────────────────────────────
 
@@ -140,15 +139,15 @@ export default function App() {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
-  // The demo CSV is used as fallback timeseries until a real model response is available.
+  // No BuEM result exists yet for any of them — timeseries stays null until the user clicks
+  // Recalculate, which is what the "last full simulation" baseline is meant to represent.
   const buildingsById = useMemo<Record<string, BuildingState>>(() => {
     const result: Record<string, BuildingState> = {};
     try {
       const features = extractFeaturesFromConfig(demoConfig);
       for (const feature of features) {
         const state = adaptBuemFeature(feature);
-        const fallbackTimeseries = state.timeseries ?? parseLoadProfileCsv(demoLoadProfileCsv);
-        result[state.identity.id] = { ...state, timeseries: fallbackTimeseries };
+        result[state.identity.id] = state;
       }
     } catch {
       // Leave result empty; MapCanvas still renders, configurator just won't open with data.
