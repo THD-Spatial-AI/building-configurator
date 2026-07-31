@@ -769,7 +769,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
    * chart. Demo-only wiring — see buemApi.ts's module doc for why this is
    * a direct call rather than going through a backend/orchestration layer.
    */
-  const handleApply = async () => {
+  const handleRecalculate = async () => {
     setSavedState({ elements, general, roofConfig });
 
     const coordinates: [number, number] = geometryData?.coordinates ?? identityData?.coordinates ?? [11.5820, 48.1351];
@@ -1321,12 +1321,12 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
             </button>
             <button
               type="button"
-              onClick={handleApply}
+              onClick={handleRecalculate}
               disabled={isRunningSimulation}
               className="flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors duration-100 hover:bg-primary/90 shadow-[0_10px_20px_rgba(47,93,138,0.22)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check className="size-3.5" />
-              {isRunningSimulation ? 'Running simulation…' : 'Apply'}
+              {isRunningSimulation ? 'Running simulation…' : 'Recalculate'}
             </button>
             </div>
           </div>
@@ -1375,7 +1375,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               {hasUnsavedChanges && (
                 <button
                   type="button"
-                  onClick={() => { handleApply(); onClose?.(); setShowCloseDialog(false); }}
+                  onClick={() => { handleRecalculate(); onClose?.(); setShowCloseDialog(false); }}
                   className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
                 >
                   Save &amp; Close

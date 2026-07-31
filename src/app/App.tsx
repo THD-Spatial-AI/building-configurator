@@ -1,8 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
-import { FeedbackKitProvider, SessionPanel } from '@thd-spatial-ai/feedback-kit';
-import { TESTING_TASKS } from './config/testingTasks';
 import { adaptBuemFeature, extractFeaturesFromConfig, parseLoadProfileCsv } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
 import demoConfig from '../assets/data/demo_config.json';
@@ -10,7 +8,28 @@ import demoLoadProfileCsv from '../assets/data/demo_load_profile.csv?raw';
 
 // ─── Fake map canvas (dark GIS-style background) ──────────────────────────────
 
-function MapCanvas({ onBuildingClick }: { onBuildingClick: () => void }) {
+/** Where a demo building renders on the fake map — independent of its real geometry. */
+interface MapBuildingMarker {
+  id: string;
+  label: string;
+  xPercent: number;
+  yPercent: number;
+}
+
+const MAP_BUILDINGS: MapBuildingMarker[] = [
+  { id: '3434', label: 'Building 3434', xPercent: 66, yPercent: 29 },
+  { id: '3435', label: 'Building 3435', xPercent: 78, yPercent: 30 },
+  { id: '3436', label: 'Building 3436', xPercent: 66, yPercent: 42 },
+  { id: '3437', label: 'Building 3437', xPercent: 82, yPercent: 44 },
+];
+
+const MARKER_WIDTH = 7.5;
+const MARKER_HEIGHT = 8.5;
+
+function MapCanvas({ buildings, onBuildingClick }: {
+  buildings: MapBuildingMarker[];
+  onBuildingClick: (id: string) => void;
+}) {
   return (
     <svg
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
@@ -59,24 +78,37 @@ function MapCanvas({ onBuildingClick }: { onBuildingClick: () => void }) {
         />
       ))}
 
-      {/* Highlighted building (the one being configured) - clickable */}
-      <g
-        onClick={onBuildingClick}
-        style={{ cursor: 'pointer' }}
-      >
-        {/* Animated dashed border to draw attention */}
-        <rect x="65.6%" y="28.5%" width="8.3%" height="9.5%" fill="none" stroke="#2f5d8a" strokeWidth="1.5" strokeDasharray="5 3" rx="4" opacity="0.6">
-          <animate attributeName="stroke-dashoffset" from="0" to="16" dur="1.2s" repeatCount="indefinite" />
-        </rect>
-        {/* Building fill */}
-        <rect x="66%" y="29%" width="7.5%" height="8.5%" fill="#2f5d8a" stroke="#7ab0e0" strokeWidth="1" rx="3" />
-        <text x="69.75%" y="33%" textAnchor="middle" fontSize="12.5" fill="#ffffff" fontWeight="700" style={{ userSelect: 'none', pointerEvents: 'none' }}>
-          Building 3
-        </text>
-        <text x="69.75%" y="35.8%" textAnchor="middle" fontSize="10" fill="#a8d0f0" style={{ userSelect: 'none', pointerEvents: 'none' }}>
-          ↑ click to configure
-        </text>
-      </g>
+      {/* Clickable demo buildings — each loads its own data on click */}
+      {buildings.map(({ id, label, xPercent, yPercent }) => (
+        <g key={id} onClick={() => onBuildingClick(id)} style={{ cursor: 'pointer' }}>
+          <rect
+            x={`${xPercent - 0.4}%`} y={`${yPercent - 0.5}%`}
+            width={`${MARKER_WIDTH + 0.8}%`} height={`${MARKER_HEIGHT + 1}%`}
+            fill="none" stroke="#2f5d8a" strokeWidth="1.5" strokeDasharray="5 3" rx="4" opacity="0.6"
+          >
+            <animate attributeName="stroke-dashoffset" from="0" to="16" dur="1.2s" repeatCount="indefinite" />
+          </rect>
+          <rect
+            x={`${xPercent}%`} y={`${yPercent}%`}
+            width={`${MARKER_WIDTH}%`} height={`${MARKER_HEIGHT}%`}
+            fill="#2f5d8a" stroke="#7ab0e0" strokeWidth="1" rx="3"
+          />
+          <text
+            x={`${xPercent + MARKER_WIDTH / 2}%`} y={`${yPercent + 4}%`}
+            textAnchor="middle" fontSize="12.5" fill="#ffffff" fontWeight="700"
+            style={{ userSelect: 'none', pointerEvents: 'none' }}
+          >
+            {label}
+          </text>
+          <text
+            x={`${xPercent + MARKER_WIDTH / 2}%`} y={`${yPercent + 6.8}%`}
+            textAnchor="middle" fontSize="10" fill="#a8d0f0"
+            style={{ userSelect: 'none', pointerEvents: 'none' }}
+          >
+            ↑ click to configure
+          </text>
+        </g>
+      ))}
 
       {/* Green area / park */}
       <rect x="4%" y="4%" width="18%" height="28%" fill="#b8d4b8" opacity="0.7" rx="3" />
@@ -105,26 +137,29 @@ function MapCanvas({ onBuildingClick }: { onBuildingClick: () => void }) {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [showConfigurator, setShowConfigurator] = useState(false);
-  const [taskIndex,     setTaskIndex]     = useState(0);
-  const [taskCollapsed, setTaskCollapsed] = useState(false);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
-  // Extract the first building feature from the EnerPlanET demo config once on mount.
+  // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
   // The demo CSV is used as fallback timeseries until a real model response is available.
-  const demoBuilding = useMemo<BuildingState | undefined>(() => {
+  const buildingsById = useMemo<Record<string, BuildingState>>(() => {
+    const result: Record<string, BuildingState> = {};
     try {
       const features = extractFeaturesFromConfig(demoConfig);
-      if (features.length === 0) return undefined;
-      const state = adaptBuemFeature(features[0]);
-      const fallbackTimeseries = state.timeseries ?? parseLoadProfileCsv(demoLoadProfileCsv);
-      return { ...state, timeseries: fallbackTimeseries };
+      for (const feature of features) {
+        const state = adaptBuemFeature(feature);
+        const fallbackTimeseries = state.timeseries ?? parseLoadProfileCsv(demoLoadProfileCsv);
+        result[state.identity.id] = { ...state, timeseries: fallbackTimeseries };
+      }
     } catch {
-      return undefined;
+      // Leave result empty; MapCanvas still renders, configurator just won't open with data.
     }
+    return result;
   }, []);
 
+  const selectedBuilding = selectedBuildingId ? buildingsById[selectedBuildingId] : undefined;
+
   return (
-    <FeedbackKitProvider apiEndpoint="/api/feedback">
+    <>
       {/* Map canvas */}
       <div style={{
         width:    '100vw',
@@ -133,10 +168,10 @@ export default function App() {
         position: 'relative',
         overflow: 'auto',
       }}>
-        <MapCanvas onBuildingClick={() => setShowConfigurator(true)} />
+        <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />
 
-        {/* Floating configurator panel — right padding keeps it clear of the session panel */}
-        {showConfigurator && (
+        {/* Floating configurator panel */}
+        {selectedBuildingId && (
           <div style={{
             position:       'absolute',
             inset:          0,
@@ -145,24 +180,12 @@ export default function App() {
             justifyContent: 'center',
             zIndex:         10,
             padding:        16,
-            // 352px = w-80 panel (320) + w-8 tab (32); 40px when only the tab is visible
-            paddingRight:   taskCollapsed ? '40px' : '360px',
-            transition:     'padding-right 300ms ease-in-out',
           }}>
-            <BuildingConfigurator onClose={() => setShowConfigurator(false)} buildingData={demoBuilding} />
+            <BuildingConfigurator onClose={() => setSelectedBuildingId(null)} buildingData={selectedBuilding} />
           </div>
         )}
       </div>
-    <SessionPanel
-      tasks={TESTING_TASKS}
-      taskIndex={taskIndex}
-      collapsed={taskCollapsed}
-      onToggleCollapsed={() => setTaskCollapsed((c) => !c)}
-      onNextTask={() => setTaskIndex((i) => i + 1)}
-      onPrevTask={() => setTaskIndex((i) => Math.max(0, i - 1))}
-      view={showConfigurator ? 'Configure' : 'Map'}
-    />
-    <Analytics />
-    </FeedbackKitProvider>
+      <Analytics />
+    </>
   );
 }
