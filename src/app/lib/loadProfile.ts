@@ -24,6 +24,8 @@ export interface EnergyTotals {
   heatingDeltaPercent?: number | null;
   /** ignis's raw per-area annual heating figure (kWh/(m²·a)), shown alongside the total. */
   heatingPerM2?: string;
+  /** Formatted BuEM baseline total (kWh), for the "vs. last full simulation" comparison sentence. */
+  heatingBaselineKwh?: string;
 }
 
 export type DatasetByResolution = Record<Resolution, LoadDataPoint[]>;

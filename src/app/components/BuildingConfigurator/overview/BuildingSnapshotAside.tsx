@@ -8,7 +8,7 @@ import { AlertTriangle, Zap, Flame, Snowflake, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { EnergyTotals } from '../../../lib/loadProfile';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
-import { HeatingDeltaBadge } from '../shared/ui';
+import { LiveEstimateTag, HeatingComparisonNote } from '../shared/ui';
 
 interface PvSummary {
   installed: boolean;
@@ -83,11 +83,18 @@ export function BuildingSnapshotAside({
                       </span>
                       <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
                       {key === 'heating' && (
-                        <HeatingDeltaBadge deltaPercent={energyTotals.heatingDeltaPercent} />
+                        <LiveEstimateTag source={energyTotals.heatingSource} />
                       )}
                     </div>
                     {key === 'heating' && energyTotals.heatingPerM2 && (
                       <p className="text-[11px] text-slate-500">{energyTotals.heatingPerM2} kWh/m²·a</p>
+                    )}
+                    {key === 'heating' && (
+                      <HeatingComparisonNote
+                        source={energyTotals.heatingSource}
+                        deltaPercent={energyTotals.heatingDeltaPercent}
+                        baselineKwh={energyTotals.heatingBaselineKwh}
+                      />
                     )}
                   </div>
                 </div>

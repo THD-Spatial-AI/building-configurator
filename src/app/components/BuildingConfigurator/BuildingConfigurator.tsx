@@ -17,7 +17,7 @@ import {
   faceFromAzimuth,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
-import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer, HeatingDeltaBadge } from './shared/ui';
+import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer, LiveEstimateTag, HeatingComparisonNote } from './shared/ui';
 import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
@@ -325,6 +325,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // priority over whatever timeseries the buildingData prop originally carried.
   const [modelTimeseries, setModelTimeseries] = useState<LoadDataPoint[] | null>(null);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
+  // True right after Recalculate, for as long as the ignis live estimate hasn't
+  // moved since — meaning BuEM's just-fetched result still reflects the current
+  // inputs and can be shown as the headline number instead of ignis's estimate.
+  const [isHeatingConfirmed, setIsHeatingConfirmed] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -488,6 +492,14 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ignis?.calcDemand, ignis?.selectedVariantIndex]);
+
+  // A fresh ignis result means the building's inputs moved since the last
+  // Recalculate — the BuEM figure on screen is no longer guaranteed current,
+  // so fall back to showing ignis's live estimate until the user confirms
+  // it again with another Recalculate.
+  useEffect(() => {
+    setIsHeatingConfirmed(false);
+  }, [ignis?.result]);
 
   // ── HDCP handlers ─────────────────────────────────────────────────────────────
 
@@ -833,6 +845,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       setModelTimeseries(result.timeseries);
       setEnergyTotals(computeEnergyTotals(result.timeseries, result.thermalSummary));
       setBuemBaselineHeatingKwh(baselineHeatingKwh(result.timeseries, result.thermalSummary));
+      setIsHeatingConfirmed(true);
     } finally {
       setIsRunningSimulation(false);
     }
@@ -945,6 +958,14 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     const ignisResult = ignis?.result;
     if (!ignisResult || totalFloorArea <= 0) return energyTotals;
 
+    // Right after Recalculate, with no edits since, energyTotals.heating is
+    // already BuEM's confirmed result for the current inputs — show that
+    // instead of ignis's fast estimate, since it's the number the user just
+    // ran a real physics simulation to get.
+    if (isHeatingConfirmed) {
+      return { ...energyTotals, heatingSource: 'buem', heatingDeltaPercent: null, heatingPerM2: undefined };
+    }
+
     const ignisHeatingKwh = ignisResult.qHnd * totalFloorArea;
     const heatingDeltaPercent = buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0
       ? ((ignisHeatingKwh - buemBaselineHeatingKwh) / buemBaselineHeatingKwh) * 100
@@ -956,8 +977,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       heatingSource: 'ignis',
       heatingDeltaPercent,
       heatingPerM2: ignisResult.qHnd.toFixed(1),
+      heatingBaselineKwh: buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0 ? formatKwh(buemBaselineHeatingKwh) : undefined,
     };
-  }, [energyTotals, ignis?.result, general.floorArea, general.storeys, buemBaselineHeatingKwh]);
+  }, [energyTotals, ignis?.result, general.floorArea, general.storeys, buemBaselineHeatingKwh, isHeatingConfirmed]);
   const pvInstalledSurfaces = useMemo(() => (
     Object.values(elements)
       .filter((element) => surfacePvConfigs[element.id]?.installed)
@@ -1170,11 +1192,18 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                                   </span>
                                   <span className="ml-1 text-[10px] text-slate-500">{displayEnergyTotals.unit}</span>
                                   {key === 'heating' && (
-                                    <HeatingDeltaBadge deltaPercent={displayEnergyTotals.heatingDeltaPercent} />
+                                    <LiveEstimateTag source={displayEnergyTotals.heatingSource} />
                                   )}
                                 </div>
                                 {key === 'heating' && displayEnergyTotals.heatingPerM2 && (
                                   <p className="text-[10px] text-slate-500">{displayEnergyTotals.heatingPerM2} kWh/m²·a</p>
+                                )}
+                                {key === 'heating' && (
+                                  <HeatingComparisonNote
+                                    source={displayEnergyTotals.heatingSource}
+                                    deltaPercent={displayEnergyTotals.heatingDeltaPercent}
+                                    baselineKwh={displayEnergyTotals.heatingBaselineKwh}
+                                  />
                                 )}
                               </div>
                             </div>

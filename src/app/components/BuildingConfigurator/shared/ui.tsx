@@ -81,14 +81,9 @@ export function InfoTip({ tip }: { tip: string }) {
   );
 }
 
-// ─── HeatingDeltaBadge ────────────────────────────────────────────────────────
+// ─── Heating source tag / comparison note ──────────────────────────────────────
 
 /**
- * Small "▲/▼ N%" pill showing how a live ignis heating figure compares to the
- * last full BuEM simulation. Lower demand is good (green); higher is a
- * regression to flag (red). Renders nothing if there's no baseline to compare
- * against, or the values are effectively unchanged.
- *
  * Percentages beyond DELTA_DISPLAY_CAP are shown as ">300%" rather than the
  * raw figure — while BuEM and the building's data are still placeholders, a
  * comparison between two disconnected estimates can produce swings in the
@@ -96,22 +91,37 @@ export function InfoTip({ tip }: { tip: string }) {
  */
 const DELTA_DISPLAY_CAP = 300;
 
-export function HeatingDeltaBadge({ deltaPercent }: { deltaPercent: number | null | undefined }) {
-  if (deltaPercent === null || deltaPercent === undefined || Math.abs(deltaPercent) < 0.5) return null;
+/** Small "live estimate" tag next to the heating figure when it's ignis's fast preview, not BuEM's confirmed result. */
+export function LiveEstimateTag({ source }: { source?: 'ignis' | 'buem' }) {
+  if (source !== 'ignis') return null;
+  return <span className="ml-1.5 text-[10px] font-medium text-slate-400">live estimate</span>;
+}
+
+/**
+ * One-line plain-language comparison — "26% lower than the last full
+ * simulation (24,955 kWh)" — replacing a bare percentage badge with wording
+ * a non-CS reader can act on. Only shown while the headline number is
+ * ignis's live estimate; once BuEM confirms it (after Recalculate), the
+ * headline number itself is already the answer, so there's nothing to add.
+ */
+export function HeatingComparisonNote({
+  source, deltaPercent, baselineKwh,
+}: {
+  source?: 'ignis' | 'buem';
+  deltaPercent?: number | null;
+  baselineKwh?: string;
+}) {
+  if (source !== 'ignis' || deltaPercent === null || deltaPercent === undefined || !baselineKwh) return null;
+  if (Math.abs(deltaPercent) < 0.5) return null;
 
   const isIncrease = deltaPercent > 0;
   const magnitude = Math.abs(deltaPercent);
-  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}%` : `${magnitude.toFixed(0)}%`;
+  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}` : magnitude.toFixed(0);
+
   return (
-    <span
-      className={cn(
-        'ml-1.5 text-[10px] font-semibold',
-        isIncrease ? 'text-red-400' : 'text-emerald-400',
-      )}
-      title="vs. last full simulation"
-    >
-      {isIncrease ? '▲' : '▼'} {displayValue}
-    </span>
+    <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
+      {displayValue}% {isIncrease ? 'higher' : 'lower'} than the last full simulation ({baselineKwh} kWh)
+    </p>
   );
 }
 
