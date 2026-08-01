@@ -271,13 +271,13 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
               />
               <Legend wrapperStyle={{ fontSize: 9 }} iconType="line" iconSize={8} />
               {(energyType === 'electricity' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="electricity" stroke="#3b82f6" strokeWidth={2} name="Electricity" dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="electricity" stroke="#f59e0b" strokeWidth={2} name="Electricity" dot={false} activeDot={{ r: 4 }} />
               )}
               {(energyType === 'heating' || energyType === 'combined') && (
                 <Line type="monotone" dataKey="heating" stroke="#ef4444" strokeWidth={2} name="Heating" dot={false} activeDot={{ r: 4 }} />
               )}
               {(energyType === 'hotwater' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="hotwater" stroke="#f59e0b" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="hotwater" stroke="#3b82f6" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
               )}
               {showBrush && mode === 'expert' && (
                 <Brush
