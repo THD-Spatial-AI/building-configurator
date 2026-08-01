@@ -1,6 +1,6 @@
 import { useRef, type ElementType } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
-import { Download, Upload, Zap, Flame, Droplets, Layers3 } from 'lucide-react';
+import { Download, Upload, Zap, Flame, Snowflake, Layers3 } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
   formatEnergyValue,
@@ -66,7 +66,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
   const ENERGY_META: Record<EnergyType, { label: string; Icon: ElementType }> = {
     electricity: { label: 'Electricity', Icon: Zap },
     heating:     { label: 'Heating', Icon: Flame },
-    hotwater:    { label: 'Hot Water', Icon: Droplets },
+    hotwater:    { label: 'Cooling', Icon: Snowflake },
     combined:    { label: 'Combined', Icon: Layers3 },
   };
 
@@ -277,7 +277,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
                 <Line type="monotone" dataKey="heating" stroke="#ef4444" strokeWidth={2} name="Heating" dot={false} activeDot={{ r: 4 }} />
               )}
               {(energyType === 'hotwater' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="hotwater" stroke="#f59e0b" strokeWidth={2} name="Hot Water" dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="hotwater" stroke="#f59e0b" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
               )}
               {showBrush && mode === 'expert' && (
                 <Brush

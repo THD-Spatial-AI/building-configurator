@@ -529,6 +529,11 @@ export function serializeToBuemFeature(
         building,
         solver: {
           use_milp: general.use_milp ?? false,
+          // Summer solar gains through real windows can plausibly need active
+          // cooling, not just heating — without this BuEM never computes a
+          // cooling load at all (not zero — the field is simply absent from
+          // the response), regardless of the building's actual exposure.
+          compute_cooling: general.compute_cooling ?? true,
         },
       },
       ...(Object.keys(techs).length > 0 ? { techs } : {}),
@@ -629,6 +634,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     massClass: (thermalBlk.thermal_class === 'medium' ? 'Medium' :
                 thermalBlk.thermal_class === 'heavy' ? 'Heavy' : 'Light'),
     use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,
+    compute_cooling: ((buem.solver ?? {}) as Record<string, unknown>).compute_cooling !== false,
   };
 
   return { elements, general, isBuemFormat: true };

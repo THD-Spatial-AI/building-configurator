@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { ScrollHintContainer } from '../shared/ui';
-import { AlertTriangle, Zap, Flame, Droplets, Gauge } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { EnergyTotals } from '../../../lib/loadProfile';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
@@ -32,7 +32,7 @@ export interface BuildingSnapshotAsideProps {
 const ENERGY_ITEMS = [
   { key: 'heating',     label: 'Heating',     Icon: Flame,    iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300'  },
   { key: 'electricity', label: 'Electricity', Icon: Zap,      iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300'  },
-  { key: 'hotwater',    label: 'Hot Water',   Icon: Droplets, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
+  { key: 'hotwater',    label: 'Cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
 ] as const;
 
 /** Left panel of the overview: energy hero numbers + building parameters table. */

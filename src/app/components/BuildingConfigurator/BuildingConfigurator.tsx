@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
   Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle,
-  Flame, Zap, Droplets, Gauge, LayoutDashboard, SlidersHorizontal,
+  Flame, Zap, Snowflake, Gauge, LayoutDashboard, SlidersHorizontal,
 } from 'lucide-react';
 
 import { BuildingVisualization, VIEW_ORDER } from './configure/visualization/BuildingVisualization';
@@ -186,7 +186,7 @@ function baselineHeatingKwh(
 const ENERGY_ITEMS = [
   { key: 'heating',     label: 'Heating',     Icon: Flame,    iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300' },
   { key: 'electricity', label: 'Electricity', Icon: Zap,      iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300' },
-  { key: 'hotwater',    label: 'Hot Water',   Icon: Droplets, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'   },
+  { key: 'hotwater',    label: 'Cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'   },
 ] as const;
 
 // --- Direction label helper ---------------------------------------------------
