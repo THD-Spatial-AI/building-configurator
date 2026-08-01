@@ -49,13 +49,6 @@ export const ELEMENT_DOTS: Record<string, string> = {
   door:   '#8a5a38',
 };
 
-// ─── ConfiguratorStyles — no-op; styles are now in theme.css ──────────────────
-
-/** @deprecated Styles are now in theme.css. This component is kept for compatibility. */
-export function ConfiguratorStyles() {
-  return null;
-}
-
 // ─── InfoTip ──────────────────────────────────────────────────────────────────
 
 export function InfoTip({ tip }: { tip: string }) {
