@@ -17,7 +17,7 @@ import {
   faceFromAzimuth,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
-import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer, HeatingDeltaBadge } from './shared/ui';
+import { SegmentedControl, ScrollHintContainer, HeatingDeltaBadge } from './shared/ui';
 import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
@@ -1026,7 +1026,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   return (
     <div className="cfg-panel w-[80vw] h-[88vh] rounded-lg shadow-2xl flex flex-col bg-card overflow-hidden">
-      <ConfiguratorStyles />
 
       {/* ── Header ── */}
       <div className="h-[52px] shrink-0 px-4 flex items-center gap-3 bg-card border-b border-border">
