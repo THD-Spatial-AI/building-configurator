@@ -228,14 +228,14 @@ function resolveDisplayEnergyTotals(
       electricitySource: 'user',
       hotwaterSource: 'user',
       heatingDeltaPercent: heatingRefKwh,
-      heatingBaselineKwh: formatKwh(currentHeatingKwh),
-      heatingComparisonLabel: heatingLabel,
+      heatingBaselineKwh: currentHeatingKwh > 0 ? formatKwh(currentHeatingKwh) : undefined,
+      heatingComparisonLabel: currentHeatingKwh > 0 ? heatingLabel : undefined,
       electricityDeltaPercent,
-      electricityBaselineKwh: formatKwh(electricityKwh),
-      electricityComparisonLabel: 'the last full simulation',
+      electricityBaselineKwh: electricityKwh > 0 ? formatKwh(electricityKwh) : undefined,
+      electricityComparisonLabel: electricityKwh > 0 ? 'the last full simulation' : undefined,
       hotwaterDeltaPercent,
-      hotwaterBaselineKwh: formatKwh(hotwaterKwh),
-      hotwaterComparisonLabel: 'the last full simulation',
+      hotwaterBaselineKwh: hotwaterKwh > 0 ? formatKwh(hotwaterKwh) : undefined,
+      hotwaterComparisonLabel: hotwaterKwh > 0 ? 'the last full simulation' : undefined,
     };
   }
 
