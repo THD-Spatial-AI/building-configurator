@@ -1,5 +1,5 @@
 import { useRef, type ElementType } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, Brush, ReferenceLine } from 'recharts';
 import { Download, Upload, Zap, Flame, Snowflake, Layers3 } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
@@ -45,10 +45,17 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
     showBrush,
     sourceCaption,
     stepLabel,
+    unit,
     uploadError,
     visibleRangeLabel,
     windowMode,
   } = useLoadProfileState({ buildingId, initialTimeseries, mode, onTotalsChange });
+
+  // Mean of electricity + heating + cooling per visible point — only meaningful
+  // once all three series are plotted together, so it's Combined-only.
+  const combinedAverage = energyType === 'combined' && data.length > 0
+    ? data.reduce((sum, point) => sum + point.electricity + point.heating + point.hotwater, 0) / data.length
+    : null;
 
   // Shorter labels that communicate "what time period each data point covers"
   const resolutionOptions = [
@@ -96,39 +103,35 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
         </div>
         {/* Resolution — labelled as the time period each point covers */}
         <SegmentedControl options={resolutionOptions} value={resolution} onChange={(v) => setResolution(v as Resolution)} />
-        {/* Graph-data import / export — expert mode only */}
-        {mode === 'expert' && (
-          <>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                height: 26, padding: '0 9px', borderRadius: 5,
-                border: `1px solid ${T.border}`, background: 'transparent',
-                color: T.foreground, cursor: 'pointer', fontSize: 11, fontWeight: 600, flexShrink: 0,
-              }}
-            >
-              <Upload size={12} /> Upload load profile
-            </button>
-            <button
-              type="button"
-              onClick={handleDownload}
-              disabled={!hasData}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                height: 26, padding: '0 9px', borderRadius: 5,
-                border: `1px solid ${T.border}`, background: 'transparent',
-                color: hasData ? T.foreground : T.mutedFg,
-                cursor: hasData ? 'pointer' : 'not-allowed',
-                fontSize: 11, fontWeight: 600, flexShrink: 0, opacity: hasData ? 1 : 0.5,
-              }}
-            >
-              <Download size={12} /> Download profiles (.zip)
-            </button>
-            <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
-          </>
-        )}
+        {/* Graph-data import / export — plain CSV in a zip, safe for any user to open in Excel */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            height: 26, padding: '0 9px', borderRadius: 5,
+            border: `1px solid ${T.border}`, background: 'transparent',
+            color: T.foreground, cursor: 'pointer', fontSize: 11, fontWeight: 600, flexShrink: 0,
+          }}
+        >
+          <Upload size={12} /> Upload load profile
+        </button>
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={!hasData}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            height: 26, padding: '0 9px', borderRadius: 5,
+            border: `1px solid ${T.border}`, background: 'transparent',
+            color: hasData ? T.foreground : T.mutedFg,
+            cursor: hasData ? 'pointer' : 'not-allowed',
+            fontSize: 11, fontWeight: 600, flexShrink: 0, opacity: hasData ? 1 : 0.5,
+          }}
+        >
+          <Download size={12} /> Download profiles (.zip)
+        </button>
+        <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
       </div>
 
       {hasData && mode === 'expert' && (
@@ -278,6 +281,15 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
               )}
               {(energyType === 'hotwater' || energyType === 'combined') && (
                 <Line type="monotone" dataKey="hotwater" stroke="#3b82f6" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
+              )}
+              {combinedAverage !== null && (
+                <ReferenceLine
+                  y={combinedAverage}
+                  stroke="#64748b"
+                  strokeDasharray="4 4"
+                  strokeWidth={1.5}
+                  label={{ value: `Avg ${formatEnergyValue(combinedAverage, 4)} ${unit}`, position: 'insideTopRight', fontSize: 10, fill: '#64748b' }}
+                />
               )}
               {showBrush && mode === 'expert' && (
                 <Brush
