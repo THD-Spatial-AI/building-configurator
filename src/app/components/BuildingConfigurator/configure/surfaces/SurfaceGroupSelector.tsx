@@ -43,7 +43,7 @@ function dirLabel(el: BuildingElement): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-interface SurfaceGroupSelectorProps {
+export interface SurfaceGroupSelectorProps {
   elements: Record<string, BuildingElement>;
   activeGroupType: ElementGroupKey | null;
   onSelectGroupType: (type: ElementGroupKey) => void;
