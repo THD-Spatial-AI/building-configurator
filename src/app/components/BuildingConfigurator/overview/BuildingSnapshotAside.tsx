@@ -78,6 +78,9 @@ export function BuildingSnapshotAside({
                   </div>
                   <div className="text-right">
                     <div>
+                      {key === 'heating' && energyTotals.heatingPerM2 && (
+                        <span className="mr-1.5 text-[11px] text-slate-500">({energyTotals.heatingPerM2} kWh/m²·a)</span>
+                      )}
                       <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
                         {value}
                       </span>
@@ -86,9 +89,6 @@ export function BuildingSnapshotAside({
                         <LiveEstimateTag source={energyTotals.heatingSource} />
                       )}
                     </div>
-                    {key === 'heating' && energyTotals.heatingPerM2 && (
-                      <p className="text-[11px] text-slate-500">{energyTotals.heatingPerM2} kWh/m²·a</p>
-                    )}
                     {key === 'heating' && (
                       <HeatingComparisonNote
                         source={energyTotals.heatingSource}

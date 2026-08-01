@@ -1187,6 +1187,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                               </div>
                               <div className="text-right">
                                 <div>
+                                  {key === 'heating' && displayEnergyTotals.heatingPerM2 && (
+                                    <span className="mr-1 text-[10px] text-slate-500">({displayEnergyTotals.heatingPerM2} kWh/m²·a)</span>
+                                  )}
                                   <span className={cn('text-lg font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
                                     {value}
                                   </span>
@@ -1195,9 +1198,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
                                     <LiveEstimateTag source={displayEnergyTotals.heatingSource} />
                                   )}
                                 </div>
-                                {key === 'heating' && displayEnergyTotals.heatingPerM2 && (
-                                  <p className="text-[10px] text-slate-500">{displayEnergyTotals.heatingPerM2} kWh/m²·a</p>
-                                )}
                                 {key === 'heating' && (
                                   <HeatingComparisonNote
                                     source={displayEnergyTotals.heatingSource}
