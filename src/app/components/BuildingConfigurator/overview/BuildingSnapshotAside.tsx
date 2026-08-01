@@ -6,9 +6,9 @@ import React from 'react';
 import { ScrollHintContainer } from '../shared/ui';
 import { AlertTriangle, Zap, Flame, Snowflake, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { EnergyTotals } from '../../../lib/loadProfile';
+import type { EnergySource, EnergyTotals } from '../../../lib/loadProfile';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
-import { LiveEstimateTag, HeatingComparisonNote } from '../shared/ui';
+import { SourceTag, EnergyComparisonNote } from '../shared/ui';
 
 interface PvSummary {
   installed: boolean;
@@ -68,6 +68,10 @@ export function BuildingSnapshotAside({
           <div className="flex flex-col gap-3">
             {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
               const value = energyTotals[key];
+              const source = energyTotals[`${key}Source` as keyof EnergyTotals] as EnergySource | undefined;
+              const deltaPercent = energyTotals[`${key}DeltaPercent` as keyof EnergyTotals] as number | null | undefined;
+              const referenceKwh = energyTotals[`${key}BaselineKwh` as keyof EnergyTotals] as string | undefined;
+              const referenceLabel = energyTotals[`${key}ComparisonLabel` as keyof EnergyTotals] as string | undefined;
               return (
                 <div key={key} className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -75,6 +79,7 @@ export function BuildingSnapshotAside({
                       <Icon className={cn('size-4', iconColor)} />
                     </div>
                     <span className="text-sm text-slate-300">{label}</span>
+                    <SourceTag source={source} />
                   </div>
                   <div className="text-right">
                     <div>
@@ -85,17 +90,8 @@ export function BuildingSnapshotAside({
                         {value}
                       </span>
                       <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
-                      {key === 'heating' && (
-                        <LiveEstimateTag source={energyTotals.heatingSource} />
-                      )}
                     </div>
-                    {key === 'heating' && (
-                      <HeatingComparisonNote
-                        source={energyTotals.heatingSource}
-                        deltaPercent={energyTotals.heatingDeltaPercent}
-                        baselineKwh={energyTotals.heatingBaselineKwh}
-                      />
-                    )}
+                    <EnergyComparisonNote deltaPercent={deltaPercent} referenceKwh={referenceKwh} referenceLabel={referenceLabel} />
                   </div>
                 </div>
               );

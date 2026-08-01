@@ -13,19 +13,36 @@ export interface LoadDataPoint {
   hotwater: number;
 }
 
+/**
+ * Where a displayed total actually came from — undefined/'buem' means "the
+ * last confirmed full simulation", the ordinary/default state that needs no
+ * tag. 'ignis' is a fast live estimate (heating only — ignis has no
+ * electricity/cooling model). 'user' is an uploaded load profile, treated
+ * as ground truth: it outranks both models as the number to trust.
+ */
+export type EnergySource = 'ignis' | 'buem' | 'user';
+
 export interface EnergyTotals {
   electricity: string;
   heating: string;
   hotwater: string;
   unit: string;
-  /** Set when 'heating' is a live ignis calculation rather than the BuEM baseline. */
-  heatingSource?: 'ignis' | 'buem';
-  /** % change of the live ignis heating figure vs. the BuEM baseline, when both exist. */
+  heatingSource?: EnergySource;
+  electricitySource?: EnergySource;
+  hotwaterSource?: EnergySource;
+  /** % difference between the displayed figure and the comparison reference named below, when one exists. */
   heatingDeltaPercent?: number | null;
+  electricityDeltaPercent?: number | null;
+  hotwaterDeltaPercent?: number | null;
   /** ignis's raw per-area annual heating figure (kWh/(m²·a)), shown alongside the total. */
   heatingPerM2?: string;
-  /** Formatted BuEM baseline total (kWh), for the "vs. last full simulation" comparison sentence. */
+  /** Formatted comparison-reference total (kWh) and what to call it in the sentence. */
   heatingBaselineKwh?: string;
+  heatingComparisonLabel?: string;
+  electricityBaselineKwh?: string;
+  electricityComparisonLabel?: string;
+  hotwaterBaselineKwh?: string;
+  hotwaterComparisonLabel?: string;
 }
 
 export type DatasetByResolution = Record<Resolution, LoadDataPoint[]>;
@@ -351,6 +368,22 @@ export function getDerivedData(dataset: DatasetByResolution, resolution: Resolut
   }
 
   return { rows: [], sourceResolution: null, isDerived: false };
+}
+
+/**
+ * Picks the rows an upload just added, by finding which resolution's array
+ * changed between the dataset before and after — used to turn an uploaded
+ * load profile into ground-truth annual totals. Deliberately does NOT just
+ * grab the finest non-empty resolution in the new dataset: the model output
+ * already sitting in `hourly` would always win over whatever resolution the
+ * user's file actually was, since a file upload never touches `hourly`
+ * unless the upload itself was hourly.
+ */
+export function pickUpdatedRows(previous: DatasetByResolution, next: DatasetByResolution): LoadDataPoint[] | null {
+  for (const resolution of RESOLUTION_ORDER) {
+    if (next[resolution] !== previous[resolution] && next[resolution].length > 0) return next[resolution];
+  }
+  return null;
 }
 
 /** Creates the empty per-resolution dataset state used by the viewer. */

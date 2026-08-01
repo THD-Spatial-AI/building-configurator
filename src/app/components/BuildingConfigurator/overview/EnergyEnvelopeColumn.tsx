@@ -32,6 +32,8 @@ export interface EnergyEnvelopeColumnProps {
   pvSummary: PvSummary;
   onToggleTech?: (id: string, installed: boolean) => void;
   onOpenTech?: (id: string) => void;
+  /** Fired when the user uploads a load profile — becomes ground truth for the annual totals elsewhere. */
+  onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
 }
 
 /** Right panel of the overview: energy chart primary, element composition secondary, technologies tertiary. */
@@ -49,6 +51,7 @@ export function EnergyEnvelopeColumn({
   pvSummary,
   onToggleTech,
   onOpenTech,
+  onGroundTruthChange,
 }: EnergyEnvelopeColumnProps) {
   return (
     <ScrollHintContainer className="flex flex-col bg-slate-100
@@ -75,6 +78,7 @@ export function EnergyEnvelopeColumn({
             buildingId={buildingId}
             initialTimeseries={initialTimeseries ?? undefined}
             mode={mode}
+            onGroundTruthChange={onGroundTruthChange}
           />
         </div>
 

@@ -20,9 +20,11 @@ interface LoadProfileViewerProps {
   initialTimeseries?: LoadDataPoint[];
   /** Controls UI complexity. Basic hides expert controls; defaults to basic. */
   mode?: 'basic' | 'expert';
+  /** Fired when the user uploads a file — the uploaded rows become ground truth for the annual totals elsewhere in the app. */
+  onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
 }
 
-export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, initialTimeseries, mode = 'basic' }: LoadProfileViewerProps) {
+export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, initialTimeseries, mode = 'basic', onGroundTruthChange }: LoadProfileViewerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     availableHourlyDates,
@@ -49,7 +51,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
     uploadError,
     visibleRangeLabel,
     windowMode,
-  } = useLoadProfileState({ buildingId, initialTimeseries, mode, onTotalsChange });
+  } = useLoadProfileState({ buildingId, initialTimeseries, mode, onTotalsChange, onGroundTruthChange });
 
   // Mean of electricity + heating + cooling per visible point — only meaningful
   // once all three series are plotted together, so it's Combined-only.

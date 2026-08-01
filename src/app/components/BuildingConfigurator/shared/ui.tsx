@@ -81,7 +81,7 @@ export function InfoTip({ tip }: { tip: string }) {
   );
 }
 
-// ─── Heating source tag / comparison note ──────────────────────────────────────
+// ─── HeatingDeltaBadge ────────────────────────────────────────────────────────
 
 /**
  * Percentages beyond DELTA_DISPLAY_CAP are shown as ">300%" rather than the
@@ -91,27 +91,32 @@ export function InfoTip({ tip }: { tip: string }) {
  */
 const DELTA_DISPLAY_CAP = 300;
 
-/** Small "live estimate" tag next to the heating figure when it's ignis's fast preview, not BuEM's confirmed result. */
-export function LiveEstimateTag({ source }: { source?: 'ignis' | 'buem' }) {
-  if (source !== 'ignis') return null;
-  return <span className="ml-1.5 text-[10px] font-medium text-slate-400">live estimate</span>;
+/**
+ * Small tag next to an energy row's label naming where its number came
+ * from. Nothing is shown for 'buem' — a confirmed full simulation is the
+ * ordinary/default state and doesn't need calling out.
+ */
+export function SourceTag({ source }: { source?: 'ignis' | 'buem' | 'user' }) {
+  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">estimated</span>;
+  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">user defined</span>;
+  return null;
 }
 
 /**
  * One-line plain-language comparison — "26% lower than the last full
  * simulation (24,955 kWh)" — replacing a bare percentage badge with wording
- * a non-CS reader can act on. Only shown while the headline number is
- * ignis's live estimate; once BuEM confirms it (after Recalculate), the
- * headline number itself is already the answer, so there's nothing to add.
+ * a non-CS reader can act on. Caller decides when there's something worth
+ * saying (e.g. only while the number differs from a reference); this just
+ * renders it.
  */
-export function HeatingComparisonNote({
-  source, deltaPercent, baselineKwh,
+export function EnergyComparisonNote({
+  deltaPercent, referenceKwh, referenceLabel,
 }: {
-  source?: 'ignis' | 'buem';
   deltaPercent?: number | null;
-  baselineKwh?: string;
+  referenceKwh?: string;
+  referenceLabel?: string;
 }) {
-  if (source !== 'ignis' || deltaPercent === null || deltaPercent === undefined || !baselineKwh) return null;
+  if (deltaPercent === null || deltaPercent === undefined || !referenceKwh || !referenceLabel) return null;
   if (Math.abs(deltaPercent) < 0.5) return null;
 
   const isIncrease = deltaPercent > 0;
@@ -120,7 +125,7 @@ export function HeatingComparisonNote({
 
   return (
     <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
-      {displayValue}% {isIncrease ? 'higher' : 'lower'} than the last full simulation ({baselineKwh} kWh)
+      {displayValue}% {isIncrease ? 'higher' : 'lower'} than {referenceLabel} ({referenceKwh} kWh)
     </p>
   );
 }
