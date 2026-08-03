@@ -662,17 +662,11 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset, fieldMet
         )}
       </div>
 
-      {/* Climate inputs */}
+      {/* Climate inputs — HeatingDays and solar irradiance are weather-derived and not
+          user-editable (decision 2026-08-03): they still flow through from the TABULA/
+          climate default in calcDemand, just without an input control here. */}
       <div className="flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Climate</p>
-        <FieldRow>
-          <FieldLabel tip={tipFor('HeatingDays', 'Number of heating degree days per year.')}>Heating days</FieldLabel>
-          <NumberInput
-            value={calcDemand.HeatingDays ?? 0}
-            onChange={(v) => onFieldChange({ HeatingDays: v })}
-            step={1} min={0} max={365}
-          />
-        </FieldRow>
         <FieldRow>
           <FieldLabel tip={tipFor('Theta_e', 'External design temperature (°C).')}>Outside temp θ_e</FieldLabel>
           <NumberInput
@@ -689,25 +683,6 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset, fieldMet
             step={0.5} min={0} max={30}
           />
         </FieldRow>
-      </div>
-
-      {/* Solar irradiance */}
-      <div className="flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Solar irradiance (Wh/m²·a)</p>
-        {(['South', 'East', 'West', 'North', 'Horizontal'] as const).map((dir) => {
-          const key = `I_Sol_${dir}` as keyof IgnisInputs;
-          const metadataKey = dir === 'Horizontal' ? 'I_Sol_Hor' : `I_Sol_${dir}`;
-          return (
-            <FieldRow key={dir}>
-              <FieldLabel tip={tipFor(metadataKey)}>{dir}</FieldLabel>
-              <NumberInput
-                value={(calcDemand[key] as number | undefined) ?? 0}
-                onChange={(v) => onFieldChange({ [key]: v })}
-                step={10} min={0}
-              />
-            </FieldRow>
-          );
-        })}
       </div>
 
       {/* Thermal bridging */}
