@@ -1,14 +1,12 @@
-// Left column of the Overview view: building identity, energy hero, key metrics.
-// Building parameters are shown as a compact always-visible table.
-// Technologies have moved to the right column (after Envelope Composition).
+// Left column of the Overview view: annual energy hero + technologies.
+// Building parameters and envelope now live in the right column's merged details card.
 
 import React from 'react';
-import { ScrollHintContainer } from '../shared/ui';
-import { AlertTriangle, Zap, Flame, Snowflake, Gauge } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Cpu as CpuIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { EnergySource, EnergyTotals } from '../../../lib/loadProfile';
-import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
-import { SourceTag, EnergyComparisonNote } from '../shared/ui';
+import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';
+import { TechnologiesSection } from './TechnologiesSection';
 
 interface PvSummary {
   installed: boolean;
@@ -18,15 +16,14 @@ interface PvSummary {
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
-  snapshotRows: SnapshotRow[];
   thermalRating: { label: string; color: string; bg: string };
   avgUValue: number;
+  mode: 'basic' | 'expert';
   installedTechIds: string[];
   pvSummary: PvSummary;
   onToggleTech?: (id: string, installed: boolean) => void;
-  /** Opens the matching technology flow in the Configure workspace. */
+  /** Opens the matching technology's editor modal. */
   onOpenTech?: (id: string) => void;
-  mode: 'basic' | 'expert';
 }
 
 const ENERGY_ITEMS = [
@@ -35,13 +32,16 @@ const ENERGY_ITEMS = [
   { key: 'hotwater',    label: 'Cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
 ] as const;
 
-/** Left panel of the overview: energy hero numbers + building parameters table. */
+/** Left panel of the overview: energy hero numbers + installed technologies. */
 export function BuildingSnapshotAside({
   energyTotals,
-  snapshotRows,
   thermalRating,
   avgUValue,
   mode,
+  installedTechIds,
+  pvSummary,
+  onToggleTech,
+  onOpenTech,
 }: BuildingSnapshotAsideProps) {
   const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
 
@@ -62,7 +62,7 @@ export function BuildingSnapshotAside({
       {/* ── Energy hero + thermal efficiency ── */}
       <div className="shrink-0 overflow-hidden rounded-xl border border-slate-700/60 shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]">
         <div className="bg-slate-800 px-5 py-5">
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-300">
             Annual energy demand
           </p>
           <div className="flex flex-col gap-3">
@@ -118,31 +118,23 @@ export function BuildingSnapshotAside({
         </div>
       </div>
 
-      {/* ── Building parameters — read-only compact table ── */}
-      <div className={cn(CARD, 'shrink-0')}>
-        <div className="px-4 py-2.5 border-b border-slate-100">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.08em]">
-            Building parameters
-          </p>
+      {/* ── Technologies ── */}
+      <div className={cn(CARD, 'shrink-0 px-4 pb-4 pt-4')}>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex size-6 items-center justify-center rounded-md bg-slate-200">
+              <CpuIcon className="size-3.5 text-slate-600" />
+            </div>
+            <p className="text-[13px] font-bold text-slate-800">Technologies</p>
+          </div>
+          <p className="text-[11px] text-slate-400">Click a card to configure</p>
         </div>
-        <table className="w-full text-[11px] bg-white">
-          <colgroup>
-            <col className="w-[38%]" />
-            <col />
-            <col className="w-[72px]" />
-          </colgroup>
-          <tbody>
-            {snapshotRows.map((row) => (
-              <tr key={row.label} className="border-t border-slate-100">
-                <td className="px-4 py-2 text-slate-500">{row.label}</td>
-                <td className="px-4 py-2 text-right font-medium text-slate-700">{row.value}</td>
-                <td className="px-3 py-2 text-center">
-                  <SnapshotStatusBadge status={row.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TechnologiesSection
+          installedTechIds={installedTechIds}
+          pvSummary={pvSummary}
+          onToggle={onToggleTech}
+          onOpen={onOpenTech}
+        />
       </div>
 
     </aside>

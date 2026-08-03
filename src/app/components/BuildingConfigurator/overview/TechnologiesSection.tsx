@@ -53,7 +53,7 @@ export function TechnologiesSection({
   onOpen,
 }: TechnologiesSectionProps) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 gap-2">
       {VISIBLE_TECHS.map((tech) => {
         const { installed, summary, detail, togglable } = cardProps(tech, installedTechIds, pvSummary);
         const { id, label, Icon } = tech;

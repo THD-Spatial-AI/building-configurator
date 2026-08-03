@@ -1051,7 +1051,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
             <BuildingSnapshotAside
               energyTotals={displayEnergyTotals}
-              snapshotRows={snapshotRows}
               thermalRating={thermalRating}
               avgUValue={avgUValue}
               installedTechIds={installedTechIds}
@@ -1071,10 +1070,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               initialTimeseries={modelTimeseries ?? thematicData?.timeseries ?? buildingData?.timeseries ?? null}
               onGroundTruthChange={(rows) => setGroundTruthTimeseries(rows)}
               mode={mode}
-              installedTechIds={installedTechIds}
-              pvSummary={pvSummary}
-              onToggleTech={handleTechToggle}
-              onOpenTech={handleTechnologyOpen}
+              snapshotRows={snapshotRows}
+              onEditField={setGen}
+              onOpenAdvanced={handleBuildingSelect}
+              onEditGroup={handleGroupTypeSelect}
             />
 
           </div>
