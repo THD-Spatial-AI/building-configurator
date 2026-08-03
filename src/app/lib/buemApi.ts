@@ -112,6 +112,8 @@ export async function runBuildingSimulation(
     buem: feature.properties.buem,
   };
 
+  console.log('[buem] building payload', request);
+
   try {
     const res = await fetch(`${BASE_URL}/buem/building`, {
       method:  'POST',

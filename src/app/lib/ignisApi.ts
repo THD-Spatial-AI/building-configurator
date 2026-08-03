@@ -193,6 +193,8 @@ export async function calculateHeatDemand(
   const url     = `${BASE_URL}/api/v1/calculate/${encodeURIComponent(variantCode)}`;
   const payload = toIgnisApiPayload(calcDemand);
 
+  console.log('[ignis] calculate payload', variantCode, payload);
+
   try {
     const res = await fetch(url, {
       method:  'POST',
