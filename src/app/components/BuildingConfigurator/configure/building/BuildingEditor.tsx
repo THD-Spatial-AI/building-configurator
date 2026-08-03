@@ -818,6 +818,8 @@ interface BuildingEditorProps {
   onIgnisReset?: () => void;
   /** Called when the user manually selects a TABULA period to override an unrecognised one. */
   onIgnisPeriodOverride?: (period: string) => void;
+  /** Hides the Basic Info tab — used when the caller already renders those fields elsewhere (the snapshot table's inline edit). */
+  hideIdentity?: boolean;
 }
 
 /**
@@ -831,6 +833,7 @@ interface BuildingEditorProps {
 export function BuildingEditor({
   general, setGen, mode,
   ignis, ignisFieldMetadata, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
+  hideIdentity = false,
 }: BuildingEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
@@ -838,9 +841,10 @@ export function BuildingEditor({
   // headline result, not an expert-only diagnostic.
   const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions', 'ignis'];
   const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver'];
-  const visibleSections = mode === 'expert'
+  const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
-    : ALL_SECTIONS;
+    : ALL_SECTIONS
+  ).filter((key) => !hideIdentity || key !== 'identity');
 
   const toggle = (id: SectionKey) =>
     setActiveSection((prev) => (prev === id ? null : id));

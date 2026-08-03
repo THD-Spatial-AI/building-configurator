@@ -310,19 +310,6 @@ function AzimuthControl({ value, disabled = false, onChange }: { value: number; 
 
 // ─── Thermal field — inline click-to-edit row ─────────────────────────────────
 
-/** Read-only display row used in basic mode and for derived values. */
-function ThermalReadRow({ label, value, unit }: { label: string; value: string; unit: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-[11px] text-slate-500">{label}</span>
-      <div className="flex items-baseline gap-1">
-        <span className="text-[12px] font-semibold text-slate-800">{value}</span>
-        <span className="text-[10px] text-slate-400">{unit}</span>
-      </div>
-    </div>
-  );
-}
-
 /** Click-to-edit inline field for numeric values. */
 function ThermalEditRow({
   label, value, unit, disabled = false, min = 0.001, max, step = 0.01, decimals = 2, onSave,
@@ -863,14 +850,19 @@ export function SurfaceGroupEditor({
                   onChange={(v) => save({ area: Math.max(0.1, v) })}
                 />
               </div>
-              <div className="border-l border-slate-200 pl-4 flex items-center justify-center gap-4">
-                <FieldLabel tip="Thermal transmittance — lower values mean better insulation. Typical values: wall 0.2–0.5, window 0.8–2.0, roof 0.15–0.35 W/m²K.">
-                  U-value
-                </FieldLabel>
-                <NumberSpinner
-                  value={el.uValue} min={0.01} max={10} step={0.01} decimals={2} unit="W/m²K"
-                  onChange={(v) => save({ uValue: Math.max(0.01, v) })}
-                />
+              <div className="border-l border-slate-200 pl-4 flex flex-col items-center justify-center gap-1">
+                <div className="flex items-center gap-4">
+                  <FieldLabel tip="Thermal transmittance — lower values mean better insulation. Typical values: wall 0.2–0.5, window 0.8–2.0, roof 0.15–0.35 W/m²K.">
+                    U-value
+                  </FieldLabel>
+                  <NumberSpinner
+                    value={el.uValue} min={0.01} max={10} step={0.01} decimals={2} unit="W/m²K"
+                    onChange={(v) => save({ uValue: Math.max(0.01, v) })}
+                  />
+                </div>
+                {mode === 'expert' && (
+                  <span className="text-[10px] text-muted-foreground">R-value (1/U): {rValue} m²K/W</span>
+                )}
               </div>
             </div>
 
@@ -896,8 +888,6 @@ export function SurfaceGroupEditor({
             {/* Expert thermal fields */}
             {mode === 'expert' && (
               <div className="mt-4 border-t border-slate-200 pt-4 flex flex-col gap-3">
-                <ThermalReadRow label="R-value (1/U)" value={rValue} unit="m²K/W" />
-
                 {isWindow && (
                   <ThermalEditRow
                     label="g-value (SHGC)"

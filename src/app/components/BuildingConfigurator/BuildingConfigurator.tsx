@@ -13,7 +13,7 @@ import {
   normalizeElementRecord,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
-import { SegmentedControl, ConfiguratorStyles, ScrollHintContainer } from './shared/ui';
+import { SegmentedControl, ConfiguratorStyles, ElementConfiguratorModal } from './shared/ui';
 import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
@@ -46,10 +46,9 @@ import {
   type SnapshotBaseline,
 } from './shared/snapshotUtils';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
-import type { ElementGroupKey } from './shared/elementListUtils';
+import { ELEMENT_GROUP_LABELS, type ElementGroupKey } from './shared/elementListUtils';
 import { BuildingSnapshotAside } from './overview/BuildingSnapshotAside';
 import { EnergyEnvelopeColumn } from './overview/EnergyEnvelopeColumn';
-import { SurfaceGroupSelector } from './configure/surfaces/SurfaceGroupSelector';
 import { SurfaceGroupGrid } from './configure/surfaces/SurfaceGroupGrid';
 import { SurfaceGroupEditor } from './configure/surfaces/SurfaceGroupEditor';
 import { BuildingEditor } from './configure/building/BuildingEditor';
@@ -57,8 +56,7 @@ import { PvSurfaceManager } from './configure/pv/PvSurfaceManager';
 import { BatteryEditor } from './configure/pv/BatteryEditor';
 import { createSurfacePvConfig, DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
 import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
-import { TECH_REGISTRY, VISIBLE_TECHS } from '../../config/techRegistry';
-import type { TechNavItem } from '../../config/techRegistry';
+import { TECH_REGISTRY } from '../../config/techRegistry';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -331,7 +329,8 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
   const [selectedId,    setSelectedId]    = useState<string | null>(null);
   const [surfaceEditorTab, setSurfaceEditorTab] = useState<'properties' | 'pv'>('properties');
-  const [panelView,     setPanelView]     = useState<string>('building');
+  // null = element configurator modal closed; a panel name opens it on that content.
+  const [panelView,     setPanelView]     = useState<string | null>(null);
   /** The group type currently driving the surface-group grid in the center panel. */
   const [activeGroupType, setActiveGroupType] = useState<ElementGroupKey | null>(null);
   /** Whether the roof-type accordion is expanded while editing a roof surface. */
@@ -339,7 +338,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [surfacePvConfigs, setSurfacePvConfigs] = useState<Record<string, PvConfig>>({});
   // True when a roof-type change removed surfaces that had PV installed.
   const [pvInvalidated,  setPvInvalidated]  = useState(false);
-  // Non-PV technology IDs (heat_pump, ev_charger) toggled by the overview panel.
+  // Non-PV technology IDs (heat_pump) toggled by the overview panel.
   const [otherTechIds,   setOtherTechIds]   = useState<string[]>(() =>
     (technologyData?.installedTechIds ?? buildingData?.installedTechIds ?? []).filter((id) => id !== 'solar_pv' && id !== 'battery'),
   );
@@ -471,7 +470,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setSelectedId(null);
     setActiveGroupType(null);
     setSurfaceEditorTab('properties');
-    setPanelView('building');
+    setPanelView(null);
     setUploadError(null);
     setSurfacePvConfigs({});
     setPvInvalidated(false);
@@ -692,7 +691,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         setPanelView('surface-group');
       } else {
         setActiveGroupType(null);
-        setPanelView('building');
+        setPanelView(null);
       }
     }
   };
@@ -711,6 +710,13 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setActiveGroupType(null);
     setSurfaceEditorTab('properties');
     setPanelView('building');
+  };
+
+  /** Closes the element configurator modal. */
+  const closeElementModal = () => {
+    setPanelView(null);
+    setSelectedId(null);
+    setActiveGroupType(null);
   };
 
   /** Opens the surface grid for a group type in the center panel. */
@@ -758,7 +764,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const updateBattery = (patch: Partial<BatteryConfig>) =>
     setBatteryConfig((prev) => ({ ...prev, ...patch }));
 
-  /** Opens the configure workspace for a technology card, using the registry to resolve the panel. */
+  /** Opens the element configurator modal for a technology card, using the registry to resolve the panel. */
   const handleTechnologyOpen = (id: string) => {
     if (id === 'solar_pv') { handleTechnologyPvSelect(); return; }
     if (id === 'battery')  { handleTechnologyBatterySelect(); return; }
@@ -826,7 +832,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setRoofConfig(DEFAULT_ROOF_CONFIG);
     setSelectedId(null);
     setActiveGroupType(null);
-    setPanelView('building');
+    setPanelView(null);
     setUploadError(null);
   };
 
@@ -994,54 +1000,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
     : otherTechIds.filter((id) => id !== 'battery');
 
-  /** Builds the tech nav item list for SurfaceGroupSelector from the registry + current state. */
-  function buildTechNavItems(): TechNavItem[] {
-    return VISIBLE_TECHS
-      .filter((tech) => tech.panelView !== undefined)
-      .map((tech): TechNavItem => {
-        if (tech.id === 'solar_pv') {
-          return {
-            id:           tech.id,
-            label:        tech.label,
-            Icon:         tech.Icon,
-            selected:     panelView === tech.panelView,
-            badge:        pvSummary.surfaceCount > 0 ? String(pvSummary.surfaceCount) : undefined,
-            subtitle:     pvSummary.surfaceCount > 0
-              ? `${pvSummary.surfaceCount} ${pvSummary.surfaceCount === 1 ? 'surface' : 'surfaces'} · ${pvSummary.totalCapacityKw.toFixed(1)} kWp`
-              : 'No surfaces configured',
-            onSelect:     handleTechnologyPvSelect,
-            navIconColor: tech.navIconColor,
-          };
-        }
-        if (tech.id === 'battery') {
-          return {
-            id:           tech.id,
-            label:        tech.label,
-            Icon:         tech.Icon,
-            selected:     panelView === tech.panelView,
-            badge:        batteryConfig.installed ? '●' : undefined,
-            subtitle:     batteryConfig.installed ? 'Installed' : 'Not configured',
-            onSelect:     handleTechnologyBatterySelect,
-            navIconColor: tech.navIconColor,
-          };
-        }
-        // Generic building-scope tech with a panelView
-        const installed = otherTechIds.includes(tech.id);
-        return {
-          id:           tech.id,
-          label:        tech.label,
-          Icon:         tech.Icon,
-          selected:     panelView === tech.panelView,
-          badge:        installed ? '●' : undefined,
-          subtitle:     installed ? 'Installed' : 'Not configured',
-          onSelect:     () => handleTechnologyOpen(tech.id),
-          navIconColor: tech.navIconColor,
-        };
-      });
-  }
+  const modalTitle =
+    panelView === 'building'             ? 'Building settings'
+    : panelView === 'surface-group'      ? (activeGroupType ? ELEMENT_GROUP_LABELS[activeGroupType] : 'Surface')
+    : panelView === 'technology-pv'      ? 'Solar PV'
+    : panelView === 'technology-battery' ? 'Battery storage'
+    : 'Configure';
 
   return (
-    <div className="cfg-panel w-[95vw] h-[92vh] rounded-lg shadow-2xl flex flex-col bg-card overflow-hidden">
+    <div className="cfg-panel w-[95vw] max-w-[1440px] h-[92vh] rounded-lg shadow-2xl flex flex-col bg-card overflow-hidden">
       <ConfiguratorStyles />
 
       {/* ── Header ── */}
@@ -1074,12 +1041,13 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       </div>
 
       {/* ── Content ── */}
-      {/* Single always-on layout: results (snapshot + envelope) | active editor | panel nav.
-          No more configure/overview mode switch — editing and its effect on the numbers are
-          both visible at once (decision 2026-08-03: merge-configure-overview-views). */}
+      {/* Two-column main view: parameters + energy (editable inline) | envelope + technologies.
+          The element configurator (building advanced settings / surface / PV / battery) lives
+          in a modal, opened on demand from a card's Edit action — it no longer occupies a
+          permanent column (decision: pull-common-editor-into-modal). */}
       <div className="min-h-0 flex-1 overflow-hidden bg-slate-50 flex flex-col">
         <div className="min-h-0 flex-1 overflow-hidden">
-          <div className="grid h-full min-h-0 grid-cols-[340px_360px_minmax(0,1fr)_288px] overflow-hidden">
+          <div className="grid h-full min-h-0 grid-cols-[minmax(420px,36%)_minmax(0,1fr)] overflow-hidden">
 
             <BuildingSnapshotAside
               energyTotals={displayEnergyTotals}
@@ -1109,135 +1077,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               onOpenTech={handleTechnologyOpen}
             />
 
-            {/* ── Active editor: building / surface / PV / battery ── */}
-            <div className="flex min-h-0 flex-col overflow-hidden bg-slate-50">
-              {uploadError && (
-                <div className="m-3 mb-0 flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
-                  <p className="flex-1 text-[11px] leading-snug text-destructive">{uploadError}</p>
-                  <button
-                    type="button"
-                    onClick={() => setUploadError(null)}
-                    className="shrink-0 cursor-pointer text-sm leading-none text-destructive"
-                  >×</button>
-                </div>
-              )}
-              {/* PV invalidation warning — shown after a roof type change removes PV surfaces */}
-              {pvInvalidated && (
-                <div className="m-3 mb-0 flex items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
-                  <p className="flex-1 text-[11px] leading-snug text-amber-700">
-                    One or more roof surfaces with PV installed were replaced by the new roof type.
-                    Please reassign PV to the updated roof surfaces.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setPvInvalidated(false)}
-                    className="shrink-0 cursor-pointer text-sm leading-none text-amber-600"
-                  >×</button>
-                </div>
-              )}
-
-              <div key={`${panelView}-${selectedId ?? ''}`} className="flex min-h-0 flex-1 flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-200">
-              {panelView === 'building' ? (
-                <BuildingEditor
-                  general={general}
-                  setGen={setGen}
-                  mode={mode}
-                  ignis={ignis}
-                  ignisFieldMetadata={ignisFieldMetadata}
-                  onIgnisFieldChange={handleIgnisFieldChange}
-                  onIgnisVariantSelect={handleIgnisVariantSelect}
-                  onIgnisReset={handleIgnisReset}
-                  onIgnisPeriodOverride={handleIgnisPeriodOverride}
-                />
-              ) : panelView === 'surface-group' && activeGroupType ? (
-                activeGroupType === 'roof' ? (
-                  // Roof: type picker (no card grid) + embedded editor when selected
-                  <SurfaceGroupGrid
-                    groupType="roof"
-                    elements={elements}
-                    selectedElementId={selectedId}
-                    onSelect={handleElementSelect}
-                    onDeleteSurface={deleteSurface}
-                    onApplyRoofType={handleApplyRoofType}
-                    onCreateSurface={createSurface}
-                    surfacePvConfigs={surfacePvConfigs}
-                    hideCardGrid
-                    editorSlot={selectedId ? (
-                      <SurfaceGroupEditor
-                        selectedElementId={selectedId}
-                        elements={elements}
-                        onUpdateElement={updateElement}
-                        onRenameElement={renameElement}
-                        preferredTab={surfaceEditorTab}
-                        surfacePvConfig={surfacePvConfigs[selectedId] ?? null}
-                        onUpdatePv={(patch) => updateSurfacePv(selectedId, patch)}
-                        onDeleteSurface={deleteSurface}
-                        mode={mode}
-                        embedded
-                      />
-                    ) : undefined}
-                  />
-                ) : selectedId ? (
-                  // Non-roof with surface selected: pure editor, no card grid
-                  <SurfaceGroupEditor
-                    selectedElementId={selectedId}
-                    elements={elements}
-                    onUpdateElement={updateElement}
-                    onRenameElement={renameElement}
-                    preferredTab={surfaceEditorTab}
-                    surfacePvConfig={surfacePvConfigs[selectedId] ?? null}
-                    onUpdatePv={(patch) => updateSurfacePv(selectedId, patch)}
-                    onDeleteSurface={deleteSurface}
-                    mode={mode}
-                  />
-                ) : (
-                  // No surface selected yet — prompt
-                  <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center p-8">
-                    <p className="text-sm font-semibold text-slate-500">Select a surface</p>
-                    <p className="text-[11px] text-slate-400 leading-snug">
-                      Pick a surface from the list on the right to configure it.
-                    </p>
-                  </div>
-                )
-              ) : panelView === 'technology-pv' ? (
-                <PvSurfaceManager
-                  surfaces={pvInstalledSurfaces}
-                  totalCapacityKw={totalPvCapacityKw}
-                  mode={mode}
-                  onEditSurface={handleEditPvSurface}
-                  allElements={elements}
-                  onEnableSurface={handleEditPvSurface}
-                />
-              ) : panelView === 'technology-battery' ? (
-                <BatteryEditor
-                  battery={batteryConfig}
-                  onUpdate={updateBattery}
-                  mode={mode}
-                />
-              ) : null}
-              </div>
-            </div>
-
-            {/* ── Panel selector nav ── */}
-            <div className="flex min-h-0 flex-col overflow-hidden border-l border-border/60 bg-slate-50/60">
-              <ScrollHintContainer>
-                <SurfaceGroupSelector
-                  elements={elements}
-                  activeGroupType={activeGroupType}
-                  onSelectGroupType={handleGroupTypeSelect}
-                  onCreateSurface={createSurface}
-                  buildingSubtitle={`${general.buildingType || buildingType}${general.floorArea ? ` · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²` : ''}`}
-                  buildingSelected={panelView === 'building'}
-                  onSelectBuilding={handleBuildingSelect}
-                  selectedSurfaceId={selectedId}
-                  onSelectSurface={handleElementSelect}
-                  onDeleteSurface={deleteSurface}
-                  surfacePvConfigs={surfacePvConfigs}
-                  techNavItems={buildTechNavItems()}
-                />
-              </ScrollHintContainer>
-            </div>
-
           </div>
         </div>
 
@@ -1266,6 +1105,83 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
           </div>
         </div>
       </div>
+
+      {/* ── Element configurator modal: building advanced settings / surface / PV / battery ── */}
+      <ElementConfiguratorModal open={panelView !== null} onClose={closeElementModal} title={modalTitle}>
+        {pvInvalidated && (
+          <div className="m-3 mb-0 flex shrink-0 items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+            <p className="flex-1 text-[11px] leading-snug text-amber-700">
+              One or more roof surfaces with PV installed were replaced by the new roof type.
+              Please reassign PV to the updated roof surfaces.
+            </p>
+            <button
+              type="button"
+              onClick={() => setPvInvalidated(false)}
+              className="shrink-0 cursor-pointer text-sm leading-none text-amber-600"
+            >×</button>
+          </div>
+        )}
+
+        <div key={`${panelView}-${selectedId ?? ''}`} className="flex min-h-0 flex-1 flex-col">
+          {panelView === 'building' ? (
+            <BuildingEditor
+              general={general}
+              setGen={setGen}
+              mode={mode}
+              ignis={ignis}
+              ignisFieldMetadata={ignisFieldMetadata}
+              onIgnisFieldChange={handleIgnisFieldChange}
+              onIgnisVariantSelect={handleIgnisVariantSelect}
+              onIgnisReset={handleIgnisReset}
+              onIgnisPeriodOverride={handleIgnisPeriodOverride}
+              hideIdentity
+            />
+          ) : panelView === 'surface-group' && activeGroupType ? (
+            // Card grid of every surface in the group + the selected one's editor below —
+            // this is how the user switches between siblings (e.g. Wall 1 -> Wall 2) now
+            // that there's no permanent side nav.
+            <SurfaceGroupGrid
+              groupType={activeGroupType}
+              elements={elements}
+              selectedElementId={selectedId}
+              onSelect={handleElementSelect}
+              onDeleteSurface={deleteSurface}
+              onApplyRoofType={handleApplyRoofType}
+              onCreateSurface={createSurface}
+              surfacePvConfigs={surfacePvConfigs}
+              editorSlot={selectedId ? (
+                <SurfaceGroupEditor
+                  selectedElementId={selectedId}
+                  elements={elements}
+                  onUpdateElement={updateElement}
+                  onRenameElement={renameElement}
+                  preferredTab={surfaceEditorTab}
+                  surfacePvConfig={surfacePvConfigs[selectedId] ?? null}
+                  onUpdatePv={(patch) => updateSurfacePv(selectedId, patch)}
+                  onDeleteSurface={deleteSurface}
+                  mode={mode}
+                  embedded
+                />
+              ) : undefined}
+            />
+          ) : panelView === 'technology-pv' ? (
+            <PvSurfaceManager
+              surfaces={pvInstalledSurfaces}
+              totalCapacityKw={totalPvCapacityKw}
+              mode={mode}
+              onEditSurface={handleEditPvSurface}
+              allElements={elements}
+              onEnableSurface={handleEditPvSurface}
+            />
+          ) : panelView === 'technology-battery' ? (
+            <BatteryEditor
+              battery={batteryConfig}
+              onUpdate={updateBattery}
+              mode={mode}
+            />
+          ) : null}
+        </div>
+      </ElementConfiguratorModal>
 
       {/* ── Close confirmation dialog ── */}
       <DialogPrimitive.Root open={showCloseDialog} onOpenChange={setShowCloseDialog}>

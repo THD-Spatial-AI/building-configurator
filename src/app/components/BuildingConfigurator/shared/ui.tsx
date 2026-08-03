@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
-import { Info, ChevronDown } from 'lucide-react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Info, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Design tokens — CSS variable references for use in SVG attributes ─────────
@@ -533,5 +534,49 @@ export function ScrollHintContainer({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Element configurator modal ────────────────────────────────────────────────
+
+/**
+ * Blurred-backdrop overlay that hosts a single element's editor (a surface
+ * group, PV, battery, or the building's advanced settings). Replaces the old
+ * persistent "active editor" column — the editor now only exists while the
+ * user is actively configuring one thing, instead of always occupying space.
+ */
+export function ElementConfiguratorModal({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          className="fixed top-1/2 left-1/2 z-50 flex h-[min(760px,85vh)] w-[min(1060px,94vw)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        >
+          <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-3 top-3 z-10 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
+          >
+            <X />
+          </button>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
