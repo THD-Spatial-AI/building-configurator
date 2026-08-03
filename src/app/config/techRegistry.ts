@@ -5,7 +5,7 @@
 // To add a new building-level technology: append an entry, implement the panel component,
 // and add a matching case in BuildingConfigurator's renderCenterPanel.
 
-import { Battery, Cat, Plug, Sun, Thermometer, WindIcon } from 'lucide-react';
+import { Battery, Sun, Thermometer } from 'lucide-react';
 import type React from 'react';
 
 export type TechScope =
@@ -87,22 +87,6 @@ export const TECH_REGISTRY: TechCardDefinition[] = [
     label:          'Heat Pump',
     Icon:           Thermometer,
     visible:        false,
-    includeInModel: false,
-    scope:          'none',
-  },
-  {
-    id:             'ev_charger',
-    label:          'EV Charger',
-    Icon:           Plug,
-    visible:        true,
-    includeInModel: false,
-    scope:          'none',
-  },
-  {
-    id:             'wind_turbine',
-    label:          'Wind Turbine',
-    Icon:           WindIcon,
-    visible:        true,
     includeInModel: false,
     scope:          'none',
   },
