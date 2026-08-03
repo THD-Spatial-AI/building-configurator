@@ -49,6 +49,13 @@ export const ELEMENT_DOTS: Record<string, string> = {
   door:   '#8a5a38',
 };
 
+// ─── ConfiguratorStyles — no-op; styles are now in theme.css ──────────────────
+
+/** @deprecated Styles are now in theme.css. This component is kept for compatibility. */
+export function ConfiguratorStyles() {
+  return null;
+}
+
 // ─── InfoTip ──────────────────────────────────────────────────────────────────
 
 export function InfoTip({ tip }: { tip: string }) {
@@ -77,11 +84,6 @@ export function InfoTip({ tip }: { tip: string }) {
 // ─── HeatingDeltaBadge ────────────────────────────────────────────────────────
 
 /**
- * Small "▲/▼ N%" pill showing how a live ignis heating figure compares to the
- * last full BuEM simulation. Lower demand is good (green); higher is a
- * regression to flag (red). Renders nothing if there's no baseline to compare
- * against, or the values are effectively unchanged.
- *
  * Percentages beyond DELTA_DISPLAY_CAP are shown as ">300%" rather than the
  * raw figure — while BuEM and the building's data are still placeholders, a
  * comparison between two disconnected estimates can produce swings in the
@@ -89,22 +91,42 @@ export function InfoTip({ tip }: { tip: string }) {
  */
 const DELTA_DISPLAY_CAP = 300;
 
-export function HeatingDeltaBadge({ deltaPercent }: { deltaPercent: number | null | undefined }) {
-  if (deltaPercent === null || deltaPercent === undefined || Math.abs(deltaPercent) < 0.5) return null;
+/**
+ * Small tag next to an energy row's label naming where its number came
+ * from. Nothing is shown for 'buem' — a confirmed full simulation is the
+ * ordinary/default state and doesn't need calling out.
+ */
+export function SourceTag({ source }: { source?: 'ignis' | 'buem' | 'user' }) {
+  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">estimated</span>;
+  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">user defined</span>;
+  return null;
+}
+
+/**
+ * One-line plain-language comparison — "26% lower than the last full
+ * simulation (24,955 kWh)" — replacing a bare percentage badge with wording
+ * a non-CS reader can act on. Caller decides when there's something worth
+ * saying (e.g. only while the number differs from a reference); this just
+ * renders it.
+ */
+export function EnergyComparisonNote({
+  deltaPercent, referenceKwh, referenceLabel,
+}: {
+  deltaPercent?: number | null;
+  referenceKwh?: string;
+  referenceLabel?: string;
+}) {
+  if (deltaPercent === null || deltaPercent === undefined || !referenceKwh || !referenceLabel) return null;
+  if (Math.abs(deltaPercent) < 0.5) return null;
 
   const isIncrease = deltaPercent > 0;
   const magnitude = Math.abs(deltaPercent);
-  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}%` : `${magnitude.toFixed(0)}%`;
+  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}` : magnitude.toFixed(0);
+
   return (
-    <span
-      className={cn(
-        'ml-1.5 text-[10px] font-semibold',
-        isIncrease ? 'text-red-400' : 'text-emerald-400',
-      )}
-      title="vs. last full simulation"
-    >
-      {isIncrease ? '▲' : '▼'} {displayValue}
-    </span>
+    <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
+      {displayValue}% {isIncrease ? 'higher' : 'lower'} than {referenceLabel} ({referenceKwh} kWh)
+    </p>
   );
 }
 

@@ -4,11 +4,11 @@
 
 import React from 'react';
 import { ScrollHintContainer } from '../shared/ui';
-import { AlertTriangle, Zap, Flame, Droplets, Gauge } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { EnergyTotals } from '../../../lib/loadProfile';
+import type { EnergySource, EnergyTotals } from '../../../lib/loadProfile';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
-import { HeatingDeltaBadge } from '../shared/ui';
+import { SourceTag, EnergyComparisonNote } from '../shared/ui';
 
 interface PvSummary {
   installed: boolean;
@@ -32,7 +32,7 @@ export interface BuildingSnapshotAsideProps {
 const ENERGY_ITEMS = [
   { key: 'heating',     label: 'Heating',     Icon: Flame,    iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300'  },
   { key: 'electricity', label: 'Electricity', Icon: Zap,      iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300'  },
-  { key: 'hotwater',    label: 'Hot Water',   Icon: Droplets, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
+  { key: 'hotwater',    label: 'Cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
 ] as const;
 
 /** Left panel of the overview: energy hero numbers + building parameters table. */
@@ -68,6 +68,10 @@ export function BuildingSnapshotAside({
           <div className="flex flex-col gap-3">
             {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
               const value = energyTotals[key];
+              const source = energyTotals[`${key}Source` as keyof EnergyTotals] as EnergySource | undefined;
+              const deltaPercent = energyTotals[`${key}DeltaPercent` as keyof EnergyTotals] as number | null | undefined;
+              const referenceKwh = energyTotals[`${key}BaselineKwh` as keyof EnergyTotals] as string | undefined;
+              const referenceLabel = energyTotals[`${key}ComparisonLabel` as keyof EnergyTotals] as string | undefined;
               return (
                 <div key={key} className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -75,20 +79,19 @@ export function BuildingSnapshotAside({
                       <Icon className={cn('size-4', iconColor)} />
                     </div>
                     <span className="text-sm text-slate-300">{label}</span>
+                    <SourceTag source={source} />
                   </div>
                   <div className="text-right">
                     <div>
+                      {key === 'heating' && energyTotals.heatingPerM2 && (
+                        <span className="mr-1.5 text-[11px] text-slate-500">({energyTotals.heatingPerM2} kWh/m²·a)</span>
+                      )}
                       <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
                         {value}
                       </span>
                       <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
-                      {key === 'heating' && (
-                        <HeatingDeltaBadge deltaPercent={energyTotals.heatingDeltaPercent} />
-                      )}
                     </div>
-                    {key === 'heating' && energyTotals.heatingPerM2 && (
-                      <p className="text-[11px] text-slate-500">{energyTotals.heatingPerM2} kWh/m²·a</p>
-                    )}
+                    <EnergyComparisonNote deltaPercent={deltaPercent} referenceKwh={referenceKwh} referenceLabel={referenceLabel} />
                   </div>
                 </div>
               );

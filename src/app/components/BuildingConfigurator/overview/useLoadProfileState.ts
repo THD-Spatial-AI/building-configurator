@@ -12,6 +12,7 @@ import {
   getVisibleRangeLabel,
   mergeUploadedData,
   parseCsv,
+  pickUpdatedRows,
   rangeEquals,
   toProfileZip,
   toUtcDateKey,
@@ -29,6 +30,8 @@ interface UseLoadProfileStateArgs {
   initialTimeseries?: LoadDataPoint[];
   mode?: 'basic' | 'expert';
   onTotalsChange?: (totals: EnergyTotals) => void;
+  /** Fired whenever the user uploads a file — the uploaded rows become ground truth for the annual totals elsewhere in the app. */
+  onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
 }
 
 /** Owns viewer-specific state while delegating parsing and aggregation to pure helpers. */
@@ -37,6 +40,7 @@ export function useLoadProfileState({
   initialTimeseries,
   mode = 'basic',
   onTotalsChange,
+  onGroundTruthChange,
 }: UseLoadProfileStateArgs) {
   const [energyType, setEnergyType] = useState<EnergyType>(mode === 'basic' ? 'combined' : 'electricity');
   const [resolution, setResolution] = useState<Resolution>(mode === 'basic' ? 'monthly' : 'daily');
@@ -220,6 +224,7 @@ export function useLoadProfileState({
 
         setDataset(nextDataset);
         setSourceLabel(file.name);
+        onGroundTruthChange?.(pickUpdatedRows(dataset, nextDataset), file.name);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Could not parse load profile file.';
         setUploadError(message);

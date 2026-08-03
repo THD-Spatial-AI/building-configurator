@@ -138,7 +138,11 @@ function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResu
         // cooling output matches the existing thermalSummary-based fallback
         // in BuildingConfigurator.tsx's computeEnergyTotals — not a
         // physically accurate label, but the established convention.
-        hotwater: ts.cooling?.[i] ?? 0,
+        // BuEM reports cooling as negative (its solver shares one signed
+        // Q_HC axis: positive = heat added, negative = heat removed) — flip
+        // it here so every downstream reader (chart, CSV export, totals)
+        // sees a plain positive "energy needed for cooling" figure.
+        hotwater: -(ts.cooling?.[i] ?? 0),
       }))
     : [];
 
