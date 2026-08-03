@@ -11,7 +11,7 @@ import {
   DEFAULT_AVG_U_VALUE,
   computeVolume,
 } from './buildingDefaults';
-import { BUILDING_TYPE_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
+import { BUILDING_TYPE_OPTIONS, CONSTRUCTION_PERIOD_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
 
 export type SnapshotStatus = 'default' | 'modified';
 
@@ -82,12 +82,11 @@ export interface SnapshotRow {
   editKey?: string;
   /**
    * Controls the edit widget rendered for this row:
-   * - 'text'           -> free-text input
-   * - 'number'         -> numeric input; saved as Number(draft)
-   * - 'select'         -> dropdown; requires `options`
-   * - 'year-to-period' -> year number input that saves the derived construction period string
+   * - 'text'   -> free-text input
+   * - 'number' -> numeric input; saved as Number(draft)
+   * - 'select' -> dropdown; requires `options`
    */
-  editType?: 'text' | 'number' | 'select' | 'year-to-period';
+  editType?: 'text' | 'number' | 'select';
   /** Option list for 'select' rows. */
   options?: Array<{ value: string; label: string }>;
   /** Raw (unformatted) value used as the initial input value when editing starts. */
@@ -131,7 +130,8 @@ export function buildSnapshotRows(
       value: general.constructionPeriod,
       status: general.constructionPeriod === baseGeneral.constructionPeriod ? 'default' : 'modified',
       editKey: 'constructionPeriod',
-      editType: 'year-to-period',
+      editType: 'select',
+      options: CONSTRUCTION_PERIOD_OPTIONS,
       rawValue: general.constructionPeriod,
     },
     {
