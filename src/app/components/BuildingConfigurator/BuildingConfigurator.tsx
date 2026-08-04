@@ -25,12 +25,10 @@ import {
   importBuildingData,
 } from '../../lib/buemAdapter';
 import { runBuildingSimulation } from '../../lib/buemApi';
-import type { IgnisState, IgnisInputs, IgnisFieldMetadata } from '../../lib/ignisAdapter';
+import type { IgnisState } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
   selectVariantLevel,
-  updateCalcDemand,
-  resetCalcDemand,
   syncElementsWithVariantLevel,
   restoreDefaultUValues,
   resetElementsToVariantDefaults,
@@ -38,7 +36,6 @@ import {
 import {
   loadVariantLevels,
   calculateHeatDemand,
-  fetchFieldMetadata,
 } from '../../lib/ignisApi';
 import {
   getThermalRating,
@@ -373,13 +370,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   // resolve to at least one TABULA variant in the HDCP service.
   const [ignis, setHdcp] = useState<IgnisState | null>(null);
 
-  // ignis field descriptions (labels/tooltips), fetched once. Empty until it
-  // resolves; IgnisSection falls back to its own hardcoded tooltip text until then.
-  const [ignisFieldMetadata, setIgnisFieldMetadata] = useState<IgnisFieldMetadata[]>([]);
-  useEffect(() => {
-    fetchFieldMetadata().then(setIgnisFieldMetadata);
-  }, []);
-
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
@@ -571,9 +561,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
   // ── HDCP handlers ─────────────────────────────────────────────────────────────
 
-  const handleIgnisFieldChange = (changes: Partial<IgnisInputs>) =>
-    setHdcp((prev) => prev ? updateCalcDemand(prev, changes) : prev);
-
   const handleIgnisVariantSelect = (index: number) => {
     if (!ignis) return;
     const targetVariant = ignis.variants[index];
@@ -636,28 +623,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
       setHdcp(initIgnisState(country, type, period, variants, building));
     })();
-  };
-
-  const handleIgnisReset = () => {
-    if (!ignis) return;
-    const selectedVariant = ignis.variants[ignis.selectedVariantIndex];
-    const nextElements = selectedVariant
-      ? syncElementsWithVariantLevel(elements, ignis.selectedVariantIndex, selectedVariant.data)
-      : elements;
-    if (nextElements !== elements) setElements(nextElements);
-
-    const building: BuildingState = {
-      geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
-      technologies: { rawTechs: {}, installedTechIds: [] },
-      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
-      envelope: nextElements,
-      thermalSummary: null,
-      timeseries: null,
-      installedTechIds: [],
-      ignis: null,
-    };
-    setHdcp(resetCalcDemand(ignis, building));
   };
 
   // --- Handlers ---------------------------------------------------------------
@@ -1106,7 +1071,16 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       </div>
 
       {/* ── Element configurator modal: building advanced settings / surface / PV / battery ── */}
-      <ElementConfiguratorModal open={panelView !== null} onClose={closeElementModal} title={modalTitle}>
+      <ElementConfiguratorModal
+        open={panelView !== null}
+        onClose={closeElementModal}
+        title={modalTitle}
+        size={
+          panelView === 'technology-battery' ? 'compact'
+          : panelView === 'surface-group'    ? 'medium'
+          : 'default'
+        }
+      >
         {pvInvalidated && (
           <div className="m-3 mb-0 flex shrink-0 items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
             <p className="flex-1 text-[11px] leading-snug text-amber-700">
@@ -1128,11 +1102,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               setGen={setGen}
               mode={mode}
               ignis={ignis}
-              ignisFieldMetadata={ignisFieldMetadata}
-              onIgnisFieldChange={handleIgnisFieldChange}
               onIgnisVariantSelect={handleIgnisVariantSelect}
-              onIgnisReset={handleIgnisReset}
               onIgnisPeriodOverride={handleIgnisPeriodOverride}
+              avgUValue={avgUValue}
+              onOpenEnvelope={() => handleGroupTypeSelect('wall')}
               hideIdentity
             />
           ) : panelView === 'surface-group' && activeGroupType ? (
