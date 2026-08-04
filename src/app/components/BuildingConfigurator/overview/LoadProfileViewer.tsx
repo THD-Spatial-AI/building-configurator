@@ -1,5 +1,5 @@
 import { useRef, type ElementType } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, Brush, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Download, Upload, Zap, Flame, Snowflake, Layers3 } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
@@ -9,7 +9,6 @@ import {
   type EnergyType,
   type LoadDataPoint,
   type Resolution,
-  type WindowMode,
 } from '../../../lib/loadProfile';
 import { useLoadProfileState } from './useLoadProfileState';
 
@@ -27,30 +26,18 @@ interface LoadProfileViewerProps {
 export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, initialTimeseries, mode = 'basic', onGroundTruthChange }: LoadProfileViewerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
-    availableHourlyDates,
-    brushRange,
     data,
     derivedData,
     energyType,
-    fitAllData,
-    handleBrushChange,
     handleDownload,
     handleFileUpload,
     hasData,
     resolution,
-    selectedDate,
     setEnergyType,
     setResolution,
-    setSelectedDate,
-    setWindowMode,
-    shiftSteppedWindow,
-    showBrush,
     sourceCaption,
-    stepLabel,
     unit,
     uploadError,
-    visibleRangeLabel,
-    windowMode,
   } = useLoadProfileState({ buildingId, initialTimeseries, mode, onTotalsChange, onGroundTruthChange });
 
   // Mean of electricity + heating + cooling per visible point — only meaningful
@@ -61,16 +48,11 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
 
   // Shorter labels that communicate "what time period each data point covers"
   const resolutionOptions = [
-    ...(mode === 'expert' ? [{ value: 'hourly', label: 'Hour' }] : []),
+    { value: 'hourly',  label: 'Hour'  },
     { value: 'daily',   label: 'Day'   },
     { value: 'weekly',  label: 'Week'  },
     { value: 'monthly', label: 'Month' },
   ];
-  const windowModeOptions = [
-    { value: 'stepped', label: 'Stepped' },
-    { value: 'free', label: 'Free Range' },
-  ];
-
   // Colours and labels for the vertical energy type tab strip.
   const ENERGY_META: Record<EnergyType, { label: string; Icon: ElementType }> = {
     electricity: { label: 'Electricity', Icon: Zap },
@@ -136,116 +118,9 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
         <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
       </div>
 
-      {hasData && mode === 'expert' && (
-        <div style={{ padding: '8px 14px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <SegmentedControl options={windowModeOptions} value={windowMode} onChange={(value) => setWindowMode(value as WindowMode)} />
-          {windowMode === 'stepped' && resolution === 'hourly' && availableHourlyDates.length > 0 && (
-            <>
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(-1)}
-                disabled={availableHourlyDates.indexOf(selectedDate) <= 0}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: availableHourlyDates.indexOf(selectedDate) <= 0 ? T.mutedFg : T.foreground,
-                  cursor: availableHourlyDates.indexOf(selectedDate) <= 0 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Prev Day
-              </button>
-              <input
-                type="date"
-                value={selectedDate}
-                min={availableHourlyDates[0]}
-                max={availableHourlyDates[availableHourlyDates.length - 1]}
-                onChange={(event) => setSelectedDate(event.target.value)}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'white', color: T.foreground, fontSize: 11,
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(1)}
-                disabled={availableHourlyDates.indexOf(selectedDate) === -1 || availableHourlyDates.indexOf(selectedDate) >= availableHourlyDates.length - 1}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: availableHourlyDates.indexOf(selectedDate) >= availableHourlyDates.length - 1 ? T.mutedFg : T.foreground,
-                  cursor: availableHourlyDates.indexOf(selectedDate) >= availableHourlyDates.length - 1 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Next Day
-              </button>
-            </>
-          )}
-          {windowMode === 'stepped' && resolution !== 'hourly' && (
-            <>
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(-1)}
-                disabled={brushRange.startIndex <= 0}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: brushRange.startIndex <= 0 ? T.mutedFg : T.foreground,
-                  cursor: brushRange.startIndex <= 0 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Prev
-              </button>
-              <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
-                {stepLabel}
-              </span>
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(1)}
-                disabled={brushRange.endIndex >= data.length - 1}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: brushRange.endIndex >= data.length - 1 ? T.mutedFg : T.foreground,
-                  cursor: brushRange.endIndex >= data.length - 1 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Next
-              </button>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={fitAllData}
-            style={{
-              height: 28, padding: '0 10px', borderRadius: 5,
-              border: `1px solid ${T.border}`, background: 'transparent', color: T.foreground,
-              cursor: 'pointer', fontSize: 11, fontWeight: 600,
-            }}
-          >
-            Show All
-          </button>
-          <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
-            {visibleRangeLabel}
-          </span>
-          {windowMode === 'free' && (
-            <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
-              Free range removes fixed steps. Switch to hourly for the finest time selection.
-            </span>
-          )}
-        </div>
-      )}
-
       {uploadError && (
         <div style={{ margin: '6px 14px 0', border: '1px solid #fecaca', background: '#fef2f2', borderRadius: 6, padding: '4px 8px', flexShrink: 0 }}>
           <span style={{ fontSize: 10, color: '#b91c1c' }}>{uploadError}</span>
-        </div>
-      )}
-
-      {hasData && showBrush && mode === 'expert' && (
-        <div style={{ padding: '6px 14px 0', flexShrink: 0 }}>
-          <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.3 }}>
-            Drag the handles below the chart to zoom. In stepped mode the window snaps to the active resolution; free range removes that constraint.
-          </span>
         </div>
       )}
 
@@ -253,7 +128,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
       <div style={{ flex: 1, minHeight: 0, padding: '8px 12px 4px' }}>
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart key={`${resolution}-${derivedData.sourceResolution ?? 'none'}-${data.length}`} data={data} margin={{ top: 4, right: 4, left: -12, bottom: showBrush && mode === 'expert' ? 18 : 0 }}>
+            <LineChart key={`${resolution}-${derivedData.sourceResolution ?? 'none'}-${data.length}`} data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
               <XAxis
                 dataKey="timestamp"
@@ -293,18 +168,6 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
                   label={{ value: `Avg ${formatEnergyValue(combinedAverage, 4)} ${unit}`, position: 'insideTopRight', fontSize: 10, fill: '#64748b' }}
                 />
               )}
-              {showBrush && mode === 'expert' && (
-                <Brush
-                  dataKey="timestamp"
-                  height={20}
-                  stroke={T.border}
-                  travellerWidth={10}
-                  startIndex={brushRange.startIndex}
-                  endIndex={brushRange.endIndex}
-                  onChange={handleBrushChange}
-                  tickFormatter={(value) => formatTickLabel(String(value), resolution)}
-                />
-              )}
             </LineChart>
           </ResponsiveContainer>
         ) : (
@@ -312,7 +175,7 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
             <div>
               <p style={{ fontSize: 13, fontWeight: 600, color: T.foreground, margin: '0 0 4px' }}>No usage data loaded</p>
               <p style={{ fontSize: 11, color: T.mutedFg, lineHeight: 1.6, margin: 0 }}>
-                Use "Import Data" to load an energy profile, or connect to the backend.
+                Use "Import Data" to load an energy profile, or generate demand profiles by clicking "Run Simulation" button at bottom.
               </p>
             </div>
           </div>
