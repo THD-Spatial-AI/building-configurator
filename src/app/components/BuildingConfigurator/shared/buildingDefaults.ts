@@ -166,20 +166,14 @@ export const DEFAULT_GENERAL = {
   storeys:            4,
   n_air_infiltration: 0.4,
   n_air_use:          0.4,
-  phi_int:            3.0,
-  q_w_nd:             12.5,
   massClass:          'Medium',
   c_m:                110,
   use_milp:           false,
   electricityDemand:  4000,
   spaceHeatingDemand: 15000,
   dhwDemand:          2500,
-  // ignis building-level condition codes (from TABULA)
+  // TABULA neighbour code — sent to BuEM as neighbour_status.
   Code_AttachedNeighbours: 'B_Alone',
-  Code_AtticCond:          'N',
-  Code_CellarCond:         'N',
-  Code_ComplexFootprint:   'Standard',
-  Code_ComplexRoof:        'no',
 };
 
 // ─── Floor area / volume ──────────────────────────────────────────────────────

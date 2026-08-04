@@ -440,6 +440,10 @@ export function serializeToBuemFeature(
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
 
+  // Attached-neighbours code (B_Alone/B_N1/B_N2) — drives BuEM's shared-wall
+  // transmission correction factor. Not consumed by ignis.
+  if (general.Code_AttachedNeighbours) building.neighbour_status = general.Code_AttachedNeighbours;
+
   if (typeof identity.floorArea === 'number') {
     // identity.floorArea is already the total conditioned floor area (BuEM A_ref semantics).
     building.A_ref = { value: identity.floorArea, unit: 'm2' };
@@ -625,6 +629,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
     constructionPeriod: String(bldg.construction_period ?? ''),
     country: String(bldg.country ?? ''),
+    Code_AttachedNeighbours: String(bldg.neighbour_status ?? 'B_Alone'),
     floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
     roomHeight: qty(bldg.h_room),
     storeys: importedStoreys,

@@ -3,8 +3,8 @@
 // Edits the same `general` state as GeneralConfig in the Overview view.
 
 import { useState, useEffect, useRef } from 'react';
-import { Building2, ChevronDown, Check, RotateCcw, Loader2, Flame } from 'lucide-react';
-import type { IgnisState, IgnisInputs, IgnisFieldMetadata } from '@/app/lib/ignisAdapter';
+import { Building2, ChevronDown, Gauge, Loader2 } from 'lucide-react';
+import type { IgnisState } from '@/app/lib/ignisAdapter';
 import {
   TABULA_PERIOD_OPTIONS,
   isBuildingTypeSupported,
@@ -21,8 +21,13 @@ import {
   COUNTRY_OPTIONS,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
-type SectionKey = 'identity' | 'conditions' | 'ventilation' | 'loads' | 'thermal' | 'solver' | 'ignis';
+// 'conditions' (Site & Surroundings) and 'ignis' (Refurbishment Level) are not
+// part of this click-to-expand card system — they're short enough to render
+// inline, always visible, instead of costing the user an extra click. See
+// BuildingEditor's `inlineSections`.
+type SectionKey = 'identity' | 'ventilation' | 'thermal' | 'solver';
 
 // ─── Attached-neighbours visual picker ────────────────────────────────────────
 
@@ -134,156 +139,6 @@ function NeighbourPicker({ value, onChange }: { value: string; onChange: (v: str
   );
 }
 
-/** Conditioning state options with full-form labels and contextual hints.
- *  The `hint` explains the energy-model impact of each choice. */
-const COND_OPTIONS: Array<{ value: string; label: string; hint: string }> = [
-  {
-    value: '-',
-    label: 'Not applicable',
-    hint:  'This space does not exist — no heat loss is applied to the adjacent surface.',
-  },
-  {
-    value: 'N',
-    label: 'Not conditioned',
-    hint:  'Unheated and uncooled — the adjacent ceiling or floor is a heat-loss boundary.',
-  },
-  {
-    value: 'P',
-    label: 'Partly conditioned',
-    hint:  'Intermittently heated — a reduced heat-loss factor is applied to the adjacent surface.',
-  },
-  {
-    value: 'C',
-    label: 'Conditioned',
-    hint:  'Fully heated and cooled — the adjacent ceiling or floor is not a heat-loss boundary.',
-  },
-  {
-    value: 'NI',
-    label: 'Not insulated',
-    hint:  'Uninsulated space — full heat loss is applied; no insulation credit given.',
-  },
-  {
-    value: 'PI',
-    label: 'Partly insulated',
-    hint:  'Some insulation is present — partial reduction in heat loss through the adjacent surface.',
-  },
-];
-
-/**
- * Custom listbox for condition codes.
- * The trigger matches the native cfg-select appearance.
- * The dropdown uses position:fixed with getBoundingClientRect so it escapes
- * the overflow:hidden accordion wrapper without clipping.
- * Each option reveals its hint text via a CSS max-height transition on hover.
- */
-function CondSelect({ label, value, onChange }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [dropRect, setDropRect] = useState<{ top: number; left: number; width: number } | null>(null);
-  const btnRef  = useRef<HTMLButtonElement>(null);
-  const dropRef = useRef<HTMLDivElement>(null);
-
-  // Close on outside click (checks both trigger and dropdown panel).
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (
-        !btnRef.current?.contains(e.target as Node) &&
-        !dropRef.current?.contains(e.target as Node)
-      ) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const r = btnRef.current.getBoundingClientRect();
-      setDropRect({ top: r.bottom + 4, left: r.left, width: r.width });
-    }
-    setOpen((v) => !v);
-  };
-
-  const selectedOpt = COND_OPTIONS.find((o) => o.value === value);
-
-  return (
-    <div>
-      {label && (
-        <div className="mb-1 flex items-center gap-1">
-          <span className="text-[11px] font-medium leading-tight text-muted-foreground">{label}</span>
-        </div>
-      )}
-
-      {/* Trigger — visually identical to cfg-select */}
-      <button
-        ref={btnRef}
-        type="button"
-        onClick={handleToggle}
-        className="flex h-9 w-full items-center justify-between rounded-md border border-border bg-[var(--input-background)] px-3 text-left transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/50"
-      >
-        <span className="truncate text-[11px] text-foreground">
-          {selectedOpt?.label ?? value}
-        </span>
-        <ChevronDown className={cn(
-          'size-3.5 shrink-0 text-muted-foreground transition-transform duration-150',
-          open && 'rotate-180',
-        )} />
-      </button>
-
-      {/* Dropdown panel — fixed position escapes overflow:hidden accordion ancestors */}
-      {open && dropRect && (
-        <div
-          ref={dropRef}
-          style={{ position: 'fixed', top: dropRect.top, left: dropRect.left, width: dropRect.width, zIndex: 200 }}
-          className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
-        >
-          {COND_OPTIONS.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => { onChange(opt.value); setOpen(false); }}
-                className={cn(
-                  'group w-full border-b border-slate-100 px-3 py-2 text-left last:border-0 transition-colors hover:bg-slate-50',
-                  isSelected && 'bg-primary/5',
-                )}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className={cn(
-                    'text-[11px]',
-                    isSelected ? 'font-semibold text-primary' : 'font-medium text-slate-700',
-                  )}>
-                    {opt.label}
-                  </span>
-                  {isSelected && <Check className="size-3 shrink-0 text-primary" />}
-                </div>
-                {/* Hint slides in on hover via max-height CSS transition */}
-                <p className="max-h-0 overflow-hidden text-[10px] leading-snug text-slate-400 transition-all duration-150 group-hover:mt-0.5 group-hover:max-h-10">
-                  {opt.hint}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const FOOTPRINT_OPTIONS = [
-  { value: 'Simple',   label: 'Simple' },
-  { value: 'Standard', label: 'Standard' },
-  { value: 'Complex',  label: 'Complex' },
-];
-
-const ROOF_OPTIONS = [
-  { value: 'no',  label: 'Simple' },
-  { value: 'yes', label: 'Complex' },
-];
 
 const MASS_CLASSES = [
   { value: 'VeryLight', label: 'Very Light — steel/timber frame' },
@@ -382,43 +237,13 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
   );
 }
 
-function ConditionsSection({ general, setGen, mode }: { general: Record<string, any>; setGen: (k: string, v: any) => void; mode: string }) {
+function ConditionsSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
   return (
     <div className="flex flex-col gap-3">
       <NeighbourPicker
         value={general.Code_AttachedNeighbours}
         onChange={(v) => setGen('Code_AttachedNeighbours', v)}
       />
-      <FieldRow>
-        <CondSelect
-          label="Attic condition"
-          value={general.Code_AtticCond}
-          onChange={(v) => setGen('Code_AtticCond', v)}
-        />
-        <CondSelect
-          label="Cellar condition"
-          value={general.Code_CellarCond}
-          onChange={(v) => setGen('Code_CellarCond', v)}
-        />
-      </FieldRow>
-      {mode === 'expert' && (
-        <FieldRow>
-          <SelectInput
-            label="Footprint complexity"
-            value={general.Code_ComplexFootprint}
-            onChange={(v) => setGen('Code_ComplexFootprint', v)}
-            options={FOOTPRINT_OPTIONS}
-            tip="Geometric complexity of the building's floor plan. Affects envelope area correction."
-          />
-          <SelectInput
-            label="Complex roof"
-            value={general.Code_ComplexRoof}
-            onChange={(v) => setGen('Code_ComplexRoof', v)}
-            options={ROOF_OPTIONS}
-            tip="Whether the roof has a complex shape. Affects roof area correction."
-          />
-        </FieldRow>
-      )}
     </div>
   );
 }
@@ -444,32 +269,6 @@ function VentilationSection({ general, setGen }: { general: Record<string, any>;
       <div className="flex items-center justify-between border-t border-border/60 pt-1">
         <span className="text-[11px] text-muted-foreground">Total ACH</span>
         <span className="text-xs font-semibold text-foreground">{total} <span className="text-[10px] font-normal text-muted-foreground">h⁻¹</span></span>
-      </div>
-    </div>
-  );
-}
-
-function InternalLoadsSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const annualGains = (general.phi_int * computeTotalFloorArea(general.floorArea, general.storeys) * 8760 / 1000).toFixed(0);
-  return (
-    <div className="flex flex-col gap-3">
-      <FieldRow>
-        <div>
-          <FieldLabel tip="Mean heat gains from occupants, lighting and appliances per unit floor area.">
-            Internal gains φ_int
-          </FieldLabel>
-          <NumberInput value={general.phi_int} onChange={(v) => setGen('phi_int', Math.max(0, v))} unit="W/m²" min={0} max={30} step={0.1} />
-        </div>
-        <div>
-          <FieldLabel tip="Annual domestic hot water energy demand per unit floor area.">
-            DHW demand q_w
-          </FieldLabel>
-          <NumberInput value={general.q_w_nd} onChange={(v) => setGen('q_w_nd', Math.max(0, v))} unit="kWh/m²a" min={0} max={100} step={0.5} />
-        </div>
-      </FieldRow>
-      <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">Annual internal gains</span>
-        <span className="text-xs font-semibold text-foreground">{annualGains} <span className="text-[10px] font-normal text-muted-foreground">kWh/a</span></span>
       </div>
     </div>
   );
@@ -594,20 +393,22 @@ function IgnisStatusSection({
 
 interface IgnisSectionProps {
   ignis: IgnisState;
-  onFieldChange: (changes: Partial<IgnisInputs>) => void;
   onVariantSelect: (index: number) => void;
-  onReset: () => void;
-  /** ignis field descriptions, fetched from GET /api/v1/fields. May be empty while loading. */
-  fieldMetadata: IgnisFieldMetadata[];
+  mode: 'basic' | 'expert';
+  /** Area-weighted average U-value (W/m²K) across all envelope surfaces. */
+  avgUValue: number;
+  /** Opens the envelope/surface configurator directly, for per-surface U-value edits. */
+  onOpenEnvelope?: () => void;
 }
 
-function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset, fieldMetadata }: IgnisSectionProps) {
-  const { variants, selectedVariantIndex, calcDemand, isDirty, result, loading, error } = ignis;
-
-  // Prefers ignis's own field description; falls back to the given hardcoded
-  // text if the metadata fetch hasn't resolved yet (or the key isn't found).
-  const tipFor = (key: string, fallback?: string): string | undefined =>
-    fieldMetadata.find((f) => f.key === key)?.simple_description ?? fallback;
+// Physics inputs beyond the TABULA variant pick itself (thermal bridging,
+// design temperatures, ...) feed ignis's own calculation but are never sent
+// to BuEM — the model these UI parameters are actually curated for. They stay
+// as internal defaults sourced from the selected variant; the user only ever
+// picks the variant, never edits them directly.
+function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope }: IgnisSectionProps) {
+  const { variants, selectedVariantIndex, result, loading, error, countryIso2 } = ignis;
+  const rating = result ? getThermalRatingFromDemand(result.qHnd, countryIso2) : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -643,79 +444,49 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset, fieldMet
         </div>
       )}
 
-      {/* Result badge */}
-      <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-        <div className="flex items-center gap-2">
-          <Flame className="size-3.5 text-orange-500" />
-          <span className="text-[11px] font-semibold text-slate-700">Annual heat demand</span>
+      {mode === 'expert' ? (
+        /* Expert mode: the raw envelope figure (area-weighted avg U-value)
+           instead of the simplified grade, plus a direct route to edit it
+           per surface. */
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Gauge className="size-3.5 text-orange-500" />
+            <span className="text-[11px] font-semibold text-slate-700">Avg U-value</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-slate-700">{avgUValue.toFixed(2)} W/m²K</span>
+            {onOpenEnvelope && (
+              <button
+                type="button"
+                onClick={onOpenEnvelope}
+                className="cursor-pointer rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 transition-colors hover:bg-slate-100"
+              >
+                Configure per surface
+              </button>
+            )}
+          </div>
         </div>
-        {loading ? (
-          <Loader2 className="size-3.5 animate-spin text-slate-400" />
-        ) : error ? (
-          <span className="text-[11px] text-red-500">Unavailable</span>
-        ) : result ? (
-          <span className="text-[11px] font-bold text-orange-600">
-            {result.qHnd.toFixed(1)} kWh/(m²·a)
-          </span>
-        ) : (
-          <span className="text-[10px] text-muted-foreground">—</span>
-        )}
-      </div>
-
-      {/* Climate inputs — HeatingDays and solar irradiance are weather-derived and not
-          user-editable (decision 2026-08-03): they still flow through from the TABULA/
-          climate default in calcDemand, just without an input control here. */}
-      <div className="flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Climate</p>
-        <FieldRow>
-          <FieldLabel tip={tipFor('Theta_e', 'External design temperature (°C).')}>Outside temp θ_e</FieldLabel>
-          <NumberInput
-            value={calcDemand.Theta_e ?? 0}
-            onChange={(v) => onFieldChange({ Theta_e: v })}
-            step={0.5}
-          />
-        </FieldRow>
-        <FieldRow>
-          <FieldLabel tip={tipFor('theta_i', 'Internal design temperature (°C).')}>Inside temp θ_i</FieldLabel>
-          <NumberInput
-            value={calcDemand.Theta_i ?? 20}
-            onChange={(v) => onFieldChange({ Theta_i: v })}
-            step={0.5} min={0} max={30}
-          />
-        </FieldRow>
-      </div>
-
-      {/* Thermal bridging */}
-      <div className="flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">Thermal bridging (W/m²K)</p>
-        <FieldRow>
-          <FieldLabel tip={tipFor('delta_U_ThermalBridging_Original', 'Additional heat loss due to thermal bridges in the original building fabric.')}>Original ΔU_tb</FieldLabel>
-          <NumberInput
-            value={calcDemand.Delta_U_ThermalBridging_Original ?? 0}
-            onChange={(v) => onFieldChange({ Delta_U_ThermalBridging_Original: v })}
-            step={0.01} min={0}
-          />
-        </FieldRow>
-        <FieldRow>
-          <FieldLabel tip={tipFor('delta_U_ThermalBridging_Refurbished', 'Additional heat loss due to thermal bridges after refurbishment.')}>Refurbished ΔU_tb</FieldLabel>
-          <NumberInput
-            value={calcDemand.Delta_U_ThermalBridging_Refurbished ?? 0}
-            onChange={(v) => onFieldChange({ Delta_U_ThermalBridging_Refurbished: v })}
-            step={0.01} min={0}
-          />
-        </FieldRow>
-      </div>
-
-      {/* Reset button */}
-      {isDirty && (
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex items-center gap-1.5 self-start rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 transition-colors"
-        >
-          <RotateCcw className="size-3" />
-          Reset to defaults
-        </button>
+      ) : (
+        /* Basic mode: grade, not a raw kWh/U-value figure basic users won't
+           parse. Same A–G scale as the Overview summary's Thermal
+           efficiency row. */
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Gauge className="size-3.5 text-orange-500" />
+            <span className="text-[11px] font-semibold text-slate-700">Thermal efficiency</span>
+          </div>
+          {loading ? (
+            <Loader2 className="size-3.5 animate-spin text-slate-400" />
+          ) : error ? (
+            <span className="text-[11px] text-red-500">Unavailable</span>
+          ) : rating ? (
+            <span className="text-[11px] font-bold" style={{ color: rating.color }}>
+              {rating.label}
+            </span>
+          ) : (
+            <span className="text-[10px] text-muted-foreground">—</span>
+          )}
+        </div>
       )}
     </div>
   );
@@ -726,80 +497,41 @@ function IgnisSection({ ignis, onFieldChange, onVariantSelect, onReset, fieldMet
 /** Colour dot for each section — mirrors the element-dot pattern used in surfaces. */
 const SECTION_COLORS: Record<SectionKey, string> = {
   identity:    '#2f5d8a',
-  conditions:  '#64748b',
   ventilation: '#0891b2',
-  loads:       '#d97706',
   thermal:     '#dc2626',
   solver:      '#7c3aed',
-  ignis:        '#ea580c',
 };
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   identity:    'Basic info',
-  conditions:  'Site & Surroundings',
   ventilation: 'Air & Ventilation',
-  loads:       'Appliances & Occupancy',
   thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
-  ignis:        'Annual Heat Demand',
 };
 
 /** One-line value summary shown on the grid card and chip. */
-function sectionSummary(key: SectionKey, general: Record<string, any>, ignis?: IgnisState | null): string {
+function sectionSummary(key: SectionKey, general: Record<string, any>): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
-    case 'conditions': {
-      const map: Record<string, string> = { B_Alone: 'Detached', B_N1: 'Semi-detached', B_N2: 'Terraced' };
-      return map[general.Code_AttachedNeighbours] ?? general.Code_AttachedNeighbours;
-    }
     case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
-    case 'loads':       return `φ_int ${general.phi_int} W/m²`;
     case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Rule-based';
-    case 'ignis':        return ignis?.result ? `${ignis.result.qHnd.toFixed(0)} kWh/(m²·a)` : 'Not calculated';
   }
 }
 
 /** Renders the content body for a given section key. */
 function SectionBody({
-  id, general, setGen, mode, ignis, ignisFieldMetadata, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
+  id, general, setGen,
 }: {
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
-  mode: string;
-  ignis?: IgnisState | null;
-  ignisFieldMetadata?: IgnisFieldMetadata[];
-  onIgnisFieldChange?: (changes: Partial<IgnisInputs>) => void;
-  onIgnisVariantSelect?: (index: number) => void;
-  onIgnisReset?: () => void;
-  onIgnisPeriodOverride?: (period: string) => void;
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
-    case 'conditions':  return <ConditionsSection  general={general} setGen={setGen} mode={mode} />;
     case 'ventilation': return <VentilationSection general={general} setGen={setGen} />;
-    case 'loads':       return <InternalLoadsSection general={general} setGen={setGen} />;
     case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
-    case 'ignis':
-      if (!ignis) {
-        return (
-          <IgnisStatusSection
-            general={general}
-            onPeriodOverride={onIgnisPeriodOverride}
-          />
-        );
-      }
-      return (
-        <IgnisSection
-          ignis={ignis}
-          onFieldChange={onIgnisFieldChange ?? (() => {})}
-          onVariantSelect={onIgnisVariantSelect ?? (() => {})}
-          onReset={onIgnisReset ?? (() => {})}
-          fieldMetadata={ignisFieldMetadata ?? []}
-        />
-      );
   }
 }
 
@@ -811,13 +543,13 @@ interface BuildingEditorProps {
   mode: 'basic' | 'expert';
   /** HDCP state — null while loading or when the service has no data for this building. */
   ignis?: IgnisState | null;
-  /** ignis field descriptions from GET /api/v1/fields, used for tooltips. May be empty while loading. */
-  ignisFieldMetadata?: IgnisFieldMetadata[];
-  onIgnisFieldChange?: (changes: Partial<IgnisInputs>) => void;
   onIgnisVariantSelect?: (index: number) => void;
-  onIgnisReset?: () => void;
   /** Called when the user manually selects a TABULA period to override an unrecognised one. */
   onIgnisPeriodOverride?: (period: string) => void;
+  /** Area-weighted average U-value (W/m²K) across all envelope surfaces — shown in Refurbishment Level for expert mode. */
+  avgUValue?: number;
+  /** Opens the envelope/surface configurator directly, for per-surface U-value edits. */
+  onOpenEnvelope?: () => void;
   /** Hides the Basic Info tab — used when the caller already renders those fields elsewhere (the snapshot table's inline edit). */
   hideIdentity?: boolean;
 }
@@ -829,18 +561,22 @@ interface BuildingEditorProps {
  *  - No section active -> 2-column grid of summary cards.
  *  - Section active -> inactive sections collapse to compact chips at the top;
  *    the active section fills the remaining height with a scrollable body.
+ *
+ * Site & Surroundings and Refurbishment Level sit outside that click-to-expand
+ * system entirely — both are short (a handful of fields/toggles), so they're
+ * pinned inline, always visible, right under the header. Forcing a click to
+ * reveal a couple of fields cost more than it saved.
  */
 export function BuildingEditor({
   general, setGen, mode,
-  ignis, ignisFieldMetadata, onIgnisFieldChange, onIgnisVariantSelect, onIgnisReset, onIgnisPeriodOverride,
+  ignis, onIgnisVariantSelect, onIgnisPeriodOverride,
+  avgUValue = 0, onOpenEnvelope,
   hideIdentity = false,
 }: BuildingEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  // 'ignis' (Annual Heat Demand) is shown in both modes — it's the building's
-  // headline result, not an expert-only diagnostic.
-  const ALL_SECTIONS: SectionKey[] = ['identity', 'conditions', 'ignis'];
-  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'loads', 'thermal', 'solver'];
+  const ALL_SECTIONS: SectionKey[] = ['identity'];
+  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'thermal', 'solver'];
   const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
     : ALL_SECTIONS
@@ -864,14 +600,45 @@ export function BuildingEditor({
     </div>
   );
 
+  // ── Site & Surroundings + Refurbishment Level — always visible, no click needed ──
+  const inlineSections = (
+    <div className="flex shrink-0 flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div>
+        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+          <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#64748b' }} />
+          Site &amp; Surroundings
+        </p>
+        <ConditionsSection general={general} setGen={setGen} />
+      </div>
+      <div className="border-t border-slate-200 pt-4">
+        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+          <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
+          Refurbishment Level
+        </p>
+        {ignis ? (
+          <IgnisSection
+            ignis={ignis}
+            onVariantSelect={onIgnisVariantSelect ?? (() => {})}
+            mode={mode}
+            avgUValue={avgUValue}
+            onOpenEnvelope={onOpenEnvelope}
+          />
+        ) : (
+          <IgnisStatusSection general={general} onPeriodOverride={onIgnisPeriodOverride} />
+        )}
+      </div>
+    </div>
+  );
+
   // ── Active section: chips row + expanded card ─────────────────────────────────
   if (activeSection) {
     const chips = visibleSections.filter((k) => k !== activeSection);
     const dotColor = SECTION_COLORS[activeSection];
 
     return (
-      <div className="flex h-full flex-col gap-3 overflow-hidden p-4">
+      <ScrollHintContainer className="flex flex-col gap-3 p-4">
         {header}
+        {inlineSections}
 
         {/* Inactive sections as compact chips */}
         <div className="shrink-0 flex flex-wrap gap-1.5">
@@ -888,8 +655,8 @@ export function BuildingEditor({
           ))}
         </div>
 
-        {/* Expanded section — fills remaining height */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        {/* Expanded section */}
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
           {/* Card header — click to collapse */}
           <button
             type="button"
@@ -902,33 +669,25 @@ export function BuildingEditor({
                 {SECTION_LABELS[activeSection]}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {sectionSummary(activeSection, general, ignis)}
+                {sectionSummary(activeSection, general)}
               </p>
             </div>
             <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
           </button>
 
-          {/* Scrollable content */}
-          <ScrollHintContainer className="p-4">
-            <SectionBody
-              id={activeSection} general={general} setGen={setGen} mode={mode}
-              ignis={ignis}
-              ignisFieldMetadata={ignisFieldMetadata}
-              onIgnisFieldChange={onIgnisFieldChange}
-              onIgnisVariantSelect={onIgnisVariantSelect}
-              onIgnisReset={onIgnisReset}
-              onIgnisPeriodOverride={onIgnisPeriodOverride}
-            />
-          </ScrollHintContainer>
+          <div className="p-4">
+            <SectionBody id={activeSection} general={general} setGen={setGen} />
+          </div>
         </div>
-      </div>
+      </ScrollHintContainer>
     );
   }
 
-  // ── No section active: 2-column grid of summary cards ────────────────────────
+  // ── No section active: header + inline sections + grid of summary cards ──────
   return (
     <ScrollHintContainer className="flex flex-col gap-3 p-4">
       {header}
+      {inlineSections}
 
       <div className="grid grid-cols-2 gap-1.5">
         {visibleSections.map((key) => (
@@ -947,7 +706,7 @@ export function BuildingEditor({
               </div>
               <ChevronDown className="size-3 shrink-0 text-slate-400" />
             </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general, ignis)}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general)}</p>
           </button>
         ))}
       </div>
