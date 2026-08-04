@@ -65,8 +65,13 @@ export function EnergyEnvelopeColumn({
           </div>
         )}
 
-        {/* ResponsiveContainer requires an explicit parent height */}
-        <div className="bg-white px-2 pb-3 pt-2" style={{ height: mode === 'expert' ? 440 : 340 }}>
+        {/* ResponsiveContainer requires an explicit parent height. Expert and
+            basic now share the same chart layout (see LoadProfileViewer) —
+            expert only adds the Hour resolution tab, not extra chrome.
+            Same gray backdrop + p-4 margin as the Building Parameters card
+            below, so both cards read as the same width on the same background
+            instead of the chart sitting in its own mismatched white frame. */}
+        <div className="bg-slate-100 p-4 pb-3" style={{ height: 340 }}>
           <LoadProfileViewer
             buildingId={buildingId}
             initialTimeseries={initialTimeseries ?? undefined}

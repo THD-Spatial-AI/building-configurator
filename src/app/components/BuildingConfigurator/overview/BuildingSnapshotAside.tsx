@@ -43,8 +43,6 @@ export function BuildingSnapshotAside({
   onToggleTech,
   onOpenTech,
 }: BuildingSnapshotAsideProps) {
-  const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
-
   return (
     <ScrollHintContainer className="flex flex-col gap-3 border-r border-border/80 bg-slate-100 p-4">
     <aside className="flex flex-col gap-3">
@@ -118,9 +116,10 @@ export function BuildingSnapshotAside({
         </div>
       </div>
 
-      {/* ── Technologies ── */}
-      <div className={cn(CARD, 'shrink-0 px-4 pb-4 pt-4')}>
-        <div className="mb-3 flex items-center justify-between">
+      {/* ── Technologies — no outer card, the individual tech cards
+            already carry their own border/shadow. ── */}
+      <div className="shrink-0">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex size-6 items-center justify-center rounded-md bg-slate-200">
               <CpuIcon className="size-3.5 text-slate-600" />

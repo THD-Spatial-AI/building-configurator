@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Pencil, Check, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
-import { SegmentedControl, NumberInput, SelectInput } from '../shared/ui';
+import { NumberInput, SelectInput } from '../shared/ui';
 import { ElementCompositionSection } from './ElementCompositionSection';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
@@ -62,22 +62,37 @@ export function BuildingDetailsCard({
         <p className="text-[13px] font-bold text-slate-800">
           {activeTab === 'envelope' ? 'Building Envelope' : 'Building Parameters'}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Plain menu-bar tabs — not a filled segmented-control pill, just
+              two labelled buttons with an underline on the active one.
+              Parameters is the default/first option, Envelope the second. */}
           {mode === 'expert' && (
-            <SegmentedControl
-              options={[{ value: 'parameters', label: 'Parameters' }, { value: 'envelope', label: 'Envelope' }]}
-              value={activeTab}
-              onChange={(v) => setActiveTab(v as 'parameters' | 'envelope')}
-            />
+            <div className="flex items-center gap-4">
+              {(['parameters', 'envelope'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    'cursor-pointer border-b-2 pb-0.5 text-xs transition-colors',
+                    activeTab === tab
+                      ? 'border-primary font-semibold text-foreground'
+                      : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {tab === 'parameters' ? 'Parameters' : 'Envelope'}
+                </button>
+              ))}
+            </div>
           )}
           {onOpenAdvanced && (
             <button
               type="button"
               onClick={onOpenAdvanced}
-              title="Advanced settings"
-              className="flex size-7 cursor-pointer items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              className="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800"
             >
               <Settings2 className="size-3.5" />
+              Advanced
             </button>
           )}
           {activeTab === 'parameters' && onEditField && (
