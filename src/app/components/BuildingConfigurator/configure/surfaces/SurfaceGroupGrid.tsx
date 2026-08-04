@@ -99,13 +99,18 @@ export function SurfaceGroupGrid({
           type="button"
           onClick={() => { setRoofGalleryOpen(false); onSelect(el.id); }}
           className={cn(
+            // Same shadow recipe as the Technologies cards in the main view,
+            // so surface cards read as the same kind of clickable tile.
             'w-full rounded-lg border p-2.5 text-left transition-all cursor-pointer',
             selected
-              ? 'border-primary/40 bg-primary/8 shadow-sm shadow-primary/10'
-              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm',
+              ? 'border-primary/40 bg-primary/8 shadow-[0_1px_3px_rgba(47,93,138,0.10),0_4px_12px_rgba(47,93,138,0.12)]'
+              : 'border-slate-200/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.07)] hover:border-slate-300',
           )}
         >
-          <div className="flex items-center justify-between gap-1.5">
+          {/* pr-5 keeps the direction badge clear of the delete button, which
+              is absolutely positioned in the same top-right corner and only
+              appears on hover. */}
+          <div className="flex items-center justify-between gap-1.5 pr-5">
             <span className={cn('min-w-0 flex-1 truncate text-[11px] font-semibold leading-tight', selected ? 'text-primary' : 'text-slate-700')}>
               {el.label}
             </span>
@@ -142,26 +147,26 @@ export function SurfaceGroupGrid({
   return (
     <div className="flex h-full min-h-0 flex-col">
 
-      {/* ── Header — pr-12 keeps the group stats clear of the modal's close button ── */}
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-5 py-4 pr-12">
-        <div className="flex items-center gap-2">
-          <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
-          <h2 className="text-sm font-semibold text-slate-700">
-            {ELEMENT_GROUP_LABELS[groupType]}
-          </h2>
-          {roofTypeLabel && (
-            <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-              {roofTypeLabel}
-            </span>
-          )}
-          <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
-            {items.length}
+      {/* ── Header — everything grouped on the left; pr-12 keeps the right
+          side clear of the modal's close button instead of anything sitting
+          next to it. ── */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-5 py-4 pr-12">
+        <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
+        <h2 className="text-sm font-semibold text-slate-700">
+          {ELEMENT_GROUP_LABELS[groupType]}
+        </h2>
+        {roofTypeLabel && (
+          <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+            {roofTypeLabel}
           </span>
-        </div>
-        <div className="flex shrink-0 items-center gap-3 text-[11px] text-slate-400">
-          <span>{totalArea.toFixed(1)} m² total</span>
-          <span>avg U {avgUValue.toFixed(2)} W/m²K</span>
-        </div>
+        )}
+        <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+          {items.length}
+        </span>
+        <span className="text-slate-300">|</span>
+        <span className="text-[11px] text-slate-400">{totalArea.toFixed(1)} m² total</span>
+        <span className="text-slate-300">|</span>
+        <span className="text-[11px] text-slate-400">avg U {avgUValue.toFixed(2)} W/m²K</span>
       </div>
 
       {/* ── Roof type section — expandable, Roof group only ── */}
@@ -216,7 +221,15 @@ export function SurfaceGroupGrid({
           </div>
         </ScrollHintContainer>
 
-        <ScrollHintContainer className="min-w-0 flex-1 bg-white">
+        {/* ScrollHintContainer's className prop only reaches its inner
+            scrollable div, not the outer div that's the real flex item here
+            — so "flex-1" on it was a no-op and the pane shrank to fit its
+            own content instead of filling the row. Wrapping it in a plain
+            div that actually receives flex-1/min-w-0 fixes that; the
+            "No surface selected" placeholder's own h-full/centering then has
+            a correctly-sized box to center within. */}
+        <div className="min-w-0 flex-1">
+          <ScrollHintContainer className="bg-white">
           {editorSlot ?? (
             <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
               <div className="flex size-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
@@ -230,7 +243,8 @@ export function SurfaceGroupGrid({
               </div>
             </div>
           )}
-        </ScrollHintContainer>
+          </ScrollHintContainer>
+        </div>
       </div>
     </div>
   );
