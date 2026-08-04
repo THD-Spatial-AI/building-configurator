@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Battery } from 'lucide-react';
 import {
-  ConfigSection, NumberInput, FieldLabel, ToggleSwitch, FieldRow, ScrollHintContainer,
+  ConfigSection, NumberInput, FieldLabel, FieldRow, ScrollHintContainer,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import { cn } from '@/lib/utils';
 import type { BatteryConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
@@ -204,6 +204,46 @@ function EconomicsSection({
   );
 }
 
+function InstallToggle({ installed, onToggle }: { installed: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={installed}
+      className={cn(
+        'mb-4 flex w-full items-center justify-between rounded-lg border px-4 py-3.5 text-left transition-colors cursor-pointer',
+        installed
+          ? 'border-blue-300 bg-blue-50 hover:bg-blue-100'
+          : 'border-slate-200 bg-slate-50 hover:bg-slate-100',
+      )}
+    >
+      <div>
+        <p className={cn('text-sm font-semibold', installed ? 'text-blue-700' : 'text-slate-700')}>
+          {installed ? 'Battery installed' : 'Install battery storage'}
+        </p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          {installed
+            ? 'Included in the energy model.'
+            : 'Not included — click to add this battery to the energy model.'}
+        </p>
+      </div>
+      <span
+        className={cn(
+          'inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 border-transparent transition-colors',
+          installed ? 'bg-primary' : 'bg-switch-background',
+        )}
+      >
+        <span
+          className={cn(
+            'block size-6 rounded-full bg-background shadow-sm transition-transform',
+            installed ? 'translate-x-5' : 'translate-x-0',
+          )}
+        />
+      </span>
+    </button>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface BatteryEditorProps {
@@ -226,34 +266,21 @@ export function BatteryEditor({ battery, onUpdate, mode }: BatteryEditorProps) {
   return (
     <ScrollHintContainer className="flex flex-col p-5">
 
-      {/* Header */}
-      <div className="mb-5 flex items-center gap-3">
+      {/* Header — no right-side control here, so it never collides with the
+          modal's own close button in the top-right corner. */}
+      <div className="mb-4 flex items-center gap-3 pr-8">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
           <Battery className="size-5 text-blue-500" />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-base font-bold text-slate-800">Battery Storage</p>
-          <p className="text-[11px] text-muted-foreground truncate">
+          <p className="truncate text-[11px] text-muted-foreground">
             {battery.cont_storage_cap_max} kWh · {battery.cont_energy_cap_max} kW max power
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-semibold text-slate-600">Installed</span>
-          <ToggleSwitch
-            checked={battery.installed}
-            onChange={(v) => onUpdate({ installed: v })}
-          />
-        </div>
       </div>
 
-      {/* Not-installed hint */}
-      {!battery.installed && (
-        <div className="mb-4 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <p className="text-[11px] text-slate-500 leading-snug">
-            Toggle <strong>Installed</strong> to include this battery in the energy model.
-          </p>
-        </div>
-      )}
+      <InstallToggle installed={battery.installed} onToggle={() => onUpdate({ installed: !battery.installed })} />
 
       {/* Parameter sections — dimmed while not installed */}
       <div className={cn('flex flex-col gap-2', !battery.installed && 'pointer-events-none opacity-40')}>
