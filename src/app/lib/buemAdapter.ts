@@ -96,6 +96,11 @@ const BUILDING_TYPE_LABELS: Record<string, string> = {
   TH:  'Terraced House',
 };
 
+/** Reverse of BUILDING_TYPE_LABELS, for serializing a label back to its BUEM code. */
+const BUILDING_TYPE_CODES: Record<string, string> = Object.fromEntries(
+  Object.entries(BUILDING_TYPE_LABELS).map(([code, label]) => [label, code]),
+);
+
 /**
  * Converts a BUEM element id to a readable label.
  * e.g. "Wall_1" -> "Wall 1", "Window_S" -> "Window S".
@@ -431,8 +436,8 @@ export function serializeToBuemFeature(
 
   // Build the building block, preferring passed identity over general config
   const building: Record<string, any> = {};
-  if (identity.buildingType) building.building_type = identity.buildingType;
-  else if (general.buildingType) building.building_type = general.buildingType.replace(/\s+/g, '_').toUpperCase();
+  if (identity.buildingType) building.building_type = BUILDING_TYPE_CODES[identity.buildingType] ?? identity.buildingType;
+  else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 
   if (identity.constructionPeriod) building.construction_period = identity.constructionPeriod;
   else if (general.constructionPeriod) building.construction_period = general.constructionPeriod;
@@ -533,11 +538,9 @@ export function serializeToBuemFeature(
         building,
         solver: {
           use_milp: general.use_milp ?? false,
-          // Summer solar gains through real windows can plausibly need active
-          // cooling, not just heating — without this BuEM never computes a
-          // cooling load at all (not zero — the field is simply absent from
-          // the response), regardless of the building's actual exposure.
-          compute_cooling: general.compute_cooling ?? true,
+          // compute_cooling is schema-only in the current BuEM release and
+          // rejected if sent at all — heating and cooling are both always
+          // computed unconditionally. Omit until BuEM wires the flag up.
         },
       },
       ...(Object.keys(techs).length > 0 ? { techs } : {}),
