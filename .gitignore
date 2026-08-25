@@ -3,3 +3,6 @@ dist
 .env.local
 .env*.local
 .vscode/
+
+# Machine-specific (CADDY_DATA_DIR is a host path) — see demo-proxy/.env.example
+demo-proxy/.env

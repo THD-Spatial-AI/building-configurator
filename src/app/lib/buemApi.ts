@@ -31,6 +31,52 @@ const AUTH_HEADERS: Record<string, string> = import.meta.env.VITE_BUEM_API_KEY
   ? { 'X-Api-Key': import.meta.env.VITE_BUEM_API_KEY as string }
   : {};
 
+/**
+ * weather-serve, via demo-proxy/ — the CORS/auth shim in this repo, not
+ * weather-serve itself (it has no CORS support, see demo-proxy/docker-compose.yml
+ * for why). Same demo-only caveat as BASE_URL above: the target architecture
+ * has the Orchestrator resolve weather server-side, not a browser call.
+ */
+const WEATHER_BASE_URL = (import.meta.env.VITE_WEATHER_API_URL as string | undefined) ?? 'https://localhost:8444';
+
+const WEATHER_AUTH_HEADERS: Record<string, string> = import.meta.env.VITE_WEATHER_API_KEY
+  ? { 'X-Api-Key': import.meta.env.VITE_WEATHER_API_KEY as string }
+  : {};
+
+/**
+ * Fetches one calendar year of hourly T/GHI/DNI/DHI for a location from
+ * weather-serve, in the {index, variables} shape buem-gateway requires
+ * under buem.weather. Returns null on any failure (wrong provider/year not
+ * archived, network error) — same "null on failure" contract as
+ * runBuildingSimulation, since a request can't proceed without this.
+ */
+async function fetchWeather(
+  latitude: number,
+  longitude: number,
+  year: number,
+): Promise<{ index: string[]; variables: Record<string, number[]> } | null> {
+  const params = new URLSearchParams({
+    lat: String(latitude),
+    lon: String(longitude),
+    year: String(year),
+    // cosmo-rea6: the only provider with a real full-year Netherlands
+    // archive processed so far (data/cosmo_rea6/netherlands/output/).
+    provider: 'cosmo-rea6',
+    use_case: 'solar',
+    format: 'json',
+  });
+  try {
+    const res = await fetch(`${WEATHER_BASE_URL}/v1/weather/point?${params}`, {
+      headers: WEATHER_AUTH_HEADERS,
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { index: string[]; variables: Record<string, number[]> };
+  } catch {
+    return null;
+  }
+}
+
 /** A {value, unit} measurement, as buem-gateway's response shapes them. */
 interface BuemQuantity {
   value: number;
@@ -79,8 +125,8 @@ export interface BuemSimulationResult {
 
 /**
  * Runs BuEM for one building via buem-gateway's single-building endpoint
- * (POST /buem/building — no topology wrapper, since this UI only ever has
- * one building) and converts the result into the UI's LoadDataPoint /
+ * (POST /api/v1/buem/building — no topology wrapper, since this UI only ever
+ * has one building) and converts the result into the UI's LoadDataPoint /
  * thermal summary shapes.
  *
  * Returns null on any failure — unreachable service, BuEM rejected the
@@ -102,6 +148,11 @@ export async function runBuildingSimulation(
     batteryConfig,
   );
 
+  const [longitude, latitude] = feature.geometry.coordinates;
+  const year = new Date(feature.properties.start_time).getUTCFullYear();
+  const weather = await fetchWeather(latitude, longitude, year);
+  if (!weather) return null;
+
   const request = {
     id: feature.id,
     geometry: feature.geometry,
@@ -109,13 +160,13 @@ export async function runBuildingSimulation(
     start_date: feature.properties.start_time,
     end_date: feature.properties.end_time,
     resolution: Number(feature.properties.resolution),
-    buem: feature.properties.buem,
+    buem: { ...feature.properties.buem, weather },
   };
 
   console.log('[buem] building payload', request);
 
   try {
-    const res = await fetch(`${BASE_URL}/buem/building`, {
+    const res = await fetch(`${BASE_URL}/api/v1/buem/building`, {
       method:  'POST',
       headers: { ...AUTH_HEADERS, 'Content-Type': 'application/json' },
       body:    JSON.stringify(request),

@@ -1,0 +1,61 @@
+# Demo-only browser CORS shim in front of weather-serve.
+#
+# weather-serve (BuEM/weather) is deliberately not built to be called from a
+# browser: no CORS headers, no reverse proxy in front of it, published only
+# on its own host port for server-side callers. The target architecture has
+# the not-yet-built Orchestrator resolve weather server-side and hand it to
+# buem-gateway embedded in the request — see BuEM/weather's own
+# decisions/2026-08-07-buem-weather-access-architecture.md.
+#
+# This container exists only so the Building Configurator demo (a
+# browser SPA that calls buem-gateway directly, see src/app/lib/buemApi.ts's
+# own header comment for why that's already a demo-only shortcut) can also
+# fetch weather directly, ahead of the Orchestrator existing. Same shape as
+# ignis's and buem-gateway's own reverse proxies: Caddy answers CORS
+# preflight, gates real requests behind X-Api-Key, forwards to the upstream.
+#
+# ---
+# Usage:  docker compose up -d
+# ---
+#
+# Host prerequisites: weather-serve already running and reachable on the
+# host (see BuEM/weather/infrastructure/container/docker-compose.serve.yml),
+# and the `caddy` CLI with `caddy trust` run once (same CADDY_DATA_DIR as
+# ignis/buem-gateway reuses their already-trusted local CA — see .env.example).
+#
+# .env must define:
+#   CADDY_DATA_DIR        host directory holding the caddy trust-installed CA.
+#   HOST_HTTPS_PORT        optional, defaults to 8444 (ignis=443, buem=8443).
+#   WEATHER_UPSTREAM_PORT   optional, defaults to 8090 (weather-serve's own
+#                          published host port).
+name: building-configurator-demo
+
+services:
+  weather-demo-proxy:
+    image: caddy:2.11-alpine
+    container_name: weather-demo-proxy
+    env_file: [env/common.env, env/proxy.env]  # ALLOWED_ORIGINS + WEATHER_API_KEY
+    environment:
+      - WEATHER_UPSTREAM_PORT=${WEATHER_UPSTREAM_PORT:-8090}
+    ports:
+      - "${HOST_HTTPS_PORT:-8444}:443"
+    volumes:
+      # Directory mount, not per-file — see ignis's docker-compose.yml for
+      # why (a single-file bind mount keeps serving stale content after an
+      # editor save-by-rename).
+      - ./caddy:/etc/caddy:ro
+      - ${CADDY_DATA_DIR:?CADDY_DATA_DIR is not set}:/data/caddy # reuse the host's already-trusted local CA
+    # weather-serve runs in its own compose project (`weather`), not joined
+    # to this one — reach it via the host, the same way weather-serve's own
+    # compose file documents for any other-project consumer.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Same ALLOWED_ORIGINS -> regex derivation as ignis's and buem-gateway's
+    # own reverse proxies — see either repo's docker-compose.yml for the
+    # full rationale.
+    entrypoint:
+      - sh
+      - -c
+      - >
+        export ALLOWED_ORIGINS_PATTERN="^($$(echo "$$ALLOWED_ORIGINS" | sed -e 's/[.]/\\./g' -e 's/,/|/g'))$$" &&
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
