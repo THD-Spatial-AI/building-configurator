@@ -172,10 +172,14 @@ export async function runBuildingSimulation(
       body:    JSON.stringify(request),
       signal:  AbortSignal.timeout(60000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error('[buem] request failed', res.status, await res.text());
+      return null;
+    }
     const body = (await res.json()) as BuemBuildingResponse;
     return toSimulationResult(body.buem.thermal_load_profile);
-  } catch {
+  } catch (err) {
+    console.error('[buem] request threw', err);
     return null;
   }
 }
