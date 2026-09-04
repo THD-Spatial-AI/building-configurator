@@ -47,7 +47,7 @@
           "buem": {
             "building": {
               "type": "SFH",
-              "construction_period": "1979-1983",
+              "construction_period": "1981",
               "country": "NL",
               "A_ref": {
                 "value": 500.4,
@@ -369,7 +369,7 @@
           "buem": {
             "building": {
               "type": "MFH",
-              "construction_period": "1949-1957",
+              "construction_period": "1953",
               "country": "DE",
               "A_ref": {
                 "value": 650.0,
@@ -645,7 +645,7 @@
           "buem": {
             "building": {
               "type": "TH",
-              "construction_period": "Post-2010",
+              "construction_period": "2015",
               "country": "DE",
               "A_ref": {
                 "value": 140.0,
@@ -921,7 +921,7 @@
           "buem": {
             "building": {
               "type": "AB",
-              "construction_period": "1958-1968",
+              "construction_period": "1963",
               "country": "DE",
               "A_ref": {
                 "value": 900.0,

@@ -5,11 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Gauge, Loader2 } from 'lucide-react';
 import type { IgnisState } from '@/app/lib/ignisAdapter';
-import {
-  TABULA_PERIOD_OPTIONS,
-  isBuildingTypeSupported,
-  isConstructionPeriodRecognised,
-} from '@/app/lib/ignisApi';
+import { isBuildingTypeSupported } from '@/app/lib/ignisApi';
 import {
   SelectInput, NumberInput, FieldLabel,
   ToggleSwitch, FieldRow, ScrollHintContainer,
@@ -17,8 +13,8 @@ import {
 import { cn } from '@/lib/utils';
 import {
   BUILDING_TYPE_OPTIONS,
-  CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
+  MIN_CONSTRUCTION_YEAR,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
@@ -187,12 +183,12 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
           options={COUNTRY_OPTIONS}
           tip="Country used to select TABULA reference data and COSMO weather station."
         />
-        <SelectInput
-          label="Construction period"
-          value={general.constructionPeriod}
-          onChange={(v) => setGen('constructionPeriod', v)}
-          options={CONSTRUCTION_PERIOD_OPTIONS}
-          tip="Construction era determines default U-values via TABULA lookup. Edit to override."
+        <NumberInput
+          label="Construction year"
+          value={general.constructionYear}
+          onChange={(v) => setGen('constructionYear', Math.round(v))}
+          unit="" min={MIN_CONSTRUCTION_YEAR} max={new Date().getFullYear()} step={1}
+          tip="Year the building was built. ignis maps it to a TABULA construction-period band for the default U-value lookup."
         />
       </FieldRow>
       <FieldRow>
@@ -328,16 +324,9 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
 
 // ─── HDCP status section (shown when ignis state is null) ─────────────────────
 
-function IgnisStatusSection({
-  general,
-  onPeriodOverride,
-}: {
-  general: Record<string, any>;
-  onPeriodOverride?: (period: string) => void;
-}) {
+function IgnisStatusSection({ general }: { general: Record<string, any> }) {
   const country = general.country as string | undefined;
   const type    = general.buildingType as string | undefined;
-  const period  = general.constructionPeriod as string | undefined;
 
   if (!country) {
     return (
@@ -356,30 +345,7 @@ function IgnisStatusSection({
     );
   }
 
-  if (period && !isConstructionPeriodRecognised(period)) {
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="text-[11px] text-muted-foreground">
-          Construction period <strong>{period}</strong> does not match a TABULA period.
-          Select the closest period to load TABULA defaults:
-        </p>
-        <div className="flex flex-col gap-1.5">
-          {TABULA_PERIOD_OPTIONS.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onPeriodOverride?.(opt)}
-              className="rounded-[6px] border border-slate-200 bg-white px-3 py-2 text-left text-[11px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Service is running and period/type are valid but no variants were found,
+  // Service is running and year/type are valid but no variants were found,
   // or the service is unreachable.
   return (
     <p className="text-[11px] text-muted-foreground">
@@ -544,8 +510,6 @@ interface BuildingEditorProps {
   /** HDCP state — null while loading or when the service has no data for this building. */
   ignis?: IgnisState | null;
   onIgnisVariantSelect?: (index: number) => void;
-  /** Called when the user manually selects a TABULA period to override an unrecognised one. */
-  onIgnisPeriodOverride?: (period: string) => void;
   /** Area-weighted average U-value (W/m²K) across all envelope surfaces — shown in Refurbishment Level for expert mode. */
   avgUValue?: number;
   /** Opens the envelope/surface configurator directly, for per-surface U-value edits. */
@@ -569,7 +533,7 @@ interface BuildingEditorProps {
  */
 export function BuildingEditor({
   general, setGen, mode,
-  ignis, onIgnisVariantSelect, onIgnisPeriodOverride,
+  ignis, onIgnisVariantSelect,
   avgUValue = 0, onOpenEnvelope,
   hideIdentity = false,
 }: BuildingEditorProps) {
@@ -594,7 +558,7 @@ export function BuildingEditor({
       <div className="min-w-0">
         <p className="text-sm font-bold text-slate-800">{general.buildingName || 'Building'}</p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {general.buildingType} · {general.constructionPeriod} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
+          {general.buildingType} · {general.constructionYear} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
         </p>
       </div>
     </div>
@@ -624,7 +588,7 @@ export function BuildingEditor({
             onOpenEnvelope={onOpenEnvelope}
           />
         ) : (
-          <IgnisStatusSection general={general} onPeriodOverride={onIgnisPeriodOverride} />
+          <IgnisStatusSection general={general} />
         )}
       </div>
     </div>

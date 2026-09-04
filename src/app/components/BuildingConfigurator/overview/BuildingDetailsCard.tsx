@@ -6,6 +6,7 @@ import { Pencil, Check, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
+import { MIN_CONSTRUCTION_YEAR } from '../shared/buildingOptions';
 import { ElementCompositionSection } from './ElementCompositionSection';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
@@ -16,6 +17,7 @@ const ROW_UNITS: Record<string, string> = {
   floorArea:  'm²',
   storeys:    '',
   roomHeight: 'm',
+  constructionYear: '',
 };
 
 const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
@@ -137,7 +139,8 @@ export function BuildingDetailsCard({
                           value={row.rawValue ?? 0}
                           onChange={(v) => onEditField!(row.editKey!, v)}
                           unit={ROW_UNITS[row.editKey!] ?? ''}
-                          min={row.editKey === 'storeys' ? 1 : 0}
+                          min={row.editKey === 'storeys' ? 1 : row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
+                          max={row.editKey === 'constructionYear' ? new Date().getFullYear() : undefined}
                           step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
                         />
                       )

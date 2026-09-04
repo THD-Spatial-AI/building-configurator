@@ -11,7 +11,7 @@ import {
   DEFAULT_AVG_U_VALUE,
   computeVolume,
 } from './buildingDefaults';
-import { BUILDING_TYPE_OPTIONS, CONSTRUCTION_PERIOD_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
+import { BUILDING_TYPE_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
 
 export type SnapshotStatus = 'default' | 'modified';
 
@@ -126,13 +126,12 @@ export function buildSnapshotRows(
       rawValue: general.buildingType,
     },
     {
-      label: 'Construction',
-      value: general.constructionPeriod,
-      status: general.constructionPeriod === baseGeneral.constructionPeriod ? 'default' : 'modified',
-      editKey: 'constructionPeriod',
-      editType: 'select',
-      options: CONSTRUCTION_PERIOD_OPTIONS,
-      rawValue: general.constructionPeriod,
+      label: 'Construction year',
+      value: String(general.constructionYear),
+      status: general.constructionYear === baseGeneral.constructionYear ? 'default' : 'modified',
+      editKey: 'constructionYear',
+      editType: 'number',
+      rawValue: general.constructionYear,
     },
     {
       label: 'Country',

@@ -25,7 +25,7 @@ export interface BuildingIdentity {
   /** [longitude, latitude] in decimal degrees. */
   coordinates: [number, number];
   buildingType: string;        // localised label, e.g. "Multi-family House"
-  constructionPeriod: string;
+  constructionYear: number;
   country: string;
   floorArea: number;           // m²
   roomHeight: number;          // m
@@ -221,7 +221,8 @@ function adaptThematicData(feature: unknown): ThematicData {
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
     coordinates: [lon, lat],
     buildingType,
-    constructionPeriod: String(getMappedValue(feature, descriptor.constructionPeriod) ?? ''),
+    // construction_period carries a plain year string here, not a { value } quantity.
+    constructionYear: Number(getMappedValue(feature, descriptor.constructionYear)) || 0,
     country: String(getMappedValue(feature, descriptor.country) ?? ''),
     floorArea: getMappedNumber(feature, descriptor.floorArea),
     roomHeight: getMappedNumber(feature, descriptor.roomHeight),
@@ -439,8 +440,12 @@ export function serializeToBuemFeature(
   if (identity.buildingType) building.building_type = BUILDING_TYPE_CODES[identity.buildingType] ?? identity.buildingType;
   else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 
-  if (identity.constructionPeriod) building.construction_period = identity.constructionPeriod;
-  else if (general.constructionPeriod) building.construction_period = general.constructionPeriod;
+  // construction_period is inert in the BUEM contract (classification metadata,
+  // no simulation effect) and its true value is a per-country TABULA class code
+  // BC does not hold. BC carries the plain construction year here instead, as a
+  // string, so an exported feature round-trips.
+  const constructionYear = identity.constructionYear || general.constructionYear;
+  if (constructionYear) building.construction_period = String(constructionYear);
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
@@ -628,9 +633,11 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
   // is per-storey, so divide by the building's own storey count.
   const importedStoreys = Number(bldg.n_storeys ?? 0);
+  const importedYear = Number(bldg.construction_period) || 0;
   const general: Record<string, any> = {
+    // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.
+    ...(importedYear ? { constructionYear: importedYear } : {}),
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
-    constructionPeriod: String(bldg.construction_period ?? ''),
     country: String(bldg.country ?? ''),
     Code_AttachedNeighbours: String(bldg.neighbour_status ?? 'B_Alone'),
     floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),

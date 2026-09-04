@@ -16,6 +16,7 @@ import type {
   IgnisVariantLevel,
 } from './ignisAdapter';
 import { ignisInputsFromTabulaData, toIgnisApiPayload } from './ignisAdapter';
+import { yearToConstructionPeriod } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 
 const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://localhost:8080';
 
@@ -42,8 +43,9 @@ const BUILDING_TYPE_TO_TABULA: Record<string, string> = {
 };
 
 /**
- * Maps UI construction period strings to TABULA period indices.
- * Period numbering follows the TABULA workbook column order.
+ * Maps a TABULA period label to its period index. Index numbering follows the
+ * TABULA workbook column order. Interim: ignis #29 will accept a year directly
+ * on /match and this map (and the year -> label step) goes away.
  */
 const CONSTRUCTION_PERIOD_TO_TABULA: Record<string, string> = {
   'Pre-1919':  '01',
@@ -58,17 +60,14 @@ const CONSTRUCTION_PERIOD_TO_TABULA: Record<string, string> = {
   'Post-2010': '10',
 };
 
-/** All TABULA period options, for use in the period override picker. */
-export const TABULA_PERIOD_OPTIONS = Object.keys(CONSTRUCTION_PERIOD_TO_TABULA);
-
 /** Converts a UI building type label to the TABULA code, or null if unsupported. */
 export function toBuildingTypeCode(label: string): string | null {
   return BUILDING_TYPE_TO_TABULA[label] ?? null;
 }
 
-/** Converts a UI construction period string to the TABULA period index, or null. */
-export function toConstructionPeriodCode(period: string): string | null {
-  return CONSTRUCTION_PERIOD_TO_TABULA[period] ?? null;
+/** Converts a construction year to its TABULA period index. */
+function yearToTabulaPeriodCode(year: number): string {
+  return CONSTRUCTION_PERIOD_TO_TABULA[yearToConstructionPeriod(year)];
 }
 
 /** Returns true if the building type is supported by TABULA. */
@@ -76,16 +75,11 @@ export function isBuildingTypeSupported(label: string): boolean {
   return label in BUILDING_TYPE_TO_TABULA;
 }
 
-/** Returns true if the construction period maps directly to a TABULA period code. */
-export function isConstructionPeriodRecognised(period: string): boolean {
-  return period in CONSTRUCTION_PERIOD_TO_TABULA;
-}
-
 // ─── API calls ────────────────────────────────────────────────────────────────
 
 /**
  * Fetches all refurbishment variants that match a building's country, type,
- * and construction period from the HDCP /variants/:country/match endpoint.
+ * and construction year from the HDCP /variants/:country/match endpoint.
  *
  * Returns an empty array if the building type is not supported by TABULA,
  * the service is unreachable, or no variants are found.
@@ -93,10 +87,10 @@ export function isConstructionPeriodRecognised(period: string): boolean {
 export async function fetchMatchingVariants(
   countryIso2: string,
   buildingTypeLabel: string,
-  constructionPeriod: string,
+  constructionYear: number,
 ): Promise<IgnisMatchResponse | null> {
   const typeCode   = toBuildingTypeCode(buildingTypeLabel);
-  const periodCode = toConstructionPeriodCode(constructionPeriod);
+  const periodCode = yearToTabulaPeriodCode(constructionYear);
 
   if (!typeCode || !periodCode) return null;
 
@@ -131,18 +125,13 @@ export async function fetchVariantData(variantCode: string): Promise<IgnisDataRe
  * Loads all refurbishment levels for a building classification.
  * Calls /match to get the list of codes, then /data for each code.
  * Returns an empty array if the service is unreachable or no variants exist.
- *
- * periodOverride lets callers supply a known TABULA period string when the
- * building's own constructionPeriod doesn't map directly (e.g. "1980-2000").
  */
 export async function loadVariantLevels(
   countryIso2: string,
   buildingTypeLabel: string,
-  constructionPeriod: string,
-  periodOverride?: string,
+  constructionYear: number,
 ): Promise<IgnisVariantLevel[]> {
-  const effectivePeriod = periodOverride ?? constructionPeriod;
-  const matchRes = await fetchMatchingVariants(countryIso2, buildingTypeLabel, effectivePeriod);
+  const matchRes = await fetchMatchingVariants(countryIso2, buildingTypeLabel, constructionYear);
   if (!matchRes || matchRes.data.length === 0) return [];
 
   const levels: IgnisVariantLevel[] = [];

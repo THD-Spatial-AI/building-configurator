@@ -18,6 +18,7 @@ import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea } from './shared/buildingDefaults';
+import { yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
 import {
   formatCoordinates,
@@ -294,7 +295,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     ...DEFAULT_GENERAL,
     buildingName:       identityData?.label ?? DEFAULT_GENERAL.buildingName,
     buildingType:       identityData?.buildingType ?? DEFAULT_GENERAL.buildingType,
-    constructionPeriod: identityData?.constructionPeriod ?? DEFAULT_GENERAL.constructionPeriod,
+    constructionYear:   identityData?.constructionYear || DEFAULT_GENERAL.constructionYear,
     country:            identityData?.country ?? DEFAULT_GENERAL.country,
     floorArea:          identityData?.floorArea
       ? identityData.floorArea / Math.max(1, identityData?.storeys || DEFAULT_GENERAL.storeys)
@@ -426,7 +427,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     const nextGeneral = {
       ...DEFAULT_GENERAL,
       buildingType:       buildingData.thematic.identity.buildingType,
-      constructionPeriod: buildingData.thematic.identity.constructionPeriod,
+      constructionYear:   buildingData.thematic.identity.constructionYear || DEFAULT_GENERAL.constructionYear,
       country:            buildingData.thematic.identity.country,
       // identity.floorArea is the total conditioned floor area (BuEM A_ref); general.floorArea is per-storey.
       floorArea:          buildingData.thematic.identity.floorArea
@@ -471,29 +472,30 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig }) !== JSON.stringify(savedState);
 
   // ── HDCP: reload variant levels when building classification changes ───────────
-  // Triggered by country, building type, or construction period changes.
+  // Triggered by country, building type, or construction year changes.
   // Resets HDCP state so stale results are not shown for a different building.
   useEffect(() => {
     const country = general.country as string | undefined;
     const type    = general.buildingType as string | undefined;
-    const period  = general.constructionPeriod as string | undefined;
+    const year    = general.constructionYear as number | undefined;
 
-    if (!country || !type || !period) {
+    if (!country || !type || !year) {
       setHdcp(null);
       return;
     }
 
+    const period = yearToConstructionPeriod(year);
     let cancelled = false;
 
     (async () => {
-      const variants = await loadVariantLevels(country, type, period);
+      const variants = await loadVariantLevels(country, type, year);
       if (cancelled || variants.length === 0) {
         if (!cancelled) setHdcp(null);
         return;
       }
 
       // Only reload TABULA defaults (envelope U-values, floor area) when the user hand-edits
-      // type/period/country for a building that's already loaded — not for the load itself,
+      // type/year/country for a building that's already loaded — not for the load itself,
       // which should keep whatever envelope/floor-area that building's own data brought.
       const isReload = !isFirstClassificationLoad.current;
       isFirstClassificationLoad.current = false;
@@ -511,9 +513,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
       const building: BuildingState = {
         geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
+        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionYear: year, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
         technologies: { rawTechs: {}, installedTechIds: [] },
-        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionYear: year, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
         envelope: nextElements,
         thermalSummary: null,
         timeseries: null,
@@ -527,7 +529,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [general.country, general.buildingType, general.constructionPeriod]);
+  }, [general.country, general.buildingType, general.constructionYear]);
 
   // ── HDCP: auto-recalculate (debounced) when calcDemand changes ────────────────
   useEffect(() => {
@@ -576,9 +578,9 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
 
     const building: BuildingState = {
       geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
+      thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionYear: general.constructionYear, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
       technologies: { rawTechs: {}, installedTechIds: [] },
-      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionPeriod: general.constructionPeriod, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
+      identity: { id: '', label: '', coordinates: [0, 0], buildingType: general.buildingType, constructionYear: general.constructionYear, country: general.country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
       envelope: nextElements,
       thermalSummary: null,
       timeseries: null,
@@ -586,43 +588,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       ignis: null,
     };
     setHdcp(selectVariantLevel(ignis, index, building));
-  };
-
-  const handleIgnisPeriodOverride = (period: string) => {
-    const country = general.country as string | undefined;
-    const type    = general.buildingType as string | undefined;
-    if (!country || !type) return;
-
-    setHdcp(null);
-
-    (async () => {
-      const variants = await loadVariantLevels(country, type, general.constructionPeriod, period);
-      if (variants.length === 0) return;
-
-      // A period override is always a deliberate reclassification — reload this variant's
-      // own "existing state" TABULA envelope and floor area, same as a type/country change.
-      const existingStateData = variants[0]?.data ?? {};
-      const nextElements = resetElementsToVariantDefaults(elements, existingStateData);
-      if (nextElements !== elements) setElements(nextElements);
-      if (existingStateData.A_C_Ref_Input) {
-        const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
-        setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
-      }
-
-      const building: BuildingState = {
-        geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
-        thematic: { identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 }, envelope: nextElements, thermalSummary: null, timeseries: null },
-        technologies: { rawTechs: {}, installedTechIds: [] },
-        identity: { id: '', label: '', coordinates: [0, 0], buildingType: type, constructionPeriod: period, country, floorArea: computeTotalFloorArea(general.floorArea ?? 0, general.storeys ?? 1), roomHeight: general.roomHeight ?? 2.5, storeys: general.storeys ?? 1 },
-        envelope: nextElements,
-        thermalSummary: null,
-        timeseries: null,
-        installedTechIds: [],
-        ignis: null,
-      };
-
-      setHdcp(initIgnisState(country, type, period, variants, building));
-    })();
   };
 
   // --- Handlers ---------------------------------------------------------------
@@ -816,7 +781,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       label: identityData?.label ?? buildingLabel,
       coordinates,
       buildingType: general.buildingType,
-      constructionPeriod: general.constructionPeriod,
+      constructionYear: general.constructionYear,
       country: general.country,
       floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
       roomHeight: general.roomHeight,
@@ -851,7 +816,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
         label: identityData?.label ?? buildingLabel,
         coordinates,
         buildingType: general.buildingType,
-        constructionPeriod: general.constructionPeriod,
+        constructionYear: general.constructionYear,
         country: general.country,
         floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
         roomHeight: general.roomHeight,
@@ -1103,7 +1068,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               mode={mode}
               ignis={ignis}
               onIgnisVariantSelect={handleIgnisVariantSelect}
-              onIgnisPeriodOverride={handleIgnisPeriodOverride}
               avgUValue={avgUValue}
               onOpenEnvelope={() => handleGroupTypeSelect('wall')}
               hideIdentity

@@ -7,8 +7,8 @@ import {
 
 import {
   BUILDING_TYPE_OPTIONS,
-  CONSTRUCTION_PERIOD_OPTIONS,
   COUNTRY_OPTIONS,
+  MIN_CONSTRUCTION_YEAR,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 
@@ -16,7 +16,6 @@ import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingC
 
 // Map shared options to the { value, label } shape expected by SelectInput in this view.
 const BUILDING_TYPES    = BUILDING_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
-const CONSTRUCTION_PERIODS = CONSTRUCTION_PERIOD_OPTIONS;
 const COUNTRIES         = COUNTRY_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
 
 const MASS_CLASSES = [
@@ -103,11 +102,11 @@ export function GeneralConfig({ mode, general, setGen, expanded, toggle }: Gener
             onChange={(v) => setGen('buildingType', v)}
             options={BUILDING_TYPES}
           />
-          <SelectInput
-            label="Construction period"
-            value={general.constructionPeriod}
-            onChange={(v) => setGen('constructionPeriod', v)}
-            options={CONSTRUCTION_PERIODS}
+          <NumberInput
+            label="Construction year"
+            value={general.constructionYear}
+            onChange={(v) => setGen('constructionYear', Math.round(v))}
+            unit="" min={MIN_CONSTRUCTION_YEAR} max={new Date().getFullYear()} step={1}
           />
           <div className="lg:col-span-2">
             <SelectInput

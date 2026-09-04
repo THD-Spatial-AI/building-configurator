@@ -159,7 +159,7 @@ export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
 export const DEFAULT_GENERAL = {
   buildingName:       '',
   buildingType:       'Multi-family House',
-  constructionPeriod: 'Post-2010',
+  constructionYear:   2015,
   country:            'DE',
   floorArea:          90.9, // per-storey footprint; 4 storeys ≈ 363.4 m² total
   roomHeight:         2.7,
