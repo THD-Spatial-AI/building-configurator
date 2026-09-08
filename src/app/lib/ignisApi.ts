@@ -16,7 +16,6 @@ import type {
   IgnisVariantLevel,
 } from './ignisAdapter';
 import { ignisInputsFromTabulaData, toIgnisApiPayload } from './ignisAdapter';
-import { yearToConstructionPeriod } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 
 const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://localhost:8080';
 
@@ -42,32 +41,9 @@ const BUILDING_TYPE_TO_TABULA: Record<string, string> = {
   'Apartment Block':     'AB',
 };
 
-/**
- * Maps a TABULA period label to its period index. Index numbering follows the
- * TABULA workbook column order. Interim: ignis #29 will accept a year directly
- * on /match and this map (and the year -> label step) goes away.
- */
-const CONSTRUCTION_PERIOD_TO_TABULA: Record<string, string> = {
-  'Pre-1919':  '01',
-  '1919-1948': '02',
-  '1949-1957': '03',
-  '1958-1968': '04',
-  '1969-1978': '05',
-  '1979-1983': '06',
-  '1984-1994': '07',
-  '1995-2001': '08',
-  '2002-2009': '09',
-  'Post-2010': '10',
-};
-
 /** Converts a UI building type label to the TABULA code, or null if unsupported. */
 export function toBuildingTypeCode(label: string): string | null {
   return BUILDING_TYPE_TO_TABULA[label] ?? null;
-}
-
-/** Converts a construction year to its TABULA period index. */
-function yearToTabulaPeriodCode(year: number): string {
-  return CONSTRUCTION_PERIOD_TO_TABULA[yearToConstructionPeriod(year)];
 }
 
 /** Returns true if the building type is supported by TABULA. */
@@ -89,13 +65,11 @@ export async function fetchMatchingVariants(
   buildingTypeLabel: string,
   constructionYear: number,
 ): Promise<IgnisMatchResponse | null> {
-  const typeCode   = toBuildingTypeCode(buildingTypeLabel);
-  const periodCode = yearToTabulaPeriodCode(constructionYear);
-
-  if (!typeCode || !periodCode) return null;
+  const typeCode = toBuildingTypeCode(buildingTypeLabel);
+  if (!typeCode) return null;
 
   const url = `${BASE_URL}/api/v1/variants/${encodeURIComponent(countryIso2)}/match`
-    + `?type=${encodeURIComponent(typeCode)}&period=${encodeURIComponent(periodCode)}`;
+    + `?type=${encodeURIComponent(typeCode)}&year=${encodeURIComponent(String(constructionYear))}`;
 
   try {
     const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
