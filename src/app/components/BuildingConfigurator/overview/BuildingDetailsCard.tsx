@@ -1,7 +1,7 @@
-// Right column's merged card: Building Parameters table, or (expert mode) Building
-// Envelope group cards — one card, one header tab switch, no separate section below.
+// Right column's merged card: Building Parameters table, or Building Envelope
+// group cards — one card, one header tab switch, no separate section below.
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Pencil, Check, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
@@ -24,7 +24,6 @@ const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow
 
 export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
-  mode: 'basic' | 'expert';
   /** Commits a single field's new value (key maps to the `general` state object). */
   onEditField?: (key: string, value: string | number) => void;
   /** Opens the building's advanced settings (site, ventilation, thermal, ignis heat demand, ...). */
@@ -36,10 +35,9 @@ export interface BuildingDetailsCardProps {
   onEditGroup?: (type: ElementGroupKey) => void;
 }
 
-/** Building parameters table, or (expert mode) building envelope cards — one merged card. */
+/** Building parameters table, or building envelope cards — one merged card. */
 export function BuildingDetailsCard({
   snapshotRows,
-  mode,
   onEditField,
   onOpenAdvanced,
   elements,
@@ -52,12 +50,6 @@ export function BuildingDetailsCard({
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'parameters' | 'envelope'>('parameters');
 
-  // Envelope is expert-only — don't let a stale tab selection persist invisibly
-  // when the user drops back to Basic mode.
-  useEffect(() => {
-    if (mode !== 'expert' && activeTab === 'envelope') setActiveTab('parameters');
-  }, [mode, activeTab]);
-
   return (
     <div className={cn(CARD, 'shrink-0')}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
@@ -68,25 +60,23 @@ export function BuildingDetailsCard({
           {/* Plain menu-bar tabs — not a filled segmented-control pill, just
               two labelled buttons with an underline on the active one.
               Parameters is the default/first option, Envelope the second. */}
-          {mode === 'expert' && (
-            <div className="flex items-center gap-4">
-              {(['parameters', 'envelope'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={cn(
-                    'cursor-pointer border-b-2 pb-0.5 text-xs transition-colors',
-                    activeTab === tab
-                      ? 'border-primary font-semibold text-foreground'
-                      : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {tab === 'parameters' ? 'Parameters' : 'Envelope'}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {(['parameters', 'envelope'] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  'cursor-pointer border-b-2 pb-0.5 text-xs transition-colors',
+                  activeTab === tab
+                    ? 'border-primary font-semibold text-foreground'
+                    : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {tab === 'parameters' ? 'Parameters' : 'Envelope'}
+              </button>
+            ))}
+          </div>
           {onOpenAdvanced && (
             <button
               type="button"

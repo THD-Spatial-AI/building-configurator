@@ -1,6 +1,8 @@
 import { Analytics } from '@vercel/analytics/react';
 import React, { useMemo, useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
+import { LoenenLiveTest } from './components/LoenenLiveTest';
+import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
 import { adaptBuemFeature, extractFeaturesFromConfig } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
 import demoConfig from '../assets/data/demo_config.json';
@@ -136,6 +138,7 @@ function MapCanvas({ buildings, onBuildingClick }: {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [view, setView] = useState<'demo' | 'live-test'>('demo');
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
@@ -167,7 +170,22 @@ export default function App() {
         position: 'relative',
         overflow: 'auto',
       }}>
-        <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />
+        <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 6 }} className="shadow-lg rounded-[6px]">
+          <SegmentedControl
+            value={view}
+            onChange={(v) => setView(v as 'demo' | 'live-test')}
+            options={[
+              { value: 'demo', label: 'Demo map' },
+              { value: 'live-test', label: 'Live backend test (Loenen)' },
+            ]}
+          />
+        </div>
+
+        {view === 'demo' ? (
+          <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />
+        ) : (
+          <LoenenLiveTest />
+        )}
 
         {/* Floating configurator panel — blurred backdrop separates it from the map behind it */}
         {selectedBuildingId && (

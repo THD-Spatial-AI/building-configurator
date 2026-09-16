@@ -11,10 +11,10 @@ import type { BuildingElement } from './configure/model/buildingElements';
 import {
   isElementEditable,
   normalizeElementRecord,
+  hasInvalidArea,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { SegmentedControl, ConfiguratorStyles, ElementConfiguratorModal } from './shared/ui';
-import { cn } from '../../../lib/utils';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea } from './shared/buildingDefaults';
@@ -773,6 +773,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
    * a direct call rather than going through a backend/orchestration layer.
    */
   const handleRecalculate = async () => {
+    const invalid = Object.values(elements).filter(hasInvalidArea);
+    if (invalid.length > 0) {
+      setUploadError(
+        `${invalid.length} surface${invalid.length > 1 ? 's have' : ' has'} no area (${invalid.map((el) => el.label).join(', ')}) — `
+        + 'fix or delete them in the Envelope view before running a simulation.',
+      );
+      return;
+    }
+
     setSavedState({ elements, general, roofConfig });
 
     const coordinates: [number, number] = geometryData?.coordinates ?? identityData?.coordinates ?? [11.5820, 48.1351];
@@ -793,7 +802,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     try {
       const result = await runBuildingSimulation(identity, elements, general, identity.id, batteryConfig);
       if (!result) {
-        setUploadError('Simulation failed — buem-gateway is unreachable or rejected the request.');
+        setUploadError('Simulation failed — weather-serve or buem-gateway is unreachable or rejected the request. See the browser console for which one.');
         return;
       }
       setModelTimeseries(result.timeseries);
@@ -965,7 +974,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
           <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleUpload} />
           <div className="w-px h-5 bg-border shrink-0 mx-1" />
           {onClose && (
-            <HeaderBtn onClick={() => setShowCloseDialog(true)} tooltip="Close"><X /></HeaderBtn>
+            <HeaderBtn
+              onClick={() => (hasUnsavedChanges ? setShowCloseDialog(true) : onClose())}
+              tooltip="Close"
+            ><X /></HeaderBtn>
           )}
         </div>
       </div>
@@ -1125,29 +1137,21 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <DialogPrimitive.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background border border-border rounded-md p-6 shadow-xl w-full max-w-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
             <div className="flex items-center gap-2 mb-3">
-              {hasUnsavedChanges && <AlertTriangle className="size-4 text-amber-500 shrink-0" />}
+              <AlertTriangle className="size-4 text-amber-500 shrink-0" />
               <DialogPrimitive.Title className="text-base font-semibold text-foreground">
-                {hasUnsavedChanges ? 'Unsaved Changes' : 'Close Configurator'}
+                Unsaved Changes
               </DialogPrimitive.Title>
             </div>
 
             <div className="mb-4">
-              {hasUnsavedChanges ? (
-                <>
-                  <p className="text-sm text-foreground mb-2">
-                    You have unsaved changes to this building configuration. What would you like to do?
-                  </p>
-                  <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
-                    <p className="text-xs text-amber-800">
-                      Closing without saving will discard all modifications made since the last Apply.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-foreground">
-                  Close the building configurator and return to the map?
+              <p className="text-sm text-foreground mb-2">
+                You have unsaved changes to this building configuration. What would you like to do?
+              </p>
+              <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
+                <p className="text-xs text-amber-800">
+                  Closing without saving will discard all modifications made since the last Apply.
                 </p>
-              )}
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2">
@@ -1158,26 +1162,19 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
               >
                 Continue Editing
               </button>
-              {hasUnsavedChanges && (
-                <button
-                  type="button"
-                  onClick={() => { handleRecalculate(); onClose?.(); setShowCloseDialog(false); }}
-                  className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
-                >
-                  Save &amp; Close
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => { handleRecalculate(); onClose?.(); setShowCloseDialog(false); }}
+                className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
+              >
+                Save &amp; Close
+              </button>
               <button
                 type="button"
                 onClick={() => { onClose?.(); setShowCloseDialog(false); }}
-                className={cn(
-                  'px-3 py-1.5 text-sm font-medium rounded-[6px] transition-colors cursor-pointer',
-                  hasUnsavedChanges
-                    ? 'text-destructive border border-destructive/30 hover:bg-destructive/5'
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90',
-                )}
+                className="px-3 py-1.5 text-sm font-medium rounded-[6px] transition-colors cursor-pointer text-destructive border border-destructive/30 hover:bg-destructive/5"
               >
-                {hasUnsavedChanges ? 'Discard Changes' : 'Close'}
+                Discard Changes
               </button>
             </div>
           </DialogPrimitive.Content>

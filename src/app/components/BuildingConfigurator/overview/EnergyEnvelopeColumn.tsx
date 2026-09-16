@@ -90,7 +90,6 @@ export function EnergyEnvelopeColumn({
           hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
         <BuildingDetailsCard
           snapshotRows={snapshotRows}
-          mode={mode}
           onEditField={onEditField}
           onOpenAdvanced={onOpenAdvanced}
           elements={elements}

@@ -70,9 +70,13 @@ async function fetchWeather(
       headers: WEATHER_AUTH_HEADERS,
       signal: AbortSignal.timeout(30000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error('[weather] request failed', res.status, await res.text());
+      return null;
+    }
     return (await res.json()) as { index: string[]; variables: Record<string, number[]> };
-  } catch {
+  } catch (err) {
+    console.error('[weather] request threw', err);
     return null;
   }
 }

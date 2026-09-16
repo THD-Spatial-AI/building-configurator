@@ -4,11 +4,11 @@
 // center — so switching surfaces never requires scrolling past the editor itself.
 
 import React, { useState } from 'react';
-import { Sun, Trash2, ChevronDown, Plus, Home, Layers } from 'lucide-react';
+import { Sun, Trash2, ChevronDown, Plus, Home, Layers, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
-import { faceFromAzimuth, isUserDefinedElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { faceFromAzimuth, isUserDefinedElement, hasInvalidArea } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import {
   ELEMENT_GROUP_LABELS,
   type ElementGroupKey,
@@ -92,17 +92,21 @@ export function SurfaceGroupGrid({
     const dir         = directionLabel(el);
     const userDefined = isUserDefinedElement(el);
     const hasPv       = surfacePvConfigs[el.id]?.installed ?? false;
+    const invalid     = hasInvalidArea(el);
 
     return (
       <div key={el.id} className="group relative">
         <button
           type="button"
           onClick={() => { setRoofGalleryOpen(false); onSelect(el.id); }}
+          title={invalid ? 'Area must be greater than 0 to run a simulation' : undefined}
           className={cn(
             // Same shadow recipe as the Technologies cards in the main view,
             // so surface cards read as the same kind of clickable tile.
             'w-full rounded-lg border p-2.5 text-left transition-all cursor-pointer',
-            selected
+            invalid
+              ? 'border-destructive/50 bg-destructive/5'
+              : selected
               ? 'border-primary/40 bg-primary/8 shadow-[0_1px_3px_rgba(47,93,138,0.10),0_4px_12px_rgba(47,93,138,0.12)]'
               : 'border-slate-200/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.07)] hover:border-slate-300',
           )}
@@ -111,7 +115,7 @@ export function SurfaceGroupGrid({
               is absolutely positioned in the same top-right corner and only
               appears on hover. */}
           <div className="flex items-center justify-between gap-1.5 pr-5">
-            <span className={cn('min-w-0 flex-1 truncate text-[11px] font-semibold leading-tight', selected ? 'text-primary' : 'text-slate-700')}>
+            <span className={cn('min-w-0 flex-1 truncate text-[11px] font-semibold leading-tight', invalid ? 'text-destructive' : selected ? 'text-primary' : 'text-slate-700')}>
               {el.label}
             </span>
             <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold', selected ? 'bg-primary/15 text-primary' : 'bg-slate-100 text-slate-500')}>
@@ -119,7 +123,8 @@ export function SurfaceGroupGrid({
             </span>
           </div>
           <div className="mt-1.5 flex items-center gap-2">
-            <span className={cn('text-[10px] font-medium', selected ? 'text-primary/80' : 'text-slate-500')}>
+            {invalid && <AlertTriangle className="size-3 shrink-0 text-destructive" />}
+            <span className={cn('text-[10px] font-medium', invalid ? 'text-destructive' : selected ? 'text-primary/80' : 'text-slate-500')}>
               {el.area.toFixed(1)} m²
             </span>
             <span className={cn('text-[10px] font-medium', selected ? 'text-primary/80' : 'text-slate-500')}>

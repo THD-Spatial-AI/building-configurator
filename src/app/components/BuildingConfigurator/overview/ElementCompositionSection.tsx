@@ -2,7 +2,9 @@
 // Clicking a card opens the surface configurator modal directly for that group.
 
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { ELEMENT_DOTS } from '../shared/ui';
+import { hasInvalidArea } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import {
@@ -46,13 +48,16 @@ export function ElementCompositionSection({
           : (items[0]?.uValue ?? 0);
         const modifiedCount = items.filter((el) => getElementStatus(el, baselineElements?.[el.id]) === 'modified').length;
         const groupStatus: SnapshotStatus = modifiedCount > 0 ? 'modified' : 'default';
+        const invalidCount = items.filter(hasInvalidArea).length;
 
         return (
           <button
             key={type}
             type="button"
             onClick={() => onEditGroup?.(type)}
-            className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3.5 text-left transition-all cursor-pointer hover:border-primary/40 hover:shadow-sm"
+            className={`flex flex-col gap-2 rounded-lg border p-3.5 text-left transition-all cursor-pointer hover:shadow-sm ${
+              invalidCount > 0 ? 'border-destructive/50 bg-destructive/5 hover:border-destructive/70' : 'border-slate-200 bg-white hover:border-primary/40'
+            }`}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
@@ -79,6 +84,12 @@ export function ElementCompositionSection({
             )}
             {modifiedCount > 0 && (
               <p className="text-[10px] text-emerald-600">{modifiedCount} modified</p>
+            )}
+            {invalidCount > 0 && (
+              <p className="flex items-center gap-1 text-[10px] font-medium text-destructive">
+                <AlertTriangle className="size-3 shrink-0" />
+                {invalidCount} with no area — fix before running a simulation
+              </p>
             )}
           </button>
         );

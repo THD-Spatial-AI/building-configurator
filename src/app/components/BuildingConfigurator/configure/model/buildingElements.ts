@@ -84,3 +84,13 @@ export function isElementEditable(el: BuildingElement): boolean {
 export function isUserDefinedElement(el: BuildingElement): boolean {
   return el.source === 'custom' || !!el.customMode;
 }
+
+/**
+ * A zero (or negative) area can't be simulated — BuEM rejects it outright.
+ * Surfaces imported from real 3D extraction occasionally carry a degenerate
+ * sliver like this; surfaced here rather than silently dropped so the user
+ * can fix or delete it before running a simulation.
+ */
+export function hasInvalidArea(el: BuildingElement): boolean {
+  return !(el.area > 0);
+}
