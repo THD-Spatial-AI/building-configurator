@@ -171,102 +171,49 @@ function computeEnergyTotals(
 }
 
 /**
- * Raw (unformatted) BuEM baseline annual heating figure, in kWh — the "last
- * full simulation" reference point that a live ignis recalculation is
- * compared against. Same source priority as computeEnergyTotals, but returns
- * a number for arithmetic rather than a display string.
- */
-function baselineHeatingKwh(
-  timeseries: LoadDataPoint[] | null,
-  thermalSummary: ThermalSummary | null,
-): number | null {
-  if (timeseries && timeseries.length > 0) {
-    return timeseries.reduce((s, p) => s + p.heating, 0);
-  }
-  if (thermalSummary) return thermalSummary.heatingKwh;
-  return null;
-}
-
-/**
- * Resolves what the three energy cards should actually show, given every
- * source that might feed them: BuEM's last confirmed run, ignis's live
- * heating estimate (heating only — ignis has no electricity/cooling model),
- * and — if the user uploaded one — a real load profile. An uploaded profile
- * is real data, not a model guess, so it outranks both as the headline
- * number; the model outputs then become the thing being compared *against*
- * it instead of the other way around.
+ * Resolves what the energy cards should show: BuEM's last confirmed run, or
+ * — if the user uploaded one — a real load profile compared against it.
+ * BuEM is the single source of truth for energy demand; ignis is used only
+ * for building thermal properties (TABULA U-values), never shown here as a
+ * competing demand estimate — the two models' figures for the same building
+ * can differ enough to read as a discrepancy rather than the different
+ * things they actually are (a fast per-m² estimate vs. an hourly physics
+ * simulation).
  */
 function resolveDisplayEnergyTotals(
   energyTotals: EnergyTotals,
   groundTruthTimeseries: LoadDataPoint[] | null,
-  ignisResult: { qHnd: number } | null | undefined,
-  totalFloorArea: number,
-  buemBaselineHeatingKwh: number | null,
-  isHeatingConfirmed: boolean,
 ): EnergyTotals {
   const groundTruth = groundTruthTimeseries ? computeEnergyTotals(groundTruthTimeseries, null) : null;
+  if (!groundTruth) return energyTotals;
 
-  const ignisHeatingKwh = ignisResult && totalFloorArea > 0 ? ignisResult.qHnd * totalFloorArea : null;
-  const currentHeatingKwh = ignisHeatingKwh === null || isHeatingConfirmed ? Number(energyTotals.heating) : ignisHeatingKwh;
-  const currentHeatingSource: 'ignis' | 'buem' = ignisHeatingKwh === null || isHeatingConfirmed ? 'buem' : 'ignis';
-  const currentHeatingPerM2 = ignisHeatingKwh !== null && !isHeatingConfirmed ? ignisResult!.qHnd.toFixed(1) : undefined;
-
-  if (groundTruth) {
-    // Ground truth always wins as the headline — compare whichever model
-    // figure is "current" right now (ignis's live estimate, or BuEM's
-    // confirmed result once Recalculate has run) against it.
-    const heatingRefKwh = currentHeatingKwh > 0
-      ? ((Number(groundTruth.heating) - currentHeatingKwh) / currentHeatingKwh) * 100
-      : null;
-    const electricityKwh = Number(energyTotals.electricity);
-    const electricityDeltaPercent = electricityKwh > 0
-      ? ((Number(groundTruth.electricity) - electricityKwh) / electricityKwh) * 100
-      : null;
-    const hotwaterKwh = Number(energyTotals.hotwater);
-    const hotwaterDeltaPercent = hotwaterKwh > 0
-      ? ((Number(groundTruth.hotwater) - hotwaterKwh) / hotwaterKwh) * 100
-      : null;
-    const heatingLabel = currentHeatingSource === 'ignis' ? "ignis's live estimate" : 'the last full simulation';
-
-    return {
-      ...groundTruth,
-      heatingSource: 'user',
-      electricitySource: 'user',
-      hotwaterSource: 'user',
-      heatingDeltaPercent: heatingRefKwh,
-      heatingBaselineKwh: currentHeatingKwh > 0 ? formatKwh(currentHeatingKwh) : undefined,
-      heatingComparisonLabel: currentHeatingKwh > 0 ? heatingLabel : undefined,
-      electricityDeltaPercent,
-      electricityBaselineKwh: electricityKwh > 0 ? formatKwh(electricityKwh) : undefined,
-      electricityComparisonLabel: electricityKwh > 0 ? 'the last full simulation' : undefined,
-      hotwaterDeltaPercent,
-      hotwaterBaselineKwh: hotwaterKwh > 0 ? formatKwh(hotwaterKwh) : undefined,
-      hotwaterComparisonLabel: hotwaterKwh > 0 ? 'the last full simulation' : undefined,
-    };
-  }
-
-  if (ignisHeatingKwh === null) return energyTotals;
-
-  if (isHeatingConfirmed) {
-    // Right after Recalculate, with no edits since, energyTotals.heating is
-    // already BuEM's confirmed result for the current inputs — show that
-    // instead of ignis's fast estimate, since it's the number the user just
-    // ran a real physics simulation to get.
-    return { ...energyTotals, heatingSource: 'buem', heatingDeltaPercent: null, heatingPerM2: undefined };
-  }
-
-  const heatingDeltaPercent = buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0
-    ? ((ignisHeatingKwh - buemBaselineHeatingKwh) / buemBaselineHeatingKwh) * 100
+  const heatingKwh = Number(energyTotals.heating);
+  const heatingDeltaPercent = heatingKwh > 0
+    ? ((Number(groundTruth.heating) - heatingKwh) / heatingKwh) * 100
+    : null;
+  const electricityKwh = Number(energyTotals.electricity);
+  const electricityDeltaPercent = electricityKwh > 0
+    ? ((Number(groundTruth.electricity) - electricityKwh) / electricityKwh) * 100
+    : null;
+  const hotwaterKwh = Number(energyTotals.hotwater);
+  const hotwaterDeltaPercent = hotwaterKwh > 0
+    ? ((Number(groundTruth.hotwater) - hotwaterKwh) / hotwaterKwh) * 100
     : null;
 
   return {
-    ...energyTotals,
-    heating: formatKwh(ignisHeatingKwh),
-    heatingSource: 'ignis',
+    ...groundTruth,
+    heatingSource: 'user',
+    electricitySource: 'user',
+    hotwaterSource: 'user',
     heatingDeltaPercent,
-    heatingPerM2: currentHeatingPerM2,
-    heatingBaselineKwh: buemBaselineHeatingKwh && buemBaselineHeatingKwh > 0 ? formatKwh(buemBaselineHeatingKwh) : undefined,
-    heatingComparisonLabel: 'the last full simulation',
+    heatingBaselineKwh: heatingKwh > 0 ? formatKwh(heatingKwh) : undefined,
+    heatingComparisonLabel: heatingKwh > 0 ? 'the last full simulation' : undefined,
+    electricityDeltaPercent,
+    electricityBaselineKwh: electricityKwh > 0 ? formatKwh(electricityKwh) : undefined,
+    electricityComparisonLabel: electricityKwh > 0 ? 'the last full simulation' : undefined,
+    hotwaterDeltaPercent,
+    hotwaterBaselineKwh: hotwaterKwh > 0 ? formatKwh(hotwaterKwh) : undefined,
+    hotwaterComparisonLabel: hotwaterKwh > 0 ? 'the last full simulation' : undefined,
   };
 }
 
@@ -330,11 +277,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     thematicData?.thermalSummary ?? buildingData?.thermalSummary ?? null,
   );
 
-  const initialBaselineHeatingKwh = baselineHeatingKwh(
-    thematicData?.timeseries ?? buildingData?.timeseries ?? null,
-    thematicData?.thermalSummary ?? buildingData?.thermalSummary ?? null,
-  );
-
   const [mode,          setMode]          = useState<'basic' | 'expert'>('basic');
   const [elements,      setElements]      = useState(initialElements);
   const [general,       setGeneralRaw]    = useState(initialGeneral);
@@ -388,19 +330,12 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
-  // The last full BuEM simulation's annual heating figure — a fixed reference point.
-  // Set once per loaded building; does not change as the user edits ignis inputs.
-  const [buemBaselineHeatingKwh, setBuemBaselineHeatingKwh] = useState<number | null>(initialBaselineHeatingKwh);
   // Hourly timeseries from the most recent live buem-gateway run this session — takes
   // priority over whatever timeseries the buildingData prop originally carried.
   const [modelTimeseries, setModelTimeseries] = useState<LoadDataPoint[] | null>(null);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
-  // True right after Recalculate, for as long as the ignis live estimate hasn't
-  // moved since — meaning BuEM's just-fetched result still reflects the current
-  // inputs and can be shown as the headline number instead of ignis's estimate.
-  const [isHeatingConfirmed, setIsHeatingConfirmed] = useState(false);
-  // A user-uploaded load profile, if any — outranks both ignis and BuEM as
-  // the annual totals' source, since it's real data rather than a model output.
+  // A user-uploaded load profile, if any — outranks BuEM as the annual
+  // totals' source, since it's real data rather than a model output.
   const [groundTruthTimeseries, setGroundTruthTimeseries] = useState<LoadDataPoint[] | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -455,10 +390,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
       buildingData.thematic.thermalSummary ?? buildingData.thermalSummary ?? null,
     );
-    const nextBaselineHeatingKwh = baselineHeatingKwh(
-      buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
-      buildingData.thematic.thermalSummary ?? buildingData.thermalSummary ?? null,
-    );
 
     baselineRef.current = {
       general:      nextGeneral,
@@ -471,7 +402,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setRoofConfig(DEFAULT_ROOF_CONFIG);
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
     setEnergyTotals(nextTotals);
-    setBuemBaselineHeatingKwh(nextBaselineHeatingKwh);
     setSelectedId(null);
     setActiveGroupType(null);
     setSurfaceEditorTab('properties');
@@ -566,14 +496,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ignis?.calcDemand, ignis?.selectedVariantIndex]);
-
-  // A fresh ignis result means the building's inputs moved since the last
-  // Recalculate — the BuEM figure on screen is no longer guaranteed current,
-  // so fall back to showing ignis's live estimate until the user confirms
-  // it again with another Recalculate.
-  useEffect(() => {
-    setIsHeatingConfirmed(false);
-  }, [ignis?.result]);
 
   // ── HDCP handlers ─────────────────────────────────────────────────────────────
 
@@ -821,8 +743,6 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
       }
       setModelTimeseries(result.timeseries);
       setEnergyTotals(computeEnergyTotals(result.timeseries, result.thermalSummary));
-      setBuemBaselineHeatingKwh(baselineHeatingKwh(result.timeseries, result.thermalSummary));
-      setIsHeatingConfirmed(true);
     } finally {
       setIsRunningSimulation(false);
     }
@@ -919,20 +839,12 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     : getThermalRating(avgUValue);
   const snapshotRows  = buildSnapshotRows(general, elements, totalArea, baselineRef.current);
 
-  // Live ignis heating figure (kWh/(m²·a) × floor area), compared against the
-  // last full BuEM simulation. Lets the user see how their edits (refurbishment
-  // level, field changes) move heating demand before deciding to save or revert.
-  const displayEnergyTotals: EnergyTotals = useMemo(() => {
-    const totalFloorArea = computeTotalFloorArea(Number(general.floorArea) || 0, Number(general.storeys) || 1);
-    return resolveDisplayEnergyTotals(
-      energyTotals,
-      groundTruthTimeseries,
-      ignis?.result,
-      totalFloorArea,
-      buemBaselineHeatingKwh,
-      isHeatingConfirmed,
-    );
-  }, [energyTotals, groundTruthTimeseries, ignis?.result, general.floorArea, general.storeys, buemBaselineHeatingKwh, isHeatingConfirmed]);
+  // BuEM's confirmed result, or a user-uploaded ground-truth profile compared
+  // against it — ignis never substitutes as a competing demand estimate here.
+  const displayEnergyTotals: EnergyTotals = useMemo(
+    () => resolveDisplayEnergyTotals(energyTotals, groundTruthTimeseries),
+    [energyTotals, groundTruthTimeseries],
+  );
   const pvInstalledSurfaces = useMemo(() => (
     Object.values(elements)
       .filter((element) => surfacePvConfigs[element.id]?.installed)
