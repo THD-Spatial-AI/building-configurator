@@ -92,16 +92,26 @@ interface BuemThermalLoadProfile {
     heating: { total: BuemQuantity };
     cooling?: { total: BuemQuantity };
     electricity: { total: BuemQuantity };
+    // v6-draft; absent on results predating hot_water/kitchen. Kitchen's
+    // total is in kWh_gas — a fuel channel, not electric kWh.
+    hot_water?: { total: BuemQuantity };
+    kitchen?: { total: BuemQuantity };
+    // heating + cooling + electricity + hot_water, deliberately excluding
+    // kitchen (a gas channel, not electric/thermal kWh — see geojson_processor.py).
+    total_energy_demand?: BuemQuantity;
     peak_heating_load?: BuemQuantity;
     peak_cooling_load?: BuemQuantity;
     energy_intensity?: BuemQuantity;
   };
   timeseries?: {
     unit: string;
+    kitchen_unit?: string;
     timestamps: string[];
     heating: number[];
     cooling?: number[];
     electricity: number[];
+    hot_water?: number[];
+    kitchen?: number[];
   };
 }
 
@@ -120,6 +130,10 @@ export interface BuemThermalSummary {
   peakHeatingKw: number;
   peakCoolingKw: number;
   energyIntensityKwhM2: number;
+  dhwKwh: number;
+  kitchenGasKwh: number;
+  /** BuEM's own heating+cooling+electricity+hot_water total — gas deliberately excluded, see BuemThermalLoadProfile. */
+  totalEnergyKwh: number;
 }
 
 export interface BuemSimulationResult {
@@ -204,6 +218,8 @@ function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResu
         // it here so every downstream reader (chart, CSV export, totals)
         // sees a plain positive "energy needed for cooling" figure.
         hotwater: -(ts.cooling?.[i] ?? 0),
+        dhw:      ts.hot_water?.[i] ?? 0,
+        kitchen:  ts.kitchen?.[i] ?? 0,
       }))
     : [];
 
@@ -216,6 +232,11 @@ function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResu
       peakHeatingKw:        profile.summary.peak_heating_load?.value ?? 0,
       peakCoolingKw:        profile.summary.peak_cooling_load?.value ?? 0,
       energyIntensityKwhM2: profile.summary.energy_intensity?.value ?? 0,
+      dhwKwh:               profile.summary.hot_water?.total.value ?? 0,
+      kitchenGasKwh:        profile.summary.kitchen?.total.value ?? 0,
+      totalEnergyKwh:       profile.summary.total_energy_demand?.value
+        ?? profile.summary.heating.total.value + (profile.summary.cooling?.total.value ?? 0)
+           + profile.summary.electricity.total.value + (profile.summary.hot_water?.total.value ?? 0),
     },
   };
 }

@@ -1,6 +1,6 @@
 import { useRef, type ElementType } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Download, Upload, Zap, Flame, Snowflake, Layers3 } from 'lucide-react';
+import { Download, Upload, Zap, Flame, Snowflake, Layers3, Droplets, CookingPot } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
   formatEnergyValue,
@@ -40,10 +40,11 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
     uploadError,
   } = useLoadProfileState({ buildingId, initialTimeseries, mode, onTotalsChange, onGroundTruthChange });
 
-  // Mean of electricity + heating + cooling per visible point — only meaningful
-  // once all three series are plotted together, so it's Combined-only.
+  // Mean of electricity + heating + cooling + hot water per visible point —
+  // only meaningful once plotted together, so it's Combined-only. Kitchen is
+  // excluded: it's a gas total (kWh_gas), not the same unit as the rest.
   const combinedAverage = energyType === 'combined' && data.length > 0
-    ? data.reduce((sum, point) => sum + point.electricity + point.heating + point.hotwater, 0) / data.length
+    ? data.reduce((sum, point) => sum + point.electricity + point.heating + point.hotwater + point.dhw, 0) / data.length
     : null;
 
   // Shorter labels that communicate "what time period each data point covers"
@@ -58,6 +59,8 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
     electricity: { label: 'Electricity', Icon: Zap },
     heating:     { label: 'Heating', Icon: Flame },
     hotwater:    { label: 'Cooling', Icon: Snowflake },
+    dhw:         { label: 'Hot Water', Icon: Droplets },
+    kitchen:     { label: 'Kitchen (gas)', Icon: CookingPot },
     combined:    { label: 'Combined', Icon: Layers3 },
   };
 
@@ -158,6 +161,13 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
               )}
               {(energyType === 'hotwater' || energyType === 'combined') && (
                 <Line type="monotone" dataKey="hotwater" stroke="#3b82f6" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
+              )}
+              {(energyType === 'dhw' || energyType === 'combined') && (
+                <Line type="monotone" dataKey="dhw" stroke="#0ea5e9" strokeWidth={2} name="Hot Water" dot={false} activeDot={{ r: 4 }} />
+              )}
+              {/* Kitchen is gas (kWh_gas) — its own tab only, never mixed into Combined. */}
+              {energyType === 'kitchen' && (
+                <Line type="monotone" dataKey="kitchen" stroke="#e11d48" strokeWidth={2} name="Kitchen (gas)" dot={false} activeDot={{ r: 4 }} />
               )}
               {combinedAverage !== null && (
                 <ReferenceLine

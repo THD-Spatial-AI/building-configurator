@@ -137,12 +137,24 @@ function computeEnergyTotals(
   timeseries: LoadDataPoint[] | null,
   thermalSummary: ThermalSummary | null,
 ): EnergyTotals {
+  // A live BuEM run always populates timeseries and thermalSummary together
+  // (see toSimulationResult), so whenever real per-hour dhw/kitchen data
+  // exists, thermalSummary — the authoritative source for these two and for
+  // the combined total below — exists alongside it. An uploaded ground-truth
+  // CSV has no dhw/kitchen column and no thermalSummary either, so both
+  // correctly fall back to '—' rather than a misleading 0.
+  const dhw     = thermalSummary ? formatKwh(thermalSummary.dhwKwh) : '—';
+  const kitchen = thermalSummary ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
+  const total   = thermalSummary ? formatKwh(thermalSummary.totalEnergyKwh) : '—';
+
   if (timeseries && timeseries.length > 0) {
     return {
       heating:     formatKwh(timeseries.reduce((s, p) => s + p.heating,     0)),
       electricity: formatKwh(timeseries.reduce((s, p) => s + p.electricity, 0)),
       hotwater:    formatKwh(timeseries.reduce((s, p) => s + p.hotwater,    0)),
+      dhw, kitchen, total,
       unit: 'kWh/year',
+      kitchenUnit: 'kWh_gas/year',
     };
   }
   if (thermalSummary) {
@@ -150,10 +162,12 @@ function computeEnergyTotals(
       heating:     thermalSummary.heatingKwh.toFixed(0),
       electricity: thermalSummary.electricityKwh.toFixed(0),
       hotwater:    thermalSummary.coolingKwh.toFixed(0),
+      dhw, kitchen, total,
       unit: 'kWh/year',
+      kitchenUnit: 'kWh_gas/year',
     };
   }
-  return { electricity: '—', heating: '—', hotwater: '—', unit: 'kWh/year' };
+  return { electricity: '—', heating: '—', hotwater: '—', dhw: '—', kitchen: '—', total: '—', unit: 'kWh/year' };
 }
 
 /**

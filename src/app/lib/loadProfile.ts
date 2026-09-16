@@ -2,7 +2,7 @@
 
 import { strToU8, zipSync } from 'fflate';
 
-export type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'combined';
+export type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'dhw' | 'kitchen' | 'combined';
 export type Resolution = 'hourly' | 'daily' | 'weekly' | 'monthly';
 
 export interface LoadDataPoint {
@@ -10,6 +10,10 @@ export interface LoadDataPoint {
   electricity: number;
   heating: number;
   hotwater: number;
+  /** Domestic hot water, kWh — real per-hour data (v6-draft), unlike `hotwater` above which is actually cooling. 0 on sources predating it (older BuEM runs, CSV uploads without a matching column). */
+  dhw: number;
+  /** Cooking gas demand, kWh_gas — a different fuel channel, not summed with the electric/thermal series above. */
+  kitchen: number;
 }
 
 /**
@@ -25,7 +29,15 @@ export interface EnergyTotals {
   electricity: string;
   heating: string;
   hotwater: string;
+  /** Domestic hot water — BuEM's v6-draft hot_water total; '—' when unavailable (e.g. an uploaded profile with no model run behind it). */
+  dhw?: string;
+  /** Cooking gas demand, in kitchenUnit (kWh_gas) rather than the electric unit below. */
+  kitchen?: string;
+  /** heating + cooling + electricity + dhw — gas (kitchen) deliberately excluded, same choice BuEM itself makes. */
+  total?: string;
   unit: string;
+  /** Overrides `unit` for the kitchen row only, since it's a gas total, not electric kWh. */
+  kitchenUnit?: string;
   heatingSource?: EnergySource;
   electricitySource?: EnergySource;
   hotwaterSource?: EnergySource;
@@ -139,6 +151,10 @@ function normalizePoint(input: unknown, index: number, resolution: Resolution = 
     electricity: clampNumber(electricity),
     heating: clampNumber(heating),
     hotwater: clampNumber(hotwater),
+    // No CSV/JSON upload column for these yet — only a live BuEM run
+    // populates real dhw/kitchen per-hour data (see buemApi.ts).
+    dhw: 0,
+    kitchen: 0,
   };
 }
 
@@ -234,6 +250,8 @@ export function aggregateSeries(data: LoadDataPoint[], resolution: Exclude<Resol
         existing.electricity = clampNumber(existing.electricity + point.electricity);
         existing.heating = clampNumber(existing.heating + point.heating);
         existing.hotwater = clampNumber(existing.hotwater + point.hotwater);
+        existing.dhw = clampNumber(existing.dhw + point.dhw);
+        existing.kitchen = clampNumber(existing.kitchen + point.kitchen);
         return;
       }
 
@@ -242,6 +260,8 @@ export function aggregateSeries(data: LoadDataPoint[], resolution: Exclude<Resol
         electricity: clampNumber(point.electricity),
         heating: clampNumber(point.heating),
         hotwater: clampNumber(point.hotwater),
+        dhw: clampNumber(point.dhw),
+        kitchen: clampNumber(point.kitchen),
       });
     });
 

@@ -2,7 +2,7 @@
 // Building parameters and envelope now live in the right column's merged details card.
 
 import React from 'react';
-import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Cpu as CpuIcon } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Cpu as CpuIcon, Droplets, CookingPot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { EnergySource, EnergyTotals } from '../../../lib/loadProfile';
 import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';
@@ -27,9 +27,11 @@ export interface BuildingSnapshotAsideProps {
 }
 
 const ENERGY_ITEMS = [
-  { key: 'heating',     label: 'Heating',     Icon: Flame,    iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300'  },
-  { key: 'electricity', label: 'Electricity', Icon: Zap,      iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300'  },
-  { key: 'hotwater',    label: 'Cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'    },
+  { key: 'heating',     label: 'Heating',     Icon: Flame,     iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300' },
+  { key: 'electricity', label: 'Electricity', Icon: Zap,       iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300' },
+  { key: 'hotwater',    label: 'Cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'   },
+  { key: 'dhw',         label: 'Hot water',   Icon: Droplets,  iconBg: 'bg-sky-500/20',    iconColor: 'text-sky-400',   valueColor: 'text-sky-300'     },
+  { key: 'kitchen',     label: 'Kitchen (gas)', Icon: CookingPot, iconBg: 'bg-rose-500/20', iconColor: 'text-rose-400', valueColor: 'text-rose-300'   },
 ] as const;
 
 /** Left panel of the overview: energy hero numbers + installed technologies. */
@@ -63,9 +65,23 @@ export function BuildingSnapshotAside({
           <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-300">
             Annual energy demand
           </p>
+
+          {/* Total — heating + cooling + electricity + hot water; kitchen (gas) is a
+              separate fuel channel and deliberately not folded in, same as BuEM itself. */}
+          <div className="mb-4 flex items-baseline justify-between border-b border-slate-700/60 pb-4">
+            <span className="text-sm font-medium text-slate-300">Total demand</span>
+            <span>
+              <span className={cn('text-3xl font-extrabold leading-none', energyTotals.total === '—' ? 'text-slate-500' : 'text-white')}>
+                {energyTotals.total ?? '—'}
+              </span>
+              <span className="ml-1.5 text-xs text-slate-500">{energyTotals.unit}</span>
+            </span>
+          </div>
+
           <div className="flex flex-col gap-3">
             {ENERGY_ITEMS.map(({ key, label, Icon, iconBg, iconColor, valueColor }) => {
-              const value = energyTotals[key];
+              const value = energyTotals[key] ?? '—';
+              const unit = energyTotals[`${key}Unit` as keyof EnergyTotals] as string | undefined ?? energyTotals.unit;
               const source = energyTotals[`${key}Source` as keyof EnergyTotals] as EnergySource | undefined;
               const deltaPercent = energyTotals[`${key}DeltaPercent` as keyof EnergyTotals] as number | null | undefined;
               const referenceKwh = energyTotals[`${key}BaselineKwh` as keyof EnergyTotals] as string | undefined;
@@ -87,7 +103,7 @@ export function BuildingSnapshotAside({
                       <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
                         {value}
                       </span>
-                      <span className="ml-1.5 text-[11px] text-slate-500">{energyTotals.unit}</span>
+                      <span className="ml-1.5 text-[11px] text-slate-500">{unit}</span>
                     </div>
                     <EnergyComparisonNote deltaPercent={deltaPercent} referenceKwh={referenceKwh} referenceLabel={referenceLabel} />
                   </div>
