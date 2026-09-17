@@ -19,8 +19,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            4.9,
-            52.37
+            6.02697,
+            52.100351
           ],
           "type": "Point"
         },
@@ -341,8 +341,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            4.48,
-            51.92
+            6.026631,
+            52.100371
           ],
           "type": "Point"
         },
@@ -617,8 +617,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            5.12,
-            52.09
+            6.022257,
+            52.099478
           ],
           "type": "Point"
         },
@@ -893,8 +893,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            4.31,
-            52.08
+            6.020456,
+            52.098909
           ],
           "type": "Point"
         },
