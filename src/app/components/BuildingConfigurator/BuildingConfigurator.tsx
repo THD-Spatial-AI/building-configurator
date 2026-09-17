@@ -25,7 +25,7 @@ import {
   exportToBuemGeojson,
   importBuildingData,
 } from '../../lib/buemAdapter';
-import { runBuildingSimulation } from '../../lib/buemApi';
+import { runBuildingSimulation } from '../../lib/enerplanetApi';
 import type { IgnisState } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
@@ -703,10 +703,10 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
   };
 
   /**
-   * Commits the working draft, then runs a full BuEM simulation via
-   * buem-gateway and feeds the resulting load profile into the overview
-   * chart. Demo-only wiring — see buemApi.ts's module doc for why this is
-   * a direct call rather than going through a backend/orchestration layer.
+   * Commits the working draft, then runs a full BuEM simulation through the
+   * EnerPlanET backend's per-building BuEM endpoint and feeds the resulting
+   * load profile into the overview chart. See enerplanetApi.ts's
+   * runBuildingSimulation doc for the request shape and known gaps.
    */
   const handleRecalculate = async () => {
     const invalid = Object.values(elements).filter(hasInvalidArea);
@@ -738,7 +738,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     try {
       const result = await runBuildingSimulation(identity, elements, general, identity.id, batteryConfig);
       if (!result) {
-        setUploadError('Simulation failed — weather-serve or buem-gateway is unreachable or rejected the request. See the browser console for which one.');
+        setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;
       }
       setModelTimeseries(result.timeseries);

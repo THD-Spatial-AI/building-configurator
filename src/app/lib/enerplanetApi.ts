@@ -1,13 +1,13 @@
 /**
- * EnerPlanET backend API client — session auth, PyLovo grid generation and
- * City2TABULA envelope enrichment.
+ * EnerPlanET backend API client — session auth, PyLovo grid generation,
+ * City2TABULA envelope enrichment and the per-building BuEM run.
  *
- * Unlike buemApi.ts/ignisApi.ts (documented demo-only shortcuts around a
- * not-yet-built Orchestrator), calling this backend directly from the
- * browser *is* the real architecture — see App[EnerPlanET frontend] -> [backend]
- * in the workspace CLAUDE.md diagram. Building Configurator is a second,
- * independent frontend against the same backend, used here to exercise it
- * ahead of any UI migration.
+ * Unlike ignisApi.ts (a documented demo-only shortcut around a not-yet-built
+ * Orchestrator), calling this backend directly from the browser *is* the
+ * real architecture — the EnerPlanET frontend calls its own backend directly
+ * in production too. Building Configurator is a second, independent
+ * frontend against the same backend, used here to exercise it ahead of any
+ * UI migration.
  *
  * BASE_URL defaults to '' (relative /api/... calls) so requests go through
  * Vite's dev proxy (see vite.config.ts) to http://localhost:8000, keeping
@@ -15,6 +15,11 @@
  * cookies the backend sets are otherwise third-party cookies a browser may
  * refuse to store/send.
  */
+
+import type { BuildingIdentity } from './buemAdapter';
+import { serializeToBuemFeature } from './buemAdapter';
+import type { BuemSimulationResult, BuemThermalLoadProfile } from './buemApi';
+import { toSimulationResult } from './buemApi';
 
 const BASE_URL = (import.meta.env.VITE_ENERPLANET_API_URL as string | undefined) ?? '';
 
@@ -162,4 +167,92 @@ export async function enrichBuildings(
     throw new Error(`city2tabula enrich failed: HTTP ${res.status}`);
   }
   return res.json();
+}
+
+export interface BuemBuildingRunRequest {
+  osm_id: string;
+  geometry: unknown;
+  building: unknown;
+  start_date: string;
+  end_date: string;
+  resolution: number;
+  model_id?: string;
+}
+
+export interface BuemBuildingRunResponse {
+  osm_id: string;
+  buem: { thermal_load_profile: BuemThermalLoadProfile };
+}
+
+/**
+ * Runs the caller's own envelope through BuEM for one building (POST
+ * /api/v1/buem/building) — the interactive counterpart to a full model run:
+ * one building, the caller's envelope instead of a City2TABULA lookup, the
+ * hourly series returned inline. Weather is resolved server-side from
+ * `geometry`, so none is sent. `building` is forwarded to buem-gateway
+ * verbatim and must be complete: no U-value resolution or archetype default
+ * is applied here.
+ */
+export async function runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse> {
+  const res = await apiFetch('/api/v1/buem/building', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) {
+    throw new Error(`buem/building failed: HTTP ${res.status} ${await res.text()}`);
+  }
+  return res.json();
+}
+
+/**
+ * Runs BuEM for one building via the EnerPlanET backend and converts the
+ * result into the UI's LoadDataPoint / thermal summary shapes.
+ *
+ * Establishes a session on every call, same as LoenenLiveTest.tsx — this
+ * client has no persisted-login concept elsewhere, and re-authenticating is
+ * cheap next to the BuEM solve itself.
+ *
+ * Returns null on any failure — no session credentials, backend or BuEM
+ * unreachable, BuEM rejected the request (e.g. incomplete envelope) — so
+ * callers can surface a clear message without crashing. The request can
+ * legitimately take several seconds: BuEM runs a real physics solve, not a
+ * lookup.
+ *
+ * Known gap: the backend's contract has no field for the UI's MILP-solver
+ * toggle (general.use_milp) — the direct buem-gateway call used to forward
+ * it, this path silently ignores it until the backend contract grows one.
+ */
+export async function runBuildingSimulation(
+  identity: BuildingIdentity,
+  elements: Record<string, any>,
+  general: Record<string, any>,
+  modelId: string,
+  batteryConfig?: Record<string, any>,
+): Promise<BuemSimulationResult | null> {
+  const feature = serializeToBuemFeature(
+    identity, elements, general,
+    undefined, undefined, undefined, undefined,
+    batteryConfig,
+  );
+
+  try {
+    const email = import.meta.env.VITE_ENERPLANET_DEV_EMAIL as string | undefined;
+    const password = import.meta.env.VITE_ENERPLANET_DEV_PASSWORD as string | undefined;
+    if (!email || !password) throw new Error('VITE_ENERPLANET_DEV_EMAIL/PASSWORD not set in .env.local');
+    await login(email, password);
+
+    const response = await runBuemBuilding({
+      osm_id:     String(feature.id),
+      geometry:   feature.geometry,
+      building:   feature.properties.buem.building,
+      start_date: feature.properties.start_time,
+      end_date:   feature.properties.end_time,
+      resolution: Number(feature.properties.resolution),
+      model_id:   modelId,
+    });
+    return toSimulationResult(response.buem.thermal_load_profile);
+  } catch (err) {
+    console.error('[buem/building] request failed', err);
+    return null;
+  }
 }
