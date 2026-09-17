@@ -1,8 +1,14 @@
+---
+audience: developer
+---
+
 # Architecture
 
 The Building Configurator is a single-page React application. All application state lives in one component (`BuildingConfigurator`), which renders one of two workspace layers depending on the user's current view.
 
 ## Two-layer structure
+
+The diagram shows how the app shell hands state to the two layers.
 
 ```mermaid
 graph TD
@@ -22,13 +28,13 @@ The header toggle (`Overview ↔ Configure`) switches `workspaceView` in `Buildi
 
 ## Overview layer
 
-Displayed when `workspaceView === 'overview'`. Split into two fixed columns.
+Displayed when `workspaceView === 'overview'`. The diagram shows its two fixed columns and the components in each.
 
 ```mermaid
 graph TD
     BC["BuildingConfigurator"]
 
-    subgraph OV["Overview layout — grid-cols: 430px | flex"]
+    subgraph OV["Overview layout, grid-cols: 430px | flex"]
         BSA["BuildingSnapshotAside<br>(left column)"]
         EEC["EnergyEnvelopeColumn<br>(right column)"]
 
@@ -36,14 +42,9 @@ graph TD
         BSA --> N2["Energy hero<br>Heating / Electricity / Hot Water / Thermal efficiency"]
         BSA --> N3["Building parameters table<br>snapshotRows (type, area, U-value, storeys …)"]
 
-        EEC --> LPV["LoadProfileViewer<br>Recharts line chart — hourly → monthly"]
+        EEC --> LPV["LoadProfileViewer<br>Recharts line chart, hourly to monthly"]
         EEC --> ECS["ElementCompositionSection<br>Envelope accordion per surface group"]
-        EEC --> TS["TechnologiesSection<br>4 tech cards"]
-
-        TS --> T1["Solar PV card<br>per-surface scope — not togglable"]
-        TS --> T2["Battery card<br>togglable install toggle"]
-        TS --> T3["Heat Pump card<br>togglable install toggle"]
-        TS --> T4["EV Charger card<br>togglable install toggle"]
+        EEC --> TS["TechnologiesSection<br>one card per visible TECH_REGISTRY entry"]
     end
 
     BC --> OV
@@ -65,18 +66,18 @@ graph TD
 
 ## Configure layer
 
-Displayed when `workspaceView === 'configure'`. Also split into two columns; the right column is further divided.
+Displayed when `workspaceView === 'configure'`. The diagram shows its two columns, the right one divided into a centre panel and a selector column.
 
 ```mermaid
 graph TD
     BC["BuildingConfigurator"]
 
-    subgraph CF["Configure layout — grid-cols: 430px | flex"]
+    subgraph CF["Configure layout, grid-cols: 430px | flex"]
         LA["Left aside"]
         RS["Right section"]
 
         LA --> BV["BuildingVisualization<br>Clickable SVG 3D preview<br>Rotates to face direction on element select"]
-        LA --> ED["Energy demand mini-panel<br>Same energyTotals as Overview — read-only"]
+        LA --> ED["Energy demand mini-panel<br>Same energyTotals as Overview, read-only"]
 
         RS --> CP["Center panel<br>switches on panelView"]
         RS --> SC["Selector column (w-72)<br>SurfaceGroupSelector"]
@@ -89,7 +90,7 @@ graph TD
 
         SC --> SNav["Building nav item → panelView = building"]
         SC --> SGNav["Surface group nav items<br>Wall / Roof / Floor / Window / Door"]
-        SC --> STNav["Technology nav items<br>Solar PV → technology-pv<br>Battery → technology-battery"]
+        SC --> STNav["Technology nav items<br>one per visible TECH_REGISTRY entry<br>opens the entry's panelView"]
     end
 
     BC --> CF
@@ -120,6 +121,8 @@ stateDiagram-v2
 ---
 
 ## State owned by BuildingConfigurator
+
+The diagram shows the state fields held in `BuildingConfigurator` and the types they reference.
 
 ```mermaid
 classDiagram
@@ -193,118 +196,21 @@ graph LR
     S --> ID["identity<br>id / label / coordinates<br>buildingType / constructionPeriod<br>floorArea / roomHeight / storeys"]
     S --> ENV["envelope<br>one feature per BuildingElement<br>area / uValue / tilt / azimuth"]
     S --> PV["techs.pv_supply<br>per-surface PV params<br>only if installed = true"]
-    S --> BAT["techs.battery_storage<br>capacity / efficiency / cost<br>only if installed = true"]
-    S --> OTH["techs (other)<br>heat_pump / ev_charger<br>only if in installedTechIds"]
+    S --> BAT["techs.battery_storage<br>capacity / efficiency / cost<br>only if installed or includeInModel = true"]
+    S --> OTH["techs (other)<br>heat_pump / ev_charger / wind_turbine<br>only if in installedTechIds"]
 ```
 
 ---
 
-## Redesign: tech card visibility registry
+## Technology registry
 
-### Problem
+`src/app/config/techRegistry.ts` defines every technology in `TECH_REGISTRY`. `TechnologiesSection` (Overview cards), `SurfaceGroupSelector` (Configure nav) and `exportToBuemGeojson` in `buemAdapter.ts` all read it, so adding, hiding or removing a technology starts in that file.
 
-Technologies (Solar PV, Battery, Heat Pump, EV Charger) are hardcoded in `TechnologiesSection.tsx` and `SurfaceGroupSelector.tsx`. Adding or hiding a technology requires editing multiple files and manually pruning the data model.
+| Field | Effect |
+|---|---|
+| `visible` | `false` hides the card in Overview and the nav item in Configure. |
+| `includeInModel` | `true` writes the technology's parameters to the export even when `visible` is `false`. |
+| `scope` | `per-surface`: configured on each surface, no install toggle. `building`: install toggle and a configure panel. `none`: install toggle only. |
+| `panelView` | The panel opened for the technology. Required when `scope` is `building` or `per-surface`. |
 
-### Proposed design
-
-Replace the hardcoded lists with a **tech registry** — a single configuration file that is the only place a developer touches when adding, removing, or hiding a technology.
-
-```mermaid
-graph TD
-    REG["techRegistry.ts<br>Array of TechCardDefinition"]
-
-    REG --> OV2["Overview: TechnologiesSection<br>renders only visible cards"]
-    REG --> CFG2["Configure: SurfaceGroupSelector<br>shows only visible tech nav items"]
-    REG --> EXP["exportToBuemGeojson<br>includes params only when<br>visible OR includeInModel = true"]
-```
-
-#### `TechCardDefinition` type
-
-```typescript
-interface TechCardDefinition {
-  /** Stable identifier used in installedTechIds and GeoJSON output. */
-  id: string;
-
-  /** Display name shown on the card. */
-  label: string;
-
-  /** Lucide icon component. */
-  Icon: React.ElementType;
-
-  /**
-   * When false, the card is hidden from Overview and Configure nav.
-   * The technology is effectively disabled for users.
-   * Default: true.
-   */
-  visible: boolean;
-
-  /**
-   * When true, the tech's parameters are written to the exported data model
-   * even if visible = false. Useful for pre-populating params that the
-   * simulation engine always expects, regardless of whether the user sees the card.
-   * Default: false.
-   */
-  includeInModel: boolean;
-
-  /**
-   * Where the technology is configured.
-   * 'per-surface' → PV-style (no install toggle; scope is each surface).
-   * 'building'    → building-level toggle + optional detail editor panel.
-   * 'none'        → toggle only, no configure panel.
-   */
-  scope: 'per-surface' | 'building' | 'none';
-
-  /**
-   * panelView key to navigate to when the card is opened.
-   * Required when scope = 'building'.
-   */
-  panelView?: string;
-}
-```
-
-#### Example registry (`src/app/config/techRegistry.ts`)
-
-```typescript
-export const TECH_REGISTRY: TechCardDefinition[] = [
-  {
-    id:             'solar_pv',
-    label:          'Solar PV',
-    Icon:           Sun,
-    visible:        true,
-    includeInModel: false,
-    scope:          'per-surface',
-  },
-  {
-    id:             'battery',
-    label:          'Battery',
-    Icon:           Battery,
-    visible:        true,
-    includeInModel: false,
-    scope:          'building',
-    panelView:      'technology-battery',
-  },
-  {
-    id:             'heat_pump',
-    label:          'Heat Pump',
-    Icon:           Thermometer,
-    visible:        true,
-    includeInModel: false,
-    scope:          'none',
-  },
-  {
-    id:             'ev_charger',
-    label:          'EV Charger',
-    Icon:           Plug,
-    visible:        false,       // hidden — card does not appear in UI
-    includeInModel: false,
-    scope:          'none',
-  },
-];
-```
-
-To hide a card: set `visible: false`.
-To keep its parameters in the exported JSON even when hidden: also set `includeInModel: true`.
-To add a new technology: append one entry and implement the configure panel if `scope = 'building'`.
-
-!!! info "Implementation scope"
-    The registry change requires updating three files: `TechnologiesSection.tsx` (reads `TECH_REGISTRY` instead of the hardcoded `BUILDING_TECHNOLOGIES` array), `SurfaceGroupSelector.tsx` (reads `TECH_REGISTRY` for nav items), and `exportToBuemGeojson` in `buemAdapter.ts` (checks `visible || includeInModel` before writing tech params).
+To add a building-level technology, append an entry, implement its panel component, and add a matching case in `renderCenterPanel` in `BuildingConfigurator.tsx`.
