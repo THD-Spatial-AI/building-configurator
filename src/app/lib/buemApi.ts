@@ -3,7 +3,8 @@
  *
  * Runs BuEM for the current building and returns its load profile. The base
  * URL is configured via the VITE_BUEM_API_URL environment variable
- * (default: https://localhost:8443, buem-gateway's own local-dev default).
+ * (default: http://127.0.0.1:8081, buem-gateway's plain-HTTP local-dev
+ * environment — no reverse proxy, no local CA trust, no API key).
  *
  * Demo-only wiring: this is a direct frontend-to-service call, not the
  * target architecture. In the real system Building Configurator only
@@ -19,13 +20,15 @@ import type { BuildingIdentity } from './buemAdapter';
 import { serializeToBuemFeature } from './buemAdapter';
 import type { LoadDataPoint } from './loadProfile';
 
-const BASE_URL = (import.meta.env.VITE_BUEM_API_URL as string | undefined) ?? 'https://localhost:8443';
+const BASE_URL = (import.meta.env.VITE_BUEM_API_URL as string | undefined) ?? 'http://127.0.0.1:8081';
 
 /**
- * Identifies this app to the reverse proxy sitting in front of buem-gateway.
- * Prototype-stage credential only — see the orchestration-layer decision
- * note before this pattern is carried into production (same caveat as
- * ignisApi.ts's identical header).
+ * Identifies this app to the reverse proxy sitting in front of buem-gateway,
+ * when one is in front of it (the HTTPS environment). buem-gateway's
+ * plain-HTTP environment has no proxy and checks no credential, so this is
+ * empty there. Prototype-stage credential only — see the orchestration-layer
+ * decision note before this pattern is carried into production (same caveat
+ * as ignisApi.ts's identical header).
  */
 const AUTH_HEADERS: Record<string, string> = import.meta.env.VITE_BUEM_API_KEY
   ? { 'X-Api-Key': import.meta.env.VITE_BUEM_API_KEY as string }

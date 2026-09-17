@@ -3,7 +3,10 @@
  *
  * Calls ignis endpoints to load TABULA variant lists and run the annual
  * heat demand calculation pipeline. The base URL is configured via the
- * VITE_IGNIS_API_URL environment variable (default: http://localhost:8080).
+ * VITE_IGNIS_API_URL environment variable (default: http://127.0.0.1:8088,
+ * ignis's plain-HTTP local-dev environment — no reverse proxy, no local CA
+ * trust, no API key; not 8080, which the EnerPlanET platform's Keycloak
+ * already holds).
  */
 
 import type {
@@ -17,10 +20,12 @@ import type {
 } from './ignisAdapter';
 import { ignisInputsFromTabulaData, toIgnisApiPayload } from './ignisAdapter';
 
-const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://localhost:8080';
+const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://127.0.0.1:8088';
 
 /**
- * Identifies this app to the reverse proxy sitting in front of ignis.
+ * Identifies this app to the reverse proxy sitting in front of ignis, when
+ * one is in front of it (the HTTPS environment). ignis's plain-HTTP
+ * environment has no proxy and checks no credential, so this is empty there.
  * Prototype-stage credential only — see the orchestration-layer decision
  * note before this pattern is carried into production.
  */
