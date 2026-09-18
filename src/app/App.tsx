@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import React, { useMemo, useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { LoenenLiveTest } from './components/LoenenLiveTest';
+import { Surface3DExperiment } from './components/experimental/Surface3DExperiment';
 import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
 import { adaptBuemFeature, extractFeaturesFromConfig } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
@@ -138,8 +139,11 @@ function MapCanvas({ buildings, onBuildingClick }: {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState<'demo' | 'live-test'>('demo');
+  const [view, setView] = useState<'demo' | 'live-test' | '3d-experiment'>('demo');
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  // Set alongside selectedBuildingId when the 3D experiment resolves a surface click;
+  // deep-links the configurator straight to that surface's PV tab.
+  const [pendingSurfaceId, setPendingSurfaceId] = useState<string | undefined>(undefined);
 
   // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
   // No BuEM result exists yet for any of them — timeseries stays null until the user clicks
@@ -173,18 +177,25 @@ export default function App() {
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 6 }} className="shadow-lg rounded-[6px]">
           <SegmentedControl
             value={view}
-            onChange={(v) => setView(v as 'demo' | 'live-test')}
+            onChange={(v) => setView(v as 'demo' | 'live-test' | '3d-experiment')}
             options={[
               { value: 'demo', label: 'Demo map' },
               { value: 'live-test', label: 'Live backend test (Loenen)' },
+              { value: '3d-experiment', label: '3D surface view (concept)' },
             ]}
           />
         </div>
 
-        {view === 'demo' ? (
-          <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />
-        ) : (
-          <LoenenLiveTest />
+        {view === 'demo' && <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />}
+        {view === 'live-test' && <LoenenLiveTest />}
+        {view === '3d-experiment' && buildingsById[MAP_BUILDINGS[0].id] && (
+          <Surface3DExperiment
+            elements={buildingsById[MAP_BUILDINGS[0].id].thematic.envelope}
+            onOpenSurface={(elementId) => {
+              setPendingSurfaceId(elementId);
+              setSelectedBuildingId(MAP_BUILDINGS[0].id);
+            }}
+          />
         )}
 
         {/* Floating configurator panel — blurred backdrop separates it from the map behind it */}
@@ -200,7 +211,11 @@ export default function App() {
             backgroundColor: 'rgba(15, 23, 42, 0.45)',
             backdropFilter:  'blur(6px)',
           }}>
-            <BuildingConfigurator onClose={() => setSelectedBuildingId(null)} buildingData={selectedBuilding} />
+            <BuildingConfigurator
+              onClose={() => { setSelectedBuildingId(null); setPendingSurfaceId(undefined); }}
+              buildingData={selectedBuilding}
+              initialSurfaceId={pendingSurfaceId}
+            />
           </div>
         )}
       </div>

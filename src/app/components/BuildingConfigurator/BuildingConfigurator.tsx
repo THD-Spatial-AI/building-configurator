@@ -236,10 +236,12 @@ interface BuildingConfiguratorProps {
   onClose?: () => void;
   /** Pre-parsed model data for a specific building. Falls back to hardcoded defaults when absent. */
   buildingData?: BuildingState;
+  /** Element id to open directly on its PV tab on mount, e.g. from a deep link. */
+  initialSurfaceId?: string;
 }
 
 /** Full-screen panel for inspecting and editing a building's energy model configuration. */
-export function BuildingConfigurator({ onClose, buildingData }: BuildingConfiguratorProps) {
+export function BuildingConfigurator({ onClose, buildingData, initialSurfaceId }: BuildingConfiguratorProps) {
   const api = useConfiguratorApi();
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
@@ -650,6 +652,15 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     const el = elements[surfaceId];
     if (el) setActiveGroupType(el.type as ElementGroupKey);
   };
+
+  // Deep-link support: open straight to a surface's PV tab when the caller
+  // already knows which element it means (e.g. the 3D surface-view concept).
+  useEffect(() => {
+    if (initialSurfaceId && elements[initialSurfaceId]) {
+      handleEditPvSurface(initialSurfaceId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSurfaceId]);
 
   /** Replaces roof elements from a new type template.
    *  If any replaced surface had PV installed, sets the invalidation warning. */
