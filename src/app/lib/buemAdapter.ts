@@ -14,6 +14,7 @@ import {
   hasMappedValue,
 } from '../config/modelDataResolver';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { LoadDataPoint } from './loadProfile';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ export interface BuildingIdentity {
   /** [longitude, latitude] in decimal degrees. */
   coordinates: [number, number];
   buildingType: string;        // localised label, e.g. "Multi-family House"
-  constructionPeriod: string;
+  constructionYear: number;
   country: string;
   floorArea: number;           // m²
   roomHeight: number;          // m
@@ -39,6 +40,12 @@ export interface ThermalSummary {
   peakHeatingKw: number;
   peakCoolingKw: number;
   energyIntensityKwhM2: number;
+  /** Domestic hot water, kWh — absent (0) on results predating BuEM's v6-draft hot_water/kitchen fields. */
+  dhwKwh: number;
+  /** Cooking gas demand — a different fuel channel from the electric kWh above, kept in kWh_gas rather than summed with it. */
+  kitchenGasKwh: number;
+  /** BuEM's own heating+cooling+electricity+hot_water total — gas deliberately excluded. */
+  totalEnergyKwh: number;
 }
 
 export interface GeometryData {
@@ -95,6 +102,11 @@ const BUILDING_TYPE_LABELS: Record<string, string> = {
   AB:  'Apartment Block',
   TH:  'Terraced House',
 };
+
+/** Reverse of BUILDING_TYPE_LABELS, for serializing a label back to its BUEM code. */
+const BUILDING_TYPE_CODES: Record<string, string> = Object.fromEntries(
+  Object.entries(BUILDING_TYPE_LABELS).map(([code, label]) => [label, code]),
+);
 
 /**
  * Converts a BUEM element id to a readable label.
@@ -179,6 +191,8 @@ function adaptTimeseries(ts: unknown): LoadDataPoint[] | null {
     heating:     Number.isFinite(heating[i])     ? Math.abs(heating[i])     : 0,
     hotwater:    0,
     electricity: Number.isFinite(electricity[i]) ? Math.abs(electricity[i]) : 0,
+    dhw:         0,
+    kitchen:     0,
   }));
 }
 
@@ -216,7 +230,8 @@ function adaptThematicData(feature: unknown): ThematicData {
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
     coordinates: [lon, lat],
     buildingType,
-    constructionPeriod: String(getMappedValue(feature, descriptor.constructionPeriod) ?? ''),
+    // construction_period carries a plain year string here, not a { value } quantity.
+    constructionYear: Number(getMappedValue(feature, descriptor.constructionYear)) || 0,
     country: String(getMappedValue(feature, descriptor.country) ?? ''),
     floorArea: getMappedNumber(feature, descriptor.floorArea),
     roomHeight: getMappedNumber(feature, descriptor.roomHeight),
@@ -239,6 +254,12 @@ function adaptThematicData(feature: unknown): ThematicData {
     peakHeatingKw: getMappedNumber(feature, results.peakHeatingLoad),
     peakCoolingKw: getMappedNumber(feature, results.peakCoolingLoad),
     energyIntensityKwhM2: getMappedNumber(feature, results.energyIntensity),
+    dhwKwh: getMappedNumber(feature, results.dhwTotal),
+    kitchenGasKwh: getMappedNumber(feature, results.kitchenTotal),
+    totalEnergyKwh: hasMappedValue(feature, results.totalEnergyDemand)
+      ? getMappedNumber(feature, results.totalEnergyDemand)
+      : getMappedNumber(feature, results.heatingTotal) + getMappedNumber(feature, results.coolingTotal)
+        + getMappedNumber(feature, results.electricityTotal) + getMappedNumber(feature, results.dhwTotal),
   } : null;
 
   return {
@@ -334,6 +355,8 @@ export function parseLoadProfileCsv(csv: string): LoadDataPoint[] {
       electricity: elIdx >= 0 ? Math.abs(Number(cols[elIdx]) || 0) : 0,
       heating:     htIdx >= 0 ? Math.abs(Number(cols[htIdx]) || 0) : 0,
       hotwater:    hwIdx >= 0 ? Math.abs(Number(cols[hwIdx]) || 0) : 0,
+      dhw:         0,
+      kitchen:     0,
     }];
   });
 }
@@ -426,19 +449,28 @@ export function serializeToBuemFeature(
   resolution: string | number = '60',
   resolutionUnit: string = 'minutes',
   batteryConfig?: Record<string, any>,
+  surfacePvConfigs?: Record<string, PvConfig>,
 ): Record<string, any> {
   const [lon, lat] = identity.coordinates;
 
   // Build the building block, preferring passed identity over general config
   const building: Record<string, any> = {};
-  if (identity.buildingType) building.building_type = identity.buildingType;
-  else if (general.buildingType) building.building_type = general.buildingType.replace(/\s+/g, '_').toUpperCase();
+  if (identity.buildingType) building.building_type = BUILDING_TYPE_CODES[identity.buildingType] ?? identity.buildingType;
+  else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 
-  if (identity.constructionPeriod) building.construction_period = identity.constructionPeriod;
-  else if (general.constructionPeriod) building.construction_period = general.constructionPeriod;
+  // construction_period is inert in the BUEM contract (classification metadata,
+  // no simulation effect) and its true value is a per-country TABULA class code
+  // BC does not hold. BC carries the plain construction year here instead, as a
+  // string, so an exported feature round-trips.
+  const constructionYear = identity.constructionYear || general.constructionYear;
+  if (constructionYear) building.construction_period = String(constructionYear);
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
+
+  // Attached-neighbours code (B_Alone/B_N1/B_N2) — drives BuEM's shared-wall
+  // transmission correction factor. Not consumed by ignis.
+  if (general.Code_AttachedNeighbours) building.neighbour_status = general.Code_AttachedNeighbours;
 
   if (typeof identity.floorArea === 'number') {
     // identity.floorArea is already the total conditioned floor area (BuEM A_ref semantics).
@@ -512,6 +544,44 @@ export function serializeToBuemFeature(
     };
   }
 
+  // One entry per PV-installed surface, not one aggregate `pv_supply` — a
+  // building can carry several distinct PV arrays (different roof faces,
+  // different orientation/capacity each), which the flat `Record<techId,
+  // TechData>` shape downstream can only represent as separate tech ids.
+  // Keying on the surface id (`pv_supply__<surfaceId>`) keeps each array
+  // addressable back to the surface it's on. TentaCron resolves any number
+  // of independent resolvent objects per payload, and Calliope addresses
+  // technologies as `location::tech`, so multiple named PV techs at one
+  // building is supported downstream. Not yet verified end-to-end with a
+  // real resource API or a real meme/Calliope run.
+  if (surfacePvConfigs) {
+    for (const [surfaceId, pv] of Object.entries(surfacePvConfigs)) {
+      if (!pv.installed || !elements[surfaceId]) continue;
+      techs[`pv_supply__${surfaceId}`] = {
+        cont_energy_cap_max:   pv.cont_energy_cap_max,
+        cont_energy_cap_min:   pv.cont_energy_cap_min,
+        cont_energy_eff:       pv.cont_energy_eff,
+        cont_lifetime:         pv.cont_lifetime,
+        cont_degradation_rate: pv.cont_degradation_rate,
+        cost_energy_cap:       pv.cost_energy_cap,
+        cost_om_annual:        pv.cost_om_annual,
+        cost_om_variable:      pv.cost_om_variable,
+        cost_interest_rate:    pv.cost_interest_rate,
+        cost_basis:            pv.cost_basis,
+        co2_emission_factor:   pv.co2_emission_factor,
+        // Panel geometry and system-level derating — inputs to whatever
+        // resolves this into a capacity-factor series, not Calliope cost/
+        // efficiency fields themselves.
+        system_capacity:       pv.system_capacity,
+        tilt:                  pv.tilt,
+        azimuth:               pv.azimuth,
+        inv_eff:               pv.inv_eff,
+        dc_ac_ratio:           pv.dc_ac_ratio,
+        losses:                pv.losses,
+      };
+    }
+  }
+
   // Build the complete feature
   const feature: Record<string, any> = {
     type: 'Feature',
@@ -529,11 +599,9 @@ export function serializeToBuemFeature(
         building,
         solver: {
           use_milp: general.use_milp ?? false,
-          // Summer solar gains through real windows can plausibly need active
-          // cooling, not just heating — without this BuEM never computes a
-          // cooling load at all (not zero — the field is simply absent from
-          // the response), regardless of the building's actual exposure.
-          compute_cooling: general.compute_cooling ?? true,
+          // compute_cooling is schema-only in the current BuEM release and
+          // rejected if sent at all — heating and cooling are both always
+          // computed unconditionally. Omit until BuEM wires the flag up.
         },
       },
       ...(Object.keys(techs).length > 0 ? { techs } : {}),
@@ -554,8 +622,11 @@ export function exportToBuemGeojson(
   startTime?: string,
   endTime?: string,
   batteryConfig?: Record<string, any>,
+  surfacePvConfigs?: Record<string, PvConfig>,
 ): string {
-  const feature = serializeToBuemFeature(identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig);
+  const feature = serializeToBuemFeature(
+    identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig, surfacePvConfigs,
+  );
   const featureCollection = {
     type: 'FeatureCollection',
     features: [feature],
@@ -621,10 +692,13 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
   // is per-storey, so divide by the building's own storey count.
   const importedStoreys = Number(bldg.n_storeys ?? 0);
+  const importedYear = Number(bldg.construction_period) || 0;
   const general: Record<string, any> = {
+    // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.
+    ...(importedYear ? { constructionYear: importedYear } : {}),
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
-    constructionPeriod: String(bldg.construction_period ?? ''),
     country: String(bldg.country ?? ''),
+    Code_AttachedNeighbours: String(bldg.neighbour_status ?? 'B_Alone'),
     floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
     roomHeight: qty(bldg.h_room),
     storeys: importedStoreys,

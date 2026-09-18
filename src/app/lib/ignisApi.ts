@@ -1,9 +1,16 @@
 /**
  * ignis API client.
  *
- * Calls ignis endpoints to load TABULA variant lists and run the annual
- * heat demand calculation pipeline. The base URL is configured via the
- * VITE_IGNIS_API_URL environment variable (default: http://localhost:8080).
+ * Loads TABULA refurbishment variants and runs the annual heat demand
+ * pipeline. Every call goes through the EnerPlanET backend's ignis routes
+ * rather than to ignis itself: the backend is the single entry point a client
+ * talks to, and it holds the credential for the service behind it.
+ *
+ * The transport is supplied by the host application (see http.ts), so this
+ * module reads no environment variable and carries no API key.
+ *
+ * The backend returns ignis's body verbatim inside its own {success, data}
+ * envelope, so every reader here unwraps one level.
  */
 
 import type {
@@ -16,17 +23,7 @@ import type {
   IgnisVariantLevel,
 } from './ignisAdapter';
 import { ignisInputsFromTabulaData, toIgnisApiPayload } from './ignisAdapter';
-
-const BASE_URL = (import.meta.env.VITE_IGNIS_API_URL as string | undefined) ?? 'http://localhost:8080';
-
-/**
- * Identifies this app to the reverse proxy sitting in front of ignis.
- * Prototype-stage credential only — see the orchestration-layer decision
- * note before this pattern is carried into production.
- */
-const AUTH_HEADERS: Record<string, string> = import.meta.env.VITE_IGNIS_API_KEY
-  ? { 'X-Api-Key': import.meta.env.VITE_IGNIS_API_KEY as string }
-  : {};
+import type { HttpClient } from './http';
 
 // ─── TABULA code mappings ─────────────────────────────────────────────────────
 
@@ -41,34 +38,9 @@ const BUILDING_TYPE_TO_TABULA: Record<string, string> = {
   'Apartment Block':     'AB',
 };
 
-/**
- * Maps UI construction period strings to TABULA period indices.
- * Period numbering follows the TABULA workbook column order.
- */
-const CONSTRUCTION_PERIOD_TO_TABULA: Record<string, string> = {
-  'Pre-1919':  '01',
-  '1919-1948': '02',
-  '1949-1957': '03',
-  '1958-1968': '04',
-  '1969-1978': '05',
-  '1979-1983': '06',
-  '1984-1994': '07',
-  '1995-2001': '08',
-  '2002-2009': '09',
-  'Post-2010': '10',
-};
-
-/** All TABULA period options, for use in the period override picker. */
-export const TABULA_PERIOD_OPTIONS = Object.keys(CONSTRUCTION_PERIOD_TO_TABULA);
-
 /** Converts a UI building type label to the TABULA code, or null if unsupported. */
 export function toBuildingTypeCode(label: string): string | null {
   return BUILDING_TYPE_TO_TABULA[label] ?? null;
-}
-
-/** Converts a UI construction period string to the TABULA period index, or null. */
-export function toConstructionPeriodCode(period: string): string | null {
-  return CONSTRUCTION_PERIOD_TO_TABULA[period] ?? null;
 }
 
 /** Returns true if the building type is supported by TABULA. */
@@ -76,133 +48,124 @@ export function isBuildingTypeSupported(label: string): boolean {
   return label in BUILDING_TYPE_TO_TABULA;
 }
 
-/** Returns true if the construction period maps directly to a TABULA period code. */
-export function isConstructionPeriodRecognised(period: string): boolean {
-  return period in CONSTRUCTION_PERIOD_TO_TABULA;
-}
-
 // ─── API calls ────────────────────────────────────────────────────────────────
 
-/**
- * Fetches all refurbishment variants that match a building's country, type,
- * and construction period from the HDCP /variants/:country/match endpoint.
- *
- * Returns an empty array if the building type is not supported by TABULA,
- * the service is unreachable, or no variants are found.
- */
-export async function fetchMatchingVariants(
-  countryIso2: string,
-  buildingTypeLabel: string,
-  constructionPeriod: string,
-): Promise<IgnisMatchResponse | null> {
-  const typeCode   = toBuildingTypeCode(buildingTypeLabel);
-  const periodCode = toConstructionPeriodCode(constructionPeriod);
-
-  if (!typeCode || !periodCode) return null;
-
-  const url = `${BASE_URL}/api/v1/variants/${encodeURIComponent(countryIso2)}/match`
-    + `?type=${encodeURIComponent(typeCode)}&period=${encodeURIComponent(periodCode)}`;
-
-  try {
-    const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return null;
-    return (await res.json()) as IgnisMatchResponse;
-  } catch {
-    return null;
-  }
+export interface IgnisApi {
+  fetchMatchingVariants(
+    countryIso2: string,
+    buildingTypeLabel: string,
+    constructionYear: number,
+  ): Promise<IgnisMatchResponse | null>;
+  fetchVariantData(variantCode: string): Promise<IgnisDataResponse | null>;
+  loadVariantLevels(
+    countryIso2: string,
+    buildingTypeLabel: string,
+    constructionYear: number,
+  ): Promise<IgnisVariantLevel[]>;
+  fetchFieldMetadata(): Promise<IgnisFieldMetadata[]>;
+  calculateHeatDemand(
+    variantCode: string,
+    calcDemand: IgnisInputs,
+  ): Promise<IgnisCalculateResponse | null>;
 }
 
 /**
- * Fetches the full TABULA record for a given variant code.
- * Returns null on error so callers can skip gracefully.
+ * Ceilings on a lookup and on the calculation respectively. These bound the
+ * UI's wait, not the work: ignis answers a lookup from its own database and
+ * the calculation is a closed-form pipeline, so anything slower than this is
+ * a service in trouble rather than a long job to wait out.
  */
-export async function fetchVariantData(variantCode: string): Promise<IgnisDataResponse | null> {
-  const url = `${BASE_URL}/api/v1/data/${encodeURIComponent(variantCode)}`;
-  try {
-    const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return null;
-    return (await res.json()) as IgnisDataResponse;
-  } catch {
-    return null;
-  }
+const LOOKUP_TIMEOUT_MS = 8000;
+const CALCULATE_TIMEOUT_MS = 15000;
+
+/** The backend's envelope around a verbatim upstream body. */
+interface Enveloped<T> {
+  data: T;
 }
 
-/**
- * Loads all refurbishment levels for a building classification.
- * Calls /match to get the list of codes, then /data for each code.
- * Returns an empty array if the service is unreachable or no variants exist.
- *
- * periodOverride lets callers supply a known TABULA period string when the
- * building's own constructionPeriod doesn't map directly (e.g. "1980-2000").
- */
-export async function loadVariantLevels(
-  countryIso2: string,
-  buildingTypeLabel: string,
-  constructionPeriod: string,
-  periodOverride?: string,
-): Promise<IgnisVariantLevel[]> {
-  const effectivePeriod = periodOverride ?? constructionPeriod;
-  const matchRes = await fetchMatchingVariants(countryIso2, buildingTypeLabel, effectivePeriod);
-  if (!matchRes || matchRes.data.length === 0) return [];
+export function createIgnisApi(http: HttpClient): IgnisApi {
+  /**
+   * Every call here answers null or an empty list rather than throwing: each
+   * one has a usable fallback in the UI (no variants offered, the component's
+   * own tooltip text, the previous demand figure), and none is a write.
+   */
+  const api: IgnisApi = {
+    async fetchMatchingVariants(countryIso2, buildingTypeLabel, constructionYear) {
+      const typeCode = toBuildingTypeCode(buildingTypeLabel);
+      if (!typeCode) return null;
 
-  const levels: IgnisVariantLevel[] = [];
+      const path = `/v2/ignis/variants/${encodeURIComponent(countryIso2)}/match`
+        + `?type=${encodeURIComponent(typeCode)}&year=${encodeURIComponent(String(constructionYear))}`;
+      try {
+        const res = await http.get<Enveloped<IgnisMatchResponse>>(path, { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) });
+        return res.data;
+      } catch {
+        return null;
+      }
+    },
 
-  await Promise.all(
-    matchRes.data.map(async (entry) => {
-      const dataRes = await fetchVariantData(entry.code);
-      if (!dataRes) return;
+    async fetchVariantData(variantCode) {
+      try {
+        const res = await http.get<Enveloped<IgnisDataResponse>>(
+          `/v2/ignis/data/${encodeURIComponent(variantCode)}`,
+          { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) },
+        );
+        return res.data;
+      } catch {
+        return null;
+      }
+    },
 
-      const inputs: IgnisInputs = ignisInputsFromTabulaData(
-        dataRes.tabula_data as Record<string, unknown>,
+    /**
+     * Loads all refurbishment levels for a building classification: /match for
+     * the list of codes, then /data for each.
+     */
+    async loadVariantLevels(countryIso2, buildingTypeLabel, constructionYear) {
+      const matchRes = await api.fetchMatchingVariants(countryIso2, buildingTypeLabel, constructionYear);
+      if (!matchRes || matchRes.data.length === 0) return [];
+
+      const levels = await Promise.all(
+        matchRes.data.map(async (entry) => {
+          const dataRes = await api.fetchVariantData(entry.code);
+          if (!dataRes) return null;
+
+          const inputs: IgnisInputs = ignisInputsFromTabulaData(
+            dataRes.tabula_data as Record<string, unknown>,
+          );
+          return { code: entry.code, label: entry.label, data: inputs };
+        }),
       );
-      levels.push({ code: entry.code, label: entry.label, data: inputs });
-    }),
-  );
 
-  // Restore original order (Promise.all may resolve out of order).
-  return matchRes.data
-    .map((entry) => levels.find((l) => l.code === entry.code))
-    .filter((l): l is IgnisVariantLevel => l !== undefined);
-}
+      return levels.filter((level): level is IgnisVariantLevel => level !== null);
+    },
 
-/**
- * Fetches ignis's static field-metadata list (labels + descriptions for every
- * TABULA input field), used to enrich form tooltips. Returns an empty array
- * on any error so callers can fall back to their own hardcoded text.
- */
-export async function fetchFieldMetadata(): Promise<IgnisFieldMetadata[]> {
-  const url = `${BASE_URL}/api/v1/fields`;
-  try {
-    const res = await fetch(url, { headers: AUTH_HEADERS, signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return [];
-    const body = (await res.json()) as IgnisFieldMetadataResponse;
-    return body.data ?? [];
-  } catch {
-    return [];
-  }
-}
+    /** Labels and descriptions for every TABULA input field, used to enrich form tooltips. */
+    async fetchFieldMetadata() {
+      try {
+        const res = await http.get<Enveloped<IgnisFieldMetadataResponse>>(
+          '/v2/ignis/fields',
+          { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) },
+        );
+        return res.data?.data ?? [];
+      } catch {
+        return [];
+      }
+    },
 
-/**
- * Calls the HDCP calculate endpoint with the current calcDemand working copy.
- * Returns the q_h_nd result or null on error.
- */
-export async function calculateHeatDemand(
-  variantCode: string,
-  calcDemand: IgnisInputs,
-): Promise<IgnisCalculateResponse | null> {
-  const url     = `${BASE_URL}/api/v1/calculate/${encodeURIComponent(variantCode)}`;
-  const payload = toIgnisApiPayload(calcDemand);
+    /** Runs the calculation against the current working copy, returning the q_h_nd result. */
+    async calculateHeatDemand(variantCode, calcDemand) {
+      try {
+        const res = await http.post<Enveloped<IgnisCalculateResponse>>(
+          `/v2/ignis/calculate/${encodeURIComponent(variantCode)}`,
+          toIgnisApiPayload(calcDemand),
+          { signal: AbortSignal.timeout(CALCULATE_TIMEOUT_MS) },
+        );
+        return res.data;
+      } catch {
+        return null;
+      }
+    },
+  };
 
-  try {
-    const res = await fetch(url, {
-      method:  'POST',
-      headers: { ...AUTH_HEADERS, 'Content-Type': 'application/json' },
-      body:    payload ? JSON.stringify(payload) : undefined,
-      signal:  AbortSignal.timeout(10000),
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as IgnisCalculateResponse;
-  } catch {
-    return null;
-  }
+  return api;
 }

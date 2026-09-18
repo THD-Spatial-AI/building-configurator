@@ -1,6 +1,7 @@
-import { useRef, type ElementType } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, Brush, ReferenceLine } from 'recharts';
-import { Download, Upload, Zap, Flame, Snowflake, Layers3 } from 'lucide-react';
+import { useMemo, useRef, type ElementType } from 'react';
+import ReactECharts from 'echarts-for-react';
+import type { EChartsOption } from 'echarts';
+import { Download, Upload, Zap, Flame, Snowflake, Layers3, Droplets, CookingPot } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
   formatEnergyValue,
@@ -9,7 +10,6 @@ import {
   type EnergyType,
   type LoadDataPoint,
   type Resolution,
-  type WindowMode,
 } from '../../../lib/loadProfile';
 import { useLoadProfileState } from './useLoadProfileState';
 
@@ -24,58 +24,128 @@ interface LoadProfileViewerProps {
   onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
 }
 
+/** One plotted series: the LoadDataPoint key, its legend name and its colour. */
+const SERIES: Record<Exclude<EnergyType, 'combined'>, { name: string; colour: string }> = {
+  electricity: { name: 'Electricity', colour: '#f59e0b' },
+  heating:     { name: 'Heating', colour: '#ef4444' },
+  hotwater:    { name: 'Cooling', colour: '#3b82f6' },
+  dhw:         { name: 'Hot Water', colour: '#0ea5e9' },
+  kitchen:     { name: 'Kitchen (gas)', colour: '#e11d48' },
+};
+
+/** Kitchen is gas (kWh_gas), so it never shares an axis with the others. */
+const COMBINED_KEYS = ['electricity', 'heating', 'hotwater', 'dhw'] as const;
+
+/**
+ * Chart chrome. Literal values rather than the CSS custom properties in T:
+ * ECharts measures and blends these colours itself, which a var() reference
+ * does not survive.
+ */
+const CHROME = {
+  axis:    '#94a3b8',
+  line:    '#e2e8f0',
+  text:    '#64748b',
+  surface: '#ffffff',
+};
+
 export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, initialTimeseries, mode = 'basic', onGroundTruthChange }: LoadProfileViewerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
-    availableHourlyDates,
-    brushRange,
     data,
-    derivedData,
     energyType,
-    fitAllData,
-    handleBrushChange,
     handleDownload,
     handleFileUpload,
     hasData,
     resolution,
-    selectedDate,
     setEnergyType,
     setResolution,
-    setSelectedDate,
-    setWindowMode,
-    shiftSteppedWindow,
-    showBrush,
     sourceCaption,
-    stepLabel,
     unit,
     uploadError,
-    visibleRangeLabel,
-    windowMode,
   } = useLoadProfileState({ buildingId, initialTimeseries, mode, onTotalsChange, onGroundTruthChange });
 
-  // Mean of electricity + heating + cooling per visible point — only meaningful
-  // once all three series are plotted together, so it's Combined-only.
+  // Mean of electricity + heating + cooling + hot water per visible point —
+  // only meaningful once plotted together, so it's Combined-only. Kitchen is
+  // excluded: it's a gas total (kWh_gas), not the same unit as the rest.
   const combinedAverage = energyType === 'combined' && data.length > 0
-    ? data.reduce((sum, point) => sum + point.electricity + point.heating + point.hotwater, 0) / data.length
+    ? data.reduce((sum, point) => sum + point.electricity + point.heating + point.hotwater + point.dhw, 0) / data.length
     : null;
+
+  const chartOption: EChartsOption = useMemo(() => {
+    const keys = energyType === 'combined' ? [...COMBINED_KEYS] : [energyType];
+    return {
+      animation: false,
+      grid: { left: 52, right: 12, top: 12, bottom: 44 },
+      tooltip: {
+        trigger: 'axis',
+        confine: true,
+        backgroundColor: CHROME.surface,
+        borderColor: CHROME.line,
+        textStyle: { color: CHROME.text, fontSize: 11 },
+        valueFormatter: (value) => formatEnergyValue(Number(value), 6),
+      },
+      legend: { bottom: 0, itemWidth: 14, itemHeight: 2, textStyle: { color: CHROME.text, fontSize: 9 } },
+      xAxis: {
+        type: 'category',
+        data: data.map((point) => point.timestamp),
+        axisLabel: {
+          color: CHROME.text,
+          fontSize: 10,
+          hideOverlap: true,
+          formatter: (value: string) => formatTickLabel(value, resolution),
+        },
+        axisLine: { lineStyle: { color: CHROME.axis } },
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        axisLabel: { color: CHROME.text, fontSize: 10, formatter: (value: number) => formatEnergyValue(value, 4) },
+        splitLine: { lineStyle: { color: CHROME.line, type: 'dashed' } },
+      },
+      series: keys.map((key) => ({
+        type: 'line',
+        name: SERIES[key].name,
+        data: data.map((point) => point[key]),
+        showSymbol: false,
+        smooth: true,
+        lineStyle: { width: 2, color: SERIES[key].colour },
+        itemStyle: { color: SERIES[key].colour },
+        // The average belongs to the combined view, so it rides on the first
+        // series rather than being a chart-level line.
+        ...(combinedAverage !== null && key === COMBINED_KEYS[0]
+          ? {
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                lineStyle: { color: CHROME.text, type: 'dashed', width: 1.5 },
+                label: {
+                  formatter: `Avg ${formatEnergyValue(combinedAverage, 4)} ${unit}`,
+                  position: 'insideEndTop',
+                  fontSize: 10,
+                  color: CHROME.text,
+                },
+                data: [{ yAxis: combinedAverage }],
+              },
+            }
+          : {}),
+      })),
+    };
+  }, [data, energyType, resolution, combinedAverage, unit]);
 
   // Shorter labels that communicate "what time period each data point covers"
   const resolutionOptions = [
-    ...(mode === 'expert' ? [{ value: 'hourly', label: 'Hour' }] : []),
+    { value: 'hourly',  label: 'Hour'  },
     { value: 'daily',   label: 'Day'   },
     { value: 'weekly',  label: 'Week'  },
     { value: 'monthly', label: 'Month' },
   ];
-  const windowModeOptions = [
-    { value: 'stepped', label: 'Stepped' },
-    { value: 'free', label: 'Free Range' },
-  ];
-
   // Colours and labels for the vertical energy type tab strip.
   const ENERGY_META: Record<EnergyType, { label: string; Icon: ElementType }> = {
     electricity: { label: 'Electricity', Icon: Zap },
     heating:     { label: 'Heating', Icon: Flame },
     hotwater:    { label: 'Cooling', Icon: Snowflake },
+    dhw:         { label: 'Hot Water', Icon: Droplets },
+    kitchen:     { label: 'Kitchen (gas)', Icon: CookingPot },
     combined:    { label: 'Combined', Icon: Layers3 },
   };
 
@@ -136,183 +206,27 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
         <input ref={fileInputRef} type="file" accept=".json,.csv" style={{ display: 'none' }} onChange={handleFileUpload} />
       </div>
 
-      {hasData && mode === 'expert' && (
-        <div style={{ padding: '8px 14px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <SegmentedControl options={windowModeOptions} value={windowMode} onChange={(value) => setWindowMode(value as WindowMode)} />
-          {windowMode === 'stepped' && resolution === 'hourly' && availableHourlyDates.length > 0 && (
-            <>
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(-1)}
-                disabled={availableHourlyDates.indexOf(selectedDate) <= 0}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: availableHourlyDates.indexOf(selectedDate) <= 0 ? T.mutedFg : T.foreground,
-                  cursor: availableHourlyDates.indexOf(selectedDate) <= 0 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Prev Day
-              </button>
-              <input
-                type="date"
-                value={selectedDate}
-                min={availableHourlyDates[0]}
-                max={availableHourlyDates[availableHourlyDates.length - 1]}
-                onChange={(event) => setSelectedDate(event.target.value)}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'white', color: T.foreground, fontSize: 11,
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(1)}
-                disabled={availableHourlyDates.indexOf(selectedDate) === -1 || availableHourlyDates.indexOf(selectedDate) >= availableHourlyDates.length - 1}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: availableHourlyDates.indexOf(selectedDate) >= availableHourlyDates.length - 1 ? T.mutedFg : T.foreground,
-                  cursor: availableHourlyDates.indexOf(selectedDate) >= availableHourlyDates.length - 1 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Next Day
-              </button>
-            </>
-          )}
-          {windowMode === 'stepped' && resolution !== 'hourly' && (
-            <>
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(-1)}
-                disabled={brushRange.startIndex <= 0}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: brushRange.startIndex <= 0 ? T.mutedFg : T.foreground,
-                  cursor: brushRange.startIndex <= 0 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Prev
-              </button>
-              <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
-                {stepLabel}
-              </span>
-              <button
-                type="button"
-                onClick={() => shiftSteppedWindow(1)}
-                disabled={brushRange.endIndex >= data.length - 1}
-                style={{
-                  height: 28, padding: '0 10px', borderRadius: 5,
-                  border: `1px solid ${T.border}`, background: 'transparent',
-                  color: brushRange.endIndex >= data.length - 1 ? T.mutedFg : T.foreground,
-                  cursor: brushRange.endIndex >= data.length - 1 ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600,
-                }}
-              >
-                Next
-              </button>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={fitAllData}
-            style={{
-              height: 28, padding: '0 10px', borderRadius: 5,
-              border: `1px solid ${T.border}`, background: 'transparent', color: T.foreground,
-              cursor: 'pointer', fontSize: 11, fontWeight: 600,
-            }}
-          >
-            Show All
-          </button>
-          <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
-            {visibleRangeLabel}
-          </span>
-          {windowMode === 'free' && (
-            <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.2 }}>
-              Free range removes fixed steps. Switch to hourly for the finest time selection.
-            </span>
-          )}
-        </div>
-      )}
-
       {uploadError && (
         <div style={{ margin: '6px 14px 0', border: '1px solid #fecaca', background: '#fef2f2', borderRadius: 6, padding: '4px 8px', flexShrink: 0 }}>
           <span style={{ fontSize: 10, color: '#b91c1c' }}>{uploadError}</span>
         </div>
       )}
 
-      {hasData && showBrush && mode === 'expert' && (
-        <div style={{ padding: '6px 14px 0', flexShrink: 0 }}>
-          <span style={{ fontSize: 10, color: T.mutedFg, lineHeight: 1.3 }}>
-            Drag the handles below the chart to zoom. In stepped mode the window snaps to the active resolution; free range removes that constraint.
-          </span>
-        </div>
-      )}
-
       {/* ── Chart ── */}
       <div style={{ flex: 1, minHeight: 0, padding: '8px 12px 4px' }}>
         {hasData ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart key={`${resolution}-${derivedData.sourceResolution ?? 'none'}-${data.length}`} data={data} margin={{ top: 4, right: 4, left: -12, bottom: showBrush && mode === 'expert' ? 18 : 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis
-                dataKey="timestamp"
-                tickFormatter={(v) => formatTickLabel(String(v), resolution)}
-                tick={{ fontSize: 10, fill: T.mutedFg }}
-                stroke={T.border}
-                minTickGap={resolution === 'hourly' ? 24 : 16}
-              />
-              <YAxis
-                tickFormatter={(value) => formatEnergyValue(Number(value), 4)}
-                tick={{ fontSize: 10, fill: T.mutedFg }}
-                stroke={T.border}
-                width={52}
-                domain={[0, 'auto']}
-              />
-              <ChartTooltip
-                labelFormatter={(v) => `Time: ${String(v)}`}
-                formatter={(value) => formatEnergyValue(Number(value), 6)}
-                contentStyle={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: 4, fontSize: 11 }}
-              />
-              <Legend wrapperStyle={{ fontSize: 9 }} iconType="line" iconSize={8} />
-              {(energyType === 'electricity' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="electricity" stroke="#f59e0b" strokeWidth={2} name="Electricity" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {(energyType === 'heating' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="heating" stroke="#ef4444" strokeWidth={2} name="Heating" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {(energyType === 'hotwater' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="hotwater" stroke="#3b82f6" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {combinedAverage !== null && (
-                <ReferenceLine
-                  y={combinedAverage}
-                  stroke="#64748b"
-                  strokeDasharray="4 4"
-                  strokeWidth={1.5}
-                  label={{ value: `Avg ${formatEnergyValue(combinedAverage, 4)} ${unit}`, position: 'insideTopRight', fontSize: 10, fill: '#64748b' }}
-                />
-              )}
-              {showBrush && mode === 'expert' && (
-                <Brush
-                  dataKey="timestamp"
-                  height={20}
-                  stroke={T.border}
-                  travellerWidth={10}
-                  startIndex={brushRange.startIndex}
-                  endIndex={brushRange.endIndex}
-                  onChange={handleBrushChange}
-                  tickFormatter={(value) => formatTickLabel(String(value), resolution)}
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
+          <ReactECharts
+            option={chartOption}
+            style={{ width: '100%', height: '100%' }}
+            notMerge
+            opts={{ renderer: 'svg' }}
+          />
         ) : (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px dashed ${T.border}`, borderRadius: 6, background: T.inputBg, padding: '0 24px', textAlign: 'center' }}>
             <div>
               <p style={{ fontSize: 13, fontWeight: 600, color: T.foreground, margin: '0 0 4px' }}>No usage data loaded</p>
               <p style={{ fontSize: 11, color: T.mutedFg, lineHeight: 1.6, margin: 0 }}>
-                Use "Import Data" to load an energy profile, or connect to the backend.
+                Use "Import Data" to load an energy profile, or generate demand profiles by clicking "Run Simulation" button at bottom.
               </p>
             </div>
           </div>

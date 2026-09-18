@@ -467,9 +467,17 @@ export function ignisInputsFromTabulaData(tabula: Record<string, unknown>): Igni
 
 // ─── API payload ──────────────────────────────────────────────────────────────
 
-/** Maps each overridable IgnisInputs field to its POST /calculate JSON key. */
+/**
+ * Maps each overridable IgnisInputs field to its POST /calculate JSON key.
+ *
+ * A_ref is deliberately absent though ignis accepts it: overriding the
+ * reference area while the archetype's envelope areas stay fixed scales
+ * q_h_nd per m2 non-linearly (verified 13.22 -> 1.55 kWh/(m2.a) for A_ref
+ * 150 -> 300). ignis returns the archetype's own per-m2 figure from an empty
+ * body; callers that need an absolute total multiply by the real floor area
+ * (resolveDisplayEnergyTotals in BuildingConfigurator.tsx).
+ */
 const IGNIS_OVERRIDE_FIELD_KEYS: [keyof IgnisInputs, string][] = [
-  ['A_C_Ref_Input', 'A_ref'],
   ['HeatingDays', 'HeatingDays'],
   ['Theta_e', 'Theta_e'],
   ['Theta_i', 'theta_i'],
@@ -483,11 +491,13 @@ const IGNIS_OVERRIDE_FIELD_KEYS: [keyof IgnisInputs, string][] = [
 ];
 
 /**
- * Produces the request body for POST /api/v1/calculate/:code — every field
- * ignis's handler accepts as an override (see internal/api/handler/calculation.go)
- * is included when present on calcDemand, so editing "Advanced parameters"
- * (heating days, design temperatures, solar irradiance, thermal bridging)
- * actually changes the returned q_h_nd, not just the local UI state.
+ * Produces the request body for POST /api/v1/calculate/:code — the
+ * climate/solar/thermal-bridging overrides (heating days, design
+ * temperatures, solar irradiance, thermal bridging) are included when
+ * present on calcDemand, so editing "Advanced parameters" actually changes
+ * the returned q_h_nd. Returns undefined for an empty body so the caller
+ * omits it and ignis uses the stored archetype values (see
+ * IGNIS_OVERRIDE_FIELD_KEYS on why A_ref is not sent).
  */
 export function toIgnisApiPayload(calcDemand: IgnisInputs): Record<string, unknown> | undefined {
   const payload: Record<string, unknown> = {};

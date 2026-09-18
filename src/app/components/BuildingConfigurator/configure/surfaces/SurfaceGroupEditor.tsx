@@ -8,7 +8,7 @@ import { ChevronUp, ChevronDown, Info, Layers, AlertTriangle, Sun, Pencil, Check
 import { ELEMENT_DOTS, SegmentedControl, ToggleSwitch, NumberInput, FieldLabel, ScrollHintContainer } from '@/app/components/BuildingConfigurator/shared/ui';
 import { createSurfacePvConfig, type PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
-import { elementToGroup, isUserDefinedElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { elementToGroup, isUserDefinedElement, hasInvalidArea } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 // ─── Exported patch type ───────────────────────────────────────────────────────
 
@@ -66,10 +66,11 @@ interface SpinnerProps {
   unit?: string;
   narrow?: boolean;
   disabled?: boolean;
+  invalid?: boolean;
   onChange: (v: number) => void;
 }
 
-function NumberSpinner({ value, min = 0, max = 360, step = 1, decimals = 0, unit = '°', narrow = false, disabled = false, onChange }: SpinnerProps) {
+function NumberSpinner({ value, min = 0, max = 360, step = 1, decimals = 0, unit = '°', narrow = false, disabled = false, invalid = false, onChange }: SpinnerProps) {
   const fmt = (v: number) => decimals > 0 ? v.toFixed(decimals) : String(Math.round(v));
   const [draft, setDraft] = useState(fmt(value));
 
@@ -85,7 +86,7 @@ function NumberSpinner({ value, min = 0, max = 360, step = 1, decimals = 0, unit
 
   return (
     <div className="flex items-center gap-1.5">
-      <div className={`flex items-center overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ${narrow ? 'w-[100px]' : 'w-[120px]'} ${disabled ? 'opacity-50' : ''}`}>
+      <div className={`flex items-center overflow-hidden rounded-lg border shadow-sm ${invalid ? 'border-destructive ring-1 ring-destructive/30 bg-destructive/5' : 'border-slate-200 bg-white'} ${narrow ? 'w-[100px]' : 'w-[120px]'} ${disabled ? 'opacity-50' : ''}`}>
         <input
           type="number" min={min} max={max} step={step} value={draft} disabled={disabled}
           onChange={(e) => setDraft(e.target.value)}
@@ -309,19 +310,6 @@ function AzimuthControl({ value, disabled = false, onChange }: { value: number; 
 }
 
 // ─── Thermal field — inline click-to-edit row ─────────────────────────────────
-
-/** Read-only display row used in basic mode and for derived values. */
-function ThermalReadRow({ label, value, unit }: { label: string; value: string; unit: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-[11px] text-slate-500">{label}</span>
-      <div className="flex items-baseline gap-1">
-        <span className="text-[12px] font-semibold text-slate-800">{value}</span>
-        <span className="text-[10px] text-slate-400">{unit}</span>
-      </div>
-    </div>
-  );
-}
 
 /** Click-to-edit inline field for numeric values. */
 function ThermalEditRow({
@@ -566,6 +554,12 @@ function PvTab({
                   <NumberInput value={+(pvConfig.losses * 100).toFixed(1)} onChange={(v) => onUpdate({ losses: v / 100 })} unit="%" min={0} max={50} step={0.5} />
                 </div>
               </div>
+              <div className="flex items-center justify-between">
+                <FieldLabel tip="Annual output loss from panel ageing. Typical crystalline silicon: 0.4-0.6%/year.">Degradation rate</FieldLabel>
+                <div className="w-28">
+                  <NumberInput value={+(pvConfig.cont_degradation_rate * 100).toFixed(2)} onChange={(v) => onUpdate({ cont_degradation_rate: v / 100 })} unit="%/yr" min={0} max={5} step={0.05} />
+                </div>
+              </div>
             </div>
           </>
         )}
@@ -697,6 +691,7 @@ export function SurfaceGroupEditor({
   const { count, totalArea } = deriveGroupStats(elements, el);
   const label             = groupLabel(el);
   const warnings          = getWarnings(el);
+  const invalidArea       = hasInvalidArea(el);
   const save              = (patch: Partial<BuildingElement>) => onUpdateElement(selectedElementId!, patch);
   const userDefined       = isUserDefinedElement(el);
   const isWindow          = el.type === 'window';
@@ -753,6 +748,15 @@ export function SurfaceGroupEditor({
           </p>
         </div>
       </div>
+
+      {activeTab === 'properties' && invalidArea && (
+        <div className="mb-3 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2.5">
+          <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+          <p className="text-[10px] leading-snug text-destructive">
+            This surface has no area, so a simulation will reject it. Enter an area greater than 0 below, or delete this surface if it's a stray sliver from the imported geometry.
+          </p>
+        </div>
+      )}
 
       {activeTab === 'properties' && warnings.length > 0 && (
         <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
@@ -856,21 +860,27 @@ export function SurfaceGroupEditor({
             <div className="mt-4 border-t border-slate-200 pt-4 grid grid-cols-2 gap-4">
               <div className="flex items-center justify-center gap-4">
                 <FieldLabel tip="Total surface area in square metres. Used to calculate heat loss through this element.">
-                  Area
+                  <span className={invalidArea ? 'text-destructive' : undefined}>Area</span>
                 </FieldLabel>
                 <NumberSpinner
                   value={el.area} min={0.1} max={100000} step={1} decimals={1} unit="m²"
+                  invalid={invalidArea}
                   onChange={(v) => save({ area: Math.max(0.1, v) })}
                 />
               </div>
-              <div className="border-l border-slate-200 pl-4 flex items-center justify-center gap-4">
-                <FieldLabel tip="Thermal transmittance — lower values mean better insulation. Typical values: wall 0.2–0.5, window 0.8–2.0, roof 0.15–0.35 W/m²K.">
-                  U-value
-                </FieldLabel>
-                <NumberSpinner
-                  value={el.uValue} min={0.01} max={10} step={0.01} decimals={2} unit="W/m²K"
-                  onChange={(v) => save({ uValue: Math.max(0.01, v) })}
-                />
+              <div className="border-l border-slate-200 pl-4 flex flex-col items-center justify-center gap-1">
+                <div className="flex items-center gap-4">
+                  <FieldLabel tip="Thermal transmittance — lower values mean better insulation. Typical values: wall 0.2–0.5, window 0.8–2.0, roof 0.15–0.35 W/m²K.">
+                    U-value
+                  </FieldLabel>
+                  <NumberSpinner
+                    value={el.uValue} min={0.01} max={10} step={0.01} decimals={2} unit="W/m²K"
+                    onChange={(v) => save({ uValue: Math.max(0.01, v) })}
+                  />
+                </div>
+                {mode === 'expert' && (
+                  <span className="text-[10px] text-muted-foreground">R-value (1/U): {rValue} m²K/W</span>
+                )}
               </div>
             </div>
 
@@ -896,8 +906,6 @@ export function SurfaceGroupEditor({
             {/* Expert thermal fields */}
             {mode === 'expert' && (
               <div className="mt-4 border-t border-slate-200 pt-4 flex flex-col gap-3">
-                <ThermalReadRow label="R-value (1/U)" value={rValue} unit="m²K/W" />
-
                 {isWindow && (
                   <ThermalEditRow
                     label="g-value (SHGC)"

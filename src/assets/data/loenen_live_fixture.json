@@ -1,0 +1,2077 @@
+{
+  "buildings": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.026936171,
+                  52.100329202
+                ],
+                [
+                  6.026920029,
+                  52.100346583
+                ],
+                [
+                  6.026897793,
+                  52.100370514
+                ],
+                [
+                  6.026954577,
+                  52.100390519
+                ],
+                [
+                  6.027024681,
+                  52.100415207
+                ],
+                [
+                  6.027085078,
+                  52.10035019
+                ],
+                [
+                  6.027016163,
+                  52.100325919
+                ],
+                [
+                  6.026958191,
+                  52.100305507
+                ],
+                [
+                  6.026936171,
+                  52.100329202
+                ]
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "area": 83.47,
+          "osm_id": "268426401",
+          "f_class": "apartments",
+          "f_classes": "apartments",
+          "feature_type": "building",
+          "grid_result_id": 2584
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.02665611,
+                  52.100399815
+                ],
+                [
+                  6.026672036,
+                  52.100339858
+                ],
+                [
+                  6.026634388,
+                  52.100336242
+                ],
+                [
+                  6.026597046,
+                  52.100332634
+                ],
+                [
+                  6.026585642,
+                  52.100392468
+                ],
+                [
+                  6.026618135,
+                  52.10039586
+                ],
+                [
+                  6.02665611,
+                  52.100399815
+                ]
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "area": 33.97,
+          "osm_id": "268426931",
+          "f_class": "apartments",
+          "f_classes": "apartments",
+          "feature_type": "building",
+          "grid_result_id": 2584
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.022238743,
+                  52.099519965
+                ],
+                [
+                  6.022264182,
+                  52.099526119
+                ],
+                [
+                  6.022266316,
+                  52.099523268
+                ],
+                [
+                  6.022290607,
+                  52.099485629
+                ],
+                [
+                  6.022301628,
+                  52.099468312
+                ],
+                [
+                  6.022325698,
+                  52.099430521
+                ],
+                [
+                  6.022298487,
+                  52.099423945
+                ],
+                [
+                  6.022261567,
+                  52.099415039
+                ],
+                [
+                  6.022230534,
+                  52.099407539
+                ],
+                [
+                  6.02216959,
+                  52.099503269
+                ],
+                [
+                  6.022194589,
+                  52.099509309
+                ],
+                [
+                  6.022238743,
+                  52.099519965
+                ]
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "area": 80.07,
+          "osm_id": "268414202",
+          "f_class": "apartments",
+          "f_classes": "apartments",
+          "feature_type": "building",
+          "grid_result_id": 2584
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.020447458,
+                  52.098956847
+                ],
+                [
+                  6.020487011,
+                  52.098924044
+                ],
+                [
+                  6.020512893,
+                  52.098901757
+                ],
+                [
+                  6.020557321,
+                  52.098864891
+                ],
+                [
+                  6.02046222,
+                  52.098821405
+                ],
+                [
+                  6.020369597,
+                  52.098898258
+                ],
+                [
+                  6.020420894,
+                  52.09892172
+                ],
+                [
+                  6.020403036,
+                  52.098936557
+                ],
+                [
+                  6.020447458,
+                  52.098956847
+                ]
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "area": 94.43,
+          "osm_id": "268414170",
+          "f_class": "apartments",
+          "f_classes": "apartments",
+          "feature_type": "building",
+          "grid_result_id": 2584
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.02049322,
+                  52.09899553
+                ],
+                [
+                  6.020485733,
+                  52.099001745
+                ],
+                [
+                  6.020521224,
+                  52.099017967
+                ],
+                [
+                  6.020524118,
+                  52.099019281
+                ],
+                [
+                  6.020611461,
+                  52.098946807
+                ],
+                [
+                  6.02060914,
+                  52.09894575
+                ],
+                [
+                  6.020573047,
+                  52.098929271
+                ],
+                [
+                  6.020559372,
+                  52.098940615
+                ],
+                [
+                  6.020550544,
+                  52.098947943
+                ],
+                [
+                  6.02049322,
+                  52.09899553
+                ]
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "area": 32.89,
+          "osm_id": "605842892",
+          "f_class": "apartments",
+          "f_classes": "apartments",
+          "feature_type": "building",
+          "grid_result_id": 2584
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  6.026923771,
+                  52.101647855
+                ],
+                [
+                  6.026927355,
+                  52.101635144
+                ],
+                [
+                  6.026986869,
+                  52.101631621
+                ],
+                [
+                  6.02702897,
+                  52.101629137
+                ],
+                [
+                  6.027021163,
+                  52.10159763
+                ],
+                [
+                  6.0270223,
+                  52.101597552
+                ],
+                [
+                  6.027015989,
+                  52.101579799
+                ],
+                [
+                  6.026896675,
+                  52.101590298
+                ],
+                [
+                  6.026900628,
+                  52.101607462
+                ],
+                [
+                  6.026902605,
+                  52.101616026
+                ],
+                [
+                  6.026910229,
+                  52.101649034
+                ],
+                [
+                  6.026923771,
+                  52.101647855
+                ]
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "area": 46.39,
+          "osm_id": "268427659",
+          "f_class": "apartments",
+          "f_classes": "apartments",
+          "feature_type": "building",
+          "grid_result_id": 2584
+        }
+      }
+    ]
+  },
+  "enrich": {
+    "status": "completed",
+    "resolved": 6,
+    "total": 6,
+    "missing": [],
+    "data": {
+      "268426401": {
+        "object_id": "NL.IMBAG.Pand.0200100000022498-0",
+        "match_type": 1,
+        "tabula_variant_code": "NL.N.SFH.02.Deta.ReEx.001.001",
+        "default_construction_year": 1969,
+        "buem": {
+          "building": {
+            "n_storeys": 3,
+            "h_room": {
+              "value": 2.5,
+              "unit": "m"
+            },
+            "footprint_area": {
+              "value": 83.47,
+              "unit": "m2"
+            },
+            "envelope": {
+              "elements": [
+                {
+                  "id": "02daa868-6116-4366-9e01-7a25a583b0cd",
+                  "type": "floor",
+                  "area": {
+                    "value": 83.47,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "1cb24c64-5ba2-4308-a9d9-29d7af3cec84",
+                  "type": "roof",
+                  "area": {
+                    "value": 69.52,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 58.95,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 48.87,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "22c7ae4d-6db6-4fdf-b6cd-5717354b204a",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.89,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 180.24,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "24a90ad2-11be-425d-a5d9-52bc7ef96486",
+                  "type": "roof",
+                  "area": {
+                    "value": 52.65,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 239.19,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 49,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "4235533f-a91a-4afe-ae45-6589d36fd27f",
+                  "type": "wall",
+                  "area": {
+                    "value": 26.84,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 329.72,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "6c9bac25-6682-4328-bef5-3fb94ed2fb9b",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.75,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 300.51,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "83089a28-daff-48ab-ae88-f140cd0abcc7",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.79,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 253.34,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "9391bbcf-5fe6-4693-809b-c4aa7c6d9b7f",
+                  "type": "wall",
+                  "area": {
+                    "value": 27.24,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 149.74,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "a7123e96-b072-4253-81fe-a93b92c52a31",
+                  "type": "wall",
+                  "area": {
+                    "value": 2.62,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 169.34,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "aa43d73b-c240-405f-8dbe-950cbd166a26",
+                  "type": "wall",
+                  "area": {
+                    "value": 10.14,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 239.71,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "bb683589-fb2b-4176-b99d-bf6ec17a81f3",
+                  "type": "wall",
+                  "area": {
+                    "value": 19.11,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 59.72,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "d21c797a-454d-413e-98bc-0eae0cf11958",
+                  "type": "wall",
+                  "area": {
+                    "value": 29.87,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 329.73,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "dbbef651-5b67-4874-907d-b609ac6641dc",
+                  "type": "wall",
+                  "area": {
+                    "value": 11.52,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 239.73,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "de7384f1-95eb-41f3-b548-9278756f9abc",
+                  "type": "roof",
+                  "area": {
+                    "value": 3.64,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 239.04,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 28.119999999999997,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "e4b12d9a-5588-47cf-9fd5-f3075e42a8e3",
+                  "type": "wall",
+                  "area": {
+                    "value": 29.77,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 149.73,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "e9f0a147-7ee9-4e38-8119-1344ab3f1022",
+                  "type": "wall",
+                  "area": {
+                    "value": 10.41,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 239.72,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "268426931": {
+        "object_id": "NL.IMBAG.Pand.0200100000022499-0",
+        "match_type": 1,
+        "tabula_variant_code": "NL.N.TH.04.Gen.ReEx.001.001",
+        "default_construction_year": 1998,
+        "buem": {
+          "building": {
+            "n_storeys": 2,
+            "h_room": {
+              "value": 2.5,
+              "unit": "m"
+            },
+            "footprint_area": {
+              "value": 33.97,
+              "unit": "m2"
+            },
+            "envelope": {
+              "elements": [
+                {
+                  "id": "156493cf-bdb1-4a61-aff1-9e9036b1cd3e",
+                  "type": "roof",
+                  "area": {
+                    "value": 18.47,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 259.97,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 28.259999999999998,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "333c3e51-56dc-4423-b478-ff2247881904",
+                  "type": "wall",
+                  "area": {
+                    "value": 7.94,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 349.87,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "33f11cce-77cd-4c7f-b66d-56d1d8ea4d75",
+                  "type": "floor",
+                  "area": {
+                    "value": 33.97,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "42d4afbe-ecdf-4816-8e3e-b0eb152bb8a4",
+                  "type": "wall",
+                  "area": {
+                    "value": 8.94,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 170.63,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "4f722765-de31-4b7a-9ded-684090d57f85",
+                  "type": "roof",
+                  "area": {
+                    "value": 20.07,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 79.97,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 28.130000000000003,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "5f560f3c-4a35-4b73-96c2-873eaae25b2f",
+                  "type": "wall",
+                  "area": {
+                    "value": 9.01,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 349.9,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "918618ac-e066-46c6-b672-fb6c1a41a7d0",
+                  "type": "wall",
+                  "area": {
+                    "value": 18.37,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 80.2,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "be5ffb44-15a1-4319-93fd-a1e386f3eb12",
+                  "type": "wall",
+                  "area": {
+                    "value": 8.87,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 170.58,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "cbae2091-7a58-466f-af8f-7ec68b75ff55",
+                  "type": "wall",
+                  "area": {
+                    "value": 18.89,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 262.8,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "268414202": {
+        "object_id": "NL.IMBAG.Pand.0200100000022490-0",
+        "match_type": 1,
+        "tabula_variant_code": "NL.N.SFH.05.Gen.ReEx.001.001",
+        "default_construction_year": 2010,
+        "buem": {
+          "building": {
+            "n_storeys": 3,
+            "h_room": {
+              "value": 2.5,
+              "unit": "m"
+            },
+            "footprint_area": {
+              "value": 80.07,
+              "unit": "m2"
+            },
+            "envelope": {
+              "elements": [
+                {
+                  "id": "0c7e0911-efa9-479d-a725-27bf857c67a6",
+                  "type": "wall",
+                  "area": {
+                    "value": 12.57,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 68.1,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "206a9b52-d805-4f83-b14e-432b3b485b50",
+                  "type": "wall",
+                  "area": {
+                    "value": 11.79,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 338.08,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "22b6de2d-82da-45d2-b940-238933ce5bbd",
+                  "type": "roof",
+                  "area": {
+                    "value": 2.45,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 70.19,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 53.44,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "2b3d84fa-063e-4eda-a725-9ec32028a0cd",
+                  "type": "wall",
+                  "area": {
+                    "value": 14.22,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 158.07,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "345c3ed3-f989-47a3-9b1d-2d8671608b2a",
+                  "type": "wall",
+                  "area": {
+                    "value": 22.8,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 338.1,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "3e70e625-41a5-498e-b7da-edd92aac20ae",
+                  "type": "roof",
+                  "area": {
+                    "value": 5.69,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 336.01,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 58.43,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "62ee199f-4f3c-499b-aedd-144b1670a3aa",
+                  "type": "wall",
+                  "area": {
+                    "value": 2.86,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 113.7,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "6651b5ca-9d1c-4dc7-a229-f536a5268371",
+                  "type": "wall",
+                  "area": {
+                    "value": 2.13,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 4.24,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "6a3532a4-59ea-4a84-bdf2-aecbcc4894ac",
+                  "type": "wall",
+                  "area": {
+                    "value": 21.31,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 68.08,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "6d2144fa-8157-4084-a663-190e212920f4",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.54,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 64.76,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "825c2e3b-5332-4ff9-b161-8982d41a2053",
+                  "type": "floor",
+                  "area": {
+                    "value": 80.07,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "876053ef-5216-4f38-ac3a-e97b73554a0b",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.44,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 38.08,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "8c2ed9bd-d3a6-4eef-8da7-e0dbbab7a555",
+                  "type": "wall",
+                  "area": {
+                    "value": 55.22,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 248.09,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "ac7ff1fe-c0be-4c92-846c-35436f649b85",
+                  "type": "wall",
+                  "area": {
+                    "value": 21.14,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 158.11,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "b73f4666-6952-4822-9de9-370a5ebdc45e",
+                  "type": "roof",
+                  "area": {
+                    "value": 65.17,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 66.53,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 55.21,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "b9a57f85-6e41-4ed7-bfe8-303b17b7f634",
+                  "type": "wall",
+                  "area": {
+                    "value": 20.17,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 67.82,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "d1deedb3-1702-4d1c-889b-10ff595acaf2",
+                  "type": "roof",
+                  "area": {
+                    "value": 64.73,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 246.34,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 55.32,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "f06a2a95-7399-4b39-aeb5-82508438a51c",
+                  "type": "wall",
+                  "area": {
+                    "value": 10.8,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 338.05,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "f989edb4-6783-4256-b8ce-3b1339f51c6a",
+                  "type": "wall",
+                  "area": {
+                    "value": 12.51,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 158.07,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "ff78698a-c538-4115-a0b8-4ce276577d43",
+                  "type": "roof",
+                  "area": {
+                    "value": 3.11,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 155.68,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 58.67,
+                    "unit": "deg"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "268414170": {
+        "object_id": "NL.IMBAG.Pand.0200100000935589-0",
+        "match_type": 1,
+        "tabula_variant_code": "NL.N.SFH.05.Gen.ReEx.001.001",
+        "default_construction_year": 2010,
+        "buem": {
+          "building": {
+            "n_storeys": 2,
+            "h_room": {
+              "value": 2.5,
+              "unit": "m"
+            },
+            "footprint_area": {
+              "value": 94.43,
+              "unit": "m2"
+            },
+            "envelope": {
+              "elements": [
+                {
+                  "id": "0024ad39-be62-454e-a2cd-6917a722a3c3",
+                  "type": "wall",
+                  "area": {
+                    "value": 27.83,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 52.92,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "0f28c2f3-133c-40bc-8441-09320d165948",
+                  "type": "wall",
+                  "area": {
+                    "value": 44.13,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 142.91,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "11cc3e63-6672-418d-91cf-1f2be52e875a",
+                  "type": "wall",
+                  "area": {
+                    "value": 11.26,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 52.95,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "1ccdfe70-0ba8-4944-ada5-b4d90e006d09",
+                  "type": "wall",
+                  "area": {
+                    "value": 23.98,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 322.9,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "86896d3d-6035-4f74-82c3-75eddfc47311",
+                  "type": "floor",
+                  "area": {
+                    "value": 94.43,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "9d0ad685-6be0-49c0-9611-55188f0730ea",
+                  "type": "wall",
+                  "area": {
+                    "value": 24.9,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 52.9,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "a05b53fc-5417-4810-8c10-259286061558",
+                  "type": "wall",
+                  "area": {
+                    "value": 58.12,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 232.92,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "b824fbcc-241b-4490-a737-8c2aa50ae0da",
+                  "type": "wall",
+                  "area": {
+                    "value": 20.79,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 322.94,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "da1d3c21-64e8-4edc-bdc8-993070ed55e8",
+                  "type": "wall",
+                  "area": {
+                    "value": 16.65,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 53.93,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "e7430c28-1a4f-4ee4-b98e-56680852883f",
+                  "type": "roof",
+                  "area": {
+                    "value": 94.43,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "605842892": {
+        "object_id": "NL.IMBAG.Pand.0200100003922295-0",
+        "match_type": 1,
+        "tabula_variant_code": "NL.N.TH.01.End1964.ReEx.001.001",
+        "default_construction_year": 1964,
+        "buem": {
+          "building": {
+            "n_storeys": 2,
+            "h_room": {
+              "value": 2.5,
+              "unit": "m"
+            },
+            "footprint_area": {
+              "value": 32.89,
+              "unit": "m2"
+            },
+            "envelope": {
+              "elements": [
+                {
+                  "id": "07b60c1b-5053-4af4-a712-60bb4999948e",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.01,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 141.41,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "098fc3c3-a738-4ff6-af93-23c1ffe6ffd0",
+                  "type": "wall",
+                  "area": {
+                    "value": 21.24,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 232.93,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "1640eb8f-740f-4c1b-a8f2-49da0bbb7df8",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.08,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 234.34,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "2b7e006f-d31d-4760-8991-58dfcbc061b0",
+                  "type": "roof",
+                  "area": {
+                    "value": 1.54,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 320.4,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 45.73,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "305e224a-758d-434c-8e55-55c712253fbd",
+                  "type": "roof",
+                  "area": {
+                    "value": 4.44,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 322.26,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 50.11,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "36a1b467-17c2-4633-b0d8-ce04b0d2d404",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.58,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 143.01,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "39ac7adb-2556-4309-bc6d-f7d2a786f9d6",
+                  "type": "wall",
+                  "area": {
+                    "value": 4.46,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 232.93,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "433a430e-e6a2-4c5f-bc49-d1872f8b15a0",
+                  "type": "roof",
+                  "area": {
+                    "value": 23.74,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 52.76,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 51.1,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "4f1146c9-40dc-4f6d-ab89-66f5eaa7f5cd",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.08,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 189.38,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "5d0c0372-ab98-4162-8072-0598a3a3aedd",
+                  "type": "wall",
+                  "area": {
+                    "value": 28.29,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 52.92,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "5e5078da-5fba-4c9c-9e23-33dc4b548149",
+                  "type": "roof",
+                  "area": {
+                    "value": 5.76,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 142.81,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 50.04,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "64ae7ecd-a1ca-459e-8d27-3749a40786ec",
+                  "type": "roof",
+                  "area": {
+                    "value": 15.45,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 233.21,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 47.87,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "77a28182-8d44-4e33-83ab-9a167028a22d",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.52,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 337.14,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "8572ed7f-15ff-4438-b544-7886ff9aca94",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.32,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 164.17,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "a5b8945a-fa9a-439c-a117-af26eabcb24c",
+                  "type": "wall",
+                  "area": {
+                    "value": 6.24,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 232.91,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "c76c9c17-c0da-4381-bff7-bf589cbc2940",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.73,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 323.08,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "c8694ce5-5eb2-4fd7-a7f1-42bc8cfe2e22",
+                  "type": "wall",
+                  "area": {
+                    "value": 9.34,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 322.92,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "dd62b0f6-51f7-45b8-88dd-958e6cd5bf7b",
+                  "type": "wall",
+                  "area": {
+                    "value": 3.08,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 232.93,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "df4b88da-c4df-4d7b-b41e-0aacfeafc389",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.13,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 164.15,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "e57e4b82-5642-4b73-a9dd-d62f3f67fd67",
+                  "type": "floor",
+                  "area": {
+                    "value": 32.89,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "f67eda90-9c27-4c0f-87ba-1ede0b308977",
+                  "type": "wall",
+                  "area": {
+                    "value": 9.33,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 142.95,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "268427659": {
+        "object_id": "NL.IMBAG.Pand.0200100000022488-0",
+        "match_type": 1,
+        "tabula_variant_code": "NL.N.SFH.03.Deta.ReEx.001.001",
+        "default_construction_year": 1983,
+        "buem": {
+          "building": {
+            "n_storeys": 3,
+            "h_room": {
+              "value": 2.5,
+              "unit": "m"
+            },
+            "footprint_area": {
+              "value": 46.39,
+              "unit": "m2"
+            },
+            "envelope": {
+              "elements": [
+                {
+                  "id": "040b9a84-c72a-41d8-aad6-7c85dd9591b0",
+                  "type": "wall",
+                  "area": {
+                    "value": 20.25,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 98.17,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "06d125f5-c91b-47d1-a882-2993dd590283",
+                  "type": "wall",
+                  "area": {
+                    "value": 15.07,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 277.59,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "134fddb3-ba82-4d2f-9ef2-9c72af6e5ed0",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.33,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 334.75,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "25426e73-ffb9-4b5f-9a9d-f11078afdd57",
+                  "type": "wall",
+                  "area": {
+                    "value": 12.58,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 277.57,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "2fac505b-d051-45ed-a4e9-cada1c70b0a1",
+                  "type": "roof",
+                  "area": {
+                    "value": 8.51,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 7.18,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 58.21,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "358f61ce-a862-4553-b811-ed3b561f81bd",
+                  "type": "roof",
+                  "area": {
+                    "value": 17.14,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 7.2,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 58.2,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "40871fda-b0be-4128-92dd-b5b81e80606c",
+                  "type": "wall",
+                  "area": {
+                    "value": 12.99,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 101.84,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "43932bd2-102e-4228-8c64-dc2a39f5b1a8",
+                  "type": "roof",
+                  "area": {
+                    "value": 33.12,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 186.94,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 60.260000000000005,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "445121a0-99ee-40ad-84a3-645403e66a99",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.74,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 187.06,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "56ccb966-5046-48f0-9c96-9ecfbb3fc2fc",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.64,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 185.86,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "7c8af814-ab98-4126-af89-db25ffa56271",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.01,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 7.54,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "8c165585-67ef-4a62-bb2d-d88d06af8451",
+                  "type": "wall",
+                  "area": {
+                    "value": 39.21,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 187.63,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "970f3e68-1655-445e-9680-eb6b0f10292d",
+                  "type": "wall",
+                  "area": {
+                    "value": 20.63,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 4.99,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "a0150fda-2099-4406-b5b1-5d98af64ce70",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.79,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 259.66,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "aa0da505-e537-4a5a-bf9d-059098f43364",
+                  "type": "wall",
+                  "area": {
+                    "value": 3.13,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 259.65,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "b798dd1d-2c3c-4368-89c5-b2c070e072f5",
+                  "type": "floor",
+                  "area": {
+                    "value": 46.39,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 0,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 0,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "d5213619-dcfd-445f-ae87-13cc6d8ef917",
+                  "type": "wall",
+                  "area": {
+                    "value": 7.47,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 277.58,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "d9af35c4-56af-48d5-98f7-1ea2061bf8ab",
+                  "type": "wall",
+                  "area": {
+                    "value": 8.52,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 4.97,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "df6c8f89-3d73-4113-bcf7-6ae29e30bb72",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.13,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 74.64,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "e92a1061-6275-4776-ac6d-86a359a54d90",
+                  "type": "wall",
+                  "area": {
+                    "value": 0.12,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 74.6,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "eeb2dd19-2e7d-4899-82e9-f5f5e87ee1d5",
+                  "type": "wall",
+                  "area": {
+                    "value": 1.72,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 100.07,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 90,
+                    "unit": "deg"
+                  }
+                },
+                {
+                  "id": "f677a2d1-cee9-4404-9885-80f091992ab5",
+                  "type": "roof",
+                  "area": {
+                    "value": 22.56,
+                    "unit": "m2"
+                  },
+                  "azimuth": {
+                    "value": 7.2,
+                    "unit": "deg"
+                  },
+                  "tilt": {
+                    "value": 43.21,
+                    "unit": "deg"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

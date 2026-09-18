@@ -113,7 +113,9 @@ markdown_extensions:
 # Page tree
 nav:
   - Home: index.md
+  - Installing: installing.md
   - Architecture: architecture.md
+  - UI Terminology: ui-terminology.md
   - ignis field mapping: ignis-field-mapping.md
 
 # Mermaid is loaded explicitly: Material's dynamic import at runtime can fail

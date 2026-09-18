@@ -2,15 +2,18 @@
 
 import { strToU8, zipSync } from 'fflate';
 
-export type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'combined';
+export type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'dhw' | 'kitchen' | 'combined';
 export type Resolution = 'hourly' | 'daily' | 'weekly' | 'monthly';
-export type WindowMode = 'stepped' | 'free';
 
 export interface LoadDataPoint {
   timestamp: string;
   electricity: number;
   heating: number;
   hotwater: number;
+  /** Domestic hot water, kWh — real per-hour data (v6-draft), unlike `hotwater` above which is actually cooling. 0 on sources predating it (older BuEM runs, CSV uploads without a matching column). */
+  dhw: number;
+  /** Cooking gas demand, kWh_gas — a different fuel channel, not summed with the electric/thermal series above. */
+  kitchen: number;
 }
 
 /**
@@ -26,7 +29,15 @@ export interface EnergyTotals {
   electricity: string;
   heating: string;
   hotwater: string;
+  /** Domestic hot water — BuEM's v6-draft hot_water total; '—' when unavailable (e.g. an uploaded profile with no model run behind it). */
+  dhw?: string;
+  /** Cooking gas demand, in kitchenUnit (kWh_gas) rather than the electric unit below. */
+  kitchen?: string;
+  /** heating + cooling + electricity + dhw — gas (kitchen) deliberately excluded, same choice BuEM itself makes. */
+  total?: string;
   unit: string;
+  /** Overrides `unit` for the kitchen row only, since it's a gas total, not electric kWh. */
+  kitchenUnit?: string;
   heatingSource?: EnergySource;
   electricitySource?: EnergySource;
   hotwaterSource?: EnergySource;
@@ -53,19 +64,8 @@ export interface DerivedDataState {
   isDerived: boolean;
 }
 
-export interface BrushRange {
-  startIndex: number;
-  endIndex: number;
-}
-
 export const RESOLUTIONS: Resolution[] = ['hourly', 'daily', 'weekly', 'monthly'];
 export const RESOLUTION_ORDER: Resolution[] = ['hourly', 'daily', 'weekly', 'monthly'];
-export const DEFAULT_WINDOW_BY_RESOLUTION: Record<Resolution, number> = {
-  hourly: 24,
-  daily: 365,
-  weekly: 52,
-  monthly: 12,
-};
 
 const BASE_UTC_DATE = Date.UTC(2026, 0, 5, 0, 0, 0);
 const TIMESTAMP_HEADERS = ['datetime', 'timestamp', 'time', 'date', 'timesteps', 'zeit'];
@@ -151,6 +151,10 @@ function normalizePoint(input: unknown, index: number, resolution: Resolution = 
     electricity: clampNumber(electricity),
     heating: clampNumber(heating),
     hotwater: clampNumber(hotwater),
+    // No CSV/JSON upload column for these yet — only a live BuEM run
+    // populates real dhw/kitchen per-hour data (see buemApi.ts).
+    dhw: 0,
+    kitchen: 0,
   };
 }
 
@@ -231,86 +235,6 @@ export function formatTickLabel(timestamp: string, resolution: Resolution) {
 }
 
 /** Converts an ISO timestamp into a UTC date key used by the hourly day picker. */
-export function toUtcDateKey(timestamp: string) {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) return timestamp;
-  return date.toISOString().slice(0, 10);
-}
-
-/** Lists unique UTC date keys present in the current series. */
-export function getDistinctDateKeys(data: LoadDataPoint[]) {
-  return Array.from(new Set(data.map((point) => toUtcDateKey(point.timestamp))));
-}
-
-/** Compares two brush ranges to avoid redundant state updates. */
-export function rangeEquals(left: BrushRange, right: BrushRange) {
-  return left.startIndex === right.startIndex && left.endIndex === right.endIndex;
-}
-
-/** Builds a window constrained to the dataset size and requested window length. */
-export function buildWindowRange(total: number, startIndex: number, windowSize: number): BrushRange {
-  if (total <= 0) {
-    return { startIndex: 0, endIndex: 0 };
-  }
-
-  const effectiveWindow = Math.max(1, Math.min(windowSize, total));
-  const safeStart = Math.max(0, Math.min(startIndex, total - effectiveWindow));
-
-  return {
-    startIndex: safeStart,
-    endIndex: safeStart + effectiveWindow - 1,
-  };
-}
-
-/** Clamps a free-form brush range to the available dataset length. */
-export function clampBrushRange(total: number, startIndex: number, endIndex: number): BrushRange {
-  if (total <= 0) {
-    return { startIndex: 0, endIndex: 0 };
-  }
-
-  const safeStart = Math.max(0, Math.min(startIndex, total - 1));
-  const safeEnd = Math.max(safeStart, Math.min(endIndex, total - 1));
-
-  return { startIndex: safeStart, endIndex: safeEnd };
-}
-
-/** Finds the contiguous hourly slice corresponding to a selected UTC date key. */
-export function findDateRange(data: LoadDataPoint[], dateKey: string): BrushRange | null {
-  const startIndex = data.findIndex((point) => toUtcDateKey(point.timestamp) === dateKey);
-
-  if (startIndex === -1) {
-    return null;
-  }
-
-  let endIndex = startIndex;
-
-  while (endIndex + 1 < data.length && toUtcDateKey(data[endIndex + 1].timestamp) === dateKey) {
-    endIndex += 1;
-  }
-
-  return { startIndex, endIndex };
-}
-
-/** Produces the chart subtitle describing the currently visible time range. */
-export function getVisibleRangeLabel(data: LoadDataPoint[], range: BrushRange, resolution: Resolution) {
-  if (data.length === 0) return '';
-
-  const safeRange = clampBrushRange(data.length, range.startIndex, range.endIndex);
-  const start = data[safeRange.startIndex];
-  const end = data[safeRange.endIndex];
-
-  if (!start || !end) return '';
-
-  const count = safeRange.endIndex - safeRange.startIndex + 1;
-
-  if (resolution === 'hourly') {
-    return `${toUtcDateKey(start.timestamp)} · ${count} hours`;
-  }
-
-  const unitLabel = resolution === 'daily' ? 'days' : resolution === 'weekly' ? 'weeks' : 'months';
-  return `${formatTickLabel(start.timestamp, resolution)} to ${formatTickLabel(end.timestamp, resolution)} · ${count} ${unitLabel}`;
-}
-
 /** Aggregates a finer-grained series into daily, weekly, or monthly buckets. */
 export function aggregateSeries(data: LoadDataPoint[], resolution: Exclude<Resolution, 'hourly'>): LoadDataPoint[] {
   const buckets = new Map<string, LoadDataPoint>();
@@ -326,6 +250,8 @@ export function aggregateSeries(data: LoadDataPoint[], resolution: Exclude<Resol
         existing.electricity = clampNumber(existing.electricity + point.electricity);
         existing.heating = clampNumber(existing.heating + point.heating);
         existing.hotwater = clampNumber(existing.hotwater + point.hotwater);
+        existing.dhw = clampNumber(existing.dhw + point.dhw);
+        existing.kitchen = clampNumber(existing.kitchen + point.kitchen);
         return;
       }
 
@@ -334,6 +260,8 @@ export function aggregateSeries(data: LoadDataPoint[], resolution: Exclude<Resol
         electricity: clampNumber(point.electricity),
         heating: clampNumber(point.heating),
         hotwater: clampNumber(point.hotwater),
+        dhw: clampNumber(point.dhw),
+        kitchen: clampNumber(point.kitchen),
       });
     });
 

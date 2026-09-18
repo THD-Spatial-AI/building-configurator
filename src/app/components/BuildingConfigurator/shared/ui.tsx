@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
-import { Info, ChevronDown } from 'lucide-react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Info, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Design tokens — CSS variable references for use in SVG attributes ─────────
@@ -508,8 +509,16 @@ export function ScrollHintContainer({
   return (
     <div className="relative h-full min-h-0 overflow-hidden">
       <div ref={scrollRef} className={cn('h-full overflow-y-auto', className)}>
-        {/* Content wrapper — observed so the hint reacts when sections expand */}
-        <div ref={contentRef}>
+        {/* Content wrapper — observed so the hint reacts when sections expand.
+            h-full (not min-h-full — that doesn't reliably give descendants a
+            definite height to resolve percentage heights against) so a short
+            child using h-full (e.g. a centered empty state) actually gets a
+            height to center against, instead of collapsing to its own
+            content size and rendering pinned at the top. Safe for taller
+            content too: overflow stays visible, so it still spills past this
+            box and still counts toward the scrollable ancestor's
+            scrollHeight, same as before. */}
+        <div ref={contentRef} className="h-full">
           {children}
         </div>
       </div>
@@ -533,5 +542,67 @@ export function ScrollHintContainer({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Element configurator modal ────────────────────────────────────────────────
+
+/**
+ * Blurred-backdrop overlay that hosts a single element's editor (a surface
+ * group, PV, battery, or the building's advanced settings). Replaces the old
+ * persistent "active editor" column — the editor now only exists while the
+ * user is actively configuring one thing, instead of always occupying space.
+ */
+const MODAL_SIZE = {
+  default: 'h-[min(760px,85vh)] w-[min(1060px,94vw)]',
+  // Battery has far less content than the other panels (building/surfaces/PV)
+  // and was leaving most of the default-sized modal blank.
+  compact: 'h-[min(520px,80vh)] w-[min(640px,94vw)]',
+  // Surface-group editor: a fixed 200px sidebar list + one surface's
+  // properties form — neither needs the full default width, which left a
+  // few hundred px of blank card on the right. Height stays fairly tall
+  // since groups with many surfaces (or Roof's expandable type gallery)
+  // still need room; the sidebar/editor panes scroll independently anyway.
+  medium: 'h-[min(660px,85vh)] w-[min(820px,94vw)]',
+} as const;
+
+export function ElementConfiguratorModal({
+  open,
+  onClose,
+  title,
+  children,
+  size = 'default',
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  size?: keyof typeof MODAL_SIZE;
+}) {
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          className={cn(
+            'fixed top-1/2 left-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+            MODAL_SIZE[size],
+          )}
+        >
+          <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-3 top-3 z-10 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
+          >
+            <X />
+          </button>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

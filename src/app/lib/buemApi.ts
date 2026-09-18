@@ -1,35 +1,13 @@
 /**
- * buem-gateway API client.
+ * BuEM response shapes, shared between callers of the per-building BuEM run.
  *
- * Runs BuEM for the current building and returns its load profile. The base
- * URL is configured via the VITE_BUEM_API_URL environment variable
- * (default: https://localhost:8443, buem-gateway's own local-dev default).
- *
- * Demo-only wiring: this is a direct frontend-to-service call, not the
- * target architecture. In the real system Building Configurator only
- * collects data — it flows through the EnerPlanET backend and an
- * Orchestration layer that dispatches to BuEM (and other services), not
- * through a call like this one. See buem-gateway's
- * decisions/2026-07-24-buem-gateway-standalone-repo.md for the full
- * reasoning. Kept here only to showcase the pieces working end-to-end ahead
- * of that layer existing.
+ * enerplanetApi.ts's runBuildingSimulation is the only caller: it posts to
+ * the EnerPlanET backend's POST /api/v1/buem/building, which forwards the
+ * request to buem-gateway and returns buem-gateway's own per-building result
+ * unchanged — so the shapes below describe buem-gateway's output either way.
  */
 
-import type { BuildingIdentity } from './buemAdapter';
-import { serializeToBuemFeature } from './buemAdapter';
 import type { LoadDataPoint } from './loadProfile';
-
-const BASE_URL = (import.meta.env.VITE_BUEM_API_URL as string | undefined) ?? 'https://localhost:8443';
-
-/**
- * Identifies this app to the reverse proxy sitting in front of buem-gateway.
- * Prototype-stage credential only — see the orchestration-layer decision
- * note before this pattern is carried into production (same caveat as
- * ignisApi.ts's identical header).
- */
-const AUTH_HEADERS: Record<string, string> = import.meta.env.VITE_BUEM_API_KEY
-  ? { 'X-Api-Key': import.meta.env.VITE_BUEM_API_KEY as string }
-  : {};
 
 /** A {value, unit} measurement, as buem-gateway's response shapes them. */
 interface BuemQuantity {
@@ -37,29 +15,31 @@ interface BuemQuantity {
   unit: string;
 }
 
-interface BuemThermalLoadProfile {
+export interface BuemThermalLoadProfile {
   summary: {
     heating: { total: BuemQuantity };
     cooling?: { total: BuemQuantity };
     electricity: { total: BuemQuantity };
+    // v6-draft; absent on results predating hot_water/kitchen. Kitchen's
+    // total is in kWh_gas — a fuel channel, not electric kWh.
+    hot_water?: { total: BuemQuantity };
+    kitchen?: { total: BuemQuantity };
+    // heating + cooling + electricity + hot_water, deliberately excluding
+    // kitchen (a gas channel, not electric/thermal kWh — see geojson_processor.py).
+    total_energy_demand?: BuemQuantity;
     peak_heating_load?: BuemQuantity;
     peak_cooling_load?: BuemQuantity;
     energy_intensity?: BuemQuantity;
   };
   timeseries?: {
     unit: string;
+    kitchen_unit?: string;
     timestamps: string[];
     heating: number[];
     cooling?: number[];
     electricity: number[];
-  };
-}
-
-interface BuemBuildingResponse {
-  id: string;
-  buem: {
-    thermal_load_profile: BuemThermalLoadProfile;
-    model_metadata?: Record<string, unknown>;
+    hot_water?: number[];
+    kitchen?: number[];
   };
 }
 
@@ -70,6 +50,10 @@ export interface BuemThermalSummary {
   peakHeatingKw: number;
   peakCoolingKw: number;
   energyIntensityKwhM2: number;
+  dhwKwh: number;
+  kitchenGasKwh: number;
+  /** BuEM's own heating+cooling+electricity+hot_water total — gas deliberately excluded, see BuemThermalLoadProfile. */
+  totalEnergyKwh: number;
 }
 
 export interface BuemSimulationResult {
@@ -77,57 +61,7 @@ export interface BuemSimulationResult {
   thermalSummary: BuemThermalSummary;
 }
 
-/**
- * Runs BuEM for one building via buem-gateway's single-building endpoint
- * (POST /buem/building — no topology wrapper, since this UI only ever has
- * one building) and converts the result into the UI's LoadDataPoint /
- * thermal summary shapes.
- *
- * Returns null on any failure — unreachable service, BuEM rejected the
- * request (e.g. no TABULA match when envelope was incomplete), timeout —
- * so callers can surface a clear message without crashing. The request can
- * legitimately take several seconds: BuEM runs a real physics solve, not a
- * lookup.
- */
-export async function runBuildingSimulation(
-  identity: BuildingIdentity,
-  elements: Record<string, any>,
-  general: Record<string, any>,
-  modelId: string,
-  batteryConfig?: Record<string, any>,
-): Promise<BuemSimulationResult | null> {
-  const feature = serializeToBuemFeature(
-    identity, elements, general,
-    undefined, undefined, undefined, undefined,
-    batteryConfig,
-  );
-
-  const request = {
-    id: feature.id,
-    geometry: feature.geometry,
-    model_id: modelId,
-    start_date: feature.properties.start_time,
-    end_date: feature.properties.end_time,
-    resolution: Number(feature.properties.resolution),
-    buem: feature.properties.buem,
-  };
-
-  try {
-    const res = await fetch(`${BASE_URL}/buem/building`, {
-      method:  'POST',
-      headers: { ...AUTH_HEADERS, 'Content-Type': 'application/json' },
-      body:    JSON.stringify(request),
-      signal:  AbortSignal.timeout(60000),
-    });
-    if (!res.ok) return null;
-    const body = (await res.json()) as BuemBuildingResponse;
-    return toSimulationResult(body.buem.thermal_load_profile);
-  } catch {
-    return null;
-  }
-}
-
-function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResult {
+export function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResult {
   const ts = profile.timeseries;
   const timeseries: LoadDataPoint[] = ts
     ? ts.timestamps.map((timestamp, i) => ({
@@ -143,6 +77,8 @@ function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResu
         // it here so every downstream reader (chart, CSV export, totals)
         // sees a plain positive "energy needed for cooling" figure.
         hotwater: -(ts.cooling?.[i] ?? 0),
+        dhw:      ts.hot_water?.[i] ?? 0,
+        kitchen:  ts.kitchen?.[i] ?? 0,
       }))
     : [];
 
@@ -155,6 +91,11 @@ function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResu
       peakHeatingKw:        profile.summary.peak_heating_load?.value ?? 0,
       peakCoolingKw:        profile.summary.peak_cooling_load?.value ?? 0,
       energyIntensityKwhM2: profile.summary.energy_intensity?.value ?? 0,
+      dhwKwh:               profile.summary.hot_water?.total.value ?? 0,
+      kitchenGasKwh:        profile.summary.kitchen?.total.value ?? 0,
+      totalEnergyKwh:       profile.summary.total_energy_demand?.value
+        ?? profile.summary.heating.total.value + (profile.summary.cooling?.total.value ?? 0)
+           + profile.summary.electricity.total.value + (profile.summary.hot_water?.total.value ?? 0),
     },
   };
 }

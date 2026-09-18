@@ -43,6 +43,18 @@ export interface PvConfig {
   cost_om_annual: number;
   /** Discount rate for financial calculations (0–1). */
   cost_interest_rate: number;
+  /**
+   * Whether cost_energy_cap is an overnight (paid up front) or annualized
+   * (spread over cont_lifetime) figure. Required by meme's Technology model;
+   * defaults to 'overnight' there when absent.
+   */
+  cost_basis: 'overnight' | 'annualized';
+  /** Variable operation and maintenance cost per unit generated (€/kWh). */
+  cost_om_variable: number;
+  /** Annual output degradation from panel ageing, as a fraction of rated capacity (0–1/year). */
+  cont_degradation_rate: number;
+  /** Operational CO2 emission factor (kg CO2/kWh generated). Zero for PV; carried for parity with other technologies. */
+  co2_emission_factor: number;
   /** Whether the optimiser should auto-orient panels. */
   optimize_orientation: boolean;
   /**
@@ -69,6 +81,10 @@ export const DEFAULT_PV_CONFIG: PvConfig = {
   cost_energy_cap:      575,
   cost_om_annual:       8,
   cost_interest_rate:   0.02,
+  cost_basis:           'overnight',
+  cost_om_variable:     0,
+  cont_degradation_rate: 0.005,
+  co2_emission_factor:  0,
   optimize_orientation: false,
   usable_area_pct:      80,
 };
@@ -159,27 +175,21 @@ export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
 export const DEFAULT_GENERAL = {
   buildingName:       '',
   buildingType:       'Multi-family House',
-  constructionPeriod: 'Post-2010',
+  constructionYear:   2015,
   country:            'DE',
   floorArea:          90.9, // per-storey footprint; 4 storeys ≈ 363.4 m² total
   roomHeight:         2.7,
   storeys:            4,
   n_air_infiltration: 0.4,
   n_air_use:          0.4,
-  phi_int:            3.0,
-  q_w_nd:             12.5,
   massClass:          'Medium',
   c_m:                110,
   use_milp:           false,
   electricityDemand:  4000,
   spaceHeatingDemand: 15000,
   dhwDemand:          2500,
-  // ignis building-level condition codes (from TABULA)
+  // TABULA neighbour code — sent to BuEM as neighbour_status.
   Code_AttachedNeighbours: 'B_Alone',
-  Code_AtticCond:          'N',
-  Code_CellarCond:         'N',
-  Code_ComplexFootprint:   'Standard',
-  Code_ComplexRoof:        'no',
 };
 
 // ─── Floor area / volume ──────────────────────────────────────────────────────

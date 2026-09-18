@@ -278,7 +278,6 @@ describe('toIgnisApiPayload', () => {
 
   it('includes only the fields that are present, using ignis\'s exact JSON keys', () => {
     const payload = toIgnisApiPayload({
-      A_C_Ref_Input: 150,
       HeatingDays: 0,
       Theta_e: -5,
       Theta_i: 20,
@@ -287,7 +286,6 @@ describe('toIgnisApiPayload', () => {
       Delta_U_ThermalBridging_Original: 0.1,
     });
     expect(payload).toEqual({
-      A_ref: 150,
       HeatingDays: 0,
       Theta_e: -5,
       theta_i: 20,
@@ -295,6 +293,11 @@ describe('toIgnisApiPayload', () => {
       I_Sol_Hor: 800,
       delta_U_ThermalBridging_Original: 0.1,
     });
+  });
+
+  it('never sends A_ref: overriding it against a fixed archetype envelope distorts q_h_nd per m2', () => {
+    expect(toIgnisApiPayload({ A_C_Ref_Input: 300 })).toBeUndefined();
+    expect(toIgnisApiPayload({ A_C_Ref_Input: 300, HeatingDays: 200 })).toEqual({ HeatingDays: 200 });
   });
 
   it('omits fields the user has not touched rather than sending zeros for them', () => {

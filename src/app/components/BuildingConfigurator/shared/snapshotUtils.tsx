@@ -82,12 +82,11 @@ export interface SnapshotRow {
   editKey?: string;
   /**
    * Controls the edit widget rendered for this row:
-   * - 'text'           -> free-text input
-   * - 'number'         -> numeric input; saved as Number(draft)
-   * - 'select'         -> dropdown; requires `options`
-   * - 'year-to-period' -> year number input that saves the derived construction period string
+   * - 'text'   -> free-text input
+   * - 'number' -> numeric input; saved as Number(draft)
+   * - 'select' -> dropdown; requires `options`
    */
-  editType?: 'text' | 'number' | 'select' | 'year-to-period';
+  editType?: 'text' | 'number' | 'select';
   /** Option list for 'select' rows. */
   options?: Array<{ value: string; label: string }>;
   /** Raw (unformatted) value used as the initial input value when editing starts. */
@@ -127,12 +126,12 @@ export function buildSnapshotRows(
       rawValue: general.buildingType,
     },
     {
-      label: 'Construction',
-      value: general.constructionPeriod,
-      status: general.constructionPeriod === baseGeneral.constructionPeriod ? 'default' : 'modified',
-      editKey: 'constructionPeriod',
-      editType: 'year-to-period',
-      rawValue: general.constructionPeriod,
+      label: 'Construction year',
+      value: String(general.constructionYear),
+      status: general.constructionYear === baseGeneral.constructionYear ? 'default' : 'modified',
+      editKey: 'constructionYear',
+      editType: 'number',
+      rawValue: general.constructionYear,
     },
     {
       label: 'Country',

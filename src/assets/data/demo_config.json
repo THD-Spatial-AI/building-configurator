@@ -19,8 +19,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            12.957720028571428,
-            48.83391105372817
+            6.02697,
+            52.100351
           ],
           "type": "Point"
         },
@@ -47,7 +47,7 @@
           "buem": {
             "building": {
               "type": "SFH",
-              "construction_period": "1979-1983",
+              "construction_period": "1981",
               "country": "NL",
               "A_ref": {
                 "value": 500.4,
@@ -341,8 +341,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            12.9584,
-            48.83415
+            6.026631,
+            52.100371
           ],
           "type": "Point"
         },
@@ -369,7 +369,7 @@
           "buem": {
             "building": {
               "type": "MFH",
-              "construction_period": "1949-1957",
+              "construction_period": "1953",
               "country": "DE",
               "A_ref": {
                 "value": 650.0,
@@ -617,8 +617,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            12.957,
-            48.8325
+            6.022257,
+            52.099478
           ],
           "type": "Point"
         },
@@ -645,7 +645,7 @@
           "buem": {
             "building": {
               "type": "TH",
-              "construction_period": "Post-2010",
+              "construction_period": "2015",
               "country": "DE",
               "A_ref": {
                 "value": 140.0,
@@ -893,8 +893,8 @@
         "custom_demand_timeseries": null,
         "geometry": {
           "coordinates": [
-            12.9601,
-            48.8333
+            6.020456,
+            52.098909
           ],
           "type": "Point"
         },
@@ -921,7 +921,7 @@
           "buem": {
             "building": {
               "type": "AB",
-              "construction_period": "1958-1968",
+              "construction_period": "1963",
               "country": "DE",
               "A_ref": {
                 "value": 900.0,

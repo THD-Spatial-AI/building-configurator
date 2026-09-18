@@ -29,11 +29,23 @@ interface PvSurfaceManagerProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function compassDir(azimuth: number): string {
+  // city2tabula sets azimuth to -1 for surfaces too close to horizontal for a
+  // bearing to mean anything (see isFlatRoof below) — reading it as a compass
+  // value would silently show "N", a plausible-looking wrong answer.
+  if (azimuth === -1) return 'flat';
   const dirs: Array<[number, string]> = [
     [22.5, 'N'], [67.5, 'NE'], [112.5, 'E'], [157.5, 'SE'],
     [202.5, 'S'], [247.5, 'SW'], [292.5, 'W'], [337.5, 'NW'],
   ];
   return dirs.find(([limit]) => azimuth < limit)?.[1] ?? 'N';
+}
+
+/** city2tabula's own signal for "this surface is horizontal, no meaningful
+ * azimuth" (tilt > ~80°, where atan2 stops being numerically stable) — not a
+ * heuristic guess, and stable across the whole dataset. On a flat roof,
+ * azimuth and tilt for PV are the installer's choice, not a geometry fact. */
+function isFlatRoof(el: BuildingElement): boolean {
+  return el.azimuth === -1;
 }
 
 function effectiveGeometry(element: BuildingElement, pv: PvConfig) {
@@ -57,19 +69,19 @@ function effectiveGeometry(element: BuildingElement, pv: PvConfig) {
 function scorePvSurface(el: BuildingElement): number | null {
   if (['floor', 'window', 'door'].includes(el.type)) return null;
 
-  // Angle from south (0 = south, 180 = north)
-  const azDiff = Math.min(Math.abs(el.azimuth - 180), 360 - Math.abs(el.azimuth - 180));
+  const flat = isFlatRoof(el);
+  // Angle from south (0 = south, 180 = north) — meaningless for a flat roof,
+  // so never computed from el.azimuth (-1) in that case.
+  const azDiff = flat ? 0 : Math.min(Math.abs(el.azimuth - 180), 360 - Math.abs(el.azimuth - 180));
 
   // Steeply-tilted surfaces facing more than 90° from south get no solar gain in the
-  // northern hemisphere — exclude them entirely from recommendations.
-  // Flat/low-tilt surfaces (≤ 10°) are orientation-agnostic.
-  if (el.tilt > 10 && azDiff > 90) return null;
+  // northern hemisphere — exclude them entirely from recommendations. Flat
+  // roofs have no bearing to measure this against, so they're never excluded here.
+  if (!flat && azDiff > 90) return null;
 
   // Cosine-based azimuth score: 1.0 south, 0 east/west.
   // Flat surfaces are unaffected by azimuth so receive full score.
-  const azScore = el.tilt <= 10
-    ? 1.0
-    : Math.max(0, Math.cos((azDiff * Math.PI) / 180));
+  const azScore = flat ? 1.0 : Math.max(0, Math.cos((azDiff * Math.PI) / 180));
 
   const tiltScore = Math.max(0, 1 - Math.abs(el.tilt - 35) / 70);
   const areaScore = Math.min(1, el.area / 40);

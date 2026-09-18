@@ -12,19 +12,8 @@ export const BUILDING_TYPE_OPTIONS = [
   { value: 'Hotel',               label: 'Hotel'               },
 ];
 
-/** TABULA-aligned construction periods supported by the BUEM model. */
-export const CONSTRUCTION_PERIOD_OPTIONS = [
-  { value: 'Pre-1919',  label: 'Pre-1919'  },
-  { value: '1919-1948', label: '1919-1948' },
-  { value: '1949-1957', label: '1949-1957' },
-  { value: '1958-1968', label: '1958-1968' },
-  { value: '1969-1978', label: '1969-1978' },
-  { value: '1979-1983', label: '1979-1983' },
-  { value: '1984-1994', label: '1984-1994' },
-  { value: '1995-2001', label: '1995-2001' },
-  { value: '2002-2009', label: '2002-2009' },
-  { value: 'Post-2010', label: 'Post-2010' },
-];
+/** Earliest construction year the year input accepts. */
+export const MIN_CONSTRUCTION_YEAR = 1850;
 
 export const COUNTRY_OPTIONS = [
   { value: 'DE', label: 'DE - Germany'     },
@@ -34,8 +23,9 @@ export const COUNTRY_OPTIONS = [
 ];
 
 /**
- * Maps a specific construction year to its TABULA period string.
- * Returns the period label that should be stored in `general.constructionPeriod`.
+ * Maps a construction year to the TABULA period label it falls in. The label is
+ * a UI/ignis-lookup concept only; `general.constructionYear` is the stored value.
+ * Every year resolves to a period, so callers never need a fallback.
  */
 export function yearToConstructionPeriod(year: number): string {
   if (year < 1919) return 'Pre-1919';

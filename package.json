@@ -1,48 +1,79 @@
 {
-  "name": "@figma/my-make-file",
-  "private": true,
-  "version": "0.0.1",
+  "name": "@thd-spatial-ai/building-configurator",
+  "version": "0.1.1",
+  "description": "Building energy model configurator for the EnerPlanET platform",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/THD-Spatial-AI/building-configurator.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
-    "build": "vite build",
     "dev": "vite",
-    "test": "vitest run"
+    "build": "vite build",
+    "build:lib": "vite build --config vite.lib.config.ts && tsc -p tsconfig.build.json && cp src/styles/package.css dist/styles.css",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepare": "npm run build:lib",
+    "prepublishOnly": "npm run build:lib"
+  },
+  "peerDependencies": {
+    "echarts": "^5.5.0 || ^6.0.0",
+    "echarts-for-react": "^3.0.2",
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "1.1.6",
-    "@radix-ui/react-slot": "1.1.2",
-    "@radix-ui/react-switch": "1.1.3",
-    "@radix-ui/react-tooltip": "1.1.8",
-    "@thd-spatial-ai/feedback-kit": "github:THD-Spatial-AI/feedback-kit",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/blob": "^2.3.3",
-    "clsx": "2.1.1",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "clsx": "^2.1.1",
     "fflate": "^0.8.3",
-    "lucide-react": "0.487.0",
-    "recharts": "2.15.2",
-    "tailwind-merge": "3.2.0"
+    "lucide-react": ">=0.487.0 <1.0.0",
+    "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
+    "@thd-spatial-ai/feedback-kit": "github:THD-Spatial-AI/feedback-kit",
     "@types/node": "^25.5.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.186.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/blob": "^2.3.3",
     "@vercel/edge": "^1.2.2",
     "@vercel/node": "^3.0.1",
     "@vitejs/plugin-react": "4.7.0",
+    "earcut": "^3.2.3",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.5",
+    "ol": "^10.10.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "tailwindcss": "4.1.12",
+    "three": "^0.186.0",
+    "typescript": "^5.9.2",
     "vite": "^6.4.2",
     "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
   },
   "pnpm": {
     "overrides": {

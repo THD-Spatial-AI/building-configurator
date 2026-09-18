@@ -29,7 +29,7 @@ export const MODEL_DATA_MAP = {
         'properties.buem.building.building_type',                         // BUEM response shape
         'properties.buem.building.type',                                  // EnerPlanET topology shape
       ],
-      constructionPeriod: 'properties.buem.building.construction_period',
+      constructionYear:  'properties.buem.building.construction_period',   // holds a plain year string, see buemAdapter
       country:            'properties.buem.building.country',
       floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
       roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
@@ -46,6 +46,9 @@ export const MODEL_DATA_MAP = {
       heatingTotal:     'properties.buem.thermal_load_profile.summary.heating.total',
       coolingTotal:     'properties.buem.thermal_load_profile.summary.cooling.total',
       electricityTotal: 'properties.buem.thermal_load_profile.summary.electricity.total',
+      dhwTotal:         'properties.buem.thermal_load_profile.summary.hot_water.total',
+      kitchenTotal:     'properties.buem.thermal_load_profile.summary.kitchen.total',
+      totalEnergyDemand: 'properties.buem.thermal_load_profile.summary.total_energy_demand',
       peakHeatingLoad:  'properties.buem.thermal_load_profile.summary.peak_heating_load',
       peakCoolingLoad:  'properties.buem.thermal_load_profile.summary.peak_cooling_load',
       energyIntensity:  'properties.buem.thermal_load_profile.summary.energy_intensity',
