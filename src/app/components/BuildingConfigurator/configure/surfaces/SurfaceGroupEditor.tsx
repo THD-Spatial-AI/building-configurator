@@ -554,6 +554,12 @@ function PvTab({
                   <NumberInput value={+(pvConfig.losses * 100).toFixed(1)} onChange={(v) => onUpdate({ losses: v / 100 })} unit="%" min={0} max={50} step={0.5} />
                 </div>
               </div>
+              <div className="flex items-center justify-between">
+                <FieldLabel tip="Annual output loss from panel ageing. Typical crystalline silicon: 0.4-0.6%/year.">Degradation rate</FieldLabel>
+                <div className="w-28">
+                  <NumberInput value={+(pvConfig.cont_degradation_rate * 100).toFixed(2)} onChange={(v) => onUpdate({ cont_degradation_rate: v / 100 })} unit="%/yr" min={0} max={5} step={0.05} />
+                </div>
+              </div>
             </div>
           </>
         )}

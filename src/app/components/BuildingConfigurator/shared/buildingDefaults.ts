@@ -43,6 +43,18 @@ export interface PvConfig {
   cost_om_annual: number;
   /** Discount rate for financial calculations (0–1). */
   cost_interest_rate: number;
+  /**
+   * Whether cost_energy_cap is an overnight (paid up front) or annualized
+   * (spread over cont_lifetime) figure. Required by meme's Technology model;
+   * defaults to 'overnight' there when absent.
+   */
+  cost_basis: 'overnight' | 'annualized';
+  /** Variable operation and maintenance cost per unit generated (€/kWh). */
+  cost_om_variable: number;
+  /** Annual output degradation from panel ageing, as a fraction of rated capacity (0–1/year). */
+  cont_degradation_rate: number;
+  /** Operational CO2 emission factor (kg CO2/kWh generated). Zero for PV; carried for parity with other technologies. */
+  co2_emission_factor: number;
   /** Whether the optimiser should auto-orient panels. */
   optimize_orientation: boolean;
   /**
@@ -69,6 +81,10 @@ export const DEFAULT_PV_CONFIG: PvConfig = {
   cost_energy_cap:      575,
   cost_om_annual:       8,
   cost_interest_rate:   0.02,
+  cost_basis:           'overnight',
+  cost_om_variable:     0,
+  cont_degradation_rate: 0.005,
+  co2_emission_factor:  0,
   optimize_orientation: false,
   usable_area_pct:      80,
 };
