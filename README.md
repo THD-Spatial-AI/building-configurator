@@ -16,12 +16,26 @@ The UI itself is a building property configurator for the [EnerPlanET](https://e
 - View simulated heating and cooling load profiles
 - Step-by-step configuration workflow with live building snapshot
 
+## Installing it in an application
+
+The configurator publishes as `@thd-spatial-ai/building-configurator`, a React
+component that calls the EnerPlanET backend over a transport the host supplies.
+See [Installing the component](docs/installing.md).
+
+```bash
+npm install @thd-spatial-ai/building-configurator
+```
+
 ## Running the code
 
 ```bash
 npm install
 npm run dev
 ```
+
+`npm run dev` serves the demo application: a map, a live Loenen fixture and the
+configurator itself, against a local EnerPlanET backend. `npm run build:lib`
+builds the package.
 
 ## Contributing
 

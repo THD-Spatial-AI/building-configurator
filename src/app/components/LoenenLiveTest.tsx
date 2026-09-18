@@ -14,17 +14,21 @@ import { useCallback, useMemo, useState } from 'react';
 import { Satellite, Loader2, AlertTriangle } from 'lucide-react';
 import { BuildingConfigurator } from './BuildingConfigurator';
 import { LoenenLiveMap, LOENEN_BBOX } from './LoenenLiveMap';
-import { login, generateGrid, enrichBuildings } from '../lib/enerplanetApi';
-import { buildLoenenBuildingStates } from '../lib/city2tabulaAdapter';
+import { useConfiguratorApi } from '../lib/provider';
+import { ensureDemoSession } from '../../demoClient';
+import { buildBuildingStates } from '../lib/city2tabulaAdapter';
+import type { IgnisApi } from '../lib/ignisApi';
 import type { BuildingState } from '../lib/buemAdapter';
 import { hasInvalidArea } from './BuildingConfigurator/configure/model/buildingElements';
 import loenenFixture from '../../assets/data/loenen_live_fixture.json';
 
+type FootprintCollection = { type: 'FeatureCollection'; features: unknown[] };
+
 type LoadState =
   | { phase: 'idle' }
   | { phase: 'loading' }
-  | { phase: 'live'; buildings: Record<string, BuildingState>; footprints: typeof loenenFixture.buildings }
-  | { phase: 'fixture'; reason: string; buildings: Record<string, BuildingState>; footprints: typeof loenenFixture.buildings }
+  | { phase: 'live'; buildings: Record<string, BuildingState>; footprints: FootprintCollection }
+  | { phase: 'fixture'; reason: string; buildings: Record<string, BuildingState>; footprints: FootprintCollection }
   | { phase: 'error'; message: string };
 
 function loenenBboxPolygon() {
@@ -35,41 +39,40 @@ function loenenBboxPolygon() {
   };
 }
 
-function buildFromFixture(): Promise<Record<string, BuildingState>> {
-  return buildLoenenBuildingStates(
-    loenenFixture.buildings as { features: never[] } as Parameters<typeof buildLoenenBuildingStates>[0],
-    loenenFixture.enrich.data as Parameters<typeof buildLoenenBuildingStates>[1],
+function buildFromFixture(ignis: IgnisApi): Promise<Record<string, BuildingState>> {
+  return buildBuildingStates(
+    ignis,
+    loenenFixture.buildings as unknown as Parameters<typeof buildBuildingStates>[1],
+    loenenFixture.enrich.data as unknown as Parameters<typeof buildBuildingStates>[2],
   );
 }
 
 export function LoenenLiveTest() {
+  const { enerplanet, ignis } = useConfiguratorApi();
   const [state, setState] = useState<LoadState>({ phase: 'idle' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setState({ phase: 'loading' });
     try {
-      const email = import.meta.env.VITE_ENERPLANET_DEV_EMAIL as string | undefined;
-      const password = import.meta.env.VITE_ENERPLANET_DEV_PASSWORD as string | undefined;
-      if (!email || !password) throw new Error('VITE_ENERPLANET_DEV_EMAIL/PASSWORD not set in .env.local');
-
-      await login(email, password);
-      const grid = await generateGrid(loenenBboxPolygon());
+      await ensureDemoSession();
+      const grid = await enerplanet.generateGrid(loenenBboxPolygon());
       const osmIds = grid.buildings.features.map((f) => String((f.properties as { osm_id: string }).osm_id));
-      const enrich = await enrichBuildings('netherlands', LOENEN_BBOX, osmIds);
+      const enrich = await enerplanet.enrichBuildings('netherlands', LOENEN_BBOX, osmIds);
 
-      const buildings = await buildLoenenBuildingStates(
-        grid.buildings as unknown as Parameters<typeof buildLoenenBuildingStates>[0],
+      const buildings = await buildBuildingStates(
+        ignis,
+        grid.buildings as unknown as Parameters<typeof buildBuildingStates>[1],
         enrich.data,
       );
-      setState({ phase: 'live', buildings, footprints: grid.buildings as typeof loenenFixture.buildings });
+      setState({ phase: 'live', buildings, footprints: grid.buildings as FootprintCollection });
     } catch (err) {
       // Any failure (auth, network, CORS, backend down) falls back to the fixture
       // rather than leaving the tester with a dead screen.
       const message = err instanceof Error ? err.message : String(err);
-      setState({ phase: 'fixture', reason: message, buildings: await buildFromFixture(), footprints: loenenFixture.buildings });
+      setState({ phase: 'fixture', reason: message, buildings: await buildFromFixture(ignis), footprints: loenenFixture.buildings as unknown as FootprintCollection });
     }
-  }, []);
+  }, [enerplanet, ignis]);
 
   const buildings = state.phase === 'live' || state.phase === 'fixture' ? state.buildings : null;
   const footprints = state.phase === 'live' || state.phase === 'fixture' ? state.footprints : null;

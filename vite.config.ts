@@ -25,27 +25,27 @@ export default defineConfig({
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
+  // dist/ is the published package (see vite.lib.config.ts); the demo
+  // application builds alongside it rather than over it.
+  build: { outDir: 'dist-demo' },
+
   server: {
+    // The EnerPlanET backend's CORS allowlist has http://localhost:5173
+    // hardcoded (see enerplanet backend cmd/main.go), so this dev server
+    // must actually be reachable there rather than silently drifting to
+    // 5174+ when the port is busy — that would trade a clean CORS check for
+    // an intermittent 403 with no port in the error message.
+    port: 5173,
+    strictPort: true,
     proxy: {
       // Keeps the browser same-origin with the EnerPlanET backend so its
       // session/csrf_token cookies aren't third-party — see enerplanetApi.ts.
-      //
-      // changeOrigin only rewrites the outgoing Host header. The backend's
-      // own CORS middleware (cfg.AppURL, see enerplanet backend cmd/main.go)
-      // allowlists only its own frontend's origin, and Chrome sends a real
-      // Origin header even on this same-origin-to-the-browser proxied
-      // request — left as localhost:5173 it gets rejected 403 by that
-      // allowlist. Rewritten here to the backend's own origin so its CORS
-      // check sees a same-origin request, matching what changeOrigin
-      // already does for Host.
+      // Origin is left as-is (localhost:5173): it's already on the backend's
+      // CORS allowlist, so no rewrite is needed here beyond changeOrigin's
+      // own Host rewrite.
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => {
-            proxyReq.setHeader('origin', 'http://localhost:8000');
-          });
-        },
       },
     },
   },

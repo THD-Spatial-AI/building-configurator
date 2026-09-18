@@ -117,7 +117,7 @@ export function useLoadProfileState({
 
   const handleDownload = () => {
     if (!hasData) return;
-    const blob = new Blob([toProfileZip(data, resolution)], { type: 'application/zip' });
+    const blob = new Blob([toProfileZip(data, resolution) as BlobPart], { type: 'application/zip' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;

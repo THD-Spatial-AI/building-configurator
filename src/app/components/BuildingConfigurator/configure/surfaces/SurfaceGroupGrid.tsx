@@ -133,7 +133,7 @@ export function SurfaceGroupGrid({
             {userDefined && (
               <span className="rounded border border-blue-200 bg-blue-50 px-1 py-0.5 text-[8px] font-semibold text-blue-700">User</span>
             )}
-            {hasPv && <Sun className="size-3 shrink-0 text-yellow-500" title="PV installed" />}
+            {hasPv && <span title="PV installed" className="flex shrink-0"><Sun className="size-3 text-yellow-500" /></span>}
           </div>
         </button>
 

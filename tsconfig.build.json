@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "allowImportingTsExtensions": false,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/main.tsx",
+    "src/demoClient.ts",
+    "src/app/App.tsx",
+    "src/app/components/LoenenLive*.tsx",
+    "src/app/components/experimental",
+    "src/app/lib/surfaceMesh.ts",
+    "src/app/lib/surfaceGeometryFixture.ts",
+    "src/**/*.test.ts"
+  ]
+}

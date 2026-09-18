@@ -1,0 +1,27 @@
+name: Publish package
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@thd-spatial-ai'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      # prepublishOnly runs build:lib, so dist is produced from this commit.
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

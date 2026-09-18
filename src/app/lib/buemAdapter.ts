@@ -190,6 +190,8 @@ function adaptTimeseries(ts: unknown): LoadDataPoint[] | null {
     heating:     Number.isFinite(heating[i])     ? Math.abs(heating[i])     : 0,
     hotwater:    0,
     electricity: Number.isFinite(electricity[i]) ? Math.abs(electricity[i]) : 0,
+    dhw:         0,
+    kitchen:     0,
   }));
 }
 
@@ -352,6 +354,8 @@ export function parseLoadProfileCsv(csv: string): LoadDataPoint[] {
       electricity: elIdx >= 0 ? Math.abs(Number(cols[elIdx]) || 0) : 0,
       heating:     htIdx >= 0 ? Math.abs(Number(cols[htIdx]) || 0) : 0,
       hotwater:    hwIdx >= 0 ? Math.abs(Number(cols[hwIdx]) || 0) : 0,
+      dhw:         0,
+      kitchen:     0,
     }];
   });
 }

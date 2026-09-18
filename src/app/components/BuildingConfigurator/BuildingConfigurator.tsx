@@ -25,7 +25,6 @@ import {
   exportToBuemGeojson,
   importBuildingData,
 } from '../../lib/buemAdapter';
-import { runBuildingSimulation } from '../../lib/enerplanetApi';
 import type { IgnisState } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
@@ -34,10 +33,7 @@ import {
   restoreDefaultUValues,
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
-import {
-  loadVariantLevels,
-  calculateHeatDemand,
-} from '../../lib/ignisApi';
+import { useConfiguratorApi } from '../../lib/provider';
 import {
   getThermalRating,
   buildSnapshotRows,
@@ -244,6 +240,7 @@ interface BuildingConfiguratorProps {
 
 /** Full-screen panel for inspecting and editing a building's energy model configuration. */
 export function BuildingConfigurator({ onClose, buildingData }: BuildingConfiguratorProps) {
+  const api = useConfiguratorApi();
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
   const technologyData = buildingData?.technologies;
@@ -432,7 +429,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     let cancelled = false;
 
     (async () => {
-      const variants = await loadVariantLevels(country, type, year);
+      const variants = await api.ignis.loadVariantLevels(country, type, year);
       if (cancelled || variants.length === 0) {
         if (!cancelled) setHdcp(null);
         return;
@@ -485,11 +482,11 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setHdcp((prev) => prev ? { ...prev, loading: true, error: null } : prev);
 
     const timer = setTimeout(async () => {
-      const result = await calculateHeatDemand(variant.code, ignis.calcDemand);
+      const result = await api.ignis.calculateHeatDemand(variant.code, ignis.calcDemand);
       setHdcp((prev) => {
         if (!prev) return prev;
         if (result) return { ...prev, loading: false, result: { qHnd: result.q_h_nd, unit: 'kWh/(m2.a)' } };
-        return { ...prev, loading: false, error: 'HDCP service unavailable' };
+        return { ...prev, loading: false, error: 'ignis service unavailable' };
       });
     }, 500);
 
@@ -736,7 +733,7 @@ export function BuildingConfigurator({ onClose, buildingData }: BuildingConfigur
     setIsRunningSimulation(true);
     setUploadError(null);
     try {
-      const result = await runBuildingSimulation(identity, elements, general, identity.id, batteryConfig);
+      const result = await api.enerplanet.runBuildingSimulation(identity, elements, general, identity.id, batteryConfig);
       if (!result) {
         setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;

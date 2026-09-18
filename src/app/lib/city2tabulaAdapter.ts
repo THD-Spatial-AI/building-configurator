@@ -16,7 +16,7 @@
 
 import type { EnrichEntry } from './enerplanetApi';
 import { adaptBuemFeature, type BuildingState } from './buemAdapter';
-import { fetchVariantData, loadVariantLevels } from './ignisApi';
+import type { IgnisApi } from './ignisApi';
 import { ignisInputsFromTabulaData, resetElementsToVariantDefaults, type IgnisInputs } from './ignisAdapter';
 
 interface PylovoBuildingFeature {
@@ -92,6 +92,7 @@ export function buildEnrichedFeature(building: PylovoBuildingFeature, entry: Enr
  * bbox — only fetch it once.
  */
 async function resolveVariantData(
+  ignis: IgnisApi,
   entry: EnrichEntry,
   building: BuildingState,
   cache: Map<string, IgnisInputs | undefined>,
@@ -102,10 +103,10 @@ async function resolveVariantData(
   if (!cache.has(cacheKey)) {
     cache.set(cacheKey, await (async () => {
       if (entry.tabula_variant_code) {
-        const dataRes = await fetchVariantData(entry.tabula_variant_code);
+        const dataRes = await ignis.fetchVariantData(entry.tabula_variant_code);
         if (dataRes) return ignisInputsFromTabulaData(dataRes.tabula_data);
       }
-      const variants = await loadVariantLevels(country, buildingType, constructionYear);
+      const variants = await ignis.loadVariantLevels(country, buildingType, constructionYear);
       return variants[0]?.data;
     })());
   }
@@ -119,7 +120,8 @@ async function resolveVariantData(
  * osm_id. Buildings with no entry in `enrichData` (city2tabula's `missing`
  * list) are skipped — they have no envelope to show.
  */
-export async function buildLoenenBuildingStates(
+export async function buildBuildingStates(
+  ignis: IgnisApi,
   buildings: { features: PylovoBuildingFeature[] },
   enrichData: Record<string, EnrichEntry>,
 ): Promise<Record<string, BuildingState>> {
@@ -133,7 +135,7 @@ export async function buildLoenenBuildingStates(
       return [(async () => {
         const feature = buildEnrichedFeature(building, entry);
         const state = adaptBuemFeature(feature);
-        const variantData = await resolveVariantData(entry, state, variantCache);
+        const variantData = await resolveVariantData(ignis, entry, state, variantCache);
         const envelope = variantData ? resetElementsToVariantDefaults(state.envelope, variantData) : state.envelope;
         return [building.properties.osm_id, { ...state, envelope, thematic: { ...state.thematic, envelope } }] as const;
       })()];

@@ -1,5 +1,6 @@
-import { useRef, type ElementType } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { useMemo, useRef, type ElementType } from 'react';
+import ReactECharts from 'echarts-for-react';
+import type { EChartsOption } from 'echarts';
 import { Download, Upload, Zap, Flame, Snowflake, Layers3, Droplets, CookingPot } from 'lucide-react';
 import { T, SegmentedControl } from '../shared/ui';
 import {
@@ -23,11 +24,34 @@ interface LoadProfileViewerProps {
   onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
 }
 
+/** One plotted series: the LoadDataPoint key, its legend name and its colour. */
+const SERIES: Record<Exclude<EnergyType, 'combined'>, { name: string; colour: string }> = {
+  electricity: { name: 'Electricity', colour: '#f59e0b' },
+  heating:     { name: 'Heating', colour: '#ef4444' },
+  hotwater:    { name: 'Cooling', colour: '#3b82f6' },
+  dhw:         { name: 'Hot Water', colour: '#0ea5e9' },
+  kitchen:     { name: 'Kitchen (gas)', colour: '#e11d48' },
+};
+
+/** Kitchen is gas (kWh_gas), so it never shares an axis with the others. */
+const COMBINED_KEYS = ['electricity', 'heating', 'hotwater', 'dhw'] as const;
+
+/**
+ * Chart chrome. Literal values rather than the CSS custom properties in T:
+ * ECharts measures and blends these colours itself, which a var() reference
+ * does not survive.
+ */
+const CHROME = {
+  axis:    '#94a3b8',
+  line:    '#e2e8f0',
+  text:    '#64748b',
+  surface: '#ffffff',
+};
+
 export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, initialTimeseries, mode = 'basic', onGroundTruthChange }: LoadProfileViewerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     data,
-    derivedData,
     energyType,
     handleDownload,
     handleFileUpload,
@@ -46,6 +70,67 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
   const combinedAverage = energyType === 'combined' && data.length > 0
     ? data.reduce((sum, point) => sum + point.electricity + point.heating + point.hotwater + point.dhw, 0) / data.length
     : null;
+
+  const chartOption: EChartsOption = useMemo(() => {
+    const keys = energyType === 'combined' ? [...COMBINED_KEYS] : [energyType];
+    return {
+      animation: false,
+      grid: { left: 52, right: 12, top: 12, bottom: 44 },
+      tooltip: {
+        trigger: 'axis',
+        confine: true,
+        backgroundColor: CHROME.surface,
+        borderColor: CHROME.line,
+        textStyle: { color: CHROME.text, fontSize: 11 },
+        valueFormatter: (value) => formatEnergyValue(Number(value), 6),
+      },
+      legend: { bottom: 0, itemWidth: 14, itemHeight: 2, textStyle: { color: CHROME.text, fontSize: 9 } },
+      xAxis: {
+        type: 'category',
+        data: data.map((point) => point.timestamp),
+        axisLabel: {
+          color: CHROME.text,
+          fontSize: 10,
+          hideOverlap: true,
+          formatter: (value: string) => formatTickLabel(value, resolution),
+        },
+        axisLine: { lineStyle: { color: CHROME.axis } },
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        axisLabel: { color: CHROME.text, fontSize: 10, formatter: (value: number) => formatEnergyValue(value, 4) },
+        splitLine: { lineStyle: { color: CHROME.line, type: 'dashed' } },
+      },
+      series: keys.map((key) => ({
+        type: 'line',
+        name: SERIES[key].name,
+        data: data.map((point) => point[key]),
+        showSymbol: false,
+        smooth: true,
+        lineStyle: { width: 2, color: SERIES[key].colour },
+        itemStyle: { color: SERIES[key].colour },
+        // The average belongs to the combined view, so it rides on the first
+        // series rather than being a chart-level line.
+        ...(combinedAverage !== null && key === COMBINED_KEYS[0]
+          ? {
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                lineStyle: { color: CHROME.text, type: 'dashed', width: 1.5 },
+                label: {
+                  formatter: `Avg ${formatEnergyValue(combinedAverage, 4)} ${unit}`,
+                  position: 'insideEndTop',
+                  fontSize: 10,
+                  color: CHROME.text,
+                },
+                data: [{ yAxis: combinedAverage }],
+              },
+            }
+          : {}),
+      })),
+    };
+  }, [data, energyType, resolution, combinedAverage, unit]);
 
   // Shorter labels that communicate "what time period each data point covers"
   const resolutionOptions = [
@@ -130,56 +215,12 @@ export function LoadProfileViewer({ buildingId = 'Building 3', onTotalsChange, i
       {/* ── Chart ── */}
       <div style={{ flex: 1, minHeight: 0, padding: '8px 12px 4px' }}>
         {hasData ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart key={`${resolution}-${derivedData.sourceResolution ?? 'none'}-${data.length}`} data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis
-                dataKey="timestamp"
-                tickFormatter={(v) => formatTickLabel(String(v), resolution)}
-                tick={{ fontSize: 10, fill: T.mutedFg }}
-                stroke={T.border}
-                minTickGap={resolution === 'hourly' ? 24 : 16}
-              />
-              <YAxis
-                tickFormatter={(value) => formatEnergyValue(Number(value), 4)}
-                tick={{ fontSize: 10, fill: T.mutedFg }}
-                stroke={T.border}
-                width={52}
-                domain={[0, 'auto']}
-              />
-              <ChartTooltip
-                labelFormatter={(v) => `Time: ${String(v)}`}
-                formatter={(value) => formatEnergyValue(Number(value), 6)}
-                contentStyle={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: 4, fontSize: 11 }}
-              />
-              <Legend wrapperStyle={{ fontSize: 9 }} iconType="line" iconSize={8} />
-              {(energyType === 'electricity' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="electricity" stroke="#f59e0b" strokeWidth={2} name="Electricity" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {(energyType === 'heating' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="heating" stroke="#ef4444" strokeWidth={2} name="Heating" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {(energyType === 'hotwater' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="hotwater" stroke="#3b82f6" strokeWidth={2} name="Cooling" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {(energyType === 'dhw' || energyType === 'combined') && (
-                <Line type="monotone" dataKey="dhw" stroke="#0ea5e9" strokeWidth={2} name="Hot Water" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {/* Kitchen is gas (kWh_gas) — its own tab only, never mixed into Combined. */}
-              {energyType === 'kitchen' && (
-                <Line type="monotone" dataKey="kitchen" stroke="#e11d48" strokeWidth={2} name="Kitchen (gas)" dot={false} activeDot={{ r: 4 }} />
-              )}
-              {combinedAverage !== null && (
-                <ReferenceLine
-                  y={combinedAverage}
-                  stroke="#64748b"
-                  strokeDasharray="4 4"
-                  strokeWidth={1.5}
-                  label={{ value: `Avg ${formatEnergyValue(combinedAverage, 4)} ${unit}`, position: 'insideTopRight', fontSize: 10, fill: '#64748b' }}
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
+          <ReactECharts
+            option={chartOption}
+            style={{ width: '100%', height: '100%' }}
+            notMerge
+            opts={{ renderer: 'svg' }}
+          />
         ) : (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px dashed ${T.border}`, borderRadius: 6, background: T.inputBg, padding: '0 24px', textAlign: 'center' }}>
             <div>
