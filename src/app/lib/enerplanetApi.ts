@@ -88,7 +88,7 @@ export interface GridResult {
 
 export interface EnerplanetApi {
   generateGrid(geom: GeoJsonPolygon, options?: GenerateGridOptions): Promise<GridResult>;
-  enrichBuildings(country: string, bbox: EnrichBbox, osmIds: string[]): Promise<EnrichResponse>;
+  enrichBuildings(bbox: EnrichBbox, osmIds: string[], country?: string): Promise<EnrichResponse>;
   runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse>;
   runBuildingSimulation(
     identity: BuildingIdentity,
@@ -121,14 +121,21 @@ export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
     /**
      * Resolves City2TABULA envelope data for the given osm_ids.
      *
+     * `country` is optional: left out, the backend resolves it from the bbox
+     * centre through the same resolver a model run uses.
+     *
      * status "running" means some osm_ids are unmatched in City2TABULA and a
      * background pipeline run was triggered to try to link them. It does not
      * mean the `data` in this response is incomplete or provisional: render it
      * immediately rather than waiting on run_id, since the run may never
      * resolve the missing ones (they can be genuinely unlinked).
      */
-    enrichBuildings(country, bbox, osmIds) {
-      return http.post<EnrichResponse>('/v1/city2tabula/enrich', { country, bbox, osm_ids: osmIds });
+    enrichBuildings(bbox, osmIds, country) {
+      return http.post<EnrichResponse>('/v1/city2tabula/enrich', {
+        country: country ?? '',
+        bbox,
+        osm_ids: osmIds,
+      });
     },
 
     /**

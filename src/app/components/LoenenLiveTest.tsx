@@ -58,7 +58,7 @@ export function LoenenLiveTest() {
       await ensureDemoSession();
       const grid = await enerplanet.generateGrid(loenenBboxPolygon());
       const osmIds = grid.buildings.features.map((f) => String((f.properties as { osm_id: string }).osm_id));
-      const enrich = await enerplanet.enrichBuildings('netherlands', LOENEN_BBOX, osmIds);
+      const enrich = await enerplanet.enrichBuildings(LOENEN_BBOX, osmIds, 'netherlands');
 
       const buildings = await buildBuildingStates(
         ignis,

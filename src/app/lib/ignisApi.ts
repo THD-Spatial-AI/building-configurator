@@ -8,6 +8,9 @@
  *
  * The transport is supplied by the host application (see http.ts), so this
  * module reads no environment variable and carries no API key.
+ *
+ * The backend returns ignis's body verbatim inside its own {success, data}
+ * envelope, so every reader here unwraps one level.
  */
 
 import type {
@@ -75,6 +78,11 @@ export interface IgnisApi {
 const LOOKUP_TIMEOUT_MS = 8000;
 const CALCULATE_TIMEOUT_MS = 15000;
 
+/** The backend's envelope around a verbatim upstream body. */
+interface Enveloped<T> {
+  data: T;
+}
+
 export function createIgnisApi(http: HttpClient): IgnisApi {
   /**
    * Every call here answers null or an empty list rather than throwing: each
@@ -89,7 +97,8 @@ export function createIgnisApi(http: HttpClient): IgnisApi {
       const path = `/v2/ignis/variants/${encodeURIComponent(countryIso2)}/match`
         + `?type=${encodeURIComponent(typeCode)}&year=${encodeURIComponent(String(constructionYear))}`;
       try {
-        return await http.get<IgnisMatchResponse>(path, { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) });
+        const res = await http.get<Enveloped<IgnisMatchResponse>>(path, { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) });
+        return res.data;
       } catch {
         return null;
       }
@@ -97,10 +106,11 @@ export function createIgnisApi(http: HttpClient): IgnisApi {
 
     async fetchVariantData(variantCode) {
       try {
-        return await http.get<IgnisDataResponse>(
+        const res = await http.get<Enveloped<IgnisDataResponse>>(
           `/v2/ignis/data/${encodeURIComponent(variantCode)}`,
           { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) },
         );
+        return res.data;
       } catch {
         return null;
       }
@@ -132,11 +142,11 @@ export function createIgnisApi(http: HttpClient): IgnisApi {
     /** Labels and descriptions for every TABULA input field, used to enrich form tooltips. */
     async fetchFieldMetadata() {
       try {
-        const body = await http.get<IgnisFieldMetadataResponse>(
+        const res = await http.get<Enveloped<IgnisFieldMetadataResponse>>(
           '/v2/ignis/fields',
           { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) },
         );
-        return body.data ?? [];
+        return res.data?.data ?? [];
       } catch {
         return [];
       }
@@ -145,11 +155,12 @@ export function createIgnisApi(http: HttpClient): IgnisApi {
     /** Runs the calculation against the current working copy, returning the q_h_nd result. */
     async calculateHeatDemand(variantCode, calcDemand) {
       try {
-        return await http.post<IgnisCalculateResponse>(
+        const res = await http.post<Enveloped<IgnisCalculateResponse>>(
           `/v2/ignis/calculate/${encodeURIComponent(variantCode)}`,
           toIgnisApiPayload(calcDemand),
           { signal: AbortSignal.timeout(CALCULATE_TIMEOUT_MS) },
         );
+        return res.data;
       } catch {
         return null;
       }
