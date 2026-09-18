@@ -1,6 +1,6 @@
 {
   "name": "@thd-spatial-ai/building-configurator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Building energy model configurator for the EnerPlanET platform",
   "license": "MIT",
   "type": "module",
@@ -48,7 +48,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "clsx": "^2.1.1",
     "fflate": "^0.8.3",
-    "lucide-react": "^0.487.0",
+    "lucide-react": ">=0.487.0 <1.0.0",
     "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
