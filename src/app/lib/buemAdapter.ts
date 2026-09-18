@@ -14,6 +14,7 @@ import {
   hasMappedValue,
 } from '../config/modelDataResolver';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { LoadDataPoint } from './loadProfile';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -448,6 +449,7 @@ export function serializeToBuemFeature(
   resolution: string | number = '60',
   resolutionUnit: string = 'minutes',
   batteryConfig?: Record<string, any>,
+  surfacePvConfigs?: Record<string, PvConfig>,
 ): Record<string, any> {
   const [lon, lat] = identity.coordinates;
 
@@ -542,6 +544,44 @@ export function serializeToBuemFeature(
     };
   }
 
+  // One entry per PV-installed surface, not one aggregate `pv_supply` — a
+  // building can carry several distinct PV arrays (different roof faces,
+  // different orientation/capacity each), which the flat `Record<techId,
+  // TechData>` shape downstream can only represent as separate tech ids.
+  // Keying on the surface id (`pv_supply__<surfaceId>`) keeps each array
+  // addressable back to the surface it's on. TentaCron resolves any number
+  // of independent resolvent objects per payload, and Calliope addresses
+  // technologies as `location::tech`, so multiple named PV techs at one
+  // building is supported downstream. Not yet verified end-to-end with a
+  // real resource API or a real meme/Calliope run.
+  if (surfacePvConfigs) {
+    for (const [surfaceId, pv] of Object.entries(surfacePvConfigs)) {
+      if (!pv.installed || !elements[surfaceId]) continue;
+      techs[`pv_supply__${surfaceId}`] = {
+        cont_energy_cap_max:   pv.cont_energy_cap_max,
+        cont_energy_cap_min:   pv.cont_energy_cap_min,
+        cont_energy_eff:       pv.cont_energy_eff,
+        cont_lifetime:         pv.cont_lifetime,
+        cont_degradation_rate: pv.cont_degradation_rate,
+        cost_energy_cap:       pv.cost_energy_cap,
+        cost_om_annual:        pv.cost_om_annual,
+        cost_om_variable:      pv.cost_om_variable,
+        cost_interest_rate:    pv.cost_interest_rate,
+        cost_basis:            pv.cost_basis,
+        co2_emission_factor:   pv.co2_emission_factor,
+        // Panel geometry and system-level derating — inputs to whatever
+        // resolves this into a capacity-factor series, not Calliope cost/
+        // efficiency fields themselves.
+        system_capacity:       pv.system_capacity,
+        tilt:                  pv.tilt,
+        azimuth:               pv.azimuth,
+        inv_eff:               pv.inv_eff,
+        dc_ac_ratio:           pv.dc_ac_ratio,
+        losses:                pv.losses,
+      };
+    }
+  }
+
   // Build the complete feature
   const feature: Record<string, any> = {
     type: 'Feature',
@@ -582,8 +622,11 @@ export function exportToBuemGeojson(
   startTime?: string,
   endTime?: string,
   batteryConfig?: Record<string, any>,
+  surfacePvConfigs?: Record<string, PvConfig>,
 ): string {
-  const feature = serializeToBuemFeature(identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig);
+  const feature = serializeToBuemFeature(
+    identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig, surfacePvConfigs,
+  );
   const featureCollection = {
     type: 'FeatureCollection',
     features: [feature],

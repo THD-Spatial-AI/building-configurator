@@ -775,7 +775,9 @@ export function BuildingConfigurator({ onClose, buildingData, initialSurfaceId }
       };
 
       // Generate BUEM API GeoJSON FeatureCollection
-      const buemJson = exportToBuemGeojson(identity, elements, general, undefined, undefined, batteryConfig);
+      const buemJson = exportToBuemGeojson(
+        identity, elements, general, undefined, undefined, batteryConfig, surfacePvConfigs,
+      );
       const blob = new Blob([buemJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
