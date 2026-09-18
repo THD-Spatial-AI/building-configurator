@@ -107,9 +107,11 @@ services behind it and routes each request on through the orchestrator.
 
 ## Styling
 
-The component is built with Tailwind v4 and inherits the host's palette, so a
-host that defines its own `--color-primary`, `--color-card` and the rest gets a
-panel that matches it.
+The component is built with Tailwind v4 and inherits the host's palette. Its
+`@theme` mapping reads the host's tokens and falls back to its own values for
+any the host does not define, so `--primary`, `--card`, `--border` and the rest
+come from the host where they exist. The published stylesheet sets no custom
+property of its own, which is what keeps the host's palette its own.
 
 Two things are needed in the host's stylesheet. The first imports the
 component's own tokens and the `.cfg-*` classes its inputs use:

@@ -1,6 +1,7 @@
-/* The demo application's full stylesheet: what the package publishes, plus
- * the reset only an application should apply.
+/* The demo application's full stylesheet: what the package publishes, plus the
+ * palette and reset only an application should define.
  */
 
+@import './palette.css';
 @import './package.css';
 @import './base.css';
