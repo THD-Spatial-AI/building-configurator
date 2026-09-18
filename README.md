@@ -4,17 +4,9 @@
 &nbsp;
 [![CodeQL](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/THD-Spatial-AI/building-configurator/actions/workflows/github-code-scanning/codeql)
 
-A practical research project exploring AI-assisted UI development workflows. The focus is on methods for generating, iterating, and evaluating UI components using AI tools, with a structured feedback loop that converts user observations into tracked issues — giving developers a clear, prioritised backlog to decide how to handle each item.
+A practical research project exploring AI-assisted UI development workflows. The focus is on methods for generating, iterating and evaluating UI components with AI tools, with a structured feedback loop that converts user observations into tracked issues. The issues form a prioritised backlog from which developers decide how to handle each item.
 
-The UI itself is a building property configurator for the [EnerPlanET](https://enerplanet.th-deg.de/) platform, covering energy simulation workflows [ignis](https://github.com/thd-spatial-ai/ignis), [BUEM](https://github.com/THD-Spatial-AI/buem), and serves as the test subject for these development methods.
-
-## Features
-
-- Configure building geometry, envelope elements, and thermal parameters
-- Set up roof and photovoltaic (PV) system properties
-- Visualise the building energy envelope and surface composition
-- View simulated heating and cooling load profiles
-- Step-by-step configuration workflow with live building snapshot
+The UI under test is a building property configurator for the [EnerPlanET](https://enerplanet.th-deg.de/) platform. It prepares building inputs for the [ignis](https://github.com/THD-Spatial-AI/ignis) and [BUEM](https://github.com/enerplanet/buem) energy simulation services.
 
 ## Installing it in an application
 
@@ -37,6 +29,14 @@ npm run dev
 configurator itself, against a local EnerPlanET backend. `npm run build:lib`
 builds the package.
 
+## Features
+
+- Configure building geometry, envelope elements, and thermal parameters
+- Set up roof and photovoltaic (PV) system properties
+- Visualise the building energy envelope and surface composition
+- View simulated heating and cooling load profiles
+- Step-by-step configuration workflow with live building snapshot
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, request features, and submit pull requests.
@@ -45,7 +45,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ## AI Disclaimer
 
-This project is itself an experiment in AI-assisted development. The concept, design decisions, and development methodology are the author's own. AI tools were used for implementation: the initial UI prototype was generated with [Figma Make](https://www.figma.com/make/), and the majority of the code was written using [Claude Code](https://claude.ai/code) (Anthropic Claude Sonnet 4.6). The feedback pipeline — which captures user observations and converts them into GitHub issues — is part of the methodology being developed and tested here. All AI-generated output was reviewed, directed, and adapted by the author throughout.
+This project is itself an experiment in AI-assisted development. The concept, design decisions, and development methodology are the author's own. AI tools were used for implementation: the initial UI prototype was generated with [Figma Make](https://www.figma.com/make/), and the majority of the code was written using [Claude Code](https://claude.ai/code) (Anthropic Claude Sonnet 4.6). The feedback pipeline, which captures user observations and converts them into GitHub issues, is part of the methodology being developed and tested here. All AI-generated output was reviewed, directed, and adapted by the author throughout.
 
 ## Designed and developed by
 

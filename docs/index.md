@@ -1,16 +1,12 @@
+---
+audience: developer
+---
+
 # Building Configurator
 
-A React component for modelling building properties within the [EnerPlanET](https://github.com/THD-Spatial-AI) platform. It provides a reusable configuration interface for energy simulation workflows, including annual heat demand estimation (ignis) and thermal load profiling (BUEM), with the intent to support additional simulation services over time.
+A single-page React application for modelling building properties within the [EnerPlanET](https://enerplanet.th-deg.de/) platform. It provides a configuration interface for energy simulation workflows: annual heat demand estimation (ignis) and thermal load profiling (BUEM).
 
-## Features
-
-- Configure building geometry, envelope elements, and thermal parameters
-- Set up roof and photovoltaic (PV) system properties
-- Visualise the building energy envelope and surface composition
-- View simulated heating and cooling load profiles
-- Step-by-step configuration workflow with live building snapshot
-
-## Getting Started
+## Getting started
 
 Install dependencies and start the development server:
 
@@ -19,9 +15,13 @@ npm install
 npm run dev
 ```
 
-## Try it out
+## Features
 
-Deployed on Vercel: [building-configurator-gui.vercel.app](https://building-configurator-phi.vercel.app/)
+- Configure building geometry, envelope elements, and thermal parameters
+- Set up roof and photovoltaic (PV) system properties
+- Visualise the building energy envelope and surface composition
+- View simulated heating and cooling load profiles
+- Step-by-step configuration workflow with live building snapshot
 
 ## Contributing
 

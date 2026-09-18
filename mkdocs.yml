@@ -118,9 +118,8 @@ nav:
   - UI Terminology: ui-terminology.md
   - ignis field mapping: ignis-field-mapping.md
 
-# Mermaid — load explicitly so diagrams render on GitHub Pages.
-# Material for MkDocs attempts a dynamic import at runtime which can silently
-# fail; loading the script here ensures it is always available.
+# Mermaid is loaded explicitly: Material's dynamic import at runtime can fail
+# silently on GitHub Pages.
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
 
