@@ -10,6 +10,11 @@
 // - geometry      — physical building geometry and footprint sources
 // - thematic      — building identity, envelope and model outputs
 // - technologies  — installed technology configuration nodes
+//
+// Contract: buem-gateway schemas/v3..v5, whose building and envelope_element
+// definitions are identical across the three. An exported FeatureCollection
+// omits properties.buem.weather, which v5 and v6-draft require, and carries
+// properties.techs, which no version defines.
 
 export type ModelDataPath = string | readonly string[];
 
