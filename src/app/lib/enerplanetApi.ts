@@ -63,6 +63,36 @@ export interface EnrichResponse {
   data: Record<string, EnrichEntry>;
 }
 
+/**
+ * One envelope surface's polygon, as City2TABULA stores it: 3D coordinates in
+ * the country's own CRS (EPSG:28992 for the Netherlands, 25832 for Germany),
+ * named in the GeoJSON's own `crs` member. Nothing reprojects it on the way.
+ *
+ * `id` is the same id the enrich envelope element carries, so geometry joins
+ * onto a BuildingState element without a second identifier. `geojson` is
+ * absent for a surface row that holds no geometry.
+ *
+ * The id is a per-insert UUID, regenerated whenever City2TABULA's database is
+ * rebuilt. It joins a geometry response to an enrich response fetched from the
+ * same generation; it is not a durable key for stored per-surface state.
+ */
+export interface SurfaceGeometry {
+  id: string;
+  type: string;
+  geojson?: {
+    type: 'Polygon';
+    crs?: { type: string; properties: { name: string } };
+    /** [x, y, z] per vertex, ring closed (first vertex repeated last). */
+    coordinates: number[][][];
+  };
+}
+
+export interface BuildingGeometry {
+  object_id: string;
+  footprint_geojson?: unknown;
+  surfaces?: SurfaceGeometry[];
+}
+
 export interface BuemBuildingRunRequest {
   osm_id: string;
   geometry: unknown;
@@ -89,6 +119,7 @@ export interface GridResult {
 export interface EnerplanetApi {
   generateGrid(geom: GeoJsonPolygon, options?: GenerateGridOptions): Promise<GridResult>;
   enrichBuildings(bbox: EnrichBbox, osmIds: string[], country?: string): Promise<EnrichResponse>;
+  getSurfaceGeometry(objectId: string, country: string): Promise<BuildingGeometry | null>;
   runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse>;
   runBuildingSimulation(
     identity: BuildingIdentity,
@@ -136,6 +167,24 @@ export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
         bbox,
         osm_ids: osmIds,
       });
+    },
+
+    /**
+     * Returns one building's envelope surface polygons, for rendering it in 3D.
+     *
+     * `objectId` is City2TABULA's building id (EnrichEntry.object_id), not the
+     * osm_id the rest of this client is keyed by. The query parameter is
+     * plural because City2TABULA's own is, and the singular form is rejected,
+     * but only one building may be asked for: a face count is unbounded, and
+     * a response carrying several exceeds the size limit the request path
+     * accepts.
+     *
+     * Returns null when City2TABULA holds no geometry for the id.
+     */
+    async getSurfaceGeometry(objectId, country) {
+      const query = new URLSearchParams({ country, object_ids: objectId });
+      const buildings = await http.get<BuildingGeometry[]>(`/v1/city2tabula/geometry?${query}`);
+      return buildings?.[0] ?? null;
     },
 
     /**

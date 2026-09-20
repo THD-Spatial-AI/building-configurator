@@ -30,7 +30,6 @@ export function SurfaceGeometryViewer({ surfaces, onSelectSurface }: SurfaceGeom
     scene.background = new THREE.Color(0xf1f5f9);
 
     const camera = new THREE.PerspectiveCamera(45, mount.clientWidth / mount.clientHeight, 0.1, 500);
-    camera.position.set(14, 11, 14);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -38,7 +37,6 @@ export function SurfaceGeometryViewer({ surfaces, onSelectSurface }: SurfaceGeom
     mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 2.5, 0);
     controls.enableDamping = true;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.65));
@@ -49,6 +47,18 @@ export function SurfaceGeometryViewer({ surfaces, onSelectSurface }: SurfaceGeom
     const origin = computeOrigin(surfaces);
     const groups = surfaces.map((surface) => buildSurfaceGroup(surface, origin));
     groups.forEach((group) => scene.add(group));
+
+    // Framed from the geometry rather than a fixed distance: a real building is
+    // anything from a garage to a terrace block, and the origin is the mean
+    // vertex, not the building's centre.
+    const bounds = new THREE.Box3();
+    groups.forEach((group) => bounds.expandByObject(group));
+    const view = bounds.getBoundingSphere(new THREE.Sphere());
+    const distance = view.radius / Math.sin((camera.fov * Math.PI) / 360);
+    camera.position.copy(view.center).add(new THREE.Vector3(1, 0.7, 1).normalize().multiplyScalar(distance));
+    camera.far = distance * 4;
+    camera.updateProjectionMatrix();
+    controls.target.copy(view.center);
 
     let selectedGroup: THREE.Group | null = null;
     function setHighlight(group: THREE.Group | null) {

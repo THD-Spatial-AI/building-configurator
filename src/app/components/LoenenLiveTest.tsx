@@ -11,13 +11,16 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { Satellite, Loader2, AlertTriangle } from 'lucide-react';
+import { Satellite, Loader2, AlertTriangle, X } from 'lucide-react';
 import { BuildingConfigurator } from './BuildingConfigurator';
+import { Surface3DExperiment } from './experimental/Surface3DExperiment';
+import { T } from './BuildingConfigurator/shared/ui';
 import { LoenenLiveMap, LOENEN_BBOX } from './LoenenLiveMap';
 import { useConfiguratorApi } from '../lib/provider';
 import { ensureDemoSession } from '../../demoClient';
 import { buildBuildingStates } from '../lib/city2tabulaAdapter';
 import type { IgnisApi } from '../lib/ignisApi';
+import type { EnrichEntry } from '../lib/enerplanetApi';
 import type { BuildingState } from '../lib/buemAdapter';
 import { hasInvalidArea } from './BuildingConfigurator/configure/model/buildingElements';
 import loenenFixture from '../../assets/data/loenen_live_fixture.json';
@@ -27,9 +30,17 @@ type FootprintCollection = { type: 'FeatureCollection'; features: unknown[] };
 type LoadState =
   | { phase: 'idle' }
   | { phase: 'loading' }
-  | { phase: 'live'; buildings: Record<string, BuildingState>; footprints: FootprintCollection }
-  | { phase: 'fixture'; reason: string; buildings: Record<string, BuildingState>; footprints: FootprintCollection }
+  | { phase: 'live'; buildings: Record<string, BuildingState>; footprints: FootprintCollection; objectIds: Record<string, string> }
+  | { phase: 'fixture'; reason: string; buildings: Record<string, BuildingState>; footprints: FootprintCollection; objectIds: Record<string, string> }
   | { phase: 'error'; message: string };
+
+const LOENEN_COUNTRY = 'netherlands';
+
+/** City2TABULA building id per osm_id. The geometry endpoint is keyed by
+ * object_id, while everything else here is keyed by osm_id. */
+function objectIdsFrom(enrichData: Record<string, EnrichEntry>): Record<string, string> {
+  return Object.fromEntries(Object.entries(enrichData).map(([osmId, entry]) => [osmId, entry.object_id]));
+}
 
 function loenenBboxPolygon() {
   const { xmin, ymin, xmax, ymax } = LOENEN_BBOX;
@@ -51,6 +62,9 @@ export function LoenenLiveTest() {
   const { enerplanet, ignis } = useConfiguratorApi();
   const [state, setState] = useState<LoadState>({ phase: 'idle' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Null shows the 3D view for selectedId; set shows the configurator over it,
+  // deep-linked to a surface when one was clicked in 3D.
+  const [configuring, setConfiguring] = useState<{ surfaceId?: string } | null>(null);
 
   const load = useCallback(async () => {
     setState({ phase: 'loading' });
@@ -58,19 +72,30 @@ export function LoenenLiveTest() {
       await ensureDemoSession();
       const grid = await enerplanet.generateGrid(loenenBboxPolygon());
       const osmIds = grid.buildings.features.map((f) => String((f.properties as { osm_id: string }).osm_id));
-      const enrich = await enerplanet.enrichBuildings(LOENEN_BBOX, osmIds, 'netherlands');
+      const enrich = await enerplanet.enrichBuildings(LOENEN_BBOX, osmIds, LOENEN_COUNTRY);
 
       const buildings = await buildBuildingStates(
         ignis,
         grid.buildings as unknown as Parameters<typeof buildBuildingStates>[1],
         enrich.data,
       );
-      setState({ phase: 'live', buildings, footprints: grid.buildings as FootprintCollection });
+      setState({
+        phase: 'live',
+        buildings,
+        footprints: grid.buildings as FootprintCollection,
+        objectIds: objectIdsFrom(enrich.data),
+      });
     } catch (err) {
       // Any failure (auth, network, CORS, backend down) falls back to the fixture
       // rather than leaving the tester with a dead screen.
       const message = err instanceof Error ? err.message : String(err);
-      setState({ phase: 'fixture', reason: message, buildings: await buildFromFixture(ignis), footprints: loenenFixture.buildings as unknown as FootprintCollection });
+      setState({
+        phase: 'fixture',
+        reason: message,
+        buildings: await buildFromFixture(ignis),
+        footprints: loenenFixture.buildings as unknown as FootprintCollection,
+        objectIds: objectIdsFrom(loenenFixture.enrich.data as unknown as Record<string, EnrichEntry>),
+      });
     }
   }, [enerplanet, ignis]);
 
@@ -82,6 +107,7 @@ export function LoenenLiveTest() {
       .filter(([, state]) => Object.values(state.envelope).some(hasInvalidArea))
       .map(([osmId]) => osmId),
   ), [buildings]);
+  const objectIds = state.phase === 'live' || state.phase === 'fixture' ? state.objectIds : {};
   const selectedBuilding = selectedId && buildings ? buildings[selectedId] : undefined;
 
   return (
@@ -112,7 +138,7 @@ export function LoenenLiveTest() {
           buildings={footprints}
           resolvedIds={resolvedIds}
           problematicIds={problematicIds}
-          onBuildingClick={setSelectedId}
+          onBuildingClick={(id) => { setSelectedId(id); setConfiguring(null); }}
         />
       )}
 
@@ -130,12 +156,61 @@ export function LoenenLiveTest() {
         </div>
       )}
 
-      {selectedId && (
+      {selectedId && selectedBuilding && (
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 10, padding: 16, backgroundColor: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(6px)',
         }}>
-          <BuildingConfigurator onClose={() => setSelectedId(null)} buildingData={selectedBuilding} />
+          {configuring ? (
+            <BuildingConfigurator
+              onClose={() => setConfiguring(null)}
+              buildingData={selectedBuilding}
+              initialSurfaceId={configuring.surfaceId}
+            />
+          ) : (
+            <div style={{
+              display: 'flex', flexDirection: 'column', width: '100%', height: '100%',
+              maxWidth: 1180, maxHeight: 700, background: T.card, borderRadius: 8, overflow: 'hidden',
+            }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                padding: '10px 14px', borderBottom: `1px solid ${T.border}`,
+              }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: T.foreground }}>
+                  Building {selectedId}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    onClick={() => setConfiguring({})}
+                    className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors duration-100 hover:bg-muted"
+                  >
+                    Open configurator
+                  </button>
+                  <button
+                    onClick={() => setSelectedId(null)}
+                    aria-label="Close"
+                    className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition-colors duration-100 hover:bg-muted"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              </div>
+              <div style={{ flex: 1, minHeight: 0 }}>
+                {objectIds[selectedId] ? (
+                  <Surface3DExperiment
+                    objectId={objectIds[selectedId]}
+                    country={LOENEN_COUNTRY}
+                    elements={selectedBuilding.envelope}
+                    onOpenSurface={(surfaceId) => setConfiguring({ surfaceId })}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
+                    No City2TABULA building id for osm_id {selectedId}, so no geometry can be fetched.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

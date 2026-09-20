@@ -5,45 +5,26 @@
 // orientation (walls in particular) without Three.js's own 2D-only ShapeUtils.
 import * as THREE from 'three';
 import earcut from 'earcut';
+import type { BuildingGeometry } from './enerplanetApi';
 
 export interface SurfacePolygon {
+  /** City2TABULA surface row id, which is also the BuildingState element id. */
   id: string;
   type: string;
-  label: string;
   /** GeoJSON Polygon coordinates: outer ring only, [x, y, z] per vertex, ring closed. */
   coordinates: number[][][];
 }
 
-/** Shape of `GET /api/v1/geometry?...&include=surfaces`, confirmed against a real
- * NL query. Not yet deployed; kept here so the client-side conversion is
- * ready the moment the endpoint ships. */
-export interface GeometryApiSurface {
-  id: string;
-  type: string;
-  geojson: {
-    type: 'Polygon';
-    crs?: { type: string; properties: { name: string } };
-    /** [x, y, z] per vertex, native CRS, ring closed (first vertex repeated last). */
-    coordinates: number[][][];
-  };
-}
-
-export interface GeometryApiBuilding {
-  object_id: string;
-  footprint_geojson?: unknown;
-  surfaces?: GeometryApiSurface[];
-}
-
-/** Flattens the endpoint's per-building response into the surfaces this viewer
- * renders. `type` doubles as the label — the API gives no friendlier name. */
-export function surfacesFromGeometryResponse(buildings: GeometryApiBuilding[]): SurfacePolygon[] {
+/** Flattens a geometry response into the surfaces this viewer renders. A surface
+ * row with no geometry is skipped rather than rendered as an empty mesh. */
+export function surfacesFromGeometryResponse(buildings: BuildingGeometry[]): SurfacePolygon[] {
   const surfaces: SurfacePolygon[] = [];
   for (const building of buildings) {
     for (const surface of building.surfaces ?? []) {
+      if (!surface.geojson) continue;
       surfaces.push({
         id: surface.id,
         type: surface.type,
-        label: surface.type,
         coordinates: surface.geojson.coordinates,
       });
     }
@@ -151,6 +132,6 @@ export function buildSurfaceGroup(surface: SurfacePolygon, origin: [number, numb
 
   const group = new THREE.Group();
   group.add(mesh, edges);
-  group.userData = { id: surface.id, type: surface.type, label: surface.label };
+  group.userData = { id: surface.id, type: surface.type };
   return group;
 }
