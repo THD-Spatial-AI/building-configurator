@@ -32,6 +32,19 @@ export function surfacesFromGeometryResponse(buildings: BuildingGeometry[]): Sur
   return surfaces;
 }
 
+/**
+ * True when no rendered surface resolves to an envelope element, meaning the
+ * geometry and the envelope came from different City2TABULA generations.
+ *
+ * A database rebuild regenerates every surface id at once, so a real mismatch
+ * is total. A few unresolved surfaces are normal, since a surface type with no
+ * envelope counterpart (ClosureSurface) is skipped upstream, so a partial miss
+ * is not a detach.
+ */
+export function isEnvelopeDetached(surfaces: SurfacePolygon[], elementIds: Set<string>): boolean {
+  return surfaces.length > 0 && !surfaces.some((surface) => elementIds.has(surface.id));
+}
+
 /** Mean of every vertex's x/y/z across all surfaces. Native storage CRS eastings and
  * northings are 100,000+ m (WebGL's float32 positions would visibly jitter at that
  * scale without subtracting a shared origin first), and elevation is an absolute

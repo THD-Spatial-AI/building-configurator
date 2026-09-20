@@ -11,11 +11,11 @@
  * unreachable, the same arrangement LoenenLiveTest uses; the banner says which
  * one is showing.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { SurfaceGeometryViewer } from './SurfaceGeometryViewer';
 import { useConfiguratorApi } from '../../lib/provider';
-import { surfacesFromGeometryResponse, type SurfacePolygon } from '../../lib/surfaceMesh';
+import { isEnvelopeDetached, surfacesFromGeometryResponse, type SurfacePolygon } from '../../lib/surfaceMesh';
 import { T } from '../BuildingConfigurator/shared/ui';
 import type { BuildingGeometry } from '../../lib/enerplanetApi';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -76,6 +76,10 @@ export function Surface3DExperiment({ objectId, country, elements, onOpenSurface
 
   const surfaces = state.phase === 'live' || state.phase === 'fixture' ? state.surfaces : null;
   const selectedElement = selectedId ? elements[selectedId] : undefined;
+  const detached = useMemo(
+    () => (surfaces ? isEnvelopeDetached(surfaces, new Set(Object.keys(elements))) : false),
+    [surfaces, elements],
+  );
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex' }}>
@@ -102,12 +106,24 @@ export function Surface3DExperiment({ objectId, country, elements, onOpenSurface
           />
         )}
 
-        {state.phase === 'fixture' && (
-          <div className="absolute top-3 left-3 right-3 z-[5] flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 shadow-sm">
-            <AlertTriangle className="size-3.5 shrink-0" />
-            Showing bundled geometry. Live backend unreachable ({state.reason}).
-          </div>
-        )}
+        <div className="absolute top-3 left-3 right-3 z-[5] flex flex-col gap-2">
+          {state.phase === 'fixture' && (
+            <div className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 shadow-sm">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              Showing bundled geometry. Live backend unreachable ({state.reason}).
+            </div>
+          )}
+          {detached && (
+            <div className="flex items-start gap-2 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-900 shadow-sm">
+              <AlertTriangle className="size-3.5 shrink-0 mt-px" />
+              <span>
+                This geometry does not match the building's envelope, so no surface can be
+                configured. City2TABULA regenerates surface ids when its database is rebuilt;
+                reload the buildings to fetch an envelope from the current generation.
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ width: 280, flexShrink: 0, borderLeft: `1px solid ${T.border}`, background: T.card, padding: 16, overflowY: 'auto' }}>

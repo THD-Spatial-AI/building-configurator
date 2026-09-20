@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { buildSurfaceGroup, computeOrigin, surfacesFromGeometryResponse } from './surfaceMesh';
+import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, surfacesFromGeometryResponse } from './surfaceMesh';
 import type { BuildingGeometry } from './enerplanetApi';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
@@ -44,6 +44,29 @@ describe('geometry and enrich responses', () => {
       expect(rendered.length).toBeGreaterThan(0);
       expect(rendered.filter((id) => !envelopeIds[objectId].has(id))).toEqual([]);
     }
+  });
+});
+
+describe('isEnvelopeDetached', () => {
+  const building = GEOMETRY['NL.IMBAG.Pand.0200100000022498-0'];
+  const surfaces = surfacesFromGeometryResponse([building]);
+  const realIds = envelopeIdsByObjectId()['NL.IMBAG.Pand.0200100000022498-0'];
+
+  it('is false for a matching geometry and envelope', () => {
+    expect(isEnvelopeDetached(surfaces, realIds)).toBe(false);
+  });
+
+  it('is true when every id was regenerated, as a rebuild does', () => {
+    expect(isEnvelopeDetached(surfaces, new Set(['some-other-uuid']))).toBe(true);
+  });
+
+  it('is false when only some surfaces are unmatched', () => {
+    const [first] = surfaces;
+    expect(isEnvelopeDetached(surfaces, new Set([first.id]))).toBe(false);
+  });
+
+  it('is false with no surfaces, which is an empty response not a mismatch', () => {
+    expect(isEnvelopeDetached([], new Set())).toBe(false);
   });
 });
 
