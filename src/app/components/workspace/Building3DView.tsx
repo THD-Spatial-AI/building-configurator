@@ -18,7 +18,10 @@ import { pvCandidates } from '../BuildingConfigurator/shared/pvSuitability';
 import { DEFAULT_PV_CONFIG, createSurfacePvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
 import { TechnologiesSection } from '../BuildingConfigurator/overview/TechnologiesSection';
 import { LoadProfileViewer } from '../BuildingConfigurator/overview/LoadProfileViewer';
-import { ConfiguratorStyles } from '../BuildingConfigurator/shared/ui';
+import { ConfiguratorStyles, SegmentedControl } from '../BuildingConfigurator/shared/ui';
+import { BuildingEditor } from '../BuildingConfigurator/configure/building/BuildingEditor';
+import { BatteryEditor } from '../BuildingConfigurator/configure/pv/BatteryEditor';
+import { PvEditor } from '../BuildingConfigurator/configure/pv/PvEditor';
 import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
 import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
 import { cn } from '@/lib/utils';
@@ -45,6 +48,12 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   const [selected, setSelected] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
   /** The PV planner is open: its candidates are lit in the model while it is. */
   const [pvPlannerOpen, setPvPlannerOpen] = useState(false);
+  /** Expert shows the full BuEM building parameters and technology settings. */
+  const [mode, setMode] = useState<'basic' | 'expert'>('basic');
+  /** Which technology's own parameters are open, if any. */
+  const [techPanel, setTechPanel] = useState<'battery' | null>(null);
+  /** The surface whose full PV parameters are open, if any. */
+  const [pvEditorId, setPvEditorId] = useState<string | null>(null);
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
 
@@ -150,6 +159,11 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
             <span className="hidden sm:inline"> · avg U {model.avgUValue.toFixed(2)} W/m²K</span>
           </p>
         </div>
+        <SegmentedControl
+          options={[{ value: 'basic', label: 'Basic' }, { value: 'expert', label: 'Expert' }]}
+          value={mode}
+          onChange={(v) => setMode(v as 'basic' | 'expert')}
+        />
         <button
           type="button"
           onClick={undo}
@@ -229,6 +243,21 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
               elements={elements}
               baselineElements={model.baselineElements}
               roofConfig={model.roofConfig}
+              parametersSlot={mode === 'expert' ? (
+                // Air, thermal mass, calculation method and refurbishment
+                // level: the BuEM building fields the table does not carry.
+                <div className="h-[460px] border-t border-slate-100">
+                  <BuildingEditor
+                    general={model.general}
+                    setGen={model.setGen}
+                    mode={mode}
+                    ignis={model.ignis}
+                    onIgnisVariantSelect={model.selectIgnisVariant}
+                    avgUValue={model.avgUValue}
+                    hideIdentity
+                  />
+                </div>
+              ) : undefined}
               overviewSlot={(
                 <div className="flex flex-col gap-3">
                   {!wide && <div className="h-[200px]">{profileChart}</div>}
@@ -256,8 +285,16 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
                     installedTechIds={model.installedTechIds}
                     pvSummary={model.pvSummary}
                     onToggle={model.setTechInstalled}
-                    onOpen={(id) => { if (id === 'solar_pv') setPvPlannerOpen((open) => !open); }}
+                    onOpen={(id) => {
+                      if (id === 'solar_pv') setPvPlannerOpen((open) => !open);
+                      if (id === 'battery') setTechPanel((open) => (open === 'battery' ? null : 'battery'));
+                    }}
                   />
+                  {techPanel === 'battery' && (
+                    <div className="h-[460px] overflow-hidden rounded-lg border border-slate-200 bg-white">
+                      <BatteryEditor battery={model.batteryConfig} onUpdate={model.updateBattery} mode={mode} />
+                    </div>
+                  )}
                   {pvPlannerOpen && (
                     <PvPlanner
                       candidates={candidates}
@@ -270,7 +307,22 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
                         cont_energy_cap_max: candidate.capacityKwp,
                       })}
                       onSelect={selectFromList}
+                      onConfigure={mode === 'expert' ? setPvEditorId : undefined}
                     />
+                  )}
+                  {pvEditorId && elements[pvEditorId] && (
+                    <div className="h-[460px] overflow-hidden rounded-lg border border-slate-200 bg-white">
+                      <PvEditor
+                        key={pvEditorId}
+                        pvConfig={model.surfacePvConfigs[pvEditorId] ?? createSurfacePvConfig(elements[pvEditorId])}
+                        onUpdate={(patch) => model.updateSurfacePv(pvEditorId, patch)}
+                        mode={mode}
+                        // The panel takes its angles from the surface it was
+                        // installed on, not from the largest south-facing roof
+                        // that notice describes.
+                        roofInferred={false}
+                      />
+                    </div>
                   )}
                   <CostSummaryCard
                     pvSurfaces={model.pvInstalledSurfaces}
@@ -319,6 +371,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
             geometryArea={selectedGeometryArea}
             uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
             pv={model.surfacePvConfigs[selected.id] ?? null}
+            mode={mode}
             onUpdate={(patch) => model.updateElement(selected.id, patch)}
             onUpdatePv={(patch) => model.updateSurfacePv(selected.id, patch)}
             onDelete={() => { model.deleteSurface(selected.id); setSelected(null); }}

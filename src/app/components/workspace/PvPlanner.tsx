@@ -5,7 +5,7 @@
 // the model are describing the same thing.
 
 import React from 'react';
-import { Sun } from 'lucide-react';
+import { Settings2, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   compassDir,
@@ -20,9 +20,11 @@ interface PvPlannerProps {
   onToggle: (candidate: PvCandidate, installed: boolean) => void;
   /** Shows the surface in the 3D view. */
   onSelect?: (elementId: string) => void;
+  /** Opens an installed surface's full PV parameters. Expert mode only. */
+  onConfigure?: (elementId: string) => void;
 }
 
-export function PvPlanner({ candidates, installedIds, onToggle, onSelect }: PvPlannerProps) {
+export function PvPlanner({ candidates, installedIds, onToggle, onSelect, onConfigure }: PvPlannerProps) {
   if (candidates.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-slate-200 bg-white px-3 py-3">
@@ -69,6 +71,16 @@ export function PvPlanner({ candidates, installedIds, onToggle, onSelect }: PvPl
               </p>
             </button>
 
+            {installed && onConfigure && (
+              <button
+                type="button"
+                title="PV parameters for this surface"
+                onClick={() => onConfigure(element.id)}
+                className="flex shrink-0 cursor-pointer items-center rounded-md border border-slate-300 bg-white p-1.5 text-slate-500 transition-colors hover:bg-muted"
+              >
+                <Settings2 className="size-3" />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onToggle(candidate, !installed)}

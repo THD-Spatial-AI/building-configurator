@@ -37,13 +37,14 @@ interface SurfaceQuickEditorProps {
   /** This building's TABULA U-values for this surface type. */
   uValuePresets: { label: string; uValue: number }[];
   pv: PvConfig | null;
+  mode?: 'basic' | 'expert';
   onUpdate: (patch: Partial<BuildingElement>) => void;
   onUpdatePv: (patch: Partial<PvConfig>) => void;
   onDelete: () => void;
 }
 
 export function SurfaceQuickEditor({
-  element, geometryArea, uValuePresets, pv, onUpdate, onUpdatePv, onDelete,
+  element, geometryArea, uValuePresets, pv, mode = 'basic', onUpdate, onUpdatePv, onDelete,
 }: SurfaceQuickEditorProps) {
   const areaMissing = !(element.area > 0);
   // Worth offering only when it would actually change the area.
@@ -121,6 +122,12 @@ export function SurfaceQuickEditor({
         presets={uValuePresets.map((p) => ({ label: shortPresetLabel(p.label), value: p.uValue }))}
         onChange={(uValue) => onUpdate({ uValue })}
       />
+
+      {mode === 'expert' && (
+        <p className="-mt-2 text-[10px] text-slate-400">
+          R-value (1/U): {(1 / Math.max(0.01, element.uValue)).toFixed(2)} m²K/W
+        </p>
+      )}
 
       {element.type === 'window' && element.gValue !== null && (
         <PresetSlider

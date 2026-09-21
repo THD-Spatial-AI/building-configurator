@@ -39,6 +39,8 @@ export interface BuildingDetailsCardProps {
   overviewSlot?: React.ReactNode;
   /** Adds a Technology tab, e.g. the technology cards and their cost. */
   technologySlot?: React.ReactNode;
+  /** Rendered under the parameters table, e.g. the advanced BuEM settings. */
+  parametersSlot?: React.ReactNode;
 }
 
 /** Building parameters table, or building envelope cards — one merged card. */
@@ -53,6 +55,7 @@ export function BuildingDetailsCard({
   envelopeSlot,
   overviewSlot,
   technologySlot,
+  parametersSlot,
 }: BuildingDetailsCardProps) {
   // Off by default — edits only ever apply while explicitly toggled on, so a stray
   // click on the table never changes the building's data.
@@ -133,6 +136,7 @@ export function BuildingDetailsCard({
       ) : activeTab === 'technology' ? (
         <div className="p-4">{technologySlot}</div>
       ) : activeTab === 'parameters' ? (
+        <>
         <table className="w-full text-sm bg-white">
           <colgroup>
             <col className="w-[42%]" />
@@ -173,6 +177,8 @@ export function BuildingDetailsCard({
             })}
           </tbody>
         </table>
+        {parametersSlot}
+        </>
       ) : (
         <div className="flex flex-col gap-3 p-4">
           <ElementCompositionSection
