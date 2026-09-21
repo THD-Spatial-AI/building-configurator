@@ -95,23 +95,29 @@ async function resolveVariantData(
   ignis: IgnisApi,
   entry: EnrichEntry,
   building: BuildingState,
-  cache: Map<string, IgnisInputs | undefined>,
+  cache: Map<string, Promise<IgnisInputs | undefined>>,
 ): Promise<IgnisInputs | undefined> {
   const { country, buildingType, constructionYear } = building.identity;
   const cacheKey = entry.tabula_variant_code ?? `${country}/${buildingType}/${constructionYear}`;
 
-  if (!cache.has(cacheKey)) {
-    cache.set(cacheKey, await (async () => {
+  // The request is cached, not its result. Every building in the bbox resolves
+  // at once, so a cache written only once the fetch had returned was always
+  // empty when the others checked it, and each one refetched an archetype its
+  // neighbours were already fetching.
+  let pending = cache.get(cacheKey);
+  if (!pending) {
+    pending = (async () => {
       if (entry.tabula_variant_code) {
         const dataRes = await ignis.fetchVariantData(entry.tabula_variant_code);
         if (dataRes) return ignisInputsFromTabulaData(dataRes.tabula_data);
       }
       const variants = await ignis.loadVariantLevels(country, buildingType, constructionYear);
       return variants[0]?.data;
-    })());
+    })();
+    cache.set(cacheKey, pending);
   }
 
-  return cache.get(cacheKey);
+  return pending;
 }
 
 /**
@@ -125,7 +131,7 @@ export async function buildBuildingStates(
   buildings: { features: PylovoBuildingFeature[] },
   enrichData: Record<string, EnrichEntry>,
 ): Promise<Record<string, BuildingState>> {
-  const variantCache = new Map<string, IgnisInputs | undefined>();
+  const variantCache = new Map<string, Promise<IgnisInputs | undefined>>();
 
   const entries = await Promise.all(
     buildings.features.flatMap((building) => {
