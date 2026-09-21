@@ -31,6 +31,7 @@ import {
 } from '../../lib/ignisAdapter';
 import { useConfiguratorApi } from '../../lib/provider';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
+import { modelTablesZip } from './shared/modelExport';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 import { DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
 import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
@@ -670,6 +671,16 @@ export function useBuildingModel(buildingData?: BuildingState) {
     }
   };
 
+  /** Saves a file the browser has just built. */
+  const saveFile = (data: BlobPart, name: string, type: string) => {
+    const url = URL.createObjectURL(new Blob([data], { type }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   /** Downloads the current model as a BUEM GeoJSON FeatureCollection. */
   const download = () => {
     try {
@@ -677,13 +688,24 @@ export function useBuildingModel(buildingData?: BuildingState) {
       const buemJson = exportToBuemGeojson(
         identity, elements, general, undefined, undefined, batteryConfig, surfacePvConfigs,
       );
-      const blob = new Blob([buemJson], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `building-${identity.id}-buem.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      saveFile(buemJson, `building-${identity.id}-buem.json`, 'application/json');
+    } catch (err) {
+      setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  /** Downloads the building and its surfaces as CSV tables, zipped together. */
+  const downloadTables = () => {
+    try {
+      const identity = buildIdentity();
+      const zip = modelTablesZip(elements, surfacePvConfigs, general, {
+        totalEnvelopeArea: totalArea,
+        avgUValue,
+        heatDemandKwhM2a: ignis?.result?.qHnd ?? null,
+      });
+      // Same cast the profile download needs: fflate's Uint8Array is not
+      // narrowed to an ArrayBuffer-backed view, which BlobPart requires.
+      saveFile(zip as BlobPart, `building-${identity.id}-tables.zip`, 'application/zip');
     } catch (err) {
       setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -786,7 +808,7 @@ export function useBuildingModel(buildingData?: BuildingState) {
     setGen, updateElement, renameElement, deleteSurface, createSurface, applyRoofType,
     updateSurfacePv, updatePvTechnology, updateBattery, setTechInstalled,
     selectIgnisVariant, undo,
-    runSimulation, download, upload, reset,
+    runSimulation, download, downloadTables, upload, reset,
     setUploadError, setGroundTruthTimeseries, setPvInvalidated,
   };
 }

@@ -6,7 +6,7 @@
 // building itself.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowLeft, Loader2, Play, Undo2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from 'lucide-react';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard } from '../BuildingConfigurator/overview/BuildingDetailsCard';
@@ -54,6 +54,8 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   const [techPanel, setTechPanel] = useState<'battery' | null>(null);
   /** The surface whose full PV parameters are open, if any. */
   const [pvEditorId, setPvEditorId] = useState<string | null>(null);
+  /** The export choices, open over the header button. */
+  const [exportOpen, setExportOpen] = useState(false);
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
 
@@ -110,7 +112,8 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (selected) setSelected(null);
+        if (exportOpen) setExportOpen(false);
+        else if (selected) setSelected(null);
         else onExit();
         return;
       }
@@ -124,7 +127,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selected, onExit, undo]);
+  }, [selected, exportOpen, onExit, undo]);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
@@ -158,6 +161,50 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
             {Object.keys(elements).length} surfaces
             <span className="hidden sm:inline"> · avg U {model.avgUValue.toFixed(2)} W/m²K</span>
           </p>
+        </div>
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setExportOpen((open) => !open)}
+            aria-expanded={exportOpen}
+            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+          >
+            <Download className="size-3.5" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+          {exportOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
+              <div className="absolute right-0 top-full z-20 mt-1 w-[248px] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]">
+                <button
+                  type="button"
+                  onClick={() => { model.download(); setExportOpen(false); }}
+                  className="flex w-full cursor-pointer items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-muted"
+                >
+                  <Download className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
+                  <span>
+                    <span className="block text-[12px] font-semibold text-slate-700">Model (JSON)</span>
+                    <span className="block text-[10px] leading-snug text-muted-foreground">
+                      BuEM GeoJSON: everything a simulation needs
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { model.downloadTables(); setExportOpen(false); }}
+                  className="flex w-full cursor-pointer items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-muted"
+                >
+                  <Table2 className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
+                  <span>
+                    <span className="block text-[12px] font-semibold text-slate-700">Tables (CSV)</span>
+                    <span className="block text-[10px] leading-snug text-muted-foreground">
+                      building.csv and surfaces.csv, zipped
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
         <SegmentedControl
           options={[{ value: 'basic', label: 'Basic' }, { value: 'expert', label: 'Expert' }]}
