@@ -1,0 +1,330 @@
+// One building, full screen: its 3D envelope in the middle, its load profile
+// across the top, its parameters down the right, and a surface editor that
+// pops up beside whichever surface was clicked.
+//
+// Escape backs out one level at a time — first the open surface, then the
+// building itself.
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, ArrowLeft, Loader2, Play, Undo2 } from 'lucide-react';
+import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
+import { SurfaceQuickEditor } from './SurfaceQuickEditor';
+import { BuildingDetailsCard } from '../BuildingConfigurator/overview/BuildingDetailsCard';
+import { BuildingSnapshotAside } from '../BuildingConfigurator/overview/BuildingSnapshotAside';
+import { CostSummaryCard } from '../BuildingConfigurator/overview/CostSummaryCard';
+import { RenewablesKpis } from '../BuildingConfigurator/overview/RenewablesKpis';
+import { PvPlanner } from './PvPlanner';
+import { pvCandidates } from '../BuildingConfigurator/shared/pvSuitability';
+import { DEFAULT_PV_CONFIG, createSurfacePvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
+import { TechnologiesSection } from '../BuildingConfigurator/overview/TechnologiesSection';
+import { LoadProfileViewer } from '../BuildingConfigurator/overview/LoadProfileViewer';
+import { ConfiguratorStyles } from '../BuildingConfigurator/shared/ui';
+import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
+import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
+import { cn } from '@/lib/utils';
+import { isEnvelopeDetached, polygonArea } from '../../lib/surfaceMesh';
+import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
+import { tabulaUValueOptions } from '../../lib/ignisAdapter';
+import { SurfacePopover, anchorCard } from './SurfacePopover';
+import type { BuildingState } from '../../lib/buemAdapter';
+import type { SurfaceGeometry } from '../../lib/useLoenen';
+
+interface Building3DViewProps {
+  building: BuildingState;
+  /** Null while the envelope geometry is still loading. */
+  geometry: SurfaceGeometry | null;
+  onExit: () => void;
+}
+
+export function Building3DView({ building, geometry, onExit }: Building3DViewProps) {
+  const model = useBuildingModel(building);
+  const { elements } = model;
+  // Below this the panel cannot sit beside the model, so it stacks under it and
+  // the load profile moves inside it rather than taking a third band.
+  const wide = useMediaQuery(WIDE_LAYOUT);
+  const [selected, setSelected] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
+  /** The PV planner is open: its candidates are lit in the model while it is. */
+  const [pvPlannerOpen, setPvPlannerOpen] = useState(false);
+  /** Bumped to turn the model towards a surface picked from a list. */
+  const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
+
+  /** Picks a surface from a list: shows it in the model and opens its editor. */
+  const selectFromList = useCallback((id: string) => {
+    setFocus((prev) => ({ id, token: (prev?.token ?? 0) + 1 }));
+    // The card places itself against the surface as soon as the turn starts, so
+    // this is only where it appears from.
+    setSelected({ id, at: { x: window.innerWidth / 2, y: window.innerHeight / 2 } });
+  }, []);
+  // The editor follows its surface while the model turns. That is a per-frame
+  // move, so the viewer writes to the node instead of pushing state through a
+  // tree that carries a chart and a parameter table.
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  const movePopover = useCallback((at: { x: number; y: number }) => {
+    if (popoverRef.current) anchorCard(popoverRef.current, at);
+  }, []);
+
+  const envelopeIds = useMemo(() => new Set(Object.keys(elements)), [elements]);
+  const invalidIds = useMemo(
+    () => new Set(Object.values(elements).filter(hasInvalidArea).map((el) => el.id)),
+    [elements],
+  );
+  const surfaces = geometry?.surfaces ?? [];
+
+  const pvIds = useMemo(
+    () => new Set(model.pvInstalledSurfaces.map(({ element }) => element.id)),
+    [model.pvInstalledSurfaces],
+  );
+  const candidates = useMemo(
+    () => pvCandidates(elements, DEFAULT_PV_CONFIG.usable_area_pct),
+    [elements],
+  );
+  const candidateIds = useMemo(
+    () => new Set(candidates.map((candidate) => candidate.element.id)),
+    [candidates],
+  );
+
+  // Held apart from the envelope: a surface edit fires on every pointer move
+  // while a dial is dragged, and re-rendering a year of hourly data with it is
+  // what makes that drag stutter.
+  const { buildingLabel, chartTimeseries, setGroundTruthTimeseries } = model;
+  const profileChart = useMemo(() => (
+    <LoadProfileViewer
+      buildingId={buildingLabel}
+      initialTimeseries={chartTimeseries ?? undefined}
+      mode="basic"
+      onGroundTruthChange={setGroundTruthTimeseries}
+    />
+  ), [buildingLabel, chartTimeseries, setGroundTruthTimeseries]);
+  const detached = isEnvelopeDetached(surfaces, envelopeIds);
+
+  const { undo, undoLabel } = model;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selected) setSelected(null);
+        else onExit();
+        return;
+      }
+      // Not while typing into a field, where the browser's own undo applies.
+      const typing = e.target instanceof HTMLElement
+        && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      if (!typing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undo();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selected, onExit, undo]);
+
+  const selectedElement = selected ? elements[selected.id] : undefined;
+  // The measured area of the clicked polygon, offered when the envelope's own
+  // figure is missing or disagrees with it.
+  const selectedGeometryArea = selected
+    ? (() => {
+        const polygon = surfaces.find((surface) => surface.id === selected.id);
+        return polygon ? polygonArea(polygon.coordinates) : null;
+      })()
+    : null;
+
+  return (
+    <div className="fixed inset-0 z-20 flex flex-col bg-slate-100">
+      <ConfiguratorStyles />
+
+      {/* ── Header ── */}
+      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-border bg-card px-3">
+        <button
+          type="button"
+          onClick={onExit}
+          className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+        >
+          <ArrowLeft className="size-3.5" />
+          Map
+        </button>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold leading-tight text-foreground">
+            {model.buildingLabel} · {model.buildingType}
+          </p>
+          <p className="truncate text-[11px] leading-tight text-muted-foreground">
+            {Object.keys(elements).length} surfaces
+            <span className="hidden sm:inline"> · avg U {model.avgUValue.toFixed(2)} W/m²K</span>
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={undo}
+          disabled={!undoLabel}
+          title={undoLabel ? `Undo ${undoLabel.toLowerCase()} (Ctrl+Z)` : 'Nothing to undo'}
+          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Undo2 className="size-3.5" />
+          <span className="hidden sm:inline">{undoLabel ? `Undo ${undoLabel.toLowerCase()}` : 'Undo'}</span>
+        </button>
+        <span
+          className="rounded-md px-2.5 py-1 text-[11px] font-bold"
+          style={{ backgroundColor: `${model.thermalRating.color}1a`, color: model.thermalRating.color }}
+        >
+          {model.thermalRating.label}
+        </span>
+      </div>
+
+      {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
+      <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+        {wide && (
+          <div className="h-[200px] shrink-0 xl:h-[220px]">{profileChart}</div>
+        )}
+
+        <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
+          {!geometry ? (
+            <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              Loading surface geometry…
+            </div>
+          ) : surfaces.length > 0 && !detached ? (
+            <SurfaceGeometryViewer
+              surfaces={surfaces}
+              selectedId={selected?.id ?? null}
+              invalidIds={invalidIds}
+              visibleIds={envelopeIds}
+              pvIds={pvIds}
+              candidateIds={pvPlannerOpen ? candidateIds : undefined}
+              focusId={focus?.id}
+              focusToken={focus?.token}
+              onSelectSurface={(id, at) => setSelected(id && elements[id] && at ? { id, at } : null)}
+              onSelectedAnchorMove={wide ? movePopover : undefined}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-6 text-center text-xs leading-snug text-muted-foreground">
+              {detached
+                ? 'This geometry belongs to a different City2TABULA generation than the envelope, so no surface can be matched to it. Reload the buildings to fetch both from the current one.'
+                : 'City2TABULA holds no 3D geometry for this building.'}
+            </div>
+          )}
+
+          {geometry?.note && (
+            <div className="absolute inset-x-3 top-3 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-snug text-amber-900 shadow-sm">
+              <AlertTriangle className="mt-px size-3.5 shrink-0" />
+              {geometry.note}
+            </div>
+          )}
+
+          {invalidIds.size > 0 && (
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm">
+              <span className="inline-block size-2.5 rounded-sm bg-destructive" />
+              {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} a simulation would reject
+            </div>
+          )}
+        </div>
+        </div>
+
+        <div className={cn(
+          'flex shrink-0 flex-col gap-3',
+          wide ? 'w-[360px] xl:w-[440px]' : 'h-[46%] min-h-[220px] w-full',
+        )}>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <BuildingDetailsCard
+              snapshotRows={model.snapshotRows}
+              onEditField={model.setGen}
+              elements={elements}
+              baselineElements={model.baselineElements}
+              roofConfig={model.roofConfig}
+              overviewSlot={(
+                <div className="flex flex-col gap-3">
+                  {!wide && <div className="h-[200px]">{profileChart}</div>}
+                  <BuildingSnapshotAside
+                    energyTotals={model.displayEnergyTotals}
+                    thermalRating={model.thermalRating}
+                    avgUValue={model.avgUValue}
+                    installedTechIds={model.installedTechIds}
+                    pvSummary={model.pvSummary}
+                    mode="basic"
+                    embedded
+                    showEstimateNotice={false}
+                    showTechnologies={false}
+                  />
+                  <RenewablesKpis
+                    pvSurfaces={model.pvInstalledSurfaces}
+                    elements={elements}
+                    battery={model.batteryConfig}
+                  />
+                </div>
+              )}
+              technologySlot={(
+                <div className="flex flex-col gap-3">
+                  <TechnologiesSection
+                    installedTechIds={model.installedTechIds}
+                    pvSummary={model.pvSummary}
+                    onToggle={model.setTechInstalled}
+                    onOpen={(id) => { if (id === 'solar_pv') setPvPlannerOpen((open) => !open); }}
+                  />
+                  {pvPlannerOpen && (
+                    <PvPlanner
+                      candidates={candidates}
+                      installedIds={pvIds}
+                      onToggle={(candidate, installed) => model.updateSurfacePv(candidate.element.id, {
+                        ...createSurfacePvConfig(candidate.element),
+                        installed,
+                        // Sized to the surface rather than left at a flat default.
+                        system_capacity: candidate.capacityKwp,
+                        cont_energy_cap_max: candidate.capacityKwp,
+                      })}
+                      onSelect={selectFromList}
+                    />
+                  )}
+                  <CostSummaryCard
+                    pvSurfaces={model.pvInstalledSurfaces}
+                    battery={model.batteryConfig}
+                  />
+                </div>
+              )}
+            />
+          </div>
+
+          {model.uploadError && (
+            <div className="flex shrink-0 items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
+              <p className="flex-1 text-[11px] leading-snug text-destructive">{model.uploadError}</p>
+              <button
+                type="button"
+                onClick={() => model.setUploadError(null)}
+                className="shrink-0 cursor-pointer text-sm leading-none text-destructive"
+              >×</button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={model.runSimulation}
+            disabled={model.isRunningSimulation}
+            className="flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {model.isRunningSimulation
+              ? <><Loader2 className="size-4 animate-spin" /> Running simulation…</>
+              : <><Play className="size-4" /> Run simulation</>}
+          </button>
+        </div>
+      </div>
+
+      {selected && selectedElement && (
+        <SurfacePopover
+          at={selected.at}
+          cardRef={popoverRef}
+          title={`${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}`}
+          subtitle={`${selectedElement.area.toFixed(1)} m² · U ${selectedElement.uValue.toFixed(2)} W/m²K`}
+          onClose={() => setSelected(null)}
+        >
+          <SurfaceQuickEditor
+            key={selected.id}
+            element={selectedElement}
+            geometryArea={selectedGeometryArea}
+            uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
+            pv={model.surfacePvConfigs[selected.id] ?? null}
+            onUpdate={(patch) => model.updateElement(selected.id, patch)}
+            onUpdatePv={(patch) => model.updateSurfacePv(selected.id, patch)}
+            onDelete={() => { model.deleteSurface(selected.id); setSelected(null); }}
+          />
+        </SurfacePopover>
+      )}
+    </div>
+  );
+}

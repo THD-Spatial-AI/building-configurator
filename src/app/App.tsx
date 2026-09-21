@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import React, { useMemo, useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { LoenenLiveTest } from './components/LoenenLiveTest';
+import { BuildingWorkspace } from './components/workspace/BuildingWorkspace';
 import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
 import { adaptBuemFeature, extractFeaturesFromConfig } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
@@ -138,7 +139,7 @@ function MapCanvas({ buildings, onBuildingClick }: {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState<'demo' | 'live-test'>('demo');
+  const [view, setView] = useState<'demo' | 'live-test' | 'workspace'>('workspace');
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
@@ -173,19 +174,21 @@ export default function App() {
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 6 }} className="shadow-lg rounded-[6px]">
           <SegmentedControl
             value={view}
-            onChange={(v) => setView(v as 'demo' | 'live-test')}
+            onChange={(v) => setView(v as 'demo' | 'live-test' | 'workspace')}
             options={[
+              { value: 'workspace', label: '3D workspace (Loenen)' },
               { value: 'demo', label: 'Demo map' },
-              { value: 'live-test', label: 'Live backend test (Loenen)' },
+              { value: 'live-test', label: 'Dialog (Loenen)' },
             ]}
           />
         </div>
 
         {view === 'demo' && <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />}
         {view === 'live-test' && <LoenenLiveTest />}
+        {view === 'workspace' && <BuildingWorkspace />}
 
         {/* Floating configurator panel — blurred backdrop separates it from the map behind it */}
-        {selectedBuildingId && (
+        {view === 'demo' && selectedBuildingId && (
           <div style={{
             position:        'absolute',
             inset:           0,
