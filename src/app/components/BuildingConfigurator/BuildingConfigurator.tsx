@@ -4,7 +4,7 @@
 import React, { useState, useRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
-  Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle, Undo2,
+  Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle, Undo2, Table2,
 } from 'lucide-react';
 
 import type { BuildingElement } from './configure/model/buildingElements';
@@ -63,7 +63,8 @@ export function BuildingConfigurator({ onClose, buildingData, geometry }: Buildi
     baselineElements, buildingLabel, buildingType, coordinates, avgUValue, thermalRating,
     snapshotRows, displayEnergyTotals, pvInstalledSurfaces, totalPvCapacityKw, pvSummary,
     installedTechIds, setGen, updateElement, renameElement, applyRoofType, updateSurfacePv,
-    updateBattery, setTechInstalled, selectIgnisVariant, runSimulation, download, upload,
+    updateBattery, setTechInstalled, selectIgnisVariant, runSimulation, download,
+    downloadTables, upload,
     setUploadError, setGroundTruthTimeseries, setPvInvalidated,
   } = model;
 
@@ -241,6 +242,10 @@ export function BuildingConfigurator({ onClose, buildingData, geometry }: Buildi
           ><Undo2 /></HeaderBtn>
           <div className="w-px h-5 bg-border shrink-0 mx-1" />
           <HeaderBtn onClick={download} tooltip="Export as BUEM GeoJSON"><Download /></HeaderBtn>
+          <HeaderBtn
+            onClick={downloadTables}
+            tooltip="Export as CSV tables (building and surfaces, zipped)"
+          ><Table2 /></HeaderBtn>
           <HeaderBtn onClick={() => fileInputRef.current?.click()} tooltip="Import BUEM or legacy JSON"><Upload /></HeaderBtn>
           <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={upload} />
           <div className="w-px h-5 bg-border shrink-0 mx-1" />
