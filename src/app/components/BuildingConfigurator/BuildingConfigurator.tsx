@@ -2,13 +2,12 @@
 // which owns the building's data.
 
 import React, { useState, useRef } from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
-  Download, Upload, X, Building2, RotateCcw, Check, AlertTriangle, Undo2, Table2,
+  Download, Upload, X, Building2, RotateCcw, Check, Undo2, Table2,
 } from 'lucide-react';
 
 import type { BuildingElement } from './configure/model/buildingElements';
-import { SegmentedControl, ConfiguratorStyles, ElementConfiguratorModal } from './shared/ui';
+import { SegmentedControl, ConfiguratorStyles, ElementConfiguratorModal, UnsavedChangesDialog } from './shared/ui';
 import type { BuildingState } from '../../lib/buemAdapter';
 import { formatCoordinates } from '../../lib/buemAdapter';
 import type { SurfacePolygon } from '../../lib/surfaceMesh';
@@ -404,55 +403,12 @@ export function BuildingConfigurator({ onClose, buildingData, geometry }: Buildi
         </div>
       </ElementConfiguratorModal>
 
-      {/* ── Close confirmation dialog ── */}
-      <DialogPrimitive.Root open={showCloseDialog} onOpenChange={setShowCloseDialog}>
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background border border-border rounded-md p-6 shadow-xl w-full max-w-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="size-4 text-amber-500 shrink-0" />
-              <DialogPrimitive.Title className="text-base font-semibold text-foreground">
-                Unsaved Changes
-              </DialogPrimitive.Title>
-            </div>
-
-            <div className="mb-4">
-              <p className="text-sm text-foreground mb-2">
-                You have unsaved changes to this building configuration. What would you like to do?
-              </p>
-              <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
-                <p className="text-xs text-amber-800">
-                  Closing without saving will discard all modifications made since the last Apply.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowCloseDialog(false)}
-                className="px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-[6px] hover:bg-muted transition-colors cursor-pointer"
-              >
-                Continue Editing
-              </button>
-              <button
-                type="button"
-                onClick={() => { runSimulation(); onClose?.(); setShowCloseDialog(false); }}
-                className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
-              >
-                Save &amp; Close
-              </button>
-              <button
-                type="button"
-                onClick={() => { onClose?.(); setShowCloseDialog(false); }}
-                className="px-3 py-1.5 text-sm font-medium rounded-[6px] transition-colors cursor-pointer text-destructive border border-destructive/30 hover:bg-destructive/5"
-              >
-                Discard Changes
-              </button>
-            </div>
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
+      <UnsavedChangesDialog
+        open={showCloseDialog}
+        onCancel={() => setShowCloseDialog(false)}
+        onSave={() => { runSimulation(); onClose?.(); setShowCloseDialog(false); }}
+        onDiscard={() => { onClose?.(); setShowCloseDialog(false); }}
+      />
     </div>
   );
 }

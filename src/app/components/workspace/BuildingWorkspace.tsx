@@ -10,12 +10,17 @@ import { AlertTriangle, Loader2, Satellite } from 'lucide-react';
 import { LoenenLiveMap } from '../LoenenLiveMap';
 import { useLoenenBuildings, useSurfaceGeometry } from '../../lib/useLoenen';
 import { Building3DView } from './Building3DView';
+import type { BuildingState } from '../../lib/buemAdapter';
 
 export function BuildingWorkspace() {
   const data = useLoenenBuildings();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  /** Buildings saved on leaving the 3D view, by id; they replace the loaded ones on reopen. */
+  const [edited, setEdited] = useState<Record<string, BuildingState>>({});
 
-  const selectedBuilding = selectedId && data.buildings ? data.buildings[selectedId] : undefined;
+  const selectedBuilding = selectedId && data.buildings
+    ? edited[selectedId] ?? data.buildings[selectedId]
+    : undefined;
   const selectedObjectId = selectedId ? data.objectIds[selectedId] : undefined;
   const geometry = useSurfaceGeometry(selectedObjectId);
 
@@ -70,7 +75,12 @@ export function BuildingWorkspace() {
           key={selectedId}
           building={selectedBuilding}
           geometry={selectedObjectId ? geometry : { surfaces: [] }}
-          onExit={() => setSelectedId(null)}
+          onExit={(building) => {
+            if (building && building !== data.buildings?.[selectedId]) {
+              setEdited((prev) => ({ ...prev, [selectedId]: building }));
+            }
+            setSelectedId(null);
+          }}
         />
       )}
     </div>

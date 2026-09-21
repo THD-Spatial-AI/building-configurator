@@ -3,7 +3,7 @@
 // pops up beside whichever surface was clicked.
 //
 // Escape backs out one level at a time — first the open surface, then the
-// building itself.
+// building itself, asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from 'lucide-react';
@@ -18,7 +18,7 @@ import { pvCandidates } from '../BuildingConfigurator/shared/pvSuitability';
 import { DEFAULT_PV_CONFIG, createSurfacePvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
 import { TechnologiesSection } from '../BuildingConfigurator/overview/TechnologiesSection';
 import { LoadProfileViewer } from '../BuildingConfigurator/overview/LoadProfileViewer';
-import { ConfiguratorStyles, SegmentedControl } from '../BuildingConfigurator/shared/ui';
+import { ConfiguratorStyles, SegmentedControl, UnsavedChangesDialog } from '../BuildingConfigurator/shared/ui';
 import { BuildingEditor } from '../BuildingConfigurator/configure/building/BuildingEditor';
 import { BatteryEditor } from '../BuildingConfigurator/configure/pv/BatteryEditor';
 import { PvEditor } from '../BuildingConfigurator/configure/pv/PvEditor';
@@ -35,7 +35,8 @@ interface Building3DViewProps {
   building: BuildingState;
   /** Null while the envelope geometry is still loading. */
   geometry: SurfaceGeometry | null;
-  onExit: () => void;
+  /** Leaves the building, handing back its edits (the building unchanged when there are none). */
+  onExit: (building: BuildingState | undefined) => void;
 }
 
 export function Building3DView({ building, geometry, onExit }: Building3DViewProps) {
@@ -55,6 +56,8 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   const [pvEditorId, setPvEditorId] = useState<string | null>(null);
   /** The export choices, open over the header button. */
   const [exportOpen, setExportOpen] = useState(false);
+  /** Leaving was asked for while there are unsaved edits. */
+  const [exitPromptOpen, setExitPromptOpen] = useState(false);
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
 
@@ -107,13 +110,20 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   ), [buildingLabel, chartTimeseries, setGroundTruthTimeseries]);
   const detached = isEnvelopeDetached(surfaces, envelopeIds);
 
-  const { undo, undoLabel } = model;
+  const { undo, undoLabel, hasUnsavedChanges, toBuildingState } = model;
+  const requestExit = useCallback(() => {
+    if (hasUnsavedChanges) setExitPromptOpen(true);
+    else onExit(toBuildingState('current'));
+  }, [hasUnsavedChanges, toBuildingState, onExit]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        // The prompt's own dialog closes itself on Escape.
+        if (exitPromptOpen) return;
         if (exportOpen) setExportOpen(false);
         else if (selected) setSelected(null);
-        else onExit();
+        else requestExit();
         return;
       }
       // Not while typing into a field, where the browser's own undo applies.
@@ -126,7 +136,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selected, exportOpen, onExit, undo]);
+  }, [selected, exportOpen, exitPromptOpen, requestExit, undo]);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
@@ -146,7 +156,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
       <div className="flex h-12 shrink-0 items-center gap-3 border-b border-border bg-card px-3">
         <button
           type="button"
-          onClick={onExit}
+          onClick={requestExit}
           className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
         >
           <ArrowLeft className="size-3.5" />
@@ -422,6 +432,13 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
           />
         </SurfacePopover>
       )}
+
+      <UnsavedChangesDialog
+        open={exitPromptOpen}
+        onCancel={() => setExitPromptOpen(false)}
+        onSave={() => onExit(toBuildingState('current'))}
+        onDiscard={() => onExit(toBuildingState('saved'))}
+      />
     </div>
   );
 }

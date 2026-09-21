@@ -792,6 +792,14 @@ export function useBuildingModel(buildingData?: BuildingState) {
 
   const chartTimeseries = modelTimeseries ?? thematicData?.timeseries ?? buildingData?.timeseries ?? null;
 
+  /** The building as opened, with the current or last saved edits written into it. */
+  const toBuildingState = (source: 'current' | 'saved'): BuildingState | undefined => {
+    const edits = source === 'current' ? { elements, general } : { elements: savedState.elements, general: savedState.general };
+    const untouched = JSON.stringify(edits) === JSON.stringify({ elements: initialElements, general: initialGeneral });
+    if (!buildingData || untouched) return buildingData;
+    return withEdits(buildingData, edits.elements, edits.general);
+  };
+
   return {
     // state
     elements, general, roofConfig, surfacePvConfigs, pvTechnology, pvArrays, batteryConfig, ignis,
@@ -808,7 +816,7 @@ export function useBuildingModel(buildingData?: BuildingState) {
     setGen, updateElement, renameElement, deleteSurface, createSurface, applyRoofType,
     updateSurfacePv, updatePvTechnology, updateBattery, setTechInstalled,
     selectIgnisVariant, undo,
-    runSimulation, download, downloadTables, upload, reset,
+    runSimulation, download, downloadTables, upload, reset, toBuildingState,
     setUploadError, setGroundTruthTimeseries, setPvInvalidated,
   };
 }
@@ -838,5 +846,34 @@ function ignisSeedBuilding(
     timeseries: null,
     installedTechIds: [],
     ignis: null,
+  };
+}
+
+/**
+ * The building with an edited envelope and building parameters written back
+ * into it, so reopening it shows the edits. Technologies and results are kept
+ * as they were.
+ */
+export function withEdits(
+  building: BuildingState,
+  elements: Record<string, BuildingElement>,
+  general: typeof DEFAULT_GENERAL,
+): BuildingState {
+  const base = building.thematic?.identity ?? building.identity;
+  const identity = {
+    ...base,
+    label: general.buildingName || base.label,
+    buildingType: general.buildingType,
+    constructionYear: general.constructionYear,
+    country: general.country,
+    floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
+    roomHeight: general.roomHeight,
+    storeys: general.storeys,
+  };
+  return {
+    ...building,
+    thematic: { ...building.thematic, identity, envelope: elements },
+    identity,
+    envelope: elements,
   };
 }
