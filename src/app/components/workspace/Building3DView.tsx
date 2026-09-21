@@ -3,7 +3,7 @@
 // pops up beside whichever surface was clicked.
 //
 // Escape backs out one level at a time — first the open surface, then the
-// building itself, asking first when it has unsaved edits.
+// building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from 'lucide-react';
@@ -30,6 +30,9 @@ import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import type { BuildingState } from '../../lib/buemAdapter';
+import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
+
+type SurfaceSelection = { id: string; at: { x: number; y: number } };
 
 interface Building3DViewProps {
   building: BuildingState;
@@ -45,7 +48,11 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
   const wide = useMediaQuery(WIDE_LAYOUT);
-  const [selected, setSelected] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
+  const [selected, setSelected] = useState<SurfaceSelection | null>(null);
+  /** The open surface as it was when its editor opened, to tell whether it was changed. */
+  const [surfaceOriginal, setSurfaceOriginal] = useState<BuildingElement | null>(null);
+  /** Where the editor was about to go when it asked about the open surface's changes. */
+  const [pendingSurface, setPendingSurface] = useState<{ next: SurfaceSelection | null } | null>(null);
   /** The PV planner is open: its candidates are lit in the model while it is. */
   const [pvPlannerOpen, setPvPlannerOpen] = useState(false);
   /** Expert shows the full BuEM building parameters and technology settings. */
@@ -61,13 +68,30 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
 
+  const openSurface = (next: SurfaceSelection | null) => {
+    setSelected(next);
+    setSurfaceOriginal(next ? elements[next.id] ?? null : null);
+  };
+
+  /** Moves the editor to another surface, or closes it, asking first when the open one was changed. */
+  const requestSurface = (next: SurfaceSelection | null) => {
+    if (selected && next?.id === selected.id) {
+      setSelected(next);
+      return;
+    }
+    const changed = selected !== null && surfaceOriginal !== null
+      && JSON.stringify(elements[selected.id]) !== JSON.stringify(surfaceOriginal);
+    if (changed) setPendingSurface({ next });
+    else openSurface(next);
+  };
+
   /** Picks a surface from a list: shows it in the model and opens its editor. */
-  const selectFromList = useCallback((id: string) => {
+  const selectFromList = (id: string) => {
     setFocus((prev) => ({ id, token: (prev?.token ?? 0) + 1 }));
     // The card places itself against the surface as soon as the turn starts, so
     // this is only where it appears from.
-    setSelected({ id, at: { x: window.innerWidth / 2, y: window.innerHeight / 2 } });
-  }, []);
+    requestSurface({ id, at: { x: window.innerWidth / 2, y: window.innerHeight / 2 } });
+  };
   // The editor follows its surface while the model turns. That is a per-frame
   // move, so the viewer writes to the node instead of pushing state through a
   // tree that carries a chart and a parameter table.
@@ -119,10 +143,10 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        // The prompt's own dialog closes itself on Escape.
-        if (exitPromptOpen) return;
+        // An open prompt's own dialog closes itself on Escape.
+        if (exitPromptOpen || pendingSurface) return;
         if (exportOpen) setExportOpen(false);
-        else if (selected) setSelected(null);
+        else if (selected) requestSurface(null);
         else requestExit();
         return;
       }
@@ -136,7 +160,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selected, exportOpen, exitPromptOpen, requestExit, undo]);
+  }, [selected, exportOpen, exitPromptOpen, pendingSurface, requestSurface, requestExit, undo]);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
@@ -261,7 +285,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
               candidateIds={pvPlannerOpen ? candidateIds : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
-              onSelectSurface={(id, at) => setSelected(id && elements[id] && at ? { id, at } : null)}
+              onSelectSurface={(id, at) => requestSurface(id && elements[id] && at ? { id, at } : null)}
               onSelectedAnchorMove={wide ? movePopover : undefined}
             />
           ) : (
@@ -417,7 +441,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
           cardRef={popoverRef}
           title={`${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}`}
           subtitle={`${selectedElement.area.toFixed(1)} m² · U ${selectedElement.uValue.toFixed(2)} W/m²K`}
-          onClose={() => setSelected(null)}
+          onClose={() => requestSurface(null)}
         >
           <SurfaceQuickEditor
             key={selected.id}
@@ -428,10 +452,23 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
             mode={mode}
             onUpdate={(patch) => model.updateElement(selected.id, patch)}
             onUpdatePv={(patch) => model.updateSurfacePv(selected.id, patch)}
-            onDelete={() => { model.deleteSurface(selected.id); setSelected(null); }}
+            onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
           />
         </SurfacePopover>
       )}
+
+      <UnsavedChangesDialog
+        open={pendingSurface !== null}
+        message="You changed this surface. Keep the changes?"
+        note="Discarding puts the surface back as it was when its editor opened."
+        onCancel={() => setPendingSurface(null)}
+        onSave={() => { openSurface(pendingSurface?.next ?? null); setPendingSurface(null); }}
+        onDiscard={() => {
+          if (surfaceOriginal) model.restoreElement(surfaceOriginal);
+          openSurface(pendingSurface?.next ?? null);
+          setPendingSurface(null);
+        }}
+      />
 
       <UnsavedChangesDialog
         open={exitPromptOpen}

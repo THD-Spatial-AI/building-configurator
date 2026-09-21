@@ -607,17 +607,21 @@ export function ElementConfiguratorModal({
   );
 }
 
-/** Asked before leaving a building that has edits since the last save. */
+/** Asked before closing something (a building, a surface) that has edits since it was last saved. */
 export function UnsavedChangesDialog({
   open,
   onCancel,
   onSave,
   onDiscard,
+  message = 'You have unsaved changes to this building configuration. What would you like to do?',
+  note = 'Closing without saving will discard all modifications made since the last save.',
 }: {
   open: boolean;
   onCancel: () => void;
   onSave: () => void;
   onDiscard: () => void;
+  message?: string;
+  note?: string;
 }) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
@@ -633,11 +637,11 @@ export function UnsavedChangesDialog({
 
           <div className="mb-4">
             <DialogPrimitive.Description className="text-sm text-foreground mb-2">
-              You have unsaved changes to this building configuration. What would you like to do?
+              {message}
             </DialogPrimitive.Description>
             <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
               <p className="text-xs text-amber-800">
-                Closing without saving will discard all modifications made since the last save.
+                {note}
               </p>
             </div>
           </div>

@@ -520,6 +520,12 @@ export function useBuildingModel(buildingData?: BuildingState) {
     });
   };
 
+  /** Puts a surface back as it was, e.g. when its editor's changes are discarded. */
+  const restoreElement = (element: BuildingElement) => {
+    remember(`restore:${element.id}`, 'Discarded surface changes');
+    setElements((prev) => (prev[element.id] ? { ...prev, [element.id]: element } : prev));
+  };
+
   // Label is display-only — rename is always allowed regardless of custom mode.
   const renameElement = (id: string, label: string) => {
     remember(`rename:${id}`, 'Rename');
@@ -813,7 +819,7 @@ export function useBuildingModel(buildingData?: BuildingState) {
     snapshotRows, displayEnergyTotals, pvInstalledSurfaces, totalPvCapacityKw,
     pvSummary, installedTechIds,
     // handlers
-    setGen, updateElement, renameElement, deleteSurface, createSurface, applyRoofType,
+    setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
     updateSurfacePv, updatePvTechnology, updateBattery, setTechInstalled,
     selectIgnisVariant, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
