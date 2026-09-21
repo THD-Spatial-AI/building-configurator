@@ -166,7 +166,7 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
         className="relative size-[86px] cursor-grab touch-none rounded-lg border border-slate-200 bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
       >
         <svg viewBox="0 0 86 86" className="pointer-events-none absolute inset-0">
-          <path d="M 8 76 A 60 60 0 0 1 68 16" fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
+          <path d="M 68 76 A 60 60 0 0 0 8 16" fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
           <line x1="8" y1="76" x2="74" y2="76" stroke="#cbd5e1" strokeWidth="1.5" />
           <line
             x1="8" y1="76"
