@@ -29,6 +29,10 @@ interface Surface3DExperimentProps {
   country: string;
   /** The building's envelope, keyed by the same ids the surfaces carry. */
   elements: Record<string, BuildingElement>;
+  /** Geometry already fetched for this dataset, keyed by object id. Owned by
+   * the caller so it outlives this component, which unmounts whenever the
+   * configurator opens over it. */
+  cache: Map<string, BuildingGeometry | null>;
   onOpenSurface: (elementId: string) => void;
 }
 
@@ -38,24 +42,35 @@ type LoadState =
   | { phase: 'fixture'; reason: string; surfaces: SurfacePolygon[] }
   | { phase: 'error'; message: string };
 
-export function Surface3DExperiment({ objectId, country, elements, onOpenSurface }: Surface3DExperimentProps) {
+export function Surface3DExperiment({ objectId, country, elements, cache, onOpenSurface }: Surface3DExperimentProps) {
   const { enerplanet } = useConfiguratorApi();
   const [state, setState] = useState<LoadState>({ phase: 'loading' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setState({ phase: 'loading' });
     setSelectedId(null);
 
+    const fromBuilding = (building: BuildingGeometry | null): LoadState => building
+      ? { phase: 'live', surfaces: surfacesFromGeometryResponse([building]) }
+      : { phase: 'error', message: `City2TABULA holds no geometry for ${objectId}` };
+
+    // An absent entry reads as undefined, so a cached "no geometry" null is a
+    // hit rather than a miss.
+    const cached = cache.get(objectId);
+    if (cached !== undefined) {
+      setState(fromBuilding(cached));
+      return;
+    }
+
+    setState({ phase: 'loading' });
     enerplanet.getSurfaceGeometry(objectId, country)
       .then((building) => {
         if (cancelled) return;
-        if (!building) {
-          setState({ phase: 'error', message: `City2TABULA holds no geometry for ${objectId}` });
-          return;
-        }
-        setState({ phase: 'live', surfaces: surfacesFromGeometryResponse([building]) });
+        // Only a successful answer is cached: a failure falls through to the
+        // bundled geometry below and must be retried on the next selection.
+        cache.set(objectId, building);
+        setState(fromBuilding(building));
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -72,7 +87,7 @@ export function Surface3DExperiment({ objectId, country, elements, onOpenSurface
       });
 
     return () => { cancelled = true; };
-  }, [enerplanet, objectId, country]);
+  }, [enerplanet, objectId, country, cache]);
 
   const surfaces = state.phase === 'live' || state.phase === 'fixture' ? state.surfaces : null;
   const selectedElement = selectedId ? elements[selectedId] : undefined;

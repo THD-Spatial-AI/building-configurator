@@ -10,7 +10,7 @@
  * says which one is showing.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Satellite, Loader2, AlertTriangle, X } from 'lucide-react';
 import { BuildingConfigurator } from './BuildingConfigurator';
 import { Surface3DExperiment } from './experimental/Surface3DExperiment';
@@ -20,7 +20,7 @@ import { useConfiguratorApi } from '../lib/provider';
 import { ensureDemoSession } from '../../demoClient';
 import { buildBuildingStates } from '../lib/city2tabulaAdapter';
 import type { IgnisApi } from '../lib/ignisApi';
-import type { EnrichEntry } from '../lib/enerplanetApi';
+import type { BuildingGeometry, EnrichEntry } from '../lib/enerplanetApi';
 import type { BuildingState } from '../lib/buemAdapter';
 import { hasInvalidArea } from './BuildingConfigurator/configure/model/buildingElements';
 import loenenFixture from '../../assets/data/loenen_live_fixture.json';
@@ -65,6 +65,11 @@ export function LoenenLiveTest() {
   // Null shows the 3D view for selectedId; set shows the configurator over it,
   // deep-linked to a surface when one was clicked in 3D.
   const [configuring, setConfiguring] = useState<{ surfaceId?: string } | null>(null);
+  // Surface geometry is fetched one building at a time, on selection, and the
+  // viewer unmounts whenever the configurator opens over it. Held here so a
+  // return to the 3D view does not refetch. Its lifetime is this component's:
+  // the buildings load once per mount, so everything in it is one generation.
+  const geometryCache = useRef(new Map<string, BuildingGeometry | null>()).current;
 
   const load = useCallback(async () => {
     setState({ phase: 'loading' });
@@ -201,6 +206,7 @@ export function LoenenLiveTest() {
                     objectId={objectIds[selectedId]}
                     country={LOENEN_COUNTRY}
                     elements={selectedBuilding.envelope}
+                    cache={geometryCache}
                     onOpenSurface={(surfaceId) => setConfiguring({ surfaceId })}
                   />
                 ) : (
