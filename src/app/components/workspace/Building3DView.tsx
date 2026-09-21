@@ -25,12 +25,11 @@ import { PvEditor } from '../BuildingConfigurator/configure/pv/PvEditor';
 import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
 import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
 import { cn } from '@/lib/utils';
-import { isEnvelopeDetached, polygonArea } from '../../lib/surfaceMesh';
+import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import type { BuildingState } from '../../lib/buemAdapter';
-import type { SurfaceGeometry } from '../../lib/useLoenen';
 
 interface Building3DViewProps {
   building: BuildingState;

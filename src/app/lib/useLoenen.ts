@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfiguratorApi } from './provider';
 import { ensureDemoSession } from '../../demoClient';
 import { buildBuildingStates } from './city2tabulaAdapter';
-import { surfacesFromGeometryResponse, type SurfacePolygon } from './surfaceMesh';
+import { surfacesFromGeometryResponse, type SurfaceGeometry } from './surfaceMesh';
 import { hasInvalidArea } from '../components/BuildingConfigurator/configure/model/buildingElements';
 import { LOENEN_BBOX } from '../components/LoenenLiveMap';
 import type { IgnisApi } from './ignisApi';
@@ -111,11 +111,7 @@ export function useLoenenBuildings() {
   };
 }
 
-export interface SurfaceGeometry {
-  surfaces: SurfacePolygon[];
-  /** Why these are not the live geometry, if they are not. */
-  note?: string;
-}
+export type { SurfaceGeometry };
 
 /**
  * One building's envelope polygons, fetched when `objectId` changes and cached

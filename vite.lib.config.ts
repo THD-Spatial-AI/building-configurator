@@ -22,9 +22,13 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        // The 3D building view, whose props are still moving.
+        experimental: path.resolve(__dirname, 'src/experimental.ts'),
+      },
       formats: ['es'],
-      fileName: () => 'index.js',
+      fileName: (_format, name) => `${name}.js`,
     },
     rollupOptions: {
       // Everything a host already has, or would otherwise end up duplicated in
@@ -40,6 +44,11 @@ export default defineConfig({
         'clsx',
         'tailwind-merge',
         'fflate',
+        // Declared dependencies, so a host installing this package gets them
+        // without a second copy of three in its bundle.
+        'three',
+        /^three\//,
+        'earcut',
         /^@radix-ui\//,
       ],
     },

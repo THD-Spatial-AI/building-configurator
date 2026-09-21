@@ -15,6 +15,13 @@ export interface SurfacePolygon {
   coordinates: number[][][];
 }
 
+/** One building's envelope, ready to render. */
+export interface SurfaceGeometry {
+  surfaces: SurfacePolygon[];
+  /** Why these are not the live geometry, if they are not. */
+  note?: string;
+}
+
 /** Flattens a geometry response into the surfaces this viewer renders. A surface
  * row with no geometry is skipped rather than rendered as an empty mesh. */
 export function surfacesFromGeometryResponse(buildings: BuildingGeometry[]): SurfacePolygon[] {
