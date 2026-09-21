@@ -2,7 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import React, { useMemo, useState } from 'react';
 import { BuildingConfigurator } from './components/BuildingConfigurator';
 import { LoenenLiveTest } from './components/LoenenLiveTest';
-import { BuildingWorkspace } from './components/workspace/BuildingWorkspace';
+import { BuildingWorkspace, FixtureWorkspace } from './components/workspace/BuildingWorkspace';
 import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
 import { adaptBuemFeature, extractFeaturesFromConfig } from './lib/buemAdapter';
 import type { BuildingState } from './lib/buemAdapter';
@@ -139,7 +139,7 @@ function MapCanvas({ buildings, onBuildingClick }: {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState<'demo' | 'live-test' | 'workspace'>('workspace');
+  const [view, setView] = useState<'demo' | 'live-test' | 'workspace' | 'fixture'>('workspace');
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
@@ -174,9 +174,10 @@ export default function App() {
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 6 }} className="shadow-lg rounded-[6px]">
           <SegmentedControl
             value={view}
-            onChange={(v) => setView(v as 'demo' | 'live-test' | 'workspace')}
+            onChange={(v) => setView(v as 'demo' | 'live-test' | 'workspace' | 'fixture')}
             options={[
               { value: 'workspace', label: '3D workspace (Loenen)' },
+              { value: 'fixture', label: '3D fixture (1 building)' },
               { value: 'demo', label: 'Demo map' },
               { value: 'live-test', label: 'Dialog (Loenen)' },
             ]}
@@ -186,6 +187,7 @@ export default function App() {
         {view === 'demo' && <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />}
         {view === 'live-test' && <LoenenLiveTest />}
         {view === 'workspace' && <BuildingWorkspace />}
+        {view === 'fixture' && <FixtureWorkspace />}
 
         {/* Floating configurator panel — blurred backdrop separates it from the map behind it */}
         {view === 'demo' && selectedBuildingId && (

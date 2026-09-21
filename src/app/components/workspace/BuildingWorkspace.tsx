@@ -6,9 +6,9 @@
  */
 
 import { useState } from 'react';
-import { AlertTriangle, Loader2, Satellite } from 'lucide-react';
+import { AlertTriangle, Box, Loader2, Satellite } from 'lucide-react';
 import { LoenenLiveMap } from '../LoenenLiveMap';
-import { useLoenenBuildings, useSurfaceGeometry } from '../../lib/useLoenen';
+import { useFixtureBuilding, useLoenenBuildings, useSurfaceGeometry } from '../../lib/useLoenen';
 import { Building3DView } from './Building3DView';
 import type { BuildingState } from '../../lib/buemAdapter';
 
@@ -84,5 +84,50 @@ export function BuildingWorkspace() {
         />
       )}
     </div>
+  );
+}
+
+/** Bundled Loenen building with surfaces that have no area, so every part of the 3D view has something to show. */
+const FIXTURE_OSM_ID = '268428620';
+
+/** The 3D view on one bundled building, opened straight away with no backend calls. */
+export function FixtureWorkspace() {
+  const fixture = useFixtureBuilding(FIXTURE_OSM_ID);
+  const [open, setOpen] = useState(true);
+  /** What was saved on leaving, reopened in place of the bundled building. */
+  const [saved, setSaved] = useState<BuildingState | null>(null);
+
+  if (!fixture) {
+    return (
+      <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Adapting the bundled building…
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <button
+          onClick={() => setOpen(true)}
+          className="flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors duration-100 hover:bg-primary/90"
+        >
+          <Box className="size-4" />
+          Reopen building {FIXTURE_OSM_ID}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <Building3DView
+      building={saved ?? fixture.building}
+      geometry={fixture.geometry}
+      onExit={(building) => {
+        if (building) setSaved(building);
+        setOpen(false);
+      }}
+    />
   );
 }

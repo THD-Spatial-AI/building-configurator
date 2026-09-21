@@ -165,3 +165,36 @@ export function useSurfaceGeometry(objectId: string | undefined, country = LOENE
 
   return geometry;
 }
+
+/**
+ * One bundled building and its bundled geometry, with no EnerPlanET calls, for
+ * working on the 3D view without loading the area. Null while it is adapted.
+ */
+export function useFixtureBuilding(osmId: string): { building: BuildingState; geometry: SurfaceGeometry } | null {
+  const { ignis } = useConfiguratorApi();
+  const [building, setBuilding] = useState<BuildingState | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const features = (loenenFixture.buildings.features as { properties: { osm_id: unknown } }[])
+      .filter((feature) => String(feature.properties.osm_id) === osmId);
+    buildBuildingStates(
+      ignis,
+      { features } as unknown as Parameters<typeof buildBuildingStates>[1],
+      loenenFixture.enrich.data as unknown as Parameters<typeof buildBuildingStates>[2],
+    ).then((states) => {
+      if (cancelled) return;
+      if (!states[osmId]) throw new Error(`No bundled Loenen building with osm_id ${osmId}`);
+      setBuilding(states[osmId]);
+    });
+    return () => { cancelled = true; };
+  }, [ignis, osmId]);
+
+  const objectId = (loenenFixture.enrich.data as unknown as Record<string, EnrichEntry>)[osmId]?.object_id;
+  const geometry = useMemo<SurfaceGeometry>(() => {
+    const fixture = objectId ? SURFACE_FIXTURE[objectId] : undefined;
+    return { surfaces: fixture ? surfacesFromGeometryResponse([fixture]) : [] };
+  }, [objectId]);
+
+  return building ? { building, geometry } : null;
+}
