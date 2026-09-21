@@ -31,6 +31,8 @@ export interface EnergyEnvelopeColumnProps {
   onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
   /** Opens the surface configurator modal for an envelope group (walls, windows, ...). */
   onEditGroup?: (type: ElementGroupKey) => void;
+  /** Rendered under the envelope group cards, e.g. the 3D envelope + surface editor. */
+  envelopeSlot?: React.ReactNode;
 }
 
 /** Right panel of the overview: energy chart pinned above, building details card scrolling below. */
@@ -48,6 +50,7 @@ export function EnergyEnvelopeColumn({
   onOpenAdvanced,
   onGroundTruthChange,
   onEditGroup,
+  envelopeSlot,
 }: EnergyEnvelopeColumnProps) {
   return (
     <div className="flex h-full min-h-0 flex-col bg-slate-100">
@@ -96,6 +99,7 @@ export function EnergyEnvelopeColumn({
           baselineElements={baselineElements}
           roofConfig={roofConfig}
           onEditGroup={onEditGroup}
+          envelopeSlot={envelopeSlot}
         />
       </ScrollHintContainer>
     </div>

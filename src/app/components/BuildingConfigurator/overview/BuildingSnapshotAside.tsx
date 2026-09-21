@@ -24,6 +24,12 @@ export interface BuildingSnapshotAsideProps {
   onToggleTech?: (id: string, installed: boolean) => void;
   /** Opens the matching technology's editor modal. */
   onOpenTech?: (id: string) => void;
+  /** Drops the scroll container, for a parent that scrolls already. */
+  embedded?: boolean;
+  /** The estimated-parameters notice, which points at the configurator dialog. */
+  showEstimateNotice?: boolean;
+  /** The technology cards, for callers that give them their own tab instead. */
+  showTechnologies?: boolean;
 }
 
 const ENERGY_ITEMS = [
@@ -44,12 +50,15 @@ export function BuildingSnapshotAside({
   pvSummary,
   onToggleTech,
   onOpenTech,
+  embedded = false,
+  showEstimateNotice = true,
+  showTechnologies = true,
 }: BuildingSnapshotAsideProps) {
-  return (
-    <ScrollHintContainer className="flex flex-col gap-3 border-r border-border/80 bg-slate-100 p-4">
+  const content = (
     <aside className="flex flex-col gap-3">
 
       {/* ── Data quality notice ── */}
+      {showEstimateNotice && (
       <div className="shrink-0 overflow-hidden rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
         <div className="flex items-center gap-2">
           <AlertTriangle className="size-3.5 shrink-0 text-amber-500" />
@@ -58,6 +67,7 @@ export function BuildingSnapshotAside({
           </p>
         </div>
       </div>
+      )}
 
       {/* ── Energy hero + thermal efficiency ── */}
       <div className="shrink-0 overflow-hidden rounded-xl border border-slate-700/60 shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]">
@@ -134,6 +144,7 @@ export function BuildingSnapshotAside({
 
       {/* ── Technologies — no outer card, the individual tech cards
             already carry their own border/shadow. ── */}
+      {showTechnologies && (
       <div className="shrink-0">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -151,8 +162,15 @@ export function BuildingSnapshotAside({
           onOpen={onOpenTech}
         />
       </div>
+      )}
 
     </aside>
+  );
+
+  if (embedded) return content;
+  return (
+    <ScrollHintContainer className="flex flex-col gap-3 border-r border-border/80 bg-slate-100 p-4">
+      {content}
     </ScrollHintContainer>
   );
 }
