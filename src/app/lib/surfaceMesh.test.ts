@@ -37,7 +37,10 @@ describe('geometry and enrich responses', () => {
   // mismatch here means that contract broke upstream, not that the UI drifted.
   it('agree on every surface id, for every captured building', () => {
     const envelopeIds = envelopeIdsByObjectId();
-    expect(Object.keys(GEOMETRY).length).toBe(6);
+    // Both captures cover the same buildings: a recapture that dropped one
+    // would leave a building the demo can show but not configure.
+    expect(Object.keys(GEOMETRY).length).toBeGreaterThan(0);
+    expect(Object.keys(GEOMETRY).sort()).toEqual(Object.keys(envelopeIds).sort());
 
     for (const [objectId, building] of Object.entries(GEOMETRY)) {
       const rendered = surfacesFromGeometryResponse([building]).map((s) => s.id);
@@ -48,9 +51,11 @@ describe('geometry and enrich responses', () => {
 });
 
 describe('isEnvelopeDetached', () => {
-  const building = GEOMETRY['NL.IMBAG.Pand.0200100000022498-0'];
+  // Whichever building the capture leads with: the behaviour is the point, not
+  // the building, and pinning an id ties this to one capture of the area.
+  const [objectId, building] = Object.entries(GEOMETRY)[0];
   const surfaces = surfacesFromGeometryResponse([building]);
-  const realIds = envelopeIdsByObjectId()['NL.IMBAG.Pand.0200100000022498-0'];
+  const realIds = envelopeIdsByObjectId()[objectId];
 
   it('is false for a matching geometry and envelope', () => {
     expect(isEnvelopeDetached(surfaces, realIds)).toBe(false);
@@ -71,8 +76,9 @@ describe('isEnvelopeDetached', () => {
 });
 
 describe('buildSurfaceGroup', () => {
-  const building = GEOMETRY['NL.IMBAG.Pand.0200100000022498-0'];
-  const surfaces = surfacesFromGeometryResponse([building]);
+  // Every captured building, not one: the triangulation has to hold for each
+  // real surface the demo can render, whatever the capture covers.
+  const surfaces = surfacesFromGeometryResponse(Object.values(GEOMETRY));
   const origin = computeOrigin(surfaces);
 
   it('triangulates every real surface, whatever its orientation', () => {
