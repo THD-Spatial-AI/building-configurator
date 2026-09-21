@@ -33,6 +33,8 @@ export interface BuildingDetailsCardProps {
   roofConfig: RoofConfig;
   /** Opens the surface configurator modal for an envelope group (walls, windows, ...). */
   onEditGroup?: (type: ElementGroupKey) => void;
+  /** Lets a group expand to its surfaces; picking one calls this. */
+  onSelectSurface?: (id: string) => void;
   /** Rendered under the envelope group cards, e.g. the 3D envelope + surface editor. */
   envelopeSlot?: React.ReactNode;
   /** Adds an Energy overview tab, e.g. the demand summary and renewable figures. */
@@ -52,6 +54,7 @@ export function BuildingDetailsCard({
   baselineElements,
   roofConfig,
   onEditGroup,
+  onSelectSurface,
   envelopeSlot,
   overviewSlot,
   technologySlot,
@@ -186,6 +189,7 @@ export function BuildingDetailsCard({
             baselineElements={baselineElements}
             roofConfig={roofConfig}
             onEditGroup={onEditGroup}
+            onSelectSurface={onSelectSurface}
           />
           {envelopeSlot}
         </div>

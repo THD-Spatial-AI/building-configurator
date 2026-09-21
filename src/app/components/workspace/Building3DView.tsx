@@ -323,6 +323,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
               elements={elements}
               baselineElements={model.baselineElements}
               roofConfig={model.roofConfig}
+              onSelectSurface={selectFromList}
               parametersSlot={mode === 'expert' ? (
                 // Air, thermal mass, calculation method and refurbishment
                 // level: the BuEM building fields the table does not carry.
