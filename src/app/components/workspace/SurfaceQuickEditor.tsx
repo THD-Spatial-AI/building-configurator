@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { createSurfacePvConfig, type PvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
+import { suggestedCapacityKwp } from '../BuildingConfigurator/shared/pvSuitability';
 
 /** Widest U-value the slider covers: a single-glazed window sits near 5. */
 const U_MAX = 5;
@@ -52,6 +53,8 @@ export function SurfaceQuickEditor({
     && Math.abs(geometryArea - element.area) > Math.max(0.05, element.area * 0.01);
   const pvEligible = element.type === 'roof' || element.type === 'wall';
   const pvConfig = pv ?? createSurfacePvConfig(element);
+  // What the coverage share puts on this surface, before any hand-set capacity.
+  const fittedCapacity = suggestedCapacityKwp(element.area, pvConfig.usable_area_pct);
 
   // The values this surface arrived with, stamped on import (see
   // normalizeElementRecord), so a hand-edit can always be walked back.
@@ -171,17 +174,27 @@ export function SurfaceQuickEditor({
           </label>
 
           {pvConfig.installed && (
-            <div className="mt-2.5">
+            <div className="mt-2.5 flex flex-col gap-2">
               <PresetSlider
-                label="Capacity"
-                value={pvConfig.system_capacity}
-                min={0.5}
-                max={30}
-                step={0.5}
-                unit="kWp"
-                decimals={1}
-                onChange={(system_capacity) => onUpdatePv({ system_capacity, cont_energy_cap_max: system_capacity })}
+                label="Panel coverage"
+                value={pvConfig.usable_area_pct}
+                min={10}
+                max={100}
+                step={5}
+                unit="%"
+                decimals={0}
+                quality="of this surface, after obstructions"
+                onChange={(usable_area_pct) => onUpdatePv({ usable_area_pct })}
               />
+              <div className="flex items-baseline justify-between">
+                <span className="text-[11px] font-medium text-muted-foreground">Capacity</span>
+                <span className="text-[12px] font-semibold text-slate-700">
+                  {pvConfig.system_capacity.toFixed(1)}
+                  <span className="ml-1 text-[10px] font-normal text-slate-400">
+                    kWp {Math.abs(pvConfig.system_capacity - fittedCapacity) < 0.05 ? 'fitted' : 'set by hand'}
+                  </span>
+                </span>
+              </div>
             </div>
           )}
         </div>

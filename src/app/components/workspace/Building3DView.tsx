@@ -299,13 +299,11 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
                     <PvPlanner
                       candidates={candidates}
                       installedIds={pvIds}
-                      onToggle={(candidate, installed) => model.updateSurfacePv(candidate.element.id, {
-                        ...createSurfacePvConfig(candidate.element),
-                        installed,
-                        // Sized to the surface rather than left at a flat default.
-                        system_capacity: candidate.capacityKwp,
-                        cont_energy_cap_max: candidate.capacityKwp,
-                      })}
+                      // Only the switch: the array takes its angles from the
+                      // surface and its size from the coverage share, and the
+                      // module comes from the building.
+                      onToggle={(candidate, installed) =>
+                        model.updateSurfacePv(candidate.element.id, { installed })}
                       onSelect={selectFromList}
                       onConfigure={mode === 'expert' ? setPvEditorId : undefined}
                     />

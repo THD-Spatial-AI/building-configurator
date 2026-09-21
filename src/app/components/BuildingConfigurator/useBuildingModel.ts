@@ -32,8 +32,16 @@ import {
 import { useConfiguratorApi } from '../../lib/provider';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
-import { createSurfacePvConfig, DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
+import { DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
 import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
+import {
+  createPvArray,
+  DEFAULT_PV_TECHNOLOGY,
+  resolvePvArray,
+  splitPvPatch,
+  type PvArray,
+  type PvTechnology,
+} from './shared/pvModel';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -255,8 +263,11 @@ export function useBuildingModel(buildingData?: BuildingState) {
   const [elements,      setElements]      = useState(initialElements);
   const [general,       setGeneralRaw]    = useState(initialGeneral);
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
-  // Per-surface PV configurations — keyed by element ID.
-  const [surfacePvConfigs, setSurfacePvConfigs] = useState<Record<string, PvConfig>>({});
+  // One module choice for the building, and an array per surface saying where
+  // the panels sit. The flat per-surface config everything else reads is
+  // resolved from the two, so cost and efficiency cannot drift between arrays.
+  const [pvTechnology, setPvTechnology] = useState<PvTechnology>(DEFAULT_PV_TECHNOLOGY);
+  const [pvArrays, setPvArrays] = useState<Record<string, PvArray>>({});
   // True when a roof-type change removed surfaces that had PV installed.
   const [pvInvalidated,  setPvInvalidated]  = useState(false);
   // Non-PV technology IDs (heat_pump) toggled by the overview panel.
@@ -371,7 +382,8 @@ export function useBuildingModel(buildingData?: BuildingState) {
     setEnergyTotals(nextTotals);
     setModelTimeseries(null);
     setUploadError(null);
-    setSurfacePvConfigs({});
+    setPvArrays({});
+    setPvTechnology(DEFAULT_PV_TECHNOLOGY);
     setPvInvalidated(false);
     setHistory([]);
     setOtherTechIds(buildingData.technologies.installedTechIds.filter((id) => id !== 'solar_pv' && id !== 'battery'));
@@ -543,11 +555,11 @@ export function useBuildingModel(buildingData?: BuildingState) {
     remember(`roof-type:${Date.now()}`, 'Roof type change');
     setElements((prev) => {
       const oldRoofIds = Object.keys(prev).filter((id) => prev[id].type === 'roof');
-      const hadPv = oldRoofIds.some((id) => surfacePvConfigs[id]?.installed);
+      const hadPv = oldRoofIds.some((id) => pvArrays[id]?.installed);
       if (hadPv) {
         setPvInvalidated(true);
-        setSurfacePvConfigs((pv) => {
-          const next = { ...pv };
+        setPvArrays((arrays) => {
+          const next = { ...arrays };
           oldRoofIds.forEach((id) => { delete next[id]; });
           return next;
         });
@@ -564,13 +576,28 @@ export function useBuildingModel(buildingData?: BuildingState) {
 
   // --- Technology handlers ----------------------------------------------------
 
-  const updateSurfacePv = (elementId: string, patch: Partial<PvConfig>) =>
-    setSurfacePvConfigs((prev) => {
-      const element = elements[elementId];
-      const base = prev[elementId] ?? (element ? createSurfacePvConfig(element) : null);
-      if (!base) return prev;
-      return { ...prev, [elementId]: { ...base, ...patch } };
-    });
+  /**
+   * Applies an edit made against the flat per-surface shape. Module and cost
+   * fields reach the building, so every array moves with them; geometry and
+   * sizing stay on the array being edited.
+   */
+  const updateSurfacePv = (elementId: string, patch: Partial<PvConfig>) => {
+    const { technology, array } = splitPvPatch(patch);
+
+    if (Object.keys(technology).length > 0) {
+      setPvTechnology((prev) => ({ ...prev, ...technology }));
+    }
+    if (Object.keys(array).length === 0) return;
+
+    setPvArrays((prev) => ({
+      ...prev,
+      [elementId]: { ...(prev[elementId] ?? createPvArray(elements[elementId])), ...array },
+    }));
+  };
+
+  /** Edits the building's module and its cost, for every array at once. */
+  const updatePvTechnology = (patch: Partial<PvTechnology>) =>
+    setPvTechnology((prev) => ({ ...prev, ...patch }));
 
   const updateBattery = (patch: Partial<BatteryConfig>) =>
     setBatteryConfig((prev) => ({ ...prev, ...patch }));
@@ -718,13 +745,16 @@ export function useBuildingModel(buildingData?: BuildingState) {
     () => resolveDisplayEnergyTotals(energyTotals, groundTruthTimeseries),
     [energyTotals, groundTruthTimeseries],
   );
+  /** The flat per-surface configs, resolved from the building's module and
+   *  each array's own geometry. */
+  const surfacePvConfigs = useMemo(() => Object.fromEntries(
+    Object.entries(pvArrays).map(([id, array]) => [id, resolvePvArray(array, pvTechnology, elements[id])]),
+  ), [pvArrays, pvTechnology, elements]);
+
   const pvInstalledSurfaces = useMemo(() => (
     Object.values(elements)
       .filter((element) => surfacePvConfigs[element.id]?.installed)
-      .map((element) => ({
-        element,
-        pv: surfacePvConfigs[element.id] ?? createSurfacePvConfig(element),
-      }))
+      .map((element) => ({ element, pv: surfacePvConfigs[element.id] }))
   ), [elements, surfacePvConfigs]);
   const totalPvCapacityKw = pvInstalledSurfaces.reduce((sum, entry) => sum + entry.pv.system_capacity, 0);
   const pvSummary = {
@@ -742,7 +772,7 @@ export function useBuildingModel(buildingData?: BuildingState) {
 
   return {
     // state
-    elements, general, roofConfig, surfacePvConfigs, batteryConfig, ignis,
+    elements, general, roofConfig, surfacePvConfigs, pvTechnology, pvArrays, batteryConfig, ignis,
     uploadError, isRunningSimulation, pvInvalidated, hasUnsavedChanges,
     chartTimeseries,
     /** What undo would take back, or null when there is nothing to undo. */
@@ -754,7 +784,8 @@ export function useBuildingModel(buildingData?: BuildingState) {
     pvSummary, installedTechIds,
     // handlers
     setGen, updateElement, renameElement, deleteSurface, createSurface, applyRoofType,
-    updateSurfacePv, updateBattery, setTechInstalled, selectIgnisVariant, undo,
+    updateSurfacePv, updatePvTechnology, updateBattery, setTechInstalled,
+    selectIgnisVariant, undo,
     runSimulation, download, upload, reset,
     setUploadError, setGroundTruthTimeseries, setPvInvalidated,
   };
