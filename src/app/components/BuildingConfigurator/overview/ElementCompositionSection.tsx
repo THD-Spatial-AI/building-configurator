@@ -98,8 +98,11 @@ export function ElementCompositionSection({
 
             {isOpen && (
               <ul className="border-t border-slate-100">
-                {/* Surfaces a simulation would reject come first. */}
-                {[...items].sort((a, b) => Number(hasInvalidArea(b)) - Number(hasInvalidArea(a))).map((el) => {
+                {/* Surfaces a simulation would reject come first, then by name so a facing's surfaces sit together. */}
+                {[...items].sort((a, b) =>
+                  Number(hasInvalidArea(b)) - Number(hasInvalidArea(a))
+                  || a.label.localeCompare(b.label, undefined, { numeric: true }),
+                ).map((el) => {
                   const invalid = hasInvalidArea(el);
                   return (
                     <li key={el.id}>

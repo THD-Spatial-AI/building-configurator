@@ -13,7 +13,7 @@ import {
   getMappedValue,
   hasMappedValue,
 } from '../config/modelDataResolver';
-import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { faceFromAzimuth, type BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { LoadDataPoint } from './loadProfile';
 
@@ -116,6 +116,39 @@ function labelFromId(id: string): string {
   return id.replace(/_/g, ' ');
 }
 
+const UUID_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** "South wall", "Flat roof", "Floor": what a surface is and which way it faces. */
+function orientationLabel(el: Pick<BuildingElement, 'type' | 'tilt' | 'azimuth'>): string {
+  if (el.type === 'floor') return 'Floor';
+  // Same flat-roof threshold as roofFaceFromElement.
+  if (el.type === 'roof' && el.tilt <= 10) return 'Flat roof';
+  const face = faceFromAzimuth(el.azimuth).replace('_wall', '');
+  return `${face[0].toUpperCase()}${face.slice(1)} ${el.type}`;
+}
+
+/**
+ * Display labels for surfaces, in input order. A UUID id (City2TABULA) says
+ * nothing to a reader, so those surfaces are named by type and orientation,
+ * numbered where several share a name; other ids keep labelFromId.
+ */
+export function readableSurfaceLabels(
+  elements: Pick<BuildingElement, 'id' | 'type' | 'tilt' | 'azimuth'>[],
+): string[] {
+  const names = elements.map((el) => (UUID_ID.test(el.id) ? orientationLabel(el) : null));
+  const totals = new Map<string, number>();
+  names.forEach((name) => { if (name) totals.set(name, (totals.get(name) ?? 0) + 1); });
+  const seen = new Map<string, number>();
+  return elements.map((el, i) => {
+    const name = names[i];
+    if (!name) return labelFromId(el.id);
+    if (totals.get(name) === 1) return name;
+    const n = (seen.get(name) ?? 0) + 1;
+    seen.set(name, n);
+    return `${name} ${n}`;
+  });
+}
+
 /**
  * Extracts the numeric value from a BUEM measurement object.
  * Returns `fallback` when the field is absent or not a valid number.
@@ -164,6 +197,8 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
     };
   });
 
+  const surfaces = Object.values(result);
+  readableSurfaceLabels(surfaces).forEach((label, i) => { surfaces[i].label = label; });
   return result;
 }
 
