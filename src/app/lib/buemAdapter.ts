@@ -14,7 +14,8 @@ import {
   hasMappedValue,
 } from '../config/modelDataResolver';
 import { faceFromAzimuth, type BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
-import type { PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import type { BatteryConfig, PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import type { PvArray, PvTechnology } from '@/app/components/BuildingConfigurator/shared/pvModel';
 import type { LoadDataPoint } from './loadProfile';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -69,6 +70,18 @@ export interface TechnologyData {
   installedTechIds: InstalledTechnologyId[];
 }
 
+/**
+ * PV and battery as the configurator holds them: the BUEM technology fields
+ * carry no per-surface PV arrays, so a saved building keeps them here.
+ */
+export interface TechnologyState {
+  pvTechnology: PvTechnology;
+  pvArrays: Record<string, PvArray>;
+  battery: BatteryConfig;
+  /** Installed technologies other than PV and the battery, which have their own state. */
+  otherTechIds: string[];
+}
+
 export interface BuildingState {
   /** Centralised geometry domain for embedding this dashboard in external apps. */
   geometry: GeometryData;
@@ -91,6 +104,8 @@ export interface BuildingState {
    * to at least one TABULA variant in the HDCP service.
    */
   ignis: import('./ignisAdapter').IgnisState | null;
+  /** Set when the building was saved from the configurator; absent on a freshly imported one. */
+  technologyState?: TechnologyState;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
