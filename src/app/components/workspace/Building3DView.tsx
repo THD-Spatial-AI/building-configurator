@@ -17,7 +17,7 @@ import { PvPlanner } from './PvPlanner';
 import { pvCandidates } from '../BuildingConfigurator/shared/pvSuitability';
 import { DEFAULT_PV_CONFIG, createSurfacePvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
 import { TechnologiesSection } from '../BuildingConfigurator/overview/TechnologiesSection';
-import { LoadProfileViewer } from '../BuildingConfigurator/overview/LoadProfileViewer';
+import { LoadProfileBar } from './LoadProfileBar';
 import { ConfiguratorStyles, SegmentedControl, UnsavedChangesDialog } from '../BuildingConfigurator/shared/ui';
 import { BuildingEditor } from '../BuildingConfigurator/configure/building/BuildingEditor';
 import { BatteryEditor } from '../BuildingConfigurator/configure/pv/BatteryEditor';
@@ -124,11 +124,10 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
   // while a dial is dragged, and re-rendering a year of hourly data with it is
   // what makes that drag stutter.
   const { buildingLabel, chartTimeseries, setGroundTruthTimeseries } = model;
-  const profileChart = useMemo(() => (
-    <LoadProfileViewer
+  const profileBar = useMemo(() => (
+    <LoadProfileBar
       buildingId={buildingLabel}
-      initialTimeseries={chartTimeseries ?? undefined}
-      mode="basic"
+      timeseries={chartTimeseries ?? undefined}
       onGroundTruthChange={setGroundTruthTimeseries}
     />
   ), [buildingLabel, chartTimeseries, setGroundTruthTimeseries]);
@@ -265,10 +264,6 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
       {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-        {wide && (
-          <div className="h-[200px] shrink-0 xl:h-[220px]">{profileChart}</div>
-        )}
-
         <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -341,7 +336,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
               ) : undefined}
               overviewSlot={(
                 <div className="flex flex-col gap-3">
-                  {!wide && <div className="h-[200px]">{profileChart}</div>}
+                  {profileBar}
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
                     thermalRating={model.thermalRating}

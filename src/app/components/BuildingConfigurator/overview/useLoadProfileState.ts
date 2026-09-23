@@ -19,6 +19,8 @@ interface UseLoadProfileStateArgs {
   buildingId: string;
   initialTimeseries?: LoadDataPoint[];
   mode?: 'basic' | 'expert';
+  /** Fixes the resolution, for a caller that offers no resolution choice. */
+  initialResolution?: Resolution;
   onTotalsChange?: (totals: EnergyTotals) => void;
   /** Fired whenever the user uploads a file — the uploaded rows become ground truth for the annual totals elsewhere in the app. */
   onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
@@ -29,11 +31,14 @@ export function useLoadProfileState({
   buildingId,
   initialTimeseries,
   mode = 'basic',
+  initialResolution,
   onTotalsChange,
   onGroundTruthChange,
 }: UseLoadProfileStateArgs) {
   const [energyType, setEnergyType] = useState<EnergyType>(mode === 'basic' ? 'combined' : 'electricity');
-  const [resolution, setResolution] = useState<Resolution>(mode === 'basic' ? 'monthly' : 'daily');
+  const [resolution, setResolution] = useState<Resolution>(
+    initialResolution ?? (mode === 'basic' ? 'monthly' : 'daily'),
+  );
   const [dataset, setDataset] = useState<DatasetByResolution>(() => {
     if (initialTimeseries && initialTimeseries.length > 0) {
       return { ...createDefaultDataset(), hourly: initialTimeseries };
@@ -46,10 +51,10 @@ export function useLoadProfileState({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode !== 'basic') return;
+    if (mode !== 'basic' || initialResolution) return;
     setResolution('monthly');
     setEnergyType('combined');
-  }, [mode]);
+  }, [mode, initialResolution]);
 
   useEffect(() => {
     if (!initialTimeseries || initialTimeseries.length === 0) return;
