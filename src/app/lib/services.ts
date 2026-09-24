@@ -15,6 +15,13 @@ import type {
 } from './ignisAdapter';
 import type { BuemThermalLoadProfile } from './buemApi';
 
+/**
+ * The overrides for a heat demand calculation, in the service's own field
+ * names. Undefined when the user has overridden nothing and the variant's own
+ * TABULA values stand.
+ */
+export type IgnisCalculatePayload = Record<string, unknown> | undefined;
+
 /** One building's BuEM run, as the package builds it. */
 export interface BuemBuildingRunRequest {
   osm_id: string;
@@ -55,13 +62,13 @@ export interface ConfiguratorServices {
   fetchVariantData(variantCode: string): Promise<IgnisDataResponse>;
 
   /**
-   * Annual specific heat demand for a variant with the given overrides.
-   * The payload is already in the service's own field names.
-   * Expected budget: 15 s.
+   * Annual specific heat demand for a variant. `inputs` is undefined when
+   * nothing was overridden, which is a calculation on the variant's own
+   * values, not an error. Expected budget: 15 s.
    */
   calculateHeatDemand(
     variantCode: string,
-    inputs: Record<string, unknown>,
+    inputs: IgnisCalculatePayload,
   ): Promise<IgnisCalculateResponse>;
 
   /**

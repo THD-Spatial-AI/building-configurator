@@ -25,6 +25,7 @@ export type {
   BuemBuildingRunRequest,
   BuemBuildingRunResponse,
   ConfiguratorServices,
+  IgnisCalculatePayload,
   VariantLookupServices,
 } from './app/lib/services';
 
