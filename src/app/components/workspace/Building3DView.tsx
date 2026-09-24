@@ -34,7 +34,7 @@ import type { BuildingElement } from '../BuildingConfigurator/configure/model/bu
 
 type SurfaceSelection = { id: string; at: { x: number; y: number } };
 
-interface Building3DViewProps {
+export interface Building3DViewProps {
   building: BuildingState;
   /** Null while the envelope geometry is still loading. */
   geometry: SurfaceGeometry | null;
