@@ -422,7 +422,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
           >
             {model.isRunningSimulation
               ? <><Loader2 className="size-4 animate-spin" /> Working out the energy…</>
-              : <><Play className="size-4" /> Save &amp; preview energy</>}
+              : <><Play className="size-4" /> Save &amp; Preview Energy Demand</>}
           </button>
         </div>
       </div>
