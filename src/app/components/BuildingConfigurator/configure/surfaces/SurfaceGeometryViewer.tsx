@@ -280,11 +280,13 @@ export function SurfaceGeometryViewer({
     }
     animate();
 
-    function handleResize() {
+    // An arrow rather than a declaration: a hoisted function could run before
+    // the null check above, so TypeScript will not carry it inside one.
+    const handleResize = () => {
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
-    }
+    };
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(mount);
 
