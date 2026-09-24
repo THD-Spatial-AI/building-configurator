@@ -72,7 +72,8 @@ export interface SimulationResult {
 }
 
 /**
- * The calls the 3D view makes. The host maps its own endpoints onto these;
+ * The calls the 3D view makes. The host maps its own endpoints onto these; the
+ * package holds no URL, session or transport of its own.
  *
  * Every member is optional. An absent call hides the feature that needs it
  * rather than failing: without `runSimulation` there is no simulation to run,
