@@ -1,6 +1,6 @@
 {
   "name": "@thd-spatial-ai/building-configurator",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Building energy model configurator for the EnerPlanET platform",
   "license": "MIT",
   "type": "module",
