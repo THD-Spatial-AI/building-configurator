@@ -29,7 +29,9 @@ import {
   restoreDefaultUValues,
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
-import { useConfiguratorApi } from '../../lib/provider';
+import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
+import { runBuildingSimulation } from '../../lib/buemRun';
+import type { ConfiguratorServices } from '../../lib/services';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
@@ -227,15 +229,16 @@ const FIELD_LABELS: Record<string, string> = {
 export type BuildingModel = ReturnType<typeof useBuildingModel>;
 
 /**
- * `estimateHeatDemand` runs ignis's annual demand alongside the model. Off for
- * a caller that shows no such figure: ignis then only serves TABULA variants
- * and their U-values, and no request is made per envelope edit.
+ * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
+ * caller that shows no such figure: the heat demand service then only serves
+ * TABULA variants and their U-values, and no request is made per envelope
+ * edit.
  */
 export function useBuildingModel(
+  services: ConfiguratorServices,
   buildingData?: BuildingState,
   { estimateHeatDemand = true }: { estimateHeatDemand?: boolean } = {},
 ) {
-  const api = useConfiguratorApi();
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
   const technologyData = buildingData?.technologies;
@@ -397,7 +400,7 @@ export function useBuildingModel(
     let cancelled = false;
 
     (async () => {
-      const variants = await api.ignis.loadVariantLevels(country, type, year);
+      const variants = await loadVariantLevels(services, country, type, year);
       if (cancelled || variants.length === 0) {
         if (!cancelled) setHdcp(null);
         return;
@@ -438,7 +441,7 @@ export function useBuildingModel(
     setHdcp((prev) => prev ? { ...prev, loading: true, error: null } : prev);
 
     const timer = setTimeout(async () => {
-      const result = await api.ignis.calculateHeatDemand(variant.code, ignis.calcDemand);
+      const result = await calculateHeatDemand(services, variant.code, ignis.calcDemand);
       setHdcp((prev) => {
         if (!prev) return prev;
         if (result) return { ...prev, loading: false, result: { qHnd: result.q_h_nd, unit: 'kWh/(m2.a)' } };
@@ -652,7 +655,7 @@ export function useBuildingModel(
     setIsRunningSimulation(true);
     setUploadError(null);
     try {
-      const result = await api.enerplanet.runBuildingSimulation(identity, elements, general, identity.id, batteryConfig);
+      const result = await runBuildingSimulation(services, identity, elements, general, identity.id, batteryConfig);
       if (!result) {
         setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;

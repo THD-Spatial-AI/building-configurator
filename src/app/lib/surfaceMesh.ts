@@ -5,7 +5,7 @@
 // orientation (walls in particular) without Three.js's own 2D-only ShapeUtils.
 import * as THREE from 'three';
 import earcut from 'earcut';
-import type { BuildingGeometry } from './enerplanetApi';
+import type { BuildingGeometry } from './enerplanet';
 
 export interface SurfacePolygon {
   /** City2TABULA surface row id, which is also the BuildingState element id. */

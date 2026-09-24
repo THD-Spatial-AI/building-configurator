@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, polygonArea, surfacesFromGeometryResponse } from './surfaceMesh';
-import type { BuildingGeometry } from './enerplanetApi';
+import type { BuildingGeometry } from './enerplanet';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
 

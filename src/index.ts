@@ -20,20 +20,20 @@ export {
   type SurfacePolygon,
 } from './app/lib/surfaceMesh';
 
-export {
-  BuildingConfiguratorProvider,
-  useConfiguratorApi,
-  type BuildingConfiguratorProviderProps,
-  type ConfiguratorApi,
-} from './app/lib/provider';
+// The four calls a host supplies, and the shapes they carry.
+export type {
+  BuemBuildingRunRequest,
+  BuemBuildingRunResponse,
+  ConfiguratorServices,
+  VariantLookupServices,
+} from './app/lib/services';
 
-export {
-  createFetchHttpClient,
-  HttpError,
-  type FetchHttpClientOptions,
-  type HttpClient,
-  type RequestOptions,
-} from './app/lib/http';
+export type {
+  IgnisCalculateResponse,
+  IgnisDataResponse,
+  IgnisInputs,
+  IgnisMatchResponse,
+} from './app/lib/ignisAdapter';
 
 // Building a BuildingState from what a host already holds: a BuEM feature, or
 // a footprint collection joined with a City2TABULA enrich response.
@@ -59,12 +59,8 @@ export type {
 } from './app/lib/loadProfile';
 
 export type {
-  BuemBuildingRunRequest,
-  BuemBuildingRunResponse,
-  EnerplanetApi,
+  BuildingGeometry,
   EnrichBbox,
   EnrichEntry,
   EnrichResponse,
-} from './app/lib/enerplanetApi';
-
-export type { IgnisApi } from './app/lib/ignisApi';
+} from './app/lib/enerplanet';

@@ -30,6 +30,7 @@ import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import type { BuildingState } from '../../lib/buemAdapter';
+import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 
 type SurfaceSelection = { id: string; at: { x: number; y: number } };
@@ -40,11 +41,17 @@ export interface Building3DViewProps {
   geometry: SurfaceGeometry | null;
   /** Leaves the building, handing back its edits (the building unchanged when there are none). */
   onExit: (building: BuildingState | undefined) => void;
+  /**
+   * The calls this view makes. Hold the object and each function in a module
+   * constant, a useMemo or a useCallback: an inline object is a new identity
+   * every render, and the effects here key on the callbacks they use.
+   */
+  services: ConfiguratorServices;
 }
 
-export function Building3DView({ building, geometry, onExit }: Building3DViewProps) {
+export function Building3DView({ building, geometry, onExit, services }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
-  const model = useBuildingModel(building, { estimateHeatDemand: false });
+  const model = useBuildingModel(services, building, { estimateHeatDemand: false });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.

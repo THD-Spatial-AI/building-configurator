@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Gauge, Loader2 } from 'lucide-react';
 import type { IgnisState } from '@/app/lib/ignisAdapter';
-import { isBuildingTypeSupported } from '@/app/lib/ignisApi';
+import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import {
   SelectInput, NumberInput, FieldLabel,
   ToggleSwitch, FieldRow, ScrollHintContainer,

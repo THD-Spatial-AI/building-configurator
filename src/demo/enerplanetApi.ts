@@ -11,10 +11,10 @@
  * are relative to the API root.
  */
 
-import type { BuildingIdentity } from './buemAdapter';
-import { serializeToBuemFeature } from './buemAdapter';
-import type { BuemSimulationResult, BuemThermalLoadProfile } from './buemApi';
-import { toSimulationResult } from './buemApi';
+import type { BuildingIdentity } from '../app/lib/buemAdapter';
+import { serializeToBuemFeature } from '../app/lib/buemAdapter';
+import type { BuemSimulationResult, BuemThermalLoadProfile } from '../app/lib/buemApi';
+import { toSimulationResult } from '../app/lib/buemApi';
 import type { HttpClient } from './http';
 
 /** Minimal GeoJSON shapes, which avoids pulling in @types/geojson for two types. */

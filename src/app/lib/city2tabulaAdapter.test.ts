@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { buildBuildingStates } from './city2tabulaAdapter';
-import type { IgnisApi } from './ignisApi';
-import type { EnrichEntry } from './enerplanetApi';
+import type { VariantLookupServices } from './services';
+import type { EnrichEntry } from './enerplanet';
 
 function footprint(osmId: string) {
   return {
@@ -35,7 +35,10 @@ function deferredIgnis() {
     return { tabula_data: { AdvancedParameters: { Uvalues: { U_Wall_1: 0.5 } } }, code } as never;
   });
   return {
-    api: { fetchVariantData, loadVariantLevels: vi.fn(async () => []) } as unknown as IgnisApi,
+    api: {
+      fetchVariantData,
+      fetchMatchingVariants: vi.fn(async () => ({ country: 'NL', prefix: 'NL.N', data: [] })),
+    } as unknown as VariantLookupServices,
     fetchVariantData,
   };
 }

@@ -12,8 +12,8 @@
  * refuse to store.
  */
 
-import { createFetchHttpClient, HttpError, type HttpClient, type RequestOptions } from './app/lib/http';
-import { devLogin } from './app/lib/enerplanetApi';
+import { createFetchHttpClient, HttpError, type HttpClient, type RequestOptions } from './demo/http';
+import { devLogin } from './demo/enerplanetApi';
 
 /** Unwrapped, so a failed login cannot trigger the re-login below. */
 const baseHttp = createFetchHttpClient();

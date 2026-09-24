@@ -6,17 +6,20 @@
 // local stack; the returned phase/note says which one is in hand.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useConfiguratorApi } from './provider';
-import { ensureDemoSession } from '../../demoClient';
-import { buildBuildingStates } from './city2tabulaAdapter';
-import { surfacesFromGeometryResponse, type SurfaceGeometry } from './surfaceMesh';
-import { hasInvalidArea } from '../components/BuildingConfigurator/configure/model/buildingElements';
-import { LOENEN_BBOX } from '../components/LoenenLiveMap';
-import type { IgnisApi } from './ignisApi';
-import type { BuildingGeometry, EnrichEntry } from './enerplanetApi';
-import type { BuildingState } from './buemAdapter';
-import loenenFixture from '../../assets/data/loenen_live_fixture.json';
-import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
+import { ensureDemoSession } from '../demoClient';
+import { demoHttp } from '../demoClient';
+import { createEnerplanetApi } from './enerplanetApi';
+import { demoServices } from './services';
+import { buildBuildingStates } from '../app/lib/city2tabulaAdapter';
+import { surfacesFromGeometryResponse, type SurfaceGeometry } from '../app/lib/surfaceMesh';
+import { hasInvalidArea } from '../app/components/BuildingConfigurator/configure/model/buildingElements';
+import { LOENEN_BBOX } from '../app/components/LoenenLiveMap';
+import type { BuildingGeometry, EnrichEntry } from '../app/lib/enerplanet';
+import type { BuildingState } from '../app/lib/buemAdapter';
+import loenenFixture from '../assets/data/loenen_live_fixture.json';
+import surfaceFixture from '../assets/data/loenen_surfaces_fixture.json';
+
+const demoEnerplanet = createEnerplanetApi(demoHttp);
 
 const SURFACE_FIXTURE = surfaceFixture as unknown as Record<string, BuildingGeometry>;
 
@@ -44,9 +47,9 @@ function loenenBboxPolygon() {
   };
 }
 
-function buildFromFixture(ignis: IgnisApi): Promise<Record<string, BuildingState>> {
+function buildFromFixture(): Promise<Record<string, BuildingState>> {
   return buildBuildingStates(
-    ignis,
+    demoServices,
     loenenFixture.buildings as unknown as Parameters<typeof buildBuildingStates>[1],
     loenenFixture.enrich.data as unknown as Parameters<typeof buildBuildingStates>[2],
   );
@@ -54,19 +57,18 @@ function buildFromFixture(ignis: IgnisApi): Promise<Record<string, BuildingState
 
 /** The whole area's buildings, loaded on demand by calling `load`. */
 export function useLoenenBuildings() {
-  const { enerplanet, ignis } = useConfiguratorApi();
   const [state, setState] = useState<LoadState>({ phase: 'idle' });
 
   const load = useCallback(async () => {
     setState({ phase: 'loading' });
     try {
       await ensureDemoSession();
-      const grid = await enerplanet.generateGrid(loenenBboxPolygon());
+      const grid = await demoEnerplanet.generateGrid(loenenBboxPolygon());
       const osmIds = grid.buildings.features.map((f) => String((f.properties as { osm_id: string }).osm_id));
-      const enrich = await enerplanet.enrichBuildings(LOENEN_BBOX, osmIds, LOENEN_COUNTRY);
+      const enrich = await demoEnerplanet.enrichBuildings(LOENEN_BBOX, osmIds, LOENEN_COUNTRY);
 
       const buildings = await buildBuildingStates(
-        ignis,
+        demoServices,
         grid.buildings as unknown as Parameters<typeof buildBuildingStates>[1],
         enrich.data,
       );
@@ -82,12 +84,12 @@ export function useLoenenBuildings() {
       setState({
         phase: 'fixture',
         reason: err instanceof Error ? err.message : String(err),
-        buildings: await buildFromFixture(ignis),
+        buildings: await buildFromFixture(),
         footprints: loenenFixture.buildings as unknown as FootprintCollection,
         objectIds: objectIdsFrom(loenenFixture.enrich.data as unknown as Record<string, EnrichEntry>),
       });
     }
-  }, [enerplanet, ignis]);
+  }, []);
 
   const loaded = state.phase === 'live' || state.phase === 'fixture' ? state : null;
   const buildings = loaded?.buildings ?? null;
@@ -118,7 +120,6 @@ export type { SurfaceGeometry };
  * for the life of the calling view. Null while a fetch is in flight.
  */
 export function useSurfaceGeometry(objectId: string | undefined, country = LOENEN_COUNTRY): SurfaceGeometry | null {
-  const { enerplanet } = useConfiguratorApi();
   const [geometry, setGeometry] = useState<SurfaceGeometry | null>(null);
   // The buildings load once per view mount, so everything cached here is one
   // City2TABULA generation.
@@ -143,7 +144,7 @@ export function useSurfaceGeometry(objectId: string | undefined, country = LOENE
 
     let cancelled = false;
     setGeometry(null);
-    enerplanet.getSurfaceGeometry(objectId, country)
+    demoEnerplanet.getSurfaceGeometry(objectId, country)
       .then((building) => {
         if (cancelled) return;
         // Only a successful answer is cached: a failure falls through to the
@@ -161,7 +162,7 @@ export function useSurfaceGeometry(objectId: string | undefined, country = LOENE
       });
 
     return () => { cancelled = true; };
-  }, [enerplanet, cache, objectId, country]);
+  }, [cache, objectId, country]);
 
   return geometry;
 }
@@ -171,7 +172,6 @@ export function useSurfaceGeometry(objectId: string | undefined, country = LOENE
  * working on the 3D view without loading the area. Null while it is adapted.
  */
 export function useFixtureBuilding(osmId: string): { building: BuildingState; geometry: SurfaceGeometry } | null {
-  const { ignis } = useConfiguratorApi();
   const [building, setBuilding] = useState<BuildingState | null>(null);
 
   useEffect(() => {
@@ -179,7 +179,7 @@ export function useFixtureBuilding(osmId: string): { building: BuildingState; ge
     const features = (loenenFixture.buildings.features as { properties: { osm_id: unknown } }[])
       .filter((feature) => String(feature.properties.osm_id) === osmId);
     buildBuildingStates(
-      ignis,
+      demoServices,
       { features } as unknown as Parameters<typeof buildBuildingStates>[1],
       loenenFixture.enrich.data as unknown as Parameters<typeof buildBuildingStates>[2],
     ).then((states) => {
@@ -188,7 +188,7 @@ export function useFixtureBuilding(osmId: string): { building: BuildingState; ge
       setBuilding(states[osmId]);
     });
     return () => { cancelled = true; };
-  }, [ignis, osmId]);
+  }, [osmId]);
 
   const objectId = (loenenFixture.enrich.data as unknown as Record<string, EnrichEntry>)[osmId]?.object_id;
   const geometry = useMemo<SurfaceGeometry>(() => {
