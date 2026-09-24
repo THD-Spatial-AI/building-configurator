@@ -19,10 +19,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./experimental": {
-      "types": "./dist/experimental.d.ts",
-      "import": "./dist/experimental.js"
-    },
     "./styles.css": "./dist/styles.css"
   },
   "publishConfig": {
@@ -41,8 +37,6 @@
     "prepublishOnly": "npm run build:lib"
   },
   "peerDependencies": {
-    "echarts": "^5.5.0 || ^6.0.0",
-    "echarts-for-react": "^3.0.2",
     "react": "^18.3.1 || ^19.0.0",
     "react-dom": "^18.3.1 || ^19.0.0",
     "three": ">=0.186.0 <1.0.0"
@@ -69,8 +63,6 @@
     "@vercel/edge": "^1.2.2",
     "@vercel/node": "^3.0.1",
     "@vitejs/plugin-react": "4.7.0",
-    "echarts": "^6.0.0",
-    "echarts-for-react": "^3.0.5",
     "ol": "^10.10.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",

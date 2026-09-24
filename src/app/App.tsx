@@ -1,165 +1,12 @@
 import { Analytics } from '@vercel/analytics/react';
-import React, { useMemo, useState } from 'react';
-import { BuildingConfigurator } from './components/BuildingConfigurator';
-import { LoenenLiveTest } from './components/LoenenLiveTest';
+import { useState } from 'react';
 import { BuildingWorkspace, FixtureWorkspace } from './components/workspace/BuildingWorkspace';
 import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
-import { adaptBuemFeature, extractFeaturesFromConfig } from './lib/buemAdapter';
-import type { BuildingState } from './lib/buemAdapter';
-import demoConfig from '../assets/data/demo_config.json';
-
-// ─── Fake map canvas (dark GIS-style background) ──────────────────────────────
-
-/** Where a demo building renders on the fake map — independent of its real geometry. */
-interface MapBuildingMarker {
-  id: string;
-  label: string;
-  xPercent: number;
-  yPercent: number;
-}
-
-const MAP_BUILDINGS: MapBuildingMarker[] = [
-  { id: '3434', label: 'Building 3434', xPercent: 66, yPercent: 29 },
-  { id: '3435', label: 'Building 3435', xPercent: 78, yPercent: 30 },
-  { id: '3436', label: 'Building 3436', xPercent: 66, yPercent: 42 },
-  { id: '3437', label: 'Building 3437', xPercent: 82, yPercent: 44 },
-];
-
-const MARKER_WIDTH = 7.5;
-const MARKER_HEIGHT = 8.5;
-
-function MapCanvas({ buildings, onBuildingClick }: {
-  buildings: MapBuildingMarker[];
-  onBuildingClick: (id: string) => void;
-}) {
-  return (
-    <svg
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Street grid pattern */}
-      <defs>
-        <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse">
-          <rect width="72" height="72" fill="#c8d4dc" />
-          <rect x="4" y="4" width="64" height="64" fill="#dce5ea" rx="2" />
-        </pattern>
-        <pattern id="smallgrid" width="24" height="24" patternUnits="userSpaceOnUse">
-          <rect width="24" height="24" fill="none" />
-          <line x1="24" y1="0" x2="24" y2="24" stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
-          <line x1="0" y1="24" x2="24" y2="24" stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
-        </pattern>
-      </defs>
-
-      <rect width="100%" height="100%" fill="#dce5ea" />
-      <rect width="100%" height="100%" fill="url(#grid)" />
-      <rect width="100%" height="100%" fill="url(#smallgrid)" />
-
-      {/* Major roads */}
-      <line x1="0" y1="38%" x2="100%" y2="38%" stroke="#b8c8d4" strokeWidth="16" />
-      <line x1="0" y1="72%" x2="100%" y2="72%" stroke="#b8c8d4" strokeWidth="10" />
-      <line x1="28%" y1="0" x2="28%" y2="100%" stroke="#b8c8d4" strokeWidth="10" />
-      <line x1="62%" y1="0" x2="62%" y2="100%" stroke="#b8c8d4" strokeWidth="16" />
-
-      {/* Road centre markings */}
-      <line x1="0" y1="38%" x2="100%" y2="38%" stroke="rgba(255,220,60,0.5)" strokeWidth="1" strokeDasharray="18 12" />
-      <line x1="62%" y1="0" x2="62%" y2="100%" stroke="rgba(255,220,60,0.5)" strokeWidth="1" strokeDasharray="18 12" />
-
-      {/* Building footprints — random blocks */}
-      {[
-        [4,  4,  18, 28], [4,  36, 20, 18], [4,  58, 16, 14],
-        [26, 4,  30, 14], [26, 22, 28, 14], [26, 40, 18, 10],
-        [4,  76, 20, 20], [26, 56, 24, 10], [26, 70, 30, 20],
-        [65, 4,  28, 22], [65, 30, 20, 6 ], [65, 40, 26, 18],
-        [65, 62, 30, 12], [65, 76, 28, 18],
-        [36, 76, 20, 20],
-      ].map(([x, y, w, h], i) => (
-        <rect
-          key={i}
-          x={`${x}%`} y={`${y}%`} width={`${w / 2.5}%`} height={`${h / 2.5}%`}
-          fill="#b0bec8" stroke="#98aab8" strokeWidth="0.8" rx="1.5"
-        />
-      ))}
-
-      {/* Clickable demo buildings — each loads its own data on click */}
-      {buildings.map(({ id, label, xPercent, yPercent }) => (
-        <g key={id} onClick={() => onBuildingClick(id)} style={{ cursor: 'pointer' }}>
-          <rect
-            x={`${xPercent - 0.4}%`} y={`${yPercent - 0.5}%`}
-            width={`${MARKER_WIDTH + 0.8}%`} height={`${MARKER_HEIGHT + 1}%`}
-            fill="none" stroke="#2f5d8a" strokeWidth="1.5" strokeDasharray="5 3" rx="4" opacity="0.6"
-          >
-            <animate attributeName="stroke-dashoffset" from="0" to="16" dur="1.2s" repeatCount="indefinite" />
-          </rect>
-          <rect
-            x={`${xPercent}%`} y={`${yPercent}%`}
-            width={`${MARKER_WIDTH}%`} height={`${MARKER_HEIGHT}%`}
-            fill="#2f5d8a" stroke="#7ab0e0" strokeWidth="1" rx="3"
-          />
-          <text
-            x={`${xPercent + MARKER_WIDTH / 2}%`} y={`${yPercent + 4}%`}
-            textAnchor="middle" fontSize="12.5" fill="#ffffff" fontWeight="700"
-            style={{ userSelect: 'none', pointerEvents: 'none' }}
-          >
-            {label}
-          </text>
-          <text
-            x={`${xPercent + MARKER_WIDTH / 2}%`} y={`${yPercent + 6.8}%`}
-            textAnchor="middle" fontSize="10" fill="#a8d0f0"
-            style={{ userSelect: 'none', pointerEvents: 'none' }}
-          >
-            ↑ click to configure
-          </text>
-        </g>
-      ))}
-
-      {/* Green area / park */}
-      <rect x="4%" y="4%" width="18%" height="28%" fill="#b8d4b8" opacity="0.7" rx="3" />
-      <text x="13%" y="18%" textAnchor="middle" fontSize="9" fill="#4a7a50" opacity="0.9" style={{ userSelect: 'none' }}>PARK</text>
-
-      {/* Water body */}
-      <ellipse cx="13%" cy="84%" rx="7%" ry="5%" fill="#a8c4d8" opacity="0.8" />
-
-      {/* Scale bar */}
-      <g transform="translate(16, 16)">
-        <rect width="80" height="18" rx="4" fill="rgba(255,255,255,0.7)" />
-        <line x1="8" y1="12" x2="72" y2="12" stroke="#445566" strokeWidth="1.2" />
-        <line x1="8" y1="8"  x2="8"  y2="16" stroke="#445566" strokeWidth="1.2" />
-        <line x1="72" y1="8" x2="72" y2="16" stroke="#445566" strokeWidth="1.2" />
-        <text x="40" y="9" textAnchor="middle" fontSize="7.5" fill="#445566" style={{ userSelect: 'none' }}>200 m</text>
-      </g>
-
-      {/* App label */}
-      <text x="50%" y="97%" textAnchor="middle" fontSize="11" fill="rgba(0,0,0,0.25)" style={{ userSelect: 'none' }}>
-        EnerPlanET · Building Energy Modelling Platform
-      </text>
-    </svg>
-  );
-}
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState<'demo' | 'live-test' | 'workspace' | 'fixture'>('workspace');
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
-
-  // Extract every building feature from the EnerPlanET demo config once on mount, keyed by id.
-  // No BuEM result exists yet for any of them — timeseries stays null until the user clicks
-  // Recalculate, which is what the "last full simulation" baseline is meant to represent.
-  const buildingsById = useMemo<Record<string, BuildingState>>(() => {
-    const result: Record<string, BuildingState> = {};
-    try {
-      const features = extractFeaturesFromConfig(demoConfig);
-      for (const feature of features) {
-        const state = adaptBuemFeature(feature);
-        result[state.identity.id] = state;
-      }
-    } catch {
-      // Leave result empty; MapCanvas still renders, configurator just won't open with data.
-    }
-    return result;
-  }, []);
-
-  const selectedBuilding = selectedBuildingId ? buildingsById[selectedBuildingId] : undefined;
+  const [view, setView] = useState<'workspace' | 'fixture'>('workspace');
 
   return (
     <>
@@ -174,40 +21,17 @@ export default function App() {
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 6 }} className="shadow-lg rounded-[6px]">
           <SegmentedControl
             value={view}
-            onChange={(v) => setView(v as 'demo' | 'live-test' | 'workspace' | 'fixture')}
+            onChange={(v) => setView(v as 'workspace' | 'fixture')}
             options={[
               { value: 'workspace', label: '3D workspace (Loenen)' },
               { value: 'fixture', label: '3D fixture (1 building)' },
-              { value: 'demo', label: 'Demo map' },
-              { value: 'live-test', label: 'Dialog (Loenen)' },
             ]}
           />
         </div>
 
-        {view === 'demo' && <MapCanvas buildings={MAP_BUILDINGS} onBuildingClick={setSelectedBuildingId} />}
-        {view === 'live-test' && <LoenenLiveTest />}
         {view === 'workspace' && <BuildingWorkspace />}
         {view === 'fixture' && <FixtureWorkspace />}
 
-        {/* Floating configurator panel — blurred backdrop separates it from the map behind it */}
-        {view === 'demo' && selectedBuildingId && (
-          <div style={{
-            position:        'absolute',
-            inset:           0,
-            display:         'flex',
-            alignItems:      'center',
-            justifyContent:  'center',
-            zIndex:          10,
-            padding:         16,
-            backgroundColor: 'rgba(15, 23, 42, 0.45)',
-            backdropFilter:  'blur(6px)',
-          }}>
-            <BuildingConfigurator
-              onClose={() => setSelectedBuildingId(null)}
-              buildingData={selectedBuilding}
-            />
-          </div>
-        )}
       </div>
       <Analytics />
     </>

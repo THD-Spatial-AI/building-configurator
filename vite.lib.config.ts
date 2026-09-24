@@ -26,8 +26,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
-        // The 3D building view, whose props are still moving.
-        experimental: path.resolve(__dirname, 'src/experimental.ts'),
       },
       formats: ['es'],
       fileName: (_format, name) => `${name}.js`,
@@ -40,8 +38,6 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
-        'echarts',
-        'echarts-for-react',
         'lucide-react',
         'clsx',
         'tailwind-merge',

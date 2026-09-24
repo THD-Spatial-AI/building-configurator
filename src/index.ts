@@ -4,9 +4,21 @@
  * Everything below is reachable from a host application. Nothing else in src/
  * is: the demo shell, its map and its fixtures stay out of the bundle because
  * nothing here imports them.
+ *
+ * The configurator is the 3D view: a building's envelope is the thing being
+ * clicked, and the panel beside it holds the parameters. The host supplies the
+ * building, its geometry and the calls that reach its services.
  */
 
-export { BuildingConfigurator } from './app/components/BuildingConfigurator';
+export { Building3DView } from './app/components/workspace/Building3DView';
+export type { Building3DViewProps } from './app/components/workspace/Building3DView';
+
+export {
+  polygonArea,
+  surfacesFromGeometryResponse,
+  type SurfaceGeometry,
+  type SurfacePolygon,
+} from './app/lib/surfaceMesh';
 
 export {
   BuildingConfiguratorProvider,
@@ -33,6 +45,7 @@ export {
   type BuildingIdentity,
   type BuildingState,
   type ImportedBuildingData,
+  type TechnologyState,
   type ThermalSummary,
 } from './app/lib/buemAdapter';
 
