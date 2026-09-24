@@ -4,7 +4,6 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "allowImportingTsExtensions": false,
     "outDir": "dist",
     "rootDir": "src"
@@ -15,8 +14,8 @@
     "src/demoClient.ts",
     "src/app/App.tsx",
     "src/app/components/LoenenLive*.tsx",
-    "src/app/components/experimental",
-    "src/app/lib/surfaceMesh.ts",
+    "src/app/components/workspace/BuildingWorkspace.tsx",
+    "src/app/lib/useLoenen.ts",
     "src/app/lib/surfaceGeometryFixture.ts",
     "src/**/*.test.ts"
   ]

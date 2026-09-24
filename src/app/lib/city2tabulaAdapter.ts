@@ -14,10 +14,11 @@
  * mechanism's other caller, not a new one.
  */
 
-import type { EnrichEntry } from './enerplanetApi';
+import type { EnrichEntry } from './enerplanet';
 import { adaptBuemFeature, type BuildingState } from './buemAdapter';
-import type { IgnisApi } from './ignisApi';
-import { ignisInputsFromTabulaData, resetElementsToVariantDefaults, type IgnisInputs } from './ignisAdapter';
+import type { VariantLookupServices } from './services';
+import { resetElementsToVariantDefaults, type IgnisInputs } from './ignisAdapter';
+import { fetchVariantInputs, loadVariantLevels } from './heatDemand';
 
 interface PylovoBuildingFeature {
   type: 'Feature';
@@ -92,26 +93,32 @@ export function buildEnrichedFeature(building: PylovoBuildingFeature, entry: Enr
  * bbox — only fetch it once.
  */
 async function resolveVariantData(
-  ignis: IgnisApi,
+  services: VariantLookupServices,
   entry: EnrichEntry,
   building: BuildingState,
-  cache: Map<string, IgnisInputs | undefined>,
+  cache: Map<string, Promise<IgnisInputs | undefined>>,
 ): Promise<IgnisInputs | undefined> {
   const { country, buildingType, constructionYear } = building.identity;
   const cacheKey = entry.tabula_variant_code ?? `${country}/${buildingType}/${constructionYear}`;
 
-  if (!cache.has(cacheKey)) {
-    cache.set(cacheKey, await (async () => {
+  // The request is cached, not its result. Every building in the bbox resolves
+  // at once, so a cache written only once the fetch had returned was always
+  // empty when the others checked it, and each one refetched an archetype its
+  // neighbours were already fetching.
+  let pending = cache.get(cacheKey);
+  if (!pending) {
+    pending = (async () => {
       if (entry.tabula_variant_code) {
-        const dataRes = await ignis.fetchVariantData(entry.tabula_variant_code);
-        if (dataRes) return ignisInputsFromTabulaData(dataRes.tabula_data);
+        const inputs = await fetchVariantInputs(services, entry.tabula_variant_code);
+        if (inputs) return inputs;
       }
-      const variants = await ignis.loadVariantLevels(country, buildingType, constructionYear);
+      const variants = await loadVariantLevels(services, country, buildingType, constructionYear);
       return variants[0]?.data;
-    })());
+    })();
+    cache.set(cacheKey, pending);
   }
 
-  return cache.get(cacheKey);
+  return pending;
 }
 
 /**
@@ -121,11 +128,11 @@ async function resolveVariantData(
  * list) are skipped — they have no envelope to show.
  */
 export async function buildBuildingStates(
-  ignis: IgnisApi,
+  services: VariantLookupServices,
   buildings: { features: PylovoBuildingFeature[] },
   enrichData: Record<string, EnrichEntry>,
 ): Promise<Record<string, BuildingState>> {
-  const variantCache = new Map<string, IgnisInputs | undefined>();
+  const variantCache = new Map<string, Promise<IgnisInputs | undefined>>();
 
   const entries = await Promise.all(
     buildings.features.flatMap((building) => {
@@ -135,7 +142,7 @@ export async function buildBuildingStates(
       return [(async () => {
         const feature = buildEnrichedFeature(building, entry);
         const state = adaptBuemFeature(feature);
-        const variantData = await resolveVariantData(ignis, entry, state, variantCache);
+        const variantData = await resolveVariantData(services, entry, state, variantCache);
         const envelope = variantData ? resetElementsToVariantDefaults(state.envelope, variantData) : state.envelope;
         return [building.properties.osm_id, { ...state, envelope, thematic: { ...state.thematic, envelope } }] as const;
       })()];

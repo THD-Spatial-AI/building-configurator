@@ -99,6 +99,7 @@ services behind it and routes each request on through the orchestrator.
 |---|---|
 | `POST /v1/buem/building` | Runs the edited envelope through BuEM, returning the hourly series |
 | `POST /v1/city2tabula/enrich` | Resolves 3D envelope geometry for a set of `osm_id`s |
+| `GET /v1/city2tabula/geometry` | Surface polygons for one building, for the 3D view |
 | `GET /v2/ignis/variants/{iso2}/match` | TABULA refurbishment variants for a classification |
 | `GET /v2/ignis/data/{code}` | The full TABULA record for one variant |
 | `POST /v2/ignis/calculate/{code}` | Annual heat demand for the working copy |
@@ -129,6 +130,57 @@ classes the component names are compiled into the host's CSS:
 
 Without the `@source` line the component renders unstyled, because Tailwind
 only emits utilities it has seen used.
+
+## Experimental: the 3D building view
+
+A second entry publishes `Building3DView`, a full-screen view where the
+building's own envelope is what the user clicks: surfaces are selected in the
+model rather than from a list, and each opens its editor beside it.
+
+!!! warning "Unstable"
+    Its props and its layout are still moving, and it is versioned as a
+    prerelease. Pin an exact version rather than a range.
+
+```bash
+npm install github:THD-Spatial-AI/building-configurator#v0.3.0-experimental.0
+```
+
+`three` and `earcut` are dependencies of the package, so they install with it.
+
+The host supplies the building and its geometry; the view knows nothing about a
+particular area or dataset. Both come from calls the host already makes: the
+building from `buildBuildingStates` or `adaptBuemFeature`, the geometry from
+`GET /v1/city2tabula/geometry` for that building's `object_id`.
+
+```tsx
+import { BuildingConfiguratorProvider } from '@thd-spatial-ai/building-configurator';
+import {
+  Building3DView,
+  surfacesFromGeometryResponse,
+} from '@thd-spatial-ai/building-configurator/experimental';
+import '@thd-spatial-ai/building-configurator/styles.css';
+
+export function BuildingView({ building, geometryResponse, onExit }) {
+  return (
+    <BuildingConfiguratorProvider http={http}>
+      <Building3DView
+        building={building}
+        geometry={{ surfaces: surfacesFromGeometryResponse(geometryResponse) }}
+        onExit={onExit}
+      />
+    </BuildingConfiguratorProvider>
+  );
+}
+```
+
+Pass `geometry={null}` while the geometry is still loading; the view shows its
+own loading state. A building City2TABULA holds no geometry for takes
+`{ surfaces: [] }`, which the view says so about.
+
+The surface ids in the geometry response are the envelope element ids, which is
+what lets a click in the model resolve to the surface being edited. Geometry
+from a different City2TABULA generation than the envelope matches nothing, and
+the view reports that rather than rendering a model nothing can be selected in.
 
 ## Building a BuildingState
 

@@ -12,16 +12,44 @@
  * refuse to store.
  */
 
-import { createFetchHttpClient } from './app/lib/http';
-import { devLogin } from './app/lib/enerplanetApi';
+import { createFetchHttpClient, HttpError, type HttpClient, type RequestOptions } from './demo/http';
+import { devLogin } from './demo/enerplanetApi';
 
-/** Module constant, so the provider's clients are built once. */
-export const demoHttp = createFetchHttpClient();
+/** Unwrapped, so a failed login cannot trigger the re-login below. */
+const baseHttp = createFetchHttpClient();
 
 let session: Promise<void> | null = null;
 
 /**
- * Logs in with the local development seed account, once per page load.
+ * Logs in again and repeats the request once when the backend reports no
+ * session.
+ *
+ * The session is established once per page load and the backend expires it on
+ * its own schedule, so without this a page left open long enough answers every
+ * later request with a 401 and only a reload recovers it.
+ */
+async function retryOnExpiredSession<T>(send: () => Promise<T>): Promise<T> {
+  try {
+    return await send();
+  } catch (err) {
+    if (!(err instanceof HttpError) || err.status !== 401) throw err;
+    session = null;
+    await ensureDemoSession();
+    return send();
+  }
+}
+
+/** Module constant, so the provider's clients are built once. */
+export const demoHttp: HttpClient = {
+  get: <T>(path: string, options?: RequestOptions) =>
+    retryOnExpiredSession<T>(() => baseHttp.get<T>(path, options)),
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    retryOnExpiredSession<T>(() => baseHttp.post<T>(path, body, options)),
+};
+
+/**
+ * Logs in with the local development seed account, holding one login for every
+ * caller until the session is discarded above.
  *
  * Every call in this app needs the session it establishes, so failure is
  * logged rather than thrown: the individual requests then fail with their own
@@ -37,7 +65,7 @@ export function ensureDemoSession(): Promise<void> {
         return;
       }
       try {
-        await devLogin(demoHttp, email, password);
+        await devLogin(baseHttp, email, password);
       } catch (err) {
         console.error('[demo] login failed', err);
       }

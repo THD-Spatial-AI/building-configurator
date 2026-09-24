@@ -264,6 +264,16 @@ function EconomicsSection({ pv, update }: {
   );
 }
 
+/** The module and its cost belong to the building, not to one roof face. */
+function SharedFieldsNote() {
+  return (
+    <p className="mb-4 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-snug text-slate-500">
+      Cost and efficiency describe the modules this building is fitted with, so
+      they apply to every PV array on it. Orientation and size are this array's own.
+    </p>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface PvEditorProps {
@@ -290,7 +300,7 @@ export function PvEditor({ pvConfig, onUpdate, mode, roofInferred }: PvEditorPro
     <ScrollHintContainer className="flex flex-col p-5">
 
       {/* Header */}
-      <div className="mb-5 flex items-center gap-3">
+      <div className="mb-3 flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-yellow-50">
           <Sun className="size-5 text-yellow-500" />
         </div>
@@ -309,6 +319,8 @@ export function PvEditor({ pvConfig, onUpdate, mode, roofInferred }: PvEditorPro
           />
         </div>
       </div>
+
+      <SharedFieldsNote />
 
       {/* Not-installed hint */}
       {!pvConfig.installed && (

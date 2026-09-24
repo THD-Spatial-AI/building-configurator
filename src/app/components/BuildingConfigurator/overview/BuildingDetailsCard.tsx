@@ -33,6 +33,16 @@ export interface BuildingDetailsCardProps {
   roofConfig: RoofConfig;
   /** Opens the surface configurator modal for an envelope group (walls, windows, ...). */
   onEditGroup?: (type: ElementGroupKey) => void;
+  /** Lets a group expand to its surfaces; picking one calls this. */
+  onSelectSurface?: (id: string) => void;
+  /** Rendered under the envelope group cards, e.g. the 3D envelope + surface editor. */
+  envelopeSlot?: React.ReactNode;
+  /** Adds an Energy overview tab, e.g. the demand summary and renewable figures. */
+  overviewSlot?: React.ReactNode;
+  /** Adds a Technology tab, e.g. the technology cards and their cost. */
+  technologySlot?: React.ReactNode;
+  /** Rendered under the parameters table, e.g. the advanced BuEM settings. */
+  parametersSlot?: React.ReactNode;
 }
 
 /** Building parameters table, or building envelope cards — one merged card. */
@@ -44,24 +54,42 @@ export function BuildingDetailsCard({
   baselineElements,
   roofConfig,
   onEditGroup,
+  onSelectSurface,
+  envelopeSlot,
+  overviewSlot,
+  technologySlot,
+  parametersSlot,
 }: BuildingDetailsCardProps) {
   // Off by default — edits only ever apply while explicitly toggled on, so a stray
   // click on the table never changes the building's data.
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'parameters' | 'envelope'>('parameters');
+  // Whichever tab carries the most for this caller opens first: the energy
+  // overview where there is one, otherwise the envelope where it carries the 3D
+  // model. The others are one click away either way.
+  const [activeTab, setActiveTab] = useState<'overview' | 'parameters' | 'envelope' | 'technology'>(
+    overviewSlot ? 'overview' : envelopeSlot ? 'envelope' : 'parameters',
+  );
 
   return (
     <div className={cn(CARD, 'shrink-0')}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
         <p className="text-[13px] font-bold text-slate-800">
-          {activeTab === 'envelope' ? 'Building Envelope' : 'Building Parameters'}
+          {activeTab === 'overview' ? 'Energy overview'
+            : activeTab === 'envelope' ? 'Building Envelope'
+            : activeTab === 'technology' ? 'Technology'
+            : 'Building Parameters'}
         </p>
         <div className="flex items-center gap-3">
           {/* Plain menu-bar tabs — not a filled segmented-control pill, just
               two labelled buttons with an underline on the active one.
               Parameters is the default/first option, Envelope the second. */}
           <div className="flex items-center gap-4">
-            {(['parameters', 'envelope'] as const).map((tab) => (
+            {([
+              ...(overviewSlot ? ['overview' as const] : []),
+              'parameters' as const,
+              'envelope' as const,
+              ...(technologySlot ? ['technology' as const] : []),
+            ]).map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -73,7 +101,10 @@ export function BuildingDetailsCard({
                     : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
                 )}
               >
-                {tab === 'parameters' ? 'Parameters' : 'Envelope'}
+                {tab === 'overview' ? 'Overview'
+                  : tab === 'parameters' ? 'Parameters'
+                  : tab === 'envelope' ? 'Envelope'
+                  : 'Technology'}
               </button>
             ))}
           </div>
@@ -103,7 +134,12 @@ export function BuildingDetailsCard({
         </div>
       </div>
 
-      {activeTab === 'parameters' ? (
+      {activeTab === 'overview' ? (
+        <div className="p-4">{overviewSlot}</div>
+      ) : activeTab === 'technology' ? (
+        <div className="p-4">{technologySlot}</div>
+      ) : activeTab === 'parameters' ? (
+        <>
         <table className="w-full text-sm bg-white">
           <colgroup>
             <col className="w-[42%]" />
@@ -144,14 +180,18 @@ export function BuildingDetailsCard({
             })}
           </tbody>
         </table>
+        {parametersSlot}
+        </>
       ) : (
-        <div className="p-4">
+        <div className="flex flex-col gap-3 p-4">
           <ElementCompositionSection
             elements={elements}
             baselineElements={baselineElements}
             roofConfig={roofConfig}
             onEditGroup={onEditGroup}
+            onSelectSurface={onSelectSurface}
           />
+          {envelopeSlot}
         </div>
       )}
     </div>

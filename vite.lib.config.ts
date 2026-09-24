@@ -20,11 +20,15 @@ export default defineConfig({
   assetsInclude: ['**/*.svg', '**/*.csv'],
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // No sourcemaps in the published package: they were two thirds of it, and
+    // they only help someone stepping into this library's own internals.
+    sourcemap: false,
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+      },
       formats: ['es'],
-      fileName: () => 'index.js',
+      fileName: (_format, name) => `${name}.js`,
     },
     rollupOptions: {
       // Everything a host already has, or would otherwise end up duplicated in
@@ -34,12 +38,15 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
-        'echarts',
-        'echarts-for-react',
         'lucide-react',
         'clsx',
         'tailwind-merge',
         'fflate',
+        // Declared dependencies, so a host installing this package gets them
+        // without a second copy of three in its bundle.
+        'three',
+        /^three\//,
+        'earcut',
         /^@radix-ui\//,
       ],
     },
