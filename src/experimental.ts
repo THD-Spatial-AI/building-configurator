@@ -35,12 +35,13 @@ export {
 // TODO: implement Building3DViewServices in Building3DView and drop the
 // provider from this entry. Held until the host side is ready to supply them.
 
-/** Which TABULA archetypes apply to a building. */
+/** Which TABULA archetypes apply to a building. Variant selection is similar to what https://webtool.building-typology.eu/ provides. */
 export interface VariantQuery {
   /** ISO-3166 alpha-2, e.g. "NL". */
   country: string;
   /** TABULA building type code: MFH, SFH, AB or TH. */
   buildingType: string;
+  /** Instead of construction period as used in TABULA, use single construction year which gets mapped to the appropriate TABULA period. */
   constructionYear: number;
 }
 
@@ -71,8 +72,7 @@ export interface SimulationResult {
 }
 
 /**
- * The calls the 3D view makes. The host maps its own endpoints onto these; the
- * package holds no URL, session or transport of its own.
+ * The calls the 3D view makes. The host maps its own endpoints onto these;
  *
  * Every member is optional. An absent call hides the feature that needs it
  * rather than failing: without `runSimulation` there is no simulation to run,
@@ -81,7 +81,7 @@ export interface SimulationResult {
  * whatever the host passed in, which is also how it runs against fixtures.
  */
 export interface Building3DViewServices {
-  /** TABULA refurbishment levels for a building's classification. */
+  /** TABULA refurbishment levels for a building's classification. For example, MFH buildings may have (existing, Usual & Advanced refurbishment) levels. */
   listVariants?: (query: VariantQuery) => Promise<IgnisVariantLevel[]>;
   /** Annual heat demand for one variant and the current envelope. */
   calculateHeatDemand?: (
