@@ -43,7 +43,8 @@ export interface Building3DViewProps {
 }
 
 export function Building3DView({ building, geometry, onExit }: Building3DViewProps) {
-  const model = useBuildingModel(building);
+  // No rating is shown here, so the annual demand estimate behind it is not run.
+  const model = useBuildingModel(building, { estimateHeatDemand: false });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
@@ -253,12 +254,6 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
           <Undo2 className="size-3.5" />
           <span className="hidden sm:inline">{undoLabel ? `Undo ${undoLabel.toLowerCase()}` : 'Undo'}</span>
         </button>
-        <span
-          className="rounded-md px-2.5 py-1 text-[11px] font-bold"
-          style={{ backgroundColor: `${model.thermalRating.color}1a`, color: model.thermalRating.color }}
-        >
-          {model.thermalRating.label}
-        </span>
       </div>
 
       {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
@@ -340,6 +335,7 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
                     thermalRating={model.thermalRating}
+                    showThermalRating={false}
                     avgUValue={model.avgUValue}
                     installedTechIds={model.installedTechIds}
                     pvSummary={model.pvSummary}
@@ -425,8 +421,8 @@ export function Building3DView({ building, geometry, onExit }: Building3DViewPro
             className="flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {model.isRunningSimulation
-              ? <><Loader2 className="size-4 animate-spin" /> Running simulation…</>
-              : <><Play className="size-4" /> Run simulation</>}
+              ? <><Loader2 className="size-4 animate-spin" /> Working out the energy…</>
+              : <><Play className="size-4" /> Save &amp; preview energy</>}
           </button>
         </div>
       </div>

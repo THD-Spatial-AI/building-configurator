@@ -226,7 +226,15 @@ const FIELD_LABELS: Record<string, string> = {
 
 export type BuildingModel = ReturnType<typeof useBuildingModel>;
 
-export function useBuildingModel(buildingData?: BuildingState) {
+/**
+ * `estimateHeatDemand` runs ignis's annual demand alongside the model. Off for
+ * a caller that shows no such figure: ignis then only serves TABULA variants
+ * and their U-values, and no request is made per envelope edit.
+ */
+export function useBuildingModel(
+  buildingData?: BuildingState,
+  { estimateHeatDemand = true }: { estimateHeatDemand?: boolean } = {},
+) {
   const api = useConfiguratorApi();
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
@@ -422,7 +430,7 @@ export function useBuildingModel(buildingData?: BuildingState) {
 
   // ── HDCP: auto-recalculate (debounced) when calcDemand changes ────────────────
   useEffect(() => {
-    if (!ignis) return;
+    if (!ignis || !estimateHeatDemand) return;
 
     const variant = ignis.variants[ignis.selectedVariantIndex];
     if (!variant) return;
@@ -440,7 +448,7 @@ export function useBuildingModel(buildingData?: BuildingState) {
 
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ignis?.calcDemand, ignis?.selectedVariantIndex]);
+  }, [ignis?.calcDemand, ignis?.selectedVariantIndex, estimateHeatDemand]);
 
   const selectIgnisVariant = (index: number) => {
     if (!ignis) return;

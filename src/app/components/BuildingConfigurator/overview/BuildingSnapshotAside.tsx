@@ -30,6 +30,8 @@ export interface BuildingSnapshotAsideProps {
   showEstimateNotice?: boolean;
   /** The technology cards, for callers that give them their own tab instead. */
   showTechnologies?: boolean;
+  /** The thermal efficiency row. Off where no defensible rating method applies. */
+  showThermalRating?: boolean;
 }
 
 const ENERGY_ITEMS = [
@@ -53,6 +55,7 @@ export function BuildingSnapshotAside({
   embedded = false,
   showEstimateNotice = true,
   showTechnologies = true,
+  showThermalRating = true,
 }: BuildingSnapshotAsideProps) {
   const content = (
     <aside className="flex flex-col gap-3">
@@ -122,6 +125,7 @@ export function BuildingSnapshotAside({
             })}
 
             {/* Thermal efficiency row */}
+            {showThermalRating && (
             <div className="border-t border-slate-700/60 pt-3 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="flex size-7 items-center justify-center rounded-md bg-slate-600/50">
@@ -138,6 +142,7 @@ export function BuildingSnapshotAside({
                 )}
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
