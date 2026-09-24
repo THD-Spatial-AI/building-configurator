@@ -20,7 +20,9 @@ export default defineConfig({
   assetsInclude: ['**/*.svg', '**/*.csv'],
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // No sourcemaps in the published package: they were two thirds of it, and
+    // they only help someone stepping into this library's own internals.
+    sourcemap: false,
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
