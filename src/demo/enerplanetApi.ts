@@ -97,6 +97,7 @@ export interface BuemBuildingRunRequest {
   osm_id: string;
   geometry: unknown;
   building: unknown;
+  solver: { use_milp: boolean };
   start_date: string;
   end_date: string;
   resolution: number;
@@ -206,10 +207,6 @@ export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
      * that rejected an incomplete envelope surfaces as a clear message rather
      * than a crash. The request can legitimately take several seconds: BuEM
      * runs a physics solve, not a lookup.
-     *
-     * Known gap: the backend's contract has no field for the MILP-solver
-     * toggle (general.use_milp), so it is dropped here until the contract
-     * grows one.
      */
     async runBuildingSimulation(identity, elements, general, modelId, batteryConfig) {
       const feature = serializeToBuemFeature(
@@ -223,6 +220,7 @@ export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
           osm_id:     String(feature.id),
           geometry:   feature.geometry,
           building:   feature.properties.buem.building,
+          solver:     feature.properties.buem.solver,
           start_date: feature.properties.start_time,
           end_date:   feature.properties.end_time,
           resolution: Number(feature.properties.resolution),

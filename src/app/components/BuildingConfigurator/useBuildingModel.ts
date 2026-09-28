@@ -843,6 +843,7 @@ export function withEdits(
       c_m:                     general.c_m,
       massClass:               general.massClass,
       Code_AttachedNeighbours: general.Code_AttachedNeighbours,
+      use_milp:                general.use_milp,
     },
   };
 }

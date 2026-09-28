@@ -16,9 +16,6 @@ import type { ConfiguratorServices } from './services';
  * rejected an incomplete envelope surfaces as a message rather than a crash.
  * The run can legitimately take several seconds: BuEM solves, it does not look
  * a value up.
- *
- * Known gap: the request has no field for the MILP-solver toggle
- * (general.use_milp), so it is dropped here until the contract grows one.
  */
 export async function runBuildingSimulation(
   services: Pick<ConfiguratorServices, 'runBuemBuilding'>,
@@ -39,6 +36,7 @@ export async function runBuildingSimulation(
       osm_id:     String(feature.id),
       geometry:   feature.geometry,
       building:   feature.properties.buem.building,
+      solver:     feature.properties.buem.solver,
       start_date: feature.properties.start_time,
       end_date:   feature.properties.end_time,
       resolution: Number(feature.properties.resolution),
@@ -71,14 +69,15 @@ export function runIdentity(
 }
 
 /**
- * The BuEM `building` block a run of this building sends, for a host to store.
- * Reopen it with adaptBuemFeature on a Feature whose properties.buem.building
- * is this block. PV arrays and the battery are not part of the block; they
- * travel in building.technologyState.
+ * The BuEM `building` and `solver` blocks a run of this building sends, for a
+ * host to store. Reopen them with adaptBuemFeature on a Feature whose
+ * properties.buem is this object. PV arrays and the battery are not part of
+ * either block; they travel in building.technologyState.
  */
-export function toBuemBuilding(building: BuildingState): Record<string, any> {
+export function toBuem(building: BuildingState): { building: Record<string, any>; solver: { use_milp: boolean } } {
   const general = generalFrom(building);
   const envelope = building.thematic?.envelope ?? building.envelope;
   const elements = Object.keys(envelope).length > 0 ? envelope : DEFAULT_ELEMENTS;
-  return serializeToBuemFeature(runIdentity(building, general), elements, general).properties.buem.building;
+  const { buem } = serializeToBuemFeature(runIdentity(building, general), elements, general).properties;
+  return { building: buem.building, solver: buem.solver };
 }

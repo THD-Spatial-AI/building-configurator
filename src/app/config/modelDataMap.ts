@@ -48,6 +48,7 @@ export const MODEL_DATA_MAP = {
       cM:                'properties.buem.building.thermal.c_m',                // { value, unit: "kJ/(m2K)" }
       thermalClass:      'properties.buem.building.thermal.thermal_class',      // light | medium | heavy
       neighbourStatus:   'properties.buem.building.neighbour_status',           // B_Alone | B_N1 | B_N2
+      useMilp:           'properties.buem.solver.use_milp',                     // boolean
     },
 
     // Envelope element list (properties.buem.building.envelope.elements[])

@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { runIdentity, toBuemBuilding } from './buemRun';
+import { describe, expect, it, vi } from 'vitest';
+import { runBuildingSimulation, runIdentity, toBuem } from './buemRun';
+import type { BuemBuildingRunRequest } from './services';
 import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
 import {
@@ -54,6 +55,7 @@ const general = {
   massClass: 'Heavy',
   c_m: 260,
   Code_AttachedNeighbours: 'B_N2',
+  use_milp: true,
 };
 
 const tech = {
@@ -65,15 +67,15 @@ const tech = {
 
 const edited = withEdits(opened, elements, general, tech);
 
-describe('toBuemBuilding', () => {
-  it('sends the block a run with the same edits sends', () => {
-    const run = serializeToBuemFeature(runIdentity(opened, general), elements, general).properties.buem.building;
+describe('toBuem', () => {
+  it('sends the blocks a run with the same edits sends', () => {
+    const { buem } = serializeToBuemFeature(runIdentity(opened, general), elements, general).properties;
 
-    expect(toBuemBuilding(edited)).toEqual(run);
+    expect(toBuem(edited)).toEqual({ building: buem.building, solver: buem.solver });
   });
 
-  it('carries the expert-mode parameters into the block', () => {
-    const building = toBuemBuilding(edited);
+  it('carries the expert-mode parameters and the solver choice', () => {
+    const { building, solver } = toBuem(edited);
     expect(building.thermal).toEqual({
       n_air_infiltration: { value: 0.7, unit: '1/h' },
       n_air_use: { value: 0.55, unit: '1/h' },
@@ -82,22 +84,37 @@ describe('toBuemBuilding', () => {
     });
     expect(building.neighbour_status).toBe('B_N2');
     expect(building.name).toBe('Renamed');
+    expect(solver).toEqual({ use_milp: true });
   });
 });
 
-describe('adaptBuemFeature on a stored building block', () => {
+describe('runBuildingSimulation', () => {
+  it('sends the solver choice with the run', async () => {
+    const requests: BuemBuildingRunRequest[] = [];
+    const services = {
+      runBuemBuilding: async (request: BuemBuildingRunRequest) => {
+        requests.push(request);
+        throw new Error('transport not under test');
+      },
+    };
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, 'model-1');
+
+    expect(requests[0].solver).toEqual({ use_milp: true });
+  });
+});
+
+describe('adaptBuemFeature on stored blocks', () => {
   const reopened = adaptBuemFeature({
     type: 'Feature',
     id: 'osm-42',
     geometry: { type: 'Point', coordinates: [5.9, 52.2] },
-    properties: { buem: { building: toBuemBuilding(edited) } },
+    properties: { buem: toBuem(edited) },
   });
 
-  it('reopens with the same building parameters', () => {
-    const { buildingName, ...rest } = generalFrom(reopened);
-    const { buildingName: savedName, ...expected } = general;
-    expect(buildingName).toBe(savedName);
-    expect(rest).toEqual(expected);
+  it('reopens with the same building parameters and solver choice', () => {
+    expect(generalFrom(reopened)).toEqual(general);
   });
 
   it('reopens with the same surfaces and their names', () => {
@@ -105,7 +122,7 @@ describe('adaptBuemFeature on a stored building block', () => {
     expect(reopened.envelope.win_south).toMatchObject({ label: 'Patio door', area: 6, uValue: 1.1, gValue: 0.5 });
   });
 
-  it('serialises to the block it was opened from', () => {
-    expect(toBuemBuilding(reopened)).toEqual(toBuemBuilding(edited));
+  it('serialises to the blocks it was opened from', () => {
+    expect(toBuem(reopened)).toEqual(toBuem(edited));
   });
 });

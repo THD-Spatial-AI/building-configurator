@@ -27,6 +27,8 @@ export interface BuemBuildingRunRequest {
   osm_id: string;
   geometry: unknown;
   building: unknown;
+  /** BuEM solver settings, forwarded as properties.buem.solver. */
+  solver: { use_milp: boolean };
   start_date: string;
   end_date: string;
   resolution: number;

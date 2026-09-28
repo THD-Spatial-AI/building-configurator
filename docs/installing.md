@@ -199,29 +199,34 @@ one:
 
 ## Storing an edited building
 
-`onExit` hands back the edited `BuildingState`. `toBuemBuilding(building)`
-turns it into the BuEM `building` block, the same block a run of that building
-sends as `BuemBuildingRunRequest.building`. To reopen, wrap the stored block in
-a Feature and pass it to `adaptBuemFeature`:
+`onExit` hands back the edited `BuildingState`. `toBuem(building)` turns it
+into `{ building, solver }`, the same two blocks a run of that building sends
+as `BuemBuildingRunRequest.building` and `.solver`. To reopen, pass the stored
+object as `properties.buem` of a Feature to `adaptBuemFeature`:
 
 ```ts
-import { adaptBuemFeature, toBuemBuilding } from '@thd-spatial-ai/building-configurator';
+import { adaptBuemFeature, toBuem } from '@thd-spatial-ai/building-configurator';
 
-const stored = toBuemBuilding(edited);
+const stored = toBuem(edited);
 
 const reopened = adaptBuemFeature({
   type: 'Feature',
   id: osmId,
   geometry: { type: 'Point', coordinates: [lon, lat] },
-  properties: { buem: { building: stored } },
+  properties: { buem: stored },
 });
 ```
 
-The block carries the building parameters (identity, floor area, storeys, room
+`building` carries the building parameters (identity, floor area, storeys, room
 height, air change rates, thermal mass, attached neighbours) and every surface
-with its name. It does not carry the PV arrays or the battery.
+with its name. `solver.use_milp` records whether BuEM solves with MILP. Neither
+carries the PV arrays or the battery.
 
 !!! warning "PV and battery"
-    Keep `edited.technologyState` beside the block and set it on the reopened
+    Keep `edited.technologyState` beside the blocks and set it on the reopened
     state (`{ ...reopened, technologyState }`), or they reopen at their
     defaults.
+
+!!! warning "Forward the solver"
+    `runBuemBuilding` receives `request.solver`. A transport that drops it runs
+    BuEM with its default solver whatever the user chose.

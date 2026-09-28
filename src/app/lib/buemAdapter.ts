@@ -117,6 +117,8 @@ export interface BuildingParameters {
   c_m?: number;                     // kJ/(m2K)
   massClass?: string;               // Light | Medium | Heavy
   Code_AttachedNeighbours?: string; // B_Alone | B_N1 | B_N2
+  /** Whether BuEM solves with MILP rather than its default sparse solver. */
+  use_milp?: boolean;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -364,6 +366,8 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (massClass) parameters.massClass = massClass;
   const neighbours = getMappedValue(feature, paths.neighbourStatus);
   if (typeof neighbours === 'string') parameters.Code_AttachedNeighbours = neighbours;
+  const useMilp = getMappedValue(feature, paths.useMilp);
+  if (typeof useMilp === 'boolean') parameters.use_milp = useMilp;
   return Object.keys(parameters).length > 0 ? parameters : undefined;
 }
 
