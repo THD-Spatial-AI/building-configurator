@@ -2,6 +2,7 @@
 // These values are placeholders until real building data is loaded from the API.
 
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { BuildingState } from '@/app/lib/buemAdapter';
 
 // ─── Technology types ─────────────────────────────────────────────────────────
 
@@ -191,6 +192,28 @@ export const DEFAULT_GENERAL = {
   // TABULA neighbour code — sent to BuEM as neighbour_status.
   Code_AttachedNeighbours: 'B_Alone',
 };
+
+/**
+ * The configurator's building parameters for a building: its identity and any
+ * saved parameters over the defaults. identity.floorArea is the total
+ * conditioned floor area (BuEM A_ref); general.floorArea is per storey.
+ */
+export function generalFrom(building?: BuildingState): typeof DEFAULT_GENERAL {
+  if (!building) return DEFAULT_GENERAL;
+  const identity = building.thematic?.identity ?? building.identity;
+  const storeys = identity.storeys || DEFAULT_GENERAL.storeys;
+  return {
+    ...DEFAULT_GENERAL,
+    ...building.parameters,
+    buildingName:     identity.label ?? DEFAULT_GENERAL.buildingName,
+    buildingType:     identity.buildingType ?? DEFAULT_GENERAL.buildingType,
+    constructionYear: identity.constructionYear || DEFAULT_GENERAL.constructionYear,
+    country:          identity.country ?? DEFAULT_GENERAL.country,
+    floorArea:        identity.floorArea ? identity.floorArea / Math.max(1, storeys) : DEFAULT_GENERAL.floorArea,
+    roomHeight:       identity.roomHeight || DEFAULT_GENERAL.roomHeight,
+    storeys,
+  };
+}
 
 // ─── Floor area / volume ──────────────────────────────────────────────────────
 // `floorArea` (general state) is the per-storey footprint, not the whole

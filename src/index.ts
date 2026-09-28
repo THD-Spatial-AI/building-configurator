@@ -44,6 +44,7 @@ export {
   importBuildingData,
   serializeToBuemFeature,
   type BuildingIdentity,
+  type BuildingParameters,
   type BuildingState,
   type ImportedBuildingData,
   type TechnologyState,
@@ -51,6 +52,9 @@ export {
 } from './app/lib/buemAdapter';
 
 export { buildBuildingStates } from './app/lib/city2tabulaAdapter';
+
+// Storing an edited building: the BuEM blocks a run would send for it.
+export { toBuem } from './app/lib/buemRun';
 
 export type {
   EnergyTotals,

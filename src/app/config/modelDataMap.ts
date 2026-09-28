@@ -25,7 +25,7 @@ export const MODEL_DATA_MAP = {
   thematic: {
     // Identity available to the dashboard header and snapshot cards.
     buildingId:  'id',
-    label:       'id',
+    label:       ['properties.buem.building.name', 'id'],
     coordinates: 'geometry.coordinates',                                  // [lon, lat] or [lon, lat, elevation]
 
     // Descriptor data  (properties.buem.building.*)
@@ -39,6 +39,16 @@ export const MODEL_DATA_MAP = {
       floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
       roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
       storeys:            'properties.buem.building.n_storeys',
+    },
+
+    // Building parameters beyond the descriptor, each absent unless set.
+    parameters: {
+      nAirInfiltration:  'properties.buem.building.thermal.n_air_infiltration', // { value, unit: "1/h" }
+      nAirUse:           'properties.buem.building.thermal.n_air_use',          // { value, unit: "1/h" }
+      cM:                'properties.buem.building.thermal.c_m',                // { value, unit: "kJ/(m2K)" }
+      thermalClass:      'properties.buem.building.thermal.thermal_class',      // light | medium | heavy
+      neighbourStatus:   'properties.buem.building.neighbour_status',           // B_Alone | B_N1 | B_N2
+      useMilp:           'properties.buem.solver.use_milp',                     // boolean
     },
 
     // Envelope element list (properties.buem.building.envelope.elements[])
