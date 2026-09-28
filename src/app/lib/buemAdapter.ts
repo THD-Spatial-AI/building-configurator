@@ -106,6 +106,17 @@ export interface BuildingState {
   ignis: import('./ignisAdapter').IgnisState | null;
   /** Set when the building was saved from the configurator; absent on a freshly imported one. */
   technologyState?: TechnologyState;
+  /** Building parameters the source or a saved edit set; the configurator defaults the rest. */
+  parameters?: BuildingParameters;
+}
+
+/** The building parameters BuEM reads beyond identity and envelope, named as the configurator holds them. */
+export interface BuildingParameters {
+  n_air_infiltration?: number;      // 1/h
+  n_air_use?: number;               // 1/h
+  c_m?: number;                     // kJ/(m2K)
+  massClass?: string;               // Light | Medium | Heavy
+  Code_AttachedNeighbours?: string; // B_Alone | B_N1 | B_N2
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -183,6 +194,7 @@ function qty(obj: unknown, fallback = 0): number {
 function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
   const valid: BuildingElement['type'][] = ['wall', 'window', 'roof', 'floor', 'door'];
   const result: Record<string, BuildingElement> = {};
+  const names: Record<string, string> = {};
 
   elements.forEach((el) => {
     if (!el || typeof el !== 'object') return;
@@ -192,6 +204,7 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
     const type = String(raw.type ?? '') as BuildingElement['type'];
 
     if (!id || !valid.includes(type)) return;
+    if (typeof raw.name === 'string' && raw.name) names[id] = raw.name;
 
     const gRaw = raw.g_gl;
     const gValue = (gRaw && typeof gRaw === 'object' && 'value' in gRaw)
@@ -213,7 +226,7 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
   });
 
   const surfaces = Object.values(result);
-  readableSurfaceLabels(surfaces).forEach((label, i) => { surfaces[i].label = label; });
+  readableSurfaceLabels(surfaces).forEach((label, i) => { surfaces[i].label = names[surfaces[i].id] ?? label; });
   return result;
 }
 
@@ -338,6 +351,22 @@ export function extractBuildingDashboardData(feature: unknown): Pick<BuildingSta
   };
 }
 
+const MASS_CLASS_LABELS: Record<string, string> = { light: 'Light', medium: 'Medium', heavy: 'Heavy' };
+
+/** The building parameters the feature sets, or undefined when it sets none. */
+function adaptParameters(feature: unknown): BuildingParameters | undefined {
+  const paths = MODEL_DATA_MAP.thematic.parameters;
+  const parameters: BuildingParameters = {};
+  if (hasMappedValue(feature, paths.nAirInfiltration)) parameters.n_air_infiltration = getMappedNumber(feature, paths.nAirInfiltration);
+  if (hasMappedValue(feature, paths.nAirUse)) parameters.n_air_use = getMappedNumber(feature, paths.nAirUse);
+  if (hasMappedValue(feature, paths.cM)) parameters.c_m = getMappedNumber(feature, paths.cM);
+  const massClass = MASS_CLASS_LABELS[String(getMappedValue(feature, paths.thermalClass))];
+  if (massClass) parameters.massClass = massClass;
+  const neighbours = getMappedValue(feature, paths.neighbourStatus);
+  if (typeof neighbours === 'string') parameters.Code_AttachedNeighbours = neighbours;
+  return Object.keys(parameters).length > 0 ? parameters : undefined;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -350,6 +379,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
   }
 
   const { geometry, thematic, technologies } = extractBuildingDashboardData(feature);
+  const parameters = adaptParameters(feature);
 
   return {
     geometry,
@@ -361,6 +391,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     timeseries: thematic.timeseries,
     installedTechIds: technologies.installedTechIds,
     ignis: null,
+    ...(parameters ? { parameters } : {}),
   };
 }
 
@@ -505,6 +536,7 @@ export function serializeToBuemFeature(
 
   // Build the building block, preferring passed identity over general config
   const building: Record<string, any> = {};
+  if (identity.label) building.name = identity.label;
   if (identity.buildingType) building.building_type = BUILDING_TYPE_CODES[identity.buildingType] ?? identity.buildingType;
   else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 

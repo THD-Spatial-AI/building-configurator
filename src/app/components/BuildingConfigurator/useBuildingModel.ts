@@ -17,7 +17,7 @@ import {
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
-import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea } from './shared/buildingDefaults';
+import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
 import { yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, TechnologyState, ThermalSummary } from '../../lib/buemAdapter';
 import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
@@ -30,7 +30,7 @@ import {
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
-import { runBuildingSimulation } from '../../lib/buemRun';
+import { runBuildingSimulation, runIdentity } from '../../lib/buemRun';
 import type { ConfiguratorServices } from '../../lib/services';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
@@ -244,21 +244,7 @@ export function useBuildingModel(
   const technologyData = buildingData?.technologies;
   const identityData = thematicData?.identity ?? buildingData?.identity;
 
-  // Merge model identity fields into general config, keeping defaults for any missing fields.
-  // identity.floorArea is the source data's total conditioned floor area (BuEM A_ref); general.floorArea
-  // is per-storey, so divide by storeys when seeding it.
-  const initialGeneral = buildingData ? {
-    ...DEFAULT_GENERAL,
-    buildingName:       identityData?.label ?? DEFAULT_GENERAL.buildingName,
-    buildingType:       identityData?.buildingType ?? DEFAULT_GENERAL.buildingType,
-    constructionYear:   identityData?.constructionYear || DEFAULT_GENERAL.constructionYear,
-    country:            identityData?.country ?? DEFAULT_GENERAL.country,
-    floorArea:          identityData?.floorArea
-      ? identityData.floorArea / Math.max(1, identityData?.storeys || DEFAULT_GENERAL.storeys)
-      : DEFAULT_GENERAL.floorArea,
-    roomHeight:         identityData?.roomHeight || DEFAULT_GENERAL.roomHeight,
-    storeys:            identityData?.storeys || DEFAULT_GENERAL.storeys,
-  } : DEFAULT_GENERAL;
+  const initialGeneral = generalFrom(buildingData);
 
   const initialElements = normalizeElementRecord(
     thematicData && Object.keys(thematicData.envelope).length > 0
@@ -339,19 +325,7 @@ export function useBuildingModel(
       Object.keys(buildingData.thematic.envelope).length > 0 ? 'city' : 'default',
     );
 
-    const nextStoreys = buildingData.thematic.identity.storeys || DEFAULT_GENERAL.storeys;
-    const nextGeneral = {
-      ...DEFAULT_GENERAL,
-      buildingType:       buildingData.thematic.identity.buildingType,
-      constructionYear:   buildingData.thematic.identity.constructionYear || DEFAULT_GENERAL.constructionYear,
-      country:            buildingData.thematic.identity.country,
-      // identity.floorArea is the total conditioned floor area (BuEM A_ref); general.floorArea is per-storey.
-      floorArea:          buildingData.thematic.identity.floorArea
-        ? buildingData.thematic.identity.floorArea / Math.max(1, nextStoreys)
-        : DEFAULT_GENERAL.floorArea,
-      roomHeight:         buildingData.thematic.identity.roomHeight || DEFAULT_GENERAL.roomHeight,
-      storeys:            nextStoreys,
-    };
+    const nextGeneral = generalFrom(buildingData);
 
     const nextTotals = computeEnergyTotals(
       buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
@@ -618,20 +592,7 @@ export function useBuildingModel(
     setUploadError(null);
   };
 
-  const buildIdentity = () => {
-    const coordinates: [number, number] = geometryData?.coordinates ?? identityData?.coordinates ?? [11.5820, 48.1351];
-    return {
-      id: identityData?.id ?? 'building-1',
-      label: identityData?.label ?? (general.buildingName || identityData?.label || 'Building'),
-      coordinates,
-      buildingType: general.buildingType,
-      constructionYear: general.constructionYear,
-      country: general.country,
-      floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
-      roomHeight: general.roomHeight,
-      storeys: general.storeys,
-    };
-  };
+  const buildIdentity = () => runIdentity(buildingData, general);
 
   /**
    * Commits the working draft, then runs a full BuEM simulation through the
@@ -876,6 +837,13 @@ export function withEdits(
     identity,
     envelope: elements,
     technologyState: tech,
+    parameters: {
+      n_air_infiltration:      general.n_air_infiltration,
+      n_air_use:               general.n_air_use,
+      c_m:                     general.c_m,
+      massClass:               general.massClass,
+      Code_AttachedNeighbours: general.Code_AttachedNeighbours,
+    },
   };
 }
 

@@ -196,3 +196,32 @@ one:
     The component resets its editing state whenever `buildingData` changes
     identity. A parent that rebuilds the object on every render discards the
     user's edits on every render with it.
+
+## Storing an edited building
+
+`onExit` hands back the edited `BuildingState`. `toBuemBuilding(building)`
+turns it into the BuEM `building` block, the same block a run of that building
+sends as `BuemBuildingRunRequest.building`. To reopen, wrap the stored block in
+a Feature and pass it to `adaptBuemFeature`:
+
+```ts
+import { adaptBuemFeature, toBuemBuilding } from '@thd-spatial-ai/building-configurator';
+
+const stored = toBuemBuilding(edited);
+
+const reopened = adaptBuemFeature({
+  type: 'Feature',
+  id: osmId,
+  geometry: { type: 'Point', coordinates: [lon, lat] },
+  properties: { buem: { building: stored } },
+});
+```
+
+The block carries the building parameters (identity, floor area, storeys, room
+height, air change rates, thermal mass, attached neighbours) and every surface
+with its name. It does not carry the PV arrays or the battery.
+
+!!! warning "PV and battery"
+    Keep `edited.technologyState` beside the block and set it on the reopened
+    state (`{ ...reopened, technologyState }`), or they reopen at their
+    defaults.

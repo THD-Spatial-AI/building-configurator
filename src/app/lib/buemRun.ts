@@ -1,7 +1,13 @@
 // One building through BuEM: build the request from the edited model, hand it
 // to the host's transport, map the answer into the shapes the UI reads.
 
-import { serializeToBuemFeature, type BuildingIdentity } from './buemAdapter';
+import { serializeToBuemFeature, type BuildingIdentity, type BuildingState } from './buemAdapter';
+import {
+  DEFAULT_ELEMENTS,
+  DEFAULT_GENERAL,
+  computeTotalFloorArea,
+  generalFrom,
+} from '../components/BuildingConfigurator/shared/buildingDefaults';
 import { toSimulationResult, type BuemSimulationResult } from './buemApi';
 import type { ConfiguratorServices } from './services';
 
@@ -43,4 +49,36 @@ export async function runBuildingSimulation(
     console.error('[buem/building] request failed', err);
     return null;
   }
+}
+
+/** The identity a run sends: the building's own, with the edited parameters over it. */
+export function runIdentity(
+  building: BuildingState | undefined,
+  general: typeof DEFAULT_GENERAL,
+): BuildingIdentity {
+  const base = building?.thematic?.identity ?? building?.identity;
+  return {
+    id: base?.id ?? 'building-1',
+    label: general.buildingName || base?.label || 'Building',
+    coordinates: building?.geometry?.coordinates ?? base?.coordinates ?? [11.5820, 48.1351],
+    buildingType: general.buildingType,
+    constructionYear: general.constructionYear,
+    country: general.country,
+    floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
+    roomHeight: general.roomHeight,
+    storeys: general.storeys,
+  };
+}
+
+/**
+ * The BuEM `building` block a run of this building sends, for a host to store.
+ * Reopen it with adaptBuemFeature on a Feature whose properties.buem.building
+ * is this block. PV arrays and the battery are not part of the block; they
+ * travel in building.technologyState.
+ */
+export function toBuemBuilding(building: BuildingState): Record<string, any> {
+  const general = generalFrom(building);
+  const envelope = building.thematic?.envelope ?? building.envelope;
+  const elements = Object.keys(envelope).length > 0 ? envelope : DEFAULT_ELEMENTS;
+  return serializeToBuemFeature(runIdentity(building, general), elements, general).properties.buem.building;
 }
