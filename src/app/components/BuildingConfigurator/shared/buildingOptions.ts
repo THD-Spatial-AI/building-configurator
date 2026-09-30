@@ -1,5 +1,4 @@
 // Predefined option lists for building parameters.
-// Used by both the full Configure view (GeneralConfig) and the Overview quick-edit.
 
 export const BUILDING_TYPE_OPTIONS = [
   { value: 'Single-family House', label: 'Single-family House' },
