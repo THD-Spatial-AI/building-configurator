@@ -3,7 +3,7 @@
 // To hide a card:  set visible: false.
 // To keep its params in the exported data model even when hidden: also set includeInModel: true.
 // To add a new building-level technology: append an entry, implement the panel component,
-// and add a matching case in BuildingConfigurator's renderCenterPanel.
+// and open it from TechnologiesSection's onOpen in Building3DView.
 
 import { Battery, Sun, Thermometer } from 'lucide-react';
 import type React from 'react';

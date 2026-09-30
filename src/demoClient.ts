@@ -2,9 +2,9 @@
  * Transport for running this component as its own application.
  *
  * Not part of the published package. An application hosting the component
- * passes its own configured client to BuildingConfiguratorProvider instead;
- * this file exists so the component can be developed and exercised against a
- * local EnerPlanET backend without one.
+ * passes its own ConfiguratorServices instead; this file exists so the
+ * component can be developed and exercised against a local EnerPlanET backend
+ * without one.
  *
  * Requests are relative, so Vite's dev proxy (see vite.config.ts) carries them
  * to the backend and the browser stays same-origin with it. Its session and

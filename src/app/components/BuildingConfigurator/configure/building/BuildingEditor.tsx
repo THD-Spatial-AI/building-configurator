@@ -1,6 +1,4 @@
-// Building-level configuration panel for the Configure view.
-// Shown when the user selects "Building" in the panel selector (not a surface).
-// Edits the same `general` state as GeneralConfig in the Overview view.
+// Building-level parameters panel, shown in the 3D view's expert mode.
 
 import { useState, useEffect, useRef } from 'react';
 import { Building2, ChevronDown, Gauge, Loader2 } from 'lucide-react';

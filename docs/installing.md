@@ -4,9 +4,11 @@ audience: developer
 
 # Installing the component
 
-The configurator publishes as `@thd-spatial-ai/building-configurator`, a React
-component an application installs and mounts. It calls the EnerPlanET backend
-and nothing else, over a transport the host supplies.
+The configurator publishes as `@thd-spatial-ai/building-configurator`: a React
+component, `Building3DView`, that shows one building's envelope in 3D with its
+parameters beside it. The host supplies the building, its geometry and four
+functions that reach its services. The package makes no network call of its
+own.
 
 ## Install
 
@@ -14,7 +16,7 @@ Install a tagged release straight from the repository, which needs no registry
 configuration:
 
 ```bash
-npm install github:THD-Spatial-AI/building-configurator#v0.1.0
+npm install github:THD-Spatial-AI/building-configurator#v0.6.0
 ```
 
 The package builds itself on install, so the tag is the version. Pin one rather
@@ -32,79 +34,81 @@ scope to the consuming project's `.npmrc`:
 npm install @thd-spatial-ai/building-configurator
 ```
 
-`react`, `react-dom`, `echarts` and `echarts-for-react` are peer dependencies:
-the host provides them, so the component shares its React instance and its
-charting library rather than shipping a second copy of either.
+`react`, `react-dom` and `three` are peer dependencies: the host provides them,
+so the component shares its React and Three.js instances rather than shipping a
+second copy.
 
 ## Mount it
 
-The component reads its API clients from a provider. Pass a transport, and hold
-it somewhere stable: a client rebuilt on every render rebuilds the clients with
-it.
-
 ```tsx
 import {
-  BuildingConfigurator,
-  BuildingConfiguratorProvider,
-  type HttpClient,
+  Building3DView,
+  surfacesFromGeometryResponse,
+  type ConfiguratorServices,
 } from '@thd-spatial-ai/building-configurator';
 import '@thd-spatial-ai/building-configurator/styles.css';
 
 import axios from '@/lib/axios';
 
-// Paths arrive relative to the API root, so the host's own baseURL, session
-// handling and CSRF apply unchanged.
-const http: HttpClient = {
-  get:  (path, options) => axios.get(path, options).then((r) => r.data),
-  post: (path, body, options) => axios.post(path, body, options).then((r) => r.data),
+// Module constant: one identity for the life of the page.
+const services: ConfiguratorServices = {
+  fetchMatchingVariants: (country, typeCode, year) =>
+    axios.get(`/v2/ignis/variants/${country}/match`, { params: { type: typeCode, year } })
+      .then((r) => r.data.data),
+  fetchVariantData: (code) =>
+    axios.get(`/v2/ignis/data/${code}`).then((r) => r.data.data),
+  calculateHeatDemand: (code, inputs) =>
+    axios.post(`/v2/ignis/calculate/${code}`, inputs).then((r) => r.data.data),
+  runBuemBuilding: (request) =>
+    axios.post('/v1/buem/building', request).then((r) => r.data),
 };
 
-export function BuildingPanel({ building, onClose }) {
+export function BuildingView({ building, geometryBuilding, onExit }) {
+  const geometry = geometryBuilding === undefined
+    ? null
+    : { surfaces: geometryBuilding ? surfacesFromGeometryResponse([geometryBuilding]) : [] };
+
   return (
-    <BuildingConfiguratorProvider http={http}>
-      <BuildingConfigurator buildingData={building} onClose={onClose} />
-    </BuildingConfiguratorProvider>
+    <Building3DView
+      building={building}
+      geometry={geometry}
+      services={services}
+      onExit={onExit}
+    />
   );
 }
 ```
 
-An application without a configured client can use `createFetchHttpClient()`,
-which sends cookies and the CSRF header but does not renew an expired session.
+`geometryBuilding` is this building's entry from the host's
+`GET /v1/city2tabula/geometry` response for its `object_id`.
 
-## Transport contract
-
-Paths are relative to the EnerPlanET API root: `/v2/ignis/fields`, never
-`/api/v2/ignis/fields` and never an absolute URL. The host owns the origin, the
-`/api` prefix, credentials and session renewal.
-
-| Method | Contract |
+| Prop | Meaning |
 |---|---|
-| `get<T>(path, options?)` | Resolves with the parsed JSON body, rejects on a non-2xx status |
-| `post<T>(path, body?, options?)` | As above; `body` is serialised as JSON |
+| `building` | The `BuildingState` to edit, see [Building a BuildingState](#building-a-buildingstate) |
+| `geometry` | `{ surfaces }` for the 3D model, or `null` while it loads |
+| `services` | The four calls below |
+| `onExit(building)` | Called when the user leaves; receives the edited building, or the one passed in when nothing changed |
 
-`options.signal` carries an `AbortSignal`, which the component uses to bound
-its ignis lookups.
+!!! warning "Hold the services stable"
+    Keep the `services` object and each function in a module constant, a
+    `useMemo` or a `useCallback`. An object written inline is a new identity on
+    every render, and the view's effects key on the individual callbacks.
 
-!!! warning "The host's client decides what a failure looks like"
-    Both methods must reject on a non-2xx response. A client that resolves with
-    an error body instead makes a failed lookup look like an empty result, and
-    the component will render it as one.
+## Services
 
-## Endpoints called
+Every function returns a promise that rejects on failure. The package decides
+what a failure means on screen, so a host never reimplements that policy. The
+routes in the example are the EnerPlanET backend's; the package holds none.
 
-Every call goes to the EnerPlanET backend, which holds the credentials for the
-services behind it and routes each request on through the orchestrator.
+| Function | What it carries | Budget |
+|---|---|---|
+| `fetchMatchingVariants(country, typeCode, year)` | TABULA variants for a classification. `typeCode` is already a TABULA code (`SFH`, `TH`, `MFH`, `AB`) | 8 s |
+| `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
+| `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
+| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, including `solver` | 15 s |
 
-| Path | Purpose |
-|---|---|
-| `POST /v1/buem/building` | Runs the edited envelope through BuEM, returning the hourly series |
-| `POST /v1/city2tabula/enrich` | Resolves 3D envelope geometry for a set of `osm_id`s |
-| `GET /v1/city2tabula/geometry` | Surface polygons for one building, for the 3D view |
-| `GET /v2/ignis/variants/{iso2}/match` | TABULA refurbishment variants for a classification |
-| `GET /v2/ignis/data/{code}` | The full TABULA record for one variant |
-| `POST /v2/ignis/calculate/{code}` | Annual heat demand for the working copy |
-| `GET /v2/ignis/fields` | Field labels and descriptions for form tooltips |
-| `POST /v2/pylovo/generate-grid` | Building footprints for an area |
+`Building3DView` does not call `calculateHeatDemand` today. It is part of the
+type, so supply it.
 
 ## Styling
 
@@ -131,47 +135,7 @@ classes the component names are compiled into the host's CSS:
 Without the `@source` line the component renders unstyled, because Tailwind
 only emits utilities it has seen used.
 
-## Experimental: the 3D building view
-
-A second entry publishes `Building3DView`, a full-screen view where the
-building's own envelope is what the user clicks: surfaces are selected in the
-model rather than from a list, and each opens its editor beside it.
-
-!!! warning "Unstable"
-    Its props and its layout are still moving, and it is versioned as a
-    prerelease. Pin an exact version rather than a range.
-
-```bash
-npm install github:THD-Spatial-AI/building-configurator#v0.3.0-experimental.0
-```
-
-`three` and `earcut` are dependencies of the package, so they install with it.
-
-The host supplies the building and its geometry; the view knows nothing about a
-particular area or dataset. Both come from calls the host already makes: the
-building from `buildBuildingStates` or `adaptBuemFeature`, the geometry from
-`GET /v1/city2tabula/geometry` for that building's `object_id`.
-
-```tsx
-import { BuildingConfiguratorProvider } from '@thd-spatial-ai/building-configurator';
-import {
-  Building3DView,
-  surfacesFromGeometryResponse,
-} from '@thd-spatial-ai/building-configurator/experimental';
-import '@thd-spatial-ai/building-configurator/styles.css';
-
-export function BuildingView({ building, geometryResponse, onExit }) {
-  return (
-    <BuildingConfiguratorProvider http={http}>
-      <Building3DView
-        building={building}
-        geometry={{ surfaces: surfacesFromGeometryResponse(geometryResponse) }}
-        onExit={onExit}
-      />
-    </BuildingConfiguratorProvider>
-  );
-}
-```
+## Geometry
 
 Pass `geometry={null}` while the geometry is still loading; the view shows its
 own loading state. A building City2TABULA holds no geometry for takes
@@ -184,18 +148,18 @@ the view reports that rather than rendering a model nothing can be selected in.
 
 ## Building a BuildingState
 
-`BuildingConfigurator` takes a `buildingData` prop. Two exported adapters build
-one:
+Two exported functions build one:
 
 - `adaptBuemFeature(feature)` from a single BuEM GeoJSON Feature.
-- `buildBuildingStates(ignis, buildings, enrichData)` from a footprint
-  collection joined with a City2TABULA enrich response, keyed by `osm_id`. The
-  `ignis` argument comes from `useConfiguratorApi()`.
+- `buildBuildingStates(services, buildings, enrichData)` from a footprint
+  collection joined with a City2TABULA enrich response, keyed by `osm_id`.
+  `services` needs only `fetchMatchingVariants` and `fetchVariantData`. A
+  footprint with no enrich entry is left out of the result.
 
 !!! warning "Memoise what you pass in"
-    The component resets its editing state whenever `buildingData` changes
-    identity. A parent that rebuilds the object on every render discards the
-    user's edits on every render with it.
+    The view resets its editing state whenever `building` changes identity. A
+    parent that rebuilds the object on every render discards the user's edits on
+    every render with it.
 
 ## Storing an edited building
 
