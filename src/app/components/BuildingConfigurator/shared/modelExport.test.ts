@@ -56,6 +56,11 @@ describe('buildingCsv', () => {
     expect(csv).toContain('calculation_method,MILP,');
   });
 
+  it('names the default solver', () => {
+    const csv = buildingCsv({ use_milp: false }, { totalEnvelopeArea: 1, avgUValue: 1 });
+    expect(csv).toContain('calculation_method,sparse,');
+  });
+
   it('leaves out a heat demand that has not been calculated', () => {
     const csv = buildingCsv({}, { totalEnvelopeArea: 1, avgUValue: 1 });
     expect(csv).not.toContain('annual_heat_demand');

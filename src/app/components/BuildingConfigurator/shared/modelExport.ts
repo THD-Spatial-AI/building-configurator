@@ -70,7 +70,7 @@ export function buildingCsv(
     ['thermal_mass_class', general.massClass ?? '', ''],
     ['thermal_capacity', general.c_m ?? '', 'Wh/m2K'],
     ['attached_neighbours', general.Code_AttachedNeighbours ?? '', ''],
-    ['calculation_method', general.use_milp ? 'MILP' : 'rule-based', ''],
+    ['calculation_method', general.use_milp ? 'MILP' : 'sparse', ''],
     ['envelope_area', extras.totalEnvelopeArea.toFixed(2), 'm2'],
     ['envelope_avg_u_value', extras.avgUValue.toFixed(3), 'W/m2K'],
   ];
