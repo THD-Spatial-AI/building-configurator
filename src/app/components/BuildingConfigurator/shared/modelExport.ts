@@ -68,7 +68,7 @@ export function buildingCsv(
     ['infiltration_air_change', (general.n_air_infiltration ?? 0).toFixed(2), '1/h'],
     ['use_air_change', (general.n_air_use ?? 0).toFixed(2), '1/h'],
     ['thermal_mass_class', general.massClass ?? '', ''],
-    ['thermal_capacity', general.c_m ?? '', 'Wh/m2K'],
+    ['thermal_capacity', general.c_m ?? '', 'kJ/(m2K)'],
     ['attached_neighbours', general.Code_AttachedNeighbours ?? '', ''],
     ['calculation_method', general.use_milp ? 'MILP' : 'sparse', ''],
     ['envelope_area', extras.totalEnvelopeArea.toFixed(2), 'm2'],
