@@ -115,7 +115,7 @@ export interface BuildingParameters {
   n_air_infiltration?: number;      // 1/h
   n_air_use?: number;               // 1/h
   c_m?: number;                     // kJ/(m2K)
-  massClass?: string;               // Light | Medium | Heavy
+  massClass?: string;               // VeryLight | Light | Medium | Heavy | VeryHeavy
   Code_AttachedNeighbours?: string; // B_Alone | B_N1 | B_N2
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
@@ -355,6 +355,13 @@ export function extractBuildingDashboardData(feature: unknown): Pick<BuildingSta
 
 const MASS_CLASS_LABELS: Record<string, string> = { light: 'Light', medium: 'Medium', heavy: 'Heavy' };
 
+// BuEM has three classes for the editor's five. c_m is sent beside the class,
+// so the very-light and very-heavy capacities still reach BuEM; on reopen the
+// class reads back as Light or Heavy.
+const THERMAL_CLASSES: Record<string, string> = {
+  VeryLight: 'light', Light: 'light', Medium: 'medium', Heavy: 'heavy', VeryHeavy: 'heavy',
+};
+
 /** The building parameters the feature sets, or undefined when it sets none. */
 function adaptParameters(feature: unknown): BuildingParameters | undefined {
   const paths = MODEL_DATA_MAP.thematic.parameters;
@@ -593,9 +600,9 @@ export function serializeToBuemFeature(
     thermal.c_m = { value: general.c_m, unit: 'kJ/(m2K)' };
   }
   if (general.massClass) {
-    thermal.thermal_class =
-      general.massClass === 'Medium' ? 'medium' :
-      general.massClass === 'Heavy' ? 'heavy' : 'light';
+    const thermalClass = THERMAL_CLASSES[general.massClass];
+    if (!thermalClass) throw new Error(`serializeToBuemFeature: no BuEM thermal_class for mass class "${general.massClass}"`);
+    thermal.thermal_class = thermalClass;
   }
   if (Object.keys(thermal).length > 0) {
     building.thermal = thermal;

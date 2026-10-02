@@ -300,8 +300,8 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
       <ToggleSwitch
         checked={general.use_milp}
         onChange={(v) => setGen('use_milp', v)}
-        label="Use MILP optimiser"
-        tip="Mixed-integer linear programming for optimal dispatch. Slower but globally optimal."
+        label="Use MILP solver"
+        tip="Solve the thermal model as a mixed-integer linear programme instead of BuEM's default sparse solver. Slower, but handles inequality constraints exactly."
       />
       <div
         className="rounded-[6px] px-3 py-2 transition-all duration-200"
@@ -312,8 +312,8 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
       >
         <p className="text-[11px] text-muted-foreground leading-snug">
           {general.use_milp
-            ? 'MILP active — dispatch schedule globally optimised. Expect 2–5× longer computation.'
-            : 'Using rule-based dispatch (fast heuristic). Enable MILP for optimal results.'}
+            ? 'MILP solver: inequality constraints handled exactly. Runs take longer.'
+            : "BuEM's default sparse solver. Fast."}
         </p>
       </div>
     </div>
@@ -479,7 +479,7 @@ function sectionSummary(key: SectionKey, general: Record<string, any>): string {
     case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
     case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
     case 'thermal':     return general.massClass ?? '—';
-    case 'solver':      return general.use_milp ? 'MILP' : 'Rule-based';
+    case 'solver':      return general.use_milp ? 'MILP' : 'Sparse';
   }
 }
 
