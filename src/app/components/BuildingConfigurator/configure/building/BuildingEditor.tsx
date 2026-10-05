@@ -12,13 +12,16 @@ import {
   BUILDING_TYPE_OPTIONS,
   COUNTRY_OPTIONS,
   MIN_CONSTRUCTION_YEAR,
+  OUTPUT_PROFILES,
+  isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
 // 'ignis' (Refurbishment Level) is not part of this click-to-expand card
 // system: it renders inline, always visible. See BuildingEditor's `inlineSections`.
-type SectionKey = 'identity' | 'ventilation' | 'thermal' | 'solver';
+type SectionKey = 'identity' | 'occupancy' | 'outputs' | 'equipment' | 'ventilation' | 'thermal' | 'solver';
 
 const MASS_CLASSES = [
   { value: 'VeryLight', label: 'Very Light — steel/timber frame' },
@@ -336,6 +339,9 @@ function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope 
 /** Colour dot for each section — mirrors the element-dot pattern used in surfaces. */
 const SECTION_COLORS: Record<SectionKey, string> = {
   identity:    '#2f5d8a',
+  occupancy:   '#16a34a',
+  outputs:     '#ca8a04',
+  equipment:   '#db2777',
   ventilation: '#0891b2',
   thermal:     '#dc2626',
   solver:      '#7c3aed',
@@ -343,6 +349,9 @@ const SECTION_COLORS: Record<SectionKey, string> = {
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   identity:    'Basic info',
+  occupancy:   'Occupancy',
+  outputs:     'Results to compute',
+  equipment:   'Appliances',
   ventilation: 'Air & Ventilation',
   thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
@@ -352,10 +361,25 @@ const SECTION_LABELS: Record<SectionKey, string> = {
 function sectionSummary(key: SectionKey, general: Record<string, any>): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
+    case 'occupancy':   return occupancySummary(general);
+    case 'outputs':     return `${OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length} of ${OUTPUT_PROFILES.length} profiles`;
+    case 'equipment': {
+      const overrides = Object.keys(general.equipment).length;
+      return overrides > 0 ? `${overrides} set by hand` : 'Defaults';
+    }
     case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
     case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Sparse';
   }
+}
+
+function occupancySummary(general: Record<string, any>): string {
+  if (isServiceBuildingType(general.buildingType)) {
+    return general.capacity ? `${general.capacity} occupants` : 'Capacity from floor area';
+  }
+  const units = general.residential_units;
+  const dwellings = units ? `${units} dwelling${units === 1 ? '' : 's'}` : 'Dwellings not set';
+  return general.num_persons ? `${dwellings} · ${general.num_persons} per dwelling` : dwellings;
 }
 
 /** Renders the content body for a given section key. */
@@ -368,6 +392,9 @@ function SectionBody({
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
+    case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} />;
+    case 'outputs':     return <OutputsSection     general={general} setGen={setGen} />;
+    case 'equipment':   return <EquipmentSection   general={general} setGen={setGen} />;
     case 'ventilation': return <VentilationSection general={general} setGen={setGen} />;
     case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
@@ -409,14 +436,18 @@ export function BuildingEditor({
   avgUValue = 0, onOpenEnvelope,
   hideIdentity = false,
 }: BuildingEditorProps) {
-  const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
+  const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity'];
-  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'thermal', 'solver'];
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'outputs'];
+  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'ventilation', 'thermal', 'solver'];
+  const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
     : ALL_SECTIONS
-  ).filter((key) => !hideIdentity || key !== 'identity');
+  ).filter((key) => (!hideIdentity || key !== 'identity') && (!service || key !== 'equipment'));
+
+  // A building type change can hide the open section (appliances on a service building).
+  const activeSection = openSection && visibleSections.includes(openSection) ? openSection : null;
 
   const toggle = (id: SectionKey) =>
     setActiveSection((prev) => (prev === id ? null : id));
