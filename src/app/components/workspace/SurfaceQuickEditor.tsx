@@ -144,6 +144,18 @@ export function SurfaceQuickEditor({
         />
       )}
 
+      {element.type === 'wall' && (
+        <label className="flex cursor-pointer items-center gap-2">
+          <input
+            type="checkbox"
+            checked={element.bTransmission === 0}
+            onChange={(e) => onUpdate({ bTransmission: e.target.checked ? 0 : undefined })}
+            className="size-4 cursor-pointer accent-primary"
+          />
+          <span className="text-[12px] text-slate-700">Shared with a neighbouring building</span>
+        </label>
+      )}
+
       {/* ── Orientation ── */}
       <div className="flex items-start justify-center gap-4">
         <AzimuthDial
