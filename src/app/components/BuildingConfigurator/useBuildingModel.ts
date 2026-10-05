@@ -18,9 +18,9 @@ import {
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
-import { yearToConstructionPeriod } from './shared/buildingOptions';
+import { requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, TechnologyState, ThermalSummary } from '../../lib/buemAdapter';
-import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
+import { exportToBuemGeojson, importBuildingData, needsEnvelope } from '../../lib/buemAdapter';
 import type { IgnisState } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
@@ -397,6 +397,16 @@ export function useBuildingModel(
         if (!cancelled) setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
       }
 
+      // TABULA's dwelling count prefills BuEM's residential_units: on load only
+      // when the building brings none, on a hand-edited classification always.
+      // 0 means TABULA gives no count.
+      const dwellings = existingStateData.n_Apartment;
+      if (!cancelled && dwellings) {
+        setGeneralRaw((prev) => (
+          prev.residential_units && !isReload ? prev : { ...prev, residential_units: dwellings }
+        ));
+      }
+
       const state = initIgnisState(country, type, period, variants, ignisSeedBuilding(general, nextElements, type, year, country));
       if (!cancelled) setHdcp(state);
     })();
@@ -601,7 +611,11 @@ export function useBuildingModel(
    * runBuildingSimulation doc for the request shape and known gaps.
    */
   const runSimulation = async () => {
-    const invalid = Object.values(elements).filter(hasInvalidArea);
+    if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
+      setUploadError(`A ${general.buildingType} needs its number of dwellings. Set it under Occupancy before running a simulation.`);
+      return;
+    }
+    const invalid = needsEnvelope(general.outputs) ? Object.values(elements).filter(hasInvalidArea) : [];
     if (invalid.length > 0) {
       setUploadError(
         `${invalid.length} surface${invalid.length > 1 ? 's have' : ' has'} no area (${invalid.map((el) => el.label).join(', ')}) — `
@@ -842,8 +856,17 @@ export function withEdits(
       n_air_use:               general.n_air_use,
       c_m:                     general.c_m,
       massClass:               general.massClass,
-      Code_AttachedNeighbours: general.Code_AttachedNeighbours,
       use_milp:                general.use_milp,
+      residential_units:       general.residential_units,
+      num_persons:             general.num_persons,
+      archetype:               general.archetype,
+      region_code:             general.region_code,
+      cooking_carrier:         general.cooking_carrier,
+      include_dhw:             general.include_dhw,
+      setback_profile:         general.setback_profile,
+      capacity:                general.capacity,
+      equipment:               general.equipment,
+      outputs:                 general.outputs,
     },
   };
 }

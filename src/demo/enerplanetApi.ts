@@ -98,6 +98,7 @@ export interface BuemBuildingRunRequest {
   geometry: unknown;
   building: unknown;
   solver: { use_milp: boolean };
+  outputs: Record<string, 'none' | 'summary' | 'series'>;
   start_date: string;
   end_date: string;
   resolution: number;
@@ -221,6 +222,7 @@ export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
           geometry:   feature.geometry,
           building:   feature.properties.buem.building,
           solver:     feature.properties.buem.solver,
+          outputs:    feature.properties.buem.outputs,
           start_date: feature.properties.start_time,
           end_date:   feature.properties.end_time,
           resolution: Number(feature.properties.resolution),

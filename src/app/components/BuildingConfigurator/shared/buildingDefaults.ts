@@ -3,6 +3,7 @@
 
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { BuildingState } from '@/app/lib/buemAdapter';
+import type { OutputLevel, OutputProfile } from './buildingOptions';
 
 // ─── Technology types ─────────────────────────────────────────────────────────
 
@@ -172,6 +173,12 @@ export const DEFAULT_ELEMENTS: Record<string, BuildingElement> = {
   door:           { id: 'door',           label: 'Front Door',     type: 'door',   area: 2.1,  uValue: 1.80, gValue: null, tilt: 90, azimuth: 180, source: 'default', customMode: false },
 };
 
+// BuEM computes an omitted profile as an annual summary only; the overview's
+// charts need the hourly series.
+const DEFAULT_OUTPUTS: Record<OutputProfile, OutputLevel> = {
+  heating: 'series', cooling: 'series', electricity: 'series', hot_water: 'series', kitchen: 'series',
+};
+
 // TODO: These defaults are purely illustrative and should be replaced with real building data from the API.
 export const DEFAULT_GENERAL = {
   buildingName:       '',
@@ -189,8 +196,19 @@ export const DEFAULT_GENERAL = {
   electricityDemand:  4000,
   spaceHeatingDemand: 15000,
   dhwDemand:          2500,
-  // TABULA neighbour code — sent to BuEM as neighbour_status.
-  Code_AttachedNeighbours: 'B_Alone',
+  // Household inputs, sent under their BuEM names. null or '' leaves the value
+  // to BuEM's default; residential_units is required for MFH and AB.
+  residential_units:  null as number | null,
+  num_persons:        null as number | null,
+  archetype:          '',
+  region_code:        '',
+  cooking_carrier:    'electric',
+  include_dhw:        true,
+  setback_profile:    'none',
+  capacity:           null as number | null,
+  /** Appliance ownership overrides; an absent id keeps BuEM's default probability. */
+  equipment:          {} as Record<string, boolean>,
+  outputs:            DEFAULT_OUTPUTS,
 };
 
 /**

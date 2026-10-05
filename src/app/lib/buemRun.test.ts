@@ -54,8 +54,16 @@ const general = {
   n_air_use: 0.55,
   massClass: 'Heavy',
   c_m: 260,
-  Code_AttachedNeighbours: 'B_N2',
   use_milp: true,
+  residential_units: 2,
+  num_persons: 3,
+  archetype: 'family_with_children',
+  region_code: 'GM0200',
+  cooking_carrier: 'gas',
+  include_dhw: false,
+  setback_profile: 'night_only',
+  equipment: { tv_1: true, tv_2: false, tumble_dryer: false },
+  outputs: { heating: 'series', cooling: 'none', electricity: 'summary', hot_water: 'series', kitchen: 'summary' } as const,
 };
 
 const tech = {
@@ -71,7 +79,7 @@ describe('toBuem', () => {
   it('sends the blocks a run with the same edits sends', () => {
     const { buem } = serializeToBuemFeature(runIdentity(opened, general), elements, general).properties;
 
-    expect(toBuem(edited)).toEqual({ building: buem.building, solver: buem.solver });
+    expect(toBuem(edited)).toEqual({ building: buem.building, outputs: buem.outputs, solver: buem.solver });
   });
 
   it('carries the expert-mode parameters and the solver choice', () => {
@@ -82,7 +90,6 @@ describe('toBuem', () => {
       c_m: { value: 260, unit: 'kJ/(m2K)' },
       thermal_class: 'heavy',
     });
-    expect(building.neighbour_status).toBe('B_N2');
     expect(building.name).toBe('Renamed');
     expect(solver).toEqual({ use_milp: true });
   });
@@ -102,6 +109,7 @@ describe('runBuildingSimulation', () => {
     await runBuildingSimulation(services, runIdentity(opened, general), elements, general, 'model-1');
 
     expect(requests[0].solver).toEqual({ use_milp: true });
+    expect(requests[0].outputs).toEqual(general.outputs);
   });
 });
 
@@ -114,7 +122,17 @@ describe('adaptBuemFeature on stored blocks', () => {
   });
 
   it('reopens with the same building parameters and solver choice', () => {
-    expect(generalFrom(reopened)).toEqual(general);
+    const { floorArea, storeys, ...rest } = general;
+    expect(generalFrom(reopened)).toMatchObject(rest);
+  });
+
+  // v6-draft deprecates n_storeys, so the block keeps the total floor area but
+  // not how it splits across storeys.
+  it('reopens with the same total floor area but the default storey count', () => {
+    const reopenedGeneral = generalFrom(reopened);
+    expect(reopenedGeneral.floorArea * reopenedGeneral.storeys).toBe(general.floorArea * general.storeys);
+    expect(reopenedGeneral.storeys).toBe(DEFAULT_GENERAL.storeys);
+    expect(toBuem(edited).building).not.toHaveProperty('n_storeys');
   });
 
   it('reopens with the same surfaces and their names', () => {

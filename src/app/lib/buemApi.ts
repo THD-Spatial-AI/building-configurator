@@ -16,10 +16,11 @@ interface BuemQuantity {
 }
 
 export interface BuemThermalLoadProfile {
+  // A profile requested as none is absent from both summary and timeseries.
   summary: {
-    heating: { total: BuemQuantity };
+    heating?: { total: BuemQuantity };
     cooling?: { total: BuemQuantity };
-    electricity: { total: BuemQuantity };
+    electricity?: { total: BuemQuantity };
     // v6-draft; absent on results predating hot_water/kitchen. Kitchen's
     // total is in kWh_gas — a fuel channel, not electric kWh.
     hot_water?: { total: BuemQuantity };
@@ -35,9 +36,9 @@ export interface BuemThermalLoadProfile {
     unit: string;
     kitchen_unit?: string;
     timestamps: string[];
-    heating: number[];
+    heating?: number[];
     cooling?: number[];
-    electricity: number[];
+    electricity?: number[];
     hot_water?: number[];
     kitchen?: number[];
   };
@@ -63,11 +64,16 @@ export interface BuemSimulationResult {
 
 export function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulationResult {
   const ts = profile.timeseries;
+  const { summary } = profile;
+  const heatingKwh = summary.heating?.total.value ?? 0;
+  const coolingKwh = summary.cooling?.total.value ?? 0;
+  const electricityKwh = summary.electricity?.total.value ?? 0;
+  const dhwKwh = summary.hot_water?.total.value ?? 0;
   const timeseries: LoadDataPoint[] = ts
     ? ts.timestamps.map((timestamp, i) => ({
         timestamp,
-        heating:     ts.heating[i] ?? 0,
-        electricity: ts.electricity[i] ?? 0,
+        heating:     ts.heating?.[i] ?? 0,
+        electricity: ts.electricity?.[i] ?? 0,
         // LoadDataPoint has no cooling field. Reusing "hotwater" for BuEM's
         // cooling output matches the existing thermalSummary-based fallback
         // in BuildingConfigurator.tsx's computeEnergyTotals — not a
@@ -85,17 +91,16 @@ export function toSimulationResult(profile: BuemThermalLoadProfile): BuemSimulat
   return {
     timeseries,
     thermalSummary: {
-      heatingKwh:           profile.summary.heating.total.value,
-      coolingKwh:           profile.summary.cooling?.total.value ?? 0,
-      electricityKwh:       profile.summary.electricity.total.value,
-      peakHeatingKw:        profile.summary.peak_heating_load?.value ?? 0,
-      peakCoolingKw:        profile.summary.peak_cooling_load?.value ?? 0,
-      energyIntensityKwhM2: profile.summary.energy_intensity?.value ?? 0,
-      dhwKwh:               profile.summary.hot_water?.total.value ?? 0,
-      kitchenGasKwh:        profile.summary.kitchen?.total.value ?? 0,
-      totalEnergyKwh:       profile.summary.total_energy_demand?.value
-        ?? profile.summary.heating.total.value + (profile.summary.cooling?.total.value ?? 0)
-           + profile.summary.electricity.total.value + (profile.summary.hot_water?.total.value ?? 0),
+      heatingKwh,
+      coolingKwh,
+      electricityKwh,
+      peakHeatingKw:        summary.peak_heating_load?.value ?? 0,
+      peakCoolingKw:        summary.peak_cooling_load?.value ?? 0,
+      energyIntensityKwhM2: summary.energy_intensity?.value ?? 0,
+      dhwKwh,
+      kitchenGasKwh:        summary.kitchen?.total.value ?? 0,
+      totalEnergyKwh:       summary.total_energy_demand?.value
+        ?? heatingKwh + coolingKwh + electricityKwh + dhwKwh,
     },
   };
 }

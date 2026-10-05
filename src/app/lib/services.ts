@@ -29,6 +29,12 @@ export interface BuemBuildingRunRequest {
   building: unknown;
   /** BuEM solver settings, forwarded as properties.buem.solver. */
   solver: { use_milp: boolean };
+  /**
+   * Load profiles to compute, forwarded as properties.buem.outputs. With
+   * heating and cooling both none, building carries no envelope and the
+   * request needs no weather.
+   */
+  outputs: Record<string, 'none' | 'summary' | 'series'>;
   start_date: string;
   end_date: string;
   resolution: number;
