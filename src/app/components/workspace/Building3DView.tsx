@@ -31,6 +31,7 @@ import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
+import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 
 type SurfaceSelection = { id: string; at: { x: number; y: number } };
@@ -47,11 +48,16 @@ export interface Building3DViewProps {
    * every render, and the effects here key on the callbacks they use.
    */
   services: ConfiguratorServices;
+  /**
+   * The period and saved model a BuEM run belongs to. Without it a run covers
+   * 2018 and carries no model id.
+   */
+  runContext?: RunContext;
 }
 
-export function Building3DView({ building, geometry, onExit, services }: Building3DViewProps) {
+export function Building3DView({ building, geometry, onExit, services, runContext }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
-  const model = useBuildingModel(services, building, { estimateHeatDemand: false });
+  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.

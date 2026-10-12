@@ -88,6 +88,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `geometry` | `{ surfaces }` for the 3D model, or `null` while it loads |
 | `services` | The four calls below |
 | `onExit(building)` | Called when the user leaves; receives the edited building, or the one passed in when nothing changed |
+| `runContext` | Optional. `{ startDate, endDate, modelId? }` (RFC 3339 dates): the period a BuEM run covers and the saved model it belongs to. Leave `modelId` out for an unsaved model. Without `runContext`, a run covers 2018 and sends no `model_id` |
 
 !!! warning "Hold the services stable"
     Keep the `services` object and each function in a module constant, a

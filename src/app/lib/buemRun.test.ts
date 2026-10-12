@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { runBuildingSimulation, runIdentity, toBuem } from './buemRun';
+import { runBuildingSimulation, runIdentity, toBuem, type RunContext } from './buemRun';
 import type { BuemBuildingRunRequest } from './services';
 import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
@@ -89,7 +89,8 @@ describe('toBuem', () => {
 });
 
 describe('runBuildingSimulation', () => {
-  it('sends the solver choice with the run', async () => {
+  /** The request a run sends, with the transport failing after capturing it. */
+  async function sentRequest(runContext?: RunContext): Promise<BuemBuildingRunRequest> {
     const requests: BuemBuildingRunRequest[] = [];
     const services = {
       runBuemBuilding: async (request: BuemBuildingRunRequest) => {
@@ -98,10 +99,32 @@ describe('runBuildingSimulation', () => {
       },
     };
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, runContext);
+    return requests[0];
+  }
 
-    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, 'model-1');
+  it('sends the solver choice with the run', async () => {
+    expect((await sentRequest()).solver).toEqual({ use_milp: true });
+  });
 
-    expect(requests[0].solver).toEqual({ use_milp: true });
+  it("sends the host's period and model id", async () => {
+    const request = await sentRequest({
+      startDate: '2019-01-01T00:00:00Z', endDate: '2019-12-31T23:00:00Z', modelId: 'model-7',
+    });
+    expect(request).toMatchObject({
+      start_date: '2019-01-01T00:00:00Z', end_date: '2019-12-31T23:00:00Z', model_id: 'model-7',
+    });
+  });
+
+  it('sends no model id for an unsaved model', async () => {
+    const request = await sentRequest({ startDate: '2019-01-01T00:00:00Z', endDate: '2019-12-31T23:00:00Z' });
+    expect(request).not.toHaveProperty('model_id');
+  });
+
+  it('runs the default year and sends no model id without a run context', async () => {
+    const request = await sentRequest();
+    expect(request).toMatchObject({ start_date: '2018-01-01T00:00:00Z', end_date: '2018-12-31T23:00:00Z' });
+    expect(request).not.toHaveProperty('model_id');
   });
 });
 

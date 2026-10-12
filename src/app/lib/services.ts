@@ -32,7 +32,8 @@ export interface BuemBuildingRunRequest {
   start_date: string;
   end_date: string;
   resolution: number;
-  model_id: string;
+  /** The saved model the run belongs to; absent for an unsaved model. */
+  model_id?: string;
 }
 
 export interface BuemBuildingRunResponse {

@@ -54,7 +54,7 @@ export {
 export { buildBuildingStates } from './app/lib/city2tabulaAdapter';
 
 // Storing an edited building: the BuEM blocks a run would send for it.
-export { toBuem } from './app/lib/buemRun';
+export { toBuem, type RunContext } from './app/lib/buemRun';
 
 export type {
   EnergyTotals,
