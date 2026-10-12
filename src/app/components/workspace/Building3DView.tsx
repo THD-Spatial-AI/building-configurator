@@ -48,10 +48,7 @@ export interface Building3DViewProps {
    * every render, and the effects here key on the callbacks they use.
    */
   services: ConfiguratorServices;
-  /**
-   * The period and saved model a BuEM run belongs to. Without it a run covers
-   * 2018 and carries no model id.
-   */
+  /** The period a BuEM run covers. Without it a run covers 2018. */
   runContext?: RunContext;
 }
 

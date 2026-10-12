@@ -8,8 +8,8 @@ Each version's GitHub release entry carries the full notes.
 
 ### Fixed
 
-- A BuEM run always covered 2018, whatever period the host's model had, and sent the building's own id as `model_id`. `Building3DView` takes an optional `runContext` prop (`{ startDate, endDate, modelId? }`, exported as the `RunContext` type): a run covers that period and carries that model id. Without it a run covers 2018 and sends no `model_id`.
-- `BuemBuildingRunRequest.model_id` is optional: absent for an unsaved model or when no `runContext` is given. A host transport must handle it being absent.
+- A BuEM run always covered 2018, whatever period the host's model had. `Building3DView` takes an optional `runContext` prop (`{ startDate, endDate }`, exported as the `RunContext` type), and a run covers that period. Without it a run covers 2018.
+- A run no longer sends the building's own id as `model_id`; it sends no `model_id` at all. buem-gateway only logs the field. `BuemBuildingRunRequest.model_id` is optional and deprecated, to be removed in the next minor release.
 
 ## [0.6.1] - 2026-10-02
 

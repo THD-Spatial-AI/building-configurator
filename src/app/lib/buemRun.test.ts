@@ -107,17 +107,9 @@ describe('runBuildingSimulation', () => {
     expect((await sentRequest()).solver).toEqual({ use_milp: true });
   });
 
-  it("sends the host's period and model id", async () => {
-    const request = await sentRequest({
-      startDate: '2019-01-01T00:00:00Z', endDate: '2019-12-31T23:00:00Z', modelId: 'model-7',
-    });
-    expect(request).toMatchObject({
-      start_date: '2019-01-01T00:00:00Z', end_date: '2019-12-31T23:00:00Z', model_id: 'model-7',
-    });
-  });
-
-  it('sends no model id for an unsaved model', async () => {
+  it("sends the host's period and no model id", async () => {
     const request = await sentRequest({ startDate: '2019-01-01T00:00:00Z', endDate: '2019-12-31T23:00:00Z' });
+    expect(request).toMatchObject({ start_date: '2019-01-01T00:00:00Z', end_date: '2019-12-31T23:00:00Z' });
     expect(request).not.toHaveProperty('model_id');
   });
 

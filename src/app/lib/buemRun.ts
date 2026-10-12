@@ -11,19 +11,14 @@ import {
 import { toSimulationResult, type BuemSimulationResult } from './buemApi';
 import type { ConfiguratorServices } from './services';
 
-/**
- * The model a run belongs to, supplied by the host. Dates are RFC 3339.
- * modelId is absent for a model not yet saved.
- */
+/** The period a run covers, supplied by the host. Dates are RFC 3339. */
 export interface RunContext {
   startDate: string;
   endDate: string;
-  modelId?: string;
 }
 
 /**
- * Without a run context the run covers the serialiser's default year and
- * carries no model id.
+ * Without a run context the run covers the serialiser's default year.
  *
  * Returns null on any failure, so a service that is unreachable or a BuEM that
  * rejected an incomplete envelope surfaces as a message rather than a crash.
@@ -53,7 +48,6 @@ export async function runBuildingSimulation(
       start_date: feature.properties.start_time,
       end_date:   feature.properties.end_time,
       resolution: Number(feature.properties.resolution),
-      ...(runContext?.modelId ? { model_id: runContext.modelId } : {}),
     });
     return toSimulationResult(response.buem.thermal_load_profile);
   } catch (err) {

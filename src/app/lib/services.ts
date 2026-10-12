@@ -32,7 +32,10 @@ export interface BuemBuildingRunRequest {
   start_date: string;
   end_date: string;
   resolution: number;
-  /** The saved model the run belongs to; absent for an unsaved model. */
+  /**
+   * @deprecated Never set. buem-gateway only logs it; kept optional so a host
+   * transport that reads it still compiles. Removed in the next minor release.
+   */
   model_id?: string;
 }
 

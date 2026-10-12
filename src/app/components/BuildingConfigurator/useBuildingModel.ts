@@ -232,7 +232,7 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
  * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
  * caller that shows no such figure: the heat demand service then only serves
  * TABULA variants and their U-values, and no request is made per envelope
- * edit. `runContext` is the period and model a BuEM run belongs to.
+ * edit. `runContext` is the period a BuEM run covers.
  */
 export function useBuildingModel(
   services: ConfiguratorServices,
