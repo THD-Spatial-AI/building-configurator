@@ -32,7 +32,11 @@ export interface BuemBuildingRunRequest {
   start_date: string;
   end_date: string;
   resolution: number;
-  model_id: string;
+  /**
+   * @deprecated Never set. buem-gateway only logs it; kept optional so a host
+   * transport that reads it still compiles. Removed in the next minor release.
+   */
+  model_id?: string;
 }
 
 export interface BuemBuildingRunResponse {

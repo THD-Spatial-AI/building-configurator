@@ -30,7 +30,7 @@ import {
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
-import { runBuildingSimulation, runIdentity } from '../../lib/buemRun';
+import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import type { ConfiguratorServices } from '../../lib/services';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
@@ -232,12 +232,12 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
  * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
  * caller that shows no such figure: the heat demand service then only serves
  * TABULA variants and their U-values, and no request is made per envelope
- * edit.
+ * edit. `runContext` is the period a BuEM run covers.
  */
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true }: { estimateHeatDemand?: boolean } = {},
+  { estimateHeatDemand = true, runContext }: { estimateHeatDemand?: boolean; runContext?: RunContext } = {},
 ) {
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
@@ -616,7 +616,7 @@ export function useBuildingModel(
     setIsRunningSimulation(true);
     setUploadError(null);
     try {
-      const result = await runBuildingSimulation(services, identity, elements, general, identity.id, batteryConfig);
+      const result = await runBuildingSimulation(services, identity, elements, general, runContext, batteryConfig);
       if (!result) {
         setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;

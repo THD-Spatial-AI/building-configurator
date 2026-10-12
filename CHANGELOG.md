@@ -4,6 +4,13 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.6.2] - 2026-10-12
+
+### Fixed
+
+- A BuEM run always covered 2018, whatever period the host's model had. `Building3DView` takes an optional `runContext` prop (`{ startDate, endDate }`, exported as the `RunContext` type), and a run covers that period. Without it a run covers 2018.
+- A run no longer sends the building's own id as `model_id`; it sends no `model_id` at all. buem-gateway only logs the field. `BuemBuildingRunRequest.model_id` is optional and deprecated, to be removed in the next minor release.
+
 ## [0.6.1] - 2026-10-02
 
 ### Fixed
@@ -63,6 +70,7 @@ Each version's GitHub release entry carries the full notes.
 
 Versions before 0.4.0 have no changelog entries; see their git tags.
 
+[0.6.2]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.2
 [0.6.1]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.1
 [0.6.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.0
 [0.5.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.5.0
