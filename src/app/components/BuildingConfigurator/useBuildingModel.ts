@@ -31,6 +31,7 @@ import {
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
+import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
@@ -232,12 +233,17 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
  * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
  * caller that shows no such figure: the heat demand service then only serves
  * TABULA variants and their U-values, and no request is made per envelope
- * edit. `runContext` is the period a BuEM run covers.
+ * edit. `runContext` is the period a BuEM run covers. `demandProfile` is the
+ * building's stored demand; when present its totals replace the building's own.
  */
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext }: { estimateHeatDemand?: boolean; runContext?: RunContext } = {},
+  { estimateHeatDemand = true, runContext, demandProfile }: {
+    estimateHeatDemand?: boolean;
+    runContext?: RunContext;
+    demandProfile?: BuildingDemandProfile | null;
+  } = {},
 ) {
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
@@ -353,6 +359,11 @@ export function useBuildingModel(
     setOtherTechIds(nextTech.otherTechIds);
     setBatteryConfig(nextTech.battery);
   }, [buildingData]);
+
+  // After the effect above, so a stored profile wins over the building's own summary.
+  useEffect(() => {
+    if (demandProfile) setEnergyTotals(computeEnergyTotals(null, toThermalSummary(demandProfile)));
+  }, [demandProfile]);
 
   const tech: TechnologyState = { pvTechnology, pvArrays, battery: batteryConfig, otherTechIds };
   const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig, tech }) !== JSON.stringify(savedState);
@@ -660,8 +671,8 @@ export function useBuildingModel(
         avgUValue,
         heatDemandKwhM2a: ignis?.result?.qHnd ?? null,
       });
-      // Same cast the profile download needs: fflate's Uint8Array is not
-      // narrowed to an ArrayBuffer-backed view, which BlobPart requires.
+      // fflate's Uint8Array is not narrowed to an ArrayBuffer-backed view,
+      // which BlobPart requires.
       saveFile(zip as BlobPart, `building-${identity.id}-tables.zip`, 'application/zip');
     } catch (err) {
       setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);

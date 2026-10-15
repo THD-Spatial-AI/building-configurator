@@ -1,7 +1,5 @@
 // Shared load profile data model and pure transformation helpers.
 
-import { strToU8, zipSync } from 'fflate';
-
 export type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'dhw' | 'kitchen' | 'combined';
 export type Resolution = 'hourly' | 'daily' | 'weekly' | 'monthly';
 
@@ -362,37 +360,6 @@ export function parseCsv(text: string, resolution: Resolution): LoadDataPoint[] 
   }
 
   return rows;
-}
-
-/** One CSV column per downloadable profile: LoadDataPoint key, header label, and file name stem. */
-const PROFILE_COLUMNS: { key: 'heating' | 'hotwater' | 'electricity'; label: string; file: string }[] = [
-  { key: 'heating', label: 'heating', file: 'heating' },
-  { key: 'hotwater', label: 'cooling', file: 'cooling' },
-  { key: 'electricity', label: 'electricity', file: 'electricity' },
-];
-
-function toProfileCsv(
-  data: LoadDataPoint[],
-  resolution: Resolution,
-  key: 'heating' | 'hotwater' | 'electricity',
-  label: string,
-) {
-  const header = `datetime,${label}`;
-  const rows = data.map((row, index) => [
-    normalizeDatetime(row.timestamp, offsetIsoDate(BASE_UTC_DATE, index, resolutionUnit(resolution)), resolution, index),
-    row[key],
-  ].join(','));
-
-  return [header, ...rows].join('\n');
-}
-
-/** Zips the heating, cooling, and electricity profiles as separate CSVs for download. */
-export function toProfileZip(data: LoadDataPoint[], resolution: Resolution): Uint8Array {
-  const files: Record<string, Uint8Array> = {};
-  for (const { key, label, file } of PROFILE_COLUMNS) {
-    files[`${file}-${resolution}.csv`] = strToU8(toProfileCsv(data, resolution, key, label));
-  }
-  return zipSync(files);
 }
 
 /** Merges uploaded JSON content into the existing per-resolution dataset state. */

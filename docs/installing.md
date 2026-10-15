@@ -89,6 +89,8 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `services` | The four calls below |
 | `onExit(building)` | Called when the user leaves; receives the edited building, or the one passed in when nothing changed |
 | `runContext` | Optional. `{ startDate, endDate }` (RFC 3339 dates): the period a BuEM run covers. Without it, a run covers 2018 |
+| `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
+| `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
     Keep the `services` object and each function in a module constant, a

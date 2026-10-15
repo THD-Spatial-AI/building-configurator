@@ -31,6 +31,7 @@ import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
+import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 
@@ -50,11 +51,20 @@ export interface Building3DViewProps {
   services: ConfiguratorServices;
   /** The period a BuEM run covers. Without it a run covers 2018. */
   runContext?: RunContext;
+  /**
+   * The building's stored demand: undefined while it loads, null when none is
+   * stored. Hold it stable; a new object resets the energy card to it.
+   */
+  demandProfile?: BuildingDemandProfile | null;
+  /** Where the building's series CSV downloads from. Without it there is no download. */
+  seriesCsvUrl?: string;
 }
 
-export function Building3DView({ building, geometry, onExit, services, runContext }: Building3DViewProps) {
+export function Building3DView({
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl,
+}: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
-  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext });
+  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
@@ -134,14 +144,14 @@ export function Building3DView({ building, geometry, onExit, services, runContex
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
   // what makes that drag stutter.
-  const { buildingLabel, chartTimeseries, setGroundTruthTimeseries } = model;
+  const { chartTimeseries, setGroundTruthTimeseries } = model;
   const profileBar = useMemo(() => (
     <LoadProfileBar
-      buildingId={buildingLabel}
       timeseries={chartTimeseries ?? undefined}
+      seriesCsvUrl={seriesCsvUrl}
       onGroundTruthChange={setGroundTruthTimeseries}
     />
-  ), [buildingLabel, chartTimeseries, setGroundTruthTimeseries]);
+  ), [chartTimeseries, seriesCsvUrl, setGroundTruthTimeseries]);
   const detached = isEnvelopeDetached(surfaces, envelopeIds);
 
   const { undo, undoLabel, hasUnsavedChanges, toBuildingState } = model;

@@ -4,6 +4,17 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Added
+
+- `Building3DView` takes an optional `demandProfile` prop, the building's stored demand as the host's backend summarises it (`BuildingDemandProfile` and `DemandSeries` types). Its annual totals fill the energy card, with the total excluding kitchen gas as BuEM does.
+- `Building3DView` takes an optional `seriesCsvUrl` prop; the load profile's Download link points at it.
+
+### Removed
+
+- The load profile's client-side download, which zipped the hourly series held in the browser. The download now comes only from `seriesCsvUrl`; without it there is none. Uploading a profile is unchanged.
+
 ## [0.6.2] - 2026-10-12
 
 ### Fixed
