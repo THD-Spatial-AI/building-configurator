@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { fixtureServices } from './services';
 import { buildBuildingStates } from '../app/lib/city2tabulaAdapter';
 import { surfacesFromGeometryResponse, type SurfaceGeometry } from '../app/lib/surfaceMesh';
-import { hasInvalidArea } from '../app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { BuildingGeometry, EnrichEntry } from '../app/lib/enerplanet';
 import type { BuildingState } from '../app/lib/buemAdapter';
 import loenenFixture from '../assets/data/loenen_live_fixture.json';
@@ -43,18 +42,12 @@ export function useLoenenBuildings() {
   }, []);
 
   const resolvedIds = useMemo(() => new Set(Object.keys(buildings ?? {})), [buildings]);
-  const problematicIds = useMemo(() => new Set(
-    Object.entries(buildings ?? {})
-      .filter(([, building]) => Object.values(building.envelope).some(hasInvalidArea))
-      .map(([osmId]) => osmId),
-  ), [buildings]);
 
   return {
     buildings,
     footprints: loenenFixture.buildings as unknown as FootprintCollection,
     objectIds: OBJECT_IDS,
     resolvedIds,
-    problematicIds,
   };
 }
 

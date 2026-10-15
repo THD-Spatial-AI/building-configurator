@@ -39,16 +39,8 @@ export function BuildingWorkspace() {
         <LoenenLiveMap
           buildings={data.footprints}
           resolvedIds={data.resolvedIds}
-          problematicIds={data.problematicIds}
           onBuildingClick={setSelectedId}
         />
-      )}
-
-      {data.problematicIds.size > 0 && (
-        <div className="absolute bottom-3 left-3 z-[5] flex items-center gap-1.5 rounded-md bg-card px-2.5 py-1.5 text-[11px] text-muted-foreground shadow-sm">
-          <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-          {data.problematicIds.size} building{data.problematicIds.size > 1 ? 's' : ''} with a surface simulations will reject
-        </div>
       )}
 
       {selectedId && selectedBuilding && (
