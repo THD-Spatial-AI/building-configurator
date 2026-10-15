@@ -32,6 +32,8 @@ interface LoenenLiveMapProps {
   /** osm_ids with resolved City2TABULA data — styled distinctly from unresolved ones. */
   resolvedIds: Set<string>;
   onBuildingClick: (osmId: string) => void;
+  /** Credits for the building layer, shown beside the basemap's own. */
+  attributions?: string[];
 }
 
 const RESOLVED_STYLE = new Style({
@@ -47,7 +49,7 @@ function styleForFeature(feature: FeatureLike, resolvedIds: Set<string>): Style 
   return resolvedIds.has(osmId) ? RESOLVED_STYLE : UNRESOLVED_STYLE;
 }
 
-export function LoenenLiveMap({ buildings, resolvedIds, onBuildingClick }: LoenenLiveMapProps) {
+export function LoenenLiveMap({ buildings, resolvedIds, onBuildingClick, attributions }: LoenenLiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const sourceRef = useRef<VectorSource | null>(null);
@@ -60,7 +62,7 @@ export function LoenenLiveMap({ buildings, resolvedIds, onBuildingClick }: Loene
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const source = new VectorSource();
+    const source = new VectorSource({ attributions });
     sourceRef.current = source;
 
     const vectorLayer = new VectorLayer({

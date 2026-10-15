@@ -10,6 +10,7 @@ import { Box, Loader2 } from 'lucide-react';
 import { LoenenLiveMap } from '../LoenenLiveMap';
 import { surfaceGeometry, useFixtureBuilding, useLoenenBuildings } from '../../../demo/useLoenen';
 import { fixtureDemandProfile, fixtureSeriesCsvUrl, fixtureServices } from '../../../demo/services';
+import { FIXTURE_ATTRIBUTION, MAP_ATTRIBUTIONS } from '../../../demo/attribution';
 import { Building3DView } from './Building3DView';
 import type { BuildingState } from '../../lib/buemAdapter';
 
@@ -40,6 +41,7 @@ export function BuildingWorkspace() {
           buildings={data.footprints}
           resolvedIds={data.resolvedIds}
           onBuildingClick={setSelectedId}
+          attributions={MAP_ATTRIBUTIONS}
         />
       )}
 
@@ -51,6 +53,7 @@ export function BuildingWorkspace() {
           services={fixtureServices}
           demandProfile={fixtureDemandProfile(selectedId)}
           seriesCsvUrl={fixtureSeriesCsvUrl(selectedId)}
+          attribution={FIXTURE_ATTRIBUTION}
           onExit={(building) => {
             if (building && building !== data.buildings?.[selectedId]) {
               setEdited((prev) => ({ ...prev, [selectedId]: building }));
@@ -103,6 +106,7 @@ export function FixtureWorkspace() {
       services={fixtureServices}
       demandProfile={fixtureDemandProfile(FIXTURE_OSM_ID)}
       seriesCsvUrl={fixtureSeriesCsvUrl(FIXTURE_OSM_ID)}
+      attribution={FIXTURE_ATTRIBUTION}
       onExit={(building) => {
         if (building) setSaved(building);
         setOpen(false);

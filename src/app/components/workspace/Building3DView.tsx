@@ -5,7 +5,7 @@
 // Escape backs out one level at a time — first the open surface, then the
 // building itself, each asking first when it has unsaved edits.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from 'lucide-react';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
@@ -58,10 +58,12 @@ export interface Building3DViewProps {
   demandProfile?: BuildingDemandProfile | null;
   /** Where the building's series CSV downloads from. Without it there is no download. */
   seriesCsvUrl?: string;
+  /** Credits for the building's data, as its licences require; shown in a corner of the 3D view. */
+  attribution?: ReactNode;
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
@@ -317,6 +319,12 @@ export function Building3DView({
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm">
               <span className="inline-block size-2.5 rounded-sm bg-destructive" />
               {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} with no area, left out of a simulation
+            </div>
+          )}
+
+          {attribution && (
+            <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-white/90 px-2 py-1 text-right text-[10px] leading-snug text-slate-500 shadow-sm">
+              {attribution}
             </div>
           )}
         </div>
