@@ -126,7 +126,7 @@ function computeEnergyTotals(
   // dhw, kitchen and the combined total come only from a summary. An uploaded
   // ground-truth CSV has no such columns and no summary, so they read '—'.
   const dhw     = thermalSummary ? formatKwh(thermalSummary.dhwKwh) : '—';
-  const kitchen = thermalSummary ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
+  const kitchen = thermalSummary?.kitchenGasKwh !== undefined ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
   const total   = thermalSummary ? formatKwh(thermalSummary.totalEnergyKwh) : '—';
 
   if (timeseries && timeseries.length > 0) {

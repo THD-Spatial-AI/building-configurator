@@ -44,8 +44,8 @@ export interface ThermalSummary {
   energyIntensityKwhM2?: number;
   /** Domestic hot water, kWh — absent (0) on results predating BuEM's v6-draft hot_water/kitchen fields. */
   dhwKwh: number;
-  /** Cooking gas demand — a different fuel channel from the electric kWh above, kept in kWh_gas rather than summed with it. */
-  kitchenGasKwh: number;
+  /** Cooking gas demand, a different fuel channel from the electric kWh above, kept in kWh_gas rather than summed with it. Absent when BuEM computed none. */
+  kitchenGasKwh?: number;
   /** BuEM's own heating+cooling+electricity+hot_water total — gas deliberately excluded. */
   totalEnergyKwh: number;
 }
@@ -321,7 +321,9 @@ function adaptThematicData(feature: unknown): ThematicData {
     peakCoolingKw: getMappedNumber(feature, results.peakCoolingLoad),
     energyIntensityKwhM2: getMappedNumber(feature, results.energyIntensity),
     dhwKwh: getMappedNumber(feature, results.dhwTotal),
-    kitchenGasKwh: getMappedNumber(feature, results.kitchenTotal),
+    kitchenGasKwh: hasMappedValue(feature, results.kitchenTotal)
+      ? getMappedNumber(feature, results.kitchenTotal)
+      : undefined,
     totalEnergyKwh: hasMappedValue(feature, results.totalEnergyDemand)
       ? getMappedNumber(feature, results.totalEnergyDemand)
       : getMappedNumber(feature, results.heatingTotal) + getMappedNumber(feature, results.coolingTotal)

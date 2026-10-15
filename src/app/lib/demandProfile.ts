@@ -49,7 +49,7 @@ export function toThermalSummary(profile: BuildingDemandProfile): ThermalSummary
     coolingKwh,
     electricityKwh,
     dhwKwh,
-    kitchenGasKwh: total('kitchen'),
+    kitchenGasKwh: find('kitchen')?.total,
     peakHeatingKw: find('heating')?.peak ?? 0,
     peakCoolingKw: find('cooling')?.peak ?? 0,
     // Matches BuEM's total_energy_demand: kitchen is a gas channel and stays out.
