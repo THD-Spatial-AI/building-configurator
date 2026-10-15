@@ -33,6 +33,7 @@
     "build:lib": "vite build --config vite.lib.config.ts && tsc -p tsconfig.build.json && cp src/styles/package.css dist/styles.css",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
+    "capture-fixtures": "node scripts/capture-fixtures.mjs",
     "prepare": "npm run build:lib",
     "prepublishOnly": "npm run build:lib"
   },
