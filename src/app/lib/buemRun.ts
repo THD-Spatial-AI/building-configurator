@@ -8,7 +8,7 @@ import {
   computeTotalFloorArea,
   generalFrom,
 } from '../components/BuildingConfigurator/shared/buildingDefaults';
-import { toSimulationResult, type BuemSimulationResult } from './buemApi';
+import type { BuildingDemandProfile } from './demandProfile';
 import type { ConfiguratorServices } from './services';
 
 /** The period a run covers, supplied by the host. Dates are RFC 3339. */
@@ -32,7 +32,7 @@ export async function runBuildingSimulation(
   general: Record<string, any>,
   runContext?: RunContext,
   batteryConfig?: Record<string, any>,
-): Promise<BuemSimulationResult | null> {
+): Promise<BuildingDemandProfile | null> {
   const feature = serializeToBuemFeature(
     identity, elements, general,
     runContext?.startDate, runContext?.endDate, undefined, undefined,
@@ -40,7 +40,7 @@ export async function runBuildingSimulation(
   );
 
   try {
-    const response = await services.runBuemBuilding({
+    return await services.runBuemBuilding({
       osm_id:     String(feature.id),
       geometry:   feature.geometry,
       building:   feature.properties.buem.building,
@@ -49,7 +49,6 @@ export async function runBuildingSimulation(
       end_date:   feature.properties.end_time,
       resolution: Number(feature.properties.resolution),
     });
-    return toSimulationResult(response.buem.thermal_load_profile);
   } catch (err) {
     console.error('[buem/building] request failed', err);
     return null;

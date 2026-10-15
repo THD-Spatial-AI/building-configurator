@@ -6,6 +6,12 @@ Each version's GitHub release entry carries the full notes.
 
 ## [Unreleased]
 
+This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDemandProfile` instead of `{ osm_id, buem: { thermal_load_profile } }`.
+
+### Changed
+
+- `ConfiguratorServices.runBuemBuilding` resolves to the building's stored demand, `{ building_ref, series }`, the same body as the `demandProfile` prop. `BuemBuildingRunResponse` is now that type. The request is unchanged. A run updates the energy card from the returned totals and no longer holds an hourly series in the browser.
+
 ### Added
 
 - `Building3DView` takes an optional `demandProfile` prop, the building's stored demand as the host's backend summarises it (`BuildingDemandProfile` and `DemandSeries` types). Its annual totals fill the energy card, with the total excluding kitchen gas as BuEM does.

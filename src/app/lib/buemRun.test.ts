@@ -113,6 +113,12 @@ describe('runBuildingSimulation', () => {
     expect(request).not.toHaveProperty('model_id');
   });
 
+  it("returns the host's stored demand profile", async () => {
+    const profile = { building_ref: 'osm-42', series: [] };
+    const services = { runBuemBuilding: async () => profile };
+    expect(await runBuildingSimulation(services, runIdentity(opened, general), elements, general)).toBe(profile);
+  });
+
   it('runs the default year and sends no model id without a run context', async () => {
     const request = await sentRequest();
     expect(request).toMatchObject({ start_date: '2018-01-01T00:00:00Z', end_date: '2018-12-31T23:00:00Z' });

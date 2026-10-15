@@ -13,7 +13,7 @@ import type {
   IgnisInputs,
   IgnisMatchResponse,
 } from './ignisAdapter';
-import type { BuemThermalLoadProfile } from './buemApi';
+import type { BuildingDemandProfile } from './demandProfile';
 
 /**
  * The overrides for a heat demand calculation, in the service's own field
@@ -39,10 +39,8 @@ export interface BuemBuildingRunRequest {
   model_id?: string;
 }
 
-export interface BuemBuildingRunResponse {
-  osm_id: string;
-  buem: { thermal_load_profile: BuemThermalLoadProfile };
-}
+/** The building's stored demand after the run, the same body as its demand-profile route. */
+export type BuemBuildingRunResponse = BuildingDemandProfile;
 
 /**
  * Every call rejects on failure; the package catches and decides what the

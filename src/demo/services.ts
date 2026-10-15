@@ -23,6 +23,9 @@ interface Enveloped<T> {
 const LOOKUP_TIMEOUT_MS = 8000;
 const CALCULATE_TIMEOUT_MS = 15000;
 
+/** The demo never saves a model, so every run is stored under this page's draft. */
+const DRAFT_ID = crypto.randomUUID();
+
 /** Module constant: one identity for the life of the page, as the props ask for. */
 export const demoServices: ConfiguratorServices = {
   async fetchMatchingVariants(countryIso2, typeCode, constructionYear) {
@@ -52,6 +55,9 @@ export const demoServices: ConfiguratorServices = {
   },
 
   runBuemBuilding(request) {
-    return demoHttp.post('/v1/buem/building', request);
+    return demoHttp.post(
+      `/drafts/${DRAFT_ID}/buildings/${encodeURIComponent(request.osm_id)}/buem`,
+      request,
+    );
   },
 };

@@ -1,6 +1,6 @@
 /**
- * EnerPlanET backend API client: PyLovo grid generation, City2TABULA
- * envelope enrichment and the per-building BuEM run.
+ * EnerPlanET backend API client: PyLovo grid generation and City2TABULA
+ * envelope enrichment.
  *
  * The backend is the only service this component calls. It resolves weather,
  * holds the credentials for BuEM, ignis and City2TABULA, and routes each
@@ -11,10 +11,6 @@
  * are relative to the API root.
  */
 
-import type { BuildingIdentity } from '../app/lib/buemAdapter';
-import { serializeToBuemFeature } from '../app/lib/buemAdapter';
-import type { BuemSimulationResult, BuemThermalLoadProfile } from '../app/lib/buemApi';
-import { toSimulationResult } from '../app/lib/buemApi';
 import type { HttpClient } from './http';
 
 /** Minimal GeoJSON shapes, which avoids pulling in @types/geojson for two types. */
@@ -93,22 +89,6 @@ export interface BuildingGeometry {
   surfaces?: SurfaceGeometry[];
 }
 
-export interface BuemBuildingRunRequest {
-  osm_id: string;
-  geometry: unknown;
-  building: unknown;
-  solver: { use_milp: boolean };
-  start_date: string;
-  end_date: string;
-  resolution: number;
-  model_id?: string;
-}
-
-export interface BuemBuildingRunResponse {
-  osm_id: string;
-  buem: { thermal_load_profile: BuemThermalLoadProfile };
-}
-
 export interface GridResult {
   buildings: GeoJsonFeatureCollection;
   transformers: GeoJsonFeatureCollection;
@@ -121,14 +101,6 @@ export interface EnerplanetApi {
   generateGrid(geom: GeoJsonPolygon, options?: GenerateGridOptions): Promise<GridResult>;
   enrichBuildings(bbox: EnrichBbox, osmIds: string[], country?: string): Promise<EnrichResponse>;
   getSurfaceGeometry(objectId: string, country: string): Promise<BuildingGeometry | null>;
-  runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse>;
-  runBuildingSimulation(
-    identity: BuildingIdentity,
-    elements: Record<string, any>,
-    general: Record<string, any>,
-    modelId: string,
-    batteryConfig?: Record<string, any>,
-  ): Promise<BuemSimulationResult | null>;
 }
 
 export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
@@ -186,51 +158,6 @@ export function createEnerplanetApi(http: HttpClient): EnerplanetApi {
       const query = new URLSearchParams({ country, object_ids: objectId });
       const buildings = await http.get<BuildingGeometry[]>(`/v1/city2tabula/geometry?${query}`);
       return buildings?.[0] ?? null;
-    },
-
-    /**
-     * Runs the caller's own envelope through BuEM for one building: the
-     * interactive counterpart to a full model run, with the hourly series
-     * returned inline. Weather is resolved server-side from `geometry`, so
-     * none is sent. `building` is forwarded verbatim and must be complete: no
-     * U-value resolution or archetype default is applied on the way.
-     */
-    runBuemBuilding(request) {
-      return http.post<BuemBuildingRunResponse>('/v1/buem/building', request);
-    },
-
-    /**
-     * Runs BuEM for one building and converts the result into the UI's
-     * LoadDataPoint and thermal summary shapes.
-     *
-     * Returns null on any failure, so a backend that is unreachable or a BuEM
-     * that rejected an incomplete envelope surfaces as a clear message rather
-     * than a crash. The request can legitimately take several seconds: BuEM
-     * runs a physics solve, not a lookup.
-     */
-    async runBuildingSimulation(identity, elements, general, modelId, batteryConfig) {
-      const feature = serializeToBuemFeature(
-        identity, elements, general,
-        undefined, undefined, undefined, undefined,
-        batteryConfig,
-      );
-
-      try {
-        const response = await api.runBuemBuilding({
-          osm_id:     String(feature.id),
-          geometry:   feature.geometry,
-          building:   feature.properties.buem.building,
-          solver:     feature.properties.buem.solver,
-          start_date: feature.properties.start_time,
-          end_date:   feature.properties.end_time,
-          resolution: Number(feature.properties.resolution),
-          model_id:   modelId,
-        });
-        return toSimulationResult(response.buem.thermal_load_profile);
-      } catch (err) {
-        console.error('[buem/building] request failed', err);
-        return null;
-      }
     },
   };
 

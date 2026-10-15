@@ -50,6 +50,9 @@ import '@thd-spatial-ai/building-configurator/styles.css';
 
 import axios from '@/lib/axios';
 
+// Runs before the model's first save are stored under a draft id the host mints.
+const draftId = crypto.randomUUID();
+
 // Module constant: one identity for the life of the page.
 const services: ConfiguratorServices = {
   fetchMatchingVariants: (country, typeCode, year) =>
@@ -60,7 +63,7 @@ const services: ConfiguratorServices = {
   calculateHeatDemand: (code, inputs) =>
     axios.post(`/v2/ignis/calculate/${code}`, inputs).then((r) => r.data.data),
   runBuemBuilding: (request) =>
-    axios.post('/v1/buem/building', request).then((r) => r.data),
+    axios.post(`/drafts/${draftId}/buildings/${request.osm_id}/buem`, request).then((r) => r.data),
 };
 
 export function BuildingView({ building, geometryBuilding, onExit }) {
@@ -108,7 +111,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchMatchingVariants(country, typeCode, year)` | TABULA variants for a classification. `typeCode` is already a TABULA code (`SFH`, `TH`, `MFH`, `AB`) | 8 s |
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
-| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, including `solver` | 15 s |
+| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, including `solver`. Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.

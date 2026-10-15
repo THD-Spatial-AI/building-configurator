@@ -124,12 +124,8 @@ function computeEnergyTotals(
   timeseries: LoadDataPoint[] | null,
   thermalSummary: ThermalSummary | null,
 ): EnergyTotals {
-  // A live BuEM run always populates timeseries and thermalSummary together
-  // (see toSimulationResult), so whenever real per-hour dhw/kitchen data
-  // exists, thermalSummary — the authoritative source for these two and for
-  // the combined total below — exists alongside it. An uploaded ground-truth
-  // CSV has no dhw/kitchen column and no thermalSummary either, so both
-  // correctly fall back to '—' rather than a misleading 0.
+  // dhw, kitchen and the combined total come only from a summary. An uploaded
+  // ground-truth CSV has no such columns and no summary, so they read '—'.
   const dhw     = thermalSummary ? formatKwh(thermalSummary.dhwKwh) : '—';
   const kitchen = thermalSummary ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
   const total   = thermalSummary ? formatKwh(thermalSummary.totalEnergyKwh) : '—';
@@ -291,9 +287,6 @@ export function useBuildingModel(
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG, tech: initialTech });
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
-  // Hourly timeseries from the most recent live buem-gateway run this session — takes
-  // priority over whatever timeseries the buildingData prop originally carried.
-  const [modelTimeseries, setModelTimeseries] = useState<LoadDataPoint[] | null>(null);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
   // A user-uploaded load profile, if any — outranks BuEM as the annual
   // totals' source, since it's real data rather than a model output.
@@ -350,7 +343,6 @@ export function useBuildingModel(
     const nextTech = technologyStateFrom(buildingData);
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG, tech: nextTech });
     setEnergyTotals(nextTotals);
-    setModelTimeseries(null);
     setUploadError(null);
     setPvArrays(nextTech.pvArrays);
     setPvTechnology(nextTech.pvTechnology);
@@ -606,10 +598,8 @@ export function useBuildingModel(
   const buildIdentity = () => runIdentity(buildingData, general);
 
   /**
-   * Commits the working draft, then runs a full BuEM simulation through the
-   * EnerPlanET backend's per-building BuEM endpoint and feeds the resulting
-   * load profile into the overview chart. See enerplanetApi.ts's
-   * runBuildingSimulation doc for the request shape and known gaps.
+   * Commits the working draft, then runs it through BuEM via the host and
+   * shows the stored totals the host returns.
    */
   const runSimulation = async () => {
     const invalid = Object.values(elements).filter(hasInvalidArea);
@@ -632,8 +622,7 @@ export function useBuildingModel(
         setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;
       }
-      setModelTimeseries(result.timeseries);
-      setEnergyTotals(computeEnergyTotals(result.timeseries, result.thermalSummary));
+      setEnergyTotals(computeEnergyTotals(null, toThermalSummary(result)));
     } finally {
       setIsRunningSimulation(false);
     }
@@ -758,7 +747,7 @@ export function useBuildingModel(
     ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
     : otherTechIds.filter((id) => id !== 'battery');
 
-  const chartTimeseries = modelTimeseries ?? thematicData?.timeseries ?? buildingData?.timeseries ?? null;
+  const chartTimeseries = thematicData?.timeseries ?? buildingData?.timeseries ?? null;
 
   /** The building as opened, with the current or last saved edits written into it. */
   const toBuildingState = (source: 'current' | 'saved'): BuildingState | undefined => {

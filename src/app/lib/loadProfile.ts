@@ -149,8 +149,7 @@ function normalizePoint(input: unknown, index: number, resolution: Resolution = 
     electricity: clampNumber(electricity),
     heating: clampNumber(heating),
     hotwater: clampNumber(hotwater),
-    // No CSV/JSON upload column for these yet — only a live BuEM run
-    // populates real dhw/kitchen per-hour data (see buemApi.ts).
+    // No CSV/JSON upload column for these yet.
     dhw: 0,
     kitchen: 0,
   };
