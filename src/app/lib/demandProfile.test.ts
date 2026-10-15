@@ -35,6 +35,11 @@ describe('toThermalSummary', () => {
     expect(summary.totalEnergyKwh).toBe(44512 + 300 + 2500 + 1800);
   });
 
+  it('reads a series without a part as the whole building', () => {
+    const { part: _part, ...heating } = series('heating', 10);
+    expect(toThermalSummary({ building_ref: 'x', series: [heating] }).heatingKwh).toBe(10);
+  });
+
   it('reads an absent series as zero', () => {
     const summary = toThermalSummary({ building_ref: 'x', series: [series('heating', 10)] });
     expect(summary.coolingKwh).toBe(0);

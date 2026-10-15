@@ -9,8 +9,8 @@ import type { ThermalSummary } from './buemAdapter';
 export interface DemandSeries {
   /** heating, cooling, electricity, hot_water or kitchen. */
   name: string;
-  /** The building part a series belongs to, such as a roof face; null for the whole building. */
-  part: string | null;
+  /** The building part a series belongs to, such as a roof face; absent or null for the whole building. */
+  part?: string | null;
   source: 'default' | 'user' | 'uploaded';
   /** BuEM release and commit that produced the series. */
   producer_version: string;
@@ -38,7 +38,7 @@ export interface BuildingDemandProfile {
 
 /** The annual totals and peaks the energy card reads, from the whole-building series. */
 export function toThermalSummary(profile: BuildingDemandProfile): ThermalSummary {
-  const find = (name: string) => profile.series.find((s) => s.name === name && s.part === null);
+  const find = (name: string) => profile.series.find((s) => s.name === name && !s.part);
   const total = (name: string) => find(name)?.total ?? 0;
   const heatingKwh = total('heating');
   const coolingKwh = total('cooling');
