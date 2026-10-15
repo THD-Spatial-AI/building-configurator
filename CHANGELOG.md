@@ -17,6 +17,10 @@ This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDem
 - `Building3DView` takes an optional `demandProfile` prop, the building's stored demand as the host's backend summarises it (`BuildingDemandProfile` and `DemandSeries` types). Its annual totals fill the energy card, with the total excluding kitchen gas as BuEM does.
 - `Building3DView` takes an optional `seriesCsvUrl` prop; the load profile's Download link points at it.
 
+### Fixed
+
+- The package shipped type declarations for the demo shell (`dist/demo/*.d.ts`, `dist/demoClient.d.ts`). They are no longer emitted.
+
 ### Removed
 
 - The load profile's client-side download, which zipped the hourly series held in the browser. The download now comes only from `seriesCsvUrl`; without it there is none. Uploading a profile is unchanged.
