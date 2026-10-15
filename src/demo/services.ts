@@ -5,21 +5,21 @@
 // src/assets/data/loenen_ignis_fixture.json holds real ignis responses for the
 // Loenen buildings, keyed by request: match by "<country>/<type>/<year>", data
 // by variant code. loenen_demand_fixture.json holds each building's stored
-// BuEM demand profile by osm_id; buildings BuEM rejected have none. A request
-// outside the captures rejects with its key.
+// BuEM demand profile by osm_id. A request outside the captures rejects with
+// its key.
 
 import type { ConfiguratorServices } from '../app/lib/services';
 import type { BuildingDemandProfile } from '../app/lib/demandProfile';
 import type { IgnisDataResponse, IgnisMatchResponse } from '../app/lib/ignisAdapter';
 import ignisFixture from '../assets/data/loenen_ignis_fixture.json';
 import demandFixture from '../assets/data/loenen_demand_fixture.json';
-import seriesCsv268426192 from '../assets/data/loenen_series_268426192.csv?url';
+import seriesCsv268428620 from '../assets/data/loenen_series_268428620.csv?url';
 
 const MATCH = ignisFixture.match as unknown as Record<string, IgnisMatchResponse>;
 const DATA = ignisFixture.data as unknown as Record<string, IgnisDataResponse>;
 const DEMAND = demandFixture as unknown as Record<string, BuildingDemandProfile>;
 /** One building's series CSV is bundled; the others have no download. */
-const SERIES_CSV: Record<string, string> = { '268426192': seriesCsv268426192 };
+const SERIES_CSV: Record<string, string> = { '268428620': seriesCsv268428620 };
 
 /** How long a fixture BuEM run takes, so the running state can be seen. */
 const RUN_DELAY_MS = 2500;
