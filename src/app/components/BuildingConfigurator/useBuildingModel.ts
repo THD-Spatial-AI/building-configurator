@@ -13,7 +13,6 @@ import type { BuildingElement } from './configure/model/buildingElements';
 import {
   isElementEditable,
   normalizeElementRecord,
-  hasInvalidArea,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
@@ -602,15 +601,6 @@ export function useBuildingModel(
    * shows the stored totals the host returns.
    */
   const runSimulation = async () => {
-    const invalid = Object.values(elements).filter(hasInvalidArea);
-    if (invalid.length > 0) {
-      setUploadError(
-        `${invalid.length} surface${invalid.length > 1 ? 's have' : ' has'} no area (${invalid.map((el) => el.label).join(', ')}) — `
-        + 'fix or delete them in the Envelope view before running a simulation.',
-      );
-      return;
-    }
-
     setSavedState({ elements, general, roofConfig, tech });
     const identity = buildIdentity();
 

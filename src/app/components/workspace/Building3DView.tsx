@@ -316,7 +316,7 @@ export function Building3DView({
           {invalidIds.size > 0 && (
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm">
               <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-              {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} a simulation would reject
+              {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} with no area, left out of a simulation
             </div>
           )}
         </div>

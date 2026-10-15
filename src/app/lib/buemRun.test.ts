@@ -119,6 +119,21 @@ describe('runBuildingSimulation', () => {
     expect(await runBuildingSimulation(services, runIdentity(opened, general), elements, general)).toBe(profile);
   });
 
+  it('leaves surfaces with no area out of the envelope it sends', async () => {
+    const requests: BuemBuildingRunRequest[] = [];
+    const services = {
+      runBuemBuilding: async (request: BuemBuildingRunRequest) => {
+        requests.push(request);
+        return { building_ref: 'osm-42', series: [] };
+      },
+    };
+    const sliver: BuildingElement = { ...elements.wall_south, id: 'wall_sliver', label: 'Sliver', area: 0 };
+    await runBuildingSimulation(services, runIdentity(opened, general), { ...elements, wall_sliver: sliver }, general);
+    const sent = (requests[0].building as { envelope: { elements: { id: string }[] } }).envelope.elements.map((el) => el.id);
+    expect(sent).toContain('wall_south');
+    expect(sent).not.toContain('wall_sliver');
+  });
+
   it('runs the default year and sends no model id without a run context', async () => {
     const request = await sentRequest();
     expect(request).toMatchObject({ start_date: '2018-01-01T00:00:00Z', end_date: '2018-12-31T23:00:00Z' });

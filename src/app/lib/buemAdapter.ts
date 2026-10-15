@@ -485,11 +485,13 @@ export function extractFeaturesFromConfig(config: unknown): unknown[] {
 
 /**
  * Serializes UI building element data to BUEM envelope element format.
- * Maps BuildingElement[] to BUEM's envelope.elements[] schema.
+ * Maps BuildingElement[] to BUEM's envelope.elements[] schema. A surface with
+ * no area is left out, since BuEM rejects one; ventilation carries no area.
  */
 function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Record<string, any>> {
   return Object.values(elements)
     .filter((el) => el && typeof el === 'object')
+    .filter((el) => el.type === 'ventilation' || Number(el.area) > 0)
     .map((el) => {
       const base: Record<string, any> = {
         id: String(el.id ?? ''),

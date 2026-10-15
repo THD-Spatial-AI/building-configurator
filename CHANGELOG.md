@@ -11,6 +11,7 @@ This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDem
 ### Changed
 
 - `ConfiguratorServices.runBuemBuilding` resolves to the building's stored demand, `{ building_ref, series }`, the same body as the `demandProfile` prop. `BuemBuildingRunResponse` is now that type. The request is unchanged. A run updates the energy card from the returned totals and no longer holds an hourly series in the browser.
+- A run no longer refuses a building with a zero-area surface. Such surfaces are left out of the BuEM envelope, since BuEM rejects them, in a run, in `toBuem` and in the BuEM GeoJSON export, so a building stored or exported this way reopens without them. The 3D view still marks them.
 
 ### Added
 
