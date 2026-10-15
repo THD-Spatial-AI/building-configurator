@@ -23,6 +23,7 @@ This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDem
 
 ### Removed
 
+- The demo shell's connection to a live EnerPlanET backend: its dev login, the `/api` proxy and the weather CORS shim (`demo-proxy/`). `npm run dev` runs on bundled captures, including real ignis responses for the Loenen buildings. Not part of the package.
 - The load profile's client-side download, which zipped the hourly series held in the browser. The download now comes only from `seriesCsvUrl`; without it there is none. Uploading a profile is unchanged.
 
 ## [0.6.2] - 2026-10-12

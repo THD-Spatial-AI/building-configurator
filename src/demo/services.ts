@@ -1,63 +1,39 @@
-// The demo shell playing host: it owns the URLs, the session and the envelope
-// the backend wraps its answers in, and hands the configurator four functions
-// that do nothing but carry a request.
+// The dev shell playing host with bundled captures in place of EnerPlanET, so
+// the configurator runs with no backend. A real host implements
+// ConfiguratorServices against its own client.
 //
-// A real host implements this against its own client. The paths below are the
-// EnerPlanET backend's.
+// src/assets/data/loenen_ignis_fixture.json holds real ignis responses for the
+// Loenen buildings, keyed by request: match by "<country>/<type>/<year>", data
+// by variant code. A request outside the capture rejects with its key.
 
 import type { ConfiguratorServices } from '../app/lib/services';
-import type { IgnisCalculateResponse, IgnisDataResponse, IgnisMatchResponse } from '../app/lib/ignisAdapter';
-import { demoHttp } from '../demoClient';
+import type { IgnisDataResponse, IgnisMatchResponse } from '../app/lib/ignisAdapter';
+import ignisFixture from '../assets/data/loenen_ignis_fixture.json';
 
-/** The backend's envelope around a verbatim upstream body. */
-interface Enveloped<T> {
-  data: T;
-}
-
-/**
- * Ceilings on a lookup and on the calculation respectively. These bound the
- * wait, not the work: the heat demand service answers a lookup from its own
- * database and the calculation is a closed-form pipeline, so anything slower
- * than this is a service in trouble rather than a long job to wait out.
- */
-const LOOKUP_TIMEOUT_MS = 8000;
-const CALCULATE_TIMEOUT_MS = 15000;
-
-/** The demo never saves a model, so every run is stored under this page's draft. */
-const DRAFT_ID = crypto.randomUUID();
+const MATCH = ignisFixture.match as unknown as Record<string, IgnisMatchResponse>;
+const DATA = ignisFixture.data as unknown as Record<string, IgnisDataResponse>;
 
 /** Module constant: one identity for the life of the page, as the props ask for. */
-export const demoServices: ConfiguratorServices = {
+export const fixtureServices: ConfiguratorServices = {
   async fetchMatchingVariants(countryIso2, typeCode, constructionYear) {
-    const res = await demoHttp.get<Enveloped<IgnisMatchResponse>>(
-      `/v2/ignis/variants/${encodeURIComponent(countryIso2)}/match`
-      + `?type=${encodeURIComponent(typeCode)}&year=${encodeURIComponent(String(constructionYear))}`,
-      { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) },
-    );
-    return res.data;
+    const key = `${countryIso2}/${typeCode}/${constructionYear}`;
+    const match = MATCH[key];
+    if (!match) throw new Error(`No bundled ignis match for ${key}`);
+    return match;
   },
 
   async fetchVariantData(variantCode) {
-    const res = await demoHttp.get<Enveloped<IgnisDataResponse>>(
-      `/v2/ignis/data/${encodeURIComponent(variantCode)}`,
-      { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) },
-    );
-    return res.data;
+    const data = DATA[variantCode];
+    if (!data) throw new Error(`No bundled ignis data for ${variantCode}`);
+    return data;
   },
 
-  async calculateHeatDemand(variantCode, inputs) {
-    const res = await demoHttp.post<Enveloped<IgnisCalculateResponse>>(
-      `/v2/ignis/calculate/${encodeURIComponent(variantCode)}`,
-      inputs,
-      { signal: AbortSignal.timeout(CALCULATE_TIMEOUT_MS) },
-    );
-    return res.data;
+  async calculateHeatDemand(variantCode) {
+    throw new Error(`Heat demand is not calculated in the dev shell (variant ${variantCode})`);
   },
 
-  runBuemBuilding(request) {
-    return demoHttp.post(
-      `/drafts/${DRAFT_ID}/buildings/${encodeURIComponent(request.osm_id)}/buem`,
-      request,
-    );
+  // TODO: answer from bundled demand profiles once a stored BuEM run is captured.
+  async runBuemBuilding(request) {
+    throw new Error(`No bundled BuEM result for building ${request.osm_id}`);
   },
 };

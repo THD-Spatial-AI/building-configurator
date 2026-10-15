@@ -25,9 +25,11 @@ npm install
 npm run dev
 ```
 
-`npm run dev` serves the demo application: a map, a live Loenen fixture and the
-configurator itself, against a local EnerPlanET backend. `npm run build:lib`
-builds the package.
+`npm run dev` serves the demo application on bundled Loenen captures (PyLovo
+grid, City2TABULA envelopes and surfaces, ignis TABULA variants), with no
+backend: a map of the area and the configurator on each building. A BuEM run
+is not available there yet. `npm run build:lib` builds the package, which
+contains none of the demo or its data.
 
 ## Features
 
