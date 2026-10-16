@@ -174,7 +174,7 @@ async function main() {
   const write = (name, text) => writeFile(new URL(name, DATA), text);
   await write('loenen_live_fixture.json', `${JSON.stringify({ ...live, enrich }, null, 2)}\n`);
   await write('loenen_surfaces_fixture.json', JSON.stringify(surfaces));
-  await write('loenen_ignis_fixture.json', `${JSON.stringify(ignis, null, 1)}\n`);
+  await write('loenen_ignis_fixture.json', `${JSON.stringify(ignis)}\n`);
   await write('loenen_demand_fixture.json', `${JSON.stringify(demand)}\n`);
   await write(`loenen_series_${CSV_BUILDING}.csv`, csv);
   await write('loenen_fixtures.meta.json', `${JSON.stringify(await metadata(demand), null, 2)}\n`);
