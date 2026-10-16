@@ -152,6 +152,9 @@ The surface ids in the geometry response are the envelope element ids, which is
 what lets a click in the model resolve to the surface being edited. Geometry
 from a different City2TABULA generation than the envelope matches nothing, and
 the view reports that rather than rendering a model nothing can be selected in.
+Saving such a building keeps its old ids; to move it to the current generation,
+rebuild its `BuildingState` from current City2TABULA data. A host detects the
+case with `isEnvelopeDetached(surfaces, new Set(Object.keys(building.envelope)))`.
 
 ## Building a BuildingState
 

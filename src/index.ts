@@ -14,6 +14,7 @@ export { Building3DView } from './app/components/workspace/Building3DView';
 export type { Building3DViewProps } from './app/components/workspace/Building3DView';
 
 export {
+  isEnvelopeDetached,
   polygonArea,
   surfacesFromGeometryResponse,
   type SurfaceGeometry,

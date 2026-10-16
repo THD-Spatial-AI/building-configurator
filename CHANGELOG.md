@@ -18,6 +18,7 @@ This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDem
 - `Building3DView` takes an optional `demandProfile` prop, the building's stored demand as the host's backend summarises it (`BuildingDemandProfile` and `DemandSeries` types). Its annual totals fill the energy card, with the total excluding kitchen gas as BuEM does.
 - `Building3DView` takes an optional `seriesCsvUrl` prop; the load profile's Download link points at it.
 - `Building3DView` takes an optional `attribution` prop, credits for the building's data shown in a corner of the 3D view.
+- `isEnvelopeDetached` is exported, so a host can tell when a saved envelope matches none of the current City2TABULA surfaces. The view's notice for that case no longer tells the user to reload, which only the demo could do.
 
 ### Fixed
 

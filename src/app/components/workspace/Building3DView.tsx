@@ -303,7 +303,7 @@ export function Building3DView({
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-xs leading-snug text-muted-foreground">
               {detached
-                ? 'This geometry belongs to a different City2TABULA generation than the envelope, so no surface can be matched to it. Reload the buildings to fetch both from the current one.'
+                ? 'This building\'s saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.'
                 : 'City2TABULA holds no 3D geometry for this building.'}
             </div>
           )}
