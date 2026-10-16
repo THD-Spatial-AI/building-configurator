@@ -6,11 +6,17 @@ Each version's GitHub release entry carries the full notes.
 
 ## [0.7.0] - 2026-10-16
 
-This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDemandProfile` instead of `{ osm_id, buem: { thermal_load_profile } }`.
+This release breaks the host interface in three places, and its building block needs a buem-gateway that accepts the v6-draft request schema:
+
+- `runBuemBuilding` resolves to a `BuildingDemandProfile` instead of `{ osm_id, buem: { thermal_load_profile } }`.
+- `BuemBuildingRunRequest` gains `outputs`, which the transport forwards as `properties.buem.outputs`, and `toBuem` returns `{ building, outputs, solver }`.
+- `BuemBuildingRunRequest.model_id`, deprecated in 0.6.2, is removed.
 
 ### Changed
 
-- `ConfiguratorServices.runBuemBuilding` resolves to the building's stored demand, `{ building_ref, series }`, the same body as the `demandProfile` prop. `BuemBuildingRunResponse` is now that type. The request is unchanged. A run updates the energy card from the returned totals and no longer holds an hourly series in the browser.
+- `ConfiguratorServices.runBuemBuilding` resolves to the building's stored demand, `{ building_ref, series }`, the same body as the `demandProfile` prop. `BuemBuildingRunResponse` is now that type. A run updates the energy card from the returned totals and no longer holds an hourly series in the browser.
+- The building block follows buem-gateway's v6-draft request schema. Building types are BuEM's four residential codes and eight service types; Retail, which BuEM has no type for, is gone. Residential buildings send their household inputs (dwellings, occupants, household type, region code, cooking carrier, hot water, appliances) and service buildings send a capacity and none of them. `setback_profile` is sent for every building. `neighbour_status` and `n_storeys` are no longer sent, the attached-neighbours picker is removed, and a reopened stored building shows the default storey count.
+- A run refuses a multi-family house or apartment block with no number of dwellings, and says so, since BuEM rejects it.
 - A run no longer refuses a building with a zero-area surface. Such surfaces are left out of the BuEM envelope, since BuEM rejects them, in a run, in `toBuem` and in the BuEM GeoJSON export, so a building stored or exported this way reopens without them. The 3D view still marks them.
 
 ### Added
@@ -18,6 +24,9 @@ This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDem
 - `Building3DView` takes an optional `demandProfile` prop, the building's stored demand as the host's backend summarises it (`BuildingDemandProfile` and `DemandSeries` types). Its annual totals fill the energy card, with the total excluding kitchen gas as BuEM does.
 - `Building3DView` takes an optional `seriesCsvUrl` prop; the load profile's Download link points at it.
 - `Building3DView` takes an optional `attribution` prop, credits for the building's data shown in a corner of the 3D view.
+- Expert mode edits what BuEM reads beyond the envelope. Occupancy: dwellings (prefilled from TABULA for MFH and AB), occupants per dwelling, household type, Dutch region code, cooking carrier, hot water and heating setback; a service building shows capacity and setback. Results to compute: each of the five load profiles off, annual or hourly. Appliances: each of BuEM's 37 appliances set to default, yes or no, with a TV count of 0 to 3.
+- The cooking carrier starts at "Model default", which sends no `cooking_carrier`, so a host's model-wide setting applies; electric, gas or not reported can be set per building.
+- A wall can be marked as shared with a neighbouring building, sent as `b_transmission` 0, which BuEM treats as a party wall.
 - `isEnvelopeDetached` is exported, so a host can tell when a saved envelope matches none of the current City2TABULA surfaces. The view's notice for that case no longer tells the user to reload, which only the demo could do.
 
 ### Fixed
