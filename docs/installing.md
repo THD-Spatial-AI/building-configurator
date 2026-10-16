@@ -174,9 +174,11 @@ Two exported functions build one:
 ## Storing an edited building
 
 `onExit` hands back the edited `BuildingState`. `toBuem(building)` turns it
-into `{ building, outputs, solver }`, the same three blocks a run of that
-building sends as `BuemBuildingRunRequest.building`, `.outputs` and `.solver`.
-To reopen, pass the stored object as `properties.buem` of a Feature to
+into `{ building, construction_year, outputs, solver }`: the same three blocks
+a run of that building sends as `BuemBuildingRunRequest.building`, `.outputs`
+and `.solver`, plus the construction year, which BuEM's `construction_period`
+cannot hold. Store the whole object and send BuEM only its blocks. To reopen,
+pass the stored object as `properties.buem` of a Feature to
 `adaptBuemFeature`:
 
 ```ts

@@ -79,7 +79,13 @@ describe('toBuem', () => {
   it('sends the blocks a run with the same edits sends', () => {
     const { buem } = serializeToBuemFeature(runIdentity(opened, general), elements, general).properties;
 
-    expect(toBuem(edited)).toEqual({ building: buem.building, outputs: buem.outputs, solver: buem.solver });
+    expect(toBuem(edited)).toMatchObject({ building: buem.building, outputs: buem.outputs, solver: buem.solver });
+  });
+
+  it('keeps the construction year beside the building block, not in it', () => {
+    const stored = toBuem(edited);
+    expect(stored.building).not.toHaveProperty('construction_period');
+    expect(stored.construction_year).toBe(general.constructionYear);
   });
 
   it('carries the expert-mode parameters and the solver choice', () => {
@@ -158,6 +164,17 @@ describe('adaptBuemFeature on stored blocks', () => {
     id: 'osm-42',
     geometry: { type: 'Point', coordinates: [5.9, 52.2] },
     properties: { buem: toBuem(edited) },
+  });
+
+  it('reopens an older block with the year in construction_period', () => {
+    const { construction_year: _year, ...older } = toBuem(edited);
+    const legacy = adaptBuemFeature({
+      type: 'Feature',
+      id: 'osm-42',
+      geometry: { type: 'Point', coordinates: [5.9, 52.2] },
+      properties: { buem: { ...older, building: { ...older.building, construction_period: '1962' } } },
+    });
+    expect(generalFrom(legacy).constructionYear).toBe(1962);
   });
 
   it('reopens with the same building parameters and solver choice', () => {

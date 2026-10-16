@@ -9,7 +9,7 @@ Each version's GitHub release entry carries the full notes.
 This release breaks the host interface in three places, and its building block needs a buem-gateway that accepts the v6-draft request schema:
 
 - `runBuemBuilding` resolves to a `BuildingDemandProfile` instead of `{ osm_id, buem: { thermal_load_profile } }`.
-- `BuemBuildingRunRequest` gains `outputs`, which the transport forwards as `properties.buem.outputs`, and `toBuem` returns `{ building, outputs, solver }`.
+- `BuemBuildingRunRequest` gains `outputs`, which the transport forwards as `properties.buem.outputs`, and `toBuem` returns `{ building, construction_year, outputs, solver }`.
 - `BuemBuildingRunRequest.model_id`, deprecated in 0.6.2, is removed.
 
 ### Changed
@@ -17,6 +17,7 @@ This release breaks the host interface in three places, and its building block n
 - `ConfiguratorServices.runBuemBuilding` resolves to the building's stored demand, `{ building_ref, series }`, the same body as the `demandProfile` prop. `BuemBuildingRunResponse` is now that type. A run updates the energy card from the returned totals and no longer holds an hourly series in the browser.
 - The building block follows buem-gateway's v6-draft request schema. Building types are BuEM's four residential codes and eight service types; Retail, which BuEM has no type for, is gone. Residential buildings send their household inputs (dwellings, occupants, household type, region code, cooking carrier, hot water, appliances) and service buildings send a capacity and none of them. `setback_profile` is sent for every building. `neighbour_status` and `n_storeys` are no longer sent, the attached-neighbours picker is removed, and a reopened stored building shows the default storey count.
 - A run refuses a multi-family house or apartment block with no number of dwellings, and says so, since BuEM rejects it.
+- The building block no longer carries `construction_period`, which the contract defines as a TABULA class code, not the year it held. The year is stored beside the block as `construction_year`, and a block stored before 0.7.0 still reopens with the year from `construction_period`.
 - A run no longer refuses a building with a zero-area surface. Such surfaces are left out of the BuEM envelope, since BuEM rejects them, in a run, in `toBuem` and in the BuEM GeoJSON export, so a building stored or exported this way reopens without them. The 3D view still marks them.
 
 ### Added

@@ -312,7 +312,6 @@ function adaptThematicData(feature: unknown): ThematicData {
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
     coordinates: [lon, lat],
     buildingType,
-    // construction_period carries a plain year string here, not a { value } quantity.
     constructionYear: Number(getMappedValue(feature, descriptor.constructionYear)) || 0,
     country: String(getMappedValue(feature, descriptor.country) ?? ''),
     floorArea: getMappedNumber(feature, descriptor.floorArea),
@@ -601,12 +600,9 @@ export function serializeToBuemFeature(
   if (identity.buildingType) building.building_type = BUILDING_TYPE_CODES[identity.buildingType] ?? identity.buildingType;
   else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 
-  // construction_period is inert in the BUEM contract (classification metadata,
-  // no simulation effect) and its true value is a per-country TABULA class code
-  // BC does not hold. BC carries the plain construction year here instead, as a
-  // string, so an exported feature round-trips.
-  const constructionYear = identity.constructionYear || general.constructionYear;
-  if (constructionYear) building.construction_period = String(constructionYear);
+  // construction_period is a per-country TABULA class code, never a year, so it
+  // is not sent. The year travels beside the block as buem.construction_year.
+  const constructionYear = Number(identity.constructionYear || general.constructionYear) || 0;
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
@@ -740,6 +736,7 @@ export function serializeToBuemFeature(
       resolution_unit: resolutionUnit,
       buem: {
         building,
+        ...(constructionYear ? { construction_year: constructionYear } : {}),
         outputs,
         solver: {
           use_milp: general.use_milp ?? false,
@@ -866,7 +863,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
   // is per-storey, so divide by the building's own storey count.
   const importedStoreys = Number(bldg.n_storeys ?? 0);
-  const importedYear = Number(bldg.construction_period) || 0;
+  const importedYear = Number(buem.construction_year ?? bldg.construction_period) || 0;
   const general: Record<string, any> = {
     // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.
     ...(importedYear ? { constructionYear: importedYear } : {}),
