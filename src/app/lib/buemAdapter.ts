@@ -773,7 +773,7 @@ function householdFields(typeLabel: string, general: Record<string, any>): Recor
   if (general.num_persons) fields.num_persons = general.num_persons;
   if (general.archetype) fields.archetype = general.archetype;
   if (general.region_code) fields.region_code = general.region_code;
-  fields.cooking_carrier = general.cooking_carrier;
+  if (general.cooking_carrier) fields.cooking_carrier = general.cooking_carrier;
   fields.include_dhw = general.include_dhw;
   if (general.equipment && Object.keys(general.equipment).length > 0) fields.equipment = { ...general.equipment };
   return fields;

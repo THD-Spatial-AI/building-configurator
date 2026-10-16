@@ -52,6 +52,7 @@ export const SETBACK_OPTIONS = [
 ];
 
 export const COOKING_CARRIER_OPTIONS = [
+  { value: '',         label: 'Model default' },
   { value: 'electric', label: 'Electric' },
   { value: 'gas',      label: 'Gas' },
   { value: 'none',     label: 'Not reported' },

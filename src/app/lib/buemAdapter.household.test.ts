@@ -38,10 +38,15 @@ describe('building block against the v6-draft contract', () => {
     const { building } = buem('Multi-family House');
     expect(building).toMatchObject({
       residential_units: 6, num_persons: 2, archetype: 'retired_single', region_code: 'GM0200',
-      cooking_carrier: 'electric', include_dhw: true, setback_profile: 'none',
+      include_dhw: true, setback_profile: 'none',
       equipment: { tv_1: true, tv_2: false },
     });
     expect(building).not.toHaveProperty('capacity');
+  });
+
+  it('leaves the cooking carrier to the host when none was chosen', () => {
+    expect(buem('Single-family House').building).not.toHaveProperty('cooking_carrier');
+    expect(buem('Single-family House', { ...household, cooking_carrier: 'gas' }).building.cooking_carrier).toBe('gas');
   });
 
   it('sends a capacity and no household inputs for a service building', () => {

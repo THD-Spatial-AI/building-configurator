@@ -144,7 +144,7 @@ export function OccupancySection({ general, setGen }: SectionProps) {
         value={general.cooking_carrier}
         onChange={(v) => setGen('cooking_carrier', v)}
         options={COOKING_CARRIER_OPTIONS}
-        tip="Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas."
+        tip="Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas. Model default uses the setting of the model the building belongs to."
       />
       <ToggleSwitch
         checked={general.include_dhw}
@@ -255,7 +255,7 @@ export function OutputsSection({ general, setGen }: SectionProps) {
           />
         </ApplianceRow>
       ))}
-      {!service && general.cooking_carrier !== 'gas' && general.outputs.kitchen !== 'none' && (
+      {!service && general.cooking_carrier && general.cooking_carrier !== 'gas' && general.outputs.kitchen !== 'none' && (
         <p className="text-[10px] text-muted-foreground">Cooking gas is reported only when cooking with gas.</p>
       )}
       {thermalOff && (
