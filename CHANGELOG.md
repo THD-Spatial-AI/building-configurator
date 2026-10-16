@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [Unreleased]
+## [0.7.0] - 2026-10-16
 
 This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDemandProfile` instead of `{ osm_id, buem: { thermal_load_profile } }`.
 
@@ -94,6 +94,7 @@ This release breaks the `runBuemBuilding` service: it resolves to a `BuildingDem
 
 Versions before 0.4.0 have no changelog entries; see their git tags.
 
+[0.7.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.7.0
 [0.6.2]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.2
 [0.6.1]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.1
 [0.6.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.0
