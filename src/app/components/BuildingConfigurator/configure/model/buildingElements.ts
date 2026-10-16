@@ -86,10 +86,9 @@ export function isUserDefinedElement(el: BuildingElement): boolean {
 }
 
 /**
- * A zero (or negative) area can't be simulated — BuEM rejects it outright.
- * Surfaces imported from real 3D extraction occasionally carry a degenerate
- * sliver like this; surfaced here rather than silently dropped so the user
- * can fix or delete it before running a simulation.
+ * A zero (or negative) area, which surfaces imported from 3D extraction
+ * occasionally carry. BuEM rejects such a surface, so a run leaves it out
+ * (see buildElementsToBuemEnvelope); it is marked so the user can see which.
  */
 export function hasInvalidArea(el: BuildingElement): boolean {
   return !(el.area > 0);

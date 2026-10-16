@@ -69,7 +69,7 @@ export function buildingCsv(
     ['use_air_change', (general.n_air_use ?? 0).toFixed(2), '1/h'],
     ['thermal_mass_class', general.massClass ?? '', ''],
     ['thermal_capacity', general.c_m ?? '', 'kJ/(m2K)'],
-    ['attached_neighbours', general.Code_AttachedNeighbours ?? '', ''],
+    ['residential_units', general.residential_units ?? '', ''],
     ['calculation_method', general.use_milp ? 'MILP' : 'sparse', ''],
     ['envelope_area', extras.totalEnvelopeArea.toFixed(2), 'm2'],
     ['envelope_avg_u_value', extras.avgUValue.toFixed(3), 'W/m2K'],

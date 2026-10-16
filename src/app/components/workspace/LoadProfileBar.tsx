@@ -1,6 +1,6 @@
 // The load profile as data rather than a chart: where the current profile came
-// from, and the two things done with it. Hourly only, which is the resolution
-// the whole stack runs at.
+// from, an upload that stays in the browser, and a download the host serves.
+// Hourly only, which is the resolution the whole stack runs at.
 
 import { useRef } from 'react';
 import { Download, Upload } from 'lucide-react';
@@ -8,18 +8,18 @@ import { useLoadProfileState } from '../BuildingConfigurator/overview/useLoadPro
 import type { LoadDataPoint } from '../../lib/loadProfile';
 
 interface LoadProfileBarProps {
-  buildingId: string;
   /** The model's hourly profile, replaced by whatever the user uploads. */
   timeseries?: LoadDataPoint[];
+  /** The host's CSV of the building's stored series; no download without it. */
+  seriesCsvUrl?: string;
   onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
 }
 
-export function LoadProfileBar({ buildingId, timeseries, onGroundTruthChange }: LoadProfileBarProps) {
+export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }: LoadProfileBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
-    handleDownload, handleFileUpload, hasData, sourceCaption, uploadError,
+    handleFileUpload, hasData, sourceCaption, uploadError,
   } = useLoadProfileState({
-    buildingId,
     initialTimeseries: timeseries,
     initialResolution: 'hourly',
     onGroundTruthChange,
@@ -30,7 +30,7 @@ export function LoadProfileBar({ buildingId, timeseries, onGroundTruthChange }: 
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-[12px] font-semibold text-slate-700">Hourly load profile</p>
-          <p className="truncate text-[10px] text-muted-foreground">{sourceCaption}</p>
+          <p className="truncate text-[10px] text-muted-foreground">{!hasData && seriesCsvUrl ? 'Stored BuEM result' : sourceCaption}</p>
         </div>
         <button
           type="button"
@@ -40,15 +40,16 @@ export function LoadProfileBar({ buildingId, timeseries, onGroundTruthChange }: 
           <Upload className="size-3" />
           Upload
         </button>
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={!hasData}
-          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Download className="size-3" />
-          Download
-        </button>
+        {seriesCsvUrl && (
+          <a
+            href={seriesCsvUrl}
+            download
+            className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
+          >
+            <Download className="size-3" />
+            Download
+          </a>
+        )}
         <input
           ref={fileInputRef}
           type="file"

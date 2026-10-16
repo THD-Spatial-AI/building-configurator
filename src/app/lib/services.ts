@@ -13,7 +13,7 @@ import type {
   IgnisInputs,
   IgnisMatchResponse,
 } from './ignisAdapter';
-import type { BuemThermalLoadProfile } from './buemApi';
+import type { BuildingDemandProfile } from './demandProfile';
 
 /**
  * The overrides for a heat demand calculation, in the service's own field
@@ -29,20 +29,19 @@ export interface BuemBuildingRunRequest {
   building: unknown;
   /** BuEM solver settings, forwarded as properties.buem.solver. */
   solver: { use_milp: boolean };
+  /**
+   * Load profiles to compute, forwarded as properties.buem.outputs. With
+   * heating and cooling both none, building carries no envelope and the
+   * request needs no weather.
+   */
+  outputs: Record<string, 'none' | 'summary' | 'series'>;
   start_date: string;
   end_date: string;
   resolution: number;
-  /**
-   * @deprecated Never set. buem-gateway only logs it; kept optional so a host
-   * transport that reads it still compiles. Removed in the next minor release.
-   */
-  model_id?: string;
 }
 
-export interface BuemBuildingRunResponse {
-  osm_id: string;
-  buem: { thermal_load_profile: BuemThermalLoadProfile };
-}
+/** The building's stored demand after the run, the same body as its demand-profile route. */
+export type BuemBuildingRunResponse = BuildingDemandProfile;
 
 /**
  * Every call rejects on failure; the package catches and decides what the

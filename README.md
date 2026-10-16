@@ -25,9 +25,18 @@ npm install
 npm run dev
 ```
 
-`npm run dev` serves the demo application: a map, a live Loenen fixture and the
-configurator itself, against a local EnerPlanET backend. `npm run build:lib`
-builds the package.
+`npm run dev` serves the demo application on bundled Loenen captures (PyLovo
+grid, City2TABULA envelopes and surfaces, ignis TABULA variants, BuEM demand),
+with no backend: a map of the area and the configurator on each building. A
+BuEM run answers with the building's stored result. `npm run build:lib` builds the
+package, which contains none of the demo or its data.
+
+`npm run capture-fixtures` captures that data again from a running EnerPlanET
+dev stack, after a change in BuEM, ignis or City2TABULA. It needs
+`FIXTURE_EMAIL` and `FIXTURE_PASSWORD` for a dev account; `BACKEND_URL`
+(default `http://localhost:8000/api`) and `REPOS_CONF` (the EnerPlanET
+`repos.conf`, for version stamps) are optional. It creates a temporary model
+and deletes it when done.
 
 ## Features
 

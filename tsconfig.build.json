@@ -11,12 +11,10 @@
   "include": ["src"],
   "exclude": [
     "src/main.tsx",
-    "src/demoClient.ts",
+    "src/demo",
     "src/app/App.tsx",
     "src/app/components/LoenenLive*.tsx",
     "src/app/components/workspace/BuildingWorkspace.tsx",
-    "src/app/lib/useLoenen.ts",
-    "src/app/lib/surfaceGeometryFixture.ts",
     "src/**/*.test.ts"
   ]
 }

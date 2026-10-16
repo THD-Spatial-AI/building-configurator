@@ -14,6 +14,7 @@ export { Building3DView } from './app/components/workspace/Building3DView';
 export type { Building3DViewProps } from './app/components/workspace/Building3DView';
 
 export {
+  isEnvelopeDetached,
   polygonArea,
   surfacesFromGeometryResponse,
   type SurfaceGeometry,
@@ -55,6 +56,9 @@ export { buildBuildingStates } from './app/lib/city2tabulaAdapter';
 
 // Storing an edited building: the BuEM blocks a run would send for it.
 export { toBuem, type RunContext } from './app/lib/buemRun';
+
+// A building's stored demand, as the host's backend summarises it.
+export type { BuildingDemandProfile, DemandSeries } from './app/lib/demandProfile';
 
 export type {
   EnergyTotals,

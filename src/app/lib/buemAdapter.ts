@@ -16,6 +16,14 @@ import {
 import { faceFromAzimuth, type BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { BatteryConfig, PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import type { PvArray, PvTechnology } from '@/app/components/BuildingConfigurator/shared/pvModel';
+import {
+  BUILDING_TYPE_LABELS,
+  OUTPUT_PROFILES,
+  isServiceBuildingType,
+  requiresResidentialUnits,
+  type OutputLevel,
+  type OutputProfile,
+} from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import type { LoadDataPoint } from './loadProfile';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -40,11 +48,12 @@ export interface ThermalSummary {
   electricityKwh: number;
   peakHeatingKw: number;
   peakCoolingKw: number;
-  energyIntensityKwhM2: number;
+  /** Absent when the source carries none, as the stored demand profile does not. */
+  energyIntensityKwhM2?: number;
   /** Domestic hot water, kWh — absent (0) on results predating BuEM's v6-draft hot_water/kitchen fields. */
   dhwKwh: number;
-  /** Cooking gas demand — a different fuel channel from the electric kWh above, kept in kWh_gas rather than summed with it. */
-  kitchenGasKwh: number;
+  /** Cooking gas demand, a different fuel channel from the electric kWh above, kept in kWh_gas rather than summed with it. Absent when BuEM computed none. */
+  kitchenGasKwh?: number;
   /** BuEM's own heating+cooling+electricity+hot_water total — gas deliberately excluded. */
   totalEnergyKwh: number;
 }
@@ -116,20 +125,21 @@ export interface BuildingParameters {
   n_air_use?: number;               // 1/h
   c_m?: number;                     // kJ/(m2K)
   massClass?: string;               // VeryLight | Light | Medium | Heavy | VeryHeavy
-  Code_AttachedNeighbours?: string; // B_Alone | B_N1 | B_N2
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
+  residential_units?: number | null;
+  num_persons?: number | null;      // per dwelling
+  archetype?: string;
+  region_code?: string;             // CBS municipality code, e.g. GM0200
+  cooking_carrier?: string;         // electric | gas | none
+  include_dhw?: boolean;
+  setback_profile?: string;
+  capacity?: number | null;         // occupants, service types only
+  equipment?: Record<string, boolean>;
+  outputs?: Record<OutputProfile, OutputLevel>;
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
-
-/** Maps BUEM building_type codes to human-readable labels. */
-const BUILDING_TYPE_LABELS: Record<string, string> = {
-  MFH: 'Multi-family House',
-  SFH: 'Single-family House',
-  AB:  'Apartment Block',
-  TH:  'Terraced House',
-};
 
 /** Reverse of BUILDING_TYPE_LABELS, for serializing a label back to its BUEM code. */
 const BUILDING_TYPE_CODES: Record<string, string> = Object.fromEntries(
@@ -222,6 +232,7 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
       gValue:  gValue !== null && Number.isFinite(gValue) ? gValue : null,
       tilt:    qty(raw.tilt),
       azimuth: qty(raw.azimuth),
+      ...transmissionFrom(raw),
       source: 'city',
       customMode: false,
     };
@@ -230,6 +241,12 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
   const surfaces = Object.values(result);
   readableSurfaceLabels(surfaces).forEach((label, i) => { surfaces[i].label = names[surfaces[i].id] ?? label; });
   return result;
+}
+
+/** The element's b_transmission, when the source sets one; 0 marks a party wall. */
+function transmissionFrom(raw: Record<string, unknown>): Pick<BuildingElement, 'bTransmission'> {
+  const b = raw.b_transmission;
+  return b && typeof b === 'object' && 'value' in b ? { bTransmission: qty(b) } : {};
 }
 
 /**
@@ -295,7 +312,6 @@ function adaptThematicData(feature: unknown): ThematicData {
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
     coordinates: [lon, lat],
     buildingType,
-    // construction_period carries a plain year string here, not a { value } quantity.
     constructionYear: Number(getMappedValue(feature, descriptor.constructionYear)) || 0,
     country: String(getMappedValue(feature, descriptor.country) ?? ''),
     floorArea: getMappedNumber(feature, descriptor.floorArea),
@@ -320,7 +336,9 @@ function adaptThematicData(feature: unknown): ThematicData {
     peakCoolingKw: getMappedNumber(feature, results.peakCoolingLoad),
     energyIntensityKwhM2: getMappedNumber(feature, results.energyIntensity),
     dhwKwh: getMappedNumber(feature, results.dhwTotal),
-    kitchenGasKwh: getMappedNumber(feature, results.kitchenTotal),
+    kitchenGasKwh: hasMappedValue(feature, results.kitchenTotal)
+      ? getMappedNumber(feature, results.kitchenTotal)
+      : undefined,
     totalEnergyKwh: hasMappedValue(feature, results.totalEnergyDemand)
       ? getMappedNumber(feature, results.totalEnergyDemand)
       : getMappedNumber(feature, results.heatingTotal) + getMappedNumber(feature, results.coolingTotal)
@@ -371,11 +389,35 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (hasMappedValue(feature, paths.cM)) parameters.c_m = getMappedNumber(feature, paths.cM);
   const massClass = MASS_CLASS_LABELS[String(getMappedValue(feature, paths.thermalClass))];
   if (massClass) parameters.massClass = massClass;
-  const neighbours = getMappedValue(feature, paths.neighbourStatus);
-  if (typeof neighbours === 'string') parameters.Code_AttachedNeighbours = neighbours;
   const useMilp = getMappedValue(feature, paths.useMilp);
   if (typeof useMilp === 'boolean') parameters.use_milp = useMilp;
+  Object.assign(parameters, householdParameters(feature));
   return Object.keys(parameters).length > 0 ? parameters : undefined;
+}
+
+/** The household and output fields the feature sets, each absent unless set. */
+function householdParameters(feature: unknown): BuildingParameters {
+  const paths = MODEL_DATA_MAP.thematic.household;
+  const parameters: BuildingParameters = {};
+  for (const key of ['residential_units', 'num_persons', 'capacity'] as const) {
+    const value = getMappedValue(feature, paths[key]);
+    if (typeof value === 'number') parameters[key] = value;
+  }
+  for (const key of ['archetype', 'region_code', 'cooking_carrier', 'setback_profile'] as const) {
+    const value = getMappedValue(feature, paths[key]);
+    if (typeof value === 'string') parameters[key] = value;
+  }
+  const includeDhw = getMappedValue(feature, paths.include_dhw);
+  if (typeof includeDhw === 'boolean') parameters.include_dhw = includeDhw;
+  const equipment = getMappedValue(feature, paths.equipment);
+  if (equipment && typeof equipment === 'object') parameters.equipment = { ...(equipment as Record<string, boolean>) };
+  const outputs = getMappedValue(feature, paths.outputs);
+  if (outputs && typeof outputs === 'object') {
+    parameters.outputs = Object.fromEntries(OUTPUT_PROFILES.map(({ key }) => (
+      [key, (outputs as Record<string, OutputLevel>)[key] ?? 'summary']
+    ))) as Record<OutputProfile, OutputLevel>;
+  }
+  return parameters;
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -484,11 +526,13 @@ export function extractFeaturesFromConfig(config: unknown): unknown[] {
 
 /**
  * Serializes UI building element data to BUEM envelope element format.
- * Maps BuildingElement[] to BUEM's envelope.elements[] schema.
+ * Maps BuildingElement[] to BUEM's envelope.elements[] schema. A surface with
+ * no area is left out, since BuEM rejects one; ventilation carries no area.
  */
 function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Record<string, any>> {
   return Object.values(elements)
     .filter((el) => el && typeof el === 'object')
+    .filter((el) => el.type === 'ventilation' || Number(el.area) > 0)
     .map((el) => {
       const base: Record<string, any> = {
         id: String(el.id ?? ''),
@@ -513,6 +557,11 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
       // Solar gain (window-specific)
       if (el.type === 'window' && typeof el.gValue === 'number') {
         base.g_gl = { value: el.gValue, unit: '-' };
+      }
+
+      // BuEM counts a wall with b_transmission 0 as shared with a neighbour.
+      if (typeof el.bTransmission === 'number') {
+        base.b_transmission = { value: el.bTransmission, unit: '-' };
       }
 
       return base;
@@ -551,19 +600,12 @@ export function serializeToBuemFeature(
   if (identity.buildingType) building.building_type = BUILDING_TYPE_CODES[identity.buildingType] ?? identity.buildingType;
   else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 
-  // construction_period is inert in the BUEM contract (classification metadata,
-  // no simulation effect) and its true value is a per-country TABULA class code
-  // BC does not hold. BC carries the plain construction year here instead, as a
-  // string, so an exported feature round-trips.
-  const constructionYear = identity.constructionYear || general.constructionYear;
-  if (constructionYear) building.construction_period = String(constructionYear);
+  // construction_period is a per-country TABULA class code, never a year, so it
+  // is not sent. The year travels beside the block as buem.construction_year.
+  const constructionYear = Number(identity.constructionYear || general.constructionYear) || 0;
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
-
-  // Attached-neighbours code (B_Alone/B_N1/B_N2) — drives BuEM's shared-wall
-  // transmission correction factor. Not consumed by ignis.
-  if (general.Code_AttachedNeighbours) building.neighbour_status = general.Code_AttachedNeighbours;
 
   if (typeof identity.floorArea === 'number') {
     // identity.floorArea is already the total conditioned floor area (BuEM A_ref semantics).
@@ -579,14 +621,18 @@ export function serializeToBuemFeature(
     building.h_room = { value: general.roomHeight, unit: 'm' };
   }
 
-  if (typeof identity.storeys === 'number') {
-    building.n_storeys = identity.storeys;
-  } else if (typeof general.storeys === 'number') {
-    building.n_storeys = general.storeys;
-  }
+  Object.assign(building, householdFields(identity.buildingType || general.buildingType, general));
 
-  // Envelope
-  building.envelope = { elements: buildElementsToBuemEnvelope(elements) };
+  const outputs = { ...general.outputs };
+  if (isServiceBuildingType(identity.buildingType || general.buildingType)) {
+    outputs.hot_water = 'none';
+    outputs.kitchen = 'none';
+  }
+  // With neither heating nor cooling selected BuEM skips the thermal solve and
+  // the contract drops the envelope requirement.
+  if (needsEnvelope(outputs)) {
+    building.envelope = { elements: buildElementsToBuemEnvelope(elements) };
+  }
 
   // Thermal parameters
   const thermal: Record<string, any> = {};
@@ -690,6 +736,8 @@ export function serializeToBuemFeature(
       resolution_unit: resolutionUnit,
       buem: {
         building,
+        ...(constructionYear ? { construction_year: constructionYear } : {}),
+        outputs,
         solver: {
           use_milp: general.use_milp ?? false,
           // compute_cooling is schema-only in the current BuEM release and
@@ -702,6 +750,35 @@ export function serializeToBuemFeature(
   };
 
   return feature;
+}
+
+/** Whether the selected profiles need BuEM's thermal solve, and so the envelope and weather. */
+export function needsEnvelope(outputs: Partial<Record<OutputProfile, OutputLevel>>): boolean {
+  return outputs.heating !== 'none' || outputs.cooling !== 'none';
+}
+
+/**
+ * The household fields of the building block for a building type label. The
+ * contract rejects household inputs on a service building, which takes a
+ * capacity instead, and requires a dwelling count for MFH and AB.
+ */
+function householdFields(typeLabel: string, general: Record<string, any>): Record<string, any> {
+  const fields: Record<string, any> = { setback_profile: general.setback_profile };
+  if (isServiceBuildingType(typeLabel)) {
+    if (general.capacity) fields.capacity = general.capacity;
+    return fields;
+  }
+  if (general.residential_units) fields.residential_units = general.residential_units;
+  else if (requiresResidentialUnits(typeLabel)) {
+    throw new Error(`serializeToBuemFeature: building type "${typeLabel}" needs a number of dwellings`);
+  }
+  if (general.num_persons) fields.num_persons = general.num_persons;
+  if (general.archetype) fields.archetype = general.archetype;
+  if (general.region_code) fields.region_code = general.region_code;
+  if (general.cooking_carrier) fields.cooking_carrier = general.cooking_carrier;
+  fields.include_dhw = general.include_dhw;
+  if (general.equipment && Object.keys(general.equipment).length > 0) fields.equipment = { ...general.equipment };
+  return fields;
 }
 
 /**
@@ -776,6 +853,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
           : null,
         tilt: qty(el.tilt),
         azimuth: qty(el.azimuth),
+        ...transmissionFrom(el),
         source: 'city',
         customMode: false,
       };
@@ -785,13 +863,12 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
   // is per-storey, so divide by the building's own storey count.
   const importedStoreys = Number(bldg.n_storeys ?? 0);
-  const importedYear = Number(bldg.construction_period) || 0;
+  const importedYear = Number(buem.construction_year ?? bldg.construction_period) || 0;
   const general: Record<string, any> = {
     // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.
     ...(importedYear ? { constructionYear: importedYear } : {}),
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
     country: String(bldg.country ?? ''),
-    Code_AttachedNeighbours: String(bldg.neighbour_status ?? 'B_Alone'),
     floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
     roomHeight: qty(bldg.h_room),
     storeys: importedStoreys,
@@ -802,6 +879,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
                 thermalBlk.thermal_class === 'heavy' ? 'Heavy' : 'Light'),
     use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,
     compute_cooling: ((buem.solver ?? {}) as Record<string, unknown>).compute_cooling !== false,
+    ...householdParameters(feature),
   };
 
   return { elements, general, isBuemFormat: true };

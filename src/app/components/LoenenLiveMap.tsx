@@ -31,9 +31,9 @@ interface LoenenLiveMapProps {
   buildings: { type: 'FeatureCollection'; features: unknown[] };
   /** osm_ids with resolved City2TABULA data — styled distinctly from unresolved ones. */
   resolvedIds: Set<string>;
-  /** osm_ids with at least one surface a simulation would reject (e.g. zero area) — takes priority over resolvedIds' styling. */
-  problematicIds: Set<string>;
   onBuildingClick: (osmId: string) => void;
+  /** Credits for the building layer, shown beside the basemap's own. */
+  attributions?: string[];
 }
 
 const RESOLVED_STYLE = new Style({
@@ -44,38 +44,30 @@ const UNRESOLVED_STYLE = new Style({
   fill: new Fill({ color: 'rgba(150, 150, 150, 0.35)' }),
   stroke: new Stroke({ color: '#888', width: 1 }),
 });
-const PROBLEMATIC_STYLE = new Style({
-  fill: new Fill({ color: 'rgba(220, 38, 38, 0.55)' }),
-  stroke: new Stroke({ color: '#dc2626', width: 1.5 }),
-});
-
-function styleForFeature(feature: FeatureLike, resolvedIds: Set<string>, problematicIds: Set<string>): Style {
+function styleForFeature(feature: FeatureLike, resolvedIds: Set<string>): Style {
   const osmId = String(feature.get('osm_id') ?? '');
-  if (problematicIds.has(osmId)) return PROBLEMATIC_STYLE;
   return resolvedIds.has(osmId) ? RESOLVED_STYLE : UNRESOLVED_STYLE;
 }
 
-export function LoenenLiveMap({ buildings, resolvedIds, problematicIds, onBuildingClick }: LoenenLiveMapProps) {
+export function LoenenLiveMap({ buildings, resolvedIds, onBuildingClick, attributions }: LoenenLiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const sourceRef = useRef<VectorSource | null>(null);
   // The style callback below is captured once at map creation; refs keep it
-  // reading the current sets instead of whatever they were at creation.
+  // reading the current set instead of whatever it was at creation.
   const resolvedIdsRef = useRef(resolvedIds);
   resolvedIdsRef.current = resolvedIds;
-  const problematicIdsRef = useRef(problematicIds);
-  problematicIdsRef.current = problematicIds;
 
   // Map + basemap + view: created once, fixed to the Loenen extent.
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const source = new VectorSource();
+    const source = new VectorSource({ attributions });
     sourceRef.current = source;
 
     const vectorLayer = new VectorLayer({
       source,
-      style: (feature) => styleForFeature(feature, resolvedIdsRef.current, problematicIdsRef.current),
+      style: (feature) => styleForFeature(feature, resolvedIdsRef.current),
     });
 
     const extent = boundingExtent([
@@ -122,10 +114,10 @@ export function LoenenLiveMap({ buildings, resolvedIds, problematicIds, onBuildi
     source.addFeatures(features);
   }, [buildings]);
 
-  // Resolved/unresolved/problematic styling: re-applied on the existing features when either set changes.
+  // Resolved/unresolved styling: re-applied on the existing features when the set changes.
   useEffect(() => {
     sourceRef.current?.changed();
-  }, [resolvedIds, problematicIds]);
+  }, [resolvedIds]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 }

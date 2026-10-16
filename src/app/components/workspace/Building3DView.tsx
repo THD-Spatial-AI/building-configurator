@@ -5,7 +5,7 @@
 // Escape backs out one level at a time — first the open surface, then the
 // building itself, each asking first when it has unsaved edits.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from 'lucide-react';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
@@ -31,6 +31,7 @@ import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
+import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 
@@ -50,11 +51,22 @@ export interface Building3DViewProps {
   services: ConfiguratorServices;
   /** The period a BuEM run covers. Without it a run covers 2018. */
   runContext?: RunContext;
+  /**
+   * The building's stored demand: undefined while it loads, null when none is
+   * stored. Hold it stable; a new object resets the energy card to it.
+   */
+  demandProfile?: BuildingDemandProfile | null;
+  /** Where the building's series CSV downloads from. Without it there is no download. */
+  seriesCsvUrl?: string;
+  /** Credits for the building's data, as its licences require; shown in a corner of the 3D view. */
+  attribution?: ReactNode;
 }
 
-export function Building3DView({ building, geometry, onExit, services, runContext }: Building3DViewProps) {
+export function Building3DView({
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution,
+}: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
-  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext });
+  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
@@ -134,14 +146,14 @@ export function Building3DView({ building, geometry, onExit, services, runContex
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
   // what makes that drag stutter.
-  const { buildingLabel, chartTimeseries, setGroundTruthTimeseries } = model;
+  const { chartTimeseries, setGroundTruthTimeseries } = model;
   const profileBar = useMemo(() => (
     <LoadProfileBar
-      buildingId={buildingLabel}
       timeseries={chartTimeseries ?? undefined}
+      seriesCsvUrl={seriesCsvUrl}
       onGroundTruthChange={setGroundTruthTimeseries}
     />
-  ), [buildingLabel, chartTimeseries, setGroundTruthTimeseries]);
+  ), [chartTimeseries, seriesCsvUrl, setGroundTruthTimeseries]);
   const detached = isEnvelopeDetached(surfaces, envelopeIds);
 
   const { undo, undoLabel, hasUnsavedChanges, toBuildingState } = model;
@@ -291,7 +303,7 @@ export function Building3DView({ building, geometry, onExit, services, runContex
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-xs leading-snug text-muted-foreground">
               {detached
-                ? 'This geometry belongs to a different City2TABULA generation than the envelope, so no surface can be matched to it. Reload the buildings to fetch both from the current one.'
+                ? 'This building\'s saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.'
                 : 'City2TABULA holds no 3D geometry for this building.'}
             </div>
           )}
@@ -306,7 +318,13 @@ export function Building3DView({ building, geometry, onExit, services, runContex
           {invalidIds.size > 0 && (
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm">
               <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-              {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} a simulation would reject
+              {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} with no area, left out of a simulation
+            </div>
+          )}
+
+          {attribution && (
+            <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-white/90 px-2 py-1 text-right text-[10px] leading-snug text-slate-500 shadow-sm">
+              {attribution}
             </div>
           )}
         </div>

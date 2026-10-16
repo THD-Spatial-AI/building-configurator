@@ -8,131 +8,20 @@ import {
   SelectInput, NumberInput, FieldLabel,
   ToggleSwitch, FieldRow, ScrollHintContainer,
 } from '@/app/components/BuildingConfigurator/shared/ui';
-import { cn } from '@/lib/utils';
 import {
   BUILDING_TYPE_OPTIONS,
   COUNTRY_OPTIONS,
   MIN_CONSTRUCTION_YEAR,
+  OUTPUT_PROFILES,
+  isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
-// 'conditions' (Site & Surroundings) and 'ignis' (Refurbishment Level) are not
-// part of this click-to-expand card system — they're short enough to render
-// inline, always visible, instead of costing the user an extra click. See
-// BuildingEditor's `inlineSections`.
-type SectionKey = 'identity' | 'ventilation' | 'thermal' | 'solver';
-
-// ─── Attached-neighbours visual picker ────────────────────────────────────────
-
-type NeighbourCode = 'B_Alone' | 'B_N1' | 'B_N2';
-
-const NEIGHBOUR_DEFS: Array<{ value: NeighbourCode; label: string; subtitle: string }> = [
-  { value: 'B_Alone', label: 'Detached',      subtitle: 'No shared walls' },
-  { value: 'B_N1',    label: 'Semi-detached', subtitle: 'One shared wall' },
-  { value: 'B_N2',    label: 'Terraced',      subtitle: 'Two shared walls' },
-];
-
-/** Front-elevation SVG for each neighbour configuration.
- *  Subject building is drawn in the brand primary; neighbours in neutral gray. */
-function NeighbourSvg({ type, active }: { type: NeighbourCode; active: boolean }) {
-  const subject  = active ? '#2f5d8a' : '#64748b';
-  const subjectR = active ? 'rgba(47,93,138,0.82)' : 'rgba(100,116,139,0.8)';
-  const neigh    = '#e2e8f0';
-  const neighR   = '#cbd5e1';
-  const ground   = '#cbd5e1';
-
-  return (
-    <svg viewBox="0 0 90 52" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-      {/* Ground line */}
-      <line x1="0" y1="47" x2="90" y2="47" stroke={ground} strokeWidth="1.5" />
-
-      {type === 'B_Alone' && (
-        /* Single house centred, open space either side */
-        <>
-          <rect x="25" y="27" width="40" height="20" fill={subject} />
-          <polygon points="25,27 45,12 65,27" fill={subjectR} />
-          {/* Small window */}
-          <rect x="36" y="33" width="8" height="7" fill="white" opacity="0.25" rx="1" />
-        </>
-      )}
-
-      {type === 'B_N1' && (
-        /* Subject on the left, one neighbour sharing the right wall */
-        <>
-          {/* Neighbour (right) — drawn first so subject wall overlaps shared edge */}
-          <rect x="46" y="29" width="30" height="18" fill={neigh} />
-          <polygon points="46,29 61,17 76,29" fill={neighR} />
-          <rect x="54" y="34" width="7" height="6" fill="white" opacity="0.3" rx="1" />
-          {/* Subject (left) */}
-          <rect x="10" y="27" width="36" height="20" fill={subject} />
-          <polygon points="10,27 28,12 46,27" fill={subjectR} />
-          <rect x="19" y="33" width="8" height="7" fill="white" opacity="0.25" rx="1" />
-          {/* Shared wall seam */}
-          <line x1="46" y1="27" x2="46" y2="47" stroke="white" strokeWidth="1" strokeOpacity="0.35" />
-        </>
-      )}
-
-      {type === 'B_N2' && (
-        /* Neighbours on both sides, subject in the middle */
-        <>
-          {/* Left neighbour */}
-          <rect x="4" y="29" width="24" height="18" fill={neigh} />
-          <polygon points="4,29 16,19 28,29" fill={neighR} />
-          {/* Right neighbour */}
-          <rect x="60" y="29" width="24" height="18" fill={neigh} />
-          <polygon points="60,29 72,19 84,29" fill={neighR} />
-          {/* Subject (centre) */}
-          <rect x="28" y="27" width="32" height="20" fill={subject} />
-          <polygon points="28,27 44,12 60,27" fill={subjectR} />
-          <rect x="37" y="33" width="8" height="7" fill="white" opacity="0.25" rx="1" />
-          {/* Shared wall seams */}
-          <line x1="28" y1="27" x2="28" y2="47" stroke="white" strokeWidth="1" strokeOpacity="0.35" />
-          <line x1="60" y1="27" x2="60" y2="47" stroke="white" strokeWidth="1" strokeOpacity="0.35" />
-        </>
-      )}
-    </svg>
-  );
-}
-
-/** Three-card visual picker for the attached-neighbours TABULA code. */
-function NeighbourPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <FieldLabel tip="Whether the building shares walls with adjacent buildings. Affects transmission heat loss via the shared wall correction factor.">
-        Attached neighbours
-      </FieldLabel>
-      <div className="grid grid-cols-3 gap-2">
-        {NEIGHBOUR_DEFS.map((opt) => {
-          const active = value === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onChange(opt.value)}
-              className={cn(
-                'flex cursor-pointer flex-col rounded-lg border p-2 text-center transition-all',
-                active
-                  ? 'border-primary/50 bg-primary/5 shadow-sm ring-1 ring-primary/20'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80',
-              )}
-            >
-              <NeighbourSvg type={opt.value} active={active} />
-              <p className={cn(
-                'mt-1.5 text-[10px] font-semibold leading-tight',
-                active ? 'text-primary' : 'text-slate-700',
-              )}>
-                {opt.label}
-              </p>
-              <p className="mt-0.5 text-[9px] leading-tight text-slate-400">{opt.subtitle}</p>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
+// 'ignis' (Refurbishment Level) is not part of this click-to-expand card
+// system: it renders inline, always visible. See BuildingEditor's `inlineSections`.
+type SectionKey = 'identity' | 'occupancy' | 'outputs' | 'equipment' | 'ventilation' | 'thermal' | 'solver';
 
 const MASS_CLASSES = [
   { value: 'VeryLight', label: 'Very Light — steel/timber frame' },
@@ -227,17 +116,6 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
           {volume} <span className="text-[10px] font-normal text-muted-foreground">m³</span>
         </span>
       </div>
-    </div>
-  );
-}
-
-function ConditionsSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <NeighbourPicker
-        value={general.Code_AttachedNeighbours}
-        onChange={(v) => setGen('Code_AttachedNeighbours', v)}
-      />
     </div>
   );
 }
@@ -461,6 +339,9 @@ function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope 
 /** Colour dot for each section — mirrors the element-dot pattern used in surfaces. */
 const SECTION_COLORS: Record<SectionKey, string> = {
   identity:    '#2f5d8a',
+  occupancy:   '#16a34a',
+  outputs:     '#ca8a04',
+  equipment:   '#db2777',
   ventilation: '#0891b2',
   thermal:     '#dc2626',
   solver:      '#7c3aed',
@@ -468,6 +349,9 @@ const SECTION_COLORS: Record<SectionKey, string> = {
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   identity:    'Basic info',
+  occupancy:   'Occupancy',
+  outputs:     'Results to compute',
+  equipment:   'Appliances',
   ventilation: 'Air & Ventilation',
   thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
@@ -477,10 +361,25 @@ const SECTION_LABELS: Record<SectionKey, string> = {
 function sectionSummary(key: SectionKey, general: Record<string, any>): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
+    case 'occupancy':   return occupancySummary(general);
+    case 'outputs':     return `${OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length} of ${OUTPUT_PROFILES.length} profiles`;
+    case 'equipment': {
+      const overrides = Object.keys(general.equipment).length;
+      return overrides > 0 ? `${overrides} set by hand` : 'Defaults';
+    }
     case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
     case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Sparse';
   }
+}
+
+function occupancySummary(general: Record<string, any>): string {
+  if (isServiceBuildingType(general.buildingType)) {
+    return general.capacity ? `${general.capacity} occupants` : 'Capacity from floor area';
+  }
+  const units = general.residential_units;
+  const dwellings = units ? `${units} dwelling${units === 1 ? '' : 's'}` : 'Dwellings not set';
+  return general.num_persons ? `${dwellings} · ${general.num_persons} per dwelling` : dwellings;
 }
 
 /** Renders the content body for a given section key. */
@@ -493,6 +392,9 @@ function SectionBody({
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
+    case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} />;
+    case 'outputs':     return <OutputsSection     general={general} setGen={setGen} />;
+    case 'equipment':   return <EquipmentSection   general={general} setGen={setGen} />;
     case 'ventilation': return <VentilationSection general={general} setGen={setGen} />;
     case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
@@ -524,10 +426,9 @@ interface BuildingEditorProps {
  *  - Section active -> inactive sections collapse to compact chips at the top;
  *    the active section fills the remaining height with a scrollable body.
  *
- * Site & Surroundings and Refurbishment Level sit outside that click-to-expand
- * system entirely — both are short (a handful of fields/toggles), so they're
- * pinned inline, always visible, right under the header. Forcing a click to
- * reveal a couple of fields cost more than it saved.
+ * Refurbishment Level sits outside that click-to-expand system, pinned inline
+ * under the header: it is short enough that a click to reveal it costs more
+ * than it saves.
  */
 export function BuildingEditor({
   general, setGen, mode,
@@ -535,14 +436,18 @@ export function BuildingEditor({
   avgUValue = 0, onOpenEnvelope,
   hideIdentity = false,
 }: BuildingEditorProps) {
-  const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
+  const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity'];
-  const EXPERT_SECTIONS: SectionKey[] = ['ventilation', 'thermal', 'solver'];
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'outputs'];
+  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'ventilation', 'thermal', 'solver'];
+  const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
     : ALL_SECTIONS
-  ).filter((key) => !hideIdentity || key !== 'identity');
+  ).filter((key) => (!hideIdentity || key !== 'identity') && (!service || key !== 'equipment'));
+
+  // A building type change can hide the open section (appliances on a service building).
+  const activeSection = openSection && visibleSections.includes(openSection) ? openSection : null;
 
   const toggle = (id: SectionKey) =>
     setActiveSection((prev) => (prev === id ? null : id));
@@ -562,17 +467,10 @@ export function BuildingEditor({
     </div>
   );
 
-  // ── Site & Surroundings + Refurbishment Level — always visible, no click needed ──
+  // ── Refurbishment Level — always visible, no click needed ──
   const inlineSections = (
     <div className="flex shrink-0 flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <div>
-        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
-          <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#64748b' }} />
-          Site &amp; Surroundings
-        </p>
-        <ConditionsSection general={general} setGen={setGen} />
-      </div>
-      <div className="border-t border-slate-200 pt-4">
         <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
           <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
           Refurbishment Level

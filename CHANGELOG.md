@@ -4,6 +4,41 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.7.0] - 2026-10-16
+
+This release breaks the host interface in three places, and its building block needs a buem-gateway that accepts the v6-draft request schema:
+
+- `runBuemBuilding` resolves to a `BuildingDemandProfile` instead of `{ osm_id, buem: { thermal_load_profile } }`.
+- `BuemBuildingRunRequest` gains `outputs`, which the transport forwards as `properties.buem.outputs`, and `toBuem` returns `{ building, construction_year, outputs, solver }`.
+- `BuemBuildingRunRequest.model_id`, deprecated in 0.6.2, is removed.
+
+### Changed
+
+- `ConfiguratorServices.runBuemBuilding` resolves to the building's stored demand, `{ building_ref, series }`, the same body as the `demandProfile` prop. `BuemBuildingRunResponse` is now that type. A run updates the energy card from the returned totals and no longer holds an hourly series in the browser.
+- The building block follows buem-gateway's v6-draft request schema. Building types are BuEM's four residential codes and eight service types; Retail, which BuEM has no type for, is gone. Residential buildings send their household inputs (dwellings, occupants, household type, region code, cooking carrier, hot water, appliances) and service buildings send a capacity and none of them. `setback_profile` is sent for every building. `neighbour_status` and `n_storeys` are no longer sent, the attached-neighbours picker is removed, and a reopened stored building shows the default storey count.
+- A run refuses a multi-family house or apartment block with no number of dwellings, and says so, since BuEM rejects it.
+- The building block no longer carries `construction_period`, which the contract defines as a TABULA class code, not the year it held. The year is stored beside the block as `construction_year`, and a block stored before 0.7.0 still reopens with the year from `construction_period`.
+- A run no longer refuses a building with a zero-area surface. Such surfaces are left out of the BuEM envelope, since BuEM rejects them, in a run, in `toBuem` and in the BuEM GeoJSON export, so a building stored or exported this way reopens without them. The 3D view still marks them.
+
+### Added
+
+- `Building3DView` takes an optional `demandProfile` prop, the building's stored demand as the host's backend summarises it (`BuildingDemandProfile` and `DemandSeries` types). Its annual totals fill the energy card, with the total excluding kitchen gas as BuEM does.
+- `Building3DView` takes an optional `seriesCsvUrl` prop; the load profile's Download link points at it.
+- `Building3DView` takes an optional `attribution` prop, credits for the building's data shown in a corner of the 3D view.
+- Expert mode edits what BuEM reads beyond the envelope. Occupancy: dwellings (prefilled from TABULA for MFH and AB), occupants per dwelling, household type, Dutch region code, cooking carrier, hot water and heating setback; a service building shows capacity and setback. Results to compute: each of the five load profiles off, annual or hourly. Appliances: each of BuEM's 37 appliances set to default, yes or no, with a TV count of 0 to 3.
+- The cooking carrier starts at "Model default", which sends no `cooking_carrier`, so a host's model-wide setting applies; electric, gas or not reported can be set per building.
+- A wall can be marked as shared with a neighbouring building, sent as `b_transmission` 0, which BuEM treats as a party wall.
+- `isEnvelopeDetached` is exported, so a host can tell when a saved envelope matches none of the current City2TABULA surfaces. The view's notice for that case no longer tells the user to reload, which only the demo could do.
+
+### Fixed
+
+- The package shipped type declarations for the demo shell (`dist/demo/*.d.ts`, `dist/demoClient.d.ts`). They are no longer emitted.
+
+### Removed
+
+- The demo shell's connection to a live EnerPlanET backend: its dev login, the `/api` proxy and the weather CORS shim (`demo-proxy/`). `npm run dev` runs on bundled captures, including real ignis responses for the Loenen buildings. Not part of the package.
+- The load profile's client-side download, which zipped the hourly series held in the browser. The download now comes only from `seriesCsvUrl`; without it there is none. Uploading a profile is unchanged.
+
 ## [0.6.2] - 2026-10-12
 
 ### Fixed
@@ -70,6 +105,7 @@ Each version's GitHub release entry carries the full notes.
 
 Versions before 0.4.0 have no changelog entries; see their git tags.
 
+[0.7.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.7.0
 [0.6.2]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.2
 [0.6.1]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.1
 [0.6.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.0

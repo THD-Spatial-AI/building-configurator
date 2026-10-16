@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { yearToConstructionPeriod } from './buildingOptions';
+import { EQUIPMENT_GROUPS, TV_IDS, yearToConstructionPeriod } from './buildingOptions';
 
 describe('yearToConstructionPeriod', () => {
   it('maps a year to the TABULA period band it falls in, at the boundaries', () => {
@@ -17,5 +17,22 @@ describe('yearToConstructionPeriod', () => {
   it('resolves every year, including ones outside the demo range', () => {
     expect(yearToConstructionPeriod(1700)).toBe('Pre-1919');
     expect(yearToConstructionPeriod(2100)).toBe('Post-2010');
+  });
+});
+
+/** building.equipment property names in buem-gateway's v6-draft request schema. */
+const CONTRACT_APPLIANCES = [
+  'air_fryer', 'answer_machine', 'cassette_cd_player', 'chest_freezer', 'clock', 'coffee_machine',
+  'cordless_telephone', 'dish_washer', 'ev_charger', 'fax', 'fridge_freezer', 'hi_fi', 'hob', 'iron',
+  'kettle', 'laptop', 'lighting', 'microwave', 'oven', 'personal_computer', 'printer', 'refrigerator',
+  'robot_vacuum', 'small_cooking_group', 'smart_speaker', 'streaming_stick', 'tumble_dryer', 'tv_1',
+  'tv_2', 'tv_3', 'tv_receiver_box', 'upright_freezer', 'vacuum', 'vcr_dvd', 'washer_dryer',
+  'washing_machine', 'wifi_router',
+];
+
+describe('EQUIPMENT_GROUPS', () => {
+  it('offers every appliance the contract accepts, once', () => {
+    const offered = [...EQUIPMENT_GROUPS.flatMap((group) => group.items.map((item) => item.id)), ...TV_IDS];
+    expect([...offered].sort()).toEqual(CONTRACT_APPLIANCES);
   });
 });

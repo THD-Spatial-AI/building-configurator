@@ -7,7 +7,6 @@ import {
   mergeUploadedData,
   parseCsv,
   pickUpdatedRows,
-  toProfileZip,
   type DatasetByResolution,
   type EnergyTotals,
   type EnergyType,
@@ -16,7 +15,6 @@ import {
 } from '../../../lib/loadProfile';
 
 interface UseLoadProfileStateArgs {
-  buildingId: string;
   initialTimeseries?: LoadDataPoint[];
   mode?: 'basic' | 'expert';
   /** Fixes the resolution, for a caller that offers no resolution choice. */
@@ -28,7 +26,6 @@ interface UseLoadProfileStateArgs {
 
 /** Owns viewer-specific state while delegating parsing and aggregation to pure helpers. */
 export function useLoadProfileState({
-  buildingId,
   initialTimeseries,
   mode = 'basic',
   initialResolution,
@@ -120,22 +117,10 @@ export function useLoadProfileState({
     reader.readAsText(file);
   };
 
-  const handleDownload = () => {
-    if (!hasData) return;
-    const blob = new Blob([toProfileZip(data, resolution) as BlobPart], { type: 'application/zip' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${buildingId.toLowerCase().replace(/\s+/g, '-')}-load-profiles-${resolution}.zip`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return {
     data,
     derivedData,
     energyType,
-    handleDownload,
     handleFileUpload,
     hasData,
     resolution,

@@ -11,10 +11,9 @@
 // - thematic      — building identity, envelope and model outputs
 // - technologies  — installed technology configuration nodes
 //
-// Contract: buem-gateway schemas/v3..v5, whose building and envelope_element
-// definitions are identical across the three. An exported FeatureCollection
-// omits properties.buem.weather, which v5 and v6-draft require, and carries
-// properties.techs, which no version defines.
+// Contract: buem-gateway schemas/v6-draft. An exported FeatureCollection omits
+// properties.buem.weather, which v6-draft requires whenever heating or cooling
+// is selected, and carries properties.techs, which no version defines.
 
 export type ModelDataPath = string | readonly string[];
 
@@ -34,11 +33,14 @@ export const MODEL_DATA_MAP = {
         'properties.buem.building.building_type',                         // BUEM response shape
         'properties.buem.building.type',                                  // EnerPlanET topology shape
       ],
-      constructionYear:  'properties.buem.building.construction_period',   // holds a plain year string, see buemAdapter
+      constructionYear: [
+        'properties.buem.construction_year',                              // beside the block, see buemAdapter
+        'properties.buem.building.construction_period',                   // a year in blocks stored before 0.7.0
+      ],
       country:            'properties.buem.building.country',
       floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
       roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
-      storeys:            'properties.buem.building.n_storeys',
+      storeys:            'properties.buem.building.n_storeys',          // deprecated in v6-draft; read from older sources, never written
     },
 
     // Building parameters beyond the descriptor, each absent unless set.
@@ -47,8 +49,21 @@ export const MODEL_DATA_MAP = {
       nAirUse:           'properties.buem.building.thermal.n_air_use',          // { value, unit: "1/h" }
       cM:                'properties.buem.building.thermal.c_m',                // { value, unit: "kJ/(m2K)" }
       thermalClass:      'properties.buem.building.thermal.thermal_class',      // light | medium | heavy
-      neighbourStatus:   'properties.buem.building.neighbour_status',           // B_Alone | B_N1 | B_N2
       useMilp:           'properties.buem.solver.use_milp',                     // boolean
+    },
+
+    // Household inputs and output selection, keyed by their BuEM names.
+    household: {
+      residential_units: 'properties.buem.building.residential_units',
+      num_persons:       'properties.buem.building.num_persons',
+      archetype:         'properties.buem.building.archetype',
+      region_code:       'properties.buem.building.region_code',
+      cooking_carrier:   'properties.buem.building.cooking_carrier',
+      include_dhw:       'properties.buem.building.include_dhw',
+      setback_profile:   'properties.buem.building.setback_profile',
+      capacity:          'properties.buem.building.capacity',
+      equipment:         'properties.buem.building.equipment',
+      outputs:           'properties.buem.outputs',
     },
 
     // Envelope element list (properties.buem.building.envelope.elements[])

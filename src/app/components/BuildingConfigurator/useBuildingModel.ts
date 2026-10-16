@@ -13,12 +13,11 @@ import type { BuildingElement } from './configure/model/buildingElements';
 import {
   isElementEditable,
   normalizeElementRecord,
-  hasInvalidArea,
 } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
-import { yearToConstructionPeriod } from './shared/buildingOptions';
+import { requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, TechnologyState, ThermalSummary } from '../../lib/buemAdapter';
 import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
 import type { IgnisState } from '../../lib/ignisAdapter';
@@ -31,6 +30,7 @@ import {
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
+import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
@@ -123,14 +123,10 @@ function computeEnergyTotals(
   timeseries: LoadDataPoint[] | null,
   thermalSummary: ThermalSummary | null,
 ): EnergyTotals {
-  // A live BuEM run always populates timeseries and thermalSummary together
-  // (see toSimulationResult), so whenever real per-hour dhw/kitchen data
-  // exists, thermalSummary — the authoritative source for these two and for
-  // the combined total below — exists alongside it. An uploaded ground-truth
-  // CSV has no dhw/kitchen column and no thermalSummary either, so both
-  // correctly fall back to '—' rather than a misleading 0.
+  // dhw, kitchen and the combined total come only from a summary. An uploaded
+  // ground-truth CSV has no such columns and no summary, so they read '—'.
   const dhw     = thermalSummary ? formatKwh(thermalSummary.dhwKwh) : '—';
-  const kitchen = thermalSummary ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
+  const kitchen = thermalSummary?.kitchenGasKwh !== undefined ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
   const total   = thermalSummary ? formatKwh(thermalSummary.totalEnergyKwh) : '—';
 
   if (timeseries && timeseries.length > 0) {
@@ -232,12 +228,17 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
  * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
  * caller that shows no such figure: the heat demand service then only serves
  * TABULA variants and their U-values, and no request is made per envelope
- * edit. `runContext` is the period a BuEM run covers.
+ * edit. `runContext` is the period a BuEM run covers. `demandProfile` is the
+ * building's stored demand; when present its totals replace the building's own.
  */
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext }: { estimateHeatDemand?: boolean; runContext?: RunContext } = {},
+  { estimateHeatDemand = true, runContext, demandProfile }: {
+    estimateHeatDemand?: boolean;
+    runContext?: RunContext;
+    demandProfile?: BuildingDemandProfile | null;
+  } = {},
 ) {
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
@@ -285,9 +286,6 @@ export function useBuildingModel(
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG, tech: initialTech });
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
-  // Hourly timeseries from the most recent live buem-gateway run this session — takes
-  // priority over whatever timeseries the buildingData prop originally carried.
-  const [modelTimeseries, setModelTimeseries] = useState<LoadDataPoint[] | null>(null);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
   // A user-uploaded load profile, if any — outranks BuEM as the annual
   // totals' source, since it's real data rather than a model output.
@@ -344,7 +342,6 @@ export function useBuildingModel(
     const nextTech = technologyStateFrom(buildingData);
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG, tech: nextTech });
     setEnergyTotals(nextTotals);
-    setModelTimeseries(null);
     setUploadError(null);
     setPvArrays(nextTech.pvArrays);
     setPvTechnology(nextTech.pvTechnology);
@@ -353,6 +350,11 @@ export function useBuildingModel(
     setOtherTechIds(nextTech.otherTechIds);
     setBatteryConfig(nextTech.battery);
   }, [buildingData]);
+
+  // After the effect above, so a stored profile wins over the building's own summary.
+  useEffect(() => {
+    if (demandProfile) setEnergyTotals(computeEnergyTotals(null, toThermalSummary(demandProfile)));
+  }, [demandProfile]);
 
   const tech: TechnologyState = { pvTechnology, pvArrays, battery: batteryConfig, otherTechIds };
   const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig, tech }) !== JSON.stringify(savedState);
@@ -395,6 +397,16 @@ export function useBuildingModel(
       if (isReload && existingStateData.A_C_Ref_Input) {
         const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
         if (!cancelled) setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
+      }
+
+      // TABULA's dwelling count prefills BuEM's residential_units: on load only
+      // when the building brings none, on a hand-edited classification always.
+      // 0 means TABULA gives no count.
+      const dwellings = existingStateData.n_Apartment;
+      if (!cancelled && dwellings) {
+        setGeneralRaw((prev) => (
+          prev.residential_units && !isReload ? prev : { ...prev, residential_units: dwellings }
+        ));
       }
 
       const state = initIgnisState(country, type, period, variants, ignisSeedBuilding(general, nextElements, type, year, country));
@@ -595,18 +607,12 @@ export function useBuildingModel(
   const buildIdentity = () => runIdentity(buildingData, general);
 
   /**
-   * Commits the working draft, then runs a full BuEM simulation through the
-   * EnerPlanET backend's per-building BuEM endpoint and feeds the resulting
-   * load profile into the overview chart. See enerplanetApi.ts's
-   * runBuildingSimulation doc for the request shape and known gaps.
+   * Commits the working draft, then runs it through BuEM via the host and
+   * shows the stored totals the host returns.
    */
   const runSimulation = async () => {
-    const invalid = Object.values(elements).filter(hasInvalidArea);
-    if (invalid.length > 0) {
-      setUploadError(
-        `${invalid.length} surface${invalid.length > 1 ? 's have' : ' has'} no area (${invalid.map((el) => el.label).join(', ')}) — `
-        + 'fix or delete them in the Envelope view before running a simulation.',
-      );
+    if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
+      setUploadError(`A ${general.buildingType} needs its number of dwellings. Set it under Occupancy before running a simulation.`);
       return;
     }
 
@@ -621,8 +627,7 @@ export function useBuildingModel(
         setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;
       }
-      setModelTimeseries(result.timeseries);
-      setEnergyTotals(computeEnergyTotals(result.timeseries, result.thermalSummary));
+      setEnergyTotals(computeEnergyTotals(null, toThermalSummary(result)));
     } finally {
       setIsRunningSimulation(false);
     }
@@ -660,8 +665,8 @@ export function useBuildingModel(
         avgUValue,
         heatDemandKwhM2a: ignis?.result?.qHnd ?? null,
       });
-      // Same cast the profile download needs: fflate's Uint8Array is not
-      // narrowed to an ArrayBuffer-backed view, which BlobPart requires.
+      // fflate's Uint8Array is not narrowed to an ArrayBuffer-backed view,
+      // which BlobPart requires.
       saveFile(zip as BlobPart, `building-${identity.id}-tables.zip`, 'application/zip');
     } catch (err) {
       setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -747,7 +752,7 @@ export function useBuildingModel(
     ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
     : otherTechIds.filter((id) => id !== 'battery');
 
-  const chartTimeseries = modelTimeseries ?? thematicData?.timeseries ?? buildingData?.timeseries ?? null;
+  const chartTimeseries = thematicData?.timeseries ?? buildingData?.timeseries ?? null;
 
   /** The building as opened, with the current or last saved edits written into it. */
   const toBuildingState = (source: 'current' | 'saved'): BuildingState | undefined => {
@@ -842,8 +847,17 @@ export function withEdits(
       n_air_use:               general.n_air_use,
       c_m:                     general.c_m,
       massClass:               general.massClass,
-      Code_AttachedNeighbours: general.Code_AttachedNeighbours,
       use_milp:                general.use_milp,
+      residential_units:       general.residential_units,
+      num_persons:             general.num_persons,
+      archetype:               general.archetype,
+      region_code:             general.region_code,
+      cooking_carrier:         general.cooking_carrier,
+      include_dhw:             general.include_dhw,
+      setback_profile:         general.setback_profile,
+      capacity:                general.capacity,
+      equipment:               general.equipment,
+      outputs:                 general.outputs,
     },
   };
 }

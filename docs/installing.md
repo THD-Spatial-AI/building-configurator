@@ -50,6 +50,9 @@ import '@thd-spatial-ai/building-configurator/styles.css';
 
 import axios from '@/lib/axios';
 
+// Runs before the model's first save are stored under a draft id the host mints.
+const draftId = crypto.randomUUID();
+
 // Module constant: one identity for the life of the page.
 const services: ConfiguratorServices = {
   fetchMatchingVariants: (country, typeCode, year) =>
@@ -60,7 +63,7 @@ const services: ConfiguratorServices = {
   calculateHeatDemand: (code, inputs) =>
     axios.post(`/v2/ignis/calculate/${code}`, inputs).then((r) => r.data.data),
   runBuemBuilding: (request) =>
-    axios.post('/v1/buem/building', request).then((r) => r.data),
+    axios.post(`/drafts/${draftId}/buildings/${request.osm_id}/buem`, request).then((r) => r.data),
 };
 
 export function BuildingView({ building, geometryBuilding, onExit }) {
@@ -89,6 +92,9 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `services` | The four calls below |
 | `onExit(building)` | Called when the user leaves; receives the edited building, or the one passed in when nothing changed |
 | `runContext` | Optional. `{ startDate, endDate }` (RFC 3339 dates): the period a BuEM run covers. Without it, a run covers 2018 |
+| `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
+| `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
+| `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
     Keep the `services` object and each function in a module constant, a
@@ -106,7 +112,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchMatchingVariants(country, typeCode, year)` | TABULA variants for a classification. `typeCode` is already a TABULA code (`SFH`, `TH`, `MFH`, `AB`) | 8 s |
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
-| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, including `solver` | 15 s |
+| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.
@@ -146,6 +152,9 @@ The surface ids in the geometry response are the envelope element ids, which is
 what lets a click in the model resolve to the surface being edited. Geometry
 from a different City2TABULA generation than the envelope matches nothing, and
 the view reports that rather than rendering a model nothing can be selected in.
+Saving such a building keeps its old ids; to move it to the current generation,
+rebuild its `BuildingState` from current City2TABULA data. A host detects the
+case with `isEnvelopeDetached(surfaces, new Set(Object.keys(building.envelope)))`.
 
 ## Building a BuildingState
 
@@ -165,9 +174,12 @@ Two exported functions build one:
 ## Storing an edited building
 
 `onExit` hands back the edited `BuildingState`. `toBuem(building)` turns it
-into `{ building, solver }`, the same two blocks a run of that building sends
-as `BuemBuildingRunRequest.building` and `.solver`. To reopen, pass the stored
-object as `properties.buem` of a Feature to `adaptBuemFeature`:
+into `{ building, construction_year, outputs, solver }`: the same three blocks
+a run of that building sends as `BuemBuildingRunRequest.building`, `.outputs`
+and `.solver`, plus the construction year, which BuEM's `construction_period`
+cannot hold. Store the whole object and send BuEM only its blocks. To reopen,
+pass the stored object as `properties.buem` of a Feature to
+`adaptBuemFeature`:
 
 ```ts
 import { adaptBuemFeature, toBuem } from '@thd-spatial-ai/building-configurator';
@@ -182,16 +194,25 @@ const reopened = adaptBuemFeature({
 });
 ```
 
-`building` carries the building parameters (identity, floor area, storeys, room
-height, air change rates, thermal mass, attached neighbours) and every surface
-with its name. `solver.use_milp` records whether BuEM solves with MILP. Neither
-carries the PV arrays or the battery.
+`building` carries the building parameters (identity, total floor area, room
+height, air change rates, thermal mass), the household inputs (dwellings,
+occupants, household type, appliances; capacity for a service building) and
+every surface with its name. `outputs` records which load profiles BuEM
+computes, and `solver.use_milp` whether it solves with MILP. None of the three
+carries the PV arrays, the battery or the storey count: a reopened building
+keeps its total floor area and shows the default storey count.
+
+When `outputs` selects neither heating nor cooling, `building` has no envelope
+and the run needs no weather.
 
 !!! warning "PV and battery"
     Keep `edited.technologyState` beside the blocks and set it on the reopened
     state (`{ ...reopened, technologyState }`), or they reopen at their
     defaults.
 
-!!! warning "Forward the solver"
-    `runBuemBuilding` receives `request.solver`. A transport that drops it runs
-    BuEM with its default solver whatever the user chose.
+!!! warning "Forward solver and outputs"
+    `runBuemBuilding` receives `request.solver` and `request.outputs`, to be
+    sent as `properties.buem.solver` and `properties.buem.outputs`. A transport
+    that drops `solver` runs BuEM with its default solver; one that drops
+    `outputs` gets annual summaries only, with no hourly profile to chart. Both
+    need a buem-gateway that accepts the v6-draft request schema.
