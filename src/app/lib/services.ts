@@ -38,11 +38,6 @@ export interface BuemBuildingRunRequest {
   start_date: string;
   end_date: string;
   resolution: number;
-  /**
-   * @deprecated Never set. buem-gateway only logs it; kept optional so a host
-   * transport that reads it still compiles. Removed in the next minor release.
-   */
-  model_id?: string;
 }
 
 /** The building's stored demand after the run, the same body as its demand-profile route. */
