@@ -87,6 +87,8 @@ export const EQUIPMENT_GROUPS: { label: string; items: { id: string; label: stri
     { id: 'microwave', label: 'Microwave' },
     { id: 'kettle', label: 'Kettle' },
     { id: 'small_cooking_group', label: 'Small cooking appliances' },
+    { id: 'air_fryer', label: 'Air fryer' },
+    { id: 'coffee_machine', label: 'Coffee machine' },
   ] },
   { label: 'Cold', items: [
     { id: 'fridge_freezer', label: 'Fridge-freezer' },
@@ -101,6 +103,7 @@ export const EQUIPMENT_GROUPS: { label: string; items: { id: string; label: stri
     { id: 'dish_washer', label: 'Dishwasher' },
     { id: 'iron', label: 'Iron' },
     { id: 'vacuum', label: 'Vacuum cleaner' },
+    { id: 'robot_vacuum', label: 'Robot vacuum' },
   ] },
   { label: 'Electronics', items: [
     { id: 'tv_receiver_box', label: 'TV receiver box' },
@@ -109,6 +112,10 @@ export const EQUIPMENT_GROUPS: { label: string; items: { id: string; label: stri
     { id: 'hi_fi', label: 'Hi-fi' },
     { id: 'cassette_cd_player', label: 'Cassette or CD player' },
     { id: 'vcr_dvd', label: 'VCR or DVD player' },
+    { id: 'laptop', label: 'Laptop' },
+    { id: 'smart_speaker', label: 'Smart speaker' },
+    { id: 'streaming_stick', label: 'Streaming stick' },
+    { id: 'wifi_router', label: 'Wi-Fi router' },
   ] },
   { label: 'Other', items: [
     { id: 'lighting', label: 'Lighting' },
@@ -116,6 +123,7 @@ export const EQUIPMENT_GROUPS: { label: string; items: { id: string; label: stri
     { id: 'answer_machine', label: 'Answering machine' },
     { id: 'cordless_telephone', label: 'Cordless telephone' },
     { id: 'fax', label: 'Fax' },
+    { id: 'ev_charger', label: 'EV charger' },
   ] },
 ];
 
