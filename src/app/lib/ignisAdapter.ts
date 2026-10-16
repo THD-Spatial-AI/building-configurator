@@ -25,6 +25,10 @@ export interface IgnisInputs {
   // Reference floor area (m²) — synced with BuEM floorArea
   A_C_Ref_Input?: number;
 
+  // Dwellings in the archetype building, 0 where TABULA gives none. Not a
+  // calculation input: it prefills BuEM's residential_units.
+  n_Apartment?: number;
+
   // Envelope areas (m²) — aggregated from BuEM surface elements
   A_Roof_1?: number;
   A_Roof_2?: number;
@@ -392,6 +396,7 @@ export function syncElementsWithVariantLevel(
  */
 const TABULA_FIELD_PATHS: Record<keyof IgnisInputs, string> = {
   A_C_Ref_Input:    'BasicParameters.Envelope.A_C_Ref_Input',
+  n_Apartment:      'BasicParameters.BuildingAppearance.n_Apartment',
   A_Roof_1:         'BasicParameters.Envelope.A_Roof_1',
   A_Roof_2:         'BasicParameters.Envelope.A_Roof_2',
   A_Wall_1:         'BasicParameters.Envelope.A_Wall_1',

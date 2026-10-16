@@ -112,7 +112,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchMatchingVariants(country, typeCode, year)` | TABULA variants for a classification. `typeCode` is already a TABULA code (`SFH`, `TH`, `MFH`, `AB`) | 8 s |
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
-| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, including `solver`. Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
+| `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.
@@ -174,9 +174,10 @@ Two exported functions build one:
 ## Storing an edited building
 
 `onExit` hands back the edited `BuildingState`. `toBuem(building)` turns it
-into `{ building, solver }`, the same two blocks a run of that building sends
-as `BuemBuildingRunRequest.building` and `.solver`. To reopen, pass the stored
-object as `properties.buem` of a Feature to `adaptBuemFeature`:
+into `{ building, outputs, solver }`, the same three blocks a run of that
+building sends as `BuemBuildingRunRequest.building`, `.outputs` and `.solver`.
+To reopen, pass the stored object as `properties.buem` of a Feature to
+`adaptBuemFeature`:
 
 ```ts
 import { adaptBuemFeature, toBuem } from '@thd-spatial-ai/building-configurator';
@@ -191,16 +192,25 @@ const reopened = adaptBuemFeature({
 });
 ```
 
-`building` carries the building parameters (identity, floor area, storeys, room
-height, air change rates, thermal mass, attached neighbours) and every surface
-with its name. `solver.use_milp` records whether BuEM solves with MILP. Neither
-carries the PV arrays or the battery.
+`building` carries the building parameters (identity, total floor area, room
+height, air change rates, thermal mass), the household inputs (dwellings,
+occupants, household type, appliances; capacity for a service building) and
+every surface with its name. `outputs` records which load profiles BuEM
+computes, and `solver.use_milp` whether it solves with MILP. None of the three
+carries the PV arrays, the battery or the storey count: a reopened building
+keeps its total floor area and shows the default storey count.
+
+When `outputs` selects neither heating nor cooling, `building` has no envelope
+and the run needs no weather.
 
 !!! warning "PV and battery"
     Keep `edited.technologyState` beside the blocks and set it on the reopened
     state (`{ ...reopened, technologyState }`), or they reopen at their
     defaults.
 
-!!! warning "Forward the solver"
-    `runBuemBuilding` receives `request.solver`. A transport that drops it runs
-    BuEM with its default solver whatever the user chose.
+!!! warning "Forward solver and outputs"
+    `runBuemBuilding` receives `request.solver` and `request.outputs`, to be
+    sent as `properties.buem.solver` and `properties.buem.outputs`. A transport
+    that drops `solver` runs BuEM with its default solver; one that drops
+    `outputs` gets annual summaries only, with no hourly profile to chart. Both
+    need a buem-gateway that accepts the v6-draft request schema.

@@ -9,7 +9,7 @@ import {
   generalFrom,
 } from '../components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingDemandProfile } from './demandProfile';
-import type { ConfiguratorServices } from './services';
+import type { BuemBuildingRunRequest, ConfiguratorServices } from './services';
 
 /** The period a run covers, supplied by the host. Dates are RFC 3339. */
 export interface RunContext {
@@ -45,6 +45,7 @@ export async function runBuildingSimulation(
       geometry:   feature.geometry,
       building:   feature.properties.buem.building,
       solver:     feature.properties.buem.solver,
+      outputs:    feature.properties.buem.outputs,
       start_date: feature.properties.start_time,
       end_date:   feature.properties.end_time,
       resolution: Number(feature.properties.resolution),
@@ -75,15 +76,19 @@ export function runIdentity(
 }
 
 /**
- * The BuEM `building` and `solver` blocks a run of this building sends, for a
- * host to store. Reopen them with adaptBuemFeature on a Feature whose
- * properties.buem is this object. PV arrays and the battery are not part of
- * either block; they travel in building.technologyState.
+ * The BuEM `building`, `outputs` and `solver` blocks a run of this building
+ * sends, for a host to store. Reopen them with adaptBuemFeature on a Feature
+ * whose properties.buem is this object. PV arrays and the battery are not part
+ * of any block; they travel in building.technologyState.
  */
-export function toBuem(building: BuildingState): { building: Record<string, any>; solver: { use_milp: boolean } } {
+export function toBuem(building: BuildingState): {
+  building: Record<string, any>;
+  outputs: BuemBuildingRunRequest['outputs'];
+  solver: { use_milp: boolean };
+} {
   const general = generalFrom(building);
   const envelope = building.thematic?.envelope ?? building.envelope;
   const elements = Object.keys(envelope).length > 0 ? envelope : DEFAULT_ELEMENTS;
   const { buem } = serializeToBuemFeature(runIdentity(building, general), elements, general).properties;
-  return { building: buem.building, solver: buem.solver };
+  return { building: buem.building, outputs: buem.outputs, solver: buem.solver };
 }

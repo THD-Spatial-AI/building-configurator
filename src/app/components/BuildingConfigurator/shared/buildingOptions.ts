@@ -1,15 +1,125 @@
 // Predefined option lists for building parameters.
 
-export const BUILDING_TYPE_OPTIONS = [
-  { value: 'Single-family House', label: 'Single-family House' },
-  { value: 'Terraced House',      label: 'Terraced House'      },
-  { value: 'Multi-family House',  label: 'Multi-family House'  },
-  { value: 'Apartment Block',     label: 'Apartment Block'     },
-  { value: 'Office',              label: 'Office'              },
-  { value: 'School',              label: 'School'              },
-  { value: 'Retail',              label: 'Retail'              },
-  { value: 'Hotel',               label: 'Hotel'               },
+/** BuEM building_type code to UI label. Residential types first, then service types. */
+export const BUILDING_TYPE_LABELS: Record<string, string> = {
+  SFH: 'Single-family House',
+  TH:  'Terraced House',
+  MFH: 'Multi-family House',
+  AB:  'Apartment Block',
+  bakery:      'Bakery',
+  clinic:      'Clinic',
+  hotel:       'Hotel',
+  office:      'Office',
+  restaurant:  'Restaurant',
+  school:      'School',
+  supermarket: 'Supermarket',
+  warehouse:   'Warehouse',
+};
+
+const RESIDENTIAL_CODES = ['SFH', 'TH', 'MFH', 'AB'];
+
+export const BUILDING_TYPE_OPTIONS = Object.values(BUILDING_TYPE_LABELS).map((label) => ({ value: label, label }));
+
+const SERVICE_LABELS = Object.entries(BUILDING_TYPE_LABELS)
+  .filter(([code]) => !RESIDENTIAL_CODES.includes(code))
+  .map(([, label]) => label);
+
+/** Service buildings take a capacity instead of households: no occupancy or equipment inputs. */
+export function isServiceBuildingType(label: string): boolean {
+  return SERVICE_LABELS.includes(label);
+}
+
+/** Building types BuEM needs a dwelling count for. */
+export function requiresResidentialUnits(label: string): boolean {
+  return label === BUILDING_TYPE_LABELS.MFH || label === BUILDING_TYPE_LABELS.AB;
+}
+
+/** Household composition driving BuEM's occupancy schedule. Empty means BuEM's per-type default. */
+export const ARCHETYPE_OPTIONS = [
+  { value: '',                     label: 'Default for the building type' },
+  { value: 'generic',              label: 'Generic household' },
+  { value: 'working_couple',       label: 'Working couple' },
+  { value: 'family_with_children', label: 'Family with children' },
+  { value: 'retired_single',       label: 'Retired, living alone' },
+  { value: 'student_shared',       label: 'Students sharing' },
 ];
+
+export const SETBACK_OPTIONS = [
+  { value: 'none',           label: 'None' },
+  { value: 'night_only',     label: 'At night' },
+  { value: 'night_and_away', label: 'At night and when away' },
+  { value: 'deep',           label: 'Deep setback' },
+];
+
+export const COOKING_CARRIER_OPTIONS = [
+  { value: '',         label: 'Model default' },
+  { value: 'electric', label: 'Electric' },
+  { value: 'gas',      label: 'Gas' },
+  { value: 'none',     label: 'Not reported' },
+];
+
+/** BuEM load profiles a run can return, in the order they are shown. */
+export const OUTPUT_PROFILES = [
+  { key: 'heating',     label: 'Space heating' },
+  { key: 'cooling',     label: 'Space cooling' },
+  { key: 'electricity', label: 'Electricity' },
+  { key: 'hot_water',   label: 'Hot water' },
+  { key: 'kitchen',     label: 'Cooking gas' },
+] as const;
+
+export type OutputProfile = typeof OUTPUT_PROFILES[number]['key'];
+export type OutputLevel = 'none' | 'summary' | 'series';
+
+export const OUTPUT_LEVEL_OPTIONS: { value: OutputLevel; label: string }[] = [
+  { value: 'none',    label: 'Off' },
+  { value: 'summary', label: 'Annual' },
+  { value: 'series',  label: 'Hourly' },
+];
+
+/**
+ * BuEM household appliances by group. Each id is one appliance: BuEM cannot
+ * express counts, so TVs are the three ids tv_1, tv_2 and tv_3.
+ */
+export const EQUIPMENT_GROUPS: { label: string; items: { id: string; label: string }[] }[] = [
+  { label: 'Cooking', items: [
+    { id: 'hob', label: 'Hob' },
+    { id: 'oven', label: 'Oven' },
+    { id: 'microwave', label: 'Microwave' },
+    { id: 'kettle', label: 'Kettle' },
+    { id: 'small_cooking_group', label: 'Small cooking appliances' },
+  ] },
+  { label: 'Cold', items: [
+    { id: 'fridge_freezer', label: 'Fridge-freezer' },
+    { id: 'refrigerator', label: 'Refrigerator' },
+    { id: 'chest_freezer', label: 'Chest freezer' },
+    { id: 'upright_freezer', label: 'Upright freezer' },
+  ] },
+  { label: 'Laundry and cleaning', items: [
+    { id: 'washing_machine', label: 'Washing machine' },
+    { id: 'tumble_dryer', label: 'Tumble dryer' },
+    { id: 'washer_dryer', label: 'Washer-dryer' },
+    { id: 'dish_washer', label: 'Dishwasher' },
+    { id: 'iron', label: 'Iron' },
+    { id: 'vacuum', label: 'Vacuum cleaner' },
+  ] },
+  { label: 'Electronics', items: [
+    { id: 'tv_receiver_box', label: 'TV receiver box' },
+    { id: 'personal_computer', label: 'Personal computer' },
+    { id: 'printer', label: 'Printer' },
+    { id: 'hi_fi', label: 'Hi-fi' },
+    { id: 'cassette_cd_player', label: 'Cassette or CD player' },
+    { id: 'vcr_dvd', label: 'VCR or DVD player' },
+  ] },
+  { label: 'Other', items: [
+    { id: 'lighting', label: 'Lighting' },
+    { id: 'clock', label: 'Clock' },
+    { id: 'answer_machine', label: 'Answering machine' },
+    { id: 'cordless_telephone', label: 'Cordless telephone' },
+    { id: 'fax', label: 'Fax' },
+  ] },
+];
+
+export const TV_IDS = ['tv_1', 'tv_2', 'tv_3'];
 
 /** Earliest construction year the year input accepts. */
 export const MIN_CONSTRUCTION_YEAR = 1850;
