@@ -262,6 +262,9 @@ export function useBuildingModel(
   const [ignis, setHdcp] = useState<IgnisState | null>(null);
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
+  // The building as opened, after the load-time TABULA pass below: what counts
+  // as untouched, so opening and leaving hands the host its building back.
+  const [loaded, setLoaded] = useState({ elements: initialElements, general: initialGeneral });
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
   // A user-uploaded load profile, if any — outranks BuEM as the annual
@@ -317,6 +320,7 @@ export function useBuildingModel(
     setGeneralRaw(nextGeneral);
     setRoofConfig(DEFAULT_ROOF_CONFIG);
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
+    setLoaded({ elements: nextElements, general: nextGeneral });
     setEnergyTotals(nextTotals);
     setUploadError(null);
     setHistory([]);
@@ -377,6 +381,15 @@ export function useBuildingModel(
         setGeneralRaw((prev) => (
           prev.residential_units && !isReload ? prev : { ...prev, residential_units: dwellings }
         ));
+      }
+
+      // What the load pass changed is part of opening the building, not an edit.
+      if (!cancelled && !isReload) {
+        const settledGeneral = dwellings && !general.residential_units
+          ? { ...general, residential_units: dwellings }
+          : general;
+        setLoaded({ elements: nextElements, general: settledGeneral });
+        setSavedState((prev) => ({ ...prev, elements: nextElements, general: settledGeneral }));
       }
 
       const state = initIgnisState(country, type, period, variants, ignisSeedBuilding(general, nextElements, type, year, country));
@@ -657,8 +670,7 @@ export function useBuildingModel(
     const edits = source === 'current'
       ? { elements, general }
       : { elements: savedState.elements, general: savedState.general };
-    const untouched = JSON.stringify(edits)
-      === JSON.stringify({ elements: initialElements, general: initialGeneral });
+    const untouched = JSON.stringify(edits) === JSON.stringify(loaded);
     if (!buildingData || untouched) return buildingData;
     return withEdits(buildingData, edits.elements, edits.general);
   };

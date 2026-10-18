@@ -4,6 +4,12 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.8.1] - 2026-10-18
+
+### Fixed
+
+- Leaving a building that was opened and not edited asked about unsaved changes, and choosing to save handed the host a changed building. This happened in PV mode, where the view stores nothing, as well as in the normal view. The adjustments made while a building opens (TABULA U-values and, where the building brings none, the dwelling count) now count as part of opening it: leaving without an edit calls `onExit` with the building as passed in.
+
 ## [0.8.0] - 2026-10-18
 
 This release breaks the host interface: the package no longer defines or stores technologies. The host owns them.
@@ -120,6 +126,7 @@ This release breaks the host interface in three places, and its building block n
 
 Versions before 0.4.0 have no changelog entries; see their git tags.
 
+[0.8.1]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.8.1
 [0.8.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.8.0
 [0.7.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.7.0
 [0.6.2]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.6.2
