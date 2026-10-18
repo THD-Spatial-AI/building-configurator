@@ -8,6 +8,10 @@ Each version's GitHub release entry carries the full notes.
 
 This release breaks the host interface: the package no longer defines or stores technologies. The host owns them.
 
+### Added
+
+- `Building3DView` takes an optional `pv` prop (`PvMode` and `PvSurface` types) that opens it in PV mode, driven entirely by the host. Surfaces the host offers are drawn with panels (`installed`), lit and outlined (`suggested`) or as usual (`available`). Clicking one switches PV through `onToggle`, and a surface with PV takes a usable share through `onShareChange`. The host's `notice` stays visible throughout. The view stores nothing.
+
 ### Removed
 
 - The Technology tab and every technology editor: the PV planner, the per-surface PV settings, the battery and heat-pump cards, and the renewables and technology-cost figures on the energy overview.

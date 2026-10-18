@@ -21,6 +21,7 @@ import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
+import { PvPanel, PvSurfaceCard, pvRenderSets, type PvMode } from './PvMode';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -52,10 +53,15 @@ export interface Building3DViewProps {
   seriesCsvUrl?: string;
   /** Credits for the building's data, as its licences require; shown in a corner of the 3D view. */
   attribution?: ReactNode;
+  /**
+   * Opens the view in PV mode: only the PV panel, and clicks on the offered
+   * surfaces switch PV. Controlled; hold it stable as for `services`.
+   */
+  pv?: PvMode;
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
@@ -99,7 +105,21 @@ export function Building3DView({
     setFocus((prev) => ({ id, token: (prev?.token ?? 0) + 1 }));
     // The card places itself against the surface as soon as the turn starts, so
     // this is only where it appears from.
-    requestSurface({ id, at: { x: window.innerWidth / 2, y: window.innerHeight / 2 } });
+    const at = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    if (pv) openSurface({ id, at });
+    else requestSurface({ id, at });
+  };
+
+  /** A click in PV mode: an offered surface without PV gets it, and any offered surface opens its card. */
+  const selectPvSurface = (id: string | null, at?: { x: number; y: number }) => {
+    if (!pv) return;
+    const surface = id ? pv.surfaces[id] : undefined;
+    if (!id || !surface || !at) {
+      if (!id) openSurface(null);
+      return;
+    }
+    if (surface.state !== 'installed') pv.onToggle(id, true);
+    openSurface({ id, at });
   };
   // The editor follows its surface while the model turns. That is a per-frame
   // move, so the viewer writes to the node instead of pushing state through a
@@ -115,6 +135,7 @@ export function Building3DView({
     [elements],
   );
   const surfaces = geometry?.surfaces ?? [];
+  const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
 
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
@@ -190,6 +211,8 @@ export function Building3DView({
             <span className="hidden sm:inline"> · avg U {model.avgUValue.toFixed(2)} W/m²K</span>
           </p>
         </div>
+        {!pv && (
+        <>
         <div className="relative shrink-0">
           <button
             type="button"
@@ -249,6 +272,8 @@ export function Building3DView({
           <Undo2 className="size-3.5" />
           <span className="hidden sm:inline">{undoLabel ? `Undo ${undoLabel.toLowerCase()}` : 'Undo'}</span>
         </button>
+        </>
+        )}
       </div>
 
       {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
@@ -266,9 +291,13 @@ export function Building3DView({
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
               visibleIds={envelopeIds}
+              pvIds={pvSets?.installed}
+              candidateIds={pvSets?.suggested}
               focusId={focus?.id}
               focusToken={focus?.token}
-              onSelectSurface={(id, at) => requestSurface(id && elements[id] && at ? { id, at } : null)}
+              onSelectSurface={pv
+                ? selectPvSurface
+                : (id, at) => requestSurface(id && elements[id] && at ? { id, at } : null)}
               onSelectedAnchorMove={wide ? movePopover : undefined}
             />
           ) : (
@@ -305,6 +334,12 @@ export function Building3DView({
           'flex shrink-0 flex-col gap-3',
           wide ? 'w-[360px] xl:w-[440px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
+          {pv ? (
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <PvPanel pv={pv} elements={elements} onSelect={selectFromList} />
+            </div>
+          ) : (
+          <>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
@@ -366,10 +401,24 @@ export function Building3DView({
               ? <><Loader2 className="size-4 animate-spin" /> Working out the energy…</>
               : <><Play className="size-4" /> Save &amp; Preview Energy Demand</>}
           </button>
+          </>
+          )}
         </div>
       </div>
 
-      {selected && selectedElement && (
+      {pv && selected && pv.surfaces[selected.id] && (
+        <SurfacePopover
+          at={selected.at}
+          cardRef={popoverRef}
+          title={selectedElement ? `${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}` : 'Surface'}
+          subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : undefined}
+          onClose={() => openSurface(null)}
+        >
+          <PvSurfaceCard key={selected.id} surfaceId={selected.id} surface={pv.surfaces[selected.id]} pv={pv} />
+        </SurfacePopover>
+      )}
+
+      {!pv && selected && selectedElement && (
         <SurfacePopover
           at={selected.at}
           cardRef={popoverRef}

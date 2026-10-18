@@ -94,6 +94,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `runContext` | Optional. `{ startDate, endDate }` (RFC 3339 dates): the period a BuEM run covers. Without it, a run covers 2018 |
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
+| `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
@@ -141,6 +142,38 @@ classes the component names are compiled into the host's CSS:
 
 Without the `@source` line the component renders unstyled, because Tailwind
 only emits utilities it has seen used.
+
+## PV mode
+
+Pass `pv` to open the building for placing PV. The view then shows only the
+model and a PV panel, and stores nothing: every change goes to a callback, and
+the view follows the next `pv` the host passes.
+
+```tsx
+const pv = useMemo<PvMode>(() => ({
+  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp } }
+  notice: t('pv.shadingNotice'),
+  typeLabel: pvType.name,
+  onToggle: (surfaceId, installed) => setInstalled(surfaceId, installed),
+  onShareChange: (surfaceId, usableShare) => setShare(surfaceId, usableShare),
+}), [surfaces, pvType, t]);
+
+<Building3DView building={building} geometry={geometry} services={services} onExit={onExit} pv={pv} />
+```
+
+| Field | Meaning |
+|---|---|
+| `surfaces` | Keyed by surface id, the id the geometry and the envelope elements carry. Only these surfaces can be clicked |
+| `surfaces[id].state` | `installed` draws panels on the surface, `suggested` lights and outlines it, `available` draws it as usual |
+| `surfaces[id].usableShare` | Share of the surface usable for panels, 0 to 1, shown as a percentage |
+| `surfaces[id].maxKwp` | Capacity the surface can take, in kWp, shown on its card |
+| `notice` | Shown for as long as PV mode is open. Pass it in the user's language |
+| `typeLabel` | Name of the PV type, shown at the top of the panel |
+| `onToggle(surfaceId, installed)` | A surface was switched. Clicking a surface without PV calls it with `true` |
+| `onShareChange(surfaceId, usableShare)` | The usable share of a surface with PV was changed, 0 to 1 |
+
+Clicking a surface opens its card: the PV switch, and on a surface with PV the
+usable share. The panel lists every offered surface with its own switch.
 
 ## Geometry
 

@@ -21,7 +21,7 @@ interface SurfaceGeometryViewerProps {
   visibleIds?: ReadonlySet<string>;
   /** Surfaces carrying PV, drawn with an array over them. */
   pvIds?: ReadonlySet<string>;
-  /** Surfaces worth putting PV on, lit while the PV planner is open. */
+  /** Surfaces suggested for PV, lit and outlined so they invite a click. */
   candidateIds?: ReadonlySet<string>;
   /** Turns the model to face this surface. Acts whenever `focusToken` changes,
    *  so picking the same surface again re-frames it. */
@@ -40,8 +40,9 @@ interface SurfaceGeometryViewerProps {
 
 const HIGHLIGHT_COLOR = 0x2563eb;
 const INVALID_COLOR = 0x991b1b;
-/** A surface the PV planner is offering: lit so it can be picked out at a glance. */
+/** A surface suggested for PV: lit and outlined so it can be picked out at a glance. */
 const CANDIDATE_COLOR = 0x92610a;
+const CANDIDATE_EDGE_COLOR = 0xf59e0b;
 const EDGE_COLOR = 0x1e293b;
 const INVALID_EDGE_COLOR = 0xdc2626;
 // A plain DOM 'click' fires on pointerup regardless of drag distance, so an
@@ -339,7 +340,9 @@ export function SurfaceGeometryViewer({
 
       const edges = group.children.find((c) => c instanceof THREE.LineSegments) as THREE.LineSegments | undefined;
       const edgeMaterial = edges?.material as THREE.LineBasicMaterial | undefined;
-      edgeMaterial?.color.setHex(invalid ? INVALID_EDGE_COLOR : EDGE_COLOR);
+      edgeMaterial?.color.setHex(
+        invalid ? INVALID_EDGE_COLOR : candidateIds?.has(id) ? CANDIDATE_EDGE_COLOR : EDGE_COLOR,
+      );
 
       // The surface's middle, not the point that was clicked: it stays put as
       // the model turns, which is what an editor beside it should track.
