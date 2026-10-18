@@ -1,4 +1,4 @@
-// The building's editable model: envelope, general parameters, technologies,
+// The building's editable model: envelope, general parameters,
 // ignis heat demand and the BuEM simulation result, with every handler that
 // changes them.
 //
@@ -18,7 +18,7 @@ import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
 import { requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
-import type { BuildingState, TechnologyState, ThermalSummary } from '../../lib/buemAdapter';
+import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
 import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
 import type { IgnisState } from '../../lib/ignisAdapter';
 import {
@@ -35,16 +35,6 @@ import type { ConfiguratorServices } from '../../lib/services';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
-import { DEFAULT_BATTERY_CONFIG } from './shared/buildingDefaults';
-import type { PvConfig, BatteryConfig } from './shared/buildingDefaults';
-import {
-  createPvArray,
-  DEFAULT_PV_TECHNOLOGY,
-  resolvePvArray,
-  splitPvPatch,
-  type PvArray,
-  type PvTechnology,
-} from './shared/pvModel';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -242,7 +232,6 @@ export function useBuildingModel(
 ) {
   const thematicData = buildingData?.thematic;
   const geometryData = buildingData?.geometry;
-  const technologyData = buildingData?.technologies;
   const identityData = thematicData?.identity ?? buildingData?.identity;
 
   const initialGeneral = generalFrom(buildingData);
@@ -259,32 +248,20 @@ export function useBuildingModel(
     thematicData?.thermalSummary ?? buildingData?.thermalSummary ?? null,
   );
 
-  const initialTech = technologyStateFrom(buildingData);
 
   const [elements,      setElements]      = useState(initialElements);
   const [general,       setGeneralRaw]    = useState(initialGeneral);
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
-  // One module choice for the building, and an array per surface saying where
-  // the panels sit. The flat per-surface config everything else reads is
-  // resolved from the two, so cost and efficiency cannot drift between arrays.
-  const [pvTechnology, setPvTechnology] = useState<PvTechnology>(initialTech.pvTechnology);
-  const [pvArrays, setPvArrays] = useState<Record<string, PvArray>>(initialTech.pvArrays);
-  // True when a roof-type change removed surfaces that had PV installed.
-  const [pvInvalidated,  setPvInvalidated]  = useState(false);
-  // Non-PV technology IDs (heat_pump) toggled by the overview panel.
-  const [otherTechIds,   setOtherTechIds]   = useState<string[]>(initialTech.otherTechIds);
-  // Battery configuration — owned as dedicated state so BatteryEditor has full control.
-  const [batteryConfig,  setBatteryConfig]  = useState<BatteryConfig>(initialTech.battery);
   const [uploadError,   setUploadError]   = useState<string | null>(null);
   // Envelope edits only: what a user changes by hand and may want back. Building
-  // parameters and technology settings are not in it.
+  // parameters are not in it.
   const [history, setHistory] = useState<EnvelopeHistoryEntry[]>([]);
 
   // HDCP annual heat demand state — null until the building's country/type/period
   // resolve to at least one TABULA variant in the HDCP service.
   const [ignis, setHdcp] = useState<IgnisState | null>(null);
 
-  const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG, tech: initialTech });
+  const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
   // A user-uploaded load profile, if any — outranks BuEM as the annual
@@ -339,16 +316,10 @@ export function useBuildingModel(
     setElements(nextElements);
     setGeneralRaw(nextGeneral);
     setRoofConfig(DEFAULT_ROOF_CONFIG);
-    const nextTech = technologyStateFrom(buildingData);
-    setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG, tech: nextTech });
+    setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
     setEnergyTotals(nextTotals);
     setUploadError(null);
-    setPvArrays(nextTech.pvArrays);
-    setPvTechnology(nextTech.pvTechnology);
-    setPvInvalidated(false);
     setHistory([]);
-    setOtherTechIds(nextTech.otherTechIds);
-    setBatteryConfig(nextTech.battery);
   }, [buildingData]);
 
   // After the effect above, so a stored profile wins over the building's own summary.
@@ -356,8 +327,7 @@ export function useBuildingModel(
     if (demandProfile) setEnergyTotals(computeEnergyTotals(null, toThermalSummary(demandProfile)));
   }, [demandProfile]);
 
-  const tech: TechnologyState = { pvTechnology, pvArrays, battery: batteryConfig, otherTechIds };
-  const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig, tech }) !== JSON.stringify(savedState);
+  const hasUnsavedChanges = JSON.stringify({ elements, general, roofConfig }) !== JSON.stringify(savedState);
 
   // ── HDCP: reload variant levels when building classification changes ───────────
   // Triggered by country, building type, or construction year changes.
@@ -532,21 +502,10 @@ export function useBuildingModel(
     return next;
   };
 
-  /** Replaces roof elements from a new type template.
-   *  If any replaced surface had PV installed, sets the invalidation warning. */
+  /** Replaces roof elements from a new type template. */
   const applyRoofType = (newRoofElements: Record<string, BuildingElement>) => {
     remember(`roof-type:${Date.now()}`, 'Roof type change');
     setElements((prev) => {
-      const oldRoofIds = Object.keys(prev).filter((id) => prev[id].type === 'roof');
-      const hadPv = oldRoofIds.some((id) => pvArrays[id]?.installed);
-      if (hadPv) {
-        setPvInvalidated(true);
-        setPvArrays((arrays) => {
-          const next = { ...arrays };
-          oldRoofIds.forEach((id) => { delete next[id]; });
-          return next;
-        });
-      }
       const withoutRoofs = Object.fromEntries(
         Object.entries(prev).filter(([, el]) => el.type !== 'roof'),
       );
@@ -556,44 +515,6 @@ export function useBuildingModel(
 
   const setGen = (key: string, value: any) =>
     setGeneralRaw((prev) => ({ ...prev, [key]: value }));
-
-  // --- Technology handlers ----------------------------------------------------
-
-  /**
-   * Applies an edit made against the flat per-surface shape. Module and cost
-   * fields reach the building, so every array moves with them; geometry and
-   * sizing stay on the array being edited.
-   */
-  const updateSurfacePv = (elementId: string, patch: Partial<PvConfig>) => {
-    const { technology, array } = splitPvPatch(patch);
-
-    if (Object.keys(technology).length > 0) {
-      setPvTechnology((prev) => ({ ...prev, ...technology }));
-    }
-    if (Object.keys(array).length === 0) return;
-
-    setPvArrays((prev) => ({
-      ...prev,
-      [elementId]: { ...(prev[elementId] ?? createPvArray(elements[elementId])), ...array },
-    }));
-  };
-
-  /** Edits the building's module and its cost, for every array at once. */
-  const updatePvTechnology = (patch: Partial<PvTechnology>) =>
-    setPvTechnology((prev) => ({ ...prev, ...patch }));
-
-  const updateBattery = (patch: Partial<BatteryConfig>) =>
-    setBatteryConfig((prev) => ({ ...prev, ...patch }));
-
-  const setTechInstalled = (id: string, installed: boolean) => {
-    if (id === 'battery') {
-      setBatteryConfig((prev) => ({ ...prev, installed }));
-      return;
-    }
-    setOtherTechIds((prev) =>
-      installed ? [...prev.filter((i) => i !== id), id] : prev.filter((i) => i !== id),
-    );
-  };
 
   // --- Model-wide actions -----------------------------------------------------
 
@@ -616,13 +537,13 @@ export function useBuildingModel(
       return;
     }
 
-    setSavedState({ elements, general, roofConfig, tech });
+    setSavedState({ elements, general, roofConfig });
     const identity = buildIdentity();
 
     setIsRunningSimulation(true);
     setUploadError(null);
     try {
-      const result = await runBuildingSimulation(services, identity, elements, general, runContext, batteryConfig);
+      const result = await runBuildingSimulation(services, identity, elements, general, runContext);
       if (!result) {
         setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
         return;
@@ -648,7 +569,7 @@ export function useBuildingModel(
     try {
       const identity = buildIdentity();
       const buemJson = exportToBuemGeojson(
-        identity, elements, general, undefined, undefined, batteryConfig, surfacePvConfigs,
+        identity, elements, general,
       );
       saveFile(buemJson, `building-${identity.id}-buem.json`, 'application/json');
     } catch (err) {
@@ -660,7 +581,7 @@ export function useBuildingModel(
   const downloadTables = () => {
     try {
       const identity = buildIdentity();
-      const zip = modelTablesZip(elements, surfacePvConfigs, general, {
+      const zip = modelTablesZip(elements, general, {
         totalEnvelopeArea: totalArea,
         avgUValue,
         heatDemandKwhM2a: ignis?.result?.qHnd ?? null,
@@ -729,60 +650,35 @@ export function useBuildingModel(
     () => resolveDisplayEnergyTotals(energyTotals, groundTruthTimeseries),
     [energyTotals, groundTruthTimeseries],
   );
-  /** The flat per-surface configs, resolved from the building's module and
-   *  each array's own geometry. */
-  const surfacePvConfigs = useMemo(() => Object.fromEntries(
-    Object.entries(pvArrays).map(([id, array]) => [id, resolvePvArray(array, pvTechnology, elements[id])]),
-  ), [pvArrays, pvTechnology, elements]);
-
-  const pvInstalledSurfaces = useMemo(() => (
-    Object.values(elements)
-      .filter((element) => surfacePvConfigs[element.id]?.installed)
-      .map((element) => ({ element, pv: surfacePvConfigs[element.id] }))
-  ), [elements, surfacePvConfigs]);
-  const totalPvCapacityKw = pvInstalledSurfaces.reduce((sum, entry) => sum + entry.pv.system_capacity, 0);
-  const pvSummary = {
-    installed: pvInstalledSurfaces.length > 0,
-    surfaceCount: pvInstalledSurfaces.length,
-    totalCapacityKw: totalPvCapacityKw,
-  };
-
-  // Installed tech IDs — solar_pv is per-surface; battery has its own config state.
-  const installedTechIds = batteryConfig.installed
-    ? [...otherTechIds.filter((id) => id !== 'battery'), 'battery']
-    : otherTechIds.filter((id) => id !== 'battery');
-
   const chartTimeseries = thematicData?.timeseries ?? buildingData?.timeseries ?? null;
 
   /** The building as opened, with the current or last saved edits written into it. */
   const toBuildingState = (source: 'current' | 'saved'): BuildingState | undefined => {
     const edits = source === 'current'
-      ? { elements, general, tech }
-      : { elements: savedState.elements, general: savedState.general, tech: savedState.tech };
+      ? { elements, general }
+      : { elements: savedState.elements, general: savedState.general };
     const untouched = JSON.stringify(edits)
-      === JSON.stringify({ elements: initialElements, general: initialGeneral, tech: initialTech });
+      === JSON.stringify({ elements: initialElements, general: initialGeneral });
     if (!buildingData || untouched) return buildingData;
-    return withEdits(buildingData, edits.elements, edits.general, edits.tech);
+    return withEdits(buildingData, edits.elements, edits.general);
   };
 
   return {
     // state
-    elements, general, roofConfig, surfacePvConfigs, pvTechnology, pvArrays, batteryConfig, ignis,
-    uploadError, isRunningSimulation, pvInvalidated, hasUnsavedChanges,
+    elements, general, roofConfig, ignis,
+    uploadError, isRunningSimulation, hasUnsavedChanges,
     chartTimeseries,
     /** What undo would take back, or null when there is nothing to undo. */
     undoLabel: history[history.length - 1]?.label ?? null,
     baselineElements: baselineRef.current.elements,
     // derived
     buildingLabel, buildingType, coordinates, totalArea, avgUValue, thermalRating,
-    snapshotRows, displayEnergyTotals, pvInstalledSurfaces, totalPvCapacityKw,
-    pvSummary, installedTechIds,
+    snapshotRows, displayEnergyTotals,
     // handlers
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
-    updateSurfacePv, updatePvTechnology, updateBattery, setTechInstalled,
     selectIgnisVariant, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
-    setUploadError, setGroundTruthTimeseries, setPvInvalidated,
+    setUploadError, setGroundTruthTimeseries,
   };
 }
 
@@ -804,26 +700,22 @@ function ignisSeedBuilding(
   return {
     geometry: { buildingId: '', coordinates: [0, 0], buildingFootprint: null, buildingHeight: null },
     thematic: { identity, envelope: elements, thermalSummary: null, timeseries: null },
-    technologies: { rawTechs: {}, installedTechIds: [] },
     identity,
     envelope: elements,
     thermalSummary: null,
     timeseries: null,
-    installedTechIds: [],
     ignis: null,
   };
 }
 
 /**
- * The building with the edited envelope, building parameters and technology
- * settings written back into it, so reopening it shows the edits. Results are
- * kept as they were.
+ * The building with the edited envelope and building parameters written back
+ * into it, so reopening it shows the edits. Results are kept as they were.
  */
 export function withEdits(
   building: BuildingState,
   elements: Record<string, BuildingElement>,
   general: typeof DEFAULT_GENERAL,
-  tech: TechnologyState,
 ): BuildingState {
   const base = building.thematic?.identity ?? building.identity;
   const identity = {
@@ -841,7 +733,6 @@ export function withEdits(
     thematic: { ...building.thematic, identity, envelope: elements },
     identity,
     envelope: elements,
-    technologyState: tech,
     parameters: {
       n_air_infiltration:      general.n_air_infiltration,
       n_air_use:               general.n_air_use,
@@ -859,46 +750,5 @@ export function withEdits(
       equipment:               general.equipment,
       outputs:                 general.outputs,
     },
-  };
-}
-
-/**
- * The configurator's PV and battery state for a building: what it was saved
- * with, or what its BUEM technology fields seed it with.
- */
-function technologyStateFrom(building?: BuildingState): TechnologyState {
-  if (building?.technologyState) return building.technologyState;
-  const installedTechIds = building?.technologies?.installedTechIds ?? building?.installedTechIds ?? [];
-  return {
-    pvTechnology: DEFAULT_PV_TECHNOLOGY,
-    pvArrays: {},
-    battery: batteryFromRawTechs(
-      building?.technologies?.rawTechs?.battery_storage,
-      installedTechIds.includes('battery'),
-    ),
-    otherTechIds: installedTechIds.filter((id) => id !== 'solar_pv' && id !== 'battery'),
-  };
-}
-
-/** The BUEM battery_storage fields as a BatteryConfig, defaults where absent. */
-function batteryFromRawTechs(raw: unknown, installed: boolean): BatteryConfig {
-  if (!raw || typeof raw !== 'object') return DEFAULT_BATTERY_CONFIG;
-  const r = raw as Record<string, any>;
-  return {
-    ...DEFAULT_BATTERY_CONFIG,
-    installed,
-    cont_energy_cap_max:          r.cont_energy_cap_max          ?? DEFAULT_BATTERY_CONFIG.cont_energy_cap_max,
-    cont_energy_cap_min:          r.cont_energy_cap_min          ?? DEFAULT_BATTERY_CONFIG.cont_energy_cap_min,
-    cont_storage_cap_max:         r.cont_storage_cap_max         ?? DEFAULT_BATTERY_CONFIG.cont_storage_cap_max,
-    cont_storage_cap_min:         r.cont_storage_cap_min         ?? DEFAULT_BATTERY_CONFIG.cont_storage_cap_min,
-    cont_energy_eff:              r.cont_energy_eff              ?? DEFAULT_BATTERY_CONFIG.cont_energy_eff,
-    cont_storage_loss:            r.cont_storage_loss            ?? DEFAULT_BATTERY_CONFIG.cont_storage_loss,
-    cont_storage_discharge_depth: r.cont_storage_discharge_depth ?? DEFAULT_BATTERY_CONFIG.cont_storage_discharge_depth,
-    cont_storage_initial:         r.cont_storage_initial         ?? DEFAULT_BATTERY_CONFIG.cont_storage_initial,
-    cont_lifetime:                r.cont_lifetime                ?? DEFAULT_BATTERY_CONFIG.cont_lifetime,
-    cost_energy_cap:              r.cost_energy_cap              ?? DEFAULT_BATTERY_CONFIG.cost_energy_cap,
-    cost_storage_cap:             r.cost_storage_cap             ?? DEFAULT_BATTERY_CONFIG.cost_storage_cap,
-    cost_om_annual:               r.cost_om_annual               ?? DEFAULT_BATTERY_CONFIG.cost_om_annual,
-    cost_interest_rate:           r.cost_interest_rate           ?? DEFAULT_BATTERY_CONFIG.cost_interest_rate,
   };
 }

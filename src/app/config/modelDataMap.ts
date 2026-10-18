@@ -6,14 +6,13 @@
 // - a dot-separated JSON path from the feature root
 // - or an ordered list of fallback paths when multiple source shapes are supported
 //
-// The dashboard is organised into three integration-facing domains:
+// The dashboard is organised into two integration-facing domains:
 // - geometry      — physical building geometry and footprint sources
 // - thematic      — building identity, envelope and model outputs
-// - technologies  — installed technology configuration nodes
 //
 // Contract: buem-gateway schemas/v6-draft. An exported FeatureCollection omits
 // properties.buem.weather, which v6-draft requires whenever heating or cooling
-// is selected, and carries properties.techs, which no version defines.
+// is selected.
 
 export type ModelDataPath = string | readonly string[];
 
@@ -92,22 +91,6 @@ export const MODEL_DATA_MAP = {
     buildingId:        ['properties.id', 'id'],
     buildingFootprint: 'geometry',          // Polygon or MultiPolygon
     buildingHeight:    'properties.height', // metres above ground, if available
-  },
-
-  // ── Technology data ─────────────────────────────────────────────────────────
-  technologies: {
-    techRoot: ['techs', 'properties.techs'],
-    catalog: {
-      solar_pv: ['techs.pv_supply', 'properties.techs.pv_supply'],
-      battery: ['techs.battery_storage', 'properties.techs.battery_storage'],
-      heat_pump: [
-        'techs.heat_pump_supply',
-        'properties.techs.heat_pump_supply',
-        'techs.heat_pump',
-        'properties.techs.heat_pump',
-      ],
-      ev_charger: ['techs.ev_charger', 'properties.techs.ev_charger'],
-    },
   },
 
 } as const;

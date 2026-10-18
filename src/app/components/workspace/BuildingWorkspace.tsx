@@ -11,6 +11,7 @@ import { LoenenLiveMap } from '../LoenenLiveMap';
 import { surfaceGeometry, useFixtureBuilding, useLoenenBuildings } from '../../../demo/useLoenen';
 import { fixtureDemandProfile, fixtureSeriesCsvUrl, fixtureServices } from '../../../demo/services';
 import { FIXTURE_ATTRIBUTION, MAP_ATTRIBUTIONS } from '../../../demo/attribution';
+import { useDemoPvHost } from '../../../demo/pvHost';
 import { Building3DView } from './Building3DView';
 import type { BuildingState } from '../../lib/buemAdapter';
 
@@ -111,6 +112,48 @@ export function FixtureWorkspace() {
         if (building) setSaved(building);
         setOpen(false);
       }}
+    />
+  );
+}
+
+/** PV mode on the bundled building, with the dev shell holding the host's PV state. */
+export function PvFixtureWorkspace() {
+  const fixture = useFixtureBuilding(FIXTURE_OSM_ID);
+  if (!fixture) {
+    return (
+      <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Adapting the bundled building…
+      </div>
+    );
+  }
+  return <PvFixtureView building={fixture.building} geometry={fixture.geometry} />;
+}
+
+function PvFixtureView({ building, geometry }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'>) {
+  const pv = useDemoPvHost(building.envelope);
+  const [open, setOpen] = useState(true);
+  if (!open) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <button
+          onClick={() => setOpen(true)}
+          className="flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          <Box className="size-4" />
+          Reopen PV mode
+        </button>
+      </div>
+    );
+  }
+  return (
+    <Building3DView
+      building={building}
+      geometry={geometry}
+      services={fixtureServices}
+      attribution={FIXTURE_ATTRIBUTION}
+      pv={pv}
+      onExit={() => setOpen(false)}
     />
   );
 }

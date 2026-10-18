@@ -187,7 +187,7 @@ classDiagram
 
 ## Data model output (`exportToBuemGeojson`)
 
-The export assembles state into a BUEM GeoJSON FeatureCollection. Which fields appear depends on which technologies are installed.
+The export assembles state into a BUEM GeoJSON FeatureCollection.
 
 ```mermaid
 graph LR
@@ -195,22 +195,6 @@ graph LR
 
     S --> ID["identity<br>id / label / coordinates<br>buildingType / constructionPeriod<br>floorArea / roomHeight / storeys"]
     S --> ENV["envelope<br>one feature per BuildingElement<br>area / uValue / tilt / azimuth"]
-    S --> PV["techs.pv_supply<br>per-surface PV params<br>only if installed = true"]
-    S --> BAT["techs.battery_storage<br>capacity / efficiency / cost<br>only if installed or includeInModel = true"]
-    S --> OTH["techs (other)<br>heat_pump / ev_charger / wind_turbine<br>only if in installedTechIds"]
 ```
 
 ---
-
-## Technology registry
-
-`src/app/config/techRegistry.ts` defines every technology in `TECH_REGISTRY`. `TechnologiesSection` (Overview cards), `SurfaceGroupSelector` (Configure nav) and `exportToBuemGeojson` in `buemAdapter.ts` all read it, so adding, hiding or removing a technology starts in that file.
-
-| Field | Effect |
-|---|---|
-| `visible` | `false` hides the card in Overview and the nav item in Configure. |
-| `includeInModel` | `true` writes the technology's parameters to the export even when `visible` is `false`. |
-| `scope` | `per-surface`: configured on each surface, no install toggle. `building`: install toggle and a configure panel. `none`: install toggle only. |
-| `panelView` | The panel opened for the technology. Required when `scope` is `building` or `per-surface`. |
-
-To add a building-level technology, append an entry, implement its panel component, and add a matching case in `renderCenterPanel` in `BuildingConfigurator.tsx`.

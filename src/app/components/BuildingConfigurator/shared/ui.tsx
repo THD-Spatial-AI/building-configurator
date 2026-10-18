@@ -549,14 +549,14 @@ export function ScrollHintContainer({
 
 /**
  * Blurred-backdrop overlay that hosts a single element's editor (a surface
- * group, PV, battery, or the building's advanced settings). Replaces the old
+ * group or the building's advanced settings). Replaces the old
  * persistent "active editor" column — the editor now only exists while the
  * user is actively configuring one thing, instead of always occupying space.
  */
 const MODAL_SIZE = {
   default: 'h-[min(760px,85vh)] w-[min(1060px,94vw)]',
-  // Battery has far less content than the other panels (building/surfaces/PV)
-  // and was leaving most of the default-sized modal blank.
+  // For an editor with little content, which would leave most of the default
+  // size blank.
   compact: 'h-[min(520px,80vh)] w-[min(640px,94vw)]',
   // Surface-group editor: a fixed 200px sidebar list + one surface's
   // properties form — neither needs the full default width, which left a

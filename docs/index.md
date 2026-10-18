@@ -18,7 +18,6 @@ npm run dev
 ## Features
 
 - Configure building geometry, envelope elements, and thermal parameters
-- Set up roof and photovoltaic (PV) system properties
 - Visualise the building energy envelope and surface composition
 - View simulated heating and cooling load profiles
 - Step-by-step configuration workflow with live building snapshot

@@ -12,6 +12,7 @@
 
 export { Building3DView } from './app/components/workspace/Building3DView';
 export type { Building3DViewProps } from './app/components/workspace/Building3DView';
+export type { PvMode, PvSurface } from './app/components/workspace/PvMode';
 
 export {
   isEnvelopeDetached,
@@ -48,7 +49,6 @@ export {
   type BuildingParameters,
   type BuildingState,
   type ImportedBuildingData,
-  type TechnologyState,
   type ThermalSummary,
 } from './app/lib/buemAdapter';
 

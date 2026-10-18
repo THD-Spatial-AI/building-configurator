@@ -1,35 +1,21 @@
-// Left column of the Overview view: annual energy hero + technologies.
+// Left column of the Overview view: the annual energy hero.
 // Building parameters and envelope now live in the right column's merged details card.
 
 import React from 'react';
-import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Cpu as CpuIcon, Droplets, CookingPot } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { EnergySource, EnergyTotals } from '../../../lib/loadProfile';
 import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';
-import { TechnologiesSection } from './TechnologiesSection';
-
-interface PvSummary {
-  installed: boolean;
-  surfaceCount: number;
-  totalCapacityKw: number;
-}
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
   thermalRating: { label: string; color: string; bg: string };
   avgUValue: number;
   mode: 'basic' | 'expert';
-  installedTechIds: string[];
-  pvSummary: PvSummary;
-  onToggleTech?: (id: string, installed: boolean) => void;
-  /** Opens the matching technology's editor modal. */
-  onOpenTech?: (id: string) => void;
   /** Drops the scroll container, for a parent that scrolls already. */
   embedded?: boolean;
   /** The estimated-parameters notice, which points at the configurator dialog. */
   showEstimateNotice?: boolean;
-  /** The technology cards, for callers that give them their own tab instead. */
-  showTechnologies?: boolean;
   /** The thermal efficiency row. Off where no defensible rating method applies. */
   showThermalRating?: boolean;
 }
@@ -42,19 +28,14 @@ const ENERGY_ITEMS = [
   { key: 'kitchen',     label: 'Kitchen (gas)', Icon: CookingPot, iconBg: 'bg-rose-500/20', iconColor: 'text-rose-400', valueColor: 'text-rose-300'   },
 ] as const;
 
-/** Left panel of the overview: energy hero numbers + installed technologies. */
+/** Left panel of the overview: the annual energy figures. */
 export function BuildingSnapshotAside({
   energyTotals,
   thermalRating,
   avgUValue,
   mode,
-  installedTechIds,
-  pvSummary,
-  onToggleTech,
-  onOpenTech,
   embedded = false,
   showEstimateNotice = true,
-  showTechnologies = true,
   showThermalRating = true,
 }: BuildingSnapshotAsideProps) {
   const content = (
@@ -147,27 +128,6 @@ export function BuildingSnapshotAside({
         </div>
       </div>
 
-      {/* ── Technologies — no outer card, the individual tech cards
-            already carry their own border/shadow. ── */}
-      {showTechnologies && (
-      <div className="shrink-0">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex size-6 items-center justify-center rounded-md bg-slate-200">
-              <CpuIcon className="size-3.5 text-slate-600" />
-            </div>
-            <p className="text-[13px] font-bold text-slate-800">Technologies</p>
-          </div>
-          <p className="text-[11px] text-slate-400">Click a card to configure</p>
-        </div>
-        <TechnologiesSection
-          installedTechIds={installedTechIds}
-          pvSummary={pvSummary}
-          onToggle={onToggleTech}
-          onOpen={onOpenTech}
-        />
-      </div>
-      )}
 
     </aside>
   );

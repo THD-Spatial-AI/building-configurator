@@ -3,12 +3,7 @@ import { runBuildingSimulation, runIdentity, toBuem, type RunContext } from './b
 import type { BuemBuildingRunRequest } from './services';
 import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
-import {
-  DEFAULT_BATTERY_CONFIG,
-  DEFAULT_GENERAL,
-  generalFrom,
-} from '../components/BuildingConfigurator/shared/buildingDefaults';
-import { DEFAULT_PV_TECHNOLOGY } from '../components/BuildingConfigurator/shared/pvModel';
+import { DEFAULT_GENERAL, generalFrom } from '../components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
 const identity = {
@@ -26,12 +21,10 @@ const identity = {
 const opened: BuildingState = {
   geometry: { buildingId: 'osm-42', coordinates: [5.9, 52.2], buildingFootprint: null, buildingHeight: null },
   thematic: { identity, envelope: {}, thermalSummary: null, timeseries: null },
-  technologies: { rawTechs: {}, installedTechIds: [] },
   identity,
   envelope: {},
   thermalSummary: null,
   timeseries: null,
-  installedTechIds: [],
   ignis: null,
 };
 
@@ -66,14 +59,7 @@ const general = {
   outputs: { heating: 'series', cooling: 'none', electricity: 'summary', hot_water: 'series', kitchen: 'summary' } as const,
 };
 
-const tech = {
-  pvTechnology: DEFAULT_PV_TECHNOLOGY,
-  pvArrays: {},
-  battery: DEFAULT_BATTERY_CONFIG,
-  otherTechIds: [],
-};
-
-const edited = withEdits(opened, elements, general, tech);
+const edited = withEdits(opened, elements, general);
 
 describe('toBuem', () => {
   it('sends the blocks a run with the same edits sends', () => {

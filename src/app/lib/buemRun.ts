@@ -31,13 +31,8 @@ export async function runBuildingSimulation(
   elements: Record<string, any>,
   general: Record<string, any>,
   runContext?: RunContext,
-  batteryConfig?: Record<string, any>,
 ): Promise<BuildingDemandProfile | null> {
-  const feature = serializeToBuemFeature(
-    identity, elements, general,
-    runContext?.startDate, runContext?.endDate, undefined, undefined,
-    batteryConfig,
-  );
+  const feature = serializeToBuemFeature(identity, elements, general, runContext?.startDate, runContext?.endDate);
 
   try {
     return await services.runBuemBuilding({
@@ -78,8 +73,7 @@ export function runIdentity(
 /**
  * The BuEM `building`, `outputs` and `solver` blocks a run of this building
  * sends, for a host to store. Reopen them with adaptBuemFeature on a Feature
- * whose properties.buem is this object. PV arrays and the battery are not part
- * of any block; they travel in building.technologyState.
+ * whose properties.buem is this object.
  */
 export function toBuem(building: BuildingState): {
   building: Record<string, any>;
