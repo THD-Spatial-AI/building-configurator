@@ -4,18 +4,14 @@
 // and never access raw BUEM JSON directly. The paths themselves are documented in
 // src/app/config/modelDataMap.ts.
 
-import { TECH_REGISTRY } from '../config/techRegistry';
 import { MODEL_DATA_MAP } from '../config/modelDataMap';
 import {
   getMappedArray,
   getMappedNumber,
-  getMappedRecord,
   getMappedValue,
   hasMappedValue,
 } from '../config/modelDataResolver';
 import { faceFromAzimuth, type BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
-import type { BatteryConfig, PvConfig } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
-import type { PvArray, PvTechnology } from '@/app/components/BuildingConfigurator/shared/pvModel';
 import {
   BUILDING_TYPE_LABELS,
   OUTPUT_PROFILES,
@@ -72,32 +68,11 @@ export interface ThematicData {
   timeseries: LoadDataPoint[] | null;
 }
 
-export type InstalledTechnologyId = keyof typeof MODEL_DATA_MAP.technologies.catalog;
-
-export interface TechnologyData {
-  rawTechs: Record<string, unknown>;
-  installedTechIds: InstalledTechnologyId[];
-}
-
-/**
- * PV and battery as the configurator holds them: the BUEM technology fields
- * carry no per-surface PV arrays, so a saved building keeps them here.
- */
-export interface TechnologyState {
-  pvTechnology: PvTechnology;
-  pvArrays: Record<string, PvArray>;
-  battery: BatteryConfig;
-  /** Installed technologies other than PV and the battery, which have their own state. */
-  otherTechIds: string[];
-}
-
 export interface BuildingState {
   /** Centralised geometry domain for embedding this dashboard in external apps. */
   geometry: GeometryData;
   /** Centralised thematic domain for identity, envelope and results. */
   thematic: ThematicData;
-  /** Centralised technology domain for installed tech discovery. */
-  technologies: TechnologyData;
   identity: BuildingIdentity;
   /** Envelope surfaces keyed by element id — same shape as the configurator UI. */
   envelope: Record<string, BuildingElement>;
@@ -105,16 +80,12 @@ export interface BuildingState {
   thermalSummary: ThermalSummary | null;
   /** Hourly load profile. Null when the request did not include timeseries. */
   timeseries: LoadDataPoint[] | null;
-  /** UI technology IDs that are installed according to the model config. */
-  installedTechIds: string[];
   /**
    * HDCP (ISO 13790 annual heat demand) state.
    * Null until the building's country + type + construction period resolve
    * to at least one TABULA variant in the HDCP service.
    */
   ignis: import('./ignisAdapter').IgnisState | null;
-  /** Set when the building was saved from the configurator; absent on a freshly imported one. */
-  technologyState?: TechnologyState;
   /** Building parameters the source or a saved edit set; the configurator defaults the rest. */
   parameters?: BuildingParameters;
 }
@@ -353,21 +324,11 @@ function adaptThematicData(feature: unknown): ThematicData {
   };
 }
 
-function adaptTechnologyData(feature: unknown): TechnologyData {
-  const rawTechs = getMappedRecord(feature, MODEL_DATA_MAP.technologies.techRoot);
-  const installedTechIds = Object.entries(MODEL_DATA_MAP.technologies.catalog)
-    .filter(([, path]) => hasMappedValue(feature, path))
-    .map(([id]) => id as InstalledTechnologyId);
-
-  return { rawTechs, installedTechIds };
-}
-
-/** Extracts the three dashboard integration domains from a single feature. */
-export function extractBuildingDashboardData(feature: unknown): Pick<BuildingState, 'geometry' | 'thematic' | 'technologies'> {
+/** Extracts the geometry and thematic domains from a single feature. */
+export function extractBuildingDashboardData(feature: unknown): Pick<BuildingState, 'geometry' | 'thematic'> {
   return {
     geometry: adaptGeometryData(feature),
     thematic: adaptThematicData(feature),
-    technologies: adaptTechnologyData(feature),
   };
 }
 
@@ -431,18 +392,16 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     throw new Error('adaptBuemFeature: expected a GeoJSON Feature object.');
   }
 
-  const { geometry, thematic, technologies } = extractBuildingDashboardData(feature);
+  const { geometry, thematic } = extractBuildingDashboardData(feature);
   const parameters = adaptParameters(feature);
 
   return {
     geometry,
     thematic,
-    technologies,
     identity: thematic.identity,
     envelope: thematic.envelope,
     thermalSummary: thematic.thermalSummary,
     timeseries: thematic.timeseries,
-    installedTechIds: technologies.installedTechIds,
     ignis: null,
     ...(parameters ? { parameters } : {}),
   };
@@ -589,8 +548,6 @@ export function serializeToBuemFeature(
   endTime: string = '2018-12-31T23:00:00Z',
   resolution: string | number = '60',
   resolutionUnit: string = 'minutes',
-  batteryConfig?: Record<string, any>,
-  surfacePvConfigs?: Record<string, PvConfig>,
 ): Record<string, any> {
   const [lon, lat] = identity.coordinates;
 
@@ -654,73 +611,6 @@ export function serializeToBuemFeature(
     building.thermal = thermal;
   }
 
-  // Build the techs block.
-  // Battery is included when installed, or when the registry marks it includeInModel = true
-  // (e.g. when the card is hidden but the simulation engine still needs the params).
-  const batteryDef = TECH_REGISTRY.find((t) => t.id === 'battery');
-  const techs: Record<string, any> = {};
-  if (batteryConfig && (batteryConfig.installed || batteryDef?.includeInModel)) {
-    const b = batteryConfig;
-    techs.battery_storage = {
-      cont_energy_cap_max:                  b.cont_energy_cap_max,
-      cont_energy_cap_min:                  b.cont_energy_cap_min,
-      cont_storage_cap_max:                 b.cont_storage_cap_max,
-      cont_storage_cap_min:                 b.cont_storage_cap_min,
-      cont_energy_eff:                      b.cont_energy_eff,
-      cont_storage_loss:                    b.cont_storage_loss,
-      cont_storage_discharge_depth:         b.cont_storage_discharge_depth,
-      cont_storage_initial:                 b.cont_storage_initial,
-      cont_lifetime:                        b.cont_lifetime,
-      cost_energy_cap:                      b.cost_energy_cap,
-      cost_storage_cap:                     b.cost_storage_cap,
-      cost_om_annual:                       b.cost_om_annual,
-      cost_om_annual_investment_fraction:   0,
-      cost_interest_rate:                   b.cost_interest_rate,
-      cost_purchase:                        0,
-      cost_export:                          0,
-      cont_energy_cap_max_systemwide:       'inf',
-      cont_export_cap:                      'inf',
-    };
-  }
-
-  // One entry per PV-installed surface, not one aggregate `pv_supply` — a
-  // building can carry several distinct PV arrays (different roof faces,
-  // different orientation/capacity each), which the flat `Record<techId,
-  // TechData>` shape downstream can only represent as separate tech ids.
-  // Keying on the surface id (`pv_supply__<surfaceId>`) keeps each array
-  // addressable back to the surface it's on. TentaCron resolves any number
-  // of independent resolvent objects per payload, and Calliope addresses
-  // technologies as `location::tech`, so multiple named PV techs at one
-  // building is supported downstream. Not yet verified end-to-end with a
-  // real resource API or a real meme/Calliope run.
-  if (surfacePvConfigs) {
-    for (const [surfaceId, pv] of Object.entries(surfacePvConfigs)) {
-      if (!pv.installed || !elements[surfaceId]) continue;
-      techs[`pv_supply__${surfaceId}`] = {
-        cont_energy_cap_max:   pv.cont_energy_cap_max,
-        cont_energy_cap_min:   pv.cont_energy_cap_min,
-        cont_energy_eff:       pv.cont_energy_eff,
-        cont_lifetime:         pv.cont_lifetime,
-        cont_degradation_rate: pv.cont_degradation_rate,
-        cost_energy_cap:       pv.cost_energy_cap,
-        cost_om_annual:        pv.cost_om_annual,
-        cost_om_variable:      pv.cost_om_variable,
-        cost_interest_rate:    pv.cost_interest_rate,
-        cost_basis:            pv.cost_basis,
-        co2_emission_factor:   pv.co2_emission_factor,
-        // Panel geometry and system-level derating — inputs to whatever
-        // resolves this into a capacity-factor series, not Calliope cost/
-        // efficiency fields themselves.
-        system_capacity:       pv.system_capacity,
-        tilt:                  pv.tilt,
-        azimuth:               pv.azimuth,
-        inv_eff:               pv.inv_eff,
-        dc_ac_ratio:           pv.dc_ac_ratio,
-        losses:                pv.losses,
-      };
-    }
-  }
-
   // Build the complete feature
   const feature: Record<string, any> = {
     type: 'Feature',
@@ -745,7 +635,6 @@ export function serializeToBuemFeature(
           // computed unconditionally. Omit until BuEM wires the flag up.
         },
       },
-      ...(Object.keys(techs).length > 0 ? { techs } : {}),
     },
   };
 
@@ -791,12 +680,8 @@ export function exportToBuemGeojson(
   general: Record<string, any>,
   startTime?: string,
   endTime?: string,
-  batteryConfig?: Record<string, any>,
-  surfacePvConfigs?: Record<string, PvConfig>,
 ): string {
-  const feature = serializeToBuemFeature(
-    identity, elements, general, startTime, endTime, '60', 'minutes', batteryConfig, surfacePvConfigs,
-  );
+  const feature = serializeToBuemFeature(identity, elements, general, startTime, endTime, '60', 'minutes');
   const featureCollection = {
     type: 'FeatureCollection',
     features: [feature],

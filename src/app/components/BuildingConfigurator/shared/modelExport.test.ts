@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { buildingCsv, surfacesCsv, toCsv } from './modelExport';
-import { DEFAULT_PV_CONFIG } from './buildingDefaults';
 import type { BuildingElement } from '../configure/model/buildingElements';
 
 function surface(over: Partial<BuildingElement>): BuildingElement {
@@ -22,25 +21,20 @@ describe('toCsv', () => {
 });
 
 describe('surfacesCsv', () => {
-  it('carries a surface and its PV array', () => {
+  it('carries a surface', () => {
     const roof = surface({ id: 'r1', label: 'Roof', type: 'roof', area: 40, tilt: 35, azimuth: 180 });
-    const csv = surfacesCsv(
-      { r1: roof },
-      { r1: { ...DEFAULT_PV_CONFIG, installed: true, system_capacity: 6.4 } },
-    );
-    const [header, row] = csv.split('\n');
+    const [header, row] = surfacesCsv({ r1: roof }).split('\n');
     expect(header.startsWith('surface_id,label,type,face')).toBe(true);
-    expect(row).toBe('r1,Roof,roof,S,40.00,0.240,,35.0,180.0,city,yes,6.40');
+    expect(row).toBe('r1,Roof,roof,S,40.00,0.240,,35.0,180.0,city');
   });
 
-  it('marks a surface with no array, and a horizontal one as flat', () => {
-    const csv = surfacesCsv({ f1: surface({ id: 'f1', type: 'roof', azimuth: -1, tilt: 0 }) }, {});
+  it('marks a horizontal surface as flat', () => {
+    const csv = surfacesCsv({ f1: surface({ id: 'f1', type: 'roof', azimuth: -1, tilt: 0 }) });
     expect(csv.split('\n')[1]).toContain(',flat,');
-    expect(csv.split('\n')[1].endsWith(',no,')).toBe(true);
   });
 
   it('escapes a renamed surface that carries a comma', () => {
-    const csv = surfacesCsv({ a: surface({ label: 'Wall, north side' }) }, {});
+    const csv = surfacesCsv({ a: surface({ label: 'Wall, north side' }) });
     expect(csv.split('\n')[1]).toContain('"Wall, north side"');
   });
 });

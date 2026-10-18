@@ -199,16 +199,11 @@ height, air change rates, thermal mass), the household inputs (dwellings,
 occupants, household type, appliances; capacity for a service building) and
 every surface with its name. `outputs` records which load profiles BuEM
 computes, and `solver.use_milp` whether it solves with MILP. None of the three
-carries the PV arrays, the battery or the storey count: a reopened building
-keeps its total floor area and shows the default storey count.
+carries the storey count: a reopened building keeps its total floor area and
+shows the default storey count.
 
 When `outputs` selects neither heating nor cooling, `building` has no envelope
 and the run needs no weather.
-
-!!! warning "PV and battery"
-    Keep `edited.technologyState` beside the blocks and set it on the reopened
-    state (`{ ...reopened, technologyState }`), or they reopen at their
-    defaults.
 
 !!! warning "Forward solver and outputs"
     `runBuemBuilding` receives `request.solver` and `request.outputs`, to be

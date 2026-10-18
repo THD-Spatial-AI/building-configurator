@@ -6,8 +6,7 @@
 
 import { strToU8, zipSync } from 'fflate';
 import type { BuildingElement } from '../configure/model/buildingElements';
-import { compassDir } from './pvSuitability';
-import { computeTotalFloorArea, computeVolume, type PvConfig } from './buildingDefaults';
+import { computeTotalFloorArea, computeVolume } from './buildingDefaults';
 
 /** RFC 4180: a field carrying a comma, quote or newline is quoted, and its own
  *  quotes are doubled. A renamed surface is free text, so this is not optional. */
@@ -23,28 +22,28 @@ export function toCsv(rows: (string | number | null | undefined)[][]): string {
 
 const SURFACE_HEADER = [
   'surface_id', 'label', 'type', 'face', 'area_m2', 'u_value_w_m2k', 'g_value',
-  'tilt_deg', 'azimuth_deg', 'source', 'pv_installed', 'pv_capacity_kwp',
+  'tilt_deg', 'azimuth_deg', 'source',
 ];
 
-/** One row per envelope surface, with its PV array where it carries one. */
-export function surfacesCsv(
-  elements: Record<string, BuildingElement>,
-  surfacePvConfigs: Record<string, PvConfig>,
-): string {
+/** Compass label for an azimuth; City2TABULA's -1 marks a horizontal surface, written "flat". */
+export function compassDir(azimuth: number): string {
+  if (azimuth === -1) return 'flat';
+  const dirs: Array<[number, string]> = [
+    [22.5, 'N'], [67.5, 'NE'], [112.5, 'E'], [157.5, 'SE'],
+    [202.5, 'S'], [247.5, 'SW'], [292.5, 'W'], [337.5, 'NW'],
+  ];
+  return dirs.find(([limit]) => azimuth < limit)?.[1] ?? 'N';
+}
+
+/** One row per envelope surface. */
+export function surfacesCsv(elements: Record<string, BuildingElement>): string {
   const rows = Object.values(elements)
     .sort((a, b) => a.type.localeCompare(b.type) || b.area - a.area)
-    .map((el) => {
-      const pv = surfacePvConfigs[el.id];
-      return [
-        // compassDir reads a horizontal surface's -1 azimuth as "flat" rather
-        // than as a bearing.
-        el.id, el.label, el.type, compassDir(el.azimuth),
-        el.area.toFixed(2), el.uValue.toFixed(3), el.gValue ?? '',
-        el.tilt.toFixed(1), el.azimuth.toFixed(1), el.source ?? '',
-        pv?.installed ? 'yes' : 'no',
-        pv?.installed ? pv.system_capacity.toFixed(2) : '',
-      ];
-    });
+    .map((el) => [
+      el.id, el.label, el.type, compassDir(el.azimuth),
+      el.area.toFixed(2), el.uValue.toFixed(3), el.gValue ?? '',
+      el.tilt.toFixed(1), el.azimuth.toFixed(1), el.source ?? '',
+    ]);
   return toCsv([SURFACE_HEADER, ...rows]);
 }
 
@@ -83,12 +82,11 @@ export function buildingCsv(
 /** Both tables in one archive, so an export is a single file. */
 export function modelTablesZip(
   elements: Record<string, BuildingElement>,
-  surfacePvConfigs: Record<string, PvConfig>,
   general: Record<string, any>,
   extras: { totalEnvelopeArea: number; avgUValue: number; heatDemandKwhM2a?: number | null },
 ): Uint8Array {
   return zipSync({
     'building.csv': strToU8(buildingCsv(general, extras)),
-    'surfaces.csv': strToU8(surfacesCsv(elements, surfacePvConfigs)),
+    'surfaces.csv': strToU8(surfacesCsv(elements)),
   });
 }

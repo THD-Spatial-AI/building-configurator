@@ -11,17 +11,9 @@ import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surface
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard } from '../BuildingConfigurator/overview/BuildingDetailsCard';
 import { BuildingSnapshotAside } from '../BuildingConfigurator/overview/BuildingSnapshotAside';
-import { CostSummaryCard } from '../BuildingConfigurator/overview/CostSummaryCard';
-import { RenewablesKpis } from '../BuildingConfigurator/overview/RenewablesKpis';
-import { PvPlanner } from './PvPlanner';
-import { pvCandidates } from '../BuildingConfigurator/shared/pvSuitability';
-import { DEFAULT_PV_CONFIG, createSurfacePvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
-import { TechnologiesSection } from '../BuildingConfigurator/overview/TechnologiesSection';
 import { LoadProfileBar } from './LoadProfileBar';
 import { ConfiguratorStyles, SegmentedControl, UnsavedChangesDialog } from '../BuildingConfigurator/shared/ui';
 import { BuildingEditor } from '../BuildingConfigurator/configure/building/BuildingEditor';
-import { BatteryEditor } from '../BuildingConfigurator/configure/pv/BatteryEditor';
-import { PvEditor } from '../BuildingConfigurator/configure/pv/PvEditor';
 import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
 import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
 import { cn } from '@/lib/utils';
@@ -76,14 +68,8 @@ export function Building3DView({
   const [surfaceOriginal, setSurfaceOriginal] = useState<BuildingElement | null>(null);
   /** Where the editor was about to go when it asked about the open surface's changes. */
   const [pendingSurface, setPendingSurface] = useState<{ next: SurfaceSelection | null } | null>(null);
-  /** The PV planner is open: its candidates are lit in the model while it is. */
-  const [pvPlannerOpen, setPvPlannerOpen] = useState(false);
-  /** Expert shows the full BuEM building parameters and technology settings. */
+  /** Expert shows the full BuEM building parameters. */
   const [mode, setMode] = useState<'basic' | 'expert'>('basic');
-  /** Which technology's own parameters are open, if any. */
-  const [techPanel, setTechPanel] = useState<'battery' | null>(null);
-  /** The surface whose full PV parameters are open, if any. */
-  const [pvEditorId, setPvEditorId] = useState<string | null>(null);
   /** The export choices, open over the header button. */
   const [exportOpen, setExportOpen] = useState(false);
   /** Leaving was asked for while there are unsaved edits. */
@@ -129,19 +115,6 @@ export function Building3DView({
     [elements],
   );
   const surfaces = geometry?.surfaces ?? [];
-
-  const pvIds = useMemo(
-    () => new Set(model.pvInstalledSurfaces.map(({ element }) => element.id)),
-    [model.pvInstalledSurfaces],
-  );
-  const candidates = useMemo(
-    () => pvCandidates(elements, DEFAULT_PV_CONFIG.usable_area_pct),
-    [elements],
-  );
-  const candidateIds = useMemo(
-    () => new Set(candidates.map((candidate) => candidate.element.id)),
-    [candidates],
-  );
 
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
@@ -293,8 +266,6 @@ export function Building3DView({
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
               visibleIds={envelopeIds}
-              pvIds={pvIds}
-              candidateIds={pvPlannerOpen ? candidateIds : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
               onSelectSurface={(id, at) => requestSurface(id && elements[id] && at ? { id, at } : null)}
@@ -365,66 +336,9 @@ export function Building3DView({
                     thermalRating={model.thermalRating}
                     showThermalRating={false}
                     avgUValue={model.avgUValue}
-                    installedTechIds={model.installedTechIds}
-                    pvSummary={model.pvSummary}
                     mode="basic"
                     embedded
                     showEstimateNotice={false}
-                    showTechnologies={false}
-                  />
-                  <RenewablesKpis
-                    pvSurfaces={model.pvInstalledSurfaces}
-                    elements={elements}
-                    battery={model.batteryConfig}
-                  />
-                </div>
-              )}
-              technologySlot={(
-                <div className="flex flex-col gap-3">
-                  <TechnologiesSection
-                    installedTechIds={model.installedTechIds}
-                    pvSummary={model.pvSummary}
-                    onToggle={model.setTechInstalled}
-                    onOpen={(id) => {
-                      if (id === 'solar_pv') setPvPlannerOpen((open) => !open);
-                      if (id === 'battery') setTechPanel((open) => (open === 'battery' ? null : 'battery'));
-                    }}
-                  />
-                  {techPanel === 'battery' && (
-                    <div className="h-[460px] overflow-hidden rounded-lg border border-slate-200 bg-white">
-                      <BatteryEditor battery={model.batteryConfig} onUpdate={model.updateBattery} mode={mode} />
-                    </div>
-                  )}
-                  {pvPlannerOpen && (
-                    <PvPlanner
-                      candidates={candidates}
-                      installedIds={pvIds}
-                      // Only the switch: the array takes its angles from the
-                      // surface and its size from the coverage share, and the
-                      // module comes from the building.
-                      onToggle={(candidate, installed) =>
-                        model.updateSurfacePv(candidate.element.id, { installed })}
-                      onSelect={selectFromList}
-                      onConfigure={mode === 'expert' ? setPvEditorId : undefined}
-                    />
-                  )}
-                  {pvEditorId && elements[pvEditorId] && (
-                    <div className="h-[460px] overflow-hidden rounded-lg border border-slate-200 bg-white">
-                      <PvEditor
-                        key={pvEditorId}
-                        pvConfig={model.surfacePvConfigs[pvEditorId] ?? createSurfacePvConfig(elements[pvEditorId])}
-                        onUpdate={(patch) => model.updateSurfacePv(pvEditorId, patch)}
-                        mode={mode}
-                        // The panel takes its angles from the surface it was
-                        // installed on, not from the largest south-facing roof
-                        // that notice describes.
-                        roofInferred={false}
-                      />
-                    </div>
-                  )}
-                  <CostSummaryCard
-                    pvSurfaces={model.pvInstalledSurfaces}
-                    battery={model.batteryConfig}
                   />
                 </div>
               )}
@@ -468,10 +382,8 @@ export function Building3DView({
             element={selectedElement}
             geometryArea={selectedGeometryArea}
             uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
-            pv={model.surfacePvConfigs[selected.id] ?? null}
             mode={mode}
             onUpdate={(patch) => model.updateElement(selected.id, patch)}
-            onUpdatePv={(patch) => model.updateSurfacePv(selected.id, patch)}
             onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
           />
         </SurfacePopover>

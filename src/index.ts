@@ -48,7 +48,6 @@ export {
   type BuildingParameters,
   type BuildingState,
   type ImportedBuildingData,
-  type TechnologyState,
   type ThermalSummary,
 } from './app/lib/buemAdapter';
 

@@ -1,17 +1,12 @@
 // Everything one surface needs, in a card small enough to sit beside it:
 // its area (with the measured value from the 3D geometry one click away), how
-// well it insulates, which way it faces, and whether it carries PV.
-//
-// Detailed technology parameters stay in the configurator dialog; this is the
-// set a user changes while looking at the building.
+// well it insulates and which way it faces.
 
 import React from 'react';
-import { AlertTriangle, Ruler, RotateCcw, Sun, Trash2 } from 'lucide-react';
+import { AlertTriangle, Ruler, RotateCcw, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { createSurfacePvConfig, type PvConfig } from '../BuildingConfigurator/shared/buildingDefaults';
-import { suggestedCapacityKwp } from '../BuildingConfigurator/shared/pvSuitability';
 
 /** Widest U-value the slider covers: a single-glazed window sits near 5. */
 const U_MAX = 5;
@@ -37,24 +32,18 @@ interface SurfaceQuickEditorProps {
   geometryArea?: number | null;
   /** This building's TABULA U-values for this surface type. */
   uValuePresets: { label: string; uValue: number }[];
-  pv: PvConfig | null;
   mode?: 'basic' | 'expert';
   onUpdate: (patch: Partial<BuildingElement>) => void;
-  onUpdatePv: (patch: Partial<PvConfig>) => void;
   onDelete: () => void;
 }
 
 export function SurfaceQuickEditor({
-  element, geometryArea, uValuePresets, pv, mode = 'basic', onUpdate, onUpdatePv, onDelete,
+  element, geometryArea, uValuePresets, mode = 'basic', onUpdate, onDelete,
 }: SurfaceQuickEditorProps) {
   const areaMissing = !(element.area > 0);
   // Worth offering only when it would actually change the area.
   const offerGeometryArea = geometryArea != null && geometryArea > 0
     && Math.abs(geometryArea - element.area) > Math.max(0.05, element.area * 0.01);
-  const pvEligible = element.type === 'roof' || element.type === 'wall';
-  const pvConfig = pv ?? createSurfacePvConfig(element);
-  // What the coverage share puts on this surface, before any hand-set capacity.
-  const fittedCapacity = suggestedCapacityKwp(element.area, pvConfig.usable_area_pct);
 
   // The values this surface arrived with, stamped on import (see
   // normalizeElementRecord), so a hand-edit can always be walked back.
@@ -165,52 +154,6 @@ export function SurfaceQuickEditor({
         />
         <TiltDial value={element.tilt} onChange={(tilt) => onUpdate({ tilt })} />
       </div>
-
-      {/* ── Solar PV ── */}
-      {pvEligible && (
-        <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={pvConfig.installed}
-              onChange={(e) => onUpdatePv({
-                installed: e.target.checked,
-                // The panel follows the surface it sits on until changed by hand.
-                tilt: element.tilt,
-                azimuth: element.azimuth,
-              })}
-              className="size-4 cursor-pointer accent-primary"
-            />
-            <Sun className={cn('size-4', pvConfig.installed ? 'text-yellow-500' : 'text-slate-300')} />
-            <span className="flex-1 text-[12px] font-semibold text-slate-700">Solar PV on this surface</span>
-          </label>
-
-          {pvConfig.installed && (
-            <div className="mt-2.5 flex flex-col gap-2">
-              <PresetSlider
-                label="Panel coverage"
-                value={pvConfig.usable_area_pct}
-                min={10}
-                max={100}
-                step={5}
-                unit="%"
-                decimals={0}
-                quality="of this surface, after obstructions"
-                onChange={(usable_area_pct) => onUpdatePv({ usable_area_pct })}
-              />
-              <div className="flex items-baseline justify-between">
-                <span className="text-[11px] font-medium text-muted-foreground">Capacity</span>
-                <span className="text-[12px] font-semibold text-slate-700">
-                  {pvConfig.system_capacity.toFixed(1)}
-                  <span className="ml-1 text-[10px] font-normal text-slate-400">
-                    kWp {Math.abs(pvConfig.system_capacity - fittedCapacity) < 0.05 ? 'fitted' : 'set by hand'}
-                  </span>
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {edited && (
         <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">

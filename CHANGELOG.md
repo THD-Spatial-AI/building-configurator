@@ -4,6 +4,17 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+This release breaks the host interface: the package no longer defines or stores technologies. The host owns them.
+
+### Removed
+
+- The Technology tab and every technology editor: the PV planner, the per-surface PV settings, the battery and heat-pump cards, and the renewables and technology-cost figures on the energy overview.
+- `TechnologyState` and the `BuildingState` fields `technologies`, `installedTechIds` and `technologyState`. A stored building that still carries `technologyState` opens without it.
+- The `batteryConfig` and `surfacePvConfigs` parameters of `serializeToBuemFeature` and `exportToBuemGeojson`, and the `techs` block they wrote. Opening a building no longer reads `properties.techs`.
+- The `pv_installed` and `pv_capacity_kwp` columns of the surfaces table.
+
 ## [0.7.0] - 2026-10-16
 
 This release breaks the host interface in three places, and its building block needs a buem-gateway that accepts the v6-draft request schema:
