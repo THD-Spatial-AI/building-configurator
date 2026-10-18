@@ -1,5 +1,5 @@
 // The dev shell playing host for PV mode: it decides which surfaces to offer
-// and what they can take, and keeps the user's choices. A real host derives
+// and what capacity they carry, and keeps the user's choices. A real host derives
 // these from its own PV placement and stores them.
 
 import { useCallback, useMemo, useState } from 'react';
@@ -9,16 +9,21 @@ import type { BuildingElement } from '../app/components/BuildingConfigurator/con
 /** Demo module density; a real host takes it from the PV type. */
 const KWP_PER_M2 = 0.2;
 
+function capacity(area: number, usableShare: number): number {
+  return Number((area * usableShare * KWP_PER_M2).toFixed(1));
+}
+
 /** Roofs facing east through west are suggested; the other roofs and every wall are offered without a highlight. */
 function offered(elements: Record<string, BuildingElement>): Record<string, PvSurface> {
   const surfaces: Record<string, PvSurface> = {};
   for (const el of Object.values(elements)) {
     if ((el.type !== 'roof' && el.type !== 'wall') || !(el.area > 0)) continue;
     const southish = el.azimuth === -1 || (el.azimuth >= 90 && el.azimuth <= 270);
+    const usableShare = el.type === 'roof' ? 0.6 : 0.4;
     surfaces[el.id] = {
       state: el.type === 'roof' && southish ? 'suggested' : 'available',
-      usableShare: el.type === 'roof' ? 0.6 : 0.4,
-      maxKwp: Number((el.area * KWP_PER_M2).toFixed(1)),
+      usableShare,
+      maxKwp: capacity(el.area, usableShare),
     };
   }
   return surfaces;
@@ -38,8 +43,11 @@ export function useDemoPvHost(elements: Record<string, BuildingElement>): PvMode
   }, [initial]);
 
   const onShareChange = useCallback((surfaceId: string, usableShare: number) => {
-    setSurfaces((prev) => ({ ...prev, [surfaceId]: { ...prev[surfaceId], usableShare } }));
-  }, []);
+    setSurfaces((prev) => ({
+      ...prev,
+      [surfaceId]: { ...prev[surfaceId], usableShare, maxKwp: capacity(elements[surfaceId].area, usableShare) },
+    }));
+  }, [elements]);
 
   return useMemo(() => ({
     surfaces,

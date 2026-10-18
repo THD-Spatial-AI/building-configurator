@@ -14,7 +14,7 @@ export interface PvSurface {
   state: 'installed' | 'suggested' | 'available';
   /** Share of the surface usable for panels, 0 to 1. */
   usableShare: number;
-  /** Capacity the surface can take, in kWp. */
+  /** Capacity of the panels at the current usable share, in kWp. */
   maxKwp: number;
 }
 
@@ -147,7 +147,7 @@ export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; s
         />
       )}
       <div className="flex items-baseline justify-between">
-        <span className="text-[11px] font-medium text-muted-foreground">Maximum capacity</span>
+        <span className="text-[11px] font-medium text-muted-foreground">Capacity</span>
         <span className="text-[12px] font-semibold text-slate-700">
           {surface.maxKwp.toFixed(1)}<span className="ml-1 text-[10px] font-normal text-slate-400">kWp</span>
         </span>
