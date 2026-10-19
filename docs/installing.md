@@ -56,12 +56,12 @@ const draftId = crypto.randomUUID();
 // Module constant: one identity for the life of the page.
 const services: ConfiguratorServices = {
   fetchMatchingVariants: (country, typeCode, year) =>
-    axios.get(`/v2/ignis/variants/${country}/match`, { params: { type: typeCode, year } })
+    axios.get(`/v1/ignis/variants/${country}/match`, { params: { type: typeCode, year } })
       .then((r) => r.data.data),
   fetchVariantData: (code) =>
-    axios.get(`/v2/ignis/data/${code}`).then((r) => r.data.data),
+    axios.get(`/v1/ignis/data/${code}`).then((r) => r.data.data),
   calculateHeatDemand: (code, inputs) =>
-    axios.post(`/v2/ignis/calculate/${code}`, inputs).then((r) => r.data.data),
+    axios.post(`/v1/ignis/calculate/${code}`, inputs).then((r) => r.data.data),
   runBuemBuilding: (request) =>
     axios.post(`/drafts/${draftId}/buildings/${request.osm_id}/buem`, request).then((r) => r.data),
 };
