@@ -72,14 +72,15 @@ export function BuildingDetailsCard({
 
   return (
     <div className={cn(CARD, 'shrink-0')}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-        <p className="text-[13px] font-bold text-slate-800">
+      {/* Wraps the tabs under the title when the panel is too narrow for both on one line. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 border-b border-slate-100">
+        <p className="whitespace-nowrap text-[13px] font-bold text-slate-800">
           {activeTab === 'overview' ? 'Energy overview'
             : activeTab === 'envelope' ? 'Building Envelope'
             : activeTab === 'technology' ? 'Technologies'
             : 'Building Parameters'}
         </p>
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
           {/* Plain menu-bar tabs — not a filled segmented-control pill, just
               two labelled buttons with an underline on the active one.
               Parameters is the default/first option, Envelope the second. */}
@@ -95,7 +96,7 @@ export function BuildingDetailsCard({
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'cursor-pointer border-b-2 pb-0.5 text-xs transition-colors',
+                  'cursor-pointer whitespace-nowrap border-b-2 pb-0.5 text-xs transition-colors',
                   activeTab === tab
                     ? 'border-primary font-semibold text-foreground'
                     : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
