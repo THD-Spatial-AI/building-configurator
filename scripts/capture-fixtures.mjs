@@ -85,11 +85,11 @@ async function captureIgnis(enrichData) {
     codes.add(entry.tabula_variant_code);
     if (match[key]) continue;
     const query = new URLSearchParams({ type, year: String(entry.default_construction_year) });
-    match[key] = (await getJson(`/v2/ignis/variants/${country}/match?${query}`)).data;
+    match[key] = (await getJson(`/v1/ignis/variants/${country}/match?${query}`)).data;
     for (const variant of match[key].data) codes.add(variant.code);
   }
   const data = {};
-  for (const code of [...codes].sort()) data[code] = (await getJson(`/v2/ignis/data/${code}`)).data;
+  for (const code of [...codes].sort()) data[code] = (await getJson(`/v1/ignis/data/${code}`)).data;
   return { match, data };
 }
 

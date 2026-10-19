@@ -44,6 +44,30 @@ describe('PvPanel', () => {
   });
 });
 
+describe('PvPanel surface names', () => {
+  it("uses the element's label, else the host's label, else the id", () => {
+    const html = renderToStaticMarkup(
+      <PvPanel
+        pv={{
+          ...pv,
+          surfaces: {
+            r1: { state: 'installed', usableShare: 0.6, maxKwp: 7.2, label: 'Ignored host label' },
+            n1: { state: 'available', usableShare: 0.5, maxKwp: 8.3, label: 'Roof on another 3D building (2 of 7), south, 30°' },
+            n2: { state: 'available', usableShare: 0.5, maxKwp: 1.0 },
+          },
+        }}
+        elements={elements}
+        onSelect={() => {}}
+      />,
+    );
+    expect(html).toContain('Roof south');
+    expect(html).not.toContain('Ignored host label');
+    expect(html).toContain('Roof on another 3D building (2 of 7), south, 30°');
+    expect(html).toContain('>n2<');
+    expect(html).not.toContain('> · 8.3 kWp');
+  });
+});
+
 describe('PvSurfaceCard', () => {
   it('offers the usable share as a percentage only on an installed surface', () => {
     const installed = renderToStaticMarkup(<PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} />);

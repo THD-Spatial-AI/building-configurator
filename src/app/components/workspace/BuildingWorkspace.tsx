@@ -5,13 +5,14 @@
  * fetched or rendered.
  */
 
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Box, Loader2 } from 'lucide-react';
 import { LoenenLiveMap } from '../LoenenLiveMap';
 import { surfaceGeometry, useFixtureBuilding, useLoenenBuildings } from '../../../demo/useLoenen';
 import { fixtureDemandProfile, fixtureSeriesCsvUrl, fixtureServices } from '../../../demo/services';
 import { FIXTURE_ATTRIBUTION, MAP_ATTRIBUTIONS } from '../../../demo/attribution';
 import { useDemoPvHost } from '../../../demo/pvHost';
+import { useDemoTechnologies } from '../../../demo/technologyHost';
 import { Building3DView } from './Building3DView';
 import type { BuildingState } from '../../lib/buemAdapter';
 
@@ -70,13 +71,13 @@ export function BuildingWorkspace() {
 /** Bundled Loenen building with surfaces that have no area, so every part of the 3D view has something to show. */
 const FIXTURE_OSM_ID = '268428620';
 
-/** The 3D view on one bundled building, opened straight away with no backend calls. */
+/**
+ * The 3D view on one bundled building, opened straight away with no backend
+ * calls. The dev shell plays the host for its technologies and PV: the PV
+ * card's button opens PV mode, and leaving it returns to the normal view.
+ */
 export function FixtureWorkspace() {
   const fixture = useFixtureBuilding(FIXTURE_OSM_ID);
-  const [open, setOpen] = useState(true);
-  /** What was saved on leaving, reopened in place of the bundled building. */
-  const [saved, setSaved] = useState<BuildingState | null>(null);
-
   if (!fixture) {
     return (
       <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -85,6 +86,21 @@ export function FixtureWorkspace() {
       </div>
     );
   }
+  return <FixtureView building={fixture.building} geometry={fixture.geometry} />;
+}
+
+function FixtureView({ building, geometry }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'>) {
+  const [open, setOpen] = useState(true);
+  const [pvOpen, setPvOpen] = useState(false);
+  /** What was saved on leaving, reopened in place of the bundled building. */
+  const [saved, setSaved] = useState<BuildingState | null>(null);
+  const pv = useDemoPvHost(building.envelope);
+  const openPv = useCallback(() => setPvOpen(true), []);
+  const technologies = useDemoTechnologies(pv, openPv);
+  const installedPvIds = useMemo(
+    () => Object.entries(pv.surfaces).filter(([, surface]) => surface.state === 'installed').map(([id]) => id),
+    [pv.surfaces],
+  );
 
   if (!open) {
     return (
@@ -100,60 +116,35 @@ export function FixtureWorkspace() {
     );
   }
 
+  if (pvOpen) {
+    return (
+      <Building3DView
+        key="pv"
+        building={saved ?? building}
+        geometry={geometry}
+        services={fixtureServices}
+        attribution={FIXTURE_ATTRIBUTION}
+        pv={pv}
+        onExit={() => setPvOpen(false)}
+      />
+    );
+  }
+
   return (
     <Building3DView
-      building={saved ?? fixture.building}
-      geometry={fixture.geometry}
+      key="normal"
+      building={saved ?? building}
+      geometry={geometry}
       services={fixtureServices}
       demandProfile={fixtureDemandProfile(FIXTURE_OSM_ID)}
       seriesCsvUrl={fixtureSeriesCsvUrl(FIXTURE_OSM_ID)}
       attribution={FIXTURE_ATTRIBUTION}
-      onExit={(building) => {
-        if (building) setSaved(building);
+      pvSurfaceIds={installedPvIds}
+      technologies={technologies}
+      onExit={(edited) => {
+        if (edited) setSaved(edited);
         setOpen(false);
       }}
-    />
-  );
-}
-
-/** PV mode on the bundled building, with the dev shell holding the host's PV state. */
-export function PvFixtureWorkspace() {
-  const fixture = useFixtureBuilding(FIXTURE_OSM_ID);
-  if (!fixture) {
-    return (
-      <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Adapting the bundled building…
-      </div>
-    );
-  }
-  return <PvFixtureView building={fixture.building} geometry={fixture.geometry} />;
-}
-
-function PvFixtureView({ building, geometry }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'>) {
-  const pv = useDemoPvHost(building.envelope);
-  const [open, setOpen] = useState(true);
-  if (!open) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <button
-          onClick={() => setOpen(true)}
-          className="flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-        >
-          <Box className="size-4" />
-          Reopen PV mode
-        </button>
-      </div>
-    );
-  }
-  return (
-    <Building3DView
-      building={building}
-      geometry={geometry}
-      services={fixtureServices}
-      attribution={FIXTURE_ATTRIBUTION}
-      pv={pv}
-      onExit={() => setOpen(false)}
     />
   );
 }

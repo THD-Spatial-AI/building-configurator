@@ -22,6 +22,7 @@ import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
 import { PvPanel, PvSurfaceCard, pvRenderSets, type PvMode } from './PvMode';
+import { TechnologyCards, type Technologies } from './TechnologyCards';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -58,10 +59,14 @@ export interface Building3DViewProps {
    * surfaces switch PV. Controlled; hold it stable as for `services`.
    */
   pv?: PvMode;
+  /** Surfaces the host has PV on, drawn with panels in the normal view. Ignored in PV mode, which draws its own. */
+  pvSurfaceIds?: readonly string[];
+  /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
+  technologies?: Technologies;
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
@@ -136,6 +141,7 @@ export function Building3DView({
   );
   const surfaces = geometry?.surfaces ?? [];
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
+  const installedPvIds = useMemo(() => new Set(pvSurfaceIds ?? []), [pvSurfaceIds]);
 
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
@@ -291,7 +297,7 @@ export function Building3DView({
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
               visibleIds={envelopeIds}
-              pvIds={pvSets?.installed}
+              pvIds={pvSets ? pvSets.installed : installedPvIds}
               candidateIds={pvSets?.suggested}
               focusId={focus?.id}
               focusToken={focus?.token}
@@ -348,6 +354,7 @@ export function Building3DView({
               baselineElements={model.baselineElements}
               roofConfig={model.roofConfig}
               onSelectSurface={selectFromList}
+              technologySlot={technologies ? <TechnologyCards technologies={technologies} /> : undefined}
               parametersSlot={mode === 'expert' ? (
                 // Air, thermal mass, calculation method and refurbishment
                 // level: the BuEM building fields the table does not carry.
@@ -411,7 +418,7 @@ export function Building3DView({
           at={selected.at}
           cardRef={popoverRef}
           title={selectedElement ? `${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}` : 'Surface'}
-          subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : undefined}
+          subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : pv.surfaces[selected.id].label}
           onClose={() => openSurface(null)}
         >
           <PvSurfaceCard key={selected.id} surfaceId={selected.id} surface={pv.surfaces[selected.id]} pv={pv} />

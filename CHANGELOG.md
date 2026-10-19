@@ -4,6 +4,14 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.9.0] - 2026-10-19
+
+### Added
+
+- `Building3DView` takes an optional `pvSurfaceIds` prop: the surfaces the host has PV on are drawn with panels in the normal view, read-only.
+- `PvSurface` takes an optional `label`, the name shown for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. An element's own label takes precedence, then this label, then the surface id.
+- `Building3DView` takes an optional `technologies` prop (`Technologies`, `TechCard`, `TechField` types) that adds a Technologies tab with one card per technology the host passes. A card shows the host's fields, as number inputs where editable, with `null` shown as "∞" for an unbounded value and a field `error` shown under its input; an optional action button, for example one that opens PV mode; and a remove button. Edits go to `onChange` and `onRemove`; the view stores nothing.
+
 ## [0.8.1] - 2026-10-18
 
 ### Fixed
@@ -126,6 +134,7 @@ This release breaks the host interface in three places, and its building block n
 
 Versions before 0.4.0 have no changelog entries; see their git tags.
 
+[0.9.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.9.0
 [0.8.1]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.8.1
 [0.8.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.8.0
 [0.7.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.7.0
