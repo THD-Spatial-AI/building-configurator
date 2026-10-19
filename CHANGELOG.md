@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [Unreleased]
+## [0.9.0] - 2026-10-19
 
 ### Added
 
@@ -133,6 +133,7 @@ This release breaks the host interface in three places, and its building block n
 
 Versions before 0.4.0 have no changelog entries; see their git tags.
 
+[0.9.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.9.0
 [0.8.1]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.8.1
 [0.8.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.8.0
 [0.7.0]: https://github.com/THD-Spatial-AI/building-configurator/releases/tag/v0.7.0
