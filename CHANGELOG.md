@@ -4,6 +4,13 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Added
+
+- `Building3DView` takes an optional `pvSurfaceIds` prop: the surfaces the host has PV on are drawn with panels in the normal view, read-only.
+- `Building3DView` takes an optional `technologies` prop (`Technologies`, `TechCard`, `TechField` types) that adds a Technologies tab with one card per technology the host passes. A card shows the host's fields, as number inputs where editable, with `null` shown as "∞" for an unbounded value and a field `error` shown under its input; an optional action button, for example one that opens PV mode; and a remove button. Edits go to `onChange` and `onRemove`; the view stores nothing.
+
 ## [0.8.1] - 2026-10-18
 
 ### Fixed

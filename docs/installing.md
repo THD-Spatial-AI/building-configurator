@@ -95,6 +95,8 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
 | `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
+| `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
+| `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
@@ -174,6 +176,51 @@ const pv = useMemo<PvMode>(() => ({
 
 Clicking a surface opens its card: the PV switch, and on a surface with PV the
 usable share. The panel lists every offered surface with its own switch.
+
+## Technologies
+
+Pass `technologies` to show the building's technologies as cards in a
+Technologies tab. The host owns every value and label; the cards show them and
+report edits, and the view stores nothing.
+
+```tsx
+const technologies = useMemo<Technologies>(() => ({
+  items: [
+    {
+      id: 'pv',
+      title: pvType.name,
+      subtitle: `${surfaceCount} surfaces`,
+      fields: [
+        { key: 'capacity', label: t('capacity'), value: 18.2, unit: 'kWp' },
+        { key: 'cost', label: t('investment'), value: 1100, unit: 'EUR/kW', editable: true },
+      ],
+      action: { label: t('pvSurfaces'), onClick: openPvMode },
+    },
+    {
+      id: 'heat_pump',
+      title: t('heatPump'),
+      fields: [{ key: 'size', label: t('maxSize'), value: null, unit: 'kW', editable: true }],
+    },
+  ],
+  onChange: (id, fieldKey, value) => setField(id, fieldKey, value),
+  onRemove: (id) => removeTechnology(id),
+}), [/* the values above */]);
+```
+
+| Field | Meaning |
+|---|---|
+| `items[].id` | Passed back to `onChange` and `onRemove` |
+| `items[].title`, `subtitle` | Shown at the top of the card, in the user's language |
+| `items[].action` | Optional button, `{ label, onClick }`; for example one that opens PV mode |
+| `fields[].value` | A number, or `null` for unbounded, shown as "∞" |
+| `fields[].editable` | A number input when true, plain text otherwise |
+| `fields[].min`, `max`, `step` | Passed to the input as hints; the host clamps |
+| `fields[].error` | Shown under the field with a red ring until the host clears it |
+| `onChange(id, fieldKey, value)` | Fires with each valid number typed, and with `null` when the input is cleared |
+| `onRemove(id)` | The card's remove button was pressed; the view does not ask first |
+
+To show which surfaces carry PV in the normal view, pass their ids as
+`pvSurfaceIds`.
 
 ## Geometry
 

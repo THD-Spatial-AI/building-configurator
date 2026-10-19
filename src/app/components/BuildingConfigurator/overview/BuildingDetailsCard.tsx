@@ -41,6 +41,8 @@ export interface BuildingDetailsCardProps {
   overviewSlot?: React.ReactNode;
   /** Rendered under the parameters table, e.g. the advanced BuEM settings. */
   parametersSlot?: React.ReactNode;
+  /** Adds a Technologies tab, e.g. the host's technology cards. */
+  technologySlot?: React.ReactNode;
 }
 
 /** Building parameters table, or building envelope cards — one merged card. */
@@ -56,6 +58,7 @@ export function BuildingDetailsCard({
   envelopeSlot,
   overviewSlot,
   parametersSlot,
+  technologySlot,
 }: BuildingDetailsCardProps) {
   // Off by default — edits only ever apply while explicitly toggled on, so a stray
   // click on the table never changes the building's data.
@@ -63,7 +66,7 @@ export function BuildingDetailsCard({
   // Whichever tab carries the most for this caller opens first: the energy
   // overview where there is one, otherwise the envelope where it carries the 3D
   // model. The others are one click away either way.
-  const [activeTab, setActiveTab] = useState<'overview' | 'parameters' | 'envelope'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'parameters' | 'envelope' | 'technology'>(
     overviewSlot ? 'overview' : envelopeSlot ? 'envelope' : 'parameters',
   );
 
@@ -73,6 +76,7 @@ export function BuildingDetailsCard({
         <p className="text-[13px] font-bold text-slate-800">
           {activeTab === 'overview' ? 'Energy overview'
             : activeTab === 'envelope' ? 'Building Envelope'
+            : activeTab === 'technology' ? 'Technologies'
             : 'Building Parameters'}
         </p>
         <div className="flex items-center gap-3">
@@ -84,6 +88,7 @@ export function BuildingDetailsCard({
               ...(overviewSlot ? ['overview' as const] : []),
               'parameters' as const,
               'envelope' as const,
+              ...(technologySlot ? ['technology' as const] : []),
             ]).map((tab) => (
               <button
                 key={tab}
@@ -98,7 +103,8 @@ export function BuildingDetailsCard({
               >
                 {tab === 'overview' ? 'Overview'
                   : tab === 'parameters' ? 'Parameters'
-                  : 'Envelope'}
+                  : tab === 'envelope' ? 'Envelope'
+                  : 'Technologies'}
               </button>
             ))}
           </div>
@@ -130,6 +136,8 @@ export function BuildingDetailsCard({
 
       {activeTab === 'overview' ? (
         <div className="p-4">{overviewSlot}</div>
+      ) : activeTab === 'technology' ? (
+        <div className="p-4">{technologySlot}</div>
       ) : activeTab === 'parameters' ? (
         <>
         <table className="w-full text-sm bg-white">
