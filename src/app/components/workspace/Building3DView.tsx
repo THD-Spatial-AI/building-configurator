@@ -418,7 +418,7 @@ export function Building3DView({
           at={selected.at}
           cardRef={popoverRef}
           title={selectedElement ? `${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}` : 'Surface'}
-          subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : undefined}
+          subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : pv.surfaces[selected.id].label}
           onClose={() => openSurface(null)}
         >
           <PvSurfaceCard key={selected.id} surfaceId={selected.id} surface={pv.surfaces[selected.id]} pv={pv} />

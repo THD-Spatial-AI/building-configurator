@@ -16,6 +16,8 @@ export interface PvSurface {
   usableShare: number;
   /** Capacity of the panels at the current usable share, in kWp. */
   maxKwp: number;
+  /** Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. */
+  label?: string;
 }
 
 /**
@@ -51,8 +53,9 @@ export function pvRenderSets(surfaces: Record<string, PvSurface>): { installed: 
   return { installed, suggested };
 }
 
-function surfaceName(id: string, elements: Record<string, BuildingElement>): string {
-  return elements[id]?.label ?? id;
+/** The element's own label, else the host's label, else the id. */
+function surfaceName(id: string, elements: Record<string, BuildingElement>, surfaces: Record<string, PvSurface>): string {
+  return elements[id]?.label ?? surfaces[id]?.label ?? id;
 }
 
 /** The side panel in PV mode: the PV type, the host's notice, and every offered surface with its switch. */
@@ -83,7 +86,7 @@ export function PvPanel({ pv, elements, onSelect }: {
       {STATE_ORDER.map((state) => {
         const group = entries
           .filter(([, surface]) => surface.state === state)
-          .sort(([a], [b]) => surfaceName(a, elements).localeCompare(surfaceName(b, elements), undefined, { numeric: true }));
+          .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true }));
         if (group.length === 0) return null;
         return (
           <div key={state}>
@@ -93,7 +96,7 @@ export function PvPanel({ pv, elements, onSelect }: {
                 <li key={id} className="flex items-center gap-2 px-2.5 py-1.5">
                   <input
                     type="checkbox"
-                    aria-label={`PV on ${surfaceName(id, elements)}`}
+                    aria-label={`PV on ${surfaceName(id, elements, pv.surfaces)}`}
                     checked={surface.state === 'installed'}
                     onChange={(e) => pv.onToggle(id, e.target.checked)}
                     className="size-4 shrink-0 cursor-pointer accent-primary"
@@ -103,10 +106,10 @@ export function PvPanel({ pv, elements, onSelect }: {
                     onClick={() => onSelect(id)}
                     className="min-w-0 flex-1 cursor-pointer truncate text-left text-[12px] text-slate-700 hover:underline"
                   >
-                    {surfaceName(id, elements)}
+                    {surfaceName(id, elements, pv.surfaces)}
                   </button>
                   <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {elements[id]?.type ?? ''} · {surface.maxKwp.toFixed(1)} kWp
+                    {elements[id] ? `${elements[id].type} · ` : ''}{surface.maxKwp.toFixed(1)} kWp
                   </span>
                 </li>
               ))}

@@ -9,6 +9,7 @@ Each version's GitHub release entry carries the full notes.
 ### Added
 
 - `Building3DView` takes an optional `pvSurfaceIds` prop: the surfaces the host has PV on are drawn with panels in the normal view, read-only.
+- `PvSurface` takes an optional `label`, the name shown for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. An element's own label takes precedence, then this label, then the surface id.
 - `Building3DView` takes an optional `technologies` prop (`Technologies`, `TechCard`, `TechField` types) that adds a Technologies tab with one card per technology the host passes. A card shows the host's fields, as number inputs where editable, with `null` shown as "∞" for an unbounded value and a field `error` shown under its input; an optional action button, for example one that opens PV mode; and a remove button. Edits go to `onChange` and `onRemove`; the view stores nothing.
 
 ## [0.8.1] - 2026-10-18

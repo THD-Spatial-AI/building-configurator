@@ -168,6 +168,7 @@ const pv = useMemo<PvMode>(() => ({
 | `surfaces` | Keyed by surface id, the id the geometry and the envelope elements carry. Only these surfaces can be clicked |
 | `surfaces[id].state` | `installed` draws panels on the surface, `suggested` lights and outlines it, `available` draws it as usual |
 | `surfaces[id].usableShare` | Share of the surface usable for panels, 0 to 1, shown as a percentage |
+| `surfaces[id].label` | Optional. Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. An element's own label takes precedence |
 | `surfaces[id].maxKwp` | Capacity of the panels at the current usable share, in kWp, shown on its card. Pass the new value after `onShareChange` |
 | `notice` | Shown for as long as PV mode is open. Pass it in the user's language |
 | `typeLabel` | Name of the PV type, shown at the top of the panel |
