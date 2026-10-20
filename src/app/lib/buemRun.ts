@@ -79,6 +79,8 @@ export function toBuem(building: BuildingState): {
   building: Record<string, any>;
   /** Kept beside the block: BuEM's construction_period is a TABULA class code, not a year. */
   construction_year?: number;
+  /** Kept beside the block and never sent to BuEM: the TABULA variant and the state per element type. */
+  refurbishment?: { variant_code?: string; states?: Record<string, number> };
   outputs: BuemBuildingRunRequest['outputs'];
   solver: { use_milp: boolean };
 } {
@@ -86,5 +88,11 @@ export function toBuem(building: BuildingState): {
   const envelope = building.thematic?.envelope ?? building.envelope;
   const elements = Object.keys(envelope).length > 0 ? envelope : DEFAULT_ELEMENTS;
   const { buem } = serializeToBuemFeature(runIdentity(building, general), elements, general).properties;
-  return { building: buem.building, construction_year: buem.construction_year, outputs: buem.outputs, solver: buem.solver };
+  return {
+    building: buem.building,
+    construction_year: buem.construction_year,
+    ...(buem.refurbishment ? { refurbishment: buem.refurbishment } : {}),
+    outputs: buem.outputs,
+    solver: buem.solver,
+  };
 }

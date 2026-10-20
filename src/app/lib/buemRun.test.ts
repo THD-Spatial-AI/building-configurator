@@ -58,6 +58,7 @@ const general = {
   include_dhw: false,
   setback_profile: 'night_only',
   equipment: { tv_1: true, tv_2: false, tumble_dryer: false },
+  refurbishment: { variantCode: 'NL.N.SFH.02.Deta.ReEx.001.002', states: { wall: 2, roof: 3, floor: 2, window: 2, door: 1 } },
   outputs: { heating: 'series', cooling: 'none', electricity: 'summary', hot_water: 'series', kitchen: 'summary' } as const,
 };
 
@@ -68,6 +69,15 @@ describe('toBuem', () => {
     const { buem } = serializeToBuemFeature(runIdentity(opened, general), elements, general).properties;
 
     expect(toBuem(edited)).toMatchObject({ building: buem.building, outputs: buem.outputs, solver: buem.solver });
+  });
+
+  it('keeps the refurbishment states beside the building block, not in it', () => {
+    const stored = toBuem(edited);
+    expect(stored.building).not.toHaveProperty('refurbishment');
+    expect(stored.refurbishment).toEqual({
+      variant_code: 'NL.N.SFH.02.Deta.ReEx.001.002',
+      states: { wall: 2, roof: 3, floor: 2, window: 2, door: 1 },
+    });
   });
 
   it('keeps the construction year beside the building block, not in it', () => {

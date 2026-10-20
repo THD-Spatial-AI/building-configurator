@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   ignisInputsFromTabulaData,
-  applyTabulaUValuesToElements,
   restoreDefaultUValues,
-  syncElementsWithVariantLevel,
   resetElementsToVariantDefaults,
+  tabulaUValue,
   toIgnisApiPayload,
   type IgnisInputs,
 } from './ignisAdapter';
@@ -180,7 +179,7 @@ describe('ignisInputsFromTabulaData', () => {
   });
 });
 
-describe('applyTabulaUValuesToElements / restoreDefaultUValues / syncElementsWithVariantLevel', () => {
+describe('restoreDefaultUValues / resetElementsToVariantDefaults', () => {
   function element(overrides: Partial<BuildingElement>): BuildingElement {
     return {
       id: overrides.id ?? 'el-1',
@@ -204,50 +203,12 @@ describe('applyTabulaUValuesToElements / restoreDefaultUValues / syncElementsWit
     U_Door_1: 1.3,
   };
 
-  it('applyTabulaUValuesToElements overwrites uValue per element type from the variant data', () => {
-    const elements = {
-      roof1:   element({ id: 'roof1', type: 'roof', uValue: 1.8, defaultUValue: 1.8 }),
-      wall1:   element({ id: 'wall1', type: 'wall', uValue: 1.5, defaultUValue: 1.5 }),
-      window1: element({ id: 'window1', type: 'window', uValue: 2.5, defaultUValue: 2.5 }),
-    };
-
-    const result = applyTabulaUValuesToElements(elements, variantData);
-
-    expect(result.roof1.uValue).toBe(0.2);
-    expect(result.wall1.uValue).toBe(0.25);
-    expect(result.window1.uValue).toBe(1.1);
-  });
-
-  it('applyTabulaUValuesToElements leaves elements untouched when the variant lacks that category', () => {
-    const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 1.5 }) };
-    const result = applyTabulaUValuesToElements(elements, { U_Roof_1: 0.2 }); // no U_Wall_1
-    expect(result.wall1.uValue).toBe(1.5);
-  });
-
-  it('applyTabulaUValuesToElements returns the same reference when nothing changes', () => {
-    const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 0.25 }) };
-    const result = applyTabulaUValuesToElements(elements, variantData); // already 0.25
-    expect(result).toBe(elements);
-  });
-
   it('restoreDefaultUValues restores the stamped real value, undoing any archetype override', () => {
     const elements = {
       wall1: element({ id: 'wall1', type: 'wall', uValue: 0.25, defaultUValue: 1.5 }), // overridden
     };
     const result = restoreDefaultUValues(elements);
     expect(result.wall1.uValue).toBe(1.5);
-  });
-
-  it('syncElementsWithVariantLevel restores real values for index 0 (existing state)', () => {
-    const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 0.25, defaultUValue: 1.5 }) };
-    const result = syncElementsWithVariantLevel(elements, 0, variantData);
-    expect(result.wall1.uValue).toBe(1.5);
-  });
-
-  it('syncElementsWithVariantLevel applies the archetype for a refurbished level (index > 0)', () => {
-    const elements = { wall1: element({ id: 'wall1', type: 'wall', uValue: 1.5, defaultUValue: 1.5 }) };
-    const result = syncElementsWithVariantLevel(elements, 1, variantData);
-    expect(result.wall1.uValue).toBe(0.25);
   });
 
   it('resetElementsToVariantDefaults rebases both uValue and defaultUValue to the new archetype', () => {
@@ -303,5 +264,24 @@ describe('toIgnisApiPayload', () => {
   it('omits fields the user has not touched rather than sending zeros for them', () => {
     const payload = toIgnisApiPayload({ HeatingDays: 200 });
     expect(payload).toEqual({ HeatingDays: 200 });
+  });
+});
+
+describe('tabulaUValue', () => {
+  it('gives the variant\'s own U-value, after its refurbishment measure', () => {
+    expect(tabulaUValue({ U_Wall_1: 0.395, U_Actual_Wall_1: 0.166 }, 'wall')).toBe(0.166);
+  });
+
+  it('falls back to the original U-value where TABULA gives the variant none', () => {
+    expect(tabulaUValue({ U_Door_1: 3.5, U_Actual_Door_1: 0 }, 'door')).toBe(3.5);
+  });
+
+  it('gives nothing where TABULA has no value for the type', () => {
+    expect(tabulaUValue({ U_Wall_1: 0, U_Actual_Wall_1: 0 }, 'wall')).toBeUndefined();
+  });
+
+  it('reads U_Actual from a TABULA record', () => {
+    const inputs = ignisInputsFromTabulaData({ AdvancedParameters: { Uvalues: { U_Wall_1: 0.395, U_Actual_Wall_1: 0.133 } } });
+    expect(tabulaUValue(inputs, 'wall')).toBe(0.133);
   });
 });

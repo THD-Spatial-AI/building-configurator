@@ -35,7 +35,7 @@ export interface BuildingDetailsCardProps {
   /** Adds an Energy overview tab, e.g. the demand summary and renewable figures. */
   overviewSlot?: React.ReactNode;
   /** Rendered under the parameters table, e.g. the advanced BuEM settings. */
-  parametersSlot?: React.ReactNode;
+  parametersSlot?: React.ReactNode | ((openEnvelope: () => void) => React.ReactNode);
   /** Adds a Technologies tab, e.g. the host's technology cards. */
   technologySlot?: React.ReactNode;
 }
@@ -164,7 +164,7 @@ export function BuildingDetailsCard({
             })}
           </tbody>
         </table>
-        {parametersSlot}
+        {typeof parametersSlot === 'function' ? parametersSlot(() => setActiveTab('envelope')) : parametersSlot}
         </>
       ) : (
         <div className="flex flex-col gap-3 p-4">

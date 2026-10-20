@@ -357,7 +357,7 @@ export function Building3DView({
               roofConfig={model.roofConfig}
               onSelectSurface={selectFromList}
               technologySlot={technologies ? <TechnologyCards technologies={technologies} /> : undefined}
-              parametersSlot={(
+              parametersSlot={(openEnvelope) => (
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
                 <div className="border-t border-slate-100">
@@ -365,9 +365,18 @@ export function Building3DView({
                     general={model.general}
                     setGen={model.setGen}
                     mode={mode}
-                    ignis={model.ignis}
-                    onIgnisVariantSelect={model.selectIgnisVariant}
-                    avgUValue={model.avgUValue}
+                    insulation={{
+                      elements,
+                      levels: model.ignis?.variants ?? [],
+                      states: model.refurbStates,
+                      initial: model.refurbInitial,
+                      variantCode: model.general.refurbishment.variantCode,
+                      avgUValue: model.avgUValue,
+                      onSetState: model.setRefurbishment,
+                      onSetTypeUValue: model.setTypeUValue,
+                      onSetTypeLossFactor: model.setTypeLossFactor,
+                      onOpenEnvelope: openEnvelope,
+                    }}
                     hideIdentity
                   />
                 </div>

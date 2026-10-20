@@ -53,6 +53,21 @@ describe('thermal defaults', () => {
     expect(parseBuemFeatureForImport(sent).general).toMatchObject({ comfortT_lb: 20, comfortT_ub: 24 });
   });
 
+  it('send the synthesised-window inputs that are set and read them back', () => {
+    const sent = serializeToBuemFeature(identity, {}, {
+      ...DEFAULT_GENERAL, window_to_wall_ratio: 0.3, window_U: 1.4, window_g_gl: 0.6,
+    });
+    expect(sent.properties.buem.building).toMatchObject({
+      window_to_wall_ratio: 0.3, window_U: { value: 1.4, unit: 'W/(m2K)' }, window_g_gl: 0.6,
+    });
+    expect(parseBuemFeatureForImport(sent).general).toMatchObject({ window_to_wall_ratio: 0.3, window_U: 1.4, window_g_gl: 0.6 });
+  });
+
+  it('leave the synthesised-window inputs to BuEM when unset', () => {
+    const { building } = serializeToBuemFeature(identity, {}, DEFAULT_GENERAL).properties.buem;
+    for (const key of ['window_to_wall_ratio', 'window_U', 'window_g_gl']) expect(building).not.toHaveProperty(key);
+  });
+
   it('import the thermal values a feature sets', () => {
     const { general } = parseBuemFeatureForImport(feature({
       n_air_infiltration: { value: 0.3 }, n_air_use: { value: 0.6 }, c_m: { value: 260 }, thermal_class: 'heavy',

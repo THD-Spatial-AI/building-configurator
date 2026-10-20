@@ -57,6 +57,15 @@ export interface IgnisInputs {
   U_Window_1?: number;
   U_Door_1?: number;
 
+  // The variant's own U-values, after its refurbishment measure; U_*_1 above
+  // are the elements' original values in every variant. 0 where TABULA gives
+  // the variant none. Read only, never sent to ignis.
+  U_Actual_Roof_1?: number;
+  U_Actual_Wall_1?: number;
+  U_Actual_Floor_1?: number;
+  U_Actual_Window_1?: number;
+  U_Actual_Door_1?: number;
+
   // Shared with BuEM — kept in sync
   N_air_infiltration?: number;
   N_air_use?: number;
@@ -86,9 +95,11 @@ export interface IgnisInputs {
  * The data object is read-only — user edits go into IgnisState.calcDemand.
  */
 export interface IgnisVariantLevel {
-  /** Full TABULA variant code, e.g. "DE.N.SFH.01.Gen". */
+  /** Full TABULA variant code, e.g. "DE.N.SFH.01.Gen.ReEx.001.002". */
   code: string;
-  /** Human-readable label: "Existing state" | "Medium refurbishment" | "Advanced refurbishment". */
+  /** 1 existing state, 2 usual refurbishment, 3 advanced refurbishment: the code's last part. */
+  number: number;
+  /** TABULA's name for the variant, as ignis gives it. */
   label: string;
   /** TABULA scalar values for this refurbishment level. Never mutated after load. */
   data: IgnisInputs;
@@ -149,6 +160,10 @@ export interface IgnisState {
 export interface IgnisVariantEntry {
   code: string;
   label: string;
+  /** 1 to 3; ignis releases before the subtype filter leave it out, and the code's last part gives it. */
+  number?: number;
+  /** TABULA's Description_BuildingVariant text, when it has one. */
+  description?: string;
 }
 
 /** Shape of /variants/:country/match response body. */
@@ -252,6 +267,23 @@ const TABULA_UVALUE_FIELD_BY_TYPE: Record<BuildingElement['type'], keyof IgnisIn
   door:   'U_Door_1',
 };
 
+const TABULA_ACTUAL_UVALUE_FIELD_BY_TYPE: Record<BuildingElement['type'], keyof IgnisInputs> = {
+  roof:   'U_Actual_Roof_1',
+  wall:   'U_Actual_Wall_1',
+  floor:  'U_Actual_Floor_1',
+  window: 'U_Actual_Window_1',
+  door:   'U_Actual_Door_1',
+};
+
+/** A variant's U-value for the element type: its own after the measure, else the original; undefined without either. */
+export function tabulaUValue(data: IgnisInputs, type: BuildingElement['type']): number | undefined {
+  for (const field of [TABULA_ACTUAL_UVALUE_FIELD_BY_TYPE[type], TABULA_UVALUE_FIELD_BY_TYPE[type]]) {
+    const value = data[field];
+    if (typeof value === 'number' && value > 0) return value;
+  }
+  return undefined;
+}
+
 /** How many refurbishment levels are worth offering as one-click presets. The
  *  first three are TABULA's own existing/medium/advanced; some tables carry
  *  several more, which do not fit beside a surface. */
@@ -268,12 +300,11 @@ export function tabulaUValueOptions(
   type: BuildingElement['type'],
 ): { label: string; uValue: number }[] {
   if (!state) return [];
-  const field = TABULA_UVALUE_FIELD_BY_TYPE[type];
   const options: { label: string; uValue: number }[] = [];
   const seen = new Set<number>();
   for (const variant of state.variants) {
-    const uValue = variant.data[field];
-    if (typeof uValue !== 'number' || uValue <= 0) continue;
+    const uValue = tabulaUValue(variant.data, type);
+    if (uValue === undefined) continue;
     const rounded = Math.round(uValue * 100) / 100;
     if (seen.has(rounded)) continue;
     seen.add(rounded);
@@ -284,47 +315,14 @@ export function tabulaUValueOptions(
 }
 
 /**
- * Applies a refurbishment level's per-category TABULA U-values onto every
- * matching BuEM surface element (by type — roof/wall/floor/window/door).
- *
- * This is the reverse direction of deriveIgnisInputsFromBuem: without it,
- * BuEM's real per-surface U-values always win, so selecting a different
- * refurbishment level cannot change the modelled insulation — thermal
- * efficiency and the heat-demand calculation would stay frozen at whatever
- * the building's original surfaces were, regardless of level chosen.
- * Returns the same object reference if nothing actually changed.
- */
-export function applyTabulaUValuesToElements(
-  elements: Record<string, BuildingElement>,
-  variantData: IgnisInputs,
-): Record<string, BuildingElement> {
-  let changed = false;
-  const next: Record<string, BuildingElement> = {};
-
-  for (const [id, el] of Object.entries(elements)) {
-    const uValue = variantData[TABULA_UVALUE_FIELD_BY_TYPE[el.type]] as number | undefined;
-    if (uValue !== undefined && uValue !== el.uValue) {
-      next[id] = { ...el, uValue };
-      changed = true;
-    } else {
-      next[id] = el;
-    }
-  }
-
-  return changed ? next : elements;
-}
-
-/**
  * Rebases every element's `uValue` AND its stamped `defaultUValue` ("existing
  * state" baseline) onto the new building type/period/country's own TABULA
  * "existing state" archetype (variant index 0).
  *
- * Unlike applyTabulaUValuesToElements (a temporary refurbishment-level
- * preview that leaves defaultUValue untouched so "existing state" can be
- * restored later), this is a permanent rebase: switching building type is a
- * different building, so its own "existing state" TABULA values become the
- * new baseline, not just a preview layered on top of the previous type's
- * values. Returns the same object reference if nothing actually changed.
+ * A permanent rebase, unlike a refurbishment state (see refurbishment.ts):
+ * another building type is another building, so its "existing state" TABULA
+ * values become the new baseline. Returns the same object reference if
+ * nothing actually changed.
  */
 export function resetElementsToVariantDefaults(
   elements: Record<string, BuildingElement>,
@@ -334,7 +332,7 @@ export function resetElementsToVariantDefaults(
   const next: Record<string, BuildingElement> = {};
 
   for (const [id, el] of Object.entries(elements)) {
-    const uValue = existingStateData[TABULA_UVALUE_FIELD_BY_TYPE[el.type]] as number | undefined;
+    const uValue = tabulaUValue(existingStateData, el.type);
     if (uValue !== undefined && (uValue !== el.uValue || uValue !== el.defaultUValue)) {
       next[id] = { ...el, uValue, defaultUValue: uValue };
       changed = true;
@@ -348,8 +346,7 @@ export function resetElementsToVariantDefaults(
 
 /**
  * Restores every element's `uValue` to its stamped `defaultUValue` — the
- * real, as-measured/configured value from before any refurbishment-level
- * override. Used when the user switches back to "existing state."
+ * value the building was opened with. Used as the building loads.
  * Returns the same object reference if nothing actually changed.
  */
 export function restoreDefaultUValues(
@@ -368,21 +365,6 @@ export function restoreDefaultUValues(
   }
 
   return changed ? next : elements;
-}
-
-/**
- * Syncs surface U-values with the given refurbishment level: the real
- * (defaultUValue) values for "existing state" (index 0), or that level's
- * TABULA archetype U-values for any refurbished level.
- */
-export function syncElementsWithVariantLevel(
-  elements: Record<string, BuildingElement>,
-  variantIndex: number,
-  variantData: IgnisInputs,
-): Record<string, BuildingElement> {
-  return variantIndex === 0
-    ? restoreDefaultUValues(elements)
-    : applyTabulaUValuesToElements(elements, variantData);
 }
 
 // ─── TABULA data → IgnisInputs ─────────────────────────────────────────────────
@@ -418,6 +400,11 @@ const TABULA_FIELD_PATHS: Record<keyof IgnisInputs, string> = {
   U_Wall_1:         'AdvancedParameters.Uvalues.U_Wall_1',
   U_Floor_1:        'AdvancedParameters.Uvalues.U_Floor_1',
   U_Window_1:       'AdvancedParameters.Uvalues.U_Window_1',
+  U_Actual_Roof_1:   'AdvancedParameters.Uvalues.U_Actual_Roof_1',
+  U_Actual_Wall_1:   'AdvancedParameters.Uvalues.U_Actual_Wall_1',
+  U_Actual_Floor_1:  'AdvancedParameters.Uvalues.U_Actual_Floor_1',
+  U_Actual_Window_1: 'AdvancedParameters.Uvalues.U_Actual_Window_1',
+  U_Actual_Door_1:   'AdvancedParameters.Uvalues.U_Actual_Door_1',
   U_Door_1:         'AdvancedParameters.Uvalues.U_Door_1',
   N_air_infiltration: 'AdvancedParameters.AirInfiltration.n_air_infiltration',
   N_air_use:          'AdvancedParameters.AirInfiltration.n_air_use',

@@ -24,11 +24,11 @@ import type { IgnisState } from '../../lib/ignisAdapter';
 import {
   initIgnisState,
   selectVariantLevel,
-  syncElementsWithVariantLevel,
   restoreDefaultUValues,
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
+import { applyState, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
@@ -260,6 +260,9 @@ export function useBuildingModel(
   // HDCP annual heat demand state — null until the building's country/type/period
   // resolve to at least one TABULA variant in the HDCP service.
   const [ignis, setHdcp] = useState<IgnisState | null>(null);
+  // The state per element type the surfaces' loaded U-values stand for; a
+  // type back at this state returns to them rather than to TABULA's values.
+  const [refurbInitial, setRefurbInitial] = useState(() => startingStates(initialGeneral.refurbishment));
 
   const [savedState,      setSavedState]      = useState({ elements: initialElements, general: initialGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
   // The building as opened, after the load-time TABULA pass below: what counts
@@ -321,6 +324,7 @@ export function useBuildingModel(
     setRoofConfig(DEFAULT_ROOF_CONFIG);
     setSavedState({ elements: nextElements, general: nextGeneral, roofConfig: DEFAULT_ROOF_CONFIG });
     setLoaded({ elements: nextElements, general: nextGeneral });
+    setRefurbInitial(startingStates(nextGeneral.refurbishment));
     setEnergyTotals(nextTotals);
     setUploadError(null);
     setHistory([]);
@@ -348,9 +352,12 @@ export function useBuildingModel(
 
     const period = yearToConstructionPeriod(year);
     let cancelled = false;
+    // City2TABULA's subtype holds for the building as loaded, not for a
+    // classification changed by hand.
+    const subtype = isFirstClassificationLoad.current ? variantSubtype(general.refurbishment.variantCode) : undefined;
 
     (async () => {
-      const variants = await loadVariantLevels(services, country, type, year);
+      const variants = await loadVariantLevels(services, country, type, year, subtype);
       if (cancelled || variants.length === 0) {
         if (!cancelled) setHdcp(null);
         return;
@@ -367,6 +374,11 @@ export function useBuildingModel(
         ? resetElementsToVariantDefaults(elements, existingStateData)
         : restoreDefaultUValues(elements);
       if (!cancelled && nextElements !== elements) setElements(nextElements);
+      // Another classification is another building: existing state everywhere.
+      if (!cancelled && isReload) {
+        setRefurbInitial(startingStates(undefined));
+        setGeneralRaw((prev) => ({ ...prev, refurbishment: {} }));
+      }
 
       if (isReload && existingStateData.A_C_Ref_Input) {
         const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
@@ -422,25 +434,51 @@ export function useBuildingModel(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ignis?.calcDemand, ignis?.selectedVariantIndex, estimateHeatDemand]);
 
-  const selectIgnisVariant = (index: number) => {
-    if (!ignis) return;
-    const targetVariant = ignis.variants[index];
-    // Refurbished levels apply the TABULA archetype's own U-values per surface
-    // category (roof/wall/floor/window/door); "existing state" restores each
-    // surface's real, as-measured U-value. Without this, refurbishment-level
-    // selection cannot change thermal efficiency or heat demand at all — BuEM's
-    // real per-surface U-values would otherwise always win.
-    const nextElements = targetVariant
-      ? syncElementsWithVariantLevel(elements, index, targetVariant.data)
-      : elements;
+  /** Each element type's refurbishment state now. */
+  const refurbStates = startingStates(general.refurbishment);
+
+  /**
+   * Sets the element types to a TABULA variant. Surfaces set by hand keep
+   * their U-value; the state is saved with the building.
+   */
+  const setRefurbishment = (types: RefurbElementType[], number: number) => {
+    const levels = ignis?.variants ?? [];
+    const nextElements = types.reduce(
+      (acc, type) => applyState(acc, type, refurbStates[type], number, refurbInitial, levels),
+      elements,
+    );
     if (nextElements !== elements) {
-      remember(`variant:${Date.now()}`, 'Refurbishment level');
+      remember(`refurbishment:${Date.now()}`, 'Refurbishment');
       setElements(nextElements);
     }
+    const states = { ...refurbStates, ...Object.fromEntries(types.map((type) => [type, number])) };
+    setGen('refurbishment', { ...general.refurbishment, states });
+    // ignis's annual demand follows the building-wide preset.
+    const index = levels.findIndex((level) => level.number === number);
+    if (ignis && index >= 0 && types.length > 1) {
+      setHdcp(selectVariantLevel(ignis, index, ignisSeedBuilding(
+        general, nextElements, general.buildingType, general.constructionYear, general.country,
+      )));
+    }
+  };
 
-    setHdcp(selectVariantLevel(ignis, index, ignisSeedBuilding(
-      general, nextElements, general.buildingType, general.constructionYear, general.country,
-    )));
+  /** Gives every surface of the type one U-value, e.g. from a per-type field in Expert. */
+  const setTypeUValue = (type: RefurbElementType, uValue: number) => {
+    remember(`type-u:${type}`, 'U-value change');
+    setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => [
+      id, el.type === type ? { ...el, uValue, customMode: true } : el,
+    ])));
+  };
+
+  /**
+   * Gives every surface of the type one loss factor (BuEM b_transmission,
+   * 0 to 1). Party walls, at 0, keep it: they are set surface by surface.
+   */
+  const setTypeLossFactor = (type: RefurbElementType, bTransmission: number) => {
+    remember(`type-b:${type}`, 'Loss factor change');
+    setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => [
+      id, el.type === type && el.bTransmission !== 0 ? { ...el, bTransmission, customMode: true } : el,
+    ])));
   };
 
   // --- Envelope history -------------------------------------------------------
@@ -678,6 +716,7 @@ export function useBuildingModel(
   return {
     // state
     elements, general, roofConfig, ignis,
+    refurbStates, refurbInitial,
     uploadError, isRunningSimulation, hasUnsavedChanges,
     chartTimeseries,
     /** What undo would take back, or null when there is nothing to undo. */
@@ -688,7 +727,7 @@ export function useBuildingModel(
     snapshotRows, displayEnergyTotals,
     // handlers
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
-    selectIgnisVariant, undo,
+    setRefurbishment, setTypeUValue, setTypeLossFactor, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
     setUploadError, setGroundTruthTimeseries,
   };
@@ -745,6 +784,7 @@ export function withEdits(
     thematic: { ...building.thematic, identity, envelope: elements },
     identity,
     envelope: elements,
+    refurbishment: general.refurbishment,
     parameters: {
       n_air_infiltration:      general.n_air_infiltration,
       n_air_use:               general.n_air_use,
@@ -752,6 +792,9 @@ export function withEdits(
       massClass:               general.massClass,
       comfortT_lb:             general.comfortT_lb,
       comfortT_ub:             general.comfortT_ub,
+      window_to_wall_ratio:    general.window_to_wall_ratio,
+      window_U:                general.window_U,
+      window_g_gl:             general.window_g_gl,
       use_milp:                general.use_milp,
       residential_units:       general.residential_units,
       num_persons:             general.num_persons,

@@ -59,6 +59,13 @@ describe('buildBuildingStates', () => {
     expect(fetchVariantData).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps the building\'s TABULA variant code', async () => {
+    const { api } = deferredIgnis();
+    const code = 'NL.N.SFH.02.Deta.ReEx.001.002';
+    const states = await buildBuildingStates(api, { features: [footprint('b')] }, { b: enrichEntry(code) });
+    expect(states.b.refurbishment).toEqual({ variantCode: code });
+  });
+
   it('skips a footprint with no envelope rather than fetching for it', async () => {
     const { api, fetchVariantData } = deferredIgnis();
     const features = [footprint('has-envelope'), footprint('missing')];

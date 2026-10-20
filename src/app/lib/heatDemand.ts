@@ -14,6 +14,7 @@ import {
   type IgnisVariantLevel,
 } from './ignisAdapter';
 import type { ConfiguratorServices, VariantLookupServices } from './services';
+import { variantNumber, variantSubtype } from './refurbishment';
 
 /** Maps UI building type labels to TABULA building type codes. */
 const BUILDING_TYPE_TO_TABULA: Record<string, string> = {
@@ -33,31 +34,53 @@ export function isBuildingTypeSupported(label: string): boolean {
   return label in BUILDING_TYPE_TO_TABULA;
 }
 
+/** TABULA's refurbishment variants: existing state, usual and advanced refurbishment. */
+const MAX_VARIANT_NUMBER = 3;
+
+const TABULA_VARIANT_NAMES = ['Existing state', 'Usual refurbishment', 'Advanced refurbishment'];
+
+/** ignis's label, or TABULA's name for the number where ignis gives a generic one. */
+function variantLabel(label: string, number: number): string {
+  const generic = /^(Existing state|Medium refurbishment|Advanced refurbishment|Refurbishment level \d+)$/;
+  return generic.test(label) ? TABULA_VARIANT_NAMES[number - 1] : label;
+}
+
 /**
- * Every refurbishment level for a building classification: one match call for
- * the codes, then one data call per code.
+ * The refurbishment variants 1 to 3 of a building classification, ordered by
+ * number: one match call for the codes, then one data call per code.
+ * `subtype` (e.g. Deta) narrows the match to the building's own subtype;
+ * without it ignis matches its default subtype.
  */
 export async function loadVariantLevels(
   services: VariantLookupServices,
   countryIso2: string,
   buildingTypeLabel: string,
   constructionYear: number,
+  subtype?: string,
 ): Promise<IgnisVariantLevel[]> {
   const typeCode = toBuildingTypeCode(buildingTypeLabel);
   if (!typeCode) return [];
 
-  let codes;
+  let entries;
   try {
-    const match = await services.fetchMatchingVariants(countryIso2, typeCode, constructionYear);
-    codes = match?.data ?? [];
+    const match = await services.fetchMatchingVariants(countryIso2, typeCode, constructionYear, subtype);
+    entries = match?.data ?? [];
   } catch {
     return [];
   }
-  if (codes.length === 0) return [];
 
-  const levels = await Promise.all(codes.map(async (entry) => {
+  // ignis releases before the subtype filter list every subtype of the period,
+  // labelled as further levels; they are not deeper refurbishment.
+  const kept = subtype ?? variantSubtype(entries[0]?.code);
+  const numbered = entries
+    .filter((entry) => variantSubtype(entry.code) === kept)
+    .map((entry) => ({ entry, number: entry.number ?? variantNumber(entry.code) }))
+    .filter((v): v is { entry: typeof v.entry; number: number } => v.number !== null && v.number <= MAX_VARIANT_NUMBER)
+    .sort((a, b) => a.number - b.number);
+
+  const levels = await Promise.all(numbered.map(async ({ entry, number }) => {
     const inputs = await fetchVariantInputs(services, entry.code);
-    return inputs ? { code: entry.code, label: entry.label, data: inputs } : null;
+    return inputs ? { code: entry.code, number, label: variantLabel(entry.label, number), data: inputs } : null;
   }));
 
   return levels.filter((level): level is IgnisVariantLevel => level !== null);

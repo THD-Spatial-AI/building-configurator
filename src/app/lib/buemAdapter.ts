@@ -21,6 +21,7 @@ import {
   type OutputProfile,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import type { LoadDataPoint } from './loadProfile';
+import { REFURB_TYPES, type RefurbElementType, type Refurbishment } from './refurbishment';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
 
@@ -88,6 +89,8 @@ export interface BuildingState {
   ignis: import('./ignisAdapter').IgnisState | null;
   /** Building parameters the source or a saved edit set; the configurator defaults the rest. */
   parameters?: BuildingParameters;
+  /** The building's TABULA variant and the refurbishment state chosen per element type. */
+  refurbishment?: Refurbishment;
 }
 
 /** The building parameters BuEM reads beyond identity and envelope, named as the configurator holds them. */
@@ -98,6 +101,10 @@ export interface BuildingParameters {
   massClass?: string;               // Light | Medium | Heavy; VeryLight and VeryHeavy from older exports
   comfortT_lb?: number;             // degC, heating setpoint
   comfortT_ub?: number;             // degC, cooling setpoint
+  /** The windows BuEM adds when the envelope has none; null leaves each to BuEM. */
+  window_to_wall_ratio?: number | null;
+  window_U?: number | null;         // W/(m2K)
+  window_g_gl?: number | null;
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
   residential_units?: number | null;
@@ -352,6 +359,9 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (hasMappedValue(feature, paths.cM)) parameters.c_m = getMappedNumber(feature, paths.cM);
   if (hasMappedValue(feature, paths.comfortTLb)) parameters.comfortT_lb = getMappedNumber(feature, paths.comfortTLb);
   if (hasMappedValue(feature, paths.comfortTUb)) parameters.comfortT_ub = getMappedNumber(feature, paths.comfortTUb);
+  if (hasMappedValue(feature, paths.windowToWallRatio)) parameters.window_to_wall_ratio = getMappedNumber(feature, paths.windowToWallRatio);
+  if (hasMappedValue(feature, paths.windowU)) parameters.window_U = getMappedNumber(feature, paths.windowU);
+  if (hasMappedValue(feature, paths.windowGGl)) parameters.window_g_gl = getMappedNumber(feature, paths.windowGGl);
   const massClass = MASS_CLASS_LABELS[String(getMappedValue(feature, paths.thermalClass))];
   if (massClass) parameters.massClass = massClass;
   const useMilp = getMappedValue(feature, paths.useMilp);
@@ -398,6 +408,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
 
   const { geometry, thematic } = extractBuildingDashboardData(feature);
   const parameters = adaptParameters(feature);
+  const refurbishment = adaptRefurbishment(feature);
 
   return {
     geometry,
@@ -408,6 +419,31 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     timeseries: thematic.timeseries,
     ignis: null,
     ...(parameters ? { parameters } : {}),
+    ...(refurbishment ? { refurbishment } : {}),
+  };
+}
+
+/** The stored refurbishment block, or undefined when the feature has none. */
+function adaptRefurbishment(feature: unknown): Refurbishment | undefined {
+  const raw = getMappedValue(feature, MODEL_DATA_MAP.thematic.refurbishment);
+  if (!raw || typeof raw !== 'object') return undefined;
+  const { variant_code: variantCode, states } = raw as { variant_code?: unknown; states?: unknown };
+  const refurbishment: Refurbishment = {};
+  if (typeof variantCode === 'string' && variantCode) refurbishment.variantCode = variantCode;
+  if (states && typeof states === 'object') {
+    refurbishment.states = Object.fromEntries(
+      Object.entries(states).filter(([type, n]) => REFURB_TYPES.includes(type as RefurbElementType) && Number.isInteger(n)),
+    );
+  }
+  return Object.keys(refurbishment).length > 0 ? refurbishment : undefined;
+}
+
+/** The refurbishment block as stored beside the building block, or undefined when there is nothing to keep. */
+function serializeRefurbishment(refurbishment: Refurbishment | undefined): Record<string, unknown> | undefined {
+  if (!refurbishment?.variantCode && !refurbishment?.states) return undefined;
+  return {
+    ...(refurbishment.variantCode ? { variant_code: refurbishment.variantCode } : {}),
+    ...(refurbishment.states ? { states: refurbishment.states } : {}),
   };
 }
 
@@ -647,6 +683,12 @@ export function serializeToBuemFeature(
     building.thermal = thermal;
   }
 
+  if (typeof general.window_to_wall_ratio === 'number') building.window_to_wall_ratio = general.window_to_wall_ratio;
+  if (typeof general.window_U === 'number') building.window_U = { value: general.window_U, unit: 'W/(m2K)' };
+  if (typeof general.window_g_gl === 'number') building.window_g_gl = general.window_g_gl;
+
+  const refurbishment = serializeRefurbishment(general.refurbishment);
+
   // Build the complete feature
   const feature: Record<string, any> = {
     type: 'Feature',
@@ -663,6 +705,7 @@ export function serializeToBuemFeature(
       buem: {
         building,
         ...(constructionYear ? { construction_year: constructionYear } : {}),
+        ...(refurbishment ? { refurbishment } : {}),
         outputs,
         solver: {
           use_milp: general.use_milp ?? false,

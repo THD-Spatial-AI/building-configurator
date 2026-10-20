@@ -3,6 +3,7 @@
 
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { BuildingState } from '@/app/lib/buemAdapter';
+import type { Refurbishment } from '@/app/lib/refurbishment';
 import type { OutputLevel, OutputProfile } from './buildingOptions';
 
 // TODO:
@@ -40,6 +41,10 @@ export const DEFAULT_GENERAL = {
   massClass:          'Medium',
   comfortT_lb:        18,
   comfortT_ub:        21,
+  // The windows BuEM adds when the envelope has none; null leaves each to BuEM.
+  window_to_wall_ratio: null as number | null,
+  window_U:           null as number | null,
+  window_g_gl:        null as number | null,
   c_m:                165,
   use_milp:           false,
   electricityDemand:  4000,
@@ -57,6 +62,8 @@ export const DEFAULT_GENERAL = {
   capacity:           null as number | null,
   /** Appliance ownership overrides; an absent id keeps BuEM's default probability. */
   equipment:          {} as Record<string, boolean>,
+  /** The TABULA variant and the state chosen per element type; empty until the building has one. */
+  refurbishment:      {} as Refurbishment,
   outputs:            DEFAULT_OUTPUTS,
 };
 
@@ -72,6 +79,7 @@ export function generalFrom(building?: BuildingState): typeof DEFAULT_GENERAL {
   return {
     ...DEFAULT_GENERAL,
     ...building.parameters,
+    refurbishment:    building.refurbishment ?? DEFAULT_GENERAL.refurbishment,
     buildingName:     identity.label ?? DEFAULT_GENERAL.buildingName,
     buildingType:     identity.buildingType ?? DEFAULT_GENERAL.buildingType,
     constructionYear: identity.constructionYear || DEFAULT_GENERAL.constructionYear,
