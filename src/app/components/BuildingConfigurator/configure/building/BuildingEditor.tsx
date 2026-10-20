@@ -23,17 +23,15 @@ import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards'
 // system: it renders inline, always visible. See BuildingEditor's `inlineSections`.
 type SectionKey = 'identity' | 'occupancy' | 'outputs' | 'equipment' | 'ventilation' | 'thermal' | 'solver';
 
+// BuEM's three thermal_class values, so a saved choice reopens as chosen.
 const MASS_CLASSES = [
-  { value: 'VeryLight', label: 'Very Light — steel/timber frame' },
-  { value: 'Light',     label: 'Light — lightweight construction' },
-  { value: 'Medium',    label: 'Medium — mixed construction' },
-  { value: 'Heavy',     label: 'Heavy — concrete / masonry' },
-  { value: 'VeryHeavy', label: 'Very Heavy — thick solid walls' },
+  { value: 'Light',  label: 'Light (timber frame, lightweight)' },
+  { value: 'Medium', label: 'Medium (mixed construction)' },
+  { value: 'Heavy',  label: 'Heavy (concrete, masonry)' },
 ];
 
-const MASS_DEFAULTS: Record<string, number> = {
-  VeryLight: 50, Light: 80, Medium: 110, Heavy: 165, VeryHeavy: 260,
-};
+// c_m per class from EN ISO 13790 Table 12; Medium is the schema's default.
+const MASS_DEFAULTS: Record<string, number> = { Light: 110, Medium: 165, Heavy: 260 };
 
 // ─── Section components ───────────────────────────────────────────────────────
 

@@ -334,9 +334,8 @@ export function extractBuildingDashboardData(feature: unknown): Pick<BuildingSta
 
 const MASS_CLASS_LABELS: Record<string, string> = { light: 'Light', medium: 'Medium', heavy: 'Heavy' };
 
-// BuEM has three classes for the editor's five. c_m is sent beside the class,
-// so the very-light and very-heavy capacities still reach BuEM; on reopen the
-// class reads back as Light or Heavy.
+// The editor offers BuEM's three classes. VeryLight and VeryHeavy still arrive
+// from older configurator exports and are sent as the nearest BuEM class.
 const THERMAL_CLASSES: Record<string, string> = {
   VeryLight: 'light', Light: 'light', Medium: 'medium', Heavy: 'heavy', VeryHeavy: 'heavy',
 };
@@ -716,7 +715,6 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   const props = (f.properties ?? {}) as Record<string, unknown>;
   const buem = (props.buem ?? {}) as Record<string, unknown>;
   const bldg = (buem.building ?? {}) as Record<string, unknown>;
-  const thermalBlk = (bldg.thermal ?? {}) as Record<string, unknown>;
   const envelopeBlk = (bldg.envelope ?? {}) as Record<string, unknown>;
   const elements: Record<string, any> = {};
 
@@ -757,14 +755,10 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
     roomHeight: qty(bldg.h_room),
     storeys: importedStoreys,
-    n_air_infiltration: qty(thermalBlk.n_air_infiltration, 0.5),
-    n_air_use: qty(thermalBlk.n_air_use, 0.5),
-    c_m: qty(thermalBlk.c_m, 165),
-    massClass: (thermalBlk.thermal_class === 'medium' ? 'Medium' :
-                thermalBlk.thermal_class === 'heavy' ? 'Heavy' : 'Light'),
     use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,
     compute_cooling: ((buem.solver ?? {}) as Record<string, unknown>).compute_cooling !== false,
-    ...householdParameters(feature),
+    // Only the values the feature sets: the caller merges over DEFAULT_GENERAL.
+    ...adaptParameters(feature),
   };
 
   return { elements, general, isBuemFormat: true };

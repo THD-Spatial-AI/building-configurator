@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { serializeToBuemFeature, type BuildingIdentity } from './buemAdapter';
+import { parseBuemFeatureForImport, serializeToBuemFeature, type BuildingIdentity } from './buemAdapter';
 import { DEFAULT_GENERAL } from '../components/BuildingConfigurator/shared/buildingDefaults';
 
 const identity: BuildingIdentity = {
@@ -25,5 +25,28 @@ describe('thermal_class', () => {
 
   it('refuses a mass class it has no BuEM class for', () => {
     expect(() => thermalClass('Massive')).toThrow('Massive');
+  });
+});
+
+describe('thermal defaults', () => {
+  const feature = (thermal?: Record<string, unknown>) => ({
+    type: 'Feature',
+    properties: { buem: { building: { building_type: 'SFH', country: 'NL', ...(thermal ? { thermal } : {}) } } },
+  });
+
+  it('match the v6-draft schema defaults', () => {
+    expect(DEFAULT_GENERAL).toMatchObject({ n_air_infiltration: 0.5, n_air_use: 0.5, c_m: 165, massClass: 'Medium' });
+  });
+
+  it('leave a thermal value the import does not set to the shared defaults', () => {
+    const { general } = parseBuemFeatureForImport(feature());
+    for (const key of ['n_air_infiltration', 'n_air_use', 'c_m', 'massClass']) expect(general).not.toHaveProperty(key);
+  });
+
+  it('import the thermal values a feature sets', () => {
+    const { general } = parseBuemFeatureForImport(feature({
+      n_air_infiltration: { value: 0.3 }, n_air_use: { value: 0.6 }, c_m: { value: 260 }, thermal_class: 'heavy',
+    }));
+    expect(general).toMatchObject({ n_air_infiltration: 0.3, n_air_use: 0.6, c_m: 260, massClass: 'Heavy' });
   });
 });

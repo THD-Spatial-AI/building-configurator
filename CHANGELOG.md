@@ -14,6 +14,11 @@ Each version's GitHub release entry carries the full notes.
 
 - The side panel is wider (400 px, 520 px from the xl breakpoint) so the expert parameters fit.
 
+### Fixed
+
+- Thermal mass offers BuEM's three classes (light, medium, heavy), so a saved choice reopens as chosen. Each sets the heat capacity c_m to its EN ISO 13790 value (110, 165, 260 kJ/(m²K)).
+- Editing and importing a building share one set of defaults, the v6-draft schema's: air changes 0.5 and 0.5 1/h, c_m 165 kJ/(m²K), medium thermal mass. Editing used 0.4, 0.4, 110 and importing fell back to light.
+
 ## [0.9.0] - 2026-10-19
 
 ### Added

@@ -34,10 +34,11 @@ export const DEFAULT_GENERAL = {
   floorArea:          90.9, // per-storey footprint; 4 storeys ≈ 363.4 m² total
   roomHeight:         2.7,
   storeys:            4,
-  n_air_infiltration: 0.4,
-  n_air_use:          0.4,
+  // The thermal values are the v6-draft request schema's defaults.
+  n_air_infiltration: 0.5,
+  n_air_use:          0.5,
   massClass:          'Medium',
-  c_m:                110,
+  c_m:                165,
   use_milp:           false,
   electricityDemand:  4000,
   spaceHeatingDemand: 15000,
