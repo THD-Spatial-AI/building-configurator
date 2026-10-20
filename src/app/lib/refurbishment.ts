@@ -3,7 +3,7 @@
 // windows and doors follows, and what that means for each surface's U-value.
 //
 // A surface is Custom when its U-value is not the one its type's state gives
-// it. A state change moves only the surfaces that are not Custom, so values
+// it, or when it was added by hand. A state change moves only the surfaces that are not Custom, so values
 // set surface by surface survive a preset.
 
 import { tabulaUValue, type IgnisVariantLevel } from './ignisAdapter';
@@ -58,6 +58,8 @@ export function expectedUValue(
 }
 
 function isCustom(el: BuildingElement, state: number, initial: RefurbStates, levels: IgnisVariantLevel[]): boolean {
+  // A surface added by hand has no TABULA counterpart; it keeps what was typed.
+  if (el.source === 'custom') return true;
   const expected = expectedUValue(el, state, initial, levels);
   return expected === undefined || Math.abs(el.uValue - expected) > U_TOLERANCE;
 }

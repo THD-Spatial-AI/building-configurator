@@ -376,6 +376,7 @@ export function Building3DView({
                       onSetTypeUValue: model.setTypeUValue,
                       onSetTypeLossFactor: model.setTypeLossFactor,
                       onOpenEnvelope: openEnvelope,
+                      onAddSurface: (type, values) => { model.createSurface(type, values); },
                     }}
                     hideIdentity
                   />

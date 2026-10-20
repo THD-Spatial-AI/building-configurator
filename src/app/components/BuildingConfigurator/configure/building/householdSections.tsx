@@ -177,23 +177,28 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
         {requiresResidentialUnits(general.buildingType) && ' Every dwelling in the building gets the same appliances.'}
       </p>
       {EQUIPMENT_GROUPS.map((group) => (
-        <div key={group.label} className="flex flex-col gap-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">{group.label}</p>
-          {group.label === 'Electronics' && (
-            <ApplianceRow label="Televisions">
-              <SegmentedControl options={TV_OPTIONS} value={tvCount(equipment)} onChange={setTvCount} />
-            </ApplianceRow>
-          )}
-          {group.items.map((item) => (
-            <ApplianceRow key={item.id} label={item.label}>
-              <SegmentedControl
-                options={OWNERSHIP_OPTIONS}
-                value={equipment[item.id] === undefined ? 'default' : equipment[item.id] ? 'on' : 'off'}
-                onChange={(v) => setOwnership(item.id, v as Ownership)}
-              />
-            </ApplianceRow>
-          ))}
-        </div>
+        <details key={group.label} className="rounded-md border border-slate-200">
+          <summary className="flex cursor-pointer items-baseline justify-between gap-2 px-2.5 py-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-600">{group.label}</span>
+            <span className="text-[10px] text-muted-foreground">{groupSummary(group, equipment)}</span>
+          </summary>
+          <div className="flex flex-col gap-1.5 border-t border-slate-200 p-2.5">
+            {group.label === 'Electronics' && (
+              <ApplianceRow label="Televisions">
+                <SegmentedControl options={TV_OPTIONS} value={tvCount(equipment)} onChange={setTvCount} />
+              </ApplianceRow>
+            )}
+            {group.items.map((item) => (
+              <ApplianceRow key={item.id} label={item.label}>
+                <SegmentedControl
+                  options={OWNERSHIP_OPTIONS}
+                  value={equipment[item.id] === undefined ? 'default' : equipment[item.id] ? 'on' : 'off'}
+                  onChange={(v) => setOwnership(item.id, v as Ownership)}
+                />
+              </ApplianceRow>
+            ))}
+          </div>
+        </details>
       ))}
       {Object.keys(equipment).length > 0 && (
         <button
@@ -206,6 +211,15 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
       )}
     </div>
   );
+}
+
+/** One line for a collapsed appliance group: how many are set by hand, and how. */
+function groupSummary(group: (typeof EQUIPMENT_GROUPS)[number], equipment: Record<string, boolean>): string {
+  const ids = [...group.items.map((item) => item.id), ...(group.label === 'Electronics' ? TV_IDS : [])];
+  const set = ids.filter((id) => equipment[id] !== undefined);
+  if (set.length === 0) return `${group.items.length} at default`;
+  const owned = set.filter((id) => equipment[id]).length;
+  return `${set.length} set: ${owned} yes, ${set.length - owned} no`;
 }
 
 function ApplianceRow({ label, children }: { label: string; children: ReactNode }) {

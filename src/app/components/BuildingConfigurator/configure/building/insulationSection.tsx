@@ -2,6 +2,7 @@
 // state for the whole building in Basic, and per element type in Expert with
 // its U-value and loss factor, plus the windows BuEM adds when there are none.
 
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
@@ -25,6 +26,8 @@ export interface InsulationProps {
   onSetTypeLossFactor: (type: RefurbElementType, b: number) => void;
   /** Opens the Envelope tab, where surfaces are edited one by one. */
   onOpenEnvelope?: () => void;
+  /** Adds a surface the 3D data lacks, such as a wall against ground. */
+  onAddSurface?: (type: RefurbElementType, values: Partial<BuildingElement>) => void;
 }
 
 const TYPE_LABELS: Record<RefurbElementType, string> = {
@@ -57,6 +60,7 @@ export function InsulationSection(props: Props) {
     <div className="flex flex-col gap-4">
       {levels.length > 0 && <BuildingPreset {...props} />}
       {mode === 'expert' && <ElementTable {...props} />}
+      {mode === 'expert' && props.onAddSurface && <AddSurface onAdd={props.onAddSurface} />}
       {mode === 'expert' && <SynthesisedWindows {...props} />}
       <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2">
         <span className="text-[11px] text-muted-foreground">
@@ -231,5 +235,61 @@ function SynthesisedWindows({ elements, general, setGen }: Props) {
         />
       </div>
     </div>
+  );
+}
+
+const ADDABLE_TYPES = [
+  { value: 'wall', label: 'Wall' },
+  { value: 'floor', label: 'Floor' },
+  { value: 'roof', label: 'Roof' },
+];
+
+/** A surface the 3D data lacks, for example a wall against ground or a floor over an open passage. */
+function AddSurface({ onAdd }: { onAdd: NonNullable<InsulationProps['onAddSurface']> }) {
+  const [type, setType] = useState<RefurbElementType>('wall');
+  const [label, setLabel] = useState('');
+  const [area, setArea] = useState(10);
+  const [uValue, setUValue] = useState(0.5);
+  const [loss, setLoss] = useState(1);
+  const add = () => {
+    onAdd(type, { area, uValue, bTransmission: loss, ...(label.trim() ? { label: label.trim() } : {}) });
+    setLabel('');
+  };
+  return (
+    <details className="group rounded-md border border-slate-200">
+      <summary className="cursor-pointer px-2.5 py-2 text-xs font-semibold text-slate-700">Add a surface</summary>
+      <div className="flex flex-col gap-2 border-t border-slate-200 p-2.5">
+        <p className="text-[10px] leading-snug text-muted-foreground">
+          For a surface the 3D data does not show, such as a wall against ground (loss factor about 0.5)
+          or a floor over an open passage (1). It is listed in the Envelope tab, not drawn in the model.
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <SelectInput label="Type" value={type} onChange={(v) => setType(v as RefurbElementType)} options={ADDABLE_TYPES} />
+          <div>
+            <FieldLabel>Name</FieldLabel>
+            <div className="cfg-input-wrap">
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="e.g. Basement wall"
+                className="cfg-number"
+              />
+            </div>
+          </div>
+          <NumberInput label="Area" value={area} onChange={(v) => setArea(Math.max(0, v))} unit="m²" min={0} step={1} />
+          <NumberInput label="U-value" value={uValue} onChange={(v) => setUValue(Math.max(0, v))} unit="W/m²K" min={0} max={6} step={0.01} />
+          <NumberInput label="Loss factor" value={loss} onChange={(v) => setLoss(Math.min(1, Math.max(0, v)))} unit="0 to 1" min={0} max={1} step={0.05} />
+        </div>
+        <button
+          type="button"
+          onClick={add}
+          disabled={area <= 0}
+          className="cursor-pointer self-start rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Add {type}
+        </button>
+      </div>
+    </details>
   );
 }

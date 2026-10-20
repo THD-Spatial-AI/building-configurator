@@ -18,8 +18,11 @@ Each version's GitHub release entry carries the full notes.
 - `ConfiguratorServices.fetchMatchingVariants` takes an optional fourth argument, `subtype`, to forward to ignis as the `subtype` query parameter.
 - Expert sets the windows BuEM adds to a building without window surfaces: window share (`window_to_wall_ratio`), U-value (`window_U`) and g-value (`window_g_gl`). Left empty, BuEM uses its defaults.
 
+- Expert adds a surface the 3D data does not show, such as a wall against ground or a floor over an open passage, with a name, area, U-value and loss factor. It is listed in the Envelope tab, not drawn in the model, and a refurbishment state leaves its U-value as entered.
+
 ### Changed
 
+- Appliances are grouped into five collapsible categories, each with a one-line summary of what is set by hand.
 - Only variants 1 to 3 of the building's own subtype are offered. ignis releases before the subtype filter list other subtypes as further levels, and their generic labels (Medium refurbishment, Refurbishment level N) show as TABULA's names.
 - The Parameters tab shows the building editor in Basic too, with fewer groups than Expert, and scrolls as one panel instead of a fixed-height box inside it.
 - Setback and hot water moved from Occupancy to Heating and comfort; the separate air and thermal mass groups are now part of it.

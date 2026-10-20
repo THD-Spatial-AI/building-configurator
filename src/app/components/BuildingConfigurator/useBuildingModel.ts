@@ -545,9 +545,12 @@ export function useBuildingModel(
     return deletedType;
   };
 
-  /** Adds a surface of the given type, returning it so the caller can select it. */
-  const createSurface = (type: BuildingElement['type']): BuildingElement => {
-    const next = buildNewSurface(type, elements);
+  /**
+   * Adds a surface of the given type, with `values` over the defaults, and
+   * returns it so the caller can select it.
+   */
+  const createSurface = (type: BuildingElement['type'], values: Partial<BuildingElement> = {}): BuildingElement => {
+    const next = { ...buildNewSurface(type, elements), ...values };
     remember(`create:${next.id}`, `Added ${type}`);
     setElements((prev) => ({ ...prev, [next.id]: next }));
     return next;
