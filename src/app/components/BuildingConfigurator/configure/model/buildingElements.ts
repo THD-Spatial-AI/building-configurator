@@ -15,6 +15,8 @@ export interface BuildingElement {
   customMode?: boolean;
   dInsulation?: number;
   bTransmission?: number;
+  /** For a window or door, the id of the wall or roof it sits in (BuEM parent_id). */
+  parentId?: string;
   measureType?: string;
   measureTypeOptions?: string[];
   /** Snapshot of the imported/default values — stamped once, never changed. Used to show reset buttons. */

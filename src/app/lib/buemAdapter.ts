@@ -204,6 +204,7 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
       tilt:    qty(raw.tilt),
       azimuth: qty(raw.azimuth),
       ...transmissionFrom(raw),
+      ...(typeof raw.parent_id === 'string' && raw.parent_id ? { parentId: raw.parent_id } : {}),
       source: 'city',
       customMode: false,
     };
@@ -488,9 +489,10 @@ export function extractFeaturesFromConfig(config: unknown): unknown[] {
  * no area is left out, since BuEM rejects one; ventilation carries no area.
  */
 function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Record<string, any>> {
-  return Object.values(elements)
+  const sent = Object.values(elements)
     .filter((el) => el && typeof el === 'object')
-    .filter((el) => el.type === 'ventilation' || Number(el.area) > 0)
+    .filter((el) => el.type === 'ventilation' || Number(el.area) > 0);
+  return sent
     .map((el) => {
       const base: Record<string, any> = {
         id: String(el.id ?? ''),
@@ -522,8 +524,36 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
         base.b_transmission = { value: el.bTransmission, unit: '-' };
       }
 
+      if (el.type === 'window' || el.type === 'door') base.parent_id = parentOf(el, sent);
+
       return base;
     });
+}
+
+/** Below this tilt a window is a skylight and sits in a roof. */
+const SKYLIGHT_MAX_TILT = 60;
+
+/**
+ * The id of the surface a window or door sits in: the one it names when that
+ * surface is sent, else the largest wall (roof, for a skylight) on the same
+ * face, else the one closest in azimuth. The schema requires one.
+ */
+function parentOf(opening: Record<string, any>, sent: Array<Record<string, any>>): string {
+  const ids = new Set(sent.map((el) => el.id));
+  if (opening.parentId && ids.has(opening.parentId)) return opening.parentId;
+  const hostType = opening.type === 'window' && Number(opening.tilt) < SKYLIGHT_MAX_TILT ? 'roof' : 'wall';
+  const face = faceFromAzimuth(Number(opening.azimuth));
+  const gap = (el: Record<string, any>) => {
+    const d = Math.abs(Number(el.azimuth) - Number(opening.azimuth)) % 360;
+    return Math.min(d, 360 - d);
+  };
+  const hosts = sent.filter((el) => el.type === hostType);
+  const sameFace = hosts.filter((el) => faceFromAzimuth(Number(el.azimuth)) === face);
+  const host = sameFace.length > 0
+    ? sameFace.reduce((a, b) => (Number(b.area) > Number(a.area) ? b : a))
+    : hosts.reduce<Record<string, any> | undefined>((a, b) => (!a || gap(b) < gap(a) ? b : a), undefined);
+  if (!host) throw new Error(`serializeToBuemFeature: no ${hostType} for ${opening.type} "${opening.id}" to sit in`);
+  return String(host.id);
 }
 
 /**
@@ -737,6 +767,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
         tilt: qty(el.tilt),
         azimuth: qty(el.azimuth),
         ...transmissionFrom(el),
+        ...(typeof el.parent_id === 'string' && el.parent_id ? { parentId: el.parent_id } : {}),
         source: 'city',
         customMode: false,
       };
