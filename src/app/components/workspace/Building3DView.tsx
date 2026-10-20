@@ -338,7 +338,7 @@ export function Building3DView({
 
         <div className={cn(
           'flex shrink-0 flex-col gap-3',
-          wide ? 'w-[360px] xl:w-[440px]' : 'h-[46%] min-h-[220px] w-full',
+          wide ? 'w-[400px] xl:w-[520px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
           {pv ? (
             <div className="min-h-0 flex-1 overflow-y-auto">
