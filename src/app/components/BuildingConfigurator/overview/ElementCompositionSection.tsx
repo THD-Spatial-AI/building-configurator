@@ -24,18 +24,15 @@ export interface ElementCompositionSectionProps {
   elements: Record<string, BuildingElement>;
   baselineElements?: Record<string, BuildingElement>;
   roofConfig: RoofConfig;
-  /** Opens the surface configurator modal for the given group. */
-  onEditGroup?: (type: ElementGroupKey) => void;
   /** When set, a group row expands to its surfaces instead, and picking one calls this. */
   onSelectSurface?: (id: string) => void;
 }
 
-/** One row per building envelope group; a row opens the group's configurator or expands to its surfaces. */
+/** One row per building envelope group; with onSelectSurface a row expands to its surfaces. */
 export function ElementCompositionSection({
   elements,
   baselineElements,
   roofConfig,
-  onEditGroup,
   onSelectSurface,
 }: ElementCompositionSectionProps) {
   const [expanded, setExpanded] = useState<ElementGroupKey | null>(null);
@@ -67,7 +64,7 @@ export function ElementCompositionSection({
             <button
               type="button"
               aria-expanded={onSelectSurface ? isOpen : undefined}
-              onClick={() => (onSelectSurface ? setExpanded(isOpen ? null : type) : onEditGroup?.(type))}
+              onClick={() => onSelectSurface && setExpanded(isOpen ? null : type)}
               className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50/80"
             >
               <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: ELEMENT_DOTS[type] }} />

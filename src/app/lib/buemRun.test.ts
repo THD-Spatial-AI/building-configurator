@@ -47,6 +47,8 @@ const general = {
   n_air_use: 0.55,
   massClass: 'Heavy',
   c_m: 260,
+  comfortT_lb: 20,
+  comfortT_ub: 25,
   use_milp: true,
   residential_units: 2,
   num_persons: 3,
@@ -56,6 +58,7 @@ const general = {
   include_dhw: false,
   setback_profile: 'night_only',
   equipment: { tv_1: true, tv_2: false, tumble_dryer: false },
+  refurbishment: { variantCode: 'NL.N.SFH.02.Deta.ReEx.001.002', states: { wall: 2, roof: 3, floor: 2, window: 2, door: 1 } },
   outputs: { heating: 'series', cooling: 'none', electricity: 'summary', hot_water: 'series', kitchen: 'summary' } as const,
 };
 
@@ -66,6 +69,15 @@ describe('toBuem', () => {
     const { buem } = serializeToBuemFeature(runIdentity(opened, general), elements, general).properties;
 
     expect(toBuem(edited)).toMatchObject({ building: buem.building, outputs: buem.outputs, solver: buem.solver });
+  });
+
+  it('keeps the refurbishment states beside the building block, not in it', () => {
+    const stored = toBuem(edited);
+    expect(stored.building).not.toHaveProperty('refurbishment');
+    expect(stored.refurbishment).toEqual({
+      variant_code: 'NL.N.SFH.02.Deta.ReEx.001.002',
+      states: { wall: 2, roof: 3, floor: 2, window: 2, door: 1 },
+    });
   });
 
   it('keeps the construction year beside the building block, not in it', () => {
@@ -80,6 +92,8 @@ describe('toBuem', () => {
       n_air_infiltration: { value: 0.7, unit: '1/h' },
       n_air_use: { value: 0.55, unit: '1/h' },
       c_m: { value: 260, unit: 'kJ/(m2K)' },
+      comfortT_lb: { value: 20, unit: 'degC' },
+      comfortT_ub: { value: 25, unit: 'degC' },
       thermal_class: 'heavy',
     });
     expect(building.name).toBe('Renamed');

@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import {
-  FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput, ToggleSwitch,
+  FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
   ARCHETYPE_OPTIONS,
@@ -11,7 +11,6 @@ import {
   EQUIPMENT_GROUPS,
   OUTPUT_LEVEL_OPTIONS,
   OUTPUT_PROFILES,
-  SETBACK_OPTIONS,
   TV_IDS,
   isServiceBuildingType,
   requiresResidentialUnits,
@@ -54,18 +53,6 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
   );
 }
 
-function SetbackSelect({ general, setGen }: SectionProps) {
-  return (
-    <SelectInput
-      label="Heating setback"
-      value={general.setback_profile}
-      onChange={(v) => setGen('setback_profile', v)}
-      options={SETBACK_OPTIONS}
-      tip="Lowers the heating set point while occupants are asleep or away. Affects heating only."
-    />
-  );
-}
-
 /** Dwellings, occupants and household habits; capacity alone for a service building. */
 export function OccupancySection({ general, setGen }: SectionProps) {
   if (isServiceBuildingType(general.buildingType)) {
@@ -78,7 +65,6 @@ export function OccupancySection({ general, setGen }: SectionProps) {
           placeholder="Derived from the floor area."
           tip="Number of occupants. Left empty, BuEM derives it from the floor area with a density for the building type."
         />
-        <SetbackSelect general={general} setGen={setGen} />
       </div>
     );
   }
@@ -146,13 +132,6 @@ export function OccupancySection({ general, setGen }: SectionProps) {
         options={COOKING_CARRIER_OPTIONS}
         tip="Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas. Model default uses the setting of the model the building belongs to."
       />
-      <ToggleSwitch
-        checked={general.include_dhw}
-        onChange={(v) => setGen('include_dhw', v)}
-        label="Report hot water"
-        tip="Turn off when hot water is supplied by a system accounted for elsewhere. Space heating is unaffected."
-      />
-      <SetbackSelect general={general} setGen={setGen} />
     </div>
   );
 }
@@ -198,23 +177,28 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
         {requiresResidentialUnits(general.buildingType) && ' Every dwelling in the building gets the same appliances.'}
       </p>
       {EQUIPMENT_GROUPS.map((group) => (
-        <div key={group.label} className="flex flex-col gap-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">{group.label}</p>
-          {group.label === 'Electronics' && (
-            <ApplianceRow label="Televisions">
-              <SegmentedControl options={TV_OPTIONS} value={tvCount(equipment)} onChange={setTvCount} />
-            </ApplianceRow>
-          )}
-          {group.items.map((item) => (
-            <ApplianceRow key={item.id} label={item.label}>
-              <SegmentedControl
-                options={OWNERSHIP_OPTIONS}
-                value={equipment[item.id] === undefined ? 'default' : equipment[item.id] ? 'on' : 'off'}
-                onChange={(v) => setOwnership(item.id, v as Ownership)}
-              />
-            </ApplianceRow>
-          ))}
-        </div>
+        <details key={group.label} className="rounded-md border border-slate-200">
+          <summary className="flex cursor-pointer items-baseline justify-between gap-2 px-2.5 py-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-600">{group.label}</span>
+            <span className="text-[10px] text-muted-foreground">{groupSummary(group, equipment)}</span>
+          </summary>
+          <div className="flex flex-col gap-1.5 border-t border-slate-200 p-2.5">
+            {group.label === 'Electronics' && (
+              <ApplianceRow label="Televisions">
+                <SegmentedControl options={TV_OPTIONS} value={tvCount(equipment)} onChange={setTvCount} />
+              </ApplianceRow>
+            )}
+            {group.items.map((item) => (
+              <ApplianceRow key={item.id} label={item.label}>
+                <SegmentedControl
+                  options={OWNERSHIP_OPTIONS}
+                  value={equipment[item.id] === undefined ? 'default' : equipment[item.id] ? 'on' : 'off'}
+                  onChange={(v) => setOwnership(item.id, v as Ownership)}
+                />
+              </ApplianceRow>
+            ))}
+          </div>
+        </details>
       ))}
       {Object.keys(equipment).length > 0 && (
         <button
@@ -227,6 +211,15 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
       )}
     </div>
   );
+}
+
+/** One line for a collapsed appliance group: how many are set by hand, and how. */
+function groupSummary(group: (typeof EQUIPMENT_GROUPS)[number], equipment: Record<string, boolean>): string {
+  const ids = [...group.items.map((item) => item.id), ...(group.label === 'Electronics' ? TV_IDS : [])];
+  const set = ids.filter((id) => equipment[id] !== undefined);
+  if (set.length === 0) return `${group.items.length} at default`;
+  const owned = set.filter((id) => equipment[id]).length;
+  return `${set.length} set: ${owned} yes, ${set.length - owned} no`;
 }
 
 function ApplianceRow({ label, children }: { label: string; children: ReactNode }) {

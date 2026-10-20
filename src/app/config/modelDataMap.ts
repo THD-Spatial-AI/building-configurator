@@ -48,7 +48,13 @@ export const MODEL_DATA_MAP = {
       nAirUse:           'properties.buem.building.thermal.n_air_use',          // { value, unit: "1/h" }
       cM:                'properties.buem.building.thermal.c_m',                // { value, unit: "kJ/(m2K)" }
       thermalClass:      'properties.buem.building.thermal.thermal_class',      // light | medium | heavy
+      comfortTLb:        'properties.buem.building.thermal.comfortT_lb',        // { value, unit: "degC" }, heating setpoint
+      comfortTUb:        'properties.buem.building.thermal.comfortT_ub',        // { value, unit: "degC" }, cooling setpoint
       useMilp:           'properties.buem.solver.use_milp',                     // boolean
+      // The windows BuEM adds when the request has none of its own.
+      windowToWallRatio: 'properties.buem.building.window_to_wall_ratio',       // 0 to <1
+      windowU:           'properties.buem.building.window_U',                   // { value, unit: "W/(m2K)" }
+      windowGGl:         'properties.buem.building.window_g_gl',                // 0 to 1
     },
 
     // Household inputs and output selection, keyed by their BuEM names.
@@ -64,6 +70,10 @@ export const MODEL_DATA_MAP = {
       equipment:         'properties.buem.building.equipment',
       outputs:           'properties.buem.outputs',
     },
+
+    // Refurbishment states, kept beside the building block and never sent to
+    // BuEM: { variant_code?: string, states?: { wall?: 1-3, roof?, ... } }.
+    refurbishment: 'properties.buem.refurbishment',
 
     // Envelope element list (properties.buem.building.envelope.elements[])
     envelope: {

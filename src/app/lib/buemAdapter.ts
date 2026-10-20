@@ -21,6 +21,7 @@ import {
   type OutputProfile,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import type { LoadDataPoint } from './loadProfile';
+import { REFURB_TYPES, type RefurbElementType, type Refurbishment } from './refurbishment';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
 
@@ -88,6 +89,8 @@ export interface BuildingState {
   ignis: import('./ignisAdapter').IgnisState | null;
   /** Building parameters the source or a saved edit set; the configurator defaults the rest. */
   parameters?: BuildingParameters;
+  /** The building's TABULA variant and the refurbishment state chosen per element type. */
+  refurbishment?: Refurbishment;
 }
 
 /** The building parameters BuEM reads beyond identity and envelope, named as the configurator holds them. */
@@ -95,7 +98,13 @@ export interface BuildingParameters {
   n_air_infiltration?: number;      // 1/h
   n_air_use?: number;               // 1/h
   c_m?: number;                     // kJ/(m2K)
-  massClass?: string;               // VeryLight | Light | Medium | Heavy | VeryHeavy
+  massClass?: string;               // Light | Medium | Heavy; VeryLight and VeryHeavy from older exports
+  comfortT_lb?: number;             // degC, heating setpoint
+  comfortT_ub?: number;             // degC, cooling setpoint
+  /** The windows BuEM adds when the envelope has none; null leaves each to BuEM. */
+  window_to_wall_ratio?: number | null;
+  window_U?: number | null;         // W/(m2K)
+  window_g_gl?: number | null;
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
   residential_units?: number | null;
@@ -204,6 +213,7 @@ function adaptEnvelope(elements: unknown[]): Record<string, BuildingElement> {
       tilt:    qty(raw.tilt),
       azimuth: qty(raw.azimuth),
       ...transmissionFrom(raw),
+      ...(typeof raw.parent_id === 'string' && raw.parent_id ? { parentId: raw.parent_id } : {}),
       source: 'city',
       customMode: false,
     };
@@ -334,9 +344,8 @@ export function extractBuildingDashboardData(feature: unknown): Pick<BuildingSta
 
 const MASS_CLASS_LABELS: Record<string, string> = { light: 'Light', medium: 'Medium', heavy: 'Heavy' };
 
-// BuEM has three classes for the editor's five. c_m is sent beside the class,
-// so the very-light and very-heavy capacities still reach BuEM; on reopen the
-// class reads back as Light or Heavy.
+// The editor offers BuEM's three classes. VeryLight and VeryHeavy still arrive
+// from older configurator exports and are sent as the nearest BuEM class.
 const THERMAL_CLASSES: Record<string, string> = {
   VeryLight: 'light', Light: 'light', Medium: 'medium', Heavy: 'heavy', VeryHeavy: 'heavy',
 };
@@ -348,6 +357,11 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (hasMappedValue(feature, paths.nAirInfiltration)) parameters.n_air_infiltration = getMappedNumber(feature, paths.nAirInfiltration);
   if (hasMappedValue(feature, paths.nAirUse)) parameters.n_air_use = getMappedNumber(feature, paths.nAirUse);
   if (hasMappedValue(feature, paths.cM)) parameters.c_m = getMappedNumber(feature, paths.cM);
+  if (hasMappedValue(feature, paths.comfortTLb)) parameters.comfortT_lb = getMappedNumber(feature, paths.comfortTLb);
+  if (hasMappedValue(feature, paths.comfortTUb)) parameters.comfortT_ub = getMappedNumber(feature, paths.comfortTUb);
+  if (hasMappedValue(feature, paths.windowToWallRatio)) parameters.window_to_wall_ratio = getMappedNumber(feature, paths.windowToWallRatio);
+  if (hasMappedValue(feature, paths.windowU)) parameters.window_U = getMappedNumber(feature, paths.windowU);
+  if (hasMappedValue(feature, paths.windowGGl)) parameters.window_g_gl = getMappedNumber(feature, paths.windowGGl);
   const massClass = MASS_CLASS_LABELS[String(getMappedValue(feature, paths.thermalClass))];
   if (massClass) parameters.massClass = massClass;
   const useMilp = getMappedValue(feature, paths.useMilp);
@@ -394,6 +408,7 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
 
   const { geometry, thematic } = extractBuildingDashboardData(feature);
   const parameters = adaptParameters(feature);
+  const refurbishment = adaptRefurbishment(feature);
 
   return {
     geometry,
@@ -404,6 +419,31 @@ export function adaptBuemFeature(feature: unknown): BuildingState {
     timeseries: thematic.timeseries,
     ignis: null,
     ...(parameters ? { parameters } : {}),
+    ...(refurbishment ? { refurbishment } : {}),
+  };
+}
+
+/** The stored refurbishment block, or undefined when the feature has none. */
+function adaptRefurbishment(feature: unknown): Refurbishment | undefined {
+  const raw = getMappedValue(feature, MODEL_DATA_MAP.thematic.refurbishment);
+  if (!raw || typeof raw !== 'object') return undefined;
+  const { variant_code: variantCode, states } = raw as { variant_code?: unknown; states?: unknown };
+  const refurbishment: Refurbishment = {};
+  if (typeof variantCode === 'string' && variantCode) refurbishment.variantCode = variantCode;
+  if (states && typeof states === 'object') {
+    refurbishment.states = Object.fromEntries(
+      Object.entries(states).filter(([type, n]) => REFURB_TYPES.includes(type as RefurbElementType) && Number.isInteger(n)),
+    );
+  }
+  return Object.keys(refurbishment).length > 0 ? refurbishment : undefined;
+}
+
+/** The refurbishment block as stored beside the building block, or undefined when there is nothing to keep. */
+function serializeRefurbishment(refurbishment: Refurbishment | undefined): Record<string, unknown> | undefined {
+  if (!refurbishment?.variantCode && !refurbishment?.states) return undefined;
+  return {
+    ...(refurbishment.variantCode ? { variant_code: refurbishment.variantCode } : {}),
+    ...(refurbishment.states ? { states: refurbishment.states } : {}),
   };
 }
 
@@ -489,9 +529,10 @@ export function extractFeaturesFromConfig(config: unknown): unknown[] {
  * no area is left out, since BuEM rejects one; ventilation carries no area.
  */
 function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Record<string, any>> {
-  return Object.values(elements)
+  const sent = Object.values(elements)
     .filter((el) => el && typeof el === 'object')
-    .filter((el) => el.type === 'ventilation' || Number(el.area) > 0)
+    .filter((el) => el.type === 'ventilation' || Number(el.area) > 0);
+  return sent
     .map((el) => {
       const base: Record<string, any> = {
         id: String(el.id ?? ''),
@@ -523,8 +564,36 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
         base.b_transmission = { value: el.bTransmission, unit: '-' };
       }
 
+      if (el.type === 'window' || el.type === 'door') base.parent_id = parentOf(el, sent);
+
       return base;
     });
+}
+
+/** Below this tilt a window is a skylight and sits in a roof. */
+const SKYLIGHT_MAX_TILT = 60;
+
+/**
+ * The id of the surface a window or door sits in: the one it names when that
+ * surface is sent, else the largest wall (roof, for a skylight) on the same
+ * face, else the one closest in azimuth. The schema requires one.
+ */
+function parentOf(opening: Record<string, any>, sent: Array<Record<string, any>>): string {
+  const ids = new Set(sent.map((el) => el.id));
+  if (opening.parentId && ids.has(opening.parentId)) return opening.parentId;
+  const hostType = opening.type === 'window' && Number(opening.tilt) < SKYLIGHT_MAX_TILT ? 'roof' : 'wall';
+  const face = faceFromAzimuth(Number(opening.azimuth));
+  const gap = (el: Record<string, any>) => {
+    const d = Math.abs(Number(el.azimuth) - Number(opening.azimuth)) % 360;
+    return Math.min(d, 360 - d);
+  };
+  const hosts = sent.filter((el) => el.type === hostType);
+  const sameFace = hosts.filter((el) => faceFromAzimuth(Number(el.azimuth)) === face);
+  const host = sameFace.length > 0
+    ? sameFace.reduce((a, b) => (Number(b.area) > Number(a.area) ? b : a))
+    : hosts.reduce<Record<string, any> | undefined>((a, b) => (!a || gap(b) < gap(a) ? b : a), undefined);
+  if (!host) throw new Error(`serializeToBuemFeature: no ${hostType} for ${opening.type} "${opening.id}" to sit in`);
+  return String(host.id);
 }
 
 /**
@@ -602,6 +671,9 @@ export function serializeToBuemFeature(
   if (typeof general.c_m === 'number') {
     thermal.c_m = { value: general.c_m, unit: 'kJ/(m2K)' };
   }
+  for (const key of ['comfortT_lb', 'comfortT_ub'] as const) {
+    if (typeof general[key] === 'number') thermal[key] = { value: general[key], unit: 'degC' };
+  }
   if (general.massClass) {
     const thermalClass = THERMAL_CLASSES[general.massClass];
     if (!thermalClass) throw new Error(`serializeToBuemFeature: no BuEM thermal_class for mass class "${general.massClass}"`);
@@ -610,6 +682,12 @@ export function serializeToBuemFeature(
   if (Object.keys(thermal).length > 0) {
     building.thermal = thermal;
   }
+
+  if (typeof general.window_to_wall_ratio === 'number') building.window_to_wall_ratio = general.window_to_wall_ratio;
+  if (typeof general.window_U === 'number') building.window_U = { value: general.window_U, unit: 'W/(m2K)' };
+  if (typeof general.window_g_gl === 'number') building.window_g_gl = general.window_g_gl;
+
+  const refurbishment = serializeRefurbishment(general.refurbishment);
 
   // Build the complete feature
   const feature: Record<string, any> = {
@@ -627,6 +705,7 @@ export function serializeToBuemFeature(
       buem: {
         building,
         ...(constructionYear ? { construction_year: constructionYear } : {}),
+        ...(refurbishment ? { refurbishment } : {}),
         outputs,
         solver: {
           use_milp: general.use_milp ?? false,
@@ -716,7 +795,6 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   const props = (f.properties ?? {}) as Record<string, unknown>;
   const buem = (props.buem ?? {}) as Record<string, unknown>;
   const bldg = (buem.building ?? {}) as Record<string, unknown>;
-  const thermalBlk = (bldg.thermal ?? {}) as Record<string, unknown>;
   const envelopeBlk = (bldg.envelope ?? {}) as Record<string, unknown>;
   const elements: Record<string, any> = {};
 
@@ -739,6 +817,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
         tilt: qty(el.tilt),
         azimuth: qty(el.azimuth),
         ...transmissionFrom(el),
+        ...(typeof el.parent_id === 'string' && el.parent_id ? { parentId: el.parent_id } : {}),
         source: 'city',
         customMode: false,
       };
@@ -757,14 +836,10 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
     roomHeight: qty(bldg.h_room),
     storeys: importedStoreys,
-    n_air_infiltration: qty(thermalBlk.n_air_infiltration, 0.5),
-    n_air_use: qty(thermalBlk.n_air_use, 0.5),
-    c_m: qty(thermalBlk.c_m, 165),
-    massClass: (thermalBlk.thermal_class === 'medium' ? 'Medium' :
-                thermalBlk.thermal_class === 'heavy' ? 'Heavy' : 'Light'),
     use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,
     compute_cooling: ((buem.solver ?? {}) as Record<string, unknown>).compute_cooling !== false,
-    ...householdParameters(feature),
+    // Only the values the feature sets: the caller merges over DEFAULT_GENERAL.
+    ...adaptParameters(feature),
   };
 
   return { elements, general, isBuemFormat: true };

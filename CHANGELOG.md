@@ -4,6 +4,38 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.10.0] - 2026-10-20
+
+### Added
+
+- `Building3DView` takes an optional `defaultMode` prop, `basic` (default) or `expert`: the mode it opens in. The user can still switch.
+
+- A Heating and comfort group in the Parameters tab. Basic sets the heating setpoint (BuEM `comfortT_lb`, default 18 °C), when to lower it (setback) and whether hot water is included. Expert adds the cooling setpoint (`comfortT_ub`, default 21 °C), the air changes and the thermal mass. The setpoints are saved with the building.
+
+- An Insulation and windows group replaces the refurbishment level buttons. Basic sets the whole building to one of TABULA's variants for it: existing state, usual refurbishment or advanced refurbishment, under the names ignis gives. Expert sets a state, U-value and, for walls, roof and floor, a loss factor (BuEM `b_transmission`, 0 to 1) per element type. A state change leaves surfaces set one by one at their values; they show as Custom. Party walls keep their loss factor of 0. Without TABULA variants for the building, only the U-values are offered.
+- The states and the building's City2TABULA variant code are saved with the building: `toBuem` returns them as `refurbishment` beside the building block, `{ variant_code?, states? }`, and `adaptBuemFeature` reads them back from `properties.buem.refurbishment`. They are not sent to BuEM. `BuildingState` takes an optional `refurbishment`, and `buildBuildingStates` fills its variant code from the enrich response.
+- A building opens in the state its City2TABULA variant code names (`...ReEx.001.002` is usual refurbishment) and looks up the variants of its own subtype (`...SFH.02.Deta...` is `Deta`).
+- `ConfiguratorServices.fetchMatchingVariants` takes an optional fourth argument, `subtype`, to forward to ignis as the `subtype` query parameter.
+- Expert sets the windows BuEM adds to a building without window surfaces: window share (`window_to_wall_ratio`), U-value (`window_U`) and g-value (`window_g_gl`). Left empty, BuEM uses its defaults.
+
+- Expert adds a surface the 3D data does not show, such as a wall against ground or a floor over an open passage, with a name, area, U-value and loss factor. It is listed in the Envelope tab, not drawn in the model, and a refurbishment state leaves its U-value as entered.
+
+### Changed
+
+- Appliances are grouped into five collapsible categories, each with a one-line summary of what is set by hand.
+- Only variants 1 to 3 of the building's own subtype are offered. ignis releases before the subtype filter list other subtypes as further levels, and their generic labels (Medium refurbishment, Refurbishment level N) show as TABULA's names.
+- The Parameters tab shows the building editor in Basic too, with fewer groups than Expert, and scrolls as one panel instead of a fixed-height box inside it.
+- Setback and hot water moved from Occupancy to Heating and comfort; the separate air and thermal mass groups are now part of it.
+- The side panel is wider (400 px, 520 px from the xl breakpoint) so the expert parameters fit.
+
+### Fixed
+
+- A refurbishment state changed no U-value. The configurator read TABULA's `U_*_1` fields, which hold the elements' original U-values in every variant; a variant's own values are in `U_Actual_*_1`. The variant's own value is now used, and the original where TABULA gives none. This also corrects the U-values of a building whose City2TABULA variant is refurbished, and the per-surface TABULA presets.
+- Window and door elements carry `parent_id`, which the v6-draft schema requires: the surface the element names, else the largest wall on the same face (a roof for a window tilted under 60°), else the wall closest in azimuth. A window or door with no wall or roof to sit in stops the request with an error naming it. `BuildingElement` takes an optional `parentId`, read from `parent_id` on load.
+- With no TABULA data for a building, the panel no longer points at a service on `localhost:8080`; it says the TABULA service holds no variant for the building or could not be reached.
+- Thermal mass offers BuEM's three classes (light, medium, heavy), so a saved choice reopens as chosen. Each sets the heat capacity c_m to its EN ISO 13790 value (110, 165, 260 kJ/(m²K)).
+- Editing and importing a building share one set of defaults, the v6-draft schema's: air changes 0.5 and 0.5 1/h, c_m 165 kJ/(m²K), medium thermal mass. Editing used 0.4, 0.4, 110 and importing fell back to light.
+
 ## [0.9.0] - 2026-10-19
 
 ### Added

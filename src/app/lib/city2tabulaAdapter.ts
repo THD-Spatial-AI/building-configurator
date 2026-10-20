@@ -78,6 +78,7 @@ export function buildEnrichedFeature(building: PylovoBuildingFeature, entry: Enr
           n_storeys: nStoreys,
           envelope: entry.buem.building.envelope,
         },
+        ...(entry.tabula_variant_code ? { refurbishment: { variant_code: entry.tabula_variant_code } } : {}),
       },
     },
   };

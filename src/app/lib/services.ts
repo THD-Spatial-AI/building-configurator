@@ -54,13 +54,16 @@ export type BuemBuildingRunResponse = BuildingDemandProfile;
 export interface ConfiguratorServices {
   /**
    * TABULA variants for a building classification. `typeCode` is already a
-   * TABULA code (MFH, SFH, AB, TH); the package maps the label.
-   * Expected budget: 8 s.
+   * TABULA code (MFH, SFH, AB, TH); the package maps the label. `subtype` is
+   * the TABULA building subtype (e.g. Deta, case as in TABULA codes), passed
+   * when the building has a City2TABULA variant code; forward it to ignis as
+   * the `subtype` query parameter. Expected budget: 8 s.
    */
   fetchMatchingVariants(
     countryIso2: string,
     typeCode: string,
     constructionYear: number,
+    subtype?: string,
   ): Promise<IgnisMatchResponse>;
 
   /** One variant's full TABULA record. Expected budget: 8 s. */

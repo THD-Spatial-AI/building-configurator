@@ -55,8 +55,8 @@ const draftId = crypto.randomUUID();
 
 // Module constant: one identity for the life of the page.
 const services: ConfiguratorServices = {
-  fetchMatchingVariants: (country, typeCode, year) =>
-    axios.get(`/v1/ignis/variants/${country}/match`, { params: { type: typeCode, year } })
+  fetchMatchingVariants: (country, typeCode, year, subtype) =>
+    axios.get(`/v1/ignis/variants/${country}/match`, { params: { type: typeCode, year, subtype } })
       .then((r) => r.data.data),
   fetchVariantData: (code) =>
     axios.get(`/v1/ignis/data/${code}`).then((r) => r.data.data),
@@ -97,6 +97,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
 | `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
+| `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
@@ -112,7 +113,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 
 | Function | What it carries | Budget |
 |---|---|---|
-| `fetchMatchingVariants(country, typeCode, year)` | TABULA variants for a classification. `typeCode` is already a TABULA code (`SFH`, `TH`, `MFH`, `AB`) | 8 s |
+| `fetchMatchingVariants(country, typeCode, year, subtype?)` | TABULA variants for a classification. `typeCode` is already a TABULA code (`SFH`, `TH`, `MFH`, `AB`). `subtype` (for example `Deta`, case as in TABULA codes) is passed for a building with a City2TABULA variant code; forward it as ignis's `subtype` query parameter | 8 s |
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
 | `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
@@ -255,10 +256,11 @@ Two exported functions build one:
 ## Storing an edited building
 
 `onExit` hands back the edited `BuildingState`. `toBuem(building)` turns it
-into `{ building, construction_year, outputs, solver }`: the same three blocks
-a run of that building sends as `BuemBuildingRunRequest.building`, `.outputs`
-and `.solver`, plus the construction year, which BuEM's `construction_period`
-cannot hold. Store the whole object and send BuEM only its blocks. To reopen,
+into `{ building, construction_year, refurbishment, outputs, solver }`: the
+same three blocks a run of that building sends as
+`BuemBuildingRunRequest.building`, `.outputs` and `.solver`, plus the
+construction year, which BuEM's `construction_period` cannot hold, and the
+refurbishment states (see below). Store the whole object and send BuEM only its blocks. To reopen,
 pass the stored object as `properties.buem` of a Feature to
 `adaptBuemFeature`:
 
@@ -282,6 +284,13 @@ every surface with its name. `outputs` records which load profiles BuEM
 computes, and `solver.use_milp` whether it solves with MILP. None of the three
 carries the storey count: a reopened building keeps its total floor area and
 shows the default storey count.
+
+`refurbishment`, when present, holds the building's City2TABULA variant code
+and the refurbishment state chosen per element type,
+`{ variant_code?, states?: { wall?, roof?, floor?, window?, door? } }` with
+states 1 (existing state), 2 (usual refurbishment) or 3 (advanced
+refurbishment). Store it with the rest so the building reopens with the
+states chosen. Do not send it to BuEM.
 
 When `outputs` selects neither heating nor cooling, `building` has no envelope
 and the run needs no weather.

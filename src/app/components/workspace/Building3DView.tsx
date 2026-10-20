@@ -63,10 +63,12 @@ export interface Building3DViewProps {
   pvSurfaceIds?: readonly string[];
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
+  /** The mode the view opens in. The user can still switch; the next opening starts here again. */
+  defaultMode?: 'basic' | 'expert';
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic',
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
@@ -80,7 +82,7 @@ export function Building3DView({
   /** Where the editor was about to go when it asked about the open surface's changes. */
   const [pendingSurface, setPendingSurface] = useState<{ next: SurfaceSelection | null } | null>(null);
   /** Expert shows the full BuEM building parameters. */
-  const [mode, setMode] = useState<'basic' | 'expert'>('basic');
+  const [mode, setMode] = useState<'basic' | 'expert'>(defaultMode);
   /** The export choices, open over the header button. */
   const [exportOpen, setExportOpen] = useState(false);
   /** Leaving was asked for while there are unsaved edits. */
@@ -338,7 +340,7 @@ export function Building3DView({
 
         <div className={cn(
           'flex shrink-0 flex-col gap-3',
-          wide ? 'w-[360px] xl:w-[440px]' : 'h-[46%] min-h-[220px] w-full',
+          wide ? 'w-[400px] xl:w-[520px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
           {pv ? (
             <div className="min-h-0 flex-1 overflow-y-auto">
@@ -355,21 +357,31 @@ export function Building3DView({
               roofConfig={model.roofConfig}
               onSelectSurface={selectFromList}
               technologySlot={technologies ? <TechnologyCards technologies={technologies} /> : undefined}
-              parametersSlot={mode === 'expert' ? (
-                // Air, thermal mass, calculation method and refurbishment
-                // level: the BuEM building fields the table does not carry.
-                <div className="h-[460px] border-t border-slate-100">
+              parametersSlot={(openEnvelope) => (
+                // The BuEM building fields the table does not carry; Expert
+                // shows more of them. No fixed height: the panel scrolls once.
+                <div className="border-t border-slate-100">
                   <BuildingEditor
                     general={model.general}
                     setGen={model.setGen}
                     mode={mode}
-                    ignis={model.ignis}
-                    onIgnisVariantSelect={model.selectIgnisVariant}
-                    avgUValue={model.avgUValue}
+                    insulation={{
+                      elements,
+                      levels: model.ignis?.variants ?? [],
+                      states: model.refurbStates,
+                      initial: model.refurbInitial,
+                      variantCode: model.general.refurbishment.variantCode,
+                      avgUValue: model.avgUValue,
+                      onSetState: model.setRefurbishment,
+                      onSetTypeUValue: model.setTypeUValue,
+                      onSetTypeLossFactor: model.setTypeLossFactor,
+                      onOpenEnvelope: openEnvelope,
+                      onAddSurface: (type, values) => { model.createSurface(type, values); },
+                    }}
                     hideIdentity
                   />
                 </div>
-              ) : undefined}
+              )}
               overviewSlot={(
                 <div className="flex flex-col gap-3">
                   {profileBar}

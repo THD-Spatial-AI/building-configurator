@@ -1,8 +1,7 @@
-// Building-level parameters panel, shown in the 3D view's expert mode.
+// Building-level parameters panel of the 3D view; Expert shows more groups.
 
-import { useState, useEffect, useRef } from 'react';
-import { Building2, ChevronDown, Gauge, Loader2 } from 'lucide-react';
-import type { IgnisState } from '@/app/lib/ignisAdapter';
+import { useState } from 'react';
+import { Building2, ChevronDown } from 'lucide-react';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import {
   SelectInput, NumberInput, FieldLabel,
@@ -16,24 +15,13 @@ import {
   isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
+import { ComfortSection, comfortSummary } from './comfortSection';
+import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
-import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
-// 'ignis' (Refurbishment Level) is not part of this click-to-expand card
-// system: it renders inline, always visible. See BuildingEditor's `inlineSections`.
-type SectionKey = 'identity' | 'occupancy' | 'outputs' | 'equipment' | 'ventilation' | 'thermal' | 'solver';
-
-const MASS_CLASSES = [
-  { value: 'VeryLight', label: 'Very Light — steel/timber frame' },
-  { value: 'Light',     label: 'Light — lightweight construction' },
-  { value: 'Medium',    label: 'Medium — mixed construction' },
-  { value: 'Heavy',     label: 'Heavy — concrete / masonry' },
-  { value: 'VeryHeavy', label: 'Very Heavy — thick solid walls' },
-];
-
-const MASS_DEFAULTS: Record<string, number> = {
-  VeryLight: 50, Light: 80, Medium: 110, Heavy: 165, VeryHeavy: 260,
-};
+// Insulation and windows is not part of this click-to-expand card system: it
+// renders inline, always visible. See BuildingEditor's `inlineSections`.
+type SectionKey = 'identity' | 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
 
 // ─── Section components ───────────────────────────────────────────────────────
 
@@ -120,58 +108,6 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
   );
 }
 
-function VentilationSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const total = (general.n_air_infiltration + general.n_air_use).toFixed(2);
-  return (
-    <div className="flex flex-col gap-3">
-      <FieldRow>
-        <div>
-          <FieldLabel tip="Uncontrolled air changes per hour through gaps in the building envelope.">
-            Air infiltration rate
-          </FieldLabel>
-          <NumberInput value={general.n_air_infiltration} onChange={(v) => setGen('n_air_infiltration', Math.max(0, v))} unit="h⁻¹" min={0} max={5} step={0.05} />
-        </div>
-        <div>
-          <FieldLabel tip="Controlled ventilation air change rate from occupant activity and mechanical systems.">
-            Ventilation use rate
-          </FieldLabel>
-          <NumberInput value={general.n_air_use} onChange={(v) => setGen('n_air_use', Math.max(0, v))} unit="h⁻¹" min={0} max={5} step={0.05} />
-        </div>
-      </FieldRow>
-      <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">Total ACH</span>
-        <span className="text-xs font-semibold text-foreground">{total} <span className="text-[10px] font-normal text-muted-foreground">h⁻¹</span></span>
-      </div>
-    </div>
-  );
-}
-
-function ThermalMassSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const totalMass = (general.c_m * computeTotalFloorArea(general.floorArea, general.storeys) / 1000).toFixed(1);
-  return (
-    <div className="flex flex-col gap-3">
-      <FieldRow>
-        <SelectInput
-          label="Mass class"
-          value={general.massClass}
-          onChange={(v) => { setGen('massClass', v); setGen('c_m', MASS_DEFAULTS[v] ?? general.c_m); }}
-          options={MASS_CLASSES}
-        />
-        <div>
-          <FieldLabel tip="Effective thermal capacity per unit floor area. Auto-set from mass class but editable.">
-            Thermal capacity c_m
-          </FieldLabel>
-          <NumberInput value={general.c_m} onChange={(v) => setGen('c_m', Math.max(10, v))} unit="kJ/m²K" min={10} max={500} step={5} />
-        </div>
-      </FieldRow>
-      <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">Total thermal mass</span>
-        <span className="text-xs font-semibold text-foreground">{totalMass} <span className="text-[10px] font-normal text-muted-foreground">MJ/K</span></span>
-      </div>
-    </div>
-  );
-}
-
 function SolverSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
   return (
     <div className="flex flex-col gap-3">
@@ -221,116 +157,11 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
     );
   }
 
-  // Service is running and year/type are valid but no variants were found,
-  // or the service is unreachable.
   return (
     <p className="text-[11px] text-muted-foreground">
-      No TABULA data found for this building. Check that the ignis-go service is running
-      at <code className="rounded bg-slate-100 px-1">localhost:8080</code>.
+      No TABULA data found for this building: the TABULA service holds no variant for it
+      or could not be reached.
     </p>
-  );
-}
-
-// ─── HDCP section ─────────────────────────────────────────────────────────────
-
-interface IgnisSectionProps {
-  ignis: IgnisState;
-  onVariantSelect: (index: number) => void;
-  mode: 'basic' | 'expert';
-  /** Area-weighted average U-value (W/m²K) across all envelope surfaces. */
-  avgUValue: number;
-  /** Opens the envelope/surface configurator directly, for per-surface U-value edits. */
-  onOpenEnvelope?: () => void;
-}
-
-// Physics inputs beyond the TABULA variant pick itself (thermal bridging,
-// design temperatures, ...) feed ignis's own calculation but are never sent
-// to BuEM — the model these UI parameters are actually curated for. They stay
-// as internal defaults sourced from the selected variant; the user only ever
-// picks the variant, never edits them directly.
-function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope }: IgnisSectionProps) {
-  const { variants, selectedVariantIndex, result, loading, error, countryIso2 } = ignis;
-  const rating = result ? getThermalRatingFromDemand(result.qHnd, countryIso2) : null;
-
-  return (
-    <div className="flex flex-col gap-4">
-
-      {/* Refurbishment level selector */}
-      {variants.length > 1 && (
-        <div className="flex flex-col gap-1.5">
-          <FieldLabel tip="Pre-defined renovation states from the TABULA building typology. Selecting a level reloads the default physics values.">
-            Refurbishment state
-          </FieldLabel>
-          <div className="flex gap-1">
-            {variants.map((v, i) => (
-              <button
-                key={v.code}
-                type="button"
-                onClick={() => onVariantSelect(i)}
-                className={[
-                  'flex-1 rounded-[6px] border px-2 py-1.5 text-[11px] font-medium transition-colors',
-                  i === selectedVariantIndex
-                    ? 'border-[#2f5d8a] bg-[#2f5d8a]/8 text-[#2f5d8a]'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
-                ].join(' ')}
-              >
-                {v.label}
-              </button>
-            ))}
-          </div>
-          {variants[selectedVariantIndex] && (
-            <p className="text-[10px] text-muted-foreground">
-              Code: {variants[selectedVariantIndex].code}
-            </p>
-          )}
-        </div>
-      )}
-
-      {mode === 'expert' ? (
-        /* Expert mode: the raw envelope figure (area-weighted avg U-value)
-           instead of the simplified grade, plus a direct route to edit it
-           per surface. */
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <div className="flex items-center gap-2">
-            <Gauge className="size-3.5 text-orange-500" />
-            <span className="text-[11px] font-semibold text-slate-700">Avg U-value</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-700">{avgUValue.toFixed(2)} W/m²K</span>
-            {onOpenEnvelope && (
-              <button
-                type="button"
-                onClick={onOpenEnvelope}
-                className="cursor-pointer rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 transition-colors hover:bg-slate-100"
-              >
-                Configure per surface
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        /* Basic mode: grade, not a raw kWh/U-value figure basic users won't
-           parse. Same A–G scale as the Overview summary's Thermal
-           efficiency row. */
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-          <div className="flex items-center gap-2">
-            <Gauge className="size-3.5 text-orange-500" />
-            <span className="text-[11px] font-semibold text-slate-700">Thermal efficiency</span>
-          </div>
-          {loading ? (
-            <Loader2 className="size-3.5 animate-spin text-slate-400" />
-          ) : error ? (
-            <span className="text-[11px] text-red-500">Unavailable</span>
-          ) : rating ? (
-            <span className="text-[11px] font-bold" style={{ color: rating.color }}>
-              {rating.label}
-            </span>
-          ) : (
-            <span className="text-[10px] text-muted-foreground">—</span>
-          )}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -340,20 +171,18 @@ function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope 
 const SECTION_COLORS: Record<SectionKey, string> = {
   identity:    '#2f5d8a',
   occupancy:   '#16a34a',
+  comfort:     '#dc2626',
   outputs:     '#ca8a04',
   equipment:   '#db2777',
-  ventilation: '#0891b2',
-  thermal:     '#dc2626',
   solver:      '#7c3aed',
 };
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   identity:    'Basic info',
   occupancy:   'Occupancy',
+  comfort:     'Heating and comfort',
   outputs:     'Results to compute',
   equipment:   'Appliances',
-  ventilation: 'Air & Ventilation',
-  thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
 };
 
@@ -362,13 +191,12 @@ function sectionSummary(key: SectionKey, general: Record<string, any>): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
     case 'occupancy':   return occupancySummary(general);
+    case 'comfort':     return comfortSummary(general);
     case 'outputs':     return `${OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length} of ${OUTPUT_PROFILES.length} profiles`;
     case 'equipment': {
       const overrides = Object.keys(general.equipment).length;
       return overrides > 0 ? `${overrides} set by hand` : 'Defaults';
     }
-    case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
-    case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Sparse';
   }
 }
@@ -384,19 +212,19 @@ function occupancySummary(general: Record<string, any>): string {
 
 /** Renders the content body for a given section key. */
 function SectionBody({
-  id, general, setGen,
+  id, general, setGen, mode,
 }: {
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
+  mode: 'basic' | 'expert';
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
     case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} />;
+    case 'comfort':     return <ComfortSection     general={general} setGen={setGen} mode={mode} />;
     case 'outputs':     return <OutputsSection     general={general} setGen={setGen} />;
     case 'equipment':   return <EquipmentSection   general={general} setGen={setGen} />;
-    case 'ventilation': return <VentilationSection general={general} setGen={setGen} />;
-    case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
   }
 }
@@ -407,13 +235,8 @@ interface BuildingEditorProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
   mode: 'basic' | 'expert';
-  /** HDCP state — null while loading or when the service has no data for this building. */
-  ignis?: IgnisState | null;
-  onIgnisVariantSelect?: (index: number) => void;
-  /** Area-weighted average U-value (W/m²K) across all envelope surfaces — shown in Refurbishment Level for expert mode. */
-  avgUValue?: number;
-  /** Opens the envelope/surface configurator directly, for per-surface U-value edits. */
-  onOpenEnvelope?: () => void;
+  /** The Insulation and windows group's model; without it the group is not shown. */
+  insulation?: InsulationProps;
   /** Hides the Basic Info tab — used when the caller already renders those fields elsewhere (the snapshot table's inline edit). */
   hideIdentity?: boolean;
 }
@@ -426,20 +249,19 @@ interface BuildingEditorProps {
  *  - Section active -> inactive sections collapse to compact chips at the top;
  *    the active section fills the remaining height with a scrollable body.
  *
- * Refurbishment Level sits outside that click-to-expand system, pinned inline
- * under the header: it is short enough that a click to reveal it costs more
- * than it saves.
+ * Insulation and windows sits outside that click-to-expand system, pinned
+ * inline under the header: the refurbishment state is the first thing most
+ * users change.
  */
 export function BuildingEditor({
   general, setGen, mode,
-  ignis, onIgnisVariantSelect,
-  avgUValue = 0, onOpenEnvelope,
+  insulation,
   hideIdentity = false,
 }: BuildingEditorProps) {
   const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'outputs'];
-  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'ventilation', 'thermal', 'solver'];
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort', 'outputs'];
+  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'solver'];
   const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
@@ -467,26 +289,18 @@ export function BuildingEditor({
     </div>
   );
 
-  // ── Refurbishment Level — always visible, no click needed ──
-  const inlineSections = (
-    <div className="flex shrink-0 flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+  // ── Insulation and windows — always visible, no click needed ──
+  const inlineSections = insulation && (
+    <div className="flex shrink-0 flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <div>
-        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
           <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
-          Refurbishment Level
+          Insulation and windows
         </p>
-        {ignis ? (
-          <IgnisSection
-            ignis={ignis}
-            onVariantSelect={onIgnisVariantSelect ?? (() => {})}
-            mode={mode}
-            avgUValue={avgUValue}
-            onOpenEnvelope={onOpenEnvelope}
-          />
-        ) : (
-          <IgnisStatusSection general={general} />
-        )}
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{insulationSummary(insulation)}</p>
       </div>
+      {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}
+      <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
     </div>
   );
 
@@ -536,7 +350,7 @@ export function BuildingEditor({
           </button>
 
           <div className="p-4">
-            <SectionBody id={activeSection} general={general} setGen={setGen} />
+            <SectionBody id={activeSection} general={general} setGen={setGen} mode={mode} />
           </div>
         </div>
       </ScrollHintContainer>
