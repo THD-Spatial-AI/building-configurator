@@ -63,10 +63,12 @@ export interface Building3DViewProps {
   pvSurfaceIds?: readonly string[];
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
+  /** The mode the view opens in. The user can still switch; the next opening starts here again. */
+  defaultMode?: 'basic' | 'expert';
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic',
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
@@ -80,7 +82,7 @@ export function Building3DView({
   /** Where the editor was about to go when it asked about the open surface's changes. */
   const [pendingSurface, setPendingSurface] = useState<{ next: SurfaceSelection | null } | null>(null);
   /** Expert shows the full BuEM building parameters. */
-  const [mode, setMode] = useState<'basic' | 'expert'>('basic');
+  const [mode, setMode] = useState<'basic' | 'expert'>(defaultMode);
   /** The export choices, open over the header button. */
   const [exportOpen, setExportOpen] = useState(false);
   /** Leaving was asked for while there are unsaved edits. */

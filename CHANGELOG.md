@@ -4,6 +4,16 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Added
+
+- `Building3DView` takes an optional `defaultMode` prop, `basic` (default) or `expert`: the mode it opens in. The user can still switch.
+
+### Changed
+
+- The side panel is wider (400 px, 520 px from the xl breakpoint) so the expert parameters fit.
+
 ## [0.9.0] - 2026-10-19
 
 ### Added

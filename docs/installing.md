@@ -97,6 +97,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
 | `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
+| `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
