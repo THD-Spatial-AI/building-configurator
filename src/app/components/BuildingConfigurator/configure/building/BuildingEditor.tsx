@@ -219,12 +219,10 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
     );
   }
 
-  // Service is running and year/type are valid but no variants were found,
-  // or the service is unreachable.
   return (
     <p className="text-[11px] text-muted-foreground">
-      No TABULA data found for this building. Check that the ignis-go service is running
-      at <code className="rounded bg-slate-100 px-1">localhost:8080</code>.
+      No TABULA data found for this building: the TABULA service holds no variant for it
+      or could not be reached.
     </p>
   );
 }

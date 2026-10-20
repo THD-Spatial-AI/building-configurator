@@ -2,7 +2,7 @@
 // group cards — one card, one header tab switch, no separate section below.
 
 import React, { useState } from 'react';
-import { Pencil, Check, Settings2 } from 'lucide-react';
+import { Pencil, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
@@ -10,7 +10,6 @@ import { MIN_CONSTRUCTION_YEAR } from '../shared/buildingOptions';
 import { ElementCompositionSection } from './ElementCompositionSection';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
-import type { ElementGroupKey } from '../shared/elementListUtils';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
 const ROW_UNITS: Record<string, string> = {
@@ -26,13 +25,9 @@ export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
   /** Commits a single field's new value (key maps to the `general` state object). */
   onEditField?: (key: string, value: string | number) => void;
-  /** Opens the building's advanced settings (site, ventilation, thermal, ignis heat demand, ...). */
-  onOpenAdvanced?: () => void;
   elements: Record<string, BuildingElement>;
   baselineElements?: Record<string, BuildingElement>;
   roofConfig: RoofConfig;
-  /** Opens the surface configurator modal for an envelope group (walls, windows, ...). */
-  onEditGroup?: (type: ElementGroupKey) => void;
   /** Lets a group expand to its surfaces; picking one calls this. */
   onSelectSurface?: (id: string) => void;
   /** Rendered under the envelope group cards, e.g. the 3D envelope + surface editor. */
@@ -49,11 +44,9 @@ export interface BuildingDetailsCardProps {
 export function BuildingDetailsCard({
   snapshotRows,
   onEditField,
-  onOpenAdvanced,
   elements,
   baselineElements,
   roofConfig,
-  onEditGroup,
   onSelectSurface,
   envelopeSlot,
   overviewSlot,
@@ -109,16 +102,6 @@ export function BuildingDetailsCard({
               </button>
             ))}
           </div>
-          {onOpenAdvanced && (
-            <button
-              type="button"
-              onClick={onOpenAdvanced}
-              className="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 px-2.5 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800"
-            >
-              <Settings2 className="size-3.5" />
-              Advanced
-            </button>
-          )}
           {activeTab === 'parameters' && onEditField && (
             <button
               type="button"
@@ -189,7 +172,6 @@ export function BuildingDetailsCard({
             elements={elements}
             baselineElements={baselineElements}
             roofConfig={roofConfig}
-            onEditGroup={onEditGroup}
             onSelectSurface={onSelectSurface}
           />
           {envelopeSlot}

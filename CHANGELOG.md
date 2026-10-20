@@ -16,6 +16,8 @@ Each version's GitHub release entry carries the full notes.
 
 ### Fixed
 
+- Window and door elements carry `parent_id`, which the v6-draft schema requires: the surface the element names, else the largest wall on the same face (a roof for a window tilted under 60°), else the wall closest in azimuth. A window or door with no wall or roof to sit in stops the request with an error naming it. `BuildingElement` takes an optional `parentId`, read from `parent_id` on load.
+- With no TABULA data for a building, the panel no longer points at a service on `localhost:8080`; it says the TABULA service holds no variant for the building or could not be reached.
 - Thermal mass offers BuEM's three classes (light, medium, heavy), so a saved choice reopens as chosen. Each sets the heat capacity c_m to its EN ISO 13790 value (110, 165, 260 kJ/(m²K)).
 - Editing and importing a building share one set of defaults, the v6-draft schema's: air changes 0.5 and 0.5 1/h, c_m 165 kJ/(m²K), medium thermal mass. Editing used 0.4, 0.4, 110 and importing fell back to light.
 
