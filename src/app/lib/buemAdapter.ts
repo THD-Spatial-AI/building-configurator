@@ -95,7 +95,9 @@ export interface BuildingParameters {
   n_air_infiltration?: number;      // 1/h
   n_air_use?: number;               // 1/h
   c_m?: number;                     // kJ/(m2K)
-  massClass?: string;               // VeryLight | Light | Medium | Heavy | VeryHeavy
+  massClass?: string;               // Light | Medium | Heavy; VeryLight and VeryHeavy from older exports
+  comfortT_lb?: number;             // degC, heating setpoint
+  comfortT_ub?: number;             // degC, cooling setpoint
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
   residential_units?: number | null;
@@ -348,6 +350,8 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (hasMappedValue(feature, paths.nAirInfiltration)) parameters.n_air_infiltration = getMappedNumber(feature, paths.nAirInfiltration);
   if (hasMappedValue(feature, paths.nAirUse)) parameters.n_air_use = getMappedNumber(feature, paths.nAirUse);
   if (hasMappedValue(feature, paths.cM)) parameters.c_m = getMappedNumber(feature, paths.cM);
+  if (hasMappedValue(feature, paths.comfortTLb)) parameters.comfortT_lb = getMappedNumber(feature, paths.comfortTLb);
+  if (hasMappedValue(feature, paths.comfortTUb)) parameters.comfortT_ub = getMappedNumber(feature, paths.comfortTUb);
   const massClass = MASS_CLASS_LABELS[String(getMappedValue(feature, paths.thermalClass))];
   if (massClass) parameters.massClass = massClass;
   const useMilp = getMappedValue(feature, paths.useMilp);
@@ -630,6 +634,9 @@ export function serializeToBuemFeature(
   }
   if (typeof general.c_m === 'number') {
     thermal.c_m = { value: general.c_m, unit: 'kJ/(m2K)' };
+  }
+  for (const key of ['comfortT_lb', 'comfortT_ub'] as const) {
+    if (typeof general[key] === 'number') thermal[key] = { value: general[key], unit: 'degC' };
   }
   if (general.massClass) {
     const thermalClass = THERMAL_CLASSES[general.massClass];

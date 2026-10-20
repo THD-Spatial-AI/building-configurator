@@ -16,22 +16,13 @@ import {
   isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
+import { ComfortSection, comfortSummary } from './comfortSection';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
 // 'ignis' (Refurbishment Level) is not part of this click-to-expand card
 // system: it renders inline, always visible. See BuildingEditor's `inlineSections`.
-type SectionKey = 'identity' | 'occupancy' | 'outputs' | 'equipment' | 'ventilation' | 'thermal' | 'solver';
-
-// BuEM's three thermal_class values, so a saved choice reopens as chosen.
-const MASS_CLASSES = [
-  { value: 'Light',  label: 'Light (timber frame, lightweight)' },
-  { value: 'Medium', label: 'Medium (mixed construction)' },
-  { value: 'Heavy',  label: 'Heavy (concrete, masonry)' },
-];
-
-// c_m per class from EN ISO 13790 Table 12; Medium is the schema's default.
-const MASS_DEFAULTS: Record<string, number> = { Light: 110, Medium: 165, Heavy: 260 };
+type SectionKey = 'identity' | 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
 
 // ─── Section components ───────────────────────────────────────────────────────
 
@@ -113,58 +104,6 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
         <span className="text-xs font-semibold text-foreground">
           {volume} <span className="text-[10px] font-normal text-muted-foreground">m³</span>
         </span>
-      </div>
-    </div>
-  );
-}
-
-function VentilationSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const total = (general.n_air_infiltration + general.n_air_use).toFixed(2);
-  return (
-    <div className="flex flex-col gap-3">
-      <FieldRow>
-        <div>
-          <FieldLabel tip="Uncontrolled air changes per hour through gaps in the building envelope.">
-            Air infiltration rate
-          </FieldLabel>
-          <NumberInput value={general.n_air_infiltration} onChange={(v) => setGen('n_air_infiltration', Math.max(0, v))} unit="h⁻¹" min={0} max={5} step={0.05} />
-        </div>
-        <div>
-          <FieldLabel tip="Controlled ventilation air change rate from occupant activity and mechanical systems.">
-            Ventilation use rate
-          </FieldLabel>
-          <NumberInput value={general.n_air_use} onChange={(v) => setGen('n_air_use', Math.max(0, v))} unit="h⁻¹" min={0} max={5} step={0.05} />
-        </div>
-      </FieldRow>
-      <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">Total ACH</span>
-        <span className="text-xs font-semibold text-foreground">{total} <span className="text-[10px] font-normal text-muted-foreground">h⁻¹</span></span>
-      </div>
-    </div>
-  );
-}
-
-function ThermalMassSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const totalMass = (general.c_m * computeTotalFloorArea(general.floorArea, general.storeys) / 1000).toFixed(1);
-  return (
-    <div className="flex flex-col gap-3">
-      <FieldRow>
-        <SelectInput
-          label="Mass class"
-          value={general.massClass}
-          onChange={(v) => { setGen('massClass', v); setGen('c_m', MASS_DEFAULTS[v] ?? general.c_m); }}
-          options={MASS_CLASSES}
-        />
-        <div>
-          <FieldLabel tip="Effective thermal capacity per unit floor area. Auto-set from mass class but editable.">
-            Thermal capacity c_m
-          </FieldLabel>
-          <NumberInput value={general.c_m} onChange={(v) => setGen('c_m', Math.max(10, v))} unit="kJ/m²K" min={10} max={500} step={5} />
-        </div>
-      </FieldRow>
-      <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">Total thermal mass</span>
-        <span className="text-xs font-semibold text-foreground">{totalMass} <span className="text-[10px] font-normal text-muted-foreground">MJ/K</span></span>
       </div>
     </div>
   );
@@ -257,7 +196,7 @@ function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope 
           <FieldLabel tip="Pre-defined renovation states from the TABULA building typology. Selecting a level reloads the default physics values.">
             Refurbishment state
           </FieldLabel>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {variants.map((v, i) => (
               <button
                 key={v.code}
@@ -336,20 +275,18 @@ function IgnisSection({ ignis, onVariantSelect, mode, avgUValue, onOpenEnvelope 
 const SECTION_COLORS: Record<SectionKey, string> = {
   identity:    '#2f5d8a',
   occupancy:   '#16a34a',
+  comfort:     '#dc2626',
   outputs:     '#ca8a04',
   equipment:   '#db2777',
-  ventilation: '#0891b2',
-  thermal:     '#dc2626',
   solver:      '#7c3aed',
 };
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   identity:    'Basic info',
   occupancy:   'Occupancy',
+  comfort:     'Heating and comfort',
   outputs:     'Results to compute',
   equipment:   'Appliances',
-  ventilation: 'Air & Ventilation',
-  thermal:     'Heat Storage Capacity',
   solver:      'Calculation Method',
 };
 
@@ -358,13 +295,12 @@ function sectionSummary(key: SectionKey, general: Record<string, any>): string {
   switch (key) {
     case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
     case 'occupancy':   return occupancySummary(general);
+    case 'comfort':     return comfortSummary(general);
     case 'outputs':     return `${OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length} of ${OUTPUT_PROFILES.length} profiles`;
     case 'equipment': {
       const overrides = Object.keys(general.equipment).length;
       return overrides > 0 ? `${overrides} set by hand` : 'Defaults';
     }
-    case 'ventilation': return `ACH ${(general.n_air_infiltration + general.n_air_use).toFixed(2)} h⁻¹`;
-    case 'thermal':     return general.massClass ?? '—';
     case 'solver':      return general.use_milp ? 'MILP' : 'Sparse';
   }
 }
@@ -380,19 +316,19 @@ function occupancySummary(general: Record<string, any>): string {
 
 /** Renders the content body for a given section key. */
 function SectionBody({
-  id, general, setGen,
+  id, general, setGen, mode,
 }: {
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
+  mode: 'basic' | 'expert';
 }) {
   switch (id) {
     case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
     case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} />;
+    case 'comfort':     return <ComfortSection     general={general} setGen={setGen} mode={mode} />;
     case 'outputs':     return <OutputsSection     general={general} setGen={setGen} />;
     case 'equipment':   return <EquipmentSection   general={general} setGen={setGen} />;
-    case 'ventilation': return <VentilationSection general={general} setGen={setGen} />;
-    case 'thermal':     return <ThermalMassSection general={general} setGen={setGen} />;
     case 'solver':      return <SolverSection      general={general} setGen={setGen} />;
   }
 }
@@ -434,8 +370,8 @@ export function BuildingEditor({
 }: BuildingEditorProps) {
   const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'outputs'];
-  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'ventilation', 'thermal', 'solver'];
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort', 'outputs'];
+  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'solver'];
   const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
@@ -532,7 +468,7 @@ export function BuildingEditor({
           </button>
 
           <div className="p-4">
-            <SectionBody id={activeSection} general={general} setGen={setGen} />
+            <SectionBody id={activeSection} general={general} setGen={setGen} mode={mode} />
           </div>
         </div>
       </ScrollHintContainer>

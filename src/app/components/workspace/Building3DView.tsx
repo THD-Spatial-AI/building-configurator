@@ -357,10 +357,10 @@ export function Building3DView({
               roofConfig={model.roofConfig}
               onSelectSurface={selectFromList}
               technologySlot={technologies ? <TechnologyCards technologies={technologies} /> : undefined}
-              parametersSlot={mode === 'expert' ? (
-                // Air, thermal mass, calculation method and refurbishment
-                // level: the BuEM building fields the table does not carry.
-                <div className="h-[460px] border-t border-slate-100">
+              parametersSlot={(
+                // The BuEM building fields the table does not carry; Expert
+                // shows more of them. No fixed height: the panel scrolls once.
+                <div className="border-t border-slate-100">
                   <BuildingEditor
                     general={model.general}
                     setGen={model.setGen}
@@ -371,7 +371,7 @@ export function Building3DView({
                     hideIdentity
                   />
                 </div>
-              ) : undefined}
+              )}
               overviewSlot={(
                 <div className="flex flex-col gap-3">
                   {profileBar}

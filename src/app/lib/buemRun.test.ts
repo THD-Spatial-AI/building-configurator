@@ -47,6 +47,8 @@ const general = {
   n_air_use: 0.55,
   massClass: 'Heavy',
   c_m: 260,
+  comfortT_lb: 20,
+  comfortT_ub: 25,
   use_milp: true,
   residential_units: 2,
   num_persons: 3,
@@ -80,6 +82,8 @@ describe('toBuem', () => {
       n_air_infiltration: { value: 0.7, unit: '1/h' },
       n_air_use: { value: 0.55, unit: '1/h' },
       c_m: { value: 260, unit: 'kJ/(m2K)' },
+      comfortT_lb: { value: 20, unit: 'degC' },
+      comfortT_ub: { value: 25, unit: 'degC' },
       thermal_class: 'heavy',
     });
     expect(building.name).toBe('Renamed');

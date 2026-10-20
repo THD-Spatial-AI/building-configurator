@@ -38,6 +38,8 @@ export const DEFAULT_GENERAL = {
   n_air_infiltration: 0.5,
   n_air_use:          0.5,
   massClass:          'Medium',
+  comfortT_lb:        18,
+  comfortT_ub:        21,
   c_m:                165,
   use_milp:           false,
   electricityDemand:  4000,

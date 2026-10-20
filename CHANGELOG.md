@@ -10,8 +10,12 @@ Each version's GitHub release entry carries the full notes.
 
 - `Building3DView` takes an optional `defaultMode` prop, `basic` (default) or `expert`: the mode it opens in. The user can still switch.
 
+- A Heating and comfort group in the Parameters tab. Basic sets the heating setpoint (BuEM `comfortT_lb`, default 18 °C), when to lower it (setback) and whether hot water is included. Expert adds the cooling setpoint (`comfortT_ub`, default 21 °C), the air changes and the thermal mass. The setpoints are saved with the building.
+
 ### Changed
 
+- The Parameters tab shows the building editor in Basic too, with fewer groups than Expert, and scrolls as one panel instead of a fixed-height box inside it.
+- Setback and hot water moved from Occupancy to Heating and comfort; the separate air and thermal mass groups are now part of it.
 - The side panel is wider (400 px, 520 px from the xl breakpoint) so the expert parameters fit.
 
 ### Fixed

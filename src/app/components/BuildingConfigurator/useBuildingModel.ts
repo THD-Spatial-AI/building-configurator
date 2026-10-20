@@ -750,6 +750,8 @@ export function withEdits(
       n_air_use:               general.n_air_use,
       c_m:                     general.c_m,
       massClass:               general.massClass,
+      comfortT_lb:             general.comfortT_lb,
+      comfortT_ub:             general.comfortT_ub,
       use_milp:                general.use_milp,
       residential_units:       general.residential_units,
       num_persons:             general.num_persons,

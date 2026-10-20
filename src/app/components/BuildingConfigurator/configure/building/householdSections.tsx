@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import {
-  FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput, ToggleSwitch,
+  FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
   ARCHETYPE_OPTIONS,
@@ -11,7 +11,6 @@ import {
   EQUIPMENT_GROUPS,
   OUTPUT_LEVEL_OPTIONS,
   OUTPUT_PROFILES,
-  SETBACK_OPTIONS,
   TV_IDS,
   isServiceBuildingType,
   requiresResidentialUnits,
@@ -54,18 +53,6 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
   );
 }
 
-function SetbackSelect({ general, setGen }: SectionProps) {
-  return (
-    <SelectInput
-      label="Heating setback"
-      value={general.setback_profile}
-      onChange={(v) => setGen('setback_profile', v)}
-      options={SETBACK_OPTIONS}
-      tip="Lowers the heating set point while occupants are asleep or away. Affects heating only."
-    />
-  );
-}
-
 /** Dwellings, occupants and household habits; capacity alone for a service building. */
 export function OccupancySection({ general, setGen }: SectionProps) {
   if (isServiceBuildingType(general.buildingType)) {
@@ -78,7 +65,6 @@ export function OccupancySection({ general, setGen }: SectionProps) {
           placeholder="Derived from the floor area."
           tip="Number of occupants. Left empty, BuEM derives it from the floor area with a density for the building type."
         />
-        <SetbackSelect general={general} setGen={setGen} />
       </div>
     );
   }
@@ -146,13 +132,6 @@ export function OccupancySection({ general, setGen }: SectionProps) {
         options={COOKING_CARRIER_OPTIONS}
         tip="Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas. Model default uses the setting of the model the building belongs to."
       />
-      <ToggleSwitch
-        checked={general.include_dhw}
-        onChange={(v) => setGen('include_dhw', v)}
-        label="Report hot water"
-        tip="Turn off when hot water is supplied by a system accounted for elsewhere. Space heating is unaffected."
-      />
-      <SetbackSelect general={general} setGen={setGen} />
     </div>
   );
 }

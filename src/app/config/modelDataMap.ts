@@ -48,6 +48,8 @@ export const MODEL_DATA_MAP = {
       nAirUse:           'properties.buem.building.thermal.n_air_use',          // { value, unit: "1/h" }
       cM:                'properties.buem.building.thermal.c_m',                // { value, unit: "kJ/(m2K)" }
       thermalClass:      'properties.buem.building.thermal.thermal_class',      // light | medium | heavy
+      comfortTLb:        'properties.buem.building.thermal.comfortT_lb',        // { value, unit: "degC" }, heating setpoint
+      comfortTUb:        'properties.buem.building.thermal.comfortT_ub',        // { value, unit: "degC" }, cooling setpoint
       useMilp:           'properties.buem.solver.use_milp',                     // boolean
     },
 

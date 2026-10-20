@@ -35,12 +35,22 @@ describe('thermal defaults', () => {
   });
 
   it('match the v6-draft schema defaults', () => {
-    expect(DEFAULT_GENERAL).toMatchObject({ n_air_infiltration: 0.5, n_air_use: 0.5, c_m: 165, massClass: 'Medium' });
+    expect(DEFAULT_GENERAL).toMatchObject({
+      n_air_infiltration: 0.5, n_air_use: 0.5, c_m: 165, massClass: 'Medium', comfortT_lb: 18, comfortT_ub: 21,
+    });
   });
 
   it('leave a thermal value the import does not set to the shared defaults', () => {
     const { general } = parseBuemFeatureForImport(feature());
     for (const key of ['n_air_infiltration', 'n_air_use', 'c_m', 'massClass']) expect(general).not.toHaveProperty(key);
+  });
+
+  it('send the heating and cooling setpoints and read them back', () => {
+    const sent = serializeToBuemFeature(identity, {}, { ...DEFAULT_GENERAL, comfortT_lb: 20, comfortT_ub: 24 });
+    expect(sent.properties.buem.building.thermal).toMatchObject({
+      comfortT_lb: { value: 20, unit: 'degC' }, comfortT_ub: { value: 24, unit: 'degC' },
+    });
+    expect(parseBuemFeatureForImport(sent).general).toMatchObject({ comfortT_lb: 20, comfortT_ub: 24 });
   });
 
   it('import the thermal values a feature sets', () => {
