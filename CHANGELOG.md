@@ -4,6 +4,16 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.10.1] - 2026-10-21
+
+### Fixed
+
+- Escape did not leave the 3D view in a host that re-renders it while a key press is being dispatched, as EnerPlanET does: the view replaced its key listener during that press, and the event never reached the new one. The listener is now registered once for the life of the view.
+
+### Changed
+
+- The Map button shows an Esc hint.
+
 ## [0.10.0] - 2026-10-20
 
 ### Added
