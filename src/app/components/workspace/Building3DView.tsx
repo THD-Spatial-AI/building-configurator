@@ -28,7 +28,7 @@ import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { LanguageProvider, translate, type Language, type Translate } from '../../i18n';
+import { LanguageProvider, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string; at: { x: number; y: number } };
@@ -67,15 +67,19 @@ export interface Building3DViewProps {
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
   defaultMode?: 'basic' | 'expert';
-  /** The language of the view's own text. Host-supplied text (PV notice, technology cards) is shown as passed. */
-  language?: Language;
+  /**
+   * The language of the view's own text: en, de, es, fr, it, nl, pl or cs. A region tag counts as its
+   * language (de-DE), anything else as en. Host-supplied text (PV notice, technology cards) is shown as passed.
+   */
+  language?: string;
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic', language = 'en',
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic', language: languageCode,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
+  const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
   const { elements } = model;

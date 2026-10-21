@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { MESSAGES, translate, type Language } from './index';
+import { MESSAGES, resolveLanguage, translate, type Language } from './index';
 
 type Messages = { [key: string]: string | Messages };
 
@@ -43,6 +43,14 @@ describe('translate', () => {
   it('falls back to English, then to the key', () => {
     expect(translate('de', '__test.greeting', { name: 'Anna' })).toBe('Hello Anna');
     expect(translate('de', 'no.such.key')).toBe('no.such.key');
+  });
+});
+
+describe('resolveLanguage', () => {
+  it.each([
+    ['de', 'de'], ['de-DE', 'de'], ['de_DE', 'de'], ['NL', 'nl'], ['pt-BR', 'en'], ['', 'en'], [undefined, 'en'],
+  ])('reads %s as %s', (code, expected) => {
+    expect(resolveLanguage(code)).toBe(expected);
   });
 });
 

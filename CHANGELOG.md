@@ -8,7 +8,7 @@ Each version's GitHub release entry carries the full notes.
 
 ### Added
 
-- `Building3DView` takes an optional `language` prop: `en` (default), `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`, EnerPlanET's languages. The view's own text comes from the package's translation files under `src/app/i18n/locales/`; a text missing from a language shows in English. Text the host passes in is shown as given. The `Language` type is exported.
+- `Building3DView` takes an optional `language` prop: `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`, EnerPlanET's languages. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. Changing it re-renders the open view without losing edits. The view's own text comes from the package's translation files under `src/app/i18n/locales/`; a text missing from a language shows in English. Text the host passes in is shown as given. The `Language` type is exported.
 
 ### Changed
 

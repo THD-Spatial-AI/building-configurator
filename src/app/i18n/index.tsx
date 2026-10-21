@@ -19,6 +19,15 @@ type Messages = { [key: string]: string | Messages };
 
 export const MESSAGES: Record<Language, Messages> = { en, de, es, fr, it, nl, pl, cs };
 
+/**
+ * The language for a host's code: a region tag counts as its language
+ * (de-DE and de_DE are de), and an unknown or missing code is English.
+ */
+export function resolveLanguage(code: string | undefined): Language {
+  const base = (code ?? '').toLowerCase().split(/[-_]/)[0];
+  return base in MESSAGES ? (base as Language) : 'en';
+}
+
 /** Values for a message's {placeholders}; a numeric `count` also picks its plural form. */
 export type MessageValues = Record<string, string | number>;
 
