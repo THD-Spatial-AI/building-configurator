@@ -15,8 +15,9 @@ import { useDemoPvHost } from '../../../demo/pvHost';
 import { useDemoTechnologies } from '../../../demo/technologyHost';
 import { Building3DView } from './Building3DView';
 import type { BuildingState } from '../../lib/buemAdapter';
+import type { Language } from '../../i18n';
 
-export function BuildingWorkspace() {
+export function BuildingWorkspace({ language }: { language: Language }) {
   const data = useLoenenBuildings();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   /** Buildings saved on leaving the 3D view, by id; they replace the loaded ones on reopen. */
@@ -50,6 +51,7 @@ export function BuildingWorkspace() {
       {selectedId && selectedBuilding && (
         <Building3DView
           key={selectedId}
+          language={language}
           building={selectedBuilding}
           geometry={surfaceGeometry(selectedObjectId)}
           services={fixtureServices}
@@ -76,7 +78,7 @@ const FIXTURE_OSM_ID = '268428620';
  * calls. The dev shell plays the host for its technologies and PV: the PV
  * card's button opens PV mode, and leaving it returns to the normal view.
  */
-export function FixtureWorkspace() {
+export function FixtureWorkspace({ language }: { language: Language }) {
   const fixture = useFixtureBuilding(FIXTURE_OSM_ID);
   if (!fixture) {
     return (
@@ -86,10 +88,10 @@ export function FixtureWorkspace() {
       </div>
     );
   }
-  return <FixtureView building={fixture.building} geometry={fixture.geometry} />;
+  return <FixtureView building={fixture.building} geometry={fixture.geometry} language={language} />;
 }
 
-function FixtureView({ building, geometry }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'>) {
+function FixtureView({ building, geometry, language }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'> & { language: Language }) {
   const [open, setOpen] = useState(true);
   const [pvOpen, setPvOpen] = useState(false);
   /** What was saved on leaving, reopened in place of the bundled building. */
@@ -120,6 +122,7 @@ function FixtureView({ building, geometry }: Pick<Parameters<typeof Building3DVi
     return (
       <Building3DView
         key="pv"
+        language={language}
         building={saved ?? building}
         geometry={geometry}
         services={fixtureServices}
@@ -133,6 +136,7 @@ function FixtureView({ building, geometry }: Pick<Parameters<typeof Building3DVi
   return (
     <Building3DView
       key="normal"
+      language={language}
       building={saved ?? building}
       geometry={geometry}
       services={fixtureServices}

@@ -6,6 +6,7 @@ import { useRef } from 'react';
 import { Download, Upload } from 'lucide-react';
 import { useLoadProfileState } from '../BuildingConfigurator/overview/useLoadProfileState';
 import type { LoadDataPoint } from '../../lib/loadProfile';
+import { useT } from '../../i18n';
 
 interface LoadProfileBarProps {
   /** The model's hourly profile, replaced by whatever the user uploads. */
@@ -16,6 +17,7 @@ interface LoadProfileBarProps {
 }
 
 export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }: LoadProfileBarProps) {
+  const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     handleFileUpload, hasData, sourceCaption, uploadError,
@@ -29,8 +31,13 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
     <div className="flex flex-col gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold text-slate-700">Hourly load profile</p>
-          <p className="truncate text-[10px] text-muted-foreground">{!hasData && seriesCsvUrl ? 'Stored BuEM result' : sourceCaption}</p>
+          <p className="text-[12px] font-semibold text-slate-700">{t('profile.title')}</p>
+          <p className="truncate text-[10px] text-muted-foreground">{!hasData && seriesCsvUrl ? t('profile.stored') : sourceCaption.aggregatedFrom
+            ? t('profile.source.aggregated', {
+              source: t(sourceCaption.source.key, sourceCaption.source.values),
+              from: t(`profile.resolution.${sourceCaption.aggregatedFrom}`),
+            })
+            : t(sourceCaption.source.key, sourceCaption.source.values)}</p>
         </div>
         <button
           type="button"
@@ -38,7 +45,7 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
           className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
         >
           <Upload className="size-3" />
-          Upload
+          {t('profile.upload')}
         </button>
         {seriesCsvUrl && (
           <a
@@ -47,7 +54,7 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
             className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
           >
             <Download className="size-3" />
-            Download
+            {t('profile.download')}
           </a>
         )}
         <input
@@ -60,7 +67,7 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
       </div>
 
       {uploadError && (
-        <p className="text-[10px] leading-snug text-destructive">{uploadError}</p>
+        <p className="text-[10px] leading-snug text-destructive">{t(uploadError.key, uploadError.values)}</p>
       )}
     </div>
   );

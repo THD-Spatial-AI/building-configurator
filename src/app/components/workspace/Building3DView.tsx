@@ -28,6 +28,8 @@ import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
+import { LanguageProvider, translate, type Language, type Translate } from '../../i18n';
+import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string; at: { x: number; y: number } };
 
@@ -65,12 +67,16 @@ export interface Building3DViewProps {
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
   defaultMode?: 'basic' | 'expert';
+  /** The language of the view's own text. Host-supplied text (PV notice, technology cards) is shown as passed. */
+  language?: Language;
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic',
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic', language = 'en',
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
+  // This component sits above its own LanguageProvider, so it translates directly.
+  const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
   const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
@@ -202,6 +208,7 @@ export function Building3DView({
     : null;
 
   return (
+    <LanguageProvider language={language}>
     <div className="fixed inset-0 z-20 flex flex-col bg-slate-100">
       <ConfiguratorStyles />
 
@@ -210,21 +217,21 @@ export function Building3DView({
         <button
           type="button"
           onClick={requestExit}
-          title="Back to the map (Esc)"
+          title={t('view.back.title')}
           aria-keyshortcuts="Escape"
           className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
         >
           <ArrowLeft className="size-3.5" />
-          Map
+          {t('view.back.label')}
           <kbd className="ml-0.5 rounded border border-border bg-muted px-1 font-sans text-[10px] font-medium text-muted-foreground">Esc</kbd>
         </button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-tight text-foreground">
-            {model.buildingLabel} · {model.buildingType}
+            {model.buildingLabel} · {buildingTypeName(t, model.buildingType)}
           </p>
           <p className="truncate text-[11px] leading-tight text-muted-foreground">
-            {Object.keys(elements).length} surfaces
-            <span className="hidden sm:inline"> · avg U {model.avgUValue.toFixed(2)} W/m²K</span>
+            {t('view.surfaceCount', { count: Object.keys(elements).length })}
+            <span className="hidden sm:inline"> · {t('view.avgU', { value: model.avgUValue.toFixed(2) })}</span>
           </p>
         </div>
         {!pv && (
@@ -237,7 +244,7 @@ export function Building3DView({
             className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
           >
             <Download className="size-3.5" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline">{t('view.export.button')}</span>
           </button>
           {exportOpen && (
             <>
@@ -250,9 +257,9 @@ export function Building3DView({
                 >
                   <Download className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
                   <span>
-                    <span className="block text-[12px] font-semibold text-slate-700">Model (JSON)</span>
+                    <span className="block text-[12px] font-semibold text-slate-700">{t('view.export.model.title')}</span>
                     <span className="block text-[10px] leading-snug text-muted-foreground">
-                      BuEM GeoJSON: everything a simulation needs
+                      {t('view.export.model.detail')}
                     </span>
                   </span>
                 </button>
@@ -263,9 +270,9 @@ export function Building3DView({
                 >
                   <Table2 className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
                   <span>
-                    <span className="block text-[12px] font-semibold text-slate-700">Tables (CSV)</span>
+                    <span className="block text-[12px] font-semibold text-slate-700">{t('view.export.tables.title')}</span>
                     <span className="block text-[10px] leading-snug text-muted-foreground">
-                      building.csv and surfaces.csv, zipped
+                      {t('view.export.tables.detail')}
                     </span>
                   </span>
                 </button>
@@ -274,7 +281,7 @@ export function Building3DView({
           )}
         </div>
         <SegmentedControl
-          options={[{ value: 'basic', label: 'Basic' }, { value: 'expert', label: 'Expert' }]}
+          options={[{ value: 'basic', label: t('view.mode.basic') }, { value: 'expert', label: t('view.mode.expert') }]}
           value={mode}
           onChange={(v) => setMode(v as 'basic' | 'expert')}
         />
@@ -282,11 +289,11 @@ export function Building3DView({
           type="button"
           onClick={undo}
           disabled={!undoLabel}
-          title={undoLabel ? `Undo ${undoLabel.toLowerCase()} (Ctrl+Z)` : 'Nothing to undo'}
+          title={undoLabel ? t('view.undo.title', { action: t(undoLabel.key, undoLabel.values) }) : t('view.undo.none')}
           className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Undo2 className="size-3.5" />
-          <span className="hidden sm:inline">{undoLabel ? `Undo ${undoLabel.toLowerCase()}` : 'Undo'}</span>
+          <span className="hidden sm:inline">{undoLabel ? t('view.undo.action', { action: t(undoLabel.key, undoLabel.values) }) : t('view.undo.label')}</span>
         </button>
         </>
         )}
@@ -299,7 +306,7 @@ export function Building3DView({
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
-              Loading surface geometry…
+              {t('view.loadingGeometry')}
             </div>
           ) : surfaces.length > 0 && !detached ? (
             <SurfaceGeometryViewer
@@ -319,8 +326,8 @@ export function Building3DView({
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-xs leading-snug text-muted-foreground">
               {detached
-                ? 'This building\'s saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.'
-                : 'City2TABULA holds no 3D geometry for this building.'}
+                ? t('view.detached')
+                : t('view.noGeometry')}
             </div>
           )}
 
@@ -334,7 +341,7 @@ export function Building3DView({
           {invalidIds.size > 0 && (
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm">
               <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-              {invalidIds.size} surface{invalidIds.size > 1 ? 's' : ''} with no area, left out of a simulation
+              {t('view.invalidSurfaces', { count: invalidIds.size })}
             </div>
           )}
 
@@ -409,7 +416,7 @@ export function Building3DView({
 
           {model.uploadError && (
             <div className="flex shrink-0 items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5">
-              <p className="flex-1 text-[11px] leading-snug text-destructive">{model.uploadError}</p>
+              <p className="flex-1 text-[11px] leading-snug text-destructive">{t(model.uploadError.key, model.uploadError.values)}</p>
               <button
                 type="button"
                 onClick={() => model.setUploadError(null)}
@@ -425,8 +432,8 @@ export function Building3DView({
             className="flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {model.isRunningSimulation
-              ? <><Loader2 className="size-4 animate-spin" /> Working out the energy…</>
-              : <><Play className="size-4" /> Save &amp; Preview Energy Demand</>}
+              ? <><Loader2 className="size-4 animate-spin" /> {t('view.run.working')}</>
+              : <><Play className="size-4" /> {t('view.run.start')}</>}
           </button>
           </>
           )}
@@ -437,7 +444,7 @@ export function Building3DView({
         <SurfacePopover
           at={selected.at}
           cardRef={popoverRef}
-          title={selectedElement ? `${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}` : 'Surface'}
+          title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
           subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : pv.surfaces[selected.id].label}
           onClose={() => openSurface(null)}
         >
@@ -449,7 +456,7 @@ export function Building3DView({
         <SurfacePopover
           at={selected.at}
           cardRef={popoverRef}
-          title={`${selectedElement.type[0].toUpperCase()}${selectedElement.type.slice(1)}`}
+          title={t(`surface.type.${selectedElement.type}`)}
           subtitle={`${selectedElement.area.toFixed(1)} m² · U ${selectedElement.uValue.toFixed(2)} W/m²K`}
           onClose={() => requestSurface(null)}
         >
@@ -467,8 +474,8 @@ export function Building3DView({
 
       <UnsavedChangesDialog
         open={pendingSurface !== null}
-        message="You changed this surface. Keep the changes?"
-        note="Discarding puts the surface back as it was when its editor opened."
+        message={t('view.discardSurface.message')}
+        note={t('view.discardSurface.note')}
         onCancel={() => setPendingSurface(null)}
         onSave={() => { openSurface(pendingSurface?.next ?? null); setPendingSurface(null); }}
         onDiscard={() => {
@@ -485,5 +492,6 @@ export function Building3DView({
         onDiscard={() => onExit(toBuildingState('saved'))}
       />
     </div>
+    </LanguageProvider>
   );
 }

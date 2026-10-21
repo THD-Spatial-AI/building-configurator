@@ -1,0 +1,664 @@
+{
+  "view": {
+    "back": {
+      "title": "Powrót do mapy (Esc)",
+      "label": "Mapa"
+    },
+    "surfaceCount": {
+      "one": "{count} przegroda",
+      "few": "{count} przegrody",
+      "many": "{count} przegród",
+      "other": "{count} przegrody"
+    },
+    "avgU": "śr. U {value} W/m²K",
+    "export": {
+      "button": "Eksportuj",
+      "model": {
+        "title": "Model (JSON)",
+        "detail": "BuEM GeoJSON: wszystko, czego potrzebuje symulacja"
+      },
+      "tables": {
+        "title": "Tabele (CSV)",
+        "detail": "building.csv i surfaces.csv w archiwum ZIP"
+      }
+    },
+    "mode": {
+      "basic": "Podstawowy",
+      "expert": "Ekspercki"
+    },
+    "undo": {
+      "title": "Cofnij {action} (Ctrl+Z)",
+      "none": "Nie ma czego cofnąć",
+      "action": "Cofnij {action}",
+      "label": "Cofnij"
+    },
+    "loadingGeometry": "Wczytywanie geometrii przegród…",
+    "detached": "Zapisane przegrody tego budynku pochodzą z wcześniejszego przebiegu City2TABULA, więc żadna nie pasuje do aktualnych danych 3D. Zapisane wartości nadal obowiązują; model nie jest wyświetlany.",
+    "noGeometry": "City2TABULA nie zawiera geometrii 3D dla tego budynku.",
+    "invalidSurfaces": {
+      "one": "{count} przegroda bez powierzchni, pominięta w symulacji",
+      "few": "{count} przegrody bez powierzchni, pominięte w symulacji",
+      "many": "{count} przegród bez powierzchni, pominiętych w symulacji",
+      "other": "{count} przegrody bez powierzchni, pominięte w symulacji"
+    },
+    "run": {
+      "working": "Obliczanie energii…",
+      "start": "Zapisz i pokaż zapotrzebowanie"
+    },
+    "surface": "Przegroda",
+    "discardSurface": {
+      "message": "Ta przegroda została zmieniona. Zachować zmiany?",
+      "note": "Odrzucenie przywraca przegrodę do stanu z chwili otwarcia edytora."
+    }
+  },
+  "surface": {
+    "type": {
+      "wall": "Ściana",
+      "window": "Okno",
+      "roof": "Dach",
+      "floor": "Podłoga",
+      "door": "Drzwi"
+    },
+    "close": "Zamknij",
+    "area": "Powierzchnia",
+    "areaRejected": "Symulacja to odrzuci",
+    "useGeometryArea": "Użyj {area} m² z modelu",
+    "uValue": "Współczynnik U",
+    "insulation": {
+      "veryWell": "Bardzo dobra izolacja",
+      "well": "Dobra izolacja",
+      "moderate": "Średnia izolacja",
+      "poor": "Słaba izolacja",
+      "none": "Brak izolacji"
+    },
+    "rValue": "Opór R (1/U): {value} m²K/W",
+    "gValue": "Przepuszczalność energii (g)",
+    "solar": {
+      "high": "Przepuszcza większość ciepła słonecznego",
+      "low": "Blokuje większość ciepła słonecznego"
+    },
+    "sharedWall": "Wspólna z sąsiednim budynkiem",
+    "imported": "Zaimportowano: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
+    "reset": "Resetuj",
+    "delete": "Usuń tę przegrodę",
+    "facing": "Orientacja",
+    "facingDirection": "kierunek {direction}",
+    "compass": {
+      "n": "N",
+      "ne": "NE",
+      "e": "E",
+      "se": "SE",
+      "s": "S",
+      "sw": "SW",
+      "w": "W",
+      "nw": "NW"
+    },
+    "azimuth": "Azymut",
+    "tilt": "Nachylenie",
+    "tiltShape": {
+      "flat": "Pozioma",
+      "vertical": "Pionowa",
+      "pitched": "Nachylona"
+    },
+    "degrees": "{degrees}°, {label}"
+  },
+  "profile": {
+    "title": "Godzinowy profil obciążenia",
+    "stored": "Zapisany wynik BuEM",
+    "upload": "Prześlij",
+    "download": "Pobierz",
+    "source": {
+      "buem": "Wynik modelu BuEM",
+      "none": "Nie wczytano profilu",
+      "file": "{name}",
+      "aggregated": "{source} · agregacja z danych {from}"
+    },
+    "resolution": {
+      "hourly": "godzinowych",
+      "daily": "dziennych",
+      "weekly": "tygodniowych",
+      "monthly": "miesięcznych"
+    },
+    "error": {
+      "parse": "{reason}",
+      "unreadable": "Nie można odczytać pliku profilu obciążenia."
+    }
+  },
+  "pv": {
+    "surfacesWithPv": {
+      "one": "{count} przegroda z PV",
+      "few": "{count} przegrody z PV",
+      "many": "{count} przegród z PV",
+      "other": "{count} przegrody z PV"
+    },
+    "state": {
+      "installed": "Z PV",
+      "suggested": "Sugerowana",
+      "available": "Dostępna"
+    },
+    "toggle": "PV: {surface}",
+    "surfaceType": {
+      "wall": "ściana",
+      "window": "okno",
+      "roof": "dach",
+      "floor": "podłoga",
+      "door": "drzwi"
+    },
+    "thisSurface": "PV na tej przegrodzie",
+    "usableShare": "Udział użyteczny",
+    "usableShareNote": "tej przegrody, po odjęciu przeszkód",
+    "capacity": "Moc"
+  },
+  "tech": {
+    "none": "Brak technologii w tym budynku.",
+    "remove": "Usuń {title}"
+  },
+  "editor": {
+    "identity": {
+      "name": {
+        "label": "Nazwa budynku",
+        "tip": "Czytelna nazwa budynku. Dołączana do eksportowanych plików.",
+        "placeholder": "np. 3434 · Dom jednorodzinny"
+      },
+      "type": {
+        "label": "Typ budynku",
+        "tip": "Kategoria budynku TABULA. Wpływa na domyślne współczynniki U i referencyjne zapotrzebowanie na energię."
+      },
+      "country": {
+        "label": "Kraj",
+        "tip": "Kraj służący do wyboru danych referencyjnych TABULA i stacji pogodowej COSMO."
+      },
+      "year": {
+        "label": "Rok budowy",
+        "tip": "Rok wybudowania budynku. ignis przypisuje go do okresu budowy TABULA, z którego pobiera domyślne współczynniki U."
+      },
+      "floorArea": {
+        "label": "Powierzchnia (na kondygnację)",
+        "tip": "Powierzchnia rzutu jednej kondygnacji; całkowita powierzchnia ogrzewana to ta wartość × liczba kondygnacji."
+      },
+      "storeys": {
+        "label": "Kondygnacje",
+        "tip": "Liczba kondygnacji nadziemnych."
+      },
+      "roomHeight": {
+        "label": "Wysokość pomieszczeń",
+        "tip": "Wysokość wewnętrzna w świetle na kondygnację. Służy do obliczenia kubatury ogrzewanej."
+      },
+      "volume": "Kubatura ogrzewana"
+    },
+    "solver": {
+      "useMilp": {
+        "label": "Użyj solwera MILP",
+        "tip": "Rozwiązuje model cieplny jako mieszane programowanie całkowitoliczbowe zamiast domyślnego solwera rzadkiego BuEM. Wolniej, ale ograniczenia nierównościowe są uwzględniane dokładnie."
+      },
+      "milpNote": "Solwer MILP: ograniczenia nierównościowe uwzględniane dokładnie. Obliczenia trwają dłużej.",
+      "sparseNote": "Domyślny solwer rzadki BuEM. Szybki."
+    },
+    "ignis": {
+      "noCountryBefore": "Ustaw kraj w sekcji",
+      "basicInfo": "Dane podstawowe",
+      "noCountryAfter": "w celu obliczenia zapotrzebowania na ciepło.",
+      "unsupportedBefore": "Typ budynku",
+      "unsupportedAfter": "nie występuje w bazie TABULA. Obsługiwane typy: {types}.",
+      "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna."
+    },
+    "section": {
+      "identity": "Dane podstawowe",
+      "occupancy": "Użytkowanie",
+      "comfort": "Ogrzewanie i komfort",
+      "outputs": "Wyniki do obliczenia",
+      "equipment": "Urządzenia",
+      "solver": "Metoda obliczeń"
+    },
+    "summary": {
+      "outputs": "{on} z {total} profili",
+      "equipmentSet": "ręcznie ustawione: {overrides}",
+      "equipmentDefault": "Domyślne",
+      "solverMilp": "MILP",
+      "solverSparse": "Rzadki",
+      "occupants": "Liczba osób: {capacity}",
+      "capacityFromArea": "Liczba osób z powierzchni",
+      "dwellings": {
+        "one": "{count} mieszkanie",
+        "few": "{count} mieszkania",
+        "many": "{count} mieszkań",
+        "other": "{count} mieszkania"
+      },
+      "dwellingsNotSet": "Nie podano mieszkań",
+      "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
+    },
+    "header": {
+      "fallbackName": "Budynek"
+    },
+    "insulationTitle": "Izolacja i okna"
+  },
+  "comfort": {
+    "mass": {
+      "light": "Lekka",
+      "medium": "Średnia",
+      "heavy": "Ciężka",
+      "label": "Masa termiczna",
+      "tip": "Ile ciepła akumuluje konstrukcja. Lekka: szkielet drewniany lub lekka konstrukcja; średnia: mieszana; ciężka: beton lub mur.",
+      "capacity": {
+        "label": "Pojemność cieplna na m² powierzchni",
+        "tip": "Ustawiana na podstawie klasy masy termicznej; edytowalna."
+      },
+      "total": "Całkowita masa termiczna"
+    },
+    "hotWater": {
+      "on": "Uwzględniona",
+      "off": "Nieuwzględniona",
+      "label": "Ciepła woda",
+      "tip": "Wyłącz, gdy ciepłą wodę dostarcza system ujęty gdzie indziej. Nie wpływa na ogrzewanie pomieszczeń."
+    },
+    "summary": {
+      "setback": {
+        "none": "bez obniżenia",
+        "nightOnly": "obniżenie nocą",
+        "nightAndAway": "obniżenie nocą i pod nieobecność",
+        "deep": "głębokie obniżenie",
+        "unknown": "obniżenie: {setback}"
+      },
+      "hotWaterOn": "z ciepłą wodą",
+      "hotWaterOff": "bez ciepłej wody"
+    },
+    "heating": {
+      "label": "Temperatura zadana ogrzewania",
+      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie."
+    },
+    "setback": {
+      "label": "Obniżaj, gdy",
+      "tip": "Obniża temperaturę zadaną ogrzewania, gdy użytkownicy śpią lub są nieobecni. Dotyczy tylko ogrzewania."
+    },
+    "cooling": {
+      "label": "Temperatura zadana chłodzenia",
+      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie.",
+      "inverted": "Ustaw ją powyżej temperatury zadanej ogrzewania."
+    },
+    "air": {
+      "infiltration": {
+        "label": "Infiltracja",
+        "tip": "Niekontrolowane wymiany powietrza na godzinę przez nieszczelności obudowy (infiltracja)."
+      },
+      "use": {
+        "label": "Wentylacja przez użytkowników",
+        "tip": "Wymiany powietrza na godzinę przez otwieranie okien i wentylatory podczas użytkowania budynku."
+      },
+      "total": "Całkowita krotność wymian"
+    }
+  },
+  "household": {
+    "default": "Domyślnie",
+    "useDefault": "Użyj domyślnej",
+    "capacity": {
+      "label": "Liczba osób",
+      "placeholder": "Wyznaczana z powierzchni.",
+      "tip": "Liczba użytkowników. Jeśli pole jest puste, BuEM wyznacza ją z powierzchni i gęstości zasiedlenia dla typu budynku."
+    },
+    "dwellings": {
+      "label": "Mieszkania",
+      "requiredTip": "Liczba mieszkań. Wstępnie uzupełniona z archetypu TABULA. BuEM symuluje jedno reprezentatywne mieszkanie i mnoży wynik przez tę liczbę.",
+      "required": "Wymagane dla typu: {type}.",
+      "placeholder": "Jedno mieszkanie.",
+      "tip": "Liczba mieszkań. BuEM symuluje jedno reprezentatywne mieszkanie i mnoży wynik przez tę liczbę."
+    },
+    "persons": {
+      "label": "Osoby na mieszkanie",
+      "tip": "Liczba osób w każdym mieszkaniu. Domyślnie statystyczna wielkość gospodarstwa domowego dla kraju, regionu i typu budynku."
+    },
+    "archetype": {
+      "label": "Typ gospodarstwa",
+      "tip": "Skład gospodarstwa domowego. Określa, kiedy użytkownicy są w domu, co wpływa na zyski wewnętrzne, energię elektryczną i ciepłą wodę."
+    },
+    "region": {
+      "label": "Kod regionu (Holandia)",
+      "tip": "Kod gminy CBS (Holandia). Wybiera regionalną wielkość gospodarstwa, gdy liczba osób na mieszkanie pozostaje domyślna.",
+      "placeholder": "np. GM0200"
+    },
+    "cooking": {
+      "label": "Gotowanie na",
+      "tip": "Gotowanie elektryczne pozostaje w profilu energii elektrycznej. Gotowanie na gazie jest raportowane osobno jako gaz do gotowania. Opcja domyślna modelu przejmuje ustawienie modelu, do którego należy budynek."
+    },
+    "equipment": {
+      "yes": "Tak",
+      "no": "Nie",
+      "intro": "Domyślnie posiadanie każdego urządzenia wynika ze statystyk BuEM.",
+      "sameInEveryDwelling": "Każde mieszkanie w budynku ma te same urządzenia.",
+      "televisions": "Telewizory",
+      "resetAll": "Przywróć wszystkie domyślne",
+      "groupDefault": "{items} domyślnie",
+      "groupSet": "ustawione: {set} ({owned} tak, {notOwned} nie)"
+    },
+    "outputs": {
+      "cookingGasOnlyWithGas": "Gaz do gotowania jest raportowany tylko przy gotowaniu na gazie.",
+      "thermalOff": "Bez ogrzewania i chłodzenia BuEM pomija model cieplny: przegrody i dane pogodowe nie są używane."
+    }
+  },
+  "insulation": {
+    "type": {
+      "wall": "Ściany",
+      "roof": "Dach",
+      "floor": "Podłoga",
+      "window": "Okna",
+      "door": "Drzwi"
+    },
+    "summary": {
+      "mixed": "Mieszany",
+      "averageU": "średnie U {value} W/m²K"
+    },
+    "averageU": "Średni współczynnik U",
+    "editSurfaces": "Edytuj przegrody pojedynczo",
+    "preset": {
+      "label": "Ustaw cały budynek na",
+      "tip": "Warianty termomodernizacji TABULA dla tego typu i wieku budynku. Wybór ustawia każdy typ przegrody; przegrody ustawione pojedynczo zachowują swoje wartości.",
+      "fromVariant": "Z danych 3D: TABULA {code}.",
+      "fromType": "Warianty TABULA dla typu i wieku budynku.",
+      "typesDiffer": "Typy przegród się różnią.",
+      "customKept": {
+        "one": "{count} przegroda ustawiona pojedynczo zachowuje swoją wartość.",
+        "few": "{count} przegrody ustawione pojedynczo zachowują swoje wartości.",
+        "many": "{count} przegród ustawionych pojedynczo zachowuje swoje wartości.",
+        "other": "{count} przegrody ustawionej pojedynczo zachowuje swoje wartości."
+      }
+    },
+    "table": {
+      "title": "Według typu przegrody",
+      "custom": "Własny",
+      "surfaces": {
+        "one": "{count} przegroda",
+        "few": "{count} przegrody",
+        "many": "{count} przegród",
+        "other": "{count} przegrody"
+      },
+      "setOneByOne": "pojedynczo: {custom}",
+      "state": "Stan",
+      "lossFactorTip": "Udział strat ciepła przez te przegrody, który jest uwzględniany: 1 do powietrza zewnętrznego, mniej do gruntu lub przestrzeni nieogrzewanej (BuEM b_transmission). Puste, gdy przegrody się różnią; ściany wspólne zachowują 0."
+    },
+    "uValue": "Współczynnik U",
+    "lossFactor": "Współczynnik b",
+    "unitShare": "od 0 do 1",
+    "buemDefault": "Domyślne BuEM.",
+    "useDefault": "Użyj domyślnej",
+    "windows": {
+      "title": "Okna dodawane przez BuEM",
+      "note": "Budynek nie ma przegród okiennych, więc BuEM przeszkla część każdej ściany zewnętrznej.",
+      "share": {
+        "label": "Udział okien",
+        "tip": "Przeszklona część powierzchni każdej ściany zewnętrznej."
+      },
+      "u": {
+        "label": "U okien",
+        "tip": "Współczynnik U tych okien. Domyślnie wartość TABULA dla typu budynku, w przeciwnym razie 2,8."
+      },
+      "g": {
+        "label": "g okien",
+        "tip": "Udział promieniowania słonecznego padającego na te okna, który wnika jako ciepło. Domyślnie wartość TABULA dla typu budynku, w przeciwnym razie 0,5."
+      }
+    },
+    "add": {
+      "type": {
+        "wall": "Ściana",
+        "floor": "Podłoga",
+        "roof": "Dach"
+      },
+      "button": {
+        "wall": "Dodaj ścianę",
+        "floor": "Dodaj podłogę",
+        "roof": "Dodaj dach"
+      },
+      "title": "Dodaj przegrodę",
+      "note": "Dla przegrody, której nie widać w danych 3D, np. ściany przy gruncie (współczynnik b ok. 0,5) lub podłogi nad otwartym przejazdem (1). Pojawia się na karcie Przegrody, ale nie jest rysowana w modelu.",
+      "typeLabel": "Typ",
+      "name": "Nazwa",
+      "namePlaceholder": "np. Ściana piwnicy",
+      "area": "Powierzchnia"
+    },
+    "variant": {
+      "full": {
+        "existing": "Stan obecny",
+        "usual": "Typowa termomodernizacja",
+        "advanced": "Zaawansowana termomodernizacja"
+      },
+      "short": {
+        "existing": "Obecny",
+        "usual": "Typowa",
+        "advanced": "Zaawansowana"
+      }
+    }
+  },
+  "options": {
+    "buildingType": {
+      "sfh": "Dom jednorodzinny",
+      "th": "Dom szeregowy",
+      "mfh": "Budynek wielorodzinny",
+      "ab": "Blok mieszkalny",
+      "bakery": "Piekarnia",
+      "clinic": "Przychodnia",
+      "hotel": "Hotel",
+      "office": "Biuro",
+      "restaurant": "Restauracja",
+      "school": "Szkoła",
+      "supermarket": "Supermarket",
+      "warehouse": "Magazyn"
+    },
+    "archetype": {
+      "default": "Domyślny dla typu budynku",
+      "generic": "Typowe gospodarstwo",
+      "workingCouple": "Pracująca para",
+      "familyWithChildren": "Rodzina z dziećmi",
+      "retiredSingle": "Emeryt mieszkający sam",
+      "studentShared": "Studenci we wspólnym mieszkaniu"
+    },
+    "setback": {
+      "none": "Nigdy",
+      "nightOnly": "Nocą",
+      "nightAndAway": "Nocą i pod nieobecność",
+      "deep": "Głębokie obniżenie"
+    },
+    "cookingCarrier": {
+      "default": "Domyślne modelu",
+      "electric": "Prąd",
+      "gas": "Gaz",
+      "none": "Nieraportowane"
+    },
+    "output": {
+      "heating": "Ogrzewanie",
+      "cooling": "Chłodzenie",
+      "electricity": "Energia elektryczna",
+      "hotWater": "Ciepła woda",
+      "kitchen": "Gaz do gotowania"
+    },
+    "outputLevel": {
+      "none": "Wył.",
+      "summary": "Rocznie",
+      "series": "Godzinowo"
+    },
+    "equipmentGroup": {
+      "cooking": "Gotowanie",
+      "cold": "Chłodzenie",
+      "laundry": "Pranie i sprzątanie",
+      "electronics": "Elektronika",
+      "misc": "Inne"
+    },
+    "equipment": {
+      "hob": "Płyta grzewcza",
+      "oven": "Piekarnik",
+      "microwave": "Mikrofalówka",
+      "kettle": "Czajnik",
+      "smallCookingGroup": "Małe AGD kuchenne",
+      "airFryer": "Frytkownica beztłuszczowa",
+      "coffeeMachine": "Ekspres do kawy",
+      "fridgeFreezer": "Lodówko-zamrażarka",
+      "refrigerator": "Lodówka",
+      "chestFreezer": "Zamrażarka skrzyniowa",
+      "uprightFreezer": "Zamrażarka szufladowa",
+      "washingMachine": "Pralka",
+      "tumbleDryer": "Suszarka bębnowa",
+      "washerDryer": "Pralko-suszarka",
+      "dishWasher": "Zmywarka",
+      "iron": "Żelazko",
+      "vacuum": "Odkurzacz",
+      "robotVacuum": "Robot sprzątający",
+      "tvReceiverBox": "Dekoder TV",
+      "personalComputer": "Komputer stacjonarny",
+      "printer": "Drukarka",
+      "hiFi": "Wieża hi-fi",
+      "cassetteCdPlayer": "Odtwarzacz kaset lub CD",
+      "vcrDvd": "Magnetowid lub odtwarzacz DVD",
+      "laptop": "Laptop",
+      "smartSpeaker": "Inteligentny głośnik",
+      "streamingStick": "Przystawka do streamingu",
+      "wifiRouter": "Router Wi-Fi",
+      "lighting": "Oświetlenie",
+      "clock": "Zegar",
+      "answerMachine": "Automatyczna sekretarka",
+      "cordlessTelephone": "Telefon bezprzewodowy",
+      "fax": "Faks",
+      "evCharger": "Ładowarka EV"
+    },
+    "country": {
+      "de": "DE - Niemcy",
+      "at": "AT - Austria",
+      "nl": "NL - Holandia",
+      "cz": "CZ - Czechy"
+    }
+  },
+  "panel": {
+    "title": {
+      "overview": "Przegląd energii",
+      "envelope": "Przegrody budynku",
+      "technology": "Technologie",
+      "parameters": "Parametry budynku"
+    },
+    "tab": {
+      "overview": "Przegląd",
+      "parameters": "Parametry",
+      "envelope": "Przegrody"
+    },
+    "doneEditing": "Zakończ edycję",
+    "editParameters": "Edytuj parametry budynku"
+  },
+  "snapshot": {
+    "status": {
+      "default": "domyślne",
+      "modified": "zmienione"
+    },
+    "thermalRating": {
+      "excellent": "Doskonała",
+      "good": "Dobra",
+      "fair": "Przeciętna",
+      "poor": "Słaba",
+      "veryPoor": "Bardzo słaba"
+    },
+    "row": {
+      "type": "Typ",
+      "constructionYear": "Rok budowy",
+      "country": "Kraj",
+      "floorAreaPerStorey": "Powierzchnia (na kondygnację)",
+      "storeys": "Kondygnacje",
+      "roomHeight": "Wysokość pomieszczeń",
+      "volume": "Kubatura",
+      "envelope": "Przegrody"
+    },
+    "envelopeValue": {
+      "one": "{area} m²  ·  {count} przegroda",
+      "few": "{area} m²  ·  {count} przegrody",
+      "many": "{area} m²  ·  {count} przegród",
+      "other": "{area} m²  ·  {count} przegrody"
+    },
+    "energy": {
+      "heating": "Ogrzewanie",
+      "electricity": "Energia elektryczna",
+      "cooling": "Chłodzenie",
+      "hotWater": "Ciepła woda",
+      "kitchen": "Kuchnia (gaz)"
+    },
+    "estimateNotice": "Parametry budynku są szacowane na podstawie publicznych rejestrów. Otwórz konfigurator, aby je sprawdzić i dostosować.",
+    "annualDemand": "Roczne zapotrzebowanie na energię",
+    "totalDemand": "Całkowite zapotrzebowanie",
+    "thermalEfficiency": "Efektywność cieplna"
+  },
+  "envelope": {
+    "group": {
+      "walls": "Ściany",
+      "windows": "Okna",
+      "doors": "Drzwi",
+      "roof": "Dach",
+      "floor": "Podłoga"
+    },
+    "roofShape": {
+      "flat": "niski spadek",
+      "monoPitch": "jednospadowy",
+      "gabled": "S + N",
+      "hipped": "S/N/E/W",
+      "vShape": "spadki do środka",
+      "sawTooth": "na S",
+      "custom": "własny"
+    },
+    "invalidAreaTip": "{count} bez powierzchni, popraw przed uruchomieniem symulacji",
+    "noArea": "brak powierzchni",
+    "compassNorth": "N"
+  },
+  "common": {
+    "source": {
+      "estimated": "szacowane",
+      "userDefined": "użytkownika"
+    },
+    "comparison": {
+      "higher": "o {percent}% więcej niż {reference} ({kwh} kWh)",
+      "lower": "o {percent}% mniej niż {reference} ({kwh} kWh)"
+    },
+    "scroll": "przewiń",
+    "close": "Zamknij",
+    "unsaved": {
+      "title": "Niezapisane zmiany",
+      "message": "Masz niezapisane zmiany w konfiguracji tego budynku. Co chcesz zrobić?",
+      "note": "Zamknięcie bez zapisu odrzuci wszystkie zmiany od ostatniego zapisu.",
+      "continueEditing": "Kontynuuj edycję",
+      "saveAndClose": "Zapisz i zamknij",
+      "discard": "Odrzuć zmiany"
+    }
+  },
+  "model": {
+    "history": {
+      "refurbishment": "termomodernizację",
+      "lossFactor": "zmianę współczynnika b",
+      "discarded": "odrzucenie zmian przegrody",
+      "roofType": "zmianę typu dachu",
+      "import": "import",
+      "field": {
+        "area": "zmianę powierzchni",
+        "uValue": "zmianę współczynnika U",
+        "tilt": "zmianę nachylenia",
+        "azimuth": "zmianę orientacji",
+        "gValue": "zmianę przepuszczalności energii",
+        "label": "zmianę nazwy",
+        "surface": "zmianę przegrody"
+      },
+      "deleted": {
+        "wall": "usunięcie ściany",
+        "window": "usunięcie okna",
+        "roof": "usunięcie dachu",
+        "floor": "usunięcie podłogi",
+        "door": "usunięcie drzwi",
+        "surface": "usunięcie przegrody"
+      },
+      "added": {
+        "wall": "dodanie ściany",
+        "window": "dodanie okna",
+        "roof": "dodanie dachu",
+        "floor": "dodanie podłogi",
+        "door": "dodanie drzwi"
+      }
+    },
+    "error": {
+      "dwellingsRequired": "Ten typ budynku wymaga podania liczby mieszkań. Ustaw ją w sekcji Użytkowanie przed uruchomieniem symulacji.",
+      "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
+      "exportFailed": "Eksport nie powiódł się: {reason}",
+      "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET."
+    },
+    "comparison": {
+      "lastRun": "w ostatniej pełnej symulacji"
+    }
+  }
+}

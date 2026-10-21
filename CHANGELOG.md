@@ -4,6 +4,17 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Added
+
+- `Building3DView` takes an optional `language` prop: `en` (default), `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`, EnerPlanET's languages. The view's own text comes from the package's translation files under `src/app/i18n/locales/`; a text missing from a language shows in English. Text the host passes in is shown as given. The `Language` type is exported.
+
+### Changed
+
+- `EnergyTotals.*ComparisonLabel` holds a translation key instead of English text.
+- A single surface reads "1 surface", not "1 surfaces".
+
 ## [0.10.1] - 2026-10-21
 
 ### Fixed

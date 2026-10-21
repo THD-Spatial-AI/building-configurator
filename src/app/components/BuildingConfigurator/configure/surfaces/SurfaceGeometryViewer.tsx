@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { buildPvPanel, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { useT } from '@/app/i18n';
 
 interface SurfaceGeometryViewerProps {
   surfaces: SurfacePolygon[];
@@ -66,6 +67,7 @@ export function SurfaceGeometryViewer({
   onSelectSurface,
   onSelectedAnchorMove,
 }: SurfaceGeometryViewerProps) {
+  const t = useT();
   const mountRef = useRef<HTMLDivElement>(null);
   const compassRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
@@ -373,7 +375,7 @@ export function SurfaceGeometryViewer({
           <span style={{
             position: 'absolute', top: 2, left: '50%', transform: 'translateX(-50%)',
             fontSize: 10, fontWeight: 700, color: '#dc2626',
-          }}>N</span>
+          }}>{t('envelope.compassNorth')}</span>
           <div style={{
             position: 'absolute', top: 14, left: '50%', width: 0, height: 14,
             borderLeft: '1.5px solid #64748b', transform: 'translateX(-50%)',

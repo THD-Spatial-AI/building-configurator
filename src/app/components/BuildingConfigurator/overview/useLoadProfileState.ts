@@ -13,6 +13,7 @@ import {
   type LoadDataPoint,
   type Resolution,
 } from '../../../lib/loadProfile';
+import type { Message } from '../../../i18n';
 
 interface UseLoadProfileStateArgs {
   initialTimeseries?: LoadDataPoint[];
@@ -42,10 +43,10 @@ export function useLoadProfileState({
     }
     return createDefaultDataset();
   });
-  const [sourceLabel, setSourceLabel] = useState(() => (
-    initialTimeseries && initialTimeseries.length > 0 ? 'BUEM model output' : 'No profile loaded'
+  const [sourceLabel, setSourceLabel] = useState<Message>(() => (
+    initialTimeseries && initialTimeseries.length > 0 ? { key: 'profile.source.buem' } : { key: 'profile.source.none' }
   ));
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<Message | null>(null);
 
   useEffect(() => {
     if (mode !== 'basic' || initialResolution) return;
@@ -56,7 +57,7 @@ export function useLoadProfileState({
   useEffect(() => {
     if (!initialTimeseries || initialTimeseries.length === 0) return;
     setDataset({ ...createDefaultDataset(), hourly: initialTimeseries });
-    setSourceLabel('BUEM model output');
+    setSourceLabel({ key: 'profile.source.buem' });
     setUploadError(null);
   }, [initialTimeseries]);
 
@@ -72,9 +73,13 @@ export function useLoadProfileState({
         ? 'kWh/week'
         : 'kWh/month';
 
-  const sourceCaption = !derivedData.isDerived || !derivedData.sourceResolution || derivedData.sourceResolution === resolution
-    ? sourceLabel
-    : `${sourceLabel} · ${resolution} view aggregated from ${derivedData.sourceResolution}`;
+  /** Where the profile came from, and the resolution it was aggregated from when that differs. */
+  const sourceCaption = {
+    source: sourceLabel,
+    aggregatedFrom: derivedData.isDerived && derivedData.sourceResolution && derivedData.sourceResolution !== resolution
+      ? derivedData.sourceResolution
+      : null,
+  };
 
   const calculateTotal = (key: 'electricity' | 'heating' | 'hotwater') => {
     if (!hasData) return '—';
@@ -107,11 +112,12 @@ export function useLoadProfileState({
           : mergeUploadedData(dataset, JSON.parse(text), resolution);
 
         setDataset(nextDataset);
-        setSourceLabel(file.name);
+        setSourceLabel({ key: 'profile.source.file', values: { name: file.name } });
         onGroundTruthChange?.(pickUpdatedRows(dataset, nextDataset), file.name);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Could not parse load profile file.';
-        setUploadError(message);
+        setUploadError(error instanceof Error
+          ? { key: 'profile.error.parse', values: { reason: error.message } }
+          : { key: 'profile.error.unreadable' });
       }
     };
     reader.readAsText(file);

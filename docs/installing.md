@@ -98,6 +98,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
+| `language` | Optional. `en` (default), `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text. Pass the user's EnerPlanET language. Text the host passes in (the PV notice, technology cards, TABULA variant names) is shown as given |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"

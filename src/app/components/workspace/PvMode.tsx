@@ -7,6 +7,7 @@ import { Info, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PresetSlider } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
+import { useT } from '../../i18n';
 
 /** One surface the host offers for PV. */
 export interface PvSurface {
@@ -36,11 +37,6 @@ export interface PvMode {
 }
 
 const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'];
-const STATE_LABEL: Record<PvSurface['state'], string> = {
-  installed: 'With PV',
-  suggested: 'Suggested',
-  available: 'Available',
-};
 
 /** The surface ids to draw with panels and to highlight as suggested. */
 export function pvRenderSets(surfaces: Record<string, PvSurface>): { installed: Set<string>; suggested: Set<string> } {
@@ -65,6 +61,7 @@ export function PvPanel({ pv, elements, onSelect }: {
   /** Shows a surface in the model and opens its card. */
   onSelect: (surfaceId: string) => void;
 }) {
+  const t = useT();
   const entries = Object.entries(pv.surfaces);
   const installedCount = entries.filter(([, surface]) => surface.state === 'installed').length;
 
@@ -74,7 +71,7 @@ export function PvPanel({ pv, elements, onSelect }: {
         <Sun className="size-4 text-yellow-500" />
         <p className="min-w-0 flex-1 truncate text-[13px] font-bold text-slate-800">{pv.typeLabel}</p>
         <p className="shrink-0 text-[11px] text-muted-foreground">
-          {installedCount} {installedCount === 1 ? 'surface' : 'surfaces'} with PV
+          {t('pv.surfacesWithPv', { count: installedCount })}
         </p>
       </div>
 
@@ -90,13 +87,13 @@ export function PvPanel({ pv, elements, onSelect }: {
         if (group.length === 0) return null;
         return (
           <div key={state}>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{STATE_LABEL[state]}</p>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t(`pv.state.${state}`)}</p>
             <ul className="divide-y divide-slate-100 rounded-md border border-slate-100">
               {group.map(([id, surface]) => (
                 <li key={id} className="flex items-center gap-2 px-2.5 py-1.5">
                   <input
                     type="checkbox"
-                    aria-label={`PV on ${surfaceName(id, elements, pv.surfaces)}`}
+                    aria-label={t('pv.toggle', { surface: surfaceName(id, elements, pv.surfaces) })}
                     checked={surface.state === 'installed'}
                     onChange={(e) => pv.onToggle(id, e.target.checked)}
                     className="size-4 shrink-0 cursor-pointer accent-primary"
@@ -109,7 +106,7 @@ export function PvPanel({ pv, elements, onSelect }: {
                     {surfaceName(id, elements, pv.surfaces)}
                   </button>
                   <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {elements[id] ? `${elements[id].type} · ` : ''}{surface.maxKwp.toFixed(1)} kWp
+                    {elements[id] ? `${t(`pv.surfaceType.${elements[id].type}`)} · ` : ''}{surface.maxKwp.toFixed(1)} kWp
                   </span>
                 </li>
               ))}
@@ -123,6 +120,7 @@ export function PvPanel({ pv, elements, onSelect }: {
 
 /** The card beside a clicked surface: its PV switch and, with PV on it, the usable share. */
 export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; surface: PvSurface; pv: PvMode }) {
+  const t = useT();
   const installed = surface.state === 'installed';
   return (
     <div className="flex flex-col gap-3 p-3">
@@ -134,23 +132,23 @@ export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; s
           className="size-4 cursor-pointer accent-primary"
         />
         <Sun className={cn('size-4', installed ? 'text-yellow-500' : 'text-slate-300')} />
-        <span className="flex-1 text-[12px] font-semibold text-slate-700">PV on this surface</span>
+        <span className="flex-1 text-[12px] font-semibold text-slate-700">{t('pv.thisSurface')}</span>
       </label>
       {installed && (
         <PresetSlider
-          label="Usable share"
+          label={t('pv.usableShare')}
           value={surface.usableShare * 100}
           min={0}
           max={100}
           step={5}
           unit="%"
           decimals={0}
-          quality="of this surface, after obstructions"
+          quality={t('pv.usableShareNote')}
           onChange={(percent) => pv.onShareChange(surfaceId, percent / 100)}
         />
       )}
       <div className="flex items-baseline justify-between">
-        <span className="text-[11px] font-medium text-muted-foreground">Capacity</span>
+        <span className="text-[11px] font-medium text-muted-foreground">{t('pv.capacity')}</span>
         <span className="text-[12px] font-semibold text-slate-700">
           {surface.maxKwp.toFixed(1)}<span className="ml-1 text-[10px] font-normal text-slate-400">kWp</span>
         </span>

@@ -10,6 +10,7 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
+import { useT } from '../../i18n';
 
 const WIDTH = 360;
 const MARGIN = 12;
@@ -94,6 +95,7 @@ interface SurfacePopoverProps {
 }
 
 export function SurfacePopover({ at, cardRef, title, subtitle, onClose, children }: SurfacePopoverProps) {
+  const t = useT();
   const wide = useMediaQuery(WIDE_LAYOUT);
   const ownRef = useRef<HTMLDivElement>(null);
 
@@ -171,7 +173,7 @@ export function SurfacePopover({ at, cardRef, title, subtitle, onClose, children
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('surface.close')}
           className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
         >
           <X />

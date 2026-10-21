@@ -5,11 +5,12 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
-import {
+import { variantName,
   REFURB_TYPES, customCount, type RefurbElementType, type RefurbStates,
 } from '@/app/lib/refurbishment';
 import type { IgnisVariantLevel } from '@/app/lib/ignisAdapter';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { useT, type Translate } from '@/app/i18n';
 
 /** What the group reads from the building model and calls back into it. */
 export interface InsulationProps {
@@ -30,8 +31,12 @@ export interface InsulationProps {
   onAddSurface?: (type: RefurbElementType, values: Partial<BuildingElement>) => void;
 }
 
-const TYPE_LABELS: Record<RefurbElementType, string> = {
-  wall: 'Walls', roof: 'Roof', floor: 'Floor', window: 'Windows', door: 'Doors',
+const TYPE_LABELS: Record<RefurbElementType, (t: Translate) => string> = {
+  wall: (t) => t('insulation.type.wall'),
+  roof: (t) => t('insulation.type.roof'),
+  floor: (t) => t('insulation.type.floor'),
+  window: (t) => t('insulation.type.window'),
+  door: (t) => t('insulation.type.door'),
 };
 
 /** The types whose loss factor is set as a group: those against ground or an unheated space. */
@@ -44,17 +49,19 @@ interface Props extends InsulationProps {
 }
 
 /** One line for the group's header. */
-export function insulationSummary({ levels, states, elements, initial, avgUValue }: InsulationProps): string {
+export function insulationSummary(t: Translate, { levels, states, elements, initial, avgUValue }: InsulationProps): string {
   const present = REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
   const custom = present.some((type) => customCount(elements, type, states[type], initial, levels) > 0);
   const uniform = present.every((type) => states[type] === states[present[0]]);
-  const label = levels.find((level) => level.number === states[present[0]])?.label;
-  const state = levels.length === 0 ? null : custom || !uniform || !label ? 'Mixed' : label;
-  return [state, `average U ${avgUValue.toFixed(2)} W/m²K`].filter(Boolean).join(' · ');
+  const level = levels.find((l) => l.number === states[present[0]]);
+  const label = level && variantName(t, level.label, level.number);
+  const state = levels.length === 0 ? null : custom || !uniform || !label ? t('insulation.summary.mixed') : label;
+  return [state, t('insulation.summary.averageU', { value: avgUValue.toFixed(2) })].filter(Boolean).join(' · ');
 }
 
 /** Building-wide preset; in Expert also a state, U-value and loss factor per element type. */
 export function InsulationSection(props: Props) {
+  const t = useT();
   const { mode, levels, onOpenEnvelope, avgUValue } = props;
   return (
     <div className="flex flex-col gap-4">
@@ -64,11 +71,11 @@ export function InsulationSection(props: Props) {
       {mode === 'expert' && <SynthesisedWindows {...props} />}
       <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2">
         <span className="text-[11px] text-muted-foreground">
-          Average U-value <span className="font-semibold text-foreground">{avgUValue.toFixed(2)} W/m²K</span>
+          {t('insulation.averageU')} <span className="font-semibold text-foreground">{avgUValue.toFixed(2)} W/m²K</span>
         </span>
         {onOpenEnvelope && (
           <button type="button" onClick={onOpenEnvelope} className="cursor-pointer text-[11px] font-medium text-primary hover:underline">
-            Edit surfaces one by one
+            {t('insulation.editSurfaces')}
           </button>
         )}
       </div>
@@ -81,14 +88,15 @@ function presentTypes(elements: Record<string, BuildingElement>): RefurbElementT
 }
 
 function BuildingPreset({ levels, states, initial, elements, variantCode, onSetState }: Props) {
+  const t = useT();
   const types = presentTypes(elements);
   const custom = types.reduce((n, type) => n + customCount(elements, type, states[type], initial, levels), 0);
   const uniform = types.every((type) => states[type] === states[types[0]]);
   const selected = uniform ? states[types[0]] : null;
   return (
     <div className="flex flex-col gap-1.5">
-      <FieldLabel tip="TABULA's refurbishment variants for this building type and age. A choice sets every element type; surfaces set one by one keep their values.">
-        Set the whole building to
+      <FieldLabel tip={t('insulation.preset.tip')}>
+        {t('insulation.preset.label')}
       </FieldLabel>
       <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${levels.length}, minmax(0, 1fr))` }}>
         {levels.map((level) => (
@@ -104,14 +112,14 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
                 : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
             )}
           >
-            {level.label}
+            {variantName(t, level.label, level.number)}
           </button>
         ))}
       </div>
       <p className="text-[10px] leading-snug text-muted-foreground">
-        {variantCode ? `From 3D data: TABULA ${variantCode}.` : 'TABULA variants for the building type and age.'}
-        {!uniform && ' Element types differ.'}
-        {custom > 0 && ` ${custom} surface${custom === 1 ? '' : 's'} set one by one keep${custom === 1 ? 's' : ''} its value.`}
+        {variantCode ? t('insulation.preset.fromVariant', { code: variantCode }) : t('insulation.preset.fromType')}
+        {!uniform && ` ${t('insulation.preset.typesDiffer')}`}
+        {custom > 0 && ` ${t('insulation.preset.customKept', { count: custom })}`}
       </p>
     </div>
   );
@@ -130,38 +138,39 @@ function typeLossFactor(surfaces: BuildingElement[]): number | null {
 }
 
 function ElementTable({ elements, levels, states, initial, onSetState, onSetTypeUValue, onSetTypeLossFactor }: Props) {
+  const t = useT();
   const types = presentTypes(elements);
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">Per element type</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">{t('insulation.table.title')}</p>
       {types.map((type) => {
         const surfaces = Object.values(elements).filter((el) => el.type === type);
         const custom = customCount(elements, type, states[type], initial, levels);
         const options = [
-          ...levels.map((level) => ({ value: String(level.number), label: level.label })),
-          ...(custom > 0 ? [{ value: 'custom', label: 'Custom' }] : []),
+          ...levels.map((level) => ({ value: String(level.number), label: variantName(t, level.label, level.number) })),
+          ...(custom > 0 ? [{ value: 'custom', label: t('insulation.table.custom') }] : []),
         ];
         const loss = typeLossFactor(surfaces);
         return (
           <div key={type} className="flex flex-col gap-1.5 rounded-md border border-slate-200 p-2.5">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-semibold text-slate-700">{TYPE_LABELS[type]}</span>
+              <span className="text-xs font-semibold text-slate-700">{TYPE_LABELS[type](t)}</span>
               <span className="text-[10px] text-muted-foreground">
-                {surfaces.length} surface{surfaces.length === 1 ? '' : 's'}
-                {custom > 0 && ` · ${custom} set one by one`}
+                {t('insulation.table.surfaces', { count: surfaces.length })}
+                {custom > 0 && ` · ${t('insulation.table.setOneByOne', { custom })}`}
               </span>
             </div>
             <div className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-2">
               {levels.length > 0 ? (
                 <SelectInput
-                  label="State"
+                  label={t('insulation.table.state')}
                   value={custom > 0 ? 'custom' : String(states[type])}
                   onChange={(v) => { if (v !== 'custom') onSetState([type], Number(v)); }}
                   options={options}
                 />
               ) : <span />}
               <NumberInput
-                label="U-value"
+                label={t('insulation.uValue')}
                 value={Number(typeUValue(surfaces).toFixed(3))}
                 onChange={(v) => onSetTypeUValue(type, Math.max(0, v))}
                 unit="W/m²K" min={0} max={6} step={0.01}
@@ -169,11 +178,11 @@ function ElementTable({ elements, levels, states, initial, onSetState, onSetType
             </div>
             {LOSS_FACTOR_TYPES.includes(type) && (
               <NumberInput
-                label="Loss factor"
+                label={t('insulation.lossFactor')}
                 value={loss ?? ''}
                 onChange={(v) => onSetTypeLossFactor(type, Math.min(1, Math.max(0, v)))}
-                unit="0 to 1" min={0} max={1} step={0.05}
-                tip="Share of the heat loss through these surfaces that counts: 1 to outdoor air, less against ground or an unheated space (BuEM b_transmission). Empty when the surfaces differ; party walls keep 0."
+                unit={t('insulation.unitShare')} min={0} max={1} step={0.05}
+                tip={t('insulation.table.lossFactorTip')}
               />
             )}
           </div>
@@ -190,12 +199,13 @@ function OptionalNumber({ label, value, onChange, unit, min, max, step, tip }: {
   onChange: (v: number | null) => void;
   unit: string; min: number; max: number; step: number; tip: string;
 }) {
+  const t = useT();
   return (
     <div>
       <NumberInput label={label} value={value ?? ''} onChange={(v) => onChange(Math.min(max, Math.max(min, v)))} unit={unit} min={min} max={max} step={step} tip={tip} />
       <p className="mt-1 text-[10px] text-muted-foreground">
-        {value === null ? 'BuEM default.' : (
-          <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>Use default</button>
+        {value === null ? t('insulation.buemDefault') : (
+          <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>{t('insulation.useDefault')}</button>
         )}
       </p>
     </div>
@@ -203,49 +213,59 @@ function OptionalNumber({ label, value, onChange, unit, min, max, step, tip }: {
 }
 
 function SynthesisedWindows({ elements, general, setGen }: Props) {
+  const t = useT();
   if (Object.values(elements).some((el) => el.type === 'window')) return null;
   const share = general.window_to_wall_ratio;
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">Windows BuEM adds</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">{t('insulation.windows.title')}</p>
       <p className="text-[10px] leading-snug text-muted-foreground">
-        The building has no window surfaces, so BuEM glazes a share of each exposed wall.
+        {t('insulation.windows.note')}
       </p>
       <div className="grid grid-cols-3 gap-2">
         <OptionalNumber
-          label="Window share"
+          label={t('insulation.windows.share.label')}
           value={share === null ? null : Math.round(share * 1000) / 10}
           onChange={(v) => setGen('window_to_wall_ratio', v === null ? null : Math.min(v, 99) / 100)}
           unit="%" min={0} max={99} step={1}
-          tip="Share of each exposed wall's area that is glazed."
+          tip={t('insulation.windows.share.tip')}
         />
         <OptionalNumber
-          label="Window U"
+          label={t('insulation.windows.u.label')}
           value={general.window_U}
           onChange={(v) => setGen('window_U', v)}
           unit="W/m²K" min={0} max={6} step={0.1}
-          tip="U-value of those windows. Default: the TABULA value for the building type, else 2.8."
+          tip={t('insulation.windows.u.tip')}
         />
         <OptionalNumber
-          label="Window g"
+          label={t('insulation.windows.g.label')}
           value={general.window_g_gl}
           onChange={(v) => setGen('window_g_gl', v)}
-          unit="0 to 1" min={0} max={1} step={0.05}
-          tip="Share of the sunlight on those windows that enters as heat. Default: the TABULA value for the building type, else 0.5."
+          unit={t('insulation.unitShare')} min={0} max={1} step={0.05}
+          tip={t('insulation.windows.g.tip')}
         />
       </div>
     </div>
   );
 }
 
-const ADDABLE_TYPES = [
-  { value: 'wall', label: 'Wall' },
-  { value: 'floor', label: 'Floor' },
-  { value: 'roof', label: 'Roof' },
-];
+function addableTypes(t: Translate) {
+  return [
+    { value: 'wall', label: t('insulation.add.type.wall') },
+    { value: 'floor', label: t('insulation.add.type.floor') },
+    { value: 'roof', label: t('insulation.add.type.roof') },
+  ];
+}
+
+const ADD_BUTTON_LABELS: Record<string, (t: Translate) => string> = {
+  wall: (t) => t('insulation.add.button.wall'),
+  floor: (t) => t('insulation.add.button.floor'),
+  roof: (t) => t('insulation.add.button.roof'),
+};
 
 /** A surface the 3D data lacks, for example a wall against ground or a floor over an open passage. */
 function AddSurface({ onAdd }: { onAdd: NonNullable<InsulationProps['onAddSurface']> }) {
+  const t = useT();
   const [type, setType] = useState<RefurbElementType>('wall');
   const [label, setLabel] = useState('');
   const [area, setArea] = useState(10);
@@ -257,29 +277,28 @@ function AddSurface({ onAdd }: { onAdd: NonNullable<InsulationProps['onAddSurfac
   };
   return (
     <details className="group rounded-md border border-slate-200">
-      <summary className="cursor-pointer px-2.5 py-2 text-xs font-semibold text-slate-700">Add a surface</summary>
+      <summary className="cursor-pointer px-2.5 py-2 text-xs font-semibold text-slate-700">{t('insulation.add.title')}</summary>
       <div className="flex flex-col gap-2 border-t border-slate-200 p-2.5">
         <p className="text-[10px] leading-snug text-muted-foreground">
-          For a surface the 3D data does not show, such as a wall against ground (loss factor about 0.5)
-          or a floor over an open passage (1). It is listed in the Envelope tab, not drawn in the model.
+          {t('insulation.add.note')}
         </p>
         <div className="grid grid-cols-2 gap-2">
-          <SelectInput label="Type" value={type} onChange={(v) => setType(v as RefurbElementType)} options={ADDABLE_TYPES} />
+          <SelectInput label={t('insulation.add.typeLabel')} value={type} onChange={(v) => setType(v as RefurbElementType)} options={addableTypes(t)} />
           <div>
-            <FieldLabel>Name</FieldLabel>
+            <FieldLabel>{t('insulation.add.name')}</FieldLabel>
             <div className="cfg-input-wrap">
               <input
                 type="text"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                placeholder="e.g. Basement wall"
+                placeholder={t('insulation.add.namePlaceholder')}
                 className="cfg-number"
               />
             </div>
           </div>
-          <NumberInput label="Area" value={area} onChange={(v) => setArea(Math.max(0, v))} unit="m²" min={0} step={1} />
-          <NumberInput label="U-value" value={uValue} onChange={(v) => setUValue(Math.max(0, v))} unit="W/m²K" min={0} max={6} step={0.01} />
-          <NumberInput label="Loss factor" value={loss} onChange={(v) => setLoss(Math.min(1, Math.max(0, v)))} unit="0 to 1" min={0} max={1} step={0.05} />
+          <NumberInput label={t('insulation.add.area')} value={area} onChange={(v) => setArea(Math.max(0, v))} unit="m²" min={0} step={1} />
+          <NumberInput label={t('insulation.uValue')} value={uValue} onChange={(v) => setUValue(Math.max(0, v))} unit="W/m²K" min={0} max={6} step={0.01} />
+          <NumberInput label={t('insulation.lossFactor')} value={loss} onChange={(v) => setLoss(Math.min(1, Math.max(0, v)))} unit={t('insulation.unitShare')} min={0} max={1} step={0.05} />
         </div>
         <button
           type="button"
@@ -287,7 +306,7 @@ function AddSurface({ onAdd }: { onAdd: NonNullable<InsulationProps['onAddSurfac
           disabled={area <= 0}
           className="cursor-pointer self-start rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Add {type}
+          {ADD_BUTTON_LABELS[type](t)}
         </button>
       </div>
     </details>

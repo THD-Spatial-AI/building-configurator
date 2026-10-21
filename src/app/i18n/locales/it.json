@@ -1,0 +1,650 @@
+{
+  "view": {
+    "back": {
+      "title": "Torna alla mappa (Esc)",
+      "label": "Mappa"
+    },
+    "surfaceCount": {
+      "one": "{count} superficie",
+      "other": "{count} superfici"
+    },
+    "avgU": "U medio {value} W/m²K",
+    "export": {
+      "button": "Esporta",
+      "model": {
+        "title": "Modello (JSON)",
+        "detail": "BuEM GeoJSON: tutto ciò che serve a una simulazione"
+      },
+      "tables": {
+        "title": "Tabelle (CSV)",
+        "detail": "building.csv e surfaces.csv, compressi in zip"
+      }
+    },
+    "mode": {
+      "basic": "Base",
+      "expert": "Esperto"
+    },
+    "undo": {
+      "title": "Annulla {action} (Ctrl+Z)",
+      "none": "Niente da annullare",
+      "action": "Annulla {action}",
+      "label": "Annulla"
+    },
+    "loadingGeometry": "Caricamento geometria delle superfici…",
+    "detached": "Le superfici salvate di questo edificio provengono da una generazione City2TABULA precedente, quindi nessuna corrisponde ai dati 3D attuali. I valori salvati restano validi; il modello non viene mostrato.",
+    "noGeometry": "City2TABULA non contiene geometria 3D per questo edificio.",
+    "invalidSurfaces": {
+      "one": "{count} superficie senza area, esclusa dalla simulazione",
+      "other": "{count} superfici senza area, escluse dalla simulazione"
+    },
+    "run": {
+      "working": "Calcolo dell'energia in corso…",
+      "start": "Salva e visualizza fabbisogno energetico"
+    },
+    "surface": "Superficie",
+    "discardSurface": {
+      "message": "Hai modificato questa superficie. Vuoi mantenere le modifiche?",
+      "note": "Scartando, la superficie torna com'era all'apertura dell'editor."
+    }
+  },
+  "surface": {
+    "type": {
+      "wall": "Parete",
+      "window": "Finestra",
+      "roof": "Tetto",
+      "floor": "Pavimento",
+      "door": "Porta"
+    },
+    "close": "Chiudi",
+    "area": "Area",
+    "areaRejected": "Una simulazione la rifiuterà",
+    "useGeometryArea": "Usa {area} m² dal modello",
+    "uValue": "Valore U",
+    "insulation": {
+      "veryWell": "Molto ben isolato",
+      "well": "Ben isolato",
+      "moderate": "Mediamente isolato",
+      "poor": "Poco isolato",
+      "none": "Non isolato"
+    },
+    "rValue": "Valore R (1/U): {value} m²K/W",
+    "gValue": "Fattore solare (g)",
+    "solar": {
+      "high": "Lascia passare gran parte del calore solare",
+      "low": "Blocca gran parte del calore solare"
+    },
+    "sharedWall": "Condivisa con un edificio adiacente",
+    "imported": "Importato: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
+    "reset": "Ripristina",
+    "delete": "Elimina questa superficie",
+    "facing": "Esposizione",
+    "facingDirection": "Esposta a {direction}",
+    "compass": {
+      "n": "N",
+      "ne": "NE",
+      "e": "E",
+      "se": "SE",
+      "s": "S",
+      "sw": "SO",
+      "w": "O",
+      "nw": "NO"
+    },
+    "azimuth": "Azimut",
+    "tilt": "Inclinazione",
+    "tiltShape": {
+      "flat": "Piano",
+      "vertical": "Verticale",
+      "pitched": "Inclinato"
+    },
+    "degrees": "{degrees} gradi, {label}"
+  },
+  "profile": {
+    "title": "Profilo di carico orario",
+    "stored": "Risultato BuEM salvato",
+    "upload": "Carica",
+    "download": "Scarica",
+    "source": {
+      "buem": "Output del modello BuEM",
+      "none": "Nessun profilo caricato",
+      "file": "{name}",
+      "aggregated": "{source} · aggregato da dati {from}"
+    },
+    "resolution": {
+      "hourly": "orari",
+      "daily": "giornalieri",
+      "weekly": "settimanali",
+      "monthly": "mensili"
+    },
+    "error": {
+      "parse": "{reason}",
+      "unreadable": "Impossibile leggere il file del profilo di carico."
+    }
+  },
+  "pv": {
+    "surfacesWithPv": {
+      "one": "{count} superficie con FV",
+      "other": "{count} superfici con FV"
+    },
+    "state": {
+      "installed": "Con FV",
+      "suggested": "Consigliata",
+      "available": "Disponibile"
+    },
+    "toggle": "FV su {surface}",
+    "surfaceType": {
+      "wall": "parete",
+      "window": "finestra",
+      "roof": "tetto",
+      "floor": "pavimento",
+      "door": "porta"
+    },
+    "thisSurface": "FV su questa superficie",
+    "usableShare": "Quota utilizzabile",
+    "usableShareNote": "di questa superficie, al netto degli ostacoli",
+    "capacity": "Potenza"
+  },
+  "tech": {
+    "none": "Nessuna tecnologia su questo edificio.",
+    "remove": "Rimuovi {title}"
+  },
+  "editor": {
+    "identity": {
+      "name": {
+        "label": "Nome edificio",
+        "tip": "Nome leggibile dell'edificio. Incluso nei file esportati.",
+        "placeholder": "es. 3434 · Casa unifamiliare"
+      },
+      "type": {
+        "label": "Tipo di edificio",
+        "tip": "Categoria edilizia TABULA. Influisce sui valori U predefiniti e sui fabbisogni energetici di riferimento."
+      },
+      "country": {
+        "label": "Paese",
+        "tip": "Paese usato per scegliere i dati di riferimento TABULA e la stazione meteo COSMO."
+      },
+      "year": {
+        "label": "Anno di costruzione",
+        "tip": "Anno di costruzione dell'edificio. ignis lo associa a un periodo costruttivo TABULA per i valori U predefiniti."
+      },
+      "floorArea": {
+        "label": "Superficie (per piano)",
+        "tip": "Superficie di un singolo piano: la superficie climatizzata totale è questa × piani."
+      },
+      "storeys": {
+        "label": "Piani",
+        "tip": "Numero di piani fuori terra."
+      },
+      "roomHeight": {
+        "label": "Altezza interna",
+        "tip": "Altezza netta interna per piano. Usata per calcolare il volume d'aria riscaldato."
+      },
+      "volume": "Volume riscaldato"
+    },
+    "solver": {
+      "useMilp": {
+        "label": "Usa il solutore MILP",
+        "tip": "Risolve il modello termico come programma lineare misto intero invece del solutore sparso predefinito di BuEM. Più lento, ma gestisce esattamente i vincoli di disuguaglianza."
+      },
+      "milpNote": "Solutore MILP: vincoli di disuguaglianza gestiti esattamente. Calcoli più lunghi.",
+      "sparseNote": "Solutore sparso predefinito di BuEM. Veloce."
+    },
+    "ignis": {
+      "noCountryBefore": "Imposta un paese in",
+      "basicInfo": "Dati di base",
+      "noCountryAfter": "per abilitare il calcolo del fabbisogno termico.",
+      "unsupportedBefore": "Il tipo di edificio",
+      "unsupportedAfter": "non è presente nel database TABULA. Tipi supportati: {types}.",
+      "noData": "Nessun dato TABULA per questo edificio: il servizio TABULA non ha varianti per esso o non è raggiungibile."
+    },
+    "section": {
+      "identity": "Dati di base",
+      "occupancy": "Occupazione",
+      "comfort": "Riscaldamento e comfort",
+      "outputs": "Risultati da calcolare",
+      "equipment": "Elettrodomestici",
+      "solver": "Metodo di calcolo"
+    },
+    "summary": {
+      "outputs": "{on} di {total} profili",
+      "equipmentSet": "{overrides} impostati a mano",
+      "equipmentDefault": "Predefiniti",
+      "solverMilp": "MILP",
+      "solverSparse": "Sparso",
+      "occupants": "{capacity} occupanti",
+      "capacityFromArea": "Capienza dalla superficie",
+      "dwellings": {
+        "one": "{count} alloggio",
+        "other": "{count} alloggi"
+      },
+      "dwellingsNotSet": "Alloggi non impostati",
+      "perDwelling": "{dwellings} · {persons} per alloggio"
+    },
+    "header": {
+      "fallbackName": "Edificio"
+    },
+    "insulationTitle": "Isolamento e finestre"
+  },
+  "comfort": {
+    "mass": {
+      "light": "Leggera",
+      "medium": "Media",
+      "heavy": "Pesante",
+      "label": "Massa termica",
+      "tip": "Quanto calore accumula la struttura. Leggera: telaio in legno o costruzione leggera; media: mista; pesante: calcestruzzo o muratura.",
+      "capacity": {
+        "label": "Capacità termica per m² di pavimento",
+        "tip": "Impostata dalla classe di massa termica; modificabile."
+      },
+      "total": "Massa termica totale"
+    },
+    "hotWater": {
+      "on": "Inclusa",
+      "off": "Non inclusa",
+      "label": "Acqua calda sanitaria",
+      "tip": "Disattiva quando l'acqua calda è fornita da un impianto considerato altrove. Il riscaldamento degli ambienti non cambia."
+    },
+    "summary": {
+      "setback": {
+        "none": "senza attenuazione",
+        "nightOnly": "ridotta di notte",
+        "nightAndAway": "ridotta di notte e in assenza",
+        "deep": "ridotta con attenuazione forte",
+        "unknown": "ridotta {setback}"
+      },
+      "hotWaterOn": "ACS inclusa",
+      "hotWaterOff": "senza ACS"
+    },
+    "heating": {
+      "label": "Setpoint riscaldamento",
+      "tip": "Temperatura interna minima mantenuta dal riscaldamento."
+    },
+    "setback": {
+      "label": "Ridurla quando",
+      "tip": "Abbassa il setpoint di riscaldamento mentre gli occupanti dormono o sono assenti. Influisce solo sul riscaldamento."
+    },
+    "cooling": {
+      "label": "Setpoint raffrescamento",
+      "tip": "Temperatura interna massima mantenuta dal raffrescamento.",
+      "inverted": "Impostalo sopra il setpoint di riscaldamento."
+    },
+    "air": {
+      "infiltration": {
+        "label": "Infiltrazioni d'aria",
+        "tip": "Ricambi d'aria orari non controllati attraverso le fessure dell'involucro (infiltrazione)."
+      },
+      "use": {
+        "label": "Ventilazione da occupanti",
+        "tip": "Ricambi d'aria orari dovuti ad apertura delle finestre e ventilatori durante l'uso dell'edificio."
+      },
+      "total": "Ricambi d'aria totali"
+    }
+  },
+  "household": {
+    "default": "Predefinito",
+    "useDefault": "Usa predefinito",
+    "capacity": {
+      "label": "Capienza",
+      "placeholder": "Ricavata dalla superficie.",
+      "tip": "Numero di occupanti. Se vuoto, BuEM lo ricava dalla superficie con una densità per il tipo di edificio."
+    },
+    "dwellings": {
+      "label": "Alloggi",
+      "requiredTip": "Numero di alloggi. Precompilato dall'archetipo TABULA. BuEM simula un alloggio rappresentativo e lo moltiplica per questo numero.",
+      "required": "Obbligatorio per il tipo {type}.",
+      "placeholder": "Un alloggio.",
+      "tip": "Numero di alloggi. BuEM simula un alloggio rappresentativo e lo moltiplica per questo numero."
+    },
+    "persons": {
+      "label": "Occupanti per alloggio",
+      "tip": "Persone che vivono in ogni alloggio. Il predefinito è la dimensione statistica del nucleo familiare per paese, regione e tipo di edificio."
+    },
+    "archetype": {
+      "label": "Tipo di nucleo familiare",
+      "tip": "Composizione del nucleo familiare. Determina quando gli occupanti sono in casa, il che influenza apporti interni, elettricità e acqua calda."
+    },
+    "region": {
+      "label": "Codice regione (Paesi Bassi)",
+      "tip": "Codice comunale CBS olandese. Seleziona la dimensione regionale del nucleo familiare quando gli occupanti per alloggio restano al predefinito.",
+      "placeholder": "es. GM0200"
+    },
+    "cooking": {
+      "label": "Cottura con",
+      "tip": "La cottura elettrica rientra nel profilo elettrico. La cottura a gas è riportata a parte come gas di cottura. Predefinito del modello usa l'impostazione del modello a cui appartiene l'edificio."
+    },
+    "equipment": {
+      "yes": "Sì",
+      "no": "No",
+      "intro": "Predefinito lascia ogni elettrodomestico alle statistiche di possesso di BuEM.",
+      "sameInEveryDwelling": "Ogni alloggio dell'edificio riceve gli stessi elettrodomestici.",
+      "televisions": "Televisori",
+      "resetAll": "Ripristina tutti i predefiniti",
+      "groupDefault": "{items} predefiniti",
+      "groupSet": "{set} impostati: {owned} sì, {notOwned} no"
+    },
+    "outputs": {
+      "cookingGasOnlyWithGas": "Il gas di cottura è riportato solo con la cottura a gas.",
+      "thermalOff": "Senza riscaldamento né raffrescamento BuEM salta il modello termico: superfici e meteo non vengono usati."
+    }
+  },
+  "insulation": {
+    "type": {
+      "wall": "Pareti",
+      "roof": "Tetto",
+      "floor": "Pavimento",
+      "window": "Finestre",
+      "door": "Porte"
+    },
+    "summary": {
+      "mixed": "Misto",
+      "averageU": "U medio {value} W/m²K"
+    },
+    "averageU": "Valore U medio",
+    "editSurfaces": "Modifica le superfici una per una",
+    "preset": {
+      "label": "Imposta l'intero edificio a",
+      "tip": "Varianti di riqualificazione TABULA per questo tipo ed età di edificio. Una scelta imposta ogni tipo di elemento; le superfici impostate una per una mantengono i loro valori.",
+      "fromVariant": "Dai dati 3D: TABULA {code}.",
+      "fromType": "Varianti TABULA per tipo ed età dell'edificio.",
+      "typesDiffer": "I tipi di elemento differiscono.",
+      "customKept": {
+        "one": "{count} superficie impostata singolarmente mantiene il suo valore.",
+        "other": "{count} superfici impostate singolarmente mantengono il loro valore."
+      }
+    },
+    "table": {
+      "title": "Per tipo di elemento",
+      "custom": "Personalizzato",
+      "surfaces": {
+        "one": "{count} superficie",
+        "other": "{count} superfici"
+      },
+      "setOneByOne": "{custom} impostate singolarmente",
+      "state": "Stato",
+      "lossFactorTip": "Quota della dispersione termica attraverso queste superfici che viene considerata: 1 verso l'aria esterna, meno verso terreno o ambienti non riscaldati (BuEM b_transmission). Vuoto se le superfici differiscono; le pareti condivise restano a 0."
+    },
+    "uValue": "Valore U",
+    "lossFactor": "Fattore di riduzione",
+    "unitShare": "da 0 a 1",
+    "buemDefault": "Predefinito BuEM.",
+    "useDefault": "Usa predefinito",
+    "windows": {
+      "title": "Finestre aggiunte da BuEM",
+      "note": "L'edificio non ha superfici finestrate, quindi BuEM vetra una quota di ogni parete esposta.",
+      "share": {
+        "label": "Quota finestrata",
+        "tip": "Quota dell'area di ogni parete esposta che è vetrata."
+      },
+      "u": {
+        "label": "U finestre",
+        "tip": "Valore U di quelle finestre. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 2.8."
+      },
+      "g": {
+        "label": "g finestre",
+        "tip": "Quota della radiazione solare su quelle finestre che entra come calore. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 0.5."
+      }
+    },
+    "add": {
+      "type": {
+        "wall": "Parete",
+        "floor": "Pavimento",
+        "roof": "Tetto"
+      },
+      "button": {
+        "wall": "Aggiungi parete",
+        "floor": "Aggiungi pavimento",
+        "roof": "Aggiungi tetto"
+      },
+      "title": "Aggiungi una superficie",
+      "note": "Per una superficie che i dati 3D non mostrano, come una parete contro terra (fattore di riduzione circa 0.5) o un pavimento su un passaggio aperto (1). È elencata nella scheda Involucro, non disegnata nel modello.",
+      "typeLabel": "Tipo",
+      "name": "Nome",
+      "namePlaceholder": "es. Parete del seminterrato",
+      "area": "Area"
+    },
+    "variant": {
+      "full": {
+        "existing": "Stato attuale",
+        "usual": "Riqualificazione standard",
+        "advanced": "Riqualificazione avanzata"
+      },
+      "short": {
+        "existing": "Attuale",
+        "usual": "Standard",
+        "advanced": "Avanzata"
+      }
+    }
+  },
+  "options": {
+    "buildingType": {
+      "sfh": "Casa unifamiliare",
+      "th": "Casa a schiera",
+      "mfh": "Edificio plurifamiliare",
+      "ab": "Condominio",
+      "bakery": "Panetteria",
+      "clinic": "Clinica",
+      "hotel": "Hotel",
+      "office": "Ufficio",
+      "restaurant": "Ristorante",
+      "school": "Scuola",
+      "supermarket": "Supermercato",
+      "warehouse": "Magazzino"
+    },
+    "archetype": {
+      "default": "Predefinito per il tipo di edificio",
+      "generic": "Nucleo familiare generico",
+      "workingCouple": "Coppia che lavora",
+      "familyWithChildren": "Famiglia con figli",
+      "retiredSingle": "Pensionato, vive da solo",
+      "studentShared": "Studenti in condivisione"
+    },
+    "setback": {
+      "none": "Mai",
+      "nightOnly": "Di notte",
+      "nightAndAway": "Di notte e in assenza",
+      "deep": "Attenuazione forte"
+    },
+    "cookingCarrier": {
+      "default": "Predefinito del modello",
+      "electric": "Elettrica",
+      "gas": "Gas",
+      "none": "Non riportata"
+    },
+    "output": {
+      "heating": "Riscaldamento ambienti",
+      "cooling": "Raffrescamento ambienti",
+      "electricity": "Elettricità",
+      "hotWater": "Acqua calda sanitaria",
+      "kitchen": "Gas di cottura"
+    },
+    "outputLevel": {
+      "none": "No",
+      "summary": "Annuale",
+      "series": "Orario"
+    },
+    "equipmentGroup": {
+      "cooking": "Cottura",
+      "cold": "Freddo",
+      "laundry": "Bucato e pulizia",
+      "electronics": "Elettronica",
+      "misc": "Altro"
+    },
+    "equipment": {
+      "hob": "Piano cottura",
+      "oven": "Forno",
+      "microwave": "Microonde",
+      "kettle": "Bollitore",
+      "smallCookingGroup": "Piccoli elettrodomestici da cucina",
+      "airFryer": "Friggitrice ad aria",
+      "coffeeMachine": "Macchina del caffè",
+      "fridgeFreezer": "Frigocongelatore",
+      "refrigerator": "Frigorifero",
+      "chestFreezer": "Congelatore a pozzetto",
+      "uprightFreezer": "Congelatore verticale",
+      "washingMachine": "Lavatrice",
+      "tumbleDryer": "Asciugatrice",
+      "washerDryer": "Lavasciuga",
+      "dishWasher": "Lavastoviglie",
+      "iron": "Ferro da stiro",
+      "vacuum": "Aspirapolvere",
+      "robotVacuum": "Robot aspirapolvere",
+      "tvReceiverBox": "Decoder TV",
+      "personalComputer": "Personal computer",
+      "printer": "Stampante",
+      "hiFi": "Hi-fi",
+      "cassetteCdPlayer": "Lettore cassette o CD",
+      "vcrDvd": "Videoregistratore o lettore DVD",
+      "laptop": "Portatile",
+      "smartSpeaker": "Smart speaker",
+      "streamingStick": "Chiavetta streaming",
+      "wifiRouter": "Router Wi-Fi",
+      "lighting": "Illuminazione",
+      "clock": "Orologio",
+      "answerMachine": "Segreteria telefonica",
+      "cordlessTelephone": "Telefono cordless",
+      "fax": "Fax",
+      "evCharger": "Caricatore VE"
+    },
+    "country": {
+      "de": "DE - Germania",
+      "at": "AT - Austria",
+      "nl": "NL - Paesi Bassi",
+      "cz": "CZ - Cechia"
+    }
+  },
+  "panel": {
+    "title": {
+      "overview": "Panoramica energetica",
+      "envelope": "Involucro edilizio",
+      "technology": "Tecnologie",
+      "parameters": "Parametri dell'edificio"
+    },
+    "tab": {
+      "overview": "Panoramica",
+      "parameters": "Parametri",
+      "envelope": "Involucro"
+    },
+    "doneEditing": "Fine modifica",
+    "editParameters": "Modifica i parametri dell'edificio"
+  },
+  "snapshot": {
+    "status": {
+      "default": "predefinito",
+      "modified": "modificato"
+    },
+    "thermalRating": {
+      "excellent": "Ottima",
+      "good": "Buona",
+      "fair": "Discreta",
+      "poor": "Scarsa",
+      "veryPoor": "Molto scarsa"
+    },
+    "row": {
+      "type": "Tipo",
+      "constructionYear": "Anno di costruzione",
+      "country": "Paese",
+      "floorAreaPerStorey": "Superficie (per piano)",
+      "storeys": "Piani",
+      "roomHeight": "Altezza interna",
+      "volume": "Volume",
+      "envelope": "Involucro"
+    },
+    "envelopeValue": {
+      "one": "{area} m²  ·  {count} superficie",
+      "other": "{area} m²  ·  {count} superfici"
+    },
+    "energy": {
+      "heating": "Riscaldamento",
+      "electricity": "Elettricità",
+      "cooling": "Raffrescamento",
+      "hotWater": "Acqua calda",
+      "kitchen": "Cucina (gas)"
+    },
+    "estimateNotice": "I parametri dell'edificio sono stimati da dati pubblici. Apri il configuratore per verificarli e modificarli.",
+    "annualDemand": "Fabbisogno energetico annuo",
+    "totalDemand": "Fabbisogno totale",
+    "thermalEfficiency": "Efficienza termica"
+  },
+  "envelope": {
+    "group": {
+      "walls": "Pareti",
+      "windows": "Finestre",
+      "doors": "Porte",
+      "roof": "Tetto",
+      "floor": "Pavimento"
+    },
+    "roofShape": {
+      "flat": "bassa pendenza",
+      "monoPitch": "una falda",
+      "gabled": "S + N",
+      "hipped": "S/N/E/O",
+      "vShape": "falde verso l'interno",
+      "sawTooth": "esposto a S",
+      "custom": "personalizzato"
+    },
+    "invalidAreaTip": "{count} senza area, da correggere prima di una simulazione",
+    "noArea": "senza area",
+    "compassNorth": "N"
+  },
+  "common": {
+    "source": {
+      "estimated": "stimato",
+      "userDefined": "definito dall'utente"
+    },
+    "comparison": {
+      "higher": "{percent}% in più rispetto {reference} ({kwh} kWh)",
+      "lower": "{percent}% in meno rispetto {reference} ({kwh} kWh)"
+    },
+    "scroll": "scorri",
+    "close": "Chiudi",
+    "unsaved": {
+      "title": "Modifiche non salvate",
+      "message": "Hai modifiche non salvate alla configurazione di questo edificio. Cosa vuoi fare?",
+      "note": "Chiudendo senza salvare perderai tutte le modifiche fatte dall'ultimo salvataggio.",
+      "continueEditing": "Continua a modificare",
+      "saveAndClose": "Salva e chiudi",
+      "discard": "Scarta modifiche"
+    }
+  },
+  "model": {
+    "history": {
+      "refurbishment": "riqualificazione",
+      "lossFactor": "modifica fattore di riduzione",
+      "discarded": "scarto modifiche superficie",
+      "roofType": "modifica tipo di tetto",
+      "import": "importazione",
+      "field": {
+        "area": "modifica area",
+        "uValue": "modifica valore U",
+        "tilt": "modifica inclinazione",
+        "azimuth": "modifica orientamento",
+        "gValue": "modifica fattore solare",
+        "label": "rinomina",
+        "surface": "modifica superficie"
+      },
+      "deleted": {
+        "wall": "eliminazione parete",
+        "window": "eliminazione finestra",
+        "roof": "eliminazione tetto",
+        "floor": "eliminazione pavimento",
+        "door": "eliminazione porta",
+        "surface": "eliminazione superficie"
+      },
+      "added": {
+        "wall": "aggiunta parete",
+        "window": "aggiunta finestra",
+        "roof": "aggiunta tetto",
+        "floor": "aggiunta pavimento",
+        "door": "aggiunta porta"
+      }
+    },
+    "error": {
+      "dwellingsRequired": "Questo tipo di edificio richiede il numero di alloggi. Impostalo in Occupazione prima di avviare una simulazione.",
+      "runFailed": "Simulazione non riuscita: il backend EnerPlanET non è raggiungibile o ha rifiutato la richiesta. Vedi la console del browser per i dettagli.",
+      "exportFailed": "Esportazione non riuscita: {reason}",
+      "importFailed": "Impossibile leggere il file: {reason}. Verifica che sia un BuEM GeoJSON valido, un export del configuratore legacy o un config.json di EnerPlanET."
+    },
+    "comparison": {
+      "lastRun": "all'ultima simulazione completa"
+    }
+  }
+}

@@ -6,8 +6,9 @@ import { Pencil, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
-import { MIN_CONSTRUCTION_YEAR } from '../shared/buildingOptions';
+import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryOptions } from '../shared/buildingOptions';
 import { ElementCompositionSection } from './ElementCompositionSection';
+import { useT, type Translate } from '@/app/i18n';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 
@@ -18,6 +19,20 @@ const ROW_UNITS: Record<string, string> = {
   roomHeight: 'm',
   constructionYear: '',
 };
+
+/** A row's select options, translated where the row is one the UI labels. */
+function rowOptions(row: SnapshotRow, t: Translate) {
+  if (row.editKey === 'buildingType') return buildingTypeOptions(t);
+  if (row.editKey === 'country') return countryOptions(t);
+  return row.options ?? [];
+}
+
+/** A row's display value, translated where it holds words. */
+function rowValue(row: SnapshotRow, t: Translate): string {
+  if (row.valueMessage) return t(row.valueMessage.key, row.valueMessage.values);
+  if (row.editKey === 'buildingType') return buildingTypeName(t, row.value);
+  return row.value;
+}
 
 const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
 
@@ -55,6 +70,7 @@ export function BuildingDetailsCard({
 }: BuildingDetailsCardProps) {
   // Off by default — edits only ever apply while explicitly toggled on, so a stray
   // click on the table never changes the building's data.
+  const t = useT();
   const [isEditing, setIsEditing] = useState(false);
   // Whichever tab carries the most for this caller opens first: the energy
   // overview where there is one, otherwise the envelope where it carries the 3D
@@ -68,10 +84,10 @@ export function BuildingDetailsCard({
       {/* Wraps the tabs under the title when the panel is too narrow for both on one line. */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 border-b border-slate-100">
         <p className="whitespace-nowrap text-[13px] font-bold text-slate-800">
-          {activeTab === 'overview' ? 'Energy overview'
-            : activeTab === 'envelope' ? 'Building Envelope'
-            : activeTab === 'technology' ? 'Technologies'
-            : 'Building Parameters'}
+          {activeTab === 'overview' ? t('panel.title.overview')
+            : activeTab === 'envelope' ? t('panel.title.envelope')
+            : activeTab === 'technology' ? t('panel.title.technology')
+            : t('panel.title.parameters')}
         </p>
         <div className="ml-auto flex items-center gap-3">
           {/* Plain menu-bar tabs — not a filled segmented-control pill, just
@@ -95,10 +111,10 @@ export function BuildingDetailsCard({
                     : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
                 )}
               >
-                {tab === 'overview' ? 'Overview'
-                  : tab === 'parameters' ? 'Parameters'
-                  : tab === 'envelope' ? 'Envelope'
-                  : 'Technologies'}
+                {tab === 'overview' ? t('panel.tab.overview')
+                  : tab === 'parameters' ? t('panel.tab.parameters')
+                  : tab === 'envelope' ? t('panel.tab.envelope')
+                  : t('panel.title.technology')}
               </button>
             ))}
           </div>
@@ -106,7 +122,7 @@ export function BuildingDetailsCard({
             <button
               type="button"
               onClick={() => setIsEditing((v) => !v)}
-              title={isEditing ? 'Done editing' : 'Edit building parameters'}
+              title={isEditing ? t('panel.doneEditing') : t('panel.editParameters')}
               className={cn(
                 'flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors',
                 isEditing ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600',
@@ -135,14 +151,14 @@ export function BuildingDetailsCard({
               const editable = isEditing && onEditField && row.editKey && row.editType;
               return (
                 <tr key={row.label} className="border-t border-slate-100">
-                  <td className="px-4 py-2.5 text-slate-500">{row.label}</td>
+                  <td className="px-4 py-2.5 text-slate-500">{t(row.labelKey)}</td>
                   <td className="px-4 py-2 text-right font-medium text-slate-700">
                     {editable ? (
                       row.editType === 'select' ? (
                         <SelectInput
                           value={String(row.rawValue ?? '')}
                           onChange={(v) => onEditField!(row.editKey!, v)}
-                          options={row.options ?? []}
+                          options={rowOptions(row, t)}
                         />
                       ) : (
                         <NumberInput
@@ -154,7 +170,7 @@ export function BuildingDetailsCard({
                           step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
                         />
                       )
-                    ) : row.value}
+                    ) : rowValue(row, t)}
                   </td>
                   <td className="px-3 py-2 text-center">
                     <SnapshotStatusBadge status={row.status} />

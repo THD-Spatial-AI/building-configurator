@@ -10,7 +10,7 @@ import type { BuildingElement } from '@/app/components/BuildingConfigurator/conf
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import {
   ElementGroupKey,
-  ELEMENT_GROUP_LABELS,
+  elementGroupLabels,
   getGroupedElements,
   getRoofGroupInfo,
 } from '../shared/elementListUtils';
@@ -19,6 +19,7 @@ import {
   SnapshotStatusBadge,
   getElementStatus,
 } from '../shared/snapshotUtils';
+import { useT } from '@/app/i18n';
 
 export interface ElementCompositionSectionProps {
   elements: Record<string, BuildingElement>;
@@ -35,10 +36,12 @@ export function ElementCompositionSection({
   roofConfig,
   onSelectSurface,
 }: ElementCompositionSectionProps) {
+  const t = useT();
   const [expanded, setExpanded] = useState<ElementGroupKey | null>(null);
   const grouped  = getGroupedElements(elements);
-  const roofInfo = getRoofGroupInfo(roofConfig);
-  const types    = (Object.keys(grouped) as ElementGroupKey[]).filter((t) => grouped[t].length > 0);
+  const roofInfo = getRoofGroupInfo(roofConfig, t);
+  const groupLabels = elementGroupLabels(t);
+  const types    = (Object.keys(grouped) as ElementGroupKey[]).filter((key) => grouped[key].length > 0);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -69,7 +72,7 @@ export function ElementCompositionSection({
             >
               <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: ELEMENT_DOTS[type] }} />
               <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-slate-700">
-                {ELEMENT_GROUP_LABELS[type]}
+                {groupLabels[type]}
                 <span className="ml-1.5 font-normal text-slate-400">
                   {items.length}
                   {type === 'roof' && roofInfo.description ? ` · ${roofInfo.description}` : ''}
@@ -80,7 +83,7 @@ export function ElementCompositionSection({
               </span>
               {invalidCount > 0 && (
                 <span
-                  title={`${invalidCount} with no area, fix before running a simulation`}
+                  title={t('envelope.invalidAreaTip', { count: invalidCount })}
                   className="flex shrink-0 items-center gap-0.5 text-[11px] font-semibold text-destructive"
                 >
                   <AlertTriangle className="size-3" />
@@ -113,7 +116,7 @@ export function ElementCompositionSection({
                           {el.label}
                         </span>
                         <span className={cn('shrink-0 tabular-nums', invalid ? 'font-medium text-destructive' : 'text-slate-500')}>
-                          {invalid ? 'no area' : `${el.area.toFixed(1)} m²`}
+                          {invalid ? t('envelope.noArea') : `${el.area.toFixed(1)} m²`}
                         </span>
                         <span className="w-12 shrink-0 text-right tabular-nums text-slate-400">U {el.uValue.toFixed(2)}</span>
                       </button>

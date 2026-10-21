@@ -32,6 +32,7 @@ import { applyState, startingStates, variantSubtype, type RefurbElementType } fr
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
+import type { Message } from '../../i18n';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
@@ -179,13 +180,13 @@ function resolveDisplayEnergyTotals(
     hotwaterSource: 'user',
     heatingDeltaPercent,
     heatingBaselineKwh: heatingKwh > 0 ? formatKwh(heatingKwh) : undefined,
-    heatingComparisonLabel: heatingKwh > 0 ? 'the last full simulation' : undefined,
+    heatingComparisonLabel: heatingKwh > 0 ? 'model.comparison.lastRun' : undefined,
     electricityDeltaPercent,
     electricityBaselineKwh: electricityKwh > 0 ? formatKwh(electricityKwh) : undefined,
-    electricityComparisonLabel: electricityKwh > 0 ? 'the last full simulation' : undefined,
+    electricityComparisonLabel: electricityKwh > 0 ? 'model.comparison.lastRun' : undefined,
     hotwaterDeltaPercent,
     hotwaterBaselineKwh: hotwaterKwh > 0 ? formatKwh(hotwaterKwh) : undefined,
-    hotwaterComparisonLabel: hotwaterKwh > 0 ? 'the last full simulation' : undefined,
+    hotwaterComparisonLabel: hotwaterKwh > 0 ? 'model.comparison.lastRun' : undefined,
   };
 }
 
@@ -196,21 +197,15 @@ const UNDO_DEPTH = 30;
 
 interface EnvelopeHistoryEntry {
   elements: Record<string, BuildingElement>;
-  /** What the step did, for the undo button, e.g. "Deleted wall". */
-  label: string;
+  /** What the step did, for the undo button: a model.history message, e.g. "deleted wall". */
+  label: Message;
   /** Identifies the edit for coalescing: same key in quick succession is one step. */
   key: string;
   at: number;
 }
 
-const FIELD_LABELS: Record<string, string> = {
-  area: 'Area',
-  uValue: 'U-value',
-  tilt: 'Tilt',
-  azimuth: 'Orientation',
-  gValue: 'Solar transmittance',
-  label: 'Name',
-};
+/** The model.history.field message for a surface field an edit changed. */
+const HISTORY_FIELDS = new Set(['area', 'uValue', 'tilt', 'azimuth', 'gValue', 'label']);
 
 export type BuildingModel = ReturnType<typeof useBuildingModel>;
 
@@ -252,7 +247,7 @@ export function useBuildingModel(
   const [elements,      setElements]      = useState(initialElements);
   const [general,       setGeneralRaw]    = useState(initialGeneral);
   const [roofConfig,    setRoofConfig]    = useState<RoofConfig>(DEFAULT_ROOF_CONFIG);
-  const [uploadError,   setUploadError]   = useState<string | null>(null);
+  const [uploadError,   setUploadError]   = useState<Message | null>(null);
   // Envelope edits only: what a user changes by hand and may want back. Building
   // parameters are not in it.
   const [history, setHistory] = useState<EnvelopeHistoryEntry[]>([]);
@@ -448,7 +443,7 @@ export function useBuildingModel(
       elements,
     );
     if (nextElements !== elements) {
-      remember(`refurbishment:${Date.now()}`, 'Refurbishment');
+      remember(`refurbishment:${Date.now()}`, { key: 'model.history.refurbishment' });
       setElements(nextElements);
     }
     const states = { ...refurbStates, ...Object.fromEntries(types.map((type) => [type, number])) };
@@ -464,7 +459,7 @@ export function useBuildingModel(
 
   /** Gives every surface of the type one U-value, e.g. from a per-type field in Expert. */
   const setTypeUValue = (type: RefurbElementType, uValue: number) => {
-    remember(`type-u:${type}`, 'U-value change');
+    remember(`type-u:${type}`, { key: 'model.history.field.uValue' });
     setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => [
       id, el.type === type ? { ...el, uValue, customMode: true } : el,
     ])));
@@ -475,7 +470,7 @@ export function useBuildingModel(
    * 0 to 1). Party walls, at 0, keep it: they are set surface by surface.
    */
   const setTypeLossFactor = (type: RefurbElementType, bTransmission: number) => {
-    remember(`type-b:${type}`, 'Loss factor change');
+    remember(`type-b:${type}`, { key: 'model.history.lossFactor' });
     setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => [
       id, el.type === type && el.bTransmission !== 0 ? { ...el, bTransmission, customMode: true } : el,
     ])));
@@ -484,7 +479,7 @@ export function useBuildingModel(
   // --- Envelope history -------------------------------------------------------
 
   /** Records the envelope as it is now, so the next change can be undone. */
-  const remember = (key: string, label: string) => {
+  const remember = (key: string, label: Message) => {
     const at = Date.now();
     setHistory((prev) => {
       const top = prev[prev.length - 1];
@@ -508,7 +503,7 @@ export function useBuildingModel(
 
   const updateElement = (id: string, patch: Partial<BuildingElement>) => {
     const field = Object.keys(patch)[0] ?? '';
-    remember(`update:${id}:${field}`, `${FIELD_LABELS[field] ?? 'Surface'} change`);
+    remember(`update:${id}:${field}`, { key: HISTORY_FIELDS.has(field) ? `model.history.field.${field}` : 'model.history.field.surface' });
     setElements((prev) => {
       const current = prev[id];
       if (!current) return prev;
@@ -519,13 +514,13 @@ export function useBuildingModel(
 
   /** Puts a surface back as it was, e.g. when its editor's changes are discarded. */
   const restoreElement = (element: BuildingElement) => {
-    remember(`restore:${element.id}`, 'Discarded surface changes');
+    remember(`restore:${element.id}`, { key: 'model.history.discarded' });
     setElements((prev) => (prev[element.id] ? { ...prev, [element.id]: element } : prev));
   };
 
   // Label is display-only — rename is always allowed regardless of custom mode.
   const renameElement = (id: string, label: string) => {
-    remember(`rename:${id}`, 'Rename');
+    remember(`rename:${id}`, { key: 'model.history.field.label' });
     setElements((prev) => {
       const current = prev[id];
       if (!current) return prev;
@@ -537,7 +532,7 @@ export function useBuildingModel(
    *  selection and navigation in step. Undo brings it back. */
   const deleteSurface = (id: string): BuildingElement['type'] | null => {
     const deletedType = elements[id]?.type ?? null;
-    remember(`delete:${id}:${Date.now()}`, `Deleted ${deletedType ?? 'surface'}`);
+    remember(`delete:${id}:${Date.now()}`, { key: `model.history.deleted.${deletedType ?? 'surface'}` });
     setElements((prev) => {
       const { [id]: _, ...rest } = prev;
       return rest;
@@ -551,14 +546,14 @@ export function useBuildingModel(
    */
   const createSurface = (type: BuildingElement['type'], values: Partial<BuildingElement> = {}): BuildingElement => {
     const next = { ...buildNewSurface(type, elements), ...values };
-    remember(`create:${next.id}`, `Added ${type}`);
+    remember(`create:${next.id}`, { key: `model.history.added.${type}` });
     setElements((prev) => ({ ...prev, [next.id]: next }));
     return next;
   };
 
   /** Replaces roof elements from a new type template. */
   const applyRoofType = (newRoofElements: Record<string, BuildingElement>) => {
-    remember(`roof-type:${Date.now()}`, 'Roof type change');
+    remember(`roof-type:${Date.now()}`, { key: 'model.history.roofType' });
     setElements((prev) => {
       const withoutRoofs = Object.fromEntries(
         Object.entries(prev).filter(([, el]) => el.type !== 'roof'),
@@ -587,7 +582,7 @@ export function useBuildingModel(
    */
   const runSimulation = async () => {
     if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
-      setUploadError(`A ${general.buildingType} needs its number of dwellings. Set it under Occupancy before running a simulation.`);
+      setUploadError({ key: 'model.error.dwellingsRequired' });
       return;
     }
 
@@ -599,7 +594,7 @@ export function useBuildingModel(
     try {
       const result = await runBuildingSimulation(services, identity, elements, general, runContext);
       if (!result) {
-        setUploadError('Simulation failed — the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.');
+        setUploadError({ key: 'model.error.runFailed' });
         return;
       }
       setEnergyTotals(computeEnergyTotals(null, toThermalSummary(result)));
@@ -627,7 +622,7 @@ export function useBuildingModel(
       );
       saveFile(buemJson, `building-${identity.id}-buem.json`, 'application/json');
     } catch (err) {
-      setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
+      setUploadError({ key: 'model.error.exportFailed', values: { reason: err instanceof Error ? err.message : String(err) } });
     }
   };
 
@@ -644,7 +639,7 @@ export function useBuildingModel(
       // which BlobPart requires.
       saveFile(zip as BlobPart, `building-${identity.id}-tables.zip`, 'application/zip');
     } catch (err) {
-      setUploadError(`Export failed: ${err instanceof Error ? err.message : String(err)}`);
+      setUploadError({ key: 'model.error.exportFailed', values: { reason: err instanceof Error ? err.message : String(err) } });
     }
   };
 
@@ -664,16 +659,13 @@ export function useBuildingModel(
           { ...DEFAULT_ELEMENTS, ...imported.elements },
           imported.isBuemFormat ? 'city' : 'default',
         );
-        remember(`import:${Date.now()}`, 'Import');
+        remember(`import:${Date.now()}`, { key: 'model.history.import' });
         setElements(normalizedElements);
         setGeneralRaw({ ...DEFAULT_GENERAL, ...imported.general });
         if (isRoofConfig(imported.roofConfig)) setRoofConfig(imported.roofConfig);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        setUploadError(
-          `Could not parse file: ${msg}. `
-          + 'Ensure it is a valid BUEM GeoJSON, legacy configurator export, or EnerPlanET config.json.',
-        );
+        setUploadError({ key: 'model.error.importFailed', values: { reason: msg } });
       }
     };
     reader.readAsText(file);

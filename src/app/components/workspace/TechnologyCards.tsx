@@ -4,6 +4,7 @@
 
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useT } from '../../i18n';
 
 /** One value on a technology card. */
 export interface TechField {
@@ -93,8 +94,9 @@ function FieldInput({ field, onChange }: { field: TechField; onChange: (value: n
 
 /** The cards, or a line saying there are none. */
 export function TechnologyCards({ technologies }: { technologies: Technologies }) {
+  const t = useT();
   if (technologies.items.length === 0) {
-    return <p className="text-[12px] text-muted-foreground">No technologies on this building.</p>;
+    return <p className="text-[12px] text-muted-foreground">{t('tech.none')}</p>;
   }
   return (
     <div className="flex flex-col gap-3">
@@ -108,8 +110,8 @@ export function TechnologyCards({ technologies }: { technologies: Technologies }
             <button
               type="button"
               onClick={() => technologies.onRemove(card.id)}
-              aria-label={`Remove ${card.title}`}
-              title={`Remove ${card.title}`}
+              aria-label={t('tech.remove', { title: card.title })}
+              title={t('tech.remove', { title: card.title })}
               className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-destructive"
             >
               <Trash2 className="size-3.5" />

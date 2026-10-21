@@ -8,16 +8,19 @@ import {
   ToggleSwitch, FieldRow, ScrollHintContainer,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
-  BUILDING_TYPE_OPTIONS,
-  COUNTRY_OPTIONS,
+  BUILDING_TYPE_LABELS,
   MIN_CONSTRUCTION_YEAR,
   OUTPUT_PROFILES,
+  buildingTypeName,
+  buildingTypeOptions,
+  countryOptions,
   isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
 import { ComfortSection, comfortSummary } from './comfortSection';
 import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
+import { useT, type Translate } from '@/app/i18n';
 
 // Insulation and windows is not part of this click-to-expand card system: it
 // renders inline, always visible. See BuildingEditor's `inlineSections`.
@@ -27,49 +30,50 @@ type SectionKey = 'identity' | 'occupancy' | 'comfort' | 'outputs' | 'equipment'
 
 /** Building identity fields — synced with the overview snapshot panel. */
 function IdentitySection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
+  const t = useT();
   const volume = computeVolume(general.floorArea, general.storeys, general.roomHeight).toFixed(0);
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <FieldLabel tip="Human-readable name for this building. Included in exported files.">
-          Building name
+        <FieldLabel tip={t('editor.identity.name.tip')}>
+          {t('editor.identity.name.label')}
         </FieldLabel>
         <input
           type="text"
           value={general.buildingName ?? ''}
           onChange={(e) => setGen('buildingName', e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-          placeholder="e.g. 3434 · Single-family House"
+          placeholder={t('editor.identity.name.placeholder')}
           className="cfg-input w-full"
         />
       </div>
       <SelectInput
-        label="Building type"
+        label={t('editor.identity.type.label')}
         value={general.buildingType}
         onChange={(v) => setGen('buildingType', v)}
-        options={BUILDING_TYPE_OPTIONS}
-        tip="TABULA building category. Affects default U-values and reference energy demand patterns."
+        options={buildingTypeOptions(t)}
+        tip={t('editor.identity.type.tip')}
       />
       <FieldRow>
         <SelectInput
-          label="Country"
+          label={t('editor.identity.country.label')}
           value={general.country}
           onChange={(v) => setGen('country', v)}
-          options={COUNTRY_OPTIONS}
-          tip="Country used to select TABULA reference data and COSMO weather station."
+          options={countryOptions(t)}
+          tip={t('editor.identity.country.tip')}
         />
         <NumberInput
-          label="Construction year"
+          label={t('editor.identity.year.label')}
           value={general.constructionYear}
           onChange={(v) => setGen('constructionYear', Math.round(v))}
           unit="" min={MIN_CONSTRUCTION_YEAR} max={new Date().getFullYear()} step={1}
-          tip="Year the building was built. ignis maps it to a TABULA construction-period band for the default U-value lookup."
+          tip={t('editor.identity.year.tip')}
         />
       </FieldRow>
       <FieldRow>
         <div>
-          <FieldLabel tip="Footprint area of a single storey — total conditioned floor area is this × storeys.">
-            Floor area (per storey)
+          <FieldLabel tip={t('editor.identity.floorArea.tip')}>
+            {t('editor.identity.floorArea.label')}
           </FieldLabel>
           <NumberInput
             value={general.floorArea}
@@ -78,8 +82,8 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
           />
         </div>
         <div>
-          <FieldLabel tip="Number of above-ground storeys.">
-            Storeys
+          <FieldLabel tip={t('editor.identity.storeys.tip')}>
+            {t('editor.identity.storeys.label')}
           </FieldLabel>
           <NumberInput
             value={general.storeys}
@@ -89,8 +93,8 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
         </div>
       </FieldRow>
       <div>
-        <FieldLabel tip="Clear internal height per storey. Used to compute the heated air volume.">
-          Room height
+        <FieldLabel tip={t('editor.identity.roomHeight.tip')}>
+          {t('editor.identity.roomHeight.label')}
         </FieldLabel>
         <NumberInput
           value={general.roomHeight}
@@ -99,7 +103,7 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
         />
       </div>
       <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">Heated volume</span>
+        <span className="text-[11px] text-muted-foreground">{t('editor.identity.volume')}</span>
         <span className="text-xs font-semibold text-foreground">
           {volume} <span className="text-[10px] font-normal text-muted-foreground">m³</span>
         </span>
@@ -109,13 +113,14 @@ function IdentitySection({ general, setGen }: { general: Record<string, any>; se
 }
 
 function SolverSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-3">
       <ToggleSwitch
         checked={general.use_milp}
         onChange={(v) => setGen('use_milp', v)}
-        label="Use MILP solver"
-        tip="Solve the thermal model as a mixed-integer linear programme instead of BuEM's default sparse solver. Slower, but handles inequality constraints exactly."
+        label={t('editor.solver.useMilp.label')}
+        tip={t('editor.solver.useMilp.tip')}
       />
       <div
         className="rounded-[6px] px-3 py-2 transition-all duration-200"
@@ -126,8 +131,8 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
       >
         <p className="text-[11px] text-muted-foreground leading-snug">
           {general.use_milp
-            ? 'MILP solver: inequality constraints handled exactly. Runs take longer.'
-            : "BuEM's default sparse solver. Fast."}
+            ? t('editor.solver.milpNote')
+            : t('editor.solver.sparseNote')}
         </p>
       </div>
     </div>
@@ -137,30 +142,30 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
 // ─── HDCP status section (shown when ignis state is null) ─────────────────────
 
 function IgnisStatusSection({ general }: { general: Record<string, any> }) {
+  const t = useT();
   const country = general.country as string | undefined;
   const type    = general.buildingType as string | undefined;
 
   if (!country) {
     return (
       <p className="text-[11px] text-muted-foreground">
-        Set a country in <strong>Basic Info</strong> to enable heat demand calculation.
+        {t('editor.ignis.noCountryBefore')} <strong>{t('editor.ignis.basicInfo')}</strong> {t('editor.ignis.noCountryAfter')}
       </p>
     );
   }
 
   if (type && !isBuildingTypeSupported(type)) {
+    const supported = ['SFH', 'MFH', 'TH', 'AB'].map((code) => buildingTypeName(t, BUILDING_TYPE_LABELS[code])).join(', ');
     return (
       <p className="text-[11px] text-muted-foreground">
-        Building type <strong>{type}</strong> is not in the TABULA database.
-        Supported types: Single-family House, Multi-family House, Terraced House, Apartment Block.
+        {t('editor.ignis.unsupportedBefore')} <strong>{buildingTypeName(t, type)}</strong> {t('editor.ignis.unsupportedAfter', { types: supported })}
       </p>
     );
   }
 
   return (
     <p className="text-[11px] text-muted-foreground">
-      No TABULA data found for this building: the TABULA service holds no variant for it
-      or could not be reached.
+      {t('editor.ignis.noData')}
     </p>
   );
 }
@@ -177,37 +182,40 @@ const SECTION_COLORS: Record<SectionKey, string> = {
   solver:      '#7c3aed',
 };
 
-const SECTION_LABELS: Record<SectionKey, string> = {
-  identity:    'Basic info',
-  occupancy:   'Occupancy',
-  comfort:     'Heating and comfort',
-  outputs:     'Results to compute',
-  equipment:   'Appliances',
-  solver:      'Calculation Method',
+const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
+  identity:    (t) => t('editor.section.identity'),
+  occupancy:   (t) => t('editor.section.occupancy'),
+  comfort:     (t) => t('editor.section.comfort'),
+  outputs:     (t) => t('editor.section.outputs'),
+  equipment:   (t) => t('editor.section.equipment'),
+  solver:      (t) => t('editor.section.solver'),
 };
 
 /** One-line value summary shown on the grid card and chip. */
-function sectionSummary(key: SectionKey, general: Record<string, any>): string {
+function sectionSummary(t: Translate, key: SectionKey, general: Record<string, any>): string {
   switch (key) {
-    case 'identity':    return `${general.buildingType} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
-    case 'occupancy':   return occupancySummary(general);
-    case 'comfort':     return comfortSummary(general);
-    case 'outputs':     return `${OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length} of ${OUTPUT_PROFILES.length} profiles`;
+    case 'identity':    return `${buildingTypeName(t, general.buildingType)} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
+    case 'occupancy':   return occupancySummary(t, general);
+    case 'comfort':     return comfortSummary(t, general);
+    case 'outputs':     return t('editor.summary.outputs', {
+      on: OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length,
+      total: OUTPUT_PROFILES.length,
+    });
     case 'equipment': {
       const overrides = Object.keys(general.equipment).length;
-      return overrides > 0 ? `${overrides} set by hand` : 'Defaults';
+      return overrides > 0 ? t('editor.summary.equipmentSet', { overrides }) : t('editor.summary.equipmentDefault');
     }
-    case 'solver':      return general.use_milp ? 'MILP' : 'Sparse';
+    case 'solver':      return general.use_milp ? t('editor.summary.solverMilp') : t('editor.summary.solverSparse');
   }
 }
 
-function occupancySummary(general: Record<string, any>): string {
+function occupancySummary(t: Translate, general: Record<string, any>): string {
   if (isServiceBuildingType(general.buildingType)) {
-    return general.capacity ? `${general.capacity} occupants` : 'Capacity from floor area';
+    return general.capacity ? t('editor.summary.occupants', { capacity: general.capacity }) : t('editor.summary.capacityFromArea');
   }
   const units = general.residential_units;
-  const dwellings = units ? `${units} dwelling${units === 1 ? '' : 's'}` : 'Dwellings not set';
-  return general.num_persons ? `${dwellings} · ${general.num_persons} per dwelling` : dwellings;
+  const dwellings = units ? t('editor.summary.dwellings', { count: units }) : t('editor.summary.dwellingsNotSet');
+  return general.num_persons ? t('editor.summary.perDwelling', { dwellings, persons: general.num_persons }) : dwellings;
 }
 
 /** Renders the content body for a given section key. */
@@ -258,6 +266,7 @@ export function BuildingEditor({
   insulation,
   hideIdentity = false,
 }: BuildingEditorProps) {
+  const t = useT();
   const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
   const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort', 'outputs'];
@@ -281,9 +290,9 @@ export function BuildingEditor({
         <Building2 className="size-4 text-slate-500" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-bold text-slate-800">{general.buildingName || 'Building'}</p>
+        <p className="text-sm font-bold text-slate-800">{general.buildingName || t('editor.header.fallbackName')}</p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {general.buildingType} · {general.constructionYear} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
+          {buildingTypeName(t, general.buildingType)} ·{general.constructionYear} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
         </p>
       </div>
     </div>
@@ -295,9 +304,9 @@ export function BuildingEditor({
       <div>
         <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
           <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
-          Insulation and windows
+          {t('editor.insulationTitle')}
         </p>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">{insulationSummary(insulation)}</p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{insulationSummary(t, insulation)}</p>
       </div>
       {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}
       <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
@@ -324,7 +333,7 @@ export function BuildingEditor({
               className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
             >
               <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
-              {SECTION_LABELS[key]}
+              {SECTION_LABELS[key](t)}
             </button>
           ))}
         </div>
@@ -340,10 +349,10 @@ export function BuildingEditor({
             <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
-                {SECTION_LABELS[activeSection]}
+                {SECTION_LABELS[activeSection](t)}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {sectionSummary(activeSection, general)}
+                {sectionSummary(t, activeSection, general)}
               </p>
             </div>
             <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
@@ -375,12 +384,12 @@ export function BuildingEditor({
               <div className="flex items-center gap-1.5">
                 <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
-                  {SECTION_LABELS[key]}
+                  {SECTION_LABELS[key](t)}
                 </p>
               </div>
               <ChevronDown className="size-3 shrink-0 text-slate-400" />
             </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(key, general)}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(t, key, general)}</p>
           </button>
         ))}
       </div>

@@ -1,0 +1,650 @@
+{
+  "view": {
+    "back": {
+      "title": "Back to the map (Esc)",
+      "label": "Map"
+    },
+    "surfaceCount": {
+      "one": "{count} surface",
+      "other": "{count} surfaces"
+    },
+    "avgU": "avg U {value} W/m²K",
+    "export": {
+      "button": "Export",
+      "model": {
+        "title": "Model (JSON)",
+        "detail": "BuEM GeoJSON: everything a simulation needs"
+      },
+      "tables": {
+        "title": "Tables (CSV)",
+        "detail": "building.csv and surfaces.csv, zipped"
+      }
+    },
+    "mode": {
+      "basic": "Basic",
+      "expert": "Expert"
+    },
+    "undo": {
+      "title": "Undo {action} (Ctrl+Z)",
+      "none": "Nothing to undo",
+      "action": "Undo {action}",
+      "label": "Undo"
+    },
+    "loadingGeometry": "Loading surface geometry…",
+    "detached": "This building's saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.",
+    "noGeometry": "City2TABULA holds no 3D geometry for this building.",
+    "invalidSurfaces": {
+      "one": "{count} surface with no area, left out of a simulation",
+      "other": "{count} surfaces with no area, left out of a simulation"
+    },
+    "run": {
+      "working": "Working out the energy…",
+      "start": "Save & Preview Energy Demand"
+    },
+    "surface": "Surface",
+    "discardSurface": {
+      "message": "You changed this surface. Keep the changes?",
+      "note": "Discarding puts the surface back as it was when its editor opened."
+    }
+  },
+  "surface": {
+    "type": {
+      "wall": "Wall",
+      "window": "Window",
+      "roof": "Roof",
+      "floor": "Floor",
+      "door": "Door"
+    },
+    "close": "Close",
+    "area": "Area",
+    "areaRejected": "A simulation will reject this",
+    "useGeometryArea": "Use {area} m² from the model",
+    "uValue": "U-value",
+    "insulation": {
+      "veryWell": "Very well insulated",
+      "well": "Well insulated",
+      "moderate": "Moderately insulated",
+      "poor": "Poorly insulated",
+      "none": "Uninsulated"
+    },
+    "rValue": "R-value (1/U): {value} m²K/W",
+    "gValue": "Solar transmittance (g)",
+    "solar": {
+      "high": "Lets most solar heat through",
+      "low": "Blocks most solar heat"
+    },
+    "sharedWall": "Shared with a neighbouring building",
+    "imported": "Imported: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
+    "reset": "Reset",
+    "delete": "Delete this surface",
+    "facing": "Facing",
+    "facingDirection": "{direction}-facing",
+    "compass": {
+      "n": "N",
+      "ne": "NE",
+      "e": "E",
+      "se": "SE",
+      "s": "S",
+      "sw": "SW",
+      "w": "W",
+      "nw": "NW"
+    },
+    "azimuth": "Azimuth",
+    "tilt": "Tilt",
+    "tiltShape": {
+      "flat": "Flat",
+      "vertical": "Vertical",
+      "pitched": "Pitched"
+    },
+    "degrees": "{degrees} degrees, {label}"
+  },
+  "profile": {
+    "title": "Hourly load profile",
+    "stored": "Stored BuEM result",
+    "upload": "Upload",
+    "download": "Download",
+    "source": {
+      "buem": "BuEM model output",
+      "none": "No profile loaded",
+      "file": "{name}",
+      "aggregated": "{source} · aggregated from {from}"
+    },
+    "resolution": {
+      "hourly": "hourly",
+      "daily": "daily",
+      "weekly": "weekly",
+      "monthly": "monthly"
+    },
+    "error": {
+      "parse": "{reason}",
+      "unreadable": "Could not parse load profile file."
+    }
+  },
+  "pv": {
+    "surfacesWithPv": {
+      "one": "{count} surface with PV",
+      "other": "{count} surfaces with PV"
+    },
+    "state": {
+      "installed": "With PV",
+      "suggested": "Suggested",
+      "available": "Available"
+    },
+    "toggle": "PV on {surface}",
+    "surfaceType": {
+      "wall": "wall",
+      "window": "window",
+      "roof": "roof",
+      "floor": "floor",
+      "door": "door"
+    },
+    "thisSurface": "PV on this surface",
+    "usableShare": "Usable share",
+    "usableShareNote": "of this surface, after obstructions",
+    "capacity": "Capacity"
+  },
+  "tech": {
+    "none": "No technologies on this building.",
+    "remove": "Remove {title}"
+  },
+  "editor": {
+    "identity": {
+      "name": {
+        "label": "Building name",
+        "tip": "Human-readable name for this building. Included in exported files.",
+        "placeholder": "e.g. 3434 · Single-family House"
+      },
+      "type": {
+        "label": "Building type",
+        "tip": "TABULA building category. Affects default U-values and reference energy demand patterns."
+      },
+      "country": {
+        "label": "Country",
+        "tip": "Country used to select TABULA reference data and COSMO weather station."
+      },
+      "year": {
+        "label": "Construction year",
+        "tip": "Year the building was built. ignis maps it to a TABULA construction-period band for the default U-value lookup."
+      },
+      "floorArea": {
+        "label": "Floor area (per storey)",
+        "tip": "Footprint area of a single storey. The total conditioned floor area is this × storeys."
+      },
+      "storeys": {
+        "label": "Storeys",
+        "tip": "Number of above-ground storeys."
+      },
+      "roomHeight": {
+        "label": "Room height",
+        "tip": "Clear internal height per storey. Used to compute the heated air volume."
+      },
+      "volume": "Heated volume"
+    },
+    "solver": {
+      "useMilp": {
+        "label": "Use MILP solver",
+        "tip": "Solve the thermal model as a mixed-integer linear programme instead of BuEM's default sparse solver. Slower, but handles inequality constraints exactly."
+      },
+      "milpNote": "MILP solver: inequality constraints handled exactly. Runs take longer.",
+      "sparseNote": "BuEM's default sparse solver. Fast."
+    },
+    "ignis": {
+      "noCountryBefore": "Set a country in",
+      "basicInfo": "Basic Info",
+      "noCountryAfter": "to enable heat demand calculation.",
+      "unsupportedBefore": "Building type",
+      "unsupportedAfter": "is not in the TABULA database. Supported types: {types}.",
+      "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached."
+    },
+    "section": {
+      "identity": "Basic info",
+      "occupancy": "Occupancy",
+      "comfort": "Heating and comfort",
+      "outputs": "Results to compute",
+      "equipment": "Appliances",
+      "solver": "Calculation Method"
+    },
+    "summary": {
+      "outputs": "{on} of {total} profiles",
+      "equipmentSet": "{overrides} set by hand",
+      "equipmentDefault": "Defaults",
+      "solverMilp": "MILP",
+      "solverSparse": "Sparse",
+      "occupants": "{capacity} occupants",
+      "capacityFromArea": "Capacity from floor area",
+      "dwellings": {
+        "one": "{count} dwelling",
+        "other": "{count} dwellings"
+      },
+      "dwellingsNotSet": "Dwellings not set",
+      "perDwelling": "{dwellings} · {persons} per dwelling"
+    },
+    "header": {
+      "fallbackName": "Building"
+    },
+    "insulationTitle": "Insulation and windows"
+  },
+  "comfort": {
+    "mass": {
+      "light": "Light",
+      "medium": "Medium",
+      "heavy": "Heavy",
+      "label": "Thermal mass",
+      "tip": "How much heat the structure stores. Light: timber frame or lightweight; medium: mixed; heavy: concrete or masonry.",
+      "capacity": {
+        "label": "Heat capacity per floor area",
+        "tip": "Set from the thermal mass class; editable."
+      },
+      "total": "Total thermal mass"
+    },
+    "hotWater": {
+      "on": "Included",
+      "off": "Not included",
+      "label": "Hot water",
+      "tip": "Turn off when hot water is supplied by a system accounted for elsewhere. Space heating is unaffected."
+    },
+    "summary": {
+      "setback": {
+        "none": "no setback",
+        "nightOnly": "lowered at night",
+        "nightAndAway": "lowered at night and when away",
+        "deep": "lowered deep setback",
+        "unknown": "lowered {setback}"
+      },
+      "hotWaterOn": "hot water included",
+      "hotWaterOff": "no hot water"
+    },
+    "heating": {
+      "label": "Heating setpoint",
+      "tip": "Lowest indoor temperature the heating keeps."
+    },
+    "setback": {
+      "label": "Lower it when",
+      "tip": "Lowers the heating setpoint while occupants are asleep or away. Affects heating only."
+    },
+    "cooling": {
+      "label": "Cooling setpoint",
+      "tip": "Highest indoor temperature the cooling keeps.",
+      "inverted": "Set it above the heating setpoint."
+    },
+    "air": {
+      "infiltration": {
+        "label": "Air leakage",
+        "tip": "Uncontrolled air changes per hour through gaps in the envelope (infiltration)."
+      },
+      "use": {
+        "label": "Ventilation by occupants",
+        "tip": "Air changes per hour from window opening and fans while the building is in use."
+      },
+      "total": "Total air changes"
+    }
+  },
+  "household": {
+    "default": "Default",
+    "useDefault": "Use default",
+    "capacity": {
+      "label": "Capacity",
+      "placeholder": "Derived from the floor area.",
+      "tip": "Number of occupants. Left empty, BuEM derives it from the floor area with a density for the building type."
+    },
+    "dwellings": {
+      "label": "Dwellings",
+      "requiredTip": "Number of dwellings. Prefilled from the TABULA archetype. BuEM simulates one representative dwelling and multiplies it by this number.",
+      "required": "Required for a {type}.",
+      "placeholder": "One dwelling.",
+      "tip": "Number of dwellings. BuEM simulates one representative dwelling and multiplies it by this number."
+    },
+    "persons": {
+      "label": "Occupants per dwelling",
+      "tip": "People living in each dwelling. The default is the statistical household size for the country, region and building type."
+    },
+    "archetype": {
+      "label": "Household type",
+      "tip": "Household composition. Sets when occupants are at home, which drives internal gains, electricity and hot water."
+    },
+    "region": {
+      "label": "Region code (Netherlands)",
+      "tip": "Dutch CBS municipality code. Selects the regional household size when occupants per dwelling is left to the default.",
+      "placeholder": "e.g. GM0200"
+    },
+    "cooking": {
+      "label": "Cooking with",
+      "tip": "Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas. Model default uses the setting of the model the building belongs to."
+    },
+    "equipment": {
+      "yes": "Yes",
+      "no": "No",
+      "intro": "Default leaves each appliance to BuEM's ownership statistics.",
+      "sameInEveryDwelling": "Every dwelling in the building gets the same appliances.",
+      "televisions": "Televisions",
+      "resetAll": "Reset all to default",
+      "groupDefault": "{items} at default",
+      "groupSet": "{set} set: {owned} yes, {notOwned} no"
+    },
+    "outputs": {
+      "cookingGasOnlyWithGas": "Cooking gas is reported only when cooking with gas.",
+      "thermalOff": "Without heating or cooling BuEM skips the thermal model: surfaces and weather are not used."
+    }
+  },
+  "insulation": {
+    "type": {
+      "wall": "Walls",
+      "roof": "Roof",
+      "floor": "Floor",
+      "window": "Windows",
+      "door": "Doors"
+    },
+    "summary": {
+      "mixed": "Mixed",
+      "averageU": "average U {value} W/m²K"
+    },
+    "averageU": "Average U-value",
+    "editSurfaces": "Edit surfaces one by one",
+    "preset": {
+      "label": "Set the whole building to",
+      "tip": "TABULA's refurbishment variants for this building type and age. A choice sets every element type; surfaces set one by one keep their values.",
+      "fromVariant": "From 3D data: TABULA {code}.",
+      "fromType": "TABULA variants for the building type and age.",
+      "typesDiffer": "Element types differ.",
+      "customKept": {
+        "one": "{count} surface set one by one keeps its value.",
+        "other": "{count} surfaces set one by one keep its value."
+      }
+    },
+    "table": {
+      "title": "Per element type",
+      "custom": "Custom",
+      "surfaces": {
+        "one": "{count} surface",
+        "other": "{count} surfaces"
+      },
+      "setOneByOne": "{custom} set one by one",
+      "state": "State",
+      "lossFactorTip": "Share of the heat loss through these surfaces that counts: 1 to outdoor air, less against ground or an unheated space (BuEM b_transmission). Empty when the surfaces differ; party walls keep 0."
+    },
+    "uValue": "U-value",
+    "lossFactor": "Loss factor",
+    "unitShare": "0 to 1",
+    "buemDefault": "BuEM default.",
+    "useDefault": "Use default",
+    "windows": {
+      "title": "Windows BuEM adds",
+      "note": "The building has no window surfaces, so BuEM glazes a share of each exposed wall.",
+      "share": {
+        "label": "Window share",
+        "tip": "Share of each exposed wall's area that is glazed."
+      },
+      "u": {
+        "label": "Window U",
+        "tip": "U-value of those windows. Default: the TABULA value for the building type, else 2.8."
+      },
+      "g": {
+        "label": "Window g",
+        "tip": "Share of the sunlight on those windows that enters as heat. Default: the TABULA value for the building type, else 0.5."
+      }
+    },
+    "add": {
+      "type": {
+        "wall": "Wall",
+        "floor": "Floor",
+        "roof": "Roof"
+      },
+      "button": {
+        "wall": "Add wall",
+        "floor": "Add floor",
+        "roof": "Add roof"
+      },
+      "title": "Add a surface",
+      "note": "For a surface the 3D data does not show, such as a wall against ground (loss factor about 0.5) or a floor over an open passage (1). It is listed in the Envelope tab, not drawn in the model.",
+      "typeLabel": "Type",
+      "name": "Name",
+      "namePlaceholder": "e.g. Basement wall",
+      "area": "Area"
+    },
+    "variant": {
+      "full": {
+        "existing": "Existing state",
+        "usual": "Usual refurbishment",
+        "advanced": "Advanced refurbishment"
+      },
+      "short": {
+        "existing": "Existing",
+        "usual": "Usual",
+        "advanced": "Advanced"
+      }
+    }
+  },
+  "options": {
+    "buildingType": {
+      "sfh": "Single-family House",
+      "th": "Terraced House",
+      "mfh": "Multi-family House",
+      "ab": "Apartment Block",
+      "bakery": "Bakery",
+      "clinic": "Clinic",
+      "hotel": "Hotel",
+      "office": "Office",
+      "restaurant": "Restaurant",
+      "school": "School",
+      "supermarket": "Supermarket",
+      "warehouse": "Warehouse"
+    },
+    "archetype": {
+      "default": "Default for the building type",
+      "generic": "Generic household",
+      "workingCouple": "Working couple",
+      "familyWithChildren": "Family with children",
+      "retiredSingle": "Retired, living alone",
+      "studentShared": "Students sharing"
+    },
+    "setback": {
+      "none": "None",
+      "nightOnly": "At night",
+      "nightAndAway": "At night and when away",
+      "deep": "Deep setback"
+    },
+    "cookingCarrier": {
+      "default": "Model default",
+      "electric": "Electric",
+      "gas": "Gas",
+      "none": "Not reported"
+    },
+    "output": {
+      "heating": "Space heating",
+      "cooling": "Space cooling",
+      "electricity": "Electricity",
+      "hotWater": "Hot water",
+      "kitchen": "Cooking gas"
+    },
+    "outputLevel": {
+      "none": "Off",
+      "summary": "Annual",
+      "series": "Hourly"
+    },
+    "equipmentGroup": {
+      "cooking": "Cooking",
+      "cold": "Cold",
+      "laundry": "Laundry and cleaning",
+      "electronics": "Electronics",
+      "misc": "Other"
+    },
+    "equipment": {
+      "hob": "Hob",
+      "oven": "Oven",
+      "microwave": "Microwave",
+      "kettle": "Kettle",
+      "smallCookingGroup": "Small cooking appliances",
+      "airFryer": "Air fryer",
+      "coffeeMachine": "Coffee machine",
+      "fridgeFreezer": "Fridge-freezer",
+      "refrigerator": "Refrigerator",
+      "chestFreezer": "Chest freezer",
+      "uprightFreezer": "Upright freezer",
+      "washingMachine": "Washing machine",
+      "tumbleDryer": "Tumble dryer",
+      "washerDryer": "Washer-dryer",
+      "dishWasher": "Dishwasher",
+      "iron": "Iron",
+      "vacuum": "Vacuum cleaner",
+      "robotVacuum": "Robot vacuum",
+      "tvReceiverBox": "TV receiver box",
+      "personalComputer": "Personal computer",
+      "printer": "Printer",
+      "hiFi": "Hi-fi",
+      "cassetteCdPlayer": "Cassette or CD player",
+      "vcrDvd": "VCR or DVD player",
+      "laptop": "Laptop",
+      "smartSpeaker": "Smart speaker",
+      "streamingStick": "Streaming stick",
+      "wifiRouter": "Wi-Fi router",
+      "lighting": "Lighting",
+      "clock": "Clock",
+      "answerMachine": "Answering machine",
+      "cordlessTelephone": "Cordless telephone",
+      "fax": "Fax",
+      "evCharger": "EV charger"
+    },
+    "country": {
+      "de": "DE - Germany",
+      "at": "AT - Austria",
+      "nl": "NL - Netherlands",
+      "cz": "CZ - Czechia"
+    }
+  },
+  "panel": {
+    "title": {
+      "overview": "Energy overview",
+      "envelope": "Building Envelope",
+      "technology": "Technologies",
+      "parameters": "Building Parameters"
+    },
+    "tab": {
+      "overview": "Overview",
+      "parameters": "Parameters",
+      "envelope": "Envelope"
+    },
+    "doneEditing": "Done editing",
+    "editParameters": "Edit building parameters"
+  },
+  "snapshot": {
+    "status": {
+      "default": "default",
+      "modified": "modified"
+    },
+    "thermalRating": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor",
+      "veryPoor": "Very Poor"
+    },
+    "row": {
+      "type": "Type",
+      "constructionYear": "Construction year",
+      "country": "Country",
+      "floorAreaPerStorey": "Floor area (per storey)",
+      "storeys": "Storeys",
+      "roomHeight": "Room height",
+      "volume": "Volume",
+      "envelope": "Envelope"
+    },
+    "envelopeValue": {
+      "one": "{area} m²  ·  {count} surface",
+      "other": "{area} m²  ·  {count} surfaces"
+    },
+    "energy": {
+      "heating": "Heating",
+      "electricity": "Electricity",
+      "cooling": "Cooling",
+      "hotWater": "Hot water",
+      "kitchen": "Kitchen (gas)"
+    },
+    "estimateNotice": "Building parameters are estimated from public records. Open the configurator to review and adjust them.",
+    "annualDemand": "Annual energy demand",
+    "totalDemand": "Total demand",
+    "thermalEfficiency": "Thermal efficiency"
+  },
+  "envelope": {
+    "group": {
+      "walls": "Walls",
+      "windows": "Windows",
+      "doors": "Doors",
+      "roof": "Roof",
+      "floor": "Floor"
+    },
+    "roofShape": {
+      "flat": "low-slope",
+      "monoPitch": "single slope",
+      "gabled": "S + N",
+      "hipped": "S/N/E/W",
+      "vShape": "inward slopes",
+      "sawTooth": "S-facing",
+      "custom": "custom"
+    },
+    "invalidAreaTip": "{count} with no area, fix before running a simulation",
+    "noArea": "no area",
+    "compassNorth": "N"
+  },
+  "common": {
+    "source": {
+      "estimated": "estimated",
+      "userDefined": "user defined"
+    },
+    "comparison": {
+      "higher": "{percent}% higher than {reference} ({kwh} kWh)",
+      "lower": "{percent}% lower than {reference} ({kwh} kWh)"
+    },
+    "scroll": "scroll",
+    "close": "Close",
+    "unsaved": {
+      "title": "Unsaved Changes",
+      "message": "You have unsaved changes to this building configuration. What would you like to do?",
+      "note": "Closing without saving will discard all modifications made since the last save.",
+      "continueEditing": "Continue Editing",
+      "saveAndClose": "Save & Close",
+      "discard": "Discard Changes"
+    }
+  },
+  "model": {
+    "history": {
+      "refurbishment": "refurbishment",
+      "lossFactor": "loss factor change",
+      "discarded": "discarded surface changes",
+      "roofType": "roof type change",
+      "import": "import",
+      "field": {
+        "area": "area change",
+        "uValue": "U-value change",
+        "tilt": "tilt change",
+        "azimuth": "orientation change",
+        "gValue": "solar transmittance change",
+        "label": "rename",
+        "surface": "surface change"
+      },
+      "deleted": {
+        "wall": "deleted wall",
+        "window": "deleted window",
+        "roof": "deleted roof",
+        "floor": "deleted floor",
+        "door": "deleted door",
+        "surface": "deleted surface"
+      },
+      "added": {
+        "wall": "added wall",
+        "window": "added window",
+        "roof": "added roof",
+        "floor": "added floor",
+        "door": "added door"
+      }
+    },
+    "error": {
+      "dwellingsRequired": "This building type needs its number of dwellings. Set it under Occupancy before running a simulation.",
+      "runFailed": "Simulation failed: the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.",
+      "exportFailed": "Export failed: {reason}",
+      "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json."
+    },
+    "comparison": {
+      "lastRun": "the last full simulation"
+    }
+  }
+}

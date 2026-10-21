@@ -45,7 +45,7 @@ export interface EnergyTotals {
   hotwaterDeltaPercent?: number | null;
   /** ignis's raw per-area annual heating figure (kWh/(m²·a)), shown alongside the total. */
   heatingPerM2?: string;
-  /** Formatted comparison-reference total (kWh) and what to call it in the sentence. */
+  /** Formatted comparison-reference total (kWh), and the message key naming it in the sentence. */
   heatingBaselineKwh?: string;
   heatingComparisonLabel?: string;
   electricityBaselineKwh?: string;

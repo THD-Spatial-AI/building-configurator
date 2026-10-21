@@ -14,7 +14,7 @@ import {
   type IgnisVariantLevel,
 } from './ignisAdapter';
 import type { ConfiguratorServices, VariantLookupServices } from './services';
-import { variantNumber, variantSubtype } from './refurbishment';
+import { TABULA_VARIANT_NAMES, variantNumber, variantSubtype } from './refurbishment';
 
 /** Maps UI building type labels to TABULA building type codes. */
 const BUILDING_TYPE_TO_TABULA: Record<string, string> = {
@@ -36,8 +36,6 @@ export function isBuildingTypeSupported(label: string): boolean {
 
 /** TABULA's refurbishment variants: existing state, usual and advanced refurbishment. */
 const MAX_VARIANT_NUMBER = 3;
-
-const TABULA_VARIANT_NAMES = ['Existing state', 'Usual refurbishment', 'Advanced refurbishment'];
 
 /** ignis's label, or TABULA's name for the number where ignis gives a generic one. */
 function variantLabel(label: string, number: number): string {

@@ -11,6 +11,7 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { AlertTriangle, Info, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useT } from '@/app/i18n';
 
 // ─── Design tokens — CSS variable references for use in SVG attributes ─────────
 // SVG stroke/fill attributes accept var() directly, so these strings work as-is.
@@ -98,8 +99,9 @@ const DELTA_DISPLAY_CAP = 300;
  * ordinary/default state and doesn't need calling out.
  */
 export function SourceTag({ source }: { source?: 'ignis' | 'buem' | 'user' }) {
-  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">estimated</span>;
-  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">user defined</span>;
+  const t = useT();
+  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">{t('common.source.estimated')}</span>;
+  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">{t('common.source.userDefined')}</span>;
   return null;
 }
 
@@ -117,6 +119,7 @@ export function EnergyComparisonNote({
   referenceKwh?: string;
   referenceLabel?: string;
 }) {
+  const t = useT();
   if (deltaPercent === null || deltaPercent === undefined || !referenceKwh || !referenceLabel) return null;
   if (Math.abs(deltaPercent) < 0.5) return null;
 
@@ -126,7 +129,9 @@ export function EnergyComparisonNote({
 
   return (
     <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
-      {displayValue}% {isIncrease ? 'higher' : 'lower'} than {referenceLabel} ({referenceKwh} kWh)
+      {t(isIncrease ? 'common.comparison.higher' : 'common.comparison.lower', {
+        percent: displayValue, reference: referenceLabel, kwh: referenceKwh,
+      })}
     </p>
   );
 }
@@ -462,6 +467,7 @@ export function ScrollHintContainer({
   children: React.ReactNode;
   className?: string;
 }) {
+  const t = useT();
   const scrollRef  = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const rafRef     = useRef<number | null>(null);
@@ -538,7 +544,7 @@ export function ScrollHintContainer({
         {/* Pill badge — clearly visible against the gradient */}
         <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 shadow-sm">
           <ChevronDown className="size-3.5 text-slate-500" />
-          <span className="text-[10px] font-semibold text-slate-500">scroll</span>
+          <span className="text-[10px] font-semibold text-slate-500">{t('common.scroll')}</span>
         </div>
       </div>
     </div>
@@ -579,6 +585,7 @@ export function ElementConfiguratorModal({
   children: React.ReactNode;
   size?: keyof typeof MODAL_SIZE;
 }) {
+  const t = useT();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
       <DialogPrimitive.Portal>
@@ -593,7 +600,7 @@ export function ElementConfiguratorModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('common.close')}
             className="absolute right-3 top-3 z-10 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
           >
             <X />
@@ -613,8 +620,8 @@ export function UnsavedChangesDialog({
   onCancel,
   onSave,
   onDiscard,
-  message = 'You have unsaved changes to this building configuration. What would you like to do?',
-  note = 'Closing without saving will discard all modifications made since the last save.',
+  message,
+  note,
 }: {
   open: boolean;
   onCancel: () => void;
@@ -623,6 +630,7 @@ export function UnsavedChangesDialog({
   message?: string;
   note?: string;
 }) {
+  const t = useT();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
       <DialogPrimitive.Portal>
@@ -631,17 +639,17 @@ export function UnsavedChangesDialog({
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="size-4 text-amber-500 shrink-0" />
             <DialogPrimitive.Title className="text-base font-semibold text-foreground">
-              Unsaved Changes
+              {t('common.unsaved.title')}
             </DialogPrimitive.Title>
           </div>
 
           <div className="mb-4">
             <DialogPrimitive.Description className="text-sm text-foreground mb-2">
-              {message}
+              {message ?? t('common.unsaved.message')}
             </DialogPrimitive.Description>
             <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
               <p className="text-xs text-amber-800">
-                {note}
+                {note ?? t('common.unsaved.note')}
               </p>
             </div>
           </div>
@@ -652,21 +660,21 @@ export function UnsavedChangesDialog({
               onClick={onCancel}
               className="px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-[6px] hover:bg-muted transition-colors cursor-pointer"
             >
-              Continue Editing
+              {t('common.unsaved.continueEditing')}
             </button>
             <button
               type="button"
               onClick={onSave}
               className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              Save &amp; Close
+              {t('common.unsaved.saveAndClose')}
             </button>
             <button
               type="button"
               onClick={onDiscard}
               className="px-3 py-1.5 text-sm font-medium rounded-[6px] transition-colors cursor-pointer text-destructive border border-destructive/30 hover:bg-destructive/5"
             >
-              Discard Changes
+              {t('common.unsaved.discard')}
             </button>
           </div>
         </DialogPrimitive.Content>

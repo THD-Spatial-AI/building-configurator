@@ -1,0 +1,664 @@
+{
+  "view": {
+    "back": {
+      "title": "Zpět na mapu (Esc)",
+      "label": "Mapa"
+    },
+    "surfaceCount": {
+      "one": "{count} plocha",
+      "few": "{count} plochy",
+      "many": "{count} plochy",
+      "other": "{count} ploch"
+    },
+    "avgU": "prům. U {value} W/m²K",
+    "export": {
+      "button": "Exportovat",
+      "model": {
+        "title": "Model (JSON)",
+        "detail": "BuEM GeoJSON: vše, co simulace potřebuje"
+      },
+      "tables": {
+        "title": "Tabulky (CSV)",
+        "detail": "building.csv a surfaces.csv v archivu ZIP"
+      }
+    },
+    "mode": {
+      "basic": "Základní",
+      "expert": "Expertní"
+    },
+    "undo": {
+      "title": "Vrátit {action} (Ctrl+Z)",
+      "none": "Není co vrátit",
+      "action": "Vrátit {action}",
+      "label": "Zpět"
+    },
+    "loadingGeometry": "Načítání geometrie ploch…",
+    "detached": "Uložené plochy této budovy pocházejí ze starší generace City2TABULA, takže žádná neodpovídá aktuálním 3D datům. Uložené hodnoty stále platí; model se nezobrazuje.",
+    "noGeometry": "City2TABULA nemá pro tuto budovu žádnou 3D geometrii.",
+    "invalidSurfaces": {
+      "one": "{count} plocha s nulovou výměrou, vynechána ze simulace",
+      "few": "{count} plochy s nulovou výměrou, vynechány ze simulace",
+      "many": "{count} plochy s nulovou výměrou, vynechány ze simulace",
+      "other": "{count} ploch s nulovou výměrou, vynechány ze simulace"
+    },
+    "run": {
+      "working": "Výpočet energie…",
+      "start": "Uložit a zobrazit potřebu energie"
+    },
+    "surface": "Plocha",
+    "discardSurface": {
+      "message": "Tuto plochu jste změnili. Ponechat změny?",
+      "note": "Zahozením se plocha vrátí do stavu z okamžiku otevření editoru."
+    }
+  },
+  "surface": {
+    "type": {
+      "wall": "Stěna",
+      "window": "Okno",
+      "roof": "Střecha",
+      "floor": "Podlaha",
+      "door": "Dveře"
+    },
+    "close": "Zavřít",
+    "area": "Výměra",
+    "areaRejected": "Simulace tuto hodnotu odmítne",
+    "useGeometryArea": "Použít {area} m² z modelu",
+    "uValue": "Součinitel U",
+    "insulation": {
+      "veryWell": "Velmi dobře izolováno",
+      "well": "Dobře izolováno",
+      "moderate": "Středně izolováno",
+      "poor": "Špatně izolováno",
+      "none": "Bez izolace"
+    },
+    "rValue": "Tepelný odpor R (1/U): {value} m²K/W",
+    "gValue": "Propustnost slunečního záření (g)",
+    "solar": {
+      "high": "Propouští většinu slunečního tepla",
+      "low": "Blokuje většinu slunečního tepla"
+    },
+    "sharedWall": "Společná se sousední budovou",
+    "imported": "Importováno: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
+    "reset": "Obnovit",
+    "delete": "Smazat tuto plochu",
+    "facing": "Orientace",
+    "facingDirection": "orientace {direction}",
+    "compass": {
+      "n": "S",
+      "ne": "SV",
+      "e": "V",
+      "se": "JV",
+      "s": "J",
+      "sw": "JZ",
+      "w": "Z",
+      "nw": "SZ"
+    },
+    "azimuth": "Azimut",
+    "tilt": "Sklon",
+    "tiltShape": {
+      "flat": "Plochá",
+      "vertical": "Svislá",
+      "pitched": "Šikmá"
+    },
+    "degrees": "{degrees} stupňů, {label}"
+  },
+  "profile": {
+    "title": "Hodinový profil zatížení",
+    "stored": "Uložený výsledek BuEM",
+    "upload": "Nahrát",
+    "download": "Stáhnout",
+    "source": {
+      "buem": "Výstup modelu BuEM",
+      "none": "Žádný profil nenačten",
+      "file": "{name}",
+      "aggregated": "{source} · agregováno z {from}"
+    },
+    "resolution": {
+      "hourly": "hodinových dat",
+      "daily": "denních dat",
+      "weekly": "týdenních dat",
+      "monthly": "měsíčních dat"
+    },
+    "error": {
+      "parse": "{reason}",
+      "unreadable": "Soubor profilu zatížení nelze načíst."
+    }
+  },
+  "pv": {
+    "surfacesWithPv": {
+      "one": "{count} plocha s FV",
+      "few": "{count} plochy s FV",
+      "many": "{count} plochy s FV",
+      "other": "{count} ploch s FV"
+    },
+    "state": {
+      "installed": "S FV",
+      "suggested": "Navrženo",
+      "available": "Dostupné"
+    },
+    "toggle": "FV na ploše {surface}",
+    "surfaceType": {
+      "wall": "stěna",
+      "window": "okno",
+      "roof": "střecha",
+      "floor": "podlaha",
+      "door": "dveře"
+    },
+    "thisSurface": "FV na této ploše",
+    "usableShare": "Využitelný podíl",
+    "usableShareNote": "této plochy po odečtení překážek",
+    "capacity": "Výkon"
+  },
+  "tech": {
+    "none": "Tato budova nemá žádné technologie.",
+    "remove": "Odebrat {title}"
+  },
+  "editor": {
+    "identity": {
+      "name": {
+        "label": "Název budovy",
+        "tip": "Čitelný název této budovy. Je součástí exportovaných souborů.",
+        "placeholder": "např. 3434 · Rodinný dům"
+      },
+      "type": {
+        "label": "Typ budovy",
+        "tip": "Kategorie budovy podle TABULA. Ovlivňuje výchozí součinitele U a referenční průběhy potřeby energie."
+      },
+      "country": {
+        "label": "Země",
+        "tip": "Země pro výběr referenčních dat TABULA a meteorologické stanice COSMO."
+      },
+      "year": {
+        "label": "Rok výstavby",
+        "tip": "Rok, kdy byla budova postavena. ignis jej přiřadí k období výstavby TABULA pro výchozí součinitele U."
+      },
+      "floorArea": {
+        "label": "Podlahová plocha (na podlaží)",
+        "tip": "Půdorysná plocha jednoho podlaží; celková vytápěná podlahová plocha je tato hodnota × počet podlaží."
+      },
+      "storeys": {
+        "label": "Podlaží",
+        "tip": "Počet nadzemních podlaží."
+      },
+      "roomHeight": {
+        "label": "Světlá výška",
+        "tip": "Světlá výška každého podlaží. Slouží k výpočtu vytápěného objemu vzduchu."
+      },
+      "volume": "Vytápěný objem"
+    },
+    "solver": {
+      "useMilp": {
+        "label": "Použít řešič MILP",
+        "tip": "Řeší tepelný model jako smíšené celočíselné lineární programování místo výchozího řídkého řešiče BuEM. Pomalejší, ale nerovnostní omezení řeší přesně."
+      },
+      "milpNote": "Řešič MILP: nerovnostní omezení řešena přesně. Výpočty trvají déle.",
+      "sparseNote": "Výchozí řídký řešič BuEM. Rychlý."
+    },
+    "ignis": {
+      "noCountryBefore": "Nastavte zemi v sekci",
+      "basicInfo": "Základní údaje",
+      "noCountryAfter": "pro výpočet potřeby tepla.",
+      "unsupportedBefore": "Typ budovy",
+      "unsupportedAfter": "není v databázi TABULA. Podporované typy: {types}.",
+      "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná."
+    },
+    "section": {
+      "identity": "Základní údaje",
+      "occupancy": "Obsazenost",
+      "comfort": "Vytápění a komfort",
+      "outputs": "Počítané výsledky",
+      "equipment": "Spotřebiče",
+      "solver": "Metoda výpočtu"
+    },
+    "summary": {
+      "outputs": "{on} z {total} profilů",
+      "equipmentSet": "{overrides} nastaveno ručně",
+      "equipmentDefault": "Výchozí",
+      "solverMilp": "MILP",
+      "solverSparse": "Řídký",
+      "occupants": "{capacity} osob",
+      "capacityFromArea": "Kapacita z podlahové plochy",
+      "dwellings": {
+        "one": "{count} byt",
+        "few": "{count} byty",
+        "many": "{count} bytu",
+        "other": "{count} bytů"
+      },
+      "dwellingsNotSet": "Počet bytů nenastaven",
+      "perDwelling": "{dwellings} · {persons} na byt"
+    },
+    "header": {
+      "fallbackName": "Budova"
+    },
+    "insulationTitle": "Izolace a okna"
+  },
+  "comfort": {
+    "mass": {
+      "light": "Lehká",
+      "medium": "Střední",
+      "heavy": "Těžká",
+      "label": "Tepelná akumulace",
+      "tip": "Kolik tepla konstrukce akumuluje. Lehká: dřevostavba nebo lehká konstrukce; střední: smíšená; těžká: beton nebo zdivo.",
+      "capacity": {
+        "label": "Tepelná kapacita na podlahovou plochu",
+        "tip": "Nastavena podle třídy tepelné akumulace; lze upravit."
+      },
+      "total": "Celková tepelná kapacita"
+    },
+    "hotWater": {
+      "on": "Zahrnuto",
+      "off": "Nezahrnuto",
+      "label": "Teplá voda",
+      "tip": "Vypněte, pokud teplou vodu zajišťuje systém zohledněný jinde. Vytápění tím není ovlivněno."
+    },
+    "summary": {
+      "setback": {
+        "none": "bez útlumu",
+        "nightOnly": "útlum v noci",
+        "nightAndAway": "útlum v noci a při nepřítomnosti",
+        "deep": "hluboký útlum",
+        "unknown": "útlum {setback}"
+      },
+      "hotWaterOn": "včetně teplé vody",
+      "hotWaterOff": "bez teplé vody"
+    },
+    "heating": {
+      "label": "Žádaná teplota vytápění",
+      "tip": "Nejnižší vnitřní teplota, kterou vytápění udržuje."
+    },
+    "setback": {
+      "label": "Útlum, když",
+      "tip": "Snižuje žádanou teplotu vytápění, když obyvatelé spí nebo jsou pryč. Ovlivňuje pouze vytápění."
+    },
+    "cooling": {
+      "label": "Žádaná teplota chlazení",
+      "tip": "Nejvyšší vnitřní teplota, kterou chlazení udržuje.",
+      "inverted": "Nastavte ji nad žádanou teplotu vytápění."
+    },
+    "air": {
+      "infiltration": {
+        "label": "Infiltrace",
+        "tip": "Neřízená výměna vzduchu za hodinu netěsnostmi obálky (infiltrace)."
+      },
+      "use": {
+        "label": "Větrání uživateli",
+        "tip": "Výměna vzduchu za hodinu otevíráním oken a ventilátory během užívání budovy."
+      },
+      "total": "Celková intenzita výměny vzduchu"
+    }
+  },
+  "household": {
+    "default": "Výchozí",
+    "useDefault": "Použít výchozí",
+    "capacity": {
+      "label": "Kapacita",
+      "placeholder": "Odvozeno z podlahové plochy.",
+      "tip": "Počet osob. Pokud zůstane prázdné, BuEM jej odvodí z podlahové plochy a hustoty obsazení pro daný typ budovy."
+    },
+    "dwellings": {
+      "label": "Byty",
+      "requiredTip": "Počet bytů. Předvyplněno z archetypu TABULA. BuEM simuluje jeden reprezentativní byt a vynásobí jej tímto počtem.",
+      "required": "Povinné pro typ {type}.",
+      "placeholder": "Jeden byt.",
+      "tip": "Počet bytů. BuEM simuluje jeden reprezentativní byt a vynásobí jej tímto počtem."
+    },
+    "persons": {
+      "label": "Osob na byt",
+      "tip": "Počet osob v každém bytě. Výchozí hodnota je statistická velikost domácnosti pro zemi, region a typ budovy."
+    },
+    "archetype": {
+      "label": "Typ domácnosti",
+      "tip": "Složení domácnosti. Určuje, kdy jsou obyvatelé doma, což ovlivňuje vnitřní zisky, elektřinu a teplou vodu."
+    },
+    "region": {
+      "label": "Kód regionu (Nizozemsko)",
+      "tip": "Nizozemský kód obce CBS. Vybírá regionální velikost domácnosti, pokud je počet osob na byt ponechán výchozí.",
+      "placeholder": "např. GM0200"
+    },
+    "cooking": {
+      "label": "Vaření na",
+      "tip": "Elektrické vaření zůstává v profilu elektřiny. Vaření na plynu se vykazuje zvlášť jako plyn na vaření. Výchozí nastavení modelu přebírá nastavení modelu, do kterého budova patří."
+    },
+    "equipment": {
+      "yes": "Ano",
+      "no": "Ne",
+      "intro": "Výchozí nastavení ponechá každý spotřebič na statistice vybavenosti BuEM.",
+      "sameInEveryDwelling": "Všechny byty v budově mají stejné spotřebiče.",
+      "televisions": "Televizory",
+      "resetAll": "Obnovit vše na výchozí",
+      "groupDefault": "{items} ve výchozím stavu",
+      "groupSet": "{set} nastaveno: {owned} ano, {notOwned} ne"
+    },
+    "outputs": {
+      "cookingGasOnlyWithGas": "Plyn na vaření se vykazuje jen při vaření na plynu.",
+      "thermalOff": "Bez vytápění a chlazení BuEM vynechá tepelný model: plochy a počasí se nepoužijí."
+    }
+  },
+  "insulation": {
+    "type": {
+      "wall": "Stěny",
+      "roof": "Střecha",
+      "floor": "Podlaha",
+      "window": "Okna",
+      "door": "Dveře"
+    },
+    "summary": {
+      "mixed": "Smíšené",
+      "averageU": "průměrné U {value} W/m²K"
+    },
+    "averageU": "Průměrný součinitel U",
+    "editSurfaces": "Upravit plochy jednotlivě",
+    "preset": {
+      "label": "Nastavit celou budovu na",
+      "tip": "Varianty renovace TABULA pro tento typ a stáří budovy. Volba nastaví všechny typy konstrukcí; jednotlivě nastavené plochy si ponechají své hodnoty.",
+      "fromVariant": "Z 3D dat: TABULA {code}.",
+      "fromType": "Varianty TABULA pro typ a stáří budovy.",
+      "typesDiffer": "Typy konstrukcí se liší.",
+      "customKept": {
+        "one": "{count} jednotlivě nastavená plocha si ponechá svou hodnotu.",
+        "few": "{count} jednotlivě nastavené plochy si ponechají své hodnoty.",
+        "many": "{count} jednotlivě nastavené plochy si ponechá své hodnoty.",
+        "other": "{count} jednotlivě nastavených ploch si ponechá své hodnoty."
+      }
+    },
+    "table": {
+      "title": "Podle typu konstrukce",
+      "custom": "Vlastní",
+      "surfaces": {
+        "one": "{count} plocha",
+        "few": "{count} plochy",
+        "many": "{count} plochy",
+        "other": "{count} ploch"
+      },
+      "setOneByOne": "{custom} nastaveno jednotlivě",
+      "state": "Stav",
+      "lossFactorTip": "Podíl tepelné ztráty těmito plochami, který se započítá: 1 do venkovního vzduchu, méně do zeminy nebo nevytápěného prostoru (BuEM b_transmission). Prázdné, pokud se plochy liší; společné stěny mají 0."
+    },
+    "uValue": "Součinitel U",
+    "lossFactor": "Redukční činitel",
+    "unitShare": "0 až 1",
+    "buemDefault": "Výchozí BuEM.",
+    "useDefault": "Použít výchozí",
+    "windows": {
+      "title": "Okna doplněná BuEM",
+      "note": "Budova nemá žádné okenní plochy, proto BuEM zasklí podíl každé exponované stěny.",
+      "share": {
+        "label": "Podíl oken",
+        "tip": "Podíl plochy každé exponované stěny, který je zasklený."
+      },
+      "u": {
+        "label": "U oken",
+        "tip": "Součinitel U těchto oken. Výchozí: hodnota TABULA pro typ budovy, jinak 2,8."
+      },
+      "g": {
+        "label": "g oken",
+        "tip": "Podíl slunečního záření dopadajícího na tato okna, který vstupuje jako teplo. Výchozí: hodnota TABULA pro typ budovy, jinak 0,5."
+      }
+    },
+    "add": {
+      "type": {
+        "wall": "Stěna",
+        "floor": "Podlaha",
+        "roof": "Střecha"
+      },
+      "button": {
+        "wall": "Přidat stěnu",
+        "floor": "Přidat podlahu",
+        "roof": "Přidat střechu"
+      },
+      "title": "Přidat plochu",
+      "note": "Pro plochu, kterou 3D data nezobrazují, např. stěnu přilehlou k zemině (redukční činitel asi 0,5) nebo podlahu nad otevřeným průjezdem (1). Je uvedena na kartě Obálka, v modelu se nevykresluje.",
+      "typeLabel": "Typ",
+      "name": "Název",
+      "namePlaceholder": "např. Suterénní stěna",
+      "area": "Výměra"
+    },
+    "variant": {
+      "full": {
+        "existing": "Současný stav",
+        "usual": "Běžná renovace",
+        "advanced": "Pokročilá renovace"
+      },
+      "short": {
+        "existing": "Současný",
+        "usual": "Běžná",
+        "advanced": "Pokročilá"
+      }
+    }
+  },
+  "options": {
+    "buildingType": {
+      "sfh": "Rodinný dům",
+      "th": "Řadový dům",
+      "mfh": "Bytový dům",
+      "ab": "Velký bytový dům",
+      "bakery": "Pekárna",
+      "clinic": "Klinika",
+      "hotel": "Hotel",
+      "office": "Kancelář",
+      "restaurant": "Restaurace",
+      "school": "Škola",
+      "supermarket": "Supermarket",
+      "warehouse": "Sklad"
+    },
+    "archetype": {
+      "default": "Výchozí pro typ budovy",
+      "generic": "Obecná domácnost",
+      "workingCouple": "Pracující pár",
+      "familyWithChildren": "Rodina s dětmi",
+      "retiredSingle": "Senior žijící sám",
+      "studentShared": "Sdílené bydlení studentů"
+    },
+    "setback": {
+      "none": "Nikdy",
+      "nightOnly": "V noci",
+      "nightAndAway": "V noci a při nepřítomnosti",
+      "deep": "Hluboký útlum"
+    },
+    "cookingCarrier": {
+      "default": "Výchozí modelu",
+      "electric": "Elektřina",
+      "gas": "Plyn",
+      "none": "Nevykazováno"
+    },
+    "output": {
+      "heating": "Vytápění",
+      "cooling": "Chlazení",
+      "electricity": "Elektřina",
+      "hotWater": "Teplá voda",
+      "kitchen": "Plyn na vaření"
+    },
+    "outputLevel": {
+      "none": "Vyp.",
+      "summary": "Roční",
+      "series": "Hodinový"
+    },
+    "equipmentGroup": {
+      "cooking": "Vaření",
+      "cold": "Chlazení potravin",
+      "laundry": "Praní a úklid",
+      "electronics": "Elektronika",
+      "misc": "Ostatní"
+    },
+    "equipment": {
+      "hob": "Varná deska",
+      "oven": "Trouba",
+      "microwave": "Mikrovlnná trouba",
+      "kettle": "Rychlovarná konvice",
+      "smallCookingGroup": "Malé kuchyňské spotřebiče",
+      "airFryer": "Horkovzdušná fritéza",
+      "coffeeMachine": "Kávovar",
+      "fridgeFreezer": "Kombinovaná chladnička",
+      "refrigerator": "Chladnička",
+      "chestFreezer": "Truhlicový mrazák",
+      "uprightFreezer": "Skříňový mrazák",
+      "washingMachine": "Pračka",
+      "tumbleDryer": "Sušička",
+      "washerDryer": "Pračka se sušičkou",
+      "dishWasher": "Myčka nádobí",
+      "iron": "Žehlička",
+      "vacuum": "Vysavač",
+      "robotVacuum": "Robotický vysavač",
+      "tvReceiverBox": "Set-top box",
+      "personalComputer": "Stolní počítač",
+      "printer": "Tiskárna",
+      "hiFi": "Hi-fi",
+      "cassetteCdPlayer": "Kazetový nebo CD přehrávač",
+      "vcrDvd": "Videorekordér nebo DVD přehrávač",
+      "laptop": "Notebook",
+      "smartSpeaker": "Chytrý reproduktor",
+      "streamingStick": "Streamovací stick",
+      "wifiRouter": "Wi-Fi router",
+      "lighting": "Osvětlení",
+      "clock": "Hodiny",
+      "answerMachine": "Záznamník",
+      "cordlessTelephone": "Bezdrátový telefon",
+      "fax": "Fax",
+      "evCharger": "Nabíječka elektromobilu"
+    },
+    "country": {
+      "de": "DE - Německo",
+      "at": "AT - Rakousko",
+      "nl": "NL - Nizozemsko",
+      "cz": "CZ - Česko"
+    }
+  },
+  "panel": {
+    "title": {
+      "overview": "Energetický přehled",
+      "envelope": "Obálka budovy",
+      "technology": "Technologie",
+      "parameters": "Parametry budovy"
+    },
+    "tab": {
+      "overview": "Přehled",
+      "parameters": "Parametry",
+      "envelope": "Obálka"
+    },
+    "doneEditing": "Hotovo",
+    "editParameters": "Upravit parametry budovy"
+  },
+  "snapshot": {
+    "status": {
+      "default": "výchozí",
+      "modified": "upraveno"
+    },
+    "thermalRating": {
+      "excellent": "Vynikající",
+      "good": "Dobrá",
+      "fair": "Průměrná",
+      "poor": "Špatná",
+      "veryPoor": "Velmi špatná"
+    },
+    "row": {
+      "type": "Typ",
+      "constructionYear": "Rok výstavby",
+      "country": "Země",
+      "floorAreaPerStorey": "Podlahová plocha (na podlaží)",
+      "storeys": "Podlaží",
+      "roomHeight": "Světlá výška",
+      "volume": "Objem",
+      "envelope": "Obálka"
+    },
+    "envelopeValue": {
+      "one": "{area} m²  ·  {count} plocha",
+      "few": "{area} m²  ·  {count} plochy",
+      "many": "{area} m²  ·  {count} plochy",
+      "other": "{area} m²  ·  {count} ploch"
+    },
+    "energy": {
+      "heating": "Vytápění",
+      "electricity": "Elektřina",
+      "cooling": "Chlazení",
+      "hotWater": "Teplá voda",
+      "kitchen": "Kuchyň (plyn)"
+    },
+    "estimateNotice": "Parametry budovy jsou odhadnuty z veřejných záznamů. Otevřete konfigurátor a zkontrolujte je a upravte.",
+    "annualDemand": "Roční potřeba energie",
+    "totalDemand": "Celková potřeba",
+    "thermalEfficiency": "Tepelná účinnost"
+  },
+  "envelope": {
+    "group": {
+      "walls": "Stěny",
+      "windows": "Okna",
+      "doors": "Dveře",
+      "roof": "Střecha",
+      "floor": "Podlaha"
+    },
+    "roofShape": {
+      "flat": "plochá",
+      "monoPitch": "pultová",
+      "gabled": "J + S",
+      "hipped": "J/S/V/Z",
+      "vShape": "sklon dovnitř",
+      "sawTooth": "orientace J",
+      "custom": "vlastní"
+    },
+    "invalidAreaTip": "{count} s nulovou výměrou, opravte před spuštěním simulace",
+    "noArea": "nulová výměra",
+    "compassNorth": "S"
+  },
+  "common": {
+    "source": {
+      "estimated": "odhad",
+      "userDefined": "zadáno uživatelem"
+    },
+    "comparison": {
+      "higher": "o {percent} % více než {reference} ({kwh} kWh)",
+      "lower": "o {percent} % méně než {reference} ({kwh} kWh)"
+    },
+    "scroll": "posunout",
+    "close": "Zavřít",
+    "unsaved": {
+      "title": "Neuložené změny",
+      "message": "V konfiguraci této budovy máte neuložené změny. Co chcete udělat?",
+      "note": "Zavřením bez uložení zahodíte všechny úpravy od posledního uložení.",
+      "continueEditing": "Pokračovat v úpravách",
+      "saveAndClose": "Uložit a zavřít",
+      "discard": "Zahodit změny"
+    }
+  },
+  "model": {
+    "history": {
+      "refurbishment": "renovaci",
+      "lossFactor": "změnu redukčního činitele",
+      "discarded": "zahozené změny plochy",
+      "roofType": "změnu typu střechy",
+      "import": "import",
+      "field": {
+        "area": "změnu výměry",
+        "uValue": "změnu součinitele U",
+        "tilt": "změnu sklonu",
+        "azimuth": "změnu orientace",
+        "gValue": "změnu propustnosti slunečního záření",
+        "label": "přejmenování",
+        "surface": "změnu plochy"
+      },
+      "deleted": {
+        "wall": "smazání stěny",
+        "window": "smazání okna",
+        "roof": "smazání střechy",
+        "floor": "smazání podlahy",
+        "door": "smazání dveří",
+        "surface": "smazání plochy"
+      },
+      "added": {
+        "wall": "přidání stěny",
+        "window": "přidání okna",
+        "roof": "přidání střechy",
+        "floor": "přidání podlahy",
+        "door": "přidání dveří"
+      }
+    },
+    "error": {
+      "dwellingsRequired": "Tento typ budovy vyžaduje počet bytů. Před spuštěním simulace jej nastavte v sekci Obsazenost.",
+      "runFailed": "Simulace selhala: backend EnerPlanET je nedostupný nebo požadavek odmítl. Podrobnosti najdete v konzoli prohlížeče.",
+      "exportFailed": "Export selhal: {reason}",
+      "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET."
+    },
+    "comparison": {
+      "lastRun": "poslední úplná simulace"
+    }
+  }
+}

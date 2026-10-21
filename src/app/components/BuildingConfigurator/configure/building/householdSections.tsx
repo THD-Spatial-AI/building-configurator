@@ -6,25 +6,29 @@ import {
   FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput,
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
-  ARCHETYPE_OPTIONS,
-  COOKING_CARRIER_OPTIONS,
+  archetypeOptions,
+  buildingTypeName,
+  cookingCarrierOptions,
   EQUIPMENT_GROUPS,
-  OUTPUT_LEVEL_OPTIONS,
+  outputLevelOptions,
   OUTPUT_PROFILES,
   TV_IDS,
   isServiceBuildingType,
   requiresResidentialUnits,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import { useT, type Translate } from '@/app/i18n';
 
 interface SectionProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
 }
 
-const PERSON_OPTIONS = [
-  { value: '', label: 'Default' },
-  ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ value: String(n), label: String(n) })),
-];
+function personOptions(t: Translate) {
+  return [
+    { value: '', label: t('household.default') },
+    ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ value: String(n), label: String(n) })),
+  ];
+}
 
 /** A whole number BuEM defaults when it is left empty. */
 function OptionalCount({ label, value, onChange, tip, placeholder }: {
@@ -34,6 +38,7 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
   tip: string;
   placeholder: string;
 }) {
+  const t = useT();
   return (
     <div>
       <FieldLabel tip={tip}>{label}</FieldLabel>
@@ -45,7 +50,7 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
       <p className="mt-1 text-[10px] text-muted-foreground">
         {value === null ? placeholder : (
           <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>
-            Use default
+            {t('household.useDefault')}
           </button>
         )}
       </p>
@@ -55,15 +60,16 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
 
 /** Dwellings, occupants and household habits; capacity alone for a service building. */
 export function OccupancySection({ general, setGen }: SectionProps) {
+  const t = useT();
   if (isServiceBuildingType(general.buildingType)) {
     return (
       <div className="flex flex-col gap-3">
         <OptionalCount
-          label="Capacity"
+          label={t('household.capacity.label')}
           value={general.capacity}
           onChange={(v) => setGen('capacity', v)}
-          placeholder="Derived from the floor area."
-          tip="Number of occupants. Left empty, BuEM derives it from the floor area with a density for the building type."
+          placeholder={t('household.capacity.placeholder')}
+          tip={t('household.capacity.tip')}
         />
       </div>
     );
@@ -75,8 +81,8 @@ export function OccupancySection({ general, setGen }: SectionProps) {
       <FieldRow>
         {required ? (
           <div>
-            <FieldLabel tip="Number of dwellings. Prefilled from the TABULA archetype. BuEM simulates one representative dwelling and multiplies it by this number.">
-              Dwellings
+            <FieldLabel tip={t('household.dwellings.requiredTip')}>
+              {t('household.dwellings.label')}
             </FieldLabel>
             <NumberInput
               value={general.residential_units ?? ''}
@@ -84,53 +90,55 @@ export function OccupancySection({ general, setGen }: SectionProps) {
               unit="" min={1} step={1}
             />
             {!general.residential_units && (
-              <p className="mt-1 text-[10px] text-amber-700">Required for a {general.buildingType}.</p>
+              <p className="mt-1 text-[10px] text-amber-700">
+                {t('household.dwellings.required', { type: buildingTypeName(t, general.buildingType) })}
+              </p>
             )}
           </div>
         ) : (
           <OptionalCount
-            label="Dwellings"
+            label={t('household.dwellings.label')}
             value={general.residential_units}
             onChange={(v) => setGen('residential_units', v)}
-            placeholder="One dwelling."
-            tip="Number of dwellings. BuEM simulates one representative dwelling and multiplies it by this number."
+            placeholder={t('household.dwellings.placeholder')}
+            tip={t('household.dwellings.tip')}
           />
         )}
         <SelectInput
-          label="Occupants per dwelling"
+          label={t('household.persons.label')}
           value={general.num_persons === null ? '' : String(general.num_persons)}
           onChange={(v) => setGen('num_persons', v ? Number(v) : null)}
-          options={PERSON_OPTIONS}
-          tip="People living in each dwelling. The default is the statistical household size for the country, region and building type."
+          options={personOptions(t)}
+          tip={t('household.persons.tip')}
         />
       </FieldRow>
       <SelectInput
-        label="Household type"
+        label={t('household.archetype.label')}
         value={general.archetype}
         onChange={(v) => setGen('archetype', v)}
-        options={ARCHETYPE_OPTIONS}
-        tip="Household composition. Sets when occupants are at home, which drives internal gains, electricity and hot water."
+        options={archetypeOptions(t)}
+        tip={t('household.archetype.tip')}
       />
       <div>
-        <FieldLabel tip="Dutch CBS municipality code. Selects the regional household size when occupants per dwelling is left to the default.">
-          Region code (Netherlands)
+        <FieldLabel tip={t('household.region.tip')}>
+          {t('household.region.label')}
         </FieldLabel>
         <div className="cfg-input-wrap">
           <input
             type="text"
             value={general.region_code}
             onChange={(e) => setGen('region_code', e.target.value.trim().toUpperCase())}
-            placeholder="e.g. GM0200"
+            placeholder={t('household.region.placeholder')}
             className="cfg-number"
           />
         </div>
       </div>
       <SelectInput
-        label="Cooking with"
+        label={t('household.cooking.label')}
         value={general.cooking_carrier}
         onChange={(v) => setGen('cooking_carrier', v)}
-        options={COOKING_CARRIER_OPTIONS}
-        tip="Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas. Model default uses the setting of the model the building belongs to."
+        options={cookingCarrierOptions(t)}
+        tip={t('household.cooking.tip')}
       />
     </div>
   );
@@ -138,15 +146,19 @@ export function OccupancySection({ general, setGen }: SectionProps) {
 
 type Ownership = 'default' | 'on' | 'off';
 
-const OWNERSHIP_OPTIONS: { value: Ownership; label: string }[] = [
-  { value: 'default', label: 'Default' },
-  { value: 'on', label: 'Yes' },
-  { value: 'off', label: 'No' },
-];
+function ownershipOptions(t: Translate): { value: Ownership; label: string }[] {
+  return [
+    { value: 'default', label: t('household.default') },
+    { value: 'on', label: t('household.equipment.yes') },
+    { value: 'off', label: t('household.equipment.no') },
+  ];
+}
 
-const TV_OPTIONS = ['default', '0', '1', '2', '3'].map((value) => ({
-  value, label: value === 'default' ? 'Default' : value,
-}));
+function tvOptions(t: Translate) {
+  return ['default', '0', '1', '2', '3'].map((value) => ({
+    value, label: value === 'default' ? t('household.default') : value,
+  }));
+}
 
 /** The TV count the three TV ids encode, or 'default' when none is set. */
 function tvCount(equipment: Record<string, boolean>): string {
@@ -156,6 +168,7 @@ function tvCount(equipment: Record<string, boolean>): string {
 
 /** Appliance ownership: each one forced on, forced off, or left to BuEM's ownership probability. */
 export function EquipmentSection({ general, setGen }: SectionProps) {
+  const t = useT();
   const equipment: Record<string, boolean> = general.equipment;
 
   const setOwnership = (id: string, value: Ownership) => {
@@ -173,25 +186,25 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-[11px] text-muted-foreground leading-snug">
-        Default leaves each appliance to BuEM's ownership statistics.
-        {requiresResidentialUnits(general.buildingType) && ' Every dwelling in the building gets the same appliances.'}
+        {t('household.equipment.intro')}
+        {requiresResidentialUnits(general.buildingType) && ` ${t('household.equipment.sameInEveryDwelling')}`}
       </p>
       {EQUIPMENT_GROUPS.map((group) => (
-        <details key={group.label} className="rounded-md border border-slate-200">
+        <details key={group.id} className="rounded-md border border-slate-200">
           <summary className="flex cursor-pointer items-baseline justify-between gap-2 px-2.5 py-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-600">{group.label}</span>
-            <span className="text-[10px] text-muted-foreground">{groupSummary(group, equipment)}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-600">{group.label(t)}</span>
+            <span className="text-[10px] text-muted-foreground">{groupSummary(t, group, equipment)}</span>
           </summary>
           <div className="flex flex-col gap-1.5 border-t border-slate-200 p-2.5">
-            {group.label === 'Electronics' && (
-              <ApplianceRow label="Televisions">
-                <SegmentedControl options={TV_OPTIONS} value={tvCount(equipment)} onChange={setTvCount} />
+            {group.id === 'electronics' && (
+              <ApplianceRow label={t('household.equipment.televisions')}>
+                <SegmentedControl options={tvOptions(t)} value={tvCount(equipment)} onChange={setTvCount} />
               </ApplianceRow>
             )}
             {group.items.map((item) => (
-              <ApplianceRow key={item.id} label={item.label}>
+              <ApplianceRow key={item.id} label={item.label(t)}>
                 <SegmentedControl
-                  options={OWNERSHIP_OPTIONS}
+                  options={ownershipOptions(t)}
                   value={equipment[item.id] === undefined ? 'default' : equipment[item.id] ? 'on' : 'off'}
                   onChange={(v) => setOwnership(item.id, v as Ownership)}
                 />
@@ -206,7 +219,7 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
           onClick={() => setGen('equipment', {})}
           className="cursor-pointer self-start text-[11px] text-muted-foreground underline"
         >
-          Reset all to default
+          {t('household.equipment.resetAll')}
         </button>
       )}
     </div>
@@ -214,12 +227,12 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
 }
 
 /** One line for a collapsed appliance group: how many are set by hand, and how. */
-function groupSummary(group: (typeof EQUIPMENT_GROUPS)[number], equipment: Record<string, boolean>): string {
-  const ids = [...group.items.map((item) => item.id), ...(group.label === 'Electronics' ? TV_IDS : [])];
+function groupSummary(t: Translate, group: (typeof EQUIPMENT_GROUPS)[number], equipment: Record<string, boolean>): string {
+  const ids = [...group.items.map((item) => item.id), ...(group.id === 'electronics' ? TV_IDS : [])];
   const set = ids.filter((id) => equipment[id] !== undefined);
-  if (set.length === 0) return `${group.items.length} at default`;
+  if (set.length === 0) return t('household.equipment.groupDefault', { items: group.items.length });
   const owned = set.filter((id) => equipment[id]).length;
-  return `${set.length} set: ${owned} yes, ${set.length - owned} no`;
+  return t('household.equipment.groupSet', { set: set.length, owned, notOwned: set.length - owned });
 }
 
 function ApplianceRow({ label, children }: { label: string; children: ReactNode }) {
@@ -233,6 +246,7 @@ function ApplianceRow({ label, children }: { label: string; children: ReactNode 
 
 /** Which load profiles BuEM computes, each off, as an annual summary, or hourly. */
 export function OutputsSection({ general, setGen }: SectionProps) {
+  const t = useT();
   const service = isServiceBuildingType(general.buildingType);
   const profiles = OUTPUT_PROFILES.filter(({ key }) => !service || (key !== 'hot_water' && key !== 'kitchen'));
   const thermalOff = general.outputs.heating === 'none' && general.outputs.cooling === 'none';
@@ -240,20 +254,20 @@ export function OutputsSection({ general, setGen }: SectionProps) {
   return (
     <div className="flex flex-col gap-2">
       {profiles.map(({ key, label }) => (
-        <ApplianceRow key={key} label={label}>
+        <ApplianceRow key={key} label={label(t)}>
           <SegmentedControl
-            options={OUTPUT_LEVEL_OPTIONS}
+            options={outputLevelOptions(t)}
             value={general.outputs[key]}
             onChange={(v) => setGen('outputs', { ...general.outputs, [key]: v })}
           />
         </ApplianceRow>
       ))}
       {!service && general.cooking_carrier && general.cooking_carrier !== 'gas' && general.outputs.kitchen !== 'none' && (
-        <p className="text-[10px] text-muted-foreground">Cooking gas is reported only when cooking with gas.</p>
+        <p className="text-[10px] text-muted-foreground">{t('household.outputs.cookingGasOnlyWithGas')}</p>
       )}
       {thermalOff && (
         <p className="text-[11px] text-muted-foreground leading-snug">
-          Without heating or cooling BuEM skips the thermal model: surfaces and weather are not used.
+          {t('household.outputs.thermalOff')}
         </p>
       )}
     </div>
