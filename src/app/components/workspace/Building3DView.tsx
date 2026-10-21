@@ -164,27 +164,32 @@ export function Building3DView({
     else onExit(toBuildingState('current'));
   }, [hasUnsavedChanges, toBuildingState, onExit]);
 
+  // Registered once and read through a ref: a host listener on document can
+  // re-render this view while a key event is still on its way to window, and
+  // a listener swapped during that dispatch never sees the event.
+  const onKeyRef = useRef<(e: KeyboardEvent) => void>(() => {});
+  onKeyRef.current = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      // An open prompt's own dialog closes itself on Escape.
+      if (exitPromptOpen || pendingSurface) return;
+      if (exportOpen) setExportOpen(false);
+      else if (selected) requestSurface(null);
+      else requestExit();
+      return;
+    }
+    // Not while typing into a field, where the browser's own undo applies.
+    const typing = e.target instanceof HTMLElement
+      && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+    if (!typing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      undo();
+    }
+  };
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        // An open prompt's own dialog closes itself on Escape.
-        if (exitPromptOpen || pendingSurface) return;
-        if (exportOpen) setExportOpen(false);
-        else if (selected) requestSurface(null);
-        else requestExit();
-        return;
-      }
-      // Not while typing into a field, where the browser's own undo applies.
-      const typing = e.target instanceof HTMLElement
-        && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
-      if (!typing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        undo();
-      }
-    };
+    const onKey = (e: KeyboardEvent) => onKeyRef.current(e);
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selected, exportOpen, exitPromptOpen, pendingSurface, requestSurface, requestExit, undo]);
+  }, []);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
@@ -205,10 +210,13 @@ export function Building3DView({
         <button
           type="button"
           onClick={requestExit}
+          title="Back to the map (Esc)"
+          aria-keyshortcuts="Escape"
           className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
         >
           <ArrowLeft className="size-3.5" />
           Map
+          <kbd className="ml-0.5 rounded border border-border bg-muted px-1 font-sans text-[10px] font-medium text-muted-foreground">Esc</kbd>
         </button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-tight text-foreground">
