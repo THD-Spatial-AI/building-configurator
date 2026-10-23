@@ -569,7 +569,11 @@
     "estimateNotice": "Les paramètres du bâtiment sont estimés à partir de données publiques. Ouvrez le configurateur pour les vérifier et les ajuster.",
     "annualDemand": "Besoins énergétiques annuels",
     "totalDemand": "Besoins totaux",
-    "thermalEfficiency": "Performance thermique"
+    "thermalEfficiency": "Performance thermique",
+    "unit": {
+      "kWhPerYear": "kWh/an",
+      "kWhGasPerYear": "kWh gaz/an"
+    }
   },
   "envelope": {
     "group": {

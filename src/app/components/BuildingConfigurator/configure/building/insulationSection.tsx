@@ -10,7 +10,7 @@ import { variantName,
 } from '@/app/lib/refurbishment';
 import type { IgnisVariantLevel } from '@/app/lib/ignisAdapter';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
-import { useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
 /** What the group reads from the building model and calls back into it. */
 export interface InsulationProps {
@@ -49,19 +49,20 @@ interface Props extends InsulationProps {
 }
 
 /** One line for the group's header. */
-export function insulationSummary(t: Translate, { levels, states, elements, initial, avgUValue }: InsulationProps): string {
+export function insulationSummary(t: Translate, format: FormatNumber, { levels, states, elements, initial, avgUValue }: InsulationProps): string {
   const present = REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
   const custom = present.some((type) => customCount(elements, type, states[type], initial, levels) > 0);
   const uniform = present.every((type) => states[type] === states[present[0]]);
   const level = levels.find((l) => l.number === states[present[0]]);
   const label = level && variantName(t, level.label, level.number);
   const state = levels.length === 0 ? null : custom || !uniform || !label ? t('insulation.summary.mixed') : label;
-  return [state, t('insulation.summary.averageU', { value: avgUValue.toFixed(2) })].filter(Boolean).join(' · ');
+  return [state, t('insulation.summary.averageU', { value: format(avgUValue, 2) })].filter(Boolean).join(' · ');
 }
 
 /** Building-wide preset; in Expert also a state, U-value and loss factor per element type. */
 export function InsulationSection(props: Props) {
   const t = useT();
+  const format = useFormatNumber();
   const { mode, levels, onOpenEnvelope, avgUValue } = props;
   return (
     <div className="flex flex-col gap-4">
@@ -71,7 +72,7 @@ export function InsulationSection(props: Props) {
       {mode === 'expert' && <SynthesisedWindows {...props} />}
       <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2">
         <span className="text-[11px] text-muted-foreground">
-          {t('insulation.averageU')} <span className="font-semibold text-foreground">{avgUValue.toFixed(2)} W/m²K</span>
+          {t('insulation.averageU')} <span className="font-semibold text-foreground">{format(avgUValue, 2)} W/m²K</span>
         </span>
         {onOpenEnvelope && (
           <button type="button" onClick={onOpenEnvelope} className="cursor-pointer text-[11px] font-medium text-primary hover:underline">

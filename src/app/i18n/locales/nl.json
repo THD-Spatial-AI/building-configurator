@@ -562,7 +562,11 @@
     "estimateNotice": "Gebouwparameters zijn geschat uit openbare registers. Open de configurator om ze te controleren en aan te passen.",
     "annualDemand": "Jaarlijkse energievraag",
     "totalDemand": "Totale vraag",
-    "thermalEfficiency": "Thermische efficiëntie"
+    "thermalEfficiency": "Thermische efficiëntie",
+    "unit": {
+      "kWhPerYear": "kWh/jaar",
+      "kWhGasPerYear": "kWh gas/jaar"
+    }
   },
   "envelope": {
     "group": {

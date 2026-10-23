@@ -562,7 +562,11 @@
     "estimateNotice": "Die Gebäudeparameter sind aus öffentlichen Daten geschätzt. Öffnen Sie den Konfigurator, um sie zu prüfen und anzupassen.",
     "annualDemand": "Jährlicher Energiebedarf",
     "totalDemand": "Gesamtbedarf",
-    "thermalEfficiency": "Thermische Effizienz"
+    "thermalEfficiency": "Thermische Effizienz",
+    "unit": {
+      "kWhPerYear": "kWh/Jahr",
+      "kWhGasPerYear": "kWh Gas/Jahr"
+    }
   },
   "envelope": {
     "group": {

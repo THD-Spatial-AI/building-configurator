@@ -6,7 +6,7 @@ import {
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import { setbackOptions, isServiceBuildingType } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { computeTotalFloorArea } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
-import { useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
 interface ComfortProps {
   general: Record<string, any>;
@@ -41,10 +41,10 @@ const SETBACK_SUMMARIES: Record<string, (t: Translate) => string> = {
 };
 
 /** One line for the group's collapsed card. */
-export function comfortSummary(t: Translate, general: Record<string, any>): string {
+export function comfortSummary(t: Translate, format: FormatNumber, general: Record<string, any>): string {
   const setback = SETBACK_SUMMARIES[general.setback_profile]?.(t)
     ?? t('comfort.summary.setback.unknown', { setback: String(general.setback_profile).toLowerCase() });
-  const parts = [`${general.comfortT_lb} °C`, setback];
+  const parts = [`${format(general.comfortT_lb)} °C`, setback];
   if (!isServiceBuildingType(general.buildingType)) {
     parts.push(general.include_dhw ? t('comfort.summary.hotWaterOn') : t('comfort.summary.hotWaterOff'));
   }
@@ -120,7 +120,8 @@ function CoolingSetpoint({ general, setGen }: FieldProps) {
 
 function AirChanges({ general, setGen }: FieldProps) {
   const t = useT();
-  const total = (general.n_air_infiltration + general.n_air_use).toFixed(2);
+  const format = useFormatNumber();
+  const total = format(general.n_air_infiltration + general.n_air_use, 2);
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
       <FieldRow>
@@ -149,7 +150,8 @@ function AirChanges({ general, setGen }: FieldProps) {
 
 function ThermalMass({ general, setGen }: FieldProps) {
   const t = useT();
-  const totalMass = (general.c_m * computeTotalFloorArea(general.floorArea, general.storeys) / 1000).toFixed(1);
+  const format = useFormatNumber();
+  const totalMass = format(general.c_m * computeTotalFloorArea(general.floorArea, general.storeys) / 1000, 1);
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
       <div>

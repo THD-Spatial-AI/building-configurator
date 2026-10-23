@@ -32,7 +32,7 @@ import { applyState, startingStates, variantSubtype, type RefurbElementType } fr
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
-import type { Message } from '../../i18n';
+import type { Language, Message } from '../../i18n';
 import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
 import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
@@ -219,10 +219,12 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile }: {
+  { estimateHeatDemand = true, runContext, demandProfile, language = 'en' }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
     demandProfile?: BuildingDemandProfile | null;
+    /** The language the snapshot rows' numbers are written in. */
+    language?: Language;
   } = {},
 ) {
   const thematicData = buildingData?.thematic;
@@ -688,7 +690,7 @@ export function useBuildingModel(
   const thermalRating = ignis?.result
     ? getThermalRatingFromDemand(ignis.result.qHnd, general.country as string | undefined)
     : getThermalRating(avgUValue);
-  const snapshotRows = buildSnapshotRows(general, elements, totalArea, baselineRef.current);
+  const snapshotRows = buildSnapshotRows(general, elements, totalArea, language, baselineRef.current);
 
   // BuEM's confirmed result, or a user-uploaded ground-truth profile compared
   // against it — ignis never substitutes as a competing demand estimate here.

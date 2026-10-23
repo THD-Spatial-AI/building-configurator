@@ -7,8 +7,9 @@ import { AlertTriangle, Ruler, RotateCcw, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { useT, type Translate } from '../../i18n';
+import { useFormatNumber, useT, type Translate } from '../../i18n';
 import { variantName } from '../../lib/refurbishment';
+import { DecimalInput } from '../BuildingConfigurator/shared/ui';
 
 /** Widest U-value the slider covers: a single-glazed window sits near 5. */
 const U_MAX = 5;
@@ -43,6 +44,7 @@ export function SurfaceQuickEditor({
   element, geometryArea, uValuePresets, mode = 'basic', onUpdate, onDelete,
 }: SurfaceQuickEditorProps) {
   const t = useT();
+  const format = useFormatNumber();
   const areaMissing = !(element.area > 0);
   // Worth offering only when it would actually change the area.
   const offerGeometryArea = geometryArea != null && geometryArea > 0
@@ -78,16 +80,12 @@ export function SurfaceQuickEditor({
             'flex items-center overflow-hidden rounded-lg border bg-card',
             areaMissing ? 'border-destructive ring-1 ring-destructive/30' : 'border-border',
           )}>
-            <input
-              type="number"
+            <DecimalInput
               aria-label={t('surface.area')}
               min={0}
               step={0.1}
               value={element.area}
-              onChange={(e) => {
-                const next = parseFloat(e.target.value);
-                if (!Number.isNaN(next)) onUpdate({ area: next });
-              }}
+              onChange={(next) => { if (next !== null) onUpdate({ area: next }); }}
               className="w-[92px] px-2.5 py-1.5 text-right text-[13px] font-semibold text-foreground outline-none"
             />
             <span className="pr-2.5 text-[10px] text-muted-foreground">m²</span>
@@ -99,7 +97,7 @@ export function SurfaceQuickEditor({
               className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/10"
             >
               <Ruler className="size-3.5" />
-              {t('surface.useGeometryArea', { area: geometryArea!.toFixed(1) })}
+              {t('surface.useGeometryArea', { area: format(geometryArea!, 1) })}
             </button>
           )}
         </div>
@@ -120,7 +118,7 @@ export function SurfaceQuickEditor({
 
       {mode === 'expert' && (
         <p className="-mt-2 text-[10px] text-muted-foreground">
-          {t('surface.rValue', { value: (1 / Math.max(0.01, element.uValue)).toFixed(2) })}
+          {t('surface.rValue', { value: format(1 / Math.max(0.01, element.uValue), 2) })}
         </p>
       )}
 
@@ -162,10 +160,10 @@ export function SurfaceQuickEditor({
         <div className="flex items-center justify-between gap-2 border-t border-border pt-2.5">
           <span className="text-[10px] leading-snug text-muted-foreground">
             {t('surface.imported', {
-              area: imported.area?.toFixed(1) ?? '',
-              uValue: imported.uValue?.toFixed(2) ?? '',
-              tilt: imported.tilt ?? '',
-              azimuth: imported.azimuth ?? '',
+              area: imported.area === undefined ? '' : format(imported.area, 1),
+              uValue: imported.uValue === undefined ? '' : format(imported.uValue, 2),
+              tilt: imported.tilt === undefined ? '' : format(imported.tilt),
+              azimuth: imported.azimuth === undefined ? '' : format(imported.azimuth),
             })}
           </span>
           <button

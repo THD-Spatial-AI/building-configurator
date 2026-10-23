@@ -576,7 +576,11 @@
     "estimateNotice": "Parametry budynku są szacowane na podstawie publicznych rejestrów. Otwórz konfigurator, aby je sprawdzić i dostosować.",
     "annualDemand": "Roczne zapotrzebowanie na energię",
     "totalDemand": "Całkowite zapotrzebowanie",
-    "thermalEfficiency": "Efektywność cieplna"
+    "thermalEfficiency": "Efektywność cieplna",
+    "unit": {
+      "kWhPerYear": "kWh/rok",
+      "kWhGasPerYear": "kWh gazu/rok"
+    }
   },
   "envelope": {
     "group": {

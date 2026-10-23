@@ -5,7 +5,7 @@
 
 import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { useT, type Translate } from '../../i18n';
+import { useFormatNumber, useT, type Translate } from '../../i18n';
 
 /** Pointer position as an angle in degrees, clockwise from north (up). */
 function pointerAngle(element: HTMLElement, clientX: number, clientY: number): number {
@@ -211,12 +211,13 @@ interface PresetSliderProps {
 export function PresetSlider({
   label, value, min, max, step, unit, decimals = 2, presets = [], quality, onChange,
 }: PresetSliderProps) {
+  const format = useFormatNumber();
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
         <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
         <span className="text-[12px] font-semibold text-foreground">
-          {value.toFixed(decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-muted-foreground">{unit}</span>}
+          {format(value, decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-muted-foreground">{unit}</span>}
         </span>
       </div>
       <input
@@ -238,7 +239,7 @@ export function PresetSlider({
             <button
               key={preset.label}
               type="button"
-              title={`${preset.label}: ${preset.value.toFixed(decimals)}${unit ? ` ${unit}` : ''}`}
+              title={`${preset.label}: ${format(preset.value, decimals)}${unit ? ` ${unit}` : ''}`}
               onClick={() => onChange(preset.value)}
               className={cn(
                 'cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-medium transition-colors',

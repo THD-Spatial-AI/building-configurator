@@ -28,7 +28,7 @@ import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { LanguageProvider, resolveLanguage, translate, type Translate } from '../../i18n';
+import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string; at: { x: number; y: number } };
@@ -81,7 +81,7 @@ export function Building3DView({
   // This component sits above its own LanguageProvider, so it translates directly.
   const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
-  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile });
+  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile, language });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
@@ -213,7 +213,7 @@ export function Building3DView({
 
   return (
     <LanguageProvider language={language}>
-    <div className="fixed inset-0 z-20 flex flex-col bg-muted">
+    <div lang={language} className="fixed inset-0 z-20 flex flex-col bg-muted">
       <ConfiguratorStyles />
 
       {/* ── Header ── */}
@@ -235,7 +235,7 @@ export function Building3DView({
           </p>
           <p className="truncate text-[11px] leading-tight text-muted-foreground">
             {t('view.surfaceCount', { count: Object.keys(elements).length })}
-            <span className="hidden sm:inline"> · {t('view.avgU', { value: model.avgUValue.toFixed(2) })}</span>
+            <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>
           </p>
         </div>
         {!pv && (
@@ -449,7 +449,7 @@ export function Building3DView({
           at={selected.at}
           cardRef={popoverRef}
           title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-          subtitle={selectedElement ? `${selectedElement.label} · ${selectedElement.area.toFixed(1)} m²` : pv.surfaces[selected.id].label}
+          subtitle={selectedElement ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m²` : pv.surfaces[selected.id].label}
           onClose={() => openSurface(null)}
         >
           <PvSurfaceCard key={selected.id} surfaceId={selected.id} surface={pv.surfaces[selected.id]} pv={pv} />
@@ -461,7 +461,7 @@ export function Building3DView({
           at={selected.at}
           cardRef={popoverRef}
           title={t(`surface.type.${selectedElement.type}`)}
-          subtitle={`${selectedElement.area.toFixed(1)} m² · U ${selectedElement.uValue.toFixed(2)} W/m²K`}
+          subtitle={`${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`}
           onClose={() => requestSurface(null)}
         >
           <SurfaceQuickEditor

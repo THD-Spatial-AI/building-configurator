@@ -569,7 +569,11 @@
     "estimateNotice": "Los parámetros del edificio se estiman a partir de registros públicos. Abre el configurador para revisarlos y ajustarlos.",
     "annualDemand": "Demanda energética anual",
     "totalDemand": "Demanda total",
-    "thermalEfficiency": "Eficiencia térmica"
+    "thermalEfficiency": "Eficiencia térmica",
+    "unit": {
+      "kWhPerYear": "kWh/año",
+      "kWhGasPerYear": "kWh gas/año"
+    }
   },
   "envelope": {
     "group": {

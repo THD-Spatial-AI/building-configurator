@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { MESSAGES, resolveLanguage, translate, type Language } from './index';
+import { MESSAGES, formatDecimal, formatNumber, parseDecimal, resolveLanguage, translate, type Language } from './index';
 
 type Messages = { [key: string]: string | Messages };
 
@@ -46,11 +46,61 @@ describe('translate', () => {
   });
 });
 
+describe('decimal fields', () => {
+  it('show a value with the language decimal separator and no grouping', () => {
+    expect(formatDecimal('de', 0.395)).toBe('0,395');
+    expect(formatDecimal('de', 21356.5)).toBe('21356,5');
+    expect(formatDecimal('en', 0.395)).toBe('0.395');
+  });
+
+  it('read either separator as the decimal one', () => {
+    expect(parseDecimal('0,7')).toBe(0.7);
+    expect(parseDecimal('0.7')).toBe(0.7);
+    expect(parseDecimal(' 1.234,5 ')).toBe(1234.5);
+    expect(parseDecimal('-2')).toBe(-2);
+  });
+
+  it('read an empty field as null and an unfinished one as undefined', () => {
+    expect(parseDecimal('')).toBeNull();
+    expect(parseDecimal('-')).toBeUndefined();
+    expect(parseDecimal('abc')).toBeUndefined();
+  });
+});
+
 describe('resolveLanguage', () => {
   it.each([
     ['de', 'de'], ['de-DE', 'de'], ['de_DE', 'de'], ['NL', 'nl'], ['pt-BR', 'en'], ['', 'en'], [undefined, 'en'],
   ])('reads %s as %s', (code, expected) => {
     expect(resolveLanguage(code)).toBe(expected);
+  });
+});
+
+describe('formatNumber', () => {
+  it('uses German separators', () => {
+    expect(formatNumber('de', 0.4, 2)).toBe('0,40');
+    expect(formatNumber('de', 21356, 0)).toBe('21.356');
+  });
+
+  it('uses English separators', () => {
+    expect(formatNumber('en', 0.4, 2)).toBe('0.40');
+    expect(formatNumber('en', 21356, 0)).toBe('21,356');
+  });
+
+  it('groups French thousands with the separator Intl gives', () => {
+    const group = new Intl.NumberFormat('fr').formatToParts(21356).find((part) => part.type === 'group')!.value;
+    expect(group).not.toMatch(/[.,]/);
+    expect(formatNumber('fr', 21356, 0)).toBe(`21${group}356`);
+    expect(formatNumber('fr', 0.4, 2)).toBe('0,40');
+  });
+
+  it('takes a range of decimals', () => {
+    expect(formatNumber('en', 1.5, { min: 0, max: 2 })).toBe('1.5');
+    expect(formatNumber('en', 2, { min: 0, max: 2 })).toBe('2');
+  });
+
+  it('leaves the number unrounded without digits', () => {
+    expect(formatNumber('de', 20.1)).toBe('20,1');
+    expect(formatNumber('en', 37.125)).toBe('37.125');
   });
 });
 

@@ -4,9 +4,9 @@
 import React from 'react';
 import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { EnergySource, EnergyTotals } from '../../../lib/loadProfile';
+import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
 import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';
-import { useT } from '@/app/i18n';
+import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
@@ -31,6 +31,16 @@ const ENERGY_ITEMS = [
 ] as const;
 
 /** Left panel of the overview: the annual energy figures. */
+/** The message for each annual unit the totals carry; any other unit shows as given. */
+const ENERGY_UNIT_KEYS: Record<string, string> = {
+  'kWh/year': 'snapshot.unit.kWhPerYear',
+  'kWh_gas/year': 'snapshot.unit.kWhGasPerYear',
+};
+
+function energyUnit(t: Translate, unit: string | undefined): string | undefined {
+  return unit && ENERGY_UNIT_KEYS[unit] ? t(ENERGY_UNIT_KEYS[unit]) : unit;
+}
+
 export function BuildingSnapshotAside({
   energyTotals,
   thermalRating,
@@ -41,6 +51,7 @@ export function BuildingSnapshotAside({
   showThermalRating = true,
 }: BuildingSnapshotAsideProps) {
   const t = useT();
+  const format = useFormatNumber();
   const content = (
     <aside className="flex flex-col gap-3">
 
@@ -69,9 +80,9 @@ export function BuildingSnapshotAside({
             <span className="text-sm font-medium text-slate-300">{t('snapshot.totalDemand')}</span>
             <span>
               <span className={cn('text-3xl font-extrabold leading-none', energyTotals.total === '—' ? 'text-slate-500' : 'text-white')}>
-                {energyTotals.total ?? '—'}
+                {formatTotal(energyTotals.total ?? '—', format)}
               </span>
-              <span className="ml-1.5 text-xs text-slate-500">{energyTotals.unit}</span>
+              <span className="ml-1.5 text-xs text-slate-500">{energyUnit(t, energyTotals.unit)}</span>
             </span>
           </div>
 
@@ -96,12 +107,12 @@ export function BuildingSnapshotAside({
                   <div className="text-right">
                     <div>
                       {key === 'heating' && energyTotals.heatingPerM2 && (
-                        <span className="mr-1.5 text-[11px] text-slate-500">({energyTotals.heatingPerM2} kWh/m²·a)</span>
+                        <span className="mr-1.5 text-[11px] text-slate-500">({formatTotal(energyTotals.heatingPerM2, format)} kWh/m²·a)</span>
                       )}
                       <span className={cn('text-xl font-bold leading-none', value === '—' ? 'text-slate-500' : valueColor)}>
-                        {value}
+                        {formatTotal(value, format)}
                       </span>
-                      <span className="ml-1.5 text-[11px] text-slate-500">{unit}</span>
+                      <span className="ml-1.5 text-[11px] text-slate-500">{energyUnit(t, unit)}</span>
                     </div>
                     <EnergyComparisonNote deltaPercent={deltaPercent} referenceKwh={referenceKwh} referenceLabel={referenceLabel} />
                   </div>
@@ -123,7 +134,7 @@ export function BuildingSnapshotAside({
                   {thermalRating.labelKey ? t(thermalRating.labelKey) : thermalRating.label}
                 </span>
                 {mode === 'expert' && (
-                  <span className="ml-1.5 text-[11px] text-slate-500">{avgUValue.toFixed(2)} W/m²K</span>
+                  <span className="ml-1.5 text-[11px] text-slate-500">{format(avgUValue, 2)} W/m²K</span>
                 )}
               </div>
             </div>

@@ -75,6 +75,53 @@ export function useT(): Translate {
   return useCallback((key, values) => translate(language, key, values), [language]);
 }
 
+/** Decimals for a shown number: a fixed count, as toFixed(n) gives, or a range. */
+export type Digits = number | { min: number; max: number };
+
+/** Decimals that leave a number unrounded, as String() shows it. */
+const UNROUNDED: Digits = { min: 0, max: 20 };
+
+/**
+ * A number as the language writes it, e.g. 21356.4 with 1 digit is "21.356,4"
+ * in de. Without `digits` it is unrounded. Not for years, which take no grouping.
+ */
+export function formatNumber(language: Language, value: number, digits: Digits = UNROUNDED): string {
+  const [min, max] = typeof digits === 'number' ? [digits, digits] : [digits.min, digits.max];
+  return new Intl.NumberFormat(language, { minimumFractionDigits: min, maximumFractionDigits: max }).format(value);
+}
+
+/** Decimals a typed value keeps on screen; past this float noise from stepping shows. */
+const FIELD_DIGITS = 6;
+
+/** A number for an editable field: the language's decimal separator, no grouping. */
+export function formatDecimal(language: Language, value: number): string {
+  return new Intl.NumberFormat(language, { maximumFractionDigits: FIELD_DIGITS, useGrouping: false }).format(value);
+}
+
+/**
+ * A typed value: a comma or a point is the decimal separator, and with both
+ * the last one is (1.234,5 is 1234.5). null for an empty field, undefined for
+ * text that is not a number yet, such as "-".
+ */
+export function parseDecimal(text: string): number | null | undefined {
+  const trimmed = text.trim().replace(/\s/g, '');
+  if (trimmed === '') return null;
+  const lastSeparator = Math.max(trimmed.lastIndexOf(','), trimmed.lastIndexOf('.'));
+  const normalised = lastSeparator < 0
+    ? trimmed
+    : `${trimmed.slice(0, lastSeparator).replace(/[.,]/g, '')}.${trimmed.slice(lastSeparator + 1)}`;
+  if (!/^-?\d*\.?\d+$|^-?\d+\.$/.test(normalised)) return undefined;
+  return Number(normalised);
+}
+
+export type FormatNumber = (value: number, digits?: Digits) => string;
+
+/** formatNumber for the current language. */
+export function useFormatNumber(): FormatNumber {
+  const language = useContext(LanguageContext);
+  return useCallback((value, digits) => formatNumber(language, value, digits), [language]);
+}
+
 /** The current language, e.g. for Intl number formatting. */
 export function useLanguage(): Language {
   return useContext(LanguageContext);

@@ -20,7 +20,7 @@ import { EquipmentSection, OccupancySection, OutputsSection } from './householdS
 import { ComfortSection, comfortSummary } from './comfortSection';
 import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
-import { useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
 // Insulation and windows is not part of this click-to-expand card system: it
 // renders inline, always visible. See BuildingEditor's `inlineSections`.
@@ -31,7 +31,8 @@ type SectionKey = 'identity' | 'occupancy' | 'comfort' | 'outputs' | 'equipment'
 /** Building identity fields — synced with the overview snapshot panel. */
 function IdentitySection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
   const t = useT();
-  const volume = computeVolume(general.floorArea, general.storeys, general.roomHeight).toFixed(0);
+  const format = useFormatNumber();
+  const volume = format(computeVolume(general.floorArea, general.storeys, general.roomHeight), 0);
   return (
     <div className="flex flex-col gap-3">
       <div>
@@ -192,11 +193,11 @@ const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
 };
 
 /** One-line value summary shown on the grid card and chip. */
-function sectionSummary(t: Translate, key: SectionKey, general: Record<string, any>): string {
+function sectionSummary(t: Translate, format: FormatNumber, key: SectionKey, general: Record<string, any>): string {
   switch (key) {
-    case 'identity':    return `${buildingTypeName(t, general.buildingType)} · ${computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²`;
-    case 'occupancy':   return occupancySummary(t, general);
-    case 'comfort':     return comfortSummary(t, general);
+    case 'identity':    return `${buildingTypeName(t, general.buildingType)} · ${format(computeTotalFloorArea(general.floorArea, general.storeys), 0)} m²`;
+    case 'occupancy':   return occupancySummary(t, format, general);
+    case 'comfort':     return comfortSummary(t, format, general);
     case 'outputs':     return t('editor.summary.outputs', {
       on: OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length,
       total: OUTPUT_PROFILES.length,
@@ -209,13 +210,13 @@ function sectionSummary(t: Translate, key: SectionKey, general: Record<string, a
   }
 }
 
-function occupancySummary(t: Translate, general: Record<string, any>): string {
+function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>): string {
   if (isServiceBuildingType(general.buildingType)) {
-    return general.capacity ? t('editor.summary.occupants', { capacity: general.capacity }) : t('editor.summary.capacityFromArea');
+    return general.capacity ? t('editor.summary.occupants', { capacity: format(general.capacity) }) : t('editor.summary.capacityFromArea');
   }
   const units = general.residential_units;
   const dwellings = units ? t('editor.summary.dwellings', { count: units }) : t('editor.summary.dwellingsNotSet');
-  return general.num_persons ? t('editor.summary.perDwelling', { dwellings, persons: general.num_persons }) : dwellings;
+  return general.num_persons ? t('editor.summary.perDwelling', { dwellings, persons: format(general.num_persons) }) : dwellings;
 }
 
 /** Renders the content body for a given section key. */
@@ -267,6 +268,7 @@ export function BuildingEditor({
   hideIdentity = false,
 }: BuildingEditorProps) {
   const t = useT();
+  const format = useFormatNumber();
   const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
   const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort', 'outputs'];
@@ -292,7 +294,7 @@ export function BuildingEditor({
       <div className="min-w-0">
         <p className="text-sm font-bold text-foreground">{general.buildingName || t('editor.header.fallbackName')}</p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {buildingTypeName(t, general.buildingType)} ·{general.constructionYear} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
+          {buildingTypeName(t, general.buildingType)} ·{general.constructionYear} · {format(computeTotalFloorArea(general.floorArea, general.storeys), 0)} m²
         </p>
       </div>
     </div>
@@ -306,7 +308,7 @@ export function BuildingEditor({
           <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
           {t('editor.insulationTitle')}
         </p>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">{insulationSummary(t, insulation)}</p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{insulationSummary(t, format, insulation)}</p>
       </div>
       {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}
       <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
@@ -352,7 +354,7 @@ export function BuildingEditor({
                 {SECTION_LABELS[activeSection](t)}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {sectionSummary(t, activeSection, general)}
+                {sectionSummary(t, format, activeSection, general)}
               </p>
             </div>
             <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
@@ -389,7 +391,7 @@ export function BuildingEditor({
               </div>
               <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
             </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(t, key, general)}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(t, format, key, general)}</p>
           </button>
         ))}
       </div>

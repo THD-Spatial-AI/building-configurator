@@ -19,7 +19,7 @@ import {
   SnapshotStatusBadge,
   getElementStatus,
 } from '../shared/snapshotUtils';
-import { useT } from '@/app/i18n';
+import { useFormatNumber, useT } from '@/app/i18n';
 
 export interface ElementCompositionSectionProps {
   elements: Record<string, BuildingElement>;
@@ -37,6 +37,7 @@ export function ElementCompositionSection({
   onSelectSurface,
 }: ElementCompositionSectionProps) {
   const t = useT();
+  const format = useFormatNumber();
   const [expanded, setExpanded] = useState<ElementGroupKey | null>(null);
   const grouped  = getGroupedElements(elements);
   const roofInfo = getRoofGroupInfo(roofConfig, t);
@@ -79,7 +80,7 @@ export function ElementCompositionSection({
                 </span>
               </span>
               <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
-                {totalArea.toFixed(1)} m² · U {avgUValue.toFixed(2)}
+                {format(totalArea, 1)} m² · U {format(avgUValue, 2)}
               </span>
               {invalidCount > 0 && (
                 <span
@@ -116,9 +117,9 @@ export function ElementCompositionSection({
                           {el.label}
                         </span>
                         <span className={cn('shrink-0 tabular-nums', invalid ? 'font-medium text-destructive' : 'text-muted-foreground')}>
-                          {invalid ? t('envelope.noArea') : `${el.area.toFixed(1)} m²`}
+                          {invalid ? t('envelope.noArea') : `${format(el.area, 1)} m²`}
                         </span>
-                        <span className="w-12 shrink-0 text-right tabular-nums text-muted-foreground">U {el.uValue.toFixed(2)}</span>
+                        <span className="w-12 shrink-0 text-right tabular-nums text-muted-foreground">U {format(el.uValue, 2)}</span>
                       </button>
                     </li>
                   );

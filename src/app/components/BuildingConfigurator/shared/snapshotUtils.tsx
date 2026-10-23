@@ -12,7 +12,7 @@ import {
   computeVolume,
 } from './buildingDefaults';
 import { BUILDING_TYPE_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
-import { useT, type MessageValues } from '@/app/i18n';
+import { formatNumber, useT, type Language, type MessageValues } from '@/app/i18n';
 
 export type SnapshotStatus = 'default' | 'modified';
 
@@ -116,6 +116,7 @@ export function buildSnapshotRows(
   general: typeof DEFAULT_GENERAL,
   elements: Record<string, BuildingElement>,
   totalArea: number,
+  language: Language,
   baseline?: SnapshotBaseline,
 ): SnapshotRow[] {
   const baseGeneral      = baseline?.general      ?? DEFAULT_GENERAL;
@@ -155,7 +156,7 @@ export function buildSnapshotRows(
     {
       label: 'Floor area (per storey)',
       labelKey: 'snapshot.row.floorAreaPerStorey',
-      value: `${general.floorArea.toFixed(1)} m²`,
+      value: `${formatNumber(language, general.floorArea, 1)} m²`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea) ? 'default' : 'modified',
       editKey: 'floorArea',
       editType: 'number',
@@ -173,7 +174,7 @@ export function buildSnapshotRows(
     {
       label: 'Room height',
       labelKey: 'snapshot.row.roomHeight',
-      value: `${general.roomHeight.toFixed(1)} m`,
+      value: `${formatNumber(language, general.roomHeight, 1)} m`,
       status: isCloseTo(general.roomHeight, baseGeneral.roomHeight) ? 'default' : 'modified',
       editKey: 'roomHeight',
       editType: 'number',
@@ -182,7 +183,7 @@ export function buildSnapshotRows(
     {
       label: 'Volume',
       labelKey: 'snapshot.row.volume',
-      value: `${computeVolume(general.floorArea, general.storeys, general.roomHeight).toFixed(0)} m³`,
+      value: `${formatNumber(language, computeVolume(general.floorArea, general.storeys, general.roomHeight), 0)} m³`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea)
         && general.storeys === baseGeneral.storeys
         && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
@@ -192,10 +193,10 @@ export function buildSnapshotRows(
     {
       label: 'Envelope',
       labelKey: 'snapshot.row.envelope',
-      value: `${totalArea.toFixed(1)} m²  ·  ${Object.keys(elements).length} surfaces`,
+      value: `${formatNumber(language, totalArea, 1)} m²  ·  ${Object.keys(elements).length} surfaces`,
       valueMessage: {
         key: 'snapshot.envelopeValue',
-        values: { area: totalArea.toFixed(1), count: Object.keys(elements).length },
+        values: { area: formatNumber(language, totalArea, 1), count: Object.keys(elements).length },
       },
       status: isCloseTo(totalArea, baseTotalArea)
         && Object.keys(elements).length === baseElementCount

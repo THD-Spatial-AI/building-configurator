@@ -11,7 +11,8 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { AlertTriangle, Info, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useT } from '@/app/i18n';
+import { formatDecimal, parseDecimal, useFormatNumber, useLanguage, useT } from '@/app/i18n';
+import { formatTotal } from '@/app/lib/loadProfile';
 
 // ─── Design tokens — CSS variable references for use in SVG attributes ─────────
 // SVG stroke/fill attributes accept var() directly, so these strings work as-is.
@@ -120,19 +121,79 @@ export function EnergyComparisonNote({
   referenceLabel?: string;
 }) {
   const t = useT();
+  const format = useFormatNumber();
   if (deltaPercent === null || deltaPercent === undefined || !referenceKwh || !referenceLabel) return null;
   if (Math.abs(deltaPercent) < 0.5) return null;
 
   const isIncrease = deltaPercent > 0;
   const magnitude = Math.abs(deltaPercent);
-  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}` : magnitude.toFixed(0);
+  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${format(DELTA_DISPLAY_CAP, 0)}` : format(magnitude, 0);
 
   return (
     <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
       {t(isIncrease ? 'common.comparison.higher' : 'common.comparison.lower', {
-        percent: displayValue, reference: referenceLabel, kwh: referenceKwh,
+        percent: displayValue, reference: referenceLabel, kwh: formatTotal(referenceKwh, format),
       })}
     </p>
+  );
+}
+
+// ─── DecimalInput ─────────────────────────────────────────────────────────────
+
+type DecimalInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step'> & {
+  /** '' or null shows an empty field. */
+  value: number | '' | null;
+  /** A typed number, or null when the field is cleared. Text that is not a number yet is not passed on. */
+  onChange?: (value: number | null) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+};
+
+/**
+ * A number field in the view's language: 0,4 in de, 0.4 in en. A browser's
+ * type="number" field shows the browser's locale, not the page's, so this is a
+ * text field that formats while not being edited and reads either separator.
+ * The arrow keys step by `step` within min and max.
+ */
+export function DecimalInput({ value, onChange, min, max, step = 1, onFocus, onBlur, onKeyDown, ...rest }: DecimalInputProps) {
+  const language = useLanguage();
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft ?? (typeof value === 'number' ? formatDecimal(language, value) : '');
+
+  const commit = (text: string) => {
+    setDraft(text);
+    const parsed = parseDecimal(text);
+    if (parsed !== undefined) onChange?.(parsed);
+  };
+
+  const stepBy = (direction: 1 | -1) => {
+    const current = parseDecimal(shown) ?? 0;
+    const precision = (String(step).split('.')[1] ?? '').length;
+    let next = Number((current + direction * step).toFixed(precision));
+    if (min !== undefined) next = Math.max(min, next);
+    if (max !== undefined) next = Math.min(max, next);
+    setDraft(formatDecimal(language, next));
+    onChange?.(next);
+  };
+
+  return (
+    <input
+      {...rest}
+      type="text"
+      inputMode="decimal"
+      value={shown}
+      onChange={(e) => commit(e.target.value)}
+      onFocus={(e) => { setDraft(shown); onFocus?.(e); }}
+      onBlur={(e) => { setDraft(null); onBlur?.(e); }}
+      onKeyDown={(e) => {
+        if (!rest.readOnly && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+          e.preventDefault();
+          stepBy(e.key === 'ArrowUp' ? 1 : -1);
+        }
+        onKeyDown?.(e);
+      }}
+    />
   );
 }
 
@@ -164,19 +225,15 @@ export function NumberInput({
         </div>
       )}
       <div className="cfg-input-wrap">
-        <input
+        <DecimalInput
           className="cfg-number"
-          type="number"
-          value={value}
+          value={typeof value === 'number' ? value : value === '' ? '' : Number(value)}
           min={min}
           max={max}
           step={step}
           readOnly={readOnly}
-          onChange={(e) => {
-            if (!onChange) return;
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v)) onChange(v);
-          }}
+          aria-label={label}
+          onChange={(v) => { if (v !== null) onChange?.(v); }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
         />
         <div className="px-2.5 flex items-center justify-center bg-muted border-l border-border text-[11px] text-muted-foreground whitespace-nowrap shrink-0 select-none">

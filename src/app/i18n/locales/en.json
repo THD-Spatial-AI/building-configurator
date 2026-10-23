@@ -562,7 +562,11 @@
     "estimateNotice": "Building parameters are estimated from public records. Open the configurator to review and adjust them.",
     "annualDemand": "Annual energy demand",
     "totalDemand": "Total demand",
-    "thermalEfficiency": "Thermal efficiency"
+    "thermalEfficiency": "Thermal efficiency",
+    "unit": {
+      "kWhPerYear": "kWh/year",
+      "kWhGasPerYear": "kWh gas/year"
+    }
   },
   "envelope": {
     "group": {

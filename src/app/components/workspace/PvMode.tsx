@@ -7,7 +7,7 @@ import { Info, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PresetSlider } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { useT } from '../../i18n';
+import { useFormatNumber, useT } from '../../i18n';
 
 /** One surface the host offers for PV. */
 export interface PvSurface {
@@ -62,6 +62,7 @@ export function PvPanel({ pv, elements, onSelect }: {
   onSelect: (surfaceId: string) => void;
 }) {
   const t = useT();
+  const format = useFormatNumber();
   const entries = Object.entries(pv.surfaces);
   const installedCount = entries.filter(([, surface]) => surface.state === 'installed').length;
 
@@ -106,7 +107,7 @@ export function PvPanel({ pv, elements, onSelect }: {
                     {surfaceName(id, elements, pv.surfaces)}
                   </button>
                   <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {elements[id] ? `${t(`pv.surfaceType.${elements[id].type}`)} · ` : ''}{surface.maxKwp.toFixed(1)} kWp
+                    {elements[id] ? `${t(`pv.surfaceType.${elements[id].type}`)} · ` : ''}{format(surface.maxKwp, 1)} kWp
                   </span>
                 </li>
               ))}
@@ -121,6 +122,7 @@ export function PvPanel({ pv, elements, onSelect }: {
 /** The card beside a clicked surface: its PV switch and, with PV on it, the usable share. */
 export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; surface: PvSurface; pv: PvMode }) {
   const t = useT();
+  const format = useFormatNumber();
   const installed = surface.state === 'installed';
   return (
     <div className="flex flex-col gap-3 p-3">
@@ -150,7 +152,7 @@ export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; s
       <div className="flex items-baseline justify-between">
         <span className="text-[11px] font-medium text-muted-foreground">{t('pv.capacity')}</span>
         <span className="text-[12px] font-semibold text-foreground">
-          {surface.maxKwp.toFixed(1)}<span className="ml-1 text-[10px] font-normal text-muted-foreground">kWp</span>
+          {format(surface.maxKwp, 1)}<span className="ml-1 text-[10px] font-normal text-muted-foreground">kWp</span>
         </span>
       </div>
     </div>
