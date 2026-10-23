@@ -24,12 +24,14 @@ export {
   type SurfacePolygon,
 } from './app/lib/surfaceMesh';
 
-// The four calls a host supplies, and the shapes they carry.
+// The calls a host supplies (four, and an optional PV run), and the shapes they carry.
 export type {
   BuemBuildingRunRequest,
   BuemBuildingRunResponse,
   ConfiguratorServices,
   IgnisCalculatePayload,
+  PvBuildingRunRequest,
+  PvBuildingRunResponse,
   VariantLookupServices,
 } from './app/lib/services';
 

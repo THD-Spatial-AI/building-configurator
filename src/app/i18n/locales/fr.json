@@ -572,7 +572,8 @@
     "unit": {
       "kWhPerYear": "kWh/an",
       "kWhGasPerYear": "kWh gaz/an"
-    }
+    },
+    "pvGeneration": "Production PV"
   },
   "envelope": {
     "group": {
@@ -651,7 +652,8 @@
       "dwellingsRequired": "Ce type de bâtiment requiert son nombre de logements. Renseignez-le sous Occupation avant de lancer une simulation.",
       "runFailed": "Échec de la simulation : le backend EnerPlanET est injoignable ou a rejeté la requête. Voir la console du navigateur pour plus de détails.",
       "exportFailed": "Échec de l'export : {reason}",
-      "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET."
+      "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET.",
+      "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour."
     },
     "comparison": {
       "lastRun": "la dernière simulation complète"

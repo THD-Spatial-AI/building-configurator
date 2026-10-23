@@ -579,7 +579,8 @@
     "unit": {
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh gazu/rok"
-    }
+    },
+    "pvGeneration": "Produkcja PV"
   },
   "envelope": {
     "group": {
@@ -658,7 +659,8 @@
       "dwellingsRequired": "Ten typ budynku wymaga podania liczby mieszkań. Ustaw ją w sekcji Mieszkańcy przed uruchomieniem symulacji.",
       "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
       "exportFailed": "Eksport nie powiódł się: {reason}",
-      "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET."
+      "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
+      "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne."
     },
     "comparison": {
       "lastRun": "w ostatniej pełnej symulacji"

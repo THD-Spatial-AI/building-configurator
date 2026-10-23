@@ -1,0 +1,32 @@
+// A PV run for the open building, through the host's optional runPvBuilding.
+// The host holds the PV arrays; the package sends the geometry of the host's
+// PV surfaces as the user has edited it, since edits are not saved until the
+// view is left.
+
+import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import type { ConfiguratorServices, PvBuildingRunRequest } from './services';
+
+/** The request for the host's PV surfaces, or null when the building has none among its elements. */
+export function pvRunRequest(
+  osmId: string,
+  elements: Record<string, BuildingElement>,
+  pvSurfaceIds: readonly string[],
+): PvBuildingRunRequest | null {
+  const surfaces = pvSurfaceIds
+    .filter((id) => elements[id])
+    .map((id) => ({ id, area: elements[id].area, tilt: elements[id].tilt, azimuth: elements[id].azimuth }));
+  return surfaces.length > 0 ? { osm_id: osmId, surfaces } : null;
+}
+
+/** The building's annual PV generation in kWh, or null when the host has no PV run or it failed. */
+export async function runPvBuilding(
+  services: Pick<ConfiguratorServices, 'runPvBuilding'>,
+  request: PvBuildingRunRequest,
+): Promise<number | null> {
+  if (!services.runPvBuilding) return null;
+  try {
+    return (await services.runPvBuilding(request)).annualKwh;
+  } catch {
+    return null;
+  }
+}

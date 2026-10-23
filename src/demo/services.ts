@@ -50,6 +50,13 @@ export const fixtureServices: ConfiguratorServices = {
     if (!profile) throw new Error(`No bundled BuEM result for building ${request.osm_id}`);
     return profile;
   },
+
+  // A stand-in for the host's PV model: 0.2 kWp/m², 900 kWh/kWp a year.
+  async runPvBuilding(request) {
+    await new Promise((resolve) => setTimeout(resolve, RUN_DELAY_MS));
+    const area = request.surfaces.reduce((sum, surface) => sum + surface.area, 0);
+    return { annualKwh: Math.round(area * 0.2 * 900) };
+  },
 };
 
 /** A building's bundled stored demand, or null when BuEM produced none for it. */
