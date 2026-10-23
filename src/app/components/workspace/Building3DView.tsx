@@ -81,7 +81,9 @@ export function Building3DView({
   // This component sits above its own LanguageProvider, so it translates directly.
   const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
-  const model = useBuildingModel(services, building, { estimateHeatDemand: false, runContext, demandProfile, language });
+  const model = useBuildingModel(services, building, {
+    estimateHeatDemand: false, runContext, demandProfile, language, pvSurfaceIds: pv ? undefined : pvSurfaceIds,
+  });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
@@ -412,6 +414,7 @@ export function Building3DView({
                     mode="basic"
                     embedded
                     showEstimateNotice={false}
+                    pvAnnualKwh={model.pvAnnualKwh}
                   />
                 </div>
               )}

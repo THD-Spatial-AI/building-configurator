@@ -2,7 +2,7 @@
 // Building parameters and envelope now live in the right column's merged details card.
 
 import React from 'react';
-import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
 import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';
@@ -20,6 +20,8 @@ export interface BuildingSnapshotAsideProps {
   showEstimateNotice?: boolean;
   /** The thermal efficiency row. Off where no defensible rating method applies. */
   showThermalRating?: boolean;
+  /** Annual PV generation in kWh; the PV row shows only when it is a number. */
+  pvAnnualKwh?: number | null;
 }
 
 const ENERGY_ITEMS = [
@@ -30,7 +32,6 @@ const ENERGY_ITEMS = [
   { key: 'kitchen',     labelKey: 'snapshot.energy.kitchen', Icon: CookingPot, iconBg: 'bg-rose-500/20', iconColor: 'text-rose-400', valueColor: 'text-rose-300'   },
 ] as const;
 
-/** Left panel of the overview: the annual energy figures. */
 /** The message for each annual unit the totals carry; any other unit shows as given. */
 const ENERGY_UNIT_KEYS: Record<string, string> = {
   'kWh/year': 'snapshot.unit.kWhPerYear',
@@ -41,6 +42,7 @@ function energyUnit(t: Translate, unit: string | undefined): string | undefined 
   return unit && ENERGY_UNIT_KEYS[unit] ? t(ENERGY_UNIT_KEYS[unit]) : unit;
 }
 
+/** Left panel of the overview: the annual energy figures. */
 export function BuildingSnapshotAside({
   energyTotals,
   thermalRating,
@@ -49,6 +51,7 @@ export function BuildingSnapshotAside({
   embedded = false,
   showEstimateNotice = true,
   showThermalRating = true,
+  pvAnnualKwh = null,
 }: BuildingSnapshotAsideProps) {
   const t = useT();
   const format = useFormatNumber();
@@ -119,6 +122,22 @@ export function BuildingSnapshotAside({
                 </div>
               );
             })}
+
+            {/* Generation, apart from the demand rows above */}
+            {typeof pvAnnualKwh === 'number' && (
+            <div className="flex items-center justify-between border-t border-slate-700/60 pt-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-7 items-center justify-center rounded-md bg-amber-500/20">
+                  <Sun className="size-4 text-amber-400" />
+                </div>
+                <span className="text-sm text-slate-300">{t('snapshot.pvGeneration')}</span>
+              </div>
+              <div>
+                <span className="text-xl font-bold leading-none text-amber-300">{format(pvAnnualKwh, 0)}</span>
+                <span className="ml-1.5 text-[11px] text-slate-500">{t('snapshot.unit.kWhPerYear')}</span>
+              </div>
+            </div>
+            )}
 
             {/* Thermal efficiency row */}
             {showThermalRating && (

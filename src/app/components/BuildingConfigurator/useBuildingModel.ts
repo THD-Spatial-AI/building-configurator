@@ -30,6 +30,7 @@ import {
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
 import { applyState, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
+import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { Language, Message } from '../../i18n';
@@ -221,12 +222,14 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en' }: {
+  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [] }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
     demandProfile?: BuildingDemandProfile | null;
     /** The language the snapshot rows' numbers are written in. */
     language?: Language;
+    /** The host's PV surfaces; with any, a run also asks the host for PV generation. */
+    pvSurfaceIds?: readonly string[];
   } = {},
 ) {
   const thematicData = buildingData?.thematic;
@@ -269,6 +272,8 @@ export function useBuildingModel(
   const [loaded, setLoaded] = useState({ elements: initialElements, general: initialGeneral });
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
+  /** Annual PV generation (kWh) from the last run, or null before one or without PV. */
+  const [pvAnnualKwh, setPvAnnualKwh] = useState<number | null>(null);
   // A user-uploaded load profile, if any — outranks BuEM as the annual
   // totals' source, since it's real data rather than a model output.
   const [groundTruthTimeseries, setGroundTruthTimeseries] = useState<LoadDataPoint[] | null>(null);
@@ -596,12 +601,20 @@ export function useBuildingModel(
     setIsRunningSimulation(true);
     setUploadError(null);
     try {
-      const result = await runBuildingSimulation(services, identity, elements, general, runContext);
+      // PV runs beside BuEM; its failure is reported on its own and does not
+      // hold back the demand result.
+      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds) : null;
+      const [result, pvKwh] = await Promise.all([
+        runBuildingSimulation(services, identity, elements, general, runContext),
+        pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),
+      ]);
+      if (pvRequest) setPvAnnualKwh(pvKwh);
       if (!result) {
         setUploadError({ key: 'model.error.runFailed' });
         return;
       }
       setEnergyTotals(computeEnergyTotals(null, toThermalSummary(result)));
+      if (pvRequest && pvKwh === null) setUploadError({ key: 'model.error.pvFailed' });
     } finally {
       setIsRunningSimulation(false);
     }
@@ -716,7 +729,7 @@ export function useBuildingModel(
     // state
     elements, general, roofConfig, ignis,
     refurbStates, refurbInitial,
-    uploadError, isRunningSimulation, hasUnsavedChanges,
+    uploadError, isRunningSimulation, hasUnsavedChanges, pvAnnualKwh,
     chartTimeseries,
     /** What undo would take back, or null when there is nothing to undo. */
     undoLabel: history[history.length - 1]?.label ?? null,

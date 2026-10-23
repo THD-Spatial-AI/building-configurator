@@ -84,6 +84,33 @@ export interface ConfiguratorServices {
    * response; this only carries it. Expected budget: 15 s.
    */
   runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse>;
+
+  /**
+   * Optional. PV generation for the building's PV surfaces, run with Save &
+   * Preview when the host passes pvSurfaceIds. Without it there is no PV run
+   * and no PV row. Expected budget: 30 s.
+   */
+  runPvBuilding?(request: PvBuildingRunRequest): Promise<PvBuildingRunResponse>;
+}
+
+/** The host's PV surfaces on the open building, with the geometry as currently edited. */
+export interface PvBuildingRunRequest {
+  /** As in BuemBuildingRunRequest. */
+  osm_id: string;
+  surfaces: {
+    id: string;
+    /** m² */
+    area: number;
+    /** Degrees from horizontal, 0 to 90. */
+    tilt: number;
+    /** Degrees clockwise from north; 180 is south. */
+    azimuth: number;
+  }[];
+}
+
+export interface PvBuildingRunResponse {
+  /** The building's PV generation over a full calendar year, the span of the BuEM totals, in kWh. */
+  annualKwh: number;
 }
 
 /** The two lookups needed to resolve a building's TABULA archetype. */

@@ -572,7 +572,8 @@
     "unit": {
       "kWhPerYear": "kWh/año",
       "kWhGasPerYear": "kWh gas/año"
-    }
+    },
+    "pvGeneration": "Generación FV"
   },
   "envelope": {
     "group": {
@@ -651,7 +652,8 @@
       "dwellingsRequired": "Este tipo de edificio necesita su número de viviendas. Indícalo en Ocupación antes de simular.",
       "runFailed": "La simulación falló: el backend de EnerPlanET no responde o rechazó la solicitud. Revisa la consola del navegador para más detalles.",
       "exportFailed": "Error al exportar: {reason}",
-      "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET."
+      "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET.",
+      "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada."
     },
     "comparison": {
       "lastRun": "la última simulación completa"

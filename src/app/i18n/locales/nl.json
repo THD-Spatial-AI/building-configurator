@@ -565,7 +565,8 @@
     "unit": {
       "kWhPerYear": "kWh/jaar",
       "kWhGasPerYear": "kWh gas/jaar"
-    }
+    },
+    "pvGeneration": "PV-opwekking"
   },
   "envelope": {
     "group": {
@@ -644,7 +645,8 @@
       "dwellingsRequired": "Dit gebouwtype vereist het aantal woningen. Stel het in onder Bewoning voordat u een simulatie start.",
       "runFailed": "Simulatie mislukt: de EnerPlanET-backend is onbereikbaar of heeft het verzoek geweigerd. Zie de browserconsole voor details.",
       "exportFailed": "Export mislukt: {reason}",
-      "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is."
+      "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
+      "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel."
     },
     "comparison": {
       "lastRun": "de laatste volledige simulatie"

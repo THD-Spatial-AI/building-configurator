@@ -89,7 +89,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 |---|---|
 | `building` | The `BuildingState` to edit, see [Building a BuildingState](#building-a-buildingstate) |
 | `geometry` | `{ surfaces }` for the 3D model, or `null` while it loads |
-| `services` | The four calls below |
+| `services` | The four calls below, and an optional PV run |
 | `onExit(building)` | Called when the user leaves; receives the edited building, or the one passed in when nothing changed |
 | `runContext` | Optional. `{ startDate, endDate }` (RFC 3339 dates): the period a BuEM run covers. Without it, a run covers 2018 |
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
@@ -118,6 +118,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
 | `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
+| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when `pvSurfaceIds` is not empty. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as currently edited (m², degrees from horizontal, degrees clockwise from north). Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.

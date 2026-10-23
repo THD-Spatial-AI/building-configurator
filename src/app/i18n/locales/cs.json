@@ -579,7 +579,8 @@
     "unit": {
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh plynu/rok"
-    }
+    },
+    "pvGeneration": "Výroba FV"
   },
   "envelope": {
     "group": {
@@ -658,7 +659,8 @@
       "dwellingsRequired": "Tento typ budovy vyžaduje počet bytů. Před spuštěním simulace jej nastavte v sekci Obsazenost.",
       "runFailed": "Simulace selhala: backend EnerPlanET je nedostupný nebo požadavek odmítl. Podrobnosti najdete v konzoli prohlížeče.",
       "exportFailed": "Export selhal: {reason}",
-      "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET."
+      "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET.",
+      "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální."
     },
     "comparison": {
       "lastRun": "poslední úplná simulace"

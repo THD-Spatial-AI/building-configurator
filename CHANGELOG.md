@@ -4,6 +4,12 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.12.0] - 2026-10-23
+
+### Added
+
+- `ConfiguratorServices.runPvBuilding` (optional, with `PvBuildingRunRequest` and `PvBuildingRunResponse` types): when the host passes `pvSurfaceIds`, Save & Preview also asks the host for the building's annual PV generation, sending each PV surface's area, tilt and azimuth as currently edited. The energy overview shows it as a PV generation row. A failed PV run shows its own message and leaves the demand result in place. Without the service nothing changes.
+
 ## [0.11.0] - 2026-10-23
 
 ### Added
