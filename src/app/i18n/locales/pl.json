@@ -317,7 +317,7 @@
     },
     "cooking": {
       "label": "Gotowanie na",
-      "tip": "Gotowanie elektryczne pozostaje w profilu energii elektrycznej. Gotowanie na gazie jest raportowane osobno jako gaz do gotowania. Opcja domyślna modelu przejmuje ustawienie modelu, do którego należy budynek."
+      "tip": "Gotowanie elektryczne pozostaje w profilu energii elektrycznej. Gotowanie na gazie jest raportowane osobno jako gaz do gotowania."
     },
     "equipment": {
       "yes": "Tak",
@@ -456,7 +456,6 @@
       "deep": "Głębokie obniżenie"
     },
     "cookingCarrier": {
-      "default": "Domyślne modelu",
       "electric": "Prąd",
       "gas": "Gaz",
       "none": "Nieraportowane"

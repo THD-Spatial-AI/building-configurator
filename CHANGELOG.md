@@ -15,6 +15,7 @@ Each version's GitHub release entry carries the full notes.
 
 ### Changed
 
+- Cooking with (BuEM `cooking_carrier`) is set per building: electric (default), gas or none. The "Model default" option is gone and the building always sends its value, so the model's cooking setting no longer applies to a building opened in the view. A stored building that names none opens as electric.
 - `EnergyTotals.*ComparisonLabel` holds a translation key instead of English text.
 - A single surface reads "1 surface", not "1 surfaces".
 

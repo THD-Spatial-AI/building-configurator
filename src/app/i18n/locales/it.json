@@ -309,7 +309,7 @@
     },
     "cooking": {
       "label": "Cottura con",
-      "tip": "La cottura elettrica rientra nel profilo elettrico. La cottura a gas è riportata a parte come gas di cottura. Predefinito del modello usa l'impostazione del modello a cui appartiene l'edificio."
+      "tip": "La cottura elettrica rientra nel profilo elettrico. La cottura a gas è riportata a parte come gas di cottura."
     },
     "equipment": {
       "yes": "Sì",
@@ -444,7 +444,6 @@
       "deep": "Attenuazione forte"
     },
     "cookingCarrier": {
-      "default": "Predefinito del modello",
       "electric": "Elettrica",
       "gas": "Gas",
       "none": "Non riportata"

@@ -309,7 +309,7 @@
     },
     "cooking": {
       "label": "Koken op",
-      "tip": "Elektrisch koken valt binnen het elektriciteitsprofiel. Koken op gas wordt apart gerapporteerd als kookgas. Modelstandaard gebruikt de instelling van het model waartoe het gebouw behoort."
+      "tip": "Elektrisch koken valt binnen het elektriciteitsprofiel. Koken op gas wordt apart gerapporteerd als kookgas."
     },
     "equipment": {
       "yes": "Ja",
@@ -444,7 +444,6 @@
       "deep": "Sterke verlaging"
     },
     "cookingCarrier": {
-      "default": "Modelstandaard",
       "electric": "Elektrisch",
       "gas": "Gas",
       "none": "Niet gerapporteerd"

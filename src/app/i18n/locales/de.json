@@ -309,7 +309,7 @@
     },
     "cooking": {
       "label": "Kochen mit",
-      "tip": "Elektrisches Kochen bleibt im Stromprofil. Kochen mit Gas wird separat als Kochgas ausgewiesen. Modellstandard übernimmt die Einstellung des Modells, zu dem das Gebäude gehört."
+      "tip": "Elektrisches Kochen bleibt im Stromprofil. Kochen mit Gas wird separat als Kochgas ausgewiesen."
     },
     "equipment": {
       "yes": "Ja",
@@ -444,7 +444,6 @@
       "deep": "Starke Absenkung"
     },
     "cookingCarrier": {
-      "default": "Modellstandard",
       "electric": "Strom",
       "gas": "Gas",
       "none": "Nicht ausgewiesen"

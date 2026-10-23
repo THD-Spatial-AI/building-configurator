@@ -87,7 +87,6 @@ export function setbackOptions(t: Translate) {
 
 export function cookingCarrierOptions(t: Translate) {
   return [
-    { value: '',         label: t('options.cookingCarrier.default') },
     { value: 'electric', label: t('options.cookingCarrier.electric') },
     { value: 'gas',      label: t('options.cookingCarrier.gas') },
     { value: 'none',     label: t('options.cookingCarrier.none') },

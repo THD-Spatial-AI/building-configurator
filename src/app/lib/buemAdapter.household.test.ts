@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { serializeToBuemFeature, type BuildingIdentity } from './buemAdapter';
+import { adaptBuemFeature, serializeToBuemFeature, type BuildingIdentity } from './buemAdapter';
 import { toThermalSummary } from './demandProfile';
-import { DEFAULT_GENERAL } from '../components/BuildingConfigurator/shared/buildingDefaults';
+import { DEFAULT_GENERAL, generalFrom } from '../components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
 const identity: BuildingIdentity = {
@@ -44,9 +44,16 @@ describe('building block against the v6-draft contract', () => {
     expect(building).not.toHaveProperty('capacity');
   });
 
-  it('leaves the cooking carrier to the host when none was chosen', () => {
-    expect(buem('Single-family House').building).not.toHaveProperty('cooking_carrier');
+  it('sends the building\'s own cooking carrier, electric unless chosen', () => {
+    expect(buem('Single-family House').building.cooking_carrier).toBe('electric');
     expect(buem('Single-family House', { ...household, cooking_carrier: 'gas' }).building.cooking_carrier).toBe('gas');
+  });
+
+  it('opens a stored building that names no cooking carrier as electric', () => {
+    expect(generalFrom(adaptBuemFeature({
+      type: 'Feature', id: 'b1', geometry: { type: 'Point', coordinates: [6, 52] },
+      properties: { buem: { building: { building_type: 'SFH', country: 'NL' } } },
+    })).cooking_carrier).toBe('electric');
   });
 
   it('sends a capacity and no household inputs for a service building', () => {

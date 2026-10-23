@@ -313,7 +313,7 @@
     },
     "cooking": {
       "label": "Cuisson au",
-      "tip": "La cuisson électrique reste dans le profil d'électricité. La cuisson au gaz est indiquée à part comme gaz de cuisson. Par défaut du modèle : le réglage du modèle auquel appartient le bâtiment."
+      "tip": "La cuisson électrique reste dans le profil d'électricité. La cuisson au gaz est indiquée à part comme gaz de cuisson."
     },
     "equipment": {
       "yes": "Oui",
@@ -450,7 +450,6 @@
       "deep": "Réduit profond"
     },
     "cookingCarrier": {
-      "default": "Défaut du modèle",
       "electric": "Électrique",
       "gas": "Gaz",
       "none": "Non indiqué"

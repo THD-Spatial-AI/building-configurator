@@ -317,7 +317,7 @@
     },
     "cooking": {
       "label": "Vaření na",
-      "tip": "Elektrické vaření zůstává v profilu elektřiny. Vaření na plynu se vykazuje zvlášť jako plyn na vaření. Výchozí nastavení modelu přebírá nastavení modelu, do kterého budova patří."
+      "tip": "Elektrické vaření zůstává v profilu elektřiny. Vaření na plynu se vykazuje zvlášť jako plyn na vaření."
     },
     "equipment": {
       "yes": "Ano",
@@ -456,7 +456,6 @@
       "deep": "Hluboký útlum"
     },
     "cookingCarrier": {
-      "default": "Výchozí modelu",
       "electric": "Elektřina",
       "gas": "Plyn",
       "none": "Nevykazováno"

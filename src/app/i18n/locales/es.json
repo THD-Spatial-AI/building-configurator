@@ -313,7 +313,7 @@
     },
     "cooking": {
       "label": "Cocina con",
-      "tip": "La cocina eléctrica queda dentro del perfil de electricidad. La cocina de gas se informa aparte como gas de cocina. «Por defecto del modelo» usa el ajuste del modelo al que pertenece el edificio."
+      "tip": "La cocina eléctrica queda dentro del perfil de electricidad. La cocina de gas se informa aparte como gas de cocina."
     },
     "equipment": {
       "yes": "Sí",
@@ -450,7 +450,6 @@
       "deep": "Reducción profunda"
     },
     "cookingCarrier": {
-      "default": "Por defecto del modelo",
       "electric": "Electricidad",
       "gas": "Gas",
       "none": "No se informa"

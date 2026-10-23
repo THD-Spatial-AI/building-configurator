@@ -56,7 +56,7 @@ export const DEFAULT_GENERAL = {
   num_persons:        null as number | null,
   archetype:          '',
   region_code:        '',
-  cooking_carrier:    '',
+  cooking_carrier:    'electric',
   include_dhw:        true,
   setback_profile:    'none',
   capacity:           null as number | null,

@@ -309,7 +309,7 @@
     },
     "cooking": {
       "label": "Cooking with",
-      "tip": "Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas. Model default uses the setting of the model the building belongs to."
+      "tip": "Electric cooking stays inside the electricity profile. Gas cooking is reported separately as cooking gas."
     },
     "equipment": {
       "yes": "Yes",
@@ -444,7 +444,6 @@
       "deep": "Deep setback"
     },
     "cookingCarrier": {
-      "default": "Model default",
       "electric": "Electric",
       "gas": "Gas",
       "none": "Not reported"
