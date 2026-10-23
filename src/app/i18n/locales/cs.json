@@ -136,7 +136,7 @@
       "suggested": "Navrženo",
       "available": "Dostupné"
     },
-    "toggle": "FV na ploše {surface}",
+    "toggle": "FV: {surface}",
     "surfaceType": {
       "wall": "stěna",
       "window": "okno",
@@ -281,7 +281,7 @@
         "tip": "Neřízená výměna vzduchu za hodinu netěsnostmi obálky (infiltrace)."
       },
       "use": {
-        "label": "Větrání uživateli",
+        "label": "Větrání při užívání",
         "tip": "Výměna vzduchu za hodinu otevíráním oken a ventilátory během užívání budovy."
       },
       "total": "Celková intenzita výměny vzduchu"
@@ -316,7 +316,7 @@
       "placeholder": "např. GM0200"
     },
     "cooking": {
-      "label": "Vaření na",
+      "label": "Vaření",
       "tip": "Elektrické vaření zůstává v profilu elektřiny. Vaření na plynu se vykazuje zvlášť jako plyn na vaření."
     },
     "equipment": {
@@ -608,8 +608,8 @@
       "userDefined": "zadáno uživatelem"
     },
     "comparison": {
-      "higher": "o {percent} % více než {reference} ({kwh} kWh)",
-      "lower": "o {percent} % méně než {reference} ({kwh} kWh)"
+      "higher": "o {percent} % více než {reference} ({kwh} kWh)",
+      "lower": "o {percent} % méně než {reference} ({kwh} kWh)"
     },
     "scroll": "posunout",
     "close": "Zavřít",

@@ -78,7 +78,7 @@
     "reset": "Ripristina",
     "delete": "Elimina questa superficie",
     "facing": "Esposizione",
-    "facingDirection": "Esposta a {direction}",
+    "facingDirection": "esposta a {direction}",
     "compass": {
       "n": "N",
       "ne": "NE",
@@ -363,7 +363,7 @@
       "lossFactorTip": "Quota della dispersione termica attraverso queste superfici che viene considerata: 1 verso l'aria esterna, meno verso terreno o ambienti non riscaldati (BuEM b_transmission). Vuoto se le superfici differiscono; le pareti condivise restano a 0."
     },
     "uValue": "Valore U",
-    "lossFactor": "Fattore di riduzione",
+    "lossFactor": "Fattore di correzione",
     "unitShare": "da 0 a 1",
     "buemDefault": "Predefinito BuEM.",
     "useDefault": "Usa predefinito",
@@ -376,11 +376,11 @@
       },
       "u": {
         "label": "U finestre",
-        "tip": "Valore U di quelle finestre. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 2.8."
+        "tip": "Valore U di quelle finestre. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 2,8."
       },
       "g": {
         "label": "g finestre",
-        "tip": "Quota della radiazione solare su quelle finestre che entra come calore. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 0.5."
+        "tip": "Quota della radiazione solare su quelle finestre che entra come calore. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 0,5."
       }
     },
     "add": {
@@ -395,7 +395,7 @@
         "roof": "Aggiungi tetto"
       },
       "title": "Aggiungi una superficie",
-      "note": "Per una superficie che i dati 3D non mostrano, come una parete contro terra (fattore di riduzione circa 0.5) o un pavimento su un passaggio aperto (1). È elencata nella scheda Involucro, non disegnata nel modello.",
+      "note": "Per una superficie che i dati 3D non mostrano, come una parete contro terra (fattore di correzione circa 0,5) o un pavimento su un passaggio aperto (1). È elencata nella scheda Involucro, non disegnata nel modello.",
       "typeLabel": "Tipo",
       "name": "Nome",
       "namePlaceholder": "es. Parete del seminterrato",
@@ -419,7 +419,7 @@
       "sfh": "Casa unifamiliare",
       "th": "Casa a schiera",
       "mfh": "Edificio plurifamiliare",
-      "ab": "Condominio",
+      "ab": "Blocco di appartamenti",
       "bakery": "Panetteria",
       "clinic": "Clinica",
       "hotel": "Hotel",
@@ -456,7 +456,7 @@
       "kitchen": "Gas di cottura"
     },
     "outputLevel": {
-      "none": "No",
+      "none": "Nessuno",
       "summary": "Annuale",
       "series": "Orario"
     },
@@ -611,7 +611,7 @@
   "model": {
     "history": {
       "refurbishment": "riqualificazione",
-      "lossFactor": "modifica fattore di riduzione",
+      "lossFactor": "modifica fattore di correzione",
       "discarded": "scarto modifiche superficie",
       "roofType": "modifica tipo di tetto",
       "import": "importazione",

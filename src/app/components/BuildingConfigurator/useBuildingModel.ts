@@ -173,6 +173,8 @@ function resolveDisplayEnergyTotals(
     ? ((Number(groundTruth.hotwater) - hotwaterKwh) / hotwaterKwh) * 100
     : null;
 
+  // model.comparison.lastRun is the only message common.comparison.* takes as
+  // {reference}; some languages carry their preposition in it (it: "all'…").
   return {
     ...groundTruth,
     heatingSource: 'user',

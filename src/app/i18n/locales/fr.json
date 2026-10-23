@@ -58,7 +58,7 @@
       "door": "Porte"
     },
     "close": "Fermer",
-    "area": "Surface",
+    "area": "Aire",
     "areaRejected": "Une simulation rejettera cette valeur",
     "useGeometryArea": "Utiliser {area} m² du modèle",
     "uValue": "Valeur U",
@@ -312,7 +312,7 @@
       "placeholder": "p. ex. GM0200"
     },
     "cooking": {
-      "label": "Cuisson au",
+      "label": "Cuisson",
       "tip": "La cuisson électrique reste dans le profil d'électricité. La cuisson au gaz est indiquée à part comme gaz de cuisson."
     },
     "equipment": {
@@ -405,7 +405,7 @@
       "typeLabel": "Type",
       "name": "Nom",
       "namePlaceholder": "p. ex. Mur de sous-sol",
-      "area": "Surface"
+      "area": "Aire"
     },
     "variant": {
       "full": {
@@ -587,7 +587,7 @@
       "monoPitch": "monopente",
       "gabled": "S + N",
       "hipped": "S/N/E/O",
-      "vShape": "pentes inversées",
+      "vShape": "en V",
       "sawTooth": "orienté S",
       "custom": "personnalisé"
     },
@@ -601,8 +601,8 @@
       "userDefined": "défini par l'utilisateur"
     },
     "comparison": {
-      "higher": "{percent} % de plus que {reference} ({kwh} kWh)",
-      "lower": "{percent} % de moins que {reference} ({kwh} kWh)"
+      "higher": "{percent} % de plus que {reference} ({kwh} kWh)",
+      "lower": "{percent} % de moins que {reference} ({kwh} kWh)"
     },
     "scroll": "défiler",
     "close": "Fermer",

@@ -49,7 +49,7 @@
   },
   "surface": {
     "type": {
-      "wall": "Gevel",
+      "wall": "Wand",
       "window": "Raam",
       "roof": "Dak",
       "floor": "Vloer",
@@ -78,7 +78,7 @@
     "reset": "Resetten",
     "delete": "Dit vlak verwijderen",
     "facing": "Oriëntatie",
-    "facingDirection": "Gericht op {direction}",
+    "facingDirection": "gericht op {direction}",
     "compass": {
       "n": "N",
       "ne": "NO",
@@ -132,7 +132,7 @@
     },
     "toggle": "PV op {surface}",
     "surfaceType": {
-      "wall": "gevel",
+      "wall": "wand",
       "window": "raam",
       "roof": "dak",
       "floor": "vloer",
@@ -328,7 +328,7 @@
   },
   "insulation": {
     "type": {
-      "wall": "Gevels",
+      "wall": "Wanden",
       "roof": "Dak",
       "floor": "Vloer",
       "window": "Ramen",
@@ -376,11 +376,11 @@
       },
       "u": {
         "label": "U raam",
-        "tip": "U-waarde van die ramen. Standaard: de TABULA-waarde voor het gebouwtype, anders 2.8."
+        "tip": "U-waarde van die ramen. Standaard: de TABULA-waarde voor het gebouwtype, anders 2,8."
       },
       "g": {
         "label": "g raam",
-        "tip": "Aandeel van het zonlicht op die ramen dat als warmte binnenkomt. Standaard: de TABULA-waarde voor het gebouwtype, anders 0.5."
+        "tip": "Aandeel van het zonlicht op die ramen dat als warmte binnenkomt. Standaard: de TABULA-waarde voor het gebouwtype, anders 0,5."
       }
     },
     "add": {
@@ -395,7 +395,7 @@
         "roof": "Dak toevoegen"
       },
       "title": "Vlak toevoegen",
-      "note": "Voor een vlak dat de 3D-data niet toont, zoals een wand tegen de grond (reductiefactor ca. 0.5) of een vloer boven een open doorgang (1). Het staat in het tabblad Schil, niet in het model getekend.",
+      "note": "Voor een vlak dat de 3D-data niet toont, zoals een wand tegen de grond (reductiefactor ca. 0,5) of een vloer boven een open doorgang (1). Het staat in het tabblad Schil, niet in het model getekend.",
       "typeLabel": "Type",
       "name": "Naam",
       "namePlaceholder": "bijv. Kelderwand",
@@ -569,7 +569,7 @@
   },
   "envelope": {
     "group": {
-      "walls": "Gevels",
+      "walls": "Wanden",
       "windows": "Ramen",
       "doors": "Deuren",
       "roof": "Dak",
@@ -625,7 +625,7 @@
         "surface": "vlakwijziging"
       },
       "deleted": {
-        "wall": "verwijderde gevel",
+        "wall": "verwijderde wand",
         "window": "verwijderd raam",
         "roof": "verwijderd dak",
         "floor": "verwijderde vloer",

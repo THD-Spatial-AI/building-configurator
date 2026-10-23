@@ -348,7 +348,7 @@
       "typesDiffer": "Element types differ.",
       "customKept": {
         "one": "{count} surface set one by one keeps its value.",
-        "other": "{count} surfaces set one by one keep its value."
+        "other": "{count} surfaces set one by one keep their values."
       }
     },
     "table": {

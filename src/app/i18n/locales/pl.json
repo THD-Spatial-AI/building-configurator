@@ -189,7 +189,7 @@
     "solver": {
       "useMilp": {
         "label": "Użyj solwera MILP",
-        "tip": "Rozwiązuje model cieplny jako mieszane programowanie całkowitoliczbowe zamiast domyślnego solwera rzadkiego BuEM. Wolniej, ale ograniczenia nierównościowe są uwzględniane dokładnie."
+        "tip": "Rozwiązuje model cieplny jako mieszane całkowitoliczbowe programowanie liniowe zamiast domyślnego solwera rzadkiego BuEM. Wolniej, ale ograniczenia nierównościowe są uwzględniane dokładnie."
       },
       "milpNote": "Solwer MILP: ograniczenia nierównościowe uwzględniane dokładnie. Obliczenia trwają dłużej.",
       "sparseNote": "Domyślny solwer rzadki BuEM. Szybki."
@@ -204,7 +204,7 @@
     },
     "section": {
       "identity": "Dane podstawowe",
-      "occupancy": "Użytkowanie",
+      "occupancy": "Mieszkańcy",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",
       "equipment": "Urządzenia",
@@ -278,7 +278,7 @@
     "air": {
       "infiltration": {
         "label": "Infiltracja",
-        "tip": "Niekontrolowane wymiany powietrza na godzinę przez nieszczelności obudowy (infiltracja)."
+        "tip": "Niekontrolowane wymiany powietrza na godzinę przez nieszczelności przegród (infiltracja)."
       },
       "use": {
         "label": "Wentylacja przez użytkowników",
@@ -316,7 +316,7 @@
       "placeholder": "np. GM0200"
     },
     "cooking": {
-      "label": "Gotowanie na",
+      "label": "Gotowanie",
       "tip": "Gotowanie elektryczne pozostaje w profilu energii elektrycznej. Gotowanie na gazie jest raportowane osobno jako gaz do gotowania."
     },
     "equipment": {
@@ -655,7 +655,7 @@
       }
     },
     "error": {
-      "dwellingsRequired": "Ten typ budynku wymaga podania liczby mieszkań. Ustaw ją w sekcji Użytkowanie przed uruchomieniem symulacji.",
+      "dwellingsRequired": "Ten typ budynku wymaga podania liczby mieszkań. Ustaw ją w sekcji Mieszkańcy przed uruchomieniem symulacji.",
       "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET."

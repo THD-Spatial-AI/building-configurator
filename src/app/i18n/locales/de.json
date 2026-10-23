@@ -211,7 +211,7 @@
       "solverMilp": "MILP",
       "solverSparse": "Sparse",
       "occupants": "{capacity} Bewohner",
-      "capacityFromArea": "Belegung aus Grundfläche",
+      "capacityFromArea": "Personenzahl aus Grundfläche",
       "dwellings": {
         "one": "{count} Wohneinheit",
         "other": "{count} Wohneinheiten"
@@ -283,7 +283,7 @@
     "default": "Standard",
     "useDefault": "Standard verwenden",
     "capacity": {
-      "label": "Belegung",
+      "label": "Personenzahl",
       "placeholder": "Aus der Grundfläche abgeleitet.",
       "tip": "Anzahl der Bewohner. Leer gelassen, leitet BuEM sie aus der Grundfläche mit einer Belegungsdichte für den Gebäudetyp ab."
     },
@@ -435,7 +435,7 @@
       "workingCouple": "Berufstätiges Paar",
       "familyWithChildren": "Familie mit Kindern",
       "retiredSingle": "Rentner, alleinlebend",
-      "studentShared": "Studenten-WG"
+      "studentShared": "Studierenden-WG"
     },
     "setback": {
       "none": "Keine",
