@@ -28,10 +28,10 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
   });
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
+    <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-card px-3 py-2">
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold text-slate-700">{t('profile.title')}</p>
+          <p className="text-[12px] font-semibold text-foreground">{t('profile.title')}</p>
           <p className="truncate text-[10px] text-muted-foreground">{!hasData && seriesCsvUrl ? t('profile.stored') : sourceCaption.aggregatedFrom
             ? t('profile.source.aggregated', {
               source: t(sourceCaption.source.key, sourceCaption.source.values),

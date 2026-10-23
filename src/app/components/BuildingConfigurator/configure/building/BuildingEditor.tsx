@@ -286,11 +286,11 @@ export function BuildingEditor({
   // ── Shared header ────────────────────────────────────────────────────────────
   const header = (
     <div className="flex shrink-0 items-center gap-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-        <Building2 className="size-4 text-slate-500" />
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+        <Building2 className="size-4 text-muted-foreground" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-bold text-slate-800">{general.buildingName || t('editor.header.fallbackName')}</p>
+        <p className="text-sm font-bold text-foreground">{general.buildingName || t('editor.header.fallbackName')}</p>
         <p className="truncate text-[11px] text-muted-foreground">
           {buildingTypeName(t, general.buildingType)} ·{general.constructionYear} · {computeTotalFloorArea(general.floorArea, general.storeys).toFixed(0)} m²
         </p>
@@ -300,9 +300,9 @@ export function BuildingEditor({
 
   // ── Insulation and windows — always visible, no click needed ──
   const inlineSections = insulation && (
-    <div className="flex shrink-0 flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="flex shrink-0 flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
       <div>
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">
           <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
           {t('editor.insulationTitle')}
         </p>
@@ -330,7 +330,7 @@ export function BuildingEditor({
               key={key}
               type="button"
               onClick={() => toggle(key)}
-              className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+              className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted"
             >
               <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
               {SECTION_LABELS[key](t)}
@@ -339,16 +339,16 @@ export function BuildingEditor({
         </div>
 
         {/* Expanded section */}
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           {/* Card header — click to collapse */}
           <button
             type="button"
             onClick={() => toggle(activeSection)}
-            className="flex w-full shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2.5 text-left transition-colors hover:bg-slate-100/80"
+            className="flex w-full shrink-0 items-center gap-2 border-b border-border bg-muted/80 px-3 py-2.5 text-left transition-colors hover:bg-muted/80"
           >
             <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">
                 {SECTION_LABELS[activeSection](t)}
               </p>
               <p className="text-[10px] text-muted-foreground">
@@ -378,16 +378,16 @@ export function BuildingEditor({
             key={key}
             type="button"
             onClick={() => toggle(key)}
-            className="flex flex-col items-start rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-slate-50"
+            className="flex flex-col items-start rounded-lg border border-border bg-card px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-muted"
           >
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">
                   {SECTION_LABELS[key](t)}
                 </p>
               </div>
-              <ChevronDown className="size-3 shrink-0 text-slate-400" />
+              <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(t, key, general)}</p>
           </button>

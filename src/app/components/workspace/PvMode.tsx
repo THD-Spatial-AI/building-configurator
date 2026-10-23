@@ -66,10 +66,10 @@ export function PvPanel({ pv, elements, onSelect }: {
   const installedCount = entries.filter(([, surface]) => surface.state === 'installed').length;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2">
         <Sun className="size-4 text-yellow-500" />
-        <p className="min-w-0 flex-1 truncate text-[13px] font-bold text-slate-800">{pv.typeLabel}</p>
+        <p className="min-w-0 flex-1 truncate text-[13px] font-bold text-foreground">{pv.typeLabel}</p>
         <p className="shrink-0 text-[11px] text-muted-foreground">
           {t('pv.surfacesWithPv', { count: installedCount })}
         </p>
@@ -87,8 +87,8 @@ export function PvPanel({ pv, elements, onSelect }: {
         if (group.length === 0) return null;
         return (
           <div key={state}>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t(`pv.state.${state}`)}</p>
-            <ul className="divide-y divide-slate-100 rounded-md border border-slate-100">
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t(`pv.state.${state}`)}</p>
+            <ul className="divide-y divide-border rounded-md border border-border">
               {group.map(([id, surface]) => (
                 <li key={id} className="flex items-center gap-2 px-2.5 py-1.5">
                   <input
@@ -101,7 +101,7 @@ export function PvPanel({ pv, elements, onSelect }: {
                   <button
                     type="button"
                     onClick={() => onSelect(id)}
-                    className="min-w-0 flex-1 cursor-pointer truncate text-left text-[12px] text-slate-700 hover:underline"
+                    className="min-w-0 flex-1 cursor-pointer truncate text-left text-[12px] text-foreground hover:underline"
                   >
                     {surfaceName(id, elements, pv.surfaces)}
                   </button>
@@ -131,8 +131,8 @@ export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; s
           onChange={(e) => pv.onToggle(surfaceId, e.target.checked)}
           className="size-4 cursor-pointer accent-primary"
         />
-        <Sun className={cn('size-4', installed ? 'text-yellow-500' : 'text-slate-300')} />
-        <span className="flex-1 text-[12px] font-semibold text-slate-700">{t('pv.thisSurface')}</span>
+        <Sun className={cn('size-4', installed ? 'text-yellow-500' : 'text-muted-foreground/50')} />
+        <span className="flex-1 text-[12px] font-semibold text-foreground">{t('pv.thisSurface')}</span>
       </label>
       {installed && (
         <PresetSlider
@@ -149,8 +149,8 @@ export function PvSurfaceCard({ surfaceId, surface, pv }: { surfaceId: string; s
       )}
       <div className="flex items-baseline justify-between">
         <span className="text-[11px] font-medium text-muted-foreground">{t('pv.capacity')}</span>
-        <span className="text-[12px] font-semibold text-slate-700">
-          {surface.maxKwp.toFixed(1)}<span className="ml-1 text-[10px] font-normal text-slate-400">kWp</span>
+        <span className="text-[12px] font-semibold text-foreground">
+          {surface.maxKwp.toFixed(1)}<span className="ml-1 text-[10px] font-normal text-muted-foreground">kWp</span>
         </span>
       </div>
     </div>

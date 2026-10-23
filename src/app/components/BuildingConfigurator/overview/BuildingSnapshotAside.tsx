@@ -138,7 +138,7 @@ export function BuildingSnapshotAside({
 
   if (embedded) return content;
   return (
-    <ScrollHintContainer className="flex flex-col gap-3 border-r border-border/80 bg-slate-100 p-4">
+    <ScrollHintContainer className="flex flex-col gap-3 border-r border-border/80 bg-muted p-4">
       {content}
     </ScrollHintContainer>
   );

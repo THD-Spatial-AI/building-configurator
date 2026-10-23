@@ -100,8 +100,8 @@ const DELTA_DISPLAY_CAP = 300;
  */
 export function SourceTag({ source }: { source?: 'ignis' | 'buem' | 'user' }) {
   const t = useT();
-  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">{t('common.source.estimated')}</span>;
-  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">{t('common.source.userDefined')}</span>;
+  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-muted-foreground">{t('common.source.estimated')}</span>;
+  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-muted-foreground">{t('common.source.userDefined')}</span>;
   return null;
 }
 
@@ -348,11 +348,11 @@ interface ConfigSectionProps {
 
 export function ConfigSection({ title, expanded, onToggle, children }: ConfigSectionProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-11 w-full items-center justify-between bg-slate-50 px-3 cursor-pointer select-none transition-colors duration-100 hover:bg-muted"
+        className="flex h-11 w-full items-center justify-between bg-muted px-3 cursor-pointer select-none transition-colors duration-100 hover:bg-muted"
       >
         <span className="text-[11px] font-semibold text-muted-foreground tracking-[0.08em] uppercase">
           {title}
@@ -369,7 +369,7 @@ export function ConfigSection({ title, expanded, onToggle, children }: ConfigSec
         'overflow-hidden transition-[max-height] duration-300 ease-in-out',
         expanded ? 'max-h-[600px]' : 'max-h-0',
       )}>
-        <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
+        <div className={cn('bg-card px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
           {children}
         </div>
       </div>
@@ -538,13 +538,13 @@ export function ScrollHintContainer({
         )}
         style={{
           height: 80,
-          background: 'linear-gradient(to top, rgba(241,245,249,1) 0%, rgba(241,245,249,0.85) 40%, transparent 100%)',
+          background: 'linear-gradient(to top, var(--card, #ffffff) 0%, color-mix(in oklab, var(--card, #ffffff) 85%, transparent) 40%, transparent 100%)',
         }}
       >
         {/* Pill badge — clearly visible against the gradient */}
-        <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 shadow-sm">
-          <ChevronDown className="size-3.5 text-slate-500" />
-          <span className="text-[10px] font-semibold text-slate-500">{t('common.scroll')}</span>
+        <div className="flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 shadow-sm">
+          <ChevronDown className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-semibold text-muted-foreground">{t('common.scroll')}</span>
         </div>
       </div>
     </div>

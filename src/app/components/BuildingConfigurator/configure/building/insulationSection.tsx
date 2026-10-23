@@ -109,7 +109,7 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
               'cursor-pointer rounded-[6px] border px-2 py-1.5 text-[11px] font-medium leading-snug transition-colors',
               selected === level.number
                 ? 'border-primary bg-primary/10 text-primary'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
+                : 'border-border bg-card text-muted-foreground hover:bg-muted',
             )}
           >
             {variantName(t, level.label, level.number)}
@@ -142,7 +142,7 @@ function ElementTable({ elements, levels, states, initial, onSetState, onSetType
   const types = presentTypes(elements);
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">{t('insulation.table.title')}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">{t('insulation.table.title')}</p>
       {types.map((type) => {
         const surfaces = Object.values(elements).filter((el) => el.type === type);
         const custom = customCount(elements, type, states[type], initial, levels);
@@ -152,9 +152,9 @@ function ElementTable({ elements, levels, states, initial, onSetState, onSetType
         ];
         const loss = typeLossFactor(surfaces);
         return (
-          <div key={type} className="flex flex-col gap-1.5 rounded-md border border-slate-200 p-2.5">
+          <div key={type} className="flex flex-col gap-1.5 rounded-md border border-border p-2.5">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-semibold text-slate-700">{TYPE_LABELS[type](t)}</span>
+              <span className="text-xs font-semibold text-foreground">{TYPE_LABELS[type](t)}</span>
               <span className="text-[10px] text-muted-foreground">
                 {t('insulation.table.surfaces', { count: surfaces.length })}
                 {custom > 0 && ` · ${t('insulation.table.setOneByOne', { custom })}`}
@@ -218,7 +218,7 @@ function SynthesisedWindows({ elements, general, setGen }: Props) {
   const share = general.window_to_wall_ratio;
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-700">{t('insulation.windows.title')}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">{t('insulation.windows.title')}</p>
       <p className="text-[10px] leading-snug text-muted-foreground">
         {t('insulation.windows.note')}
       </p>
@@ -276,9 +276,9 @@ function AddSurface({ onAdd }: { onAdd: NonNullable<InsulationProps['onAddSurfac
     setLabel('');
   };
   return (
-    <details className="group rounded-md border border-slate-200">
-      <summary className="cursor-pointer px-2.5 py-2 text-xs font-semibold text-slate-700">{t('insulation.add.title')}</summary>
-      <div className="flex flex-col gap-2 border-t border-slate-200 p-2.5">
+    <details className="group rounded-md border border-border">
+      <summary className="cursor-pointer px-2.5 py-2 text-xs font-semibold text-foreground">{t('insulation.add.title')}</summary>
+      <div className="flex flex-col gap-2 border-t border-border p-2.5">
         <p className="text-[10px] leading-snug text-muted-foreground">
           {t('insulation.add.note')}
         </p>

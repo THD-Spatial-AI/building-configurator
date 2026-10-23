@@ -101,10 +101,10 @@ export function TechnologyCards({ technologies }: { technologies: Technologies }
   return (
     <div className="flex flex-col gap-3">
       {technologies.items.map((card) => (
-        <div key={card.id} className="rounded-lg border border-slate-200 bg-white p-3">
+        <div key={card.id} className="rounded-lg border border-border bg-card p-3">
           <div className="mb-2 flex items-start gap-2">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-slate-800">{card.title}</p>
+              <p className="truncate text-[13px] font-semibold text-foreground">{card.title}</p>
               {card.subtitle && <p className="truncate text-[11px] text-muted-foreground">{card.subtitle}</p>}
             </div>
             <button
@@ -112,7 +112,7 @@ export function TechnologyCards({ technologies }: { technologies: Technologies }
               onClick={() => technologies.onRemove(card.id)}
               aria-label={t('tech.remove', { title: card.title })}
               title={t('tech.remove', { title: card.title })}
-              className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-destructive"
+              className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-red-50 hover:text-destructive"
             >
               <Trash2 className="size-3.5" />
             </button>
@@ -129,9 +129,9 @@ export function TechnologyCards({ technologies }: { technologies: Technologies }
               <div key={field.key}>
                 <div className="flex items-baseline justify-between">
                   <span className="text-[11px] font-medium text-muted-foreground">{field.label}</span>
-                  <span className="text-[12px] font-semibold text-slate-700">
+                  <span className="text-[12px] font-semibold text-foreground">
                     {formatValue(field.value)}
-                    {field.unit && <span className="ml-1 text-[10px] font-normal text-slate-400">{field.unit}</span>}
+                    {field.unit && <span className="ml-1 text-[10px] font-normal text-muted-foreground">{field.unit}</span>}
                   </span>
                 </div>
                 {field.error && <p className="mt-1 text-[10px] leading-snug text-destructive">{field.error}</p>}

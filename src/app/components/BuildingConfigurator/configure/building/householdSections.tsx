@@ -190,12 +190,12 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
         {requiresResidentialUnits(general.buildingType) && ` ${t('household.equipment.sameInEveryDwelling')}`}
       </p>
       {EQUIPMENT_GROUPS.map((group) => (
-        <details key={group.id} className="rounded-md border border-slate-200">
+        <details key={group.id} className="rounded-md border border-border">
           <summary className="flex cursor-pointer items-baseline justify-between gap-2 px-2.5 py-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-slate-600">{group.label(t)}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">{group.label(t)}</span>
             <span className="text-[10px] text-muted-foreground">{groupSummary(t, group, equipment)}</span>
           </summary>
-          <div className="flex flex-col gap-1.5 border-t border-slate-200 p-2.5">
+          <div className="flex flex-col gap-1.5 border-t border-border p-2.5">
             {group.id === 'electronics' && (
               <ApplianceRow label={t('household.equipment.televisions')}>
                 <SegmentedControl options={tvOptions(t)} value={tvCount(equipment)} onChange={setTvCount} />

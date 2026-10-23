@@ -87,12 +87,12 @@ export function AzimuthDial({ value, onChange, reference }: AzimuthDialProps) {
           e.preventDefault();
           onChange(normalize360(next));
         }}
-        className="relative size-[86px] cursor-grab touch-none rounded-full border border-slate-200 bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
+        className="relative size-[86px] cursor-grab touch-none rounded-full border border-border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
       >
         {COMPASS_POINTS.map(({ point, deg }) => (
           <span
             key={point}
-            className={cn('absolute text-[9px] font-bold', point === 'n' ? 'text-red-500' : 'text-slate-400')}
+            className={cn('absolute text-[9px] font-bold', point === 'n' ? 'text-red-500' : 'text-muted-foreground')}
             style={{
               left: `${50 + 40 * Math.sin((deg * Math.PI) / 180)}%`,
               top: `${50 - 40 * Math.cos((deg * Math.PI) / 180)}%`,
@@ -105,7 +105,7 @@ export function AzimuthDial({ value, onChange, reference }: AzimuthDialProps) {
 
         {reference !== undefined && Math.round(reference) !== Math.round(value) && (
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[30px] w-px origin-bottom bg-slate-300"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[30px] w-px origin-bottom bg-muted-foreground/40"
             style={{ transform: `translate(-50%, -100%) rotate(${reference}deg)`, transformOrigin: '50% 100%' }}
           />
         )}
@@ -115,7 +115,7 @@ export function AzimuthDial({ value, onChange, reference }: AzimuthDialProps) {
         />
         <div className="pointer-events-none absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
       </div>
-      <span className="text-[10px] font-semibold text-slate-600">
+      <span className="text-[10px] font-semibold text-muted-foreground">
         {Math.round(value)}° · {facingLabel(value, t)}
       </span>
     </div>
@@ -167,7 +167,7 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
           e.preventDefault();
           onChange(Math.min(90, Math.max(0, next)));
         }}
-        className="relative size-[86px] cursor-grab touch-none rounded-lg border border-slate-200 bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
+        className="relative size-[86px] cursor-grab touch-none rounded-lg border border-border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
       >
         <svg viewBox="0 0 86 86" className="pointer-events-none absolute inset-0">
           <path d="M 68 76 A 60 60 0 0 0 8 16" fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
@@ -185,7 +185,7 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
           />
         </svg>
       </div>
-      <span className="text-[10px] font-semibold text-slate-600">
+      <span className="text-[10px] font-semibold text-muted-foreground">
         {Math.round(value)}° · {tiltLabel(value, t)}
       </span>
     </div>
@@ -215,8 +215,8 @@ export function PresetSlider({
     <div>
       <div className="mb-1 flex items-baseline justify-between">
         <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
-        <span className="text-[12px] font-semibold text-slate-700">
-          {value.toFixed(decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-slate-400">{unit}</span>}
+        <span className="text-[12px] font-semibold text-foreground">
+          {value.toFixed(decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-muted-foreground">{unit}</span>}
         </span>
       </div>
       <input
@@ -227,12 +227,12 @@ export function PresetSlider({
         step={step}
         value={Math.min(max, Math.max(min, value))}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       />
       {(quality || presets.length > 0) && (
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
           {quality && (
-            <span className="mr-auto text-[10px] font-medium text-slate-500">{quality}</span>
+            <span className="mr-auto text-[10px] font-medium text-muted-foreground">{quality}</span>
           )}
           {presets.map((preset) => (
             <button
@@ -244,7 +244,7 @@ export function PresetSlider({
                 'cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-medium transition-colors',
                 Math.abs(preset.value - value) < step / 2
                   ? 'border-primary/40 bg-primary/10 text-primary'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
+                  : 'border-border bg-card text-muted-foreground hover:border-border',
               )}
             >
               {preset.label}

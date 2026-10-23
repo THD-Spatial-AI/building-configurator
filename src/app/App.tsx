@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BuildingWorkspace, FixtureWorkspace } from './components/workspace/BuildingWorkspace';
 import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
 import { MESSAGES, type Language } from './i18n';
@@ -10,6 +10,9 @@ export default function App() {
   const [view, setView] = useState<'workspace' | 'fixture'>('workspace');
   // The host's language setting, played by a picker here.
   const [language, setLanguage] = useState<Language>('en');
+  // The host's theme, played here: EnerPlanET sets .dark on <html> the same way.
+  const [dark, setDark] = useState(false);
+  useEffect(() => { document.documentElement.classList.toggle('dark', dark); }, [dark]);
 
   return (
     <>
@@ -38,6 +41,13 @@ export default function App() {
           >
             {(Object.keys(MESSAGES) as Language[]).map((code) => <option key={code} value={code}>{code}</option>)}
           </select>
+          <button
+            type="button"
+            onClick={() => setDark((d) => !d)}
+            className="ml-2 cursor-pointer rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-foreground"
+          >
+            {dark ? 'Light' : 'Dark'}
+          </button>
         </div>
 
         {view === 'workspace' && <BuildingWorkspace language={language} />}

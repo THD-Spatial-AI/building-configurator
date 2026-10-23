@@ -75,8 +75,8 @@ export function SurfaceQuickEditor({
         </div>
         <div className="flex items-center gap-2">
           <div className={cn(
-            'flex items-center overflow-hidden rounded-lg border bg-white',
-            areaMissing ? 'border-destructive ring-1 ring-destructive/30' : 'border-slate-200',
+            'flex items-center overflow-hidden rounded-lg border bg-card',
+            areaMissing ? 'border-destructive ring-1 ring-destructive/30' : 'border-border',
           )}>
             <input
               type="number"
@@ -88,9 +88,9 @@ export function SurfaceQuickEditor({
                 const next = parseFloat(e.target.value);
                 if (!Number.isNaN(next)) onUpdate({ area: next });
               }}
-              className="w-[92px] px-2.5 py-1.5 text-right text-[13px] font-semibold text-slate-700 outline-none"
+              className="w-[92px] px-2.5 py-1.5 text-right text-[13px] font-semibold text-foreground outline-none"
             />
-            <span className="pr-2.5 text-[10px] text-slate-400">m²</span>
+            <span className="pr-2.5 text-[10px] text-muted-foreground">m²</span>
           </div>
           {offerGeometryArea && (
             <button
@@ -119,7 +119,7 @@ export function SurfaceQuickEditor({
       />
 
       {mode === 'expert' && (
-        <p className="-mt-2 text-[10px] text-slate-400">
+        <p className="-mt-2 text-[10px] text-muted-foreground">
           {t('surface.rValue', { value: (1 / Math.max(0.01, element.uValue)).toFixed(2) })}
         </p>
       )}
@@ -144,7 +144,7 @@ export function SurfaceQuickEditor({
             onChange={(e) => onUpdate({ bTransmission: e.target.checked ? 0 : undefined })}
             className="size-4 cursor-pointer accent-primary"
           />
-          <span className="text-[12px] text-slate-700">{t('surface.sharedWall')}</span>
+          <span className="text-[12px] text-foreground">{t('surface.sharedWall')}</span>
         </label>
       )}
 
@@ -159,8 +159,8 @@ export function SurfaceQuickEditor({
       </div>
 
       {edited && (
-        <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
-          <span className="text-[10px] leading-snug text-slate-400">
+        <div className="flex items-center justify-between gap-2 border-t border-border pt-2.5">
+          <span className="text-[10px] leading-snug text-muted-foreground">
             {t('surface.imported', {
               area: imported.area?.toFixed(1) ?? '',
               uValue: imported.uValue?.toFixed(2) ?? '',
@@ -176,7 +176,7 @@ export function SurfaceQuickEditor({
               tilt: imported.tilt ?? element.tilt,
               azimuth: imported.azimuth ?? element.azimuth,
             })}
-            className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-500 transition-colors hover:bg-muted"
+            className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted"
           >
             <RotateCcw className="size-3" />
             {t('surface.reset')}

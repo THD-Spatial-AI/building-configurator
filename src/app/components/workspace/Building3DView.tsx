@@ -213,7 +213,7 @@ export function Building3DView({
 
   return (
     <LanguageProvider language={language}>
-    <div className="fixed inset-0 z-20 flex flex-col bg-slate-100">
+    <div className="fixed inset-0 z-20 flex flex-col bg-muted">
       <ConfiguratorStyles />
 
       {/* ── Header ── */}
@@ -253,15 +253,15 @@ export function Building3DView({
           {exportOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
-              <div className="absolute right-0 top-full z-20 mt-1 w-[248px] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]">
+              <div className="absolute right-0 top-full z-20 mt-1 w-[248px] overflow-hidden rounded-lg border border-border bg-card py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]">
                 <button
                   type="button"
                   onClick={() => { model.download(); setExportOpen(false); }}
                   className="flex w-full cursor-pointer items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-muted"
                 >
-                  <Download className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
+                  <Download className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                   <span>
-                    <span className="block text-[12px] font-semibold text-slate-700">{t('view.export.model.title')}</span>
+                    <span className="block text-[12px] font-semibold text-foreground">{t('view.export.model.title')}</span>
                     <span className="block text-[10px] leading-snug text-muted-foreground">
                       {t('view.export.model.detail')}
                     </span>
@@ -272,9 +272,9 @@ export function Building3DView({
                   onClick={() => { model.downloadTables(); setExportOpen(false); }}
                   className="flex w-full cursor-pointer items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-muted"
                 >
-                  <Table2 className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
+                  <Table2 className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                   <span>
-                    <span className="block text-[12px] font-semibold text-slate-700">{t('view.export.tables.title')}</span>
+                    <span className="block text-[12px] font-semibold text-foreground">{t('view.export.tables.title')}</span>
                     <span className="block text-[10px] leading-snug text-muted-foreground">
                       {t('view.export.tables.detail')}
                     </span>
@@ -306,7 +306,7 @@ export function Building3DView({
       {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-        <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
@@ -343,14 +343,14 @@ export function Building3DView({
           )}
 
           {invalidIds.size > 0 && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm">
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-card/90 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm">
               <span className="inline-block size-2.5 rounded-sm bg-destructive" />
               {t('view.invalidSurfaces', { count: invalidIds.size })}
             </div>
           )}
 
           {attribution && (
-            <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-white/90 px-2 py-1 text-right text-[10px] leading-snug text-slate-500 shadow-sm">
+            <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm">
               {attribution}
             </div>
           )}
@@ -379,7 +379,7 @@ export function Building3DView({
               parametersSlot={(openEnvelope) => (
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
-                <div className="border-t border-slate-100">
+                <div className="border-t border-border">
                   <BuildingEditor
                     general={model.general}
                     setGen={model.setGen}
