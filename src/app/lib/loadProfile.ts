@@ -1,5 +1,7 @@
 // Shared load profile data model and pure transformation helpers.
 
+import type { FormatNumber } from '../i18n';
+
 export type EnergyType = 'electricity' | 'heating' | 'hotwater' | 'dhw' | 'kitchen' | 'combined';
 export type Resolution = 'hourly' | 'daily' | 'weekly' | 'monthly';
 
@@ -45,13 +47,24 @@ export interface EnergyTotals {
   hotwaterDeltaPercent?: number | null;
   /** ignis's raw per-area annual heating figure (kWh/(m²·a)), shown alongside the total. */
   heatingPerM2?: string;
-  /** Formatted comparison-reference total (kWh) and what to call it in the sentence. */
+  /** Formatted comparison-reference total (kWh), and the message key naming it in the sentence. */
   heatingBaselineKwh?: string;
   heatingComparisonLabel?: string;
   electricityBaselineKwh?: string;
   electricityComparisonLabel?: string;
   hotwaterBaselineKwh?: string;
   hotwaterComparisonLabel?: string;
+}
+
+/**
+ * An EnergyTotals figure for display: its toFixed text (e.g. "21356.4") in the
+ * language's separators at the same decimals. Text that is not a number, such
+ * as '—', is returned unchanged.
+ */
+export function formatTotal(text: string, format: FormatNumber): string {
+  const value = Number(text);
+  if (text.trim() === '' || !Number.isFinite(value)) return text;
+  return format(value, text.split('.')[1]?.length ?? 0);
 }
 
 export type DatasetByResolution = Record<Resolution, LoadDataPoint[]>;

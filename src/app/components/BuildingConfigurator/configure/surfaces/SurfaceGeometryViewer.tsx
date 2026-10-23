@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { buildPvPanel, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { useT } from '@/app/i18n';
 
 interface SurfaceGeometryViewerProps {
   surfaces: SurfacePolygon[];
@@ -66,6 +67,7 @@ export function SurfaceGeometryViewer({
   onSelectSurface,
   onSelectedAnchorMove,
 }: SurfaceGeometryViewerProps) {
+  const t = useT();
   const mountRef = useRef<HTMLDivElement>(null);
   const compassRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
@@ -91,12 +93,13 @@ export function SurfaceGeometryViewer({
     const mount = mountRef.current;
     if (!mount) return;
 
+    // No scene background: the canvas is transparent and the container's
+    // theme colour shows through, so the model follows the host's theme.
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf1f5f9);
 
     const camera = new THREE.PerspectiveCamera(45, mount.clientWidth / mount.clientHeight, 0.1, 500);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     mount.appendChild(renderer.domElement);
@@ -362,21 +365,20 @@ export function SurfaceGeometryViewer({
   }, [surfaces, selectedId, invalidIds, visibleIds, pvIds, candidateIds]);
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div className="bg-muted" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%', cursor: 'grab' }} />
-      <div style={{
+      <div className="border border-border bg-card/90" style={{
         position: 'absolute', top: 12, right: 12, width: 44, height: 44, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(148,163,184,0.6)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
       }}>
         <div ref={compassRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
           <span style={{
             position: 'absolute', top: 2, left: '50%', transform: 'translateX(-50%)',
             fontSize: 10, fontWeight: 700, color: '#dc2626',
-          }}>N</span>
-          <div style={{
+          }}>{t('envelope.compassNorth')}</span>
+          <div className="border-l-[1.5px] border-muted-foreground" style={{
             position: 'absolute', top: 14, left: '50%', width: 0, height: 14,
-            borderLeft: '1.5px solid #64748b', transform: 'translateX(-50%)',
+            transform: 'translateX(-50%)',
           }} />
         </div>
       </div>

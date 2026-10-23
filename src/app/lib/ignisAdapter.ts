@@ -298,9 +298,9 @@ const MAX_UVALUE_PRESETS = 4;
 export function tabulaUValueOptions(
   state: IgnisState | null,
   type: BuildingElement['type'],
-): { label: string; uValue: number }[] {
+): { label: string; number: number; uValue: number }[] {
   if (!state) return [];
-  const options: { label: string; uValue: number }[] = [];
+  const options: { label: string; number: number; uValue: number }[] = [];
   const seen = new Set<number>();
   for (const variant of state.variants) {
     const uValue = tabulaUValue(variant.data, type);
@@ -308,7 +308,7 @@ export function tabulaUValueOptions(
     const rounded = Math.round(uValue * 100) / 100;
     if (seen.has(rounded)) continue;
     seen.add(rounded);
-    options.push({ label: variant.label, uValue });
+    options.push({ label: variant.label, number: variant.number, uValue });
     if (options.length === MAX_UVALUE_PRESETS) break;
   }
   return options;

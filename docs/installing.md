@@ -98,6 +98,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
+| `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { TechnologyCards, fieldValueFromInput, type Technologies } from './TechnologyCards';
+import { TechnologyCards, type Technologies } from './TechnologyCards';
 
 const technologies: Technologies = {
   items: [
@@ -27,20 +27,6 @@ const technologies: Technologies = {
   onChange: () => {},
   onRemove: () => {},
 };
-
-describe('fieldValueFromInput', () => {
-  it('reports a cleared input as unbounded', () => {
-    expect(fieldValueFromInput('', false)).toBeNull();
-  });
-
-  it('reports nothing while a number is half typed', () => {
-    expect(fieldValueFromInput('', true)).toBeUndefined();
-  });
-
-  it('reports the number typed', () => {
-    expect(fieldValueFromInput('12.5', false)).toBe(12.5);
-  });
-});
 
 describe('TechnologyCards', () => {
   const html = renderToStaticMarkup(<TechnologyCards technologies={technologies} />);

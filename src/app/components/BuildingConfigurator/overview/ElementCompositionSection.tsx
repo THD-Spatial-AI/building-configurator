@@ -10,7 +10,7 @@ import type { BuildingElement } from '@/app/components/BuildingConfigurator/conf
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
 import {
   ElementGroupKey,
-  ELEMENT_GROUP_LABELS,
+  elementGroupLabels,
   getGroupedElements,
   getRoofGroupInfo,
 } from '../shared/elementListUtils';
@@ -19,6 +19,7 @@ import {
   SnapshotStatusBadge,
   getElementStatus,
 } from '../shared/snapshotUtils';
+import { useFormatNumber, useT } from '@/app/i18n';
 
 export interface ElementCompositionSectionProps {
   elements: Record<string, BuildingElement>;
@@ -35,10 +36,13 @@ export function ElementCompositionSection({
   roofConfig,
   onSelectSurface,
 }: ElementCompositionSectionProps) {
+  const t = useT();
+  const format = useFormatNumber();
   const [expanded, setExpanded] = useState<ElementGroupKey | null>(null);
   const grouped  = getGroupedElements(elements);
-  const roofInfo = getRoofGroupInfo(roofConfig);
-  const types    = (Object.keys(grouped) as ElementGroupKey[]).filter((t) => grouped[t].length > 0);
+  const roofInfo = getRoofGroupInfo(roofConfig, t);
+  const groupLabels = elementGroupLabels(t);
+  const types    = (Object.keys(grouped) as ElementGroupKey[]).filter((key) => grouped[key].length > 0);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -58,29 +62,29 @@ export function ElementCompositionSection({
             key={type}
             className={cn(
               'overflow-hidden rounded-lg border',
-              invalidCount > 0 ? 'border-destructive/50 bg-destructive/5' : 'border-slate-200 bg-white',
+              invalidCount > 0 ? 'border-destructive/50 bg-destructive/5' : 'border-border bg-card',
             )}
           >
             <button
               type="button"
               aria-expanded={onSelectSurface ? isOpen : undefined}
               onClick={() => onSelectSurface && setExpanded(isOpen ? null : type)}
-              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-slate-50/80"
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-muted/80"
             >
               <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: ELEMENT_DOTS[type] }} />
-              <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-slate-700">
-                {ELEMENT_GROUP_LABELS[type]}
-                <span className="ml-1.5 font-normal text-slate-400">
+              <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-foreground">
+                {groupLabels[type]}
+                <span className="ml-1.5 font-normal text-muted-foreground">
                   {items.length}
                   {type === 'roof' && roofInfo.description ? ` · ${roofInfo.description}` : ''}
                 </span>
               </span>
-              <span className="shrink-0 text-[11px] tabular-nums text-slate-500">
-                {totalArea.toFixed(1)} m² · U {avgUValue.toFixed(2)}
+              <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                {format(totalArea, 1)} m² · U {format(avgUValue, 2)}
               </span>
               {invalidCount > 0 && (
                 <span
-                  title={`${invalidCount} with no area, fix before running a simulation`}
+                  title={t('envelope.invalidAreaTip', { count: invalidCount })}
                   className="flex shrink-0 items-center gap-0.5 text-[11px] font-semibold text-destructive"
                 >
                   <AlertTriangle className="size-3" />
@@ -89,12 +93,12 @@ export function ElementCompositionSection({
               )}
               <SnapshotStatusBadge status={groupStatus} />
               {onSelectSurface && (
-                <ChevronDown className={cn('size-3.5 shrink-0 text-slate-400 transition-transform', isOpen && 'rotate-180')} />
+                <ChevronDown className={cn('size-3.5 shrink-0 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
               )}
             </button>
 
             {isOpen && (
-              <ul className="border-t border-slate-100">
+              <ul className="border-t border-border">
                 {/* Surfaces a simulation would reject come first, then by name so a facing's surfaces sit together. */}
                 {[...items].sort((a, b) =>
                   Number(hasInvalidArea(b)) - Number(hasInvalidArea(a))
@@ -106,16 +110,16 @@ export function ElementCompositionSection({
                       <button
                         type="button"
                         onClick={() => onSelectSurface(el.id)}
-                        className="flex w-full cursor-pointer items-center gap-2 py-1.5 pl-7 pr-3 text-left text-[11px] transition-colors hover:bg-slate-50"
+                        className="flex w-full cursor-pointer items-center gap-2 py-1.5 pl-7 pr-3 text-left text-[11px] transition-colors hover:bg-muted"
                       >
                         {invalid && <AlertTriangle className="size-3 shrink-0 text-destructive" />}
-                        <span className={cn('min-w-0 flex-1 truncate', invalid ? 'font-medium text-destructive' : 'text-slate-600')}>
+                        <span className={cn('min-w-0 flex-1 truncate', invalid ? 'font-medium text-destructive' : 'text-muted-foreground')}>
                           {el.label}
                         </span>
-                        <span className={cn('shrink-0 tabular-nums', invalid ? 'font-medium text-destructive' : 'text-slate-500')}>
-                          {invalid ? 'no area' : `${el.area.toFixed(1)} m²`}
+                        <span className={cn('shrink-0 tabular-nums', invalid ? 'font-medium text-destructive' : 'text-muted-foreground')}>
+                          {invalid ? t('envelope.noArea') : `${format(el.area, 1)} m²`}
                         </span>
-                        <span className="w-12 shrink-0 text-right tabular-nums text-slate-400">U {el.uValue.toFixed(2)}</span>
+                        <span className="w-12 shrink-0 text-right tabular-nums text-muted-foreground">U {format(el.uValue, 2)}</span>
                       </button>
                     </li>
                   );

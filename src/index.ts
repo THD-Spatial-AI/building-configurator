@@ -14,6 +14,7 @@ export { Building3DView } from './app/components/workspace/Building3DView';
 export type { Building3DViewProps } from './app/components/workspace/Building3DView';
 export type { PvMode, PvSurface } from './app/components/workspace/PvMode';
 export type { TechCard, TechField, Technologies } from './app/components/workspace/TechnologyCards';
+export type { Language } from './app/i18n';
 
 export {
   isEnvelopeDetached,

@@ -12,6 +12,7 @@ import {
   computeVolume,
 } from './buildingDefaults';
 import { BUILDING_TYPE_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
+import { formatNumber, useT, type Language, type MessageValues } from '@/app/i18n';
 
 export type SnapshotStatus = 'default' | 'modified';
 
@@ -19,7 +20,7 @@ export type SnapshotStatus = 'default' | 'modified';
 export function getSnapshotStatusClassName(status: SnapshotStatus): string {
   return status === 'modified'
     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-    : 'border-slate-200 bg-slate-100 text-slate-600';
+    : 'border-border bg-muted text-muted-foreground';
 }
 
 /** Returns true when two floats are equal within `epsilon`. */
@@ -54,29 +55,35 @@ export function getElementStatus(
 
 /** Small pill badge showing whether a value matches or diverges from the estimate. */
 export function SnapshotStatusBadge({ status }: { status: SnapshotStatus }) {
+  const t = useT();
   return (
     <span className={cn(
       'inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold capitalize',
       getSnapshotStatusClassName(status),
     )}>
-      {status}
+      {status === 'modified' ? t('snapshot.status.modified') : t('snapshot.status.default')}
     </span>
   );
 }
 
 // Maps area-weighted avg U-value to a human-readable thermal efficiency label.
-export function getThermalRating(u: number): { label: string; color: string; bg: string } {
-  if (u < 0.20) return { label: 'Excellent', color: '#059669', bg: '#ecfdf5' };
-  if (u < 0.30) return { label: 'Good',      color: '#16a34a', bg: '#f0fdf4' };
-  if (u < 0.50) return { label: 'Fair',      color: '#d97706', bg: '#fffbeb' };
-  if (u < 0.80) return { label: 'Poor',      color: '#dc2626', bg: '#fef2f2' };
-  return             { label: 'Very Poor',   color: '#9f1239', bg: '#fff1f2' };
+// `labelKey` is the translation of `label`, looked up where it is shown.
+export function getThermalRating(u: number): { label: string; labelKey: string; color: string; bg: string } {
+  if (u < 0.20) return { label: 'Excellent', labelKey: 'snapshot.thermalRating.excellent', color: '#059669', bg: '#ecfdf5' };
+  if (u < 0.30) return { label: 'Good',      labelKey: 'snapshot.thermalRating.good',      color: '#16a34a', bg: '#f0fdf4' };
+  if (u < 0.50) return { label: 'Fair',      labelKey: 'snapshot.thermalRating.fair',      color: '#d97706', bg: '#fffbeb' };
+  if (u < 0.80) return { label: 'Poor',      labelKey: 'snapshot.thermalRating.poor',      color: '#dc2626', bg: '#fef2f2' };
+  return             { label: 'Very Poor',   labelKey: 'snapshot.thermalRating.veryPoor',  color: '#9f1239', bg: '#fff1f2' };
 }
 
 export interface SnapshotRow {
   label: string;
+  /** Translation key for `label`. */
+  labelKey: string;
   /** Formatted display string shown when not editing. */
   value: string;
+  /** Translation of `value`, where it holds words. */
+  valueMessage?: { key: string; values: MessageValues };
   status: SnapshotStatus;
   /** When set, the row is inline-editable. Key maps to the `general` state object. */
   editKey?: string;
@@ -109,6 +116,7 @@ export function buildSnapshotRows(
   general: typeof DEFAULT_GENERAL,
   elements: Record<string, BuildingElement>,
   totalArea: number,
+  language: Language,
   baseline?: SnapshotBaseline,
 ): SnapshotRow[] {
   const baseGeneral      = baseline?.general      ?? DEFAULT_GENERAL;
@@ -118,6 +126,7 @@ export function buildSnapshotRows(
   return [
     {
       label: 'Type',
+      labelKey: 'snapshot.row.type',
       value: general.buildingType,
       status: general.buildingType === baseGeneral.buildingType ? 'default' : 'modified',
       editKey: 'buildingType',
@@ -127,6 +136,7 @@ export function buildSnapshotRows(
     },
     {
       label: 'Construction year',
+      labelKey: 'snapshot.row.constructionYear',
       value: String(general.constructionYear),
       status: general.constructionYear === baseGeneral.constructionYear ? 'default' : 'modified',
       editKey: 'constructionYear',
@@ -135,6 +145,7 @@ export function buildSnapshotRows(
     },
     {
       label: 'Country',
+      labelKey: 'snapshot.row.country',
       value: general.country,
       status: general.country === baseGeneral.country ? 'default' : 'modified',
       editKey: 'country',
@@ -144,7 +155,8 @@ export function buildSnapshotRows(
     },
     {
       label: 'Floor area (per storey)',
-      value: `${general.floorArea.toFixed(1)} m²`,
+      labelKey: 'snapshot.row.floorAreaPerStorey',
+      value: `${formatNumber(language, general.floorArea, 1)} m²`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea) ? 'default' : 'modified',
       editKey: 'floorArea',
       editType: 'number',
@@ -152,6 +164,7 @@ export function buildSnapshotRows(
     },
     {
       label: 'Storeys',
+      labelKey: 'snapshot.row.storeys',
       value: `${general.storeys}`,
       status: general.storeys === baseGeneral.storeys ? 'default' : 'modified',
       editKey: 'storeys',
@@ -160,7 +173,8 @@ export function buildSnapshotRows(
     },
     {
       label: 'Room height',
-      value: `${general.roomHeight.toFixed(1)} m`,
+      labelKey: 'snapshot.row.roomHeight',
+      value: `${formatNumber(language, general.roomHeight, 1)} m`,
       status: isCloseTo(general.roomHeight, baseGeneral.roomHeight) ? 'default' : 'modified',
       editKey: 'roomHeight',
       editType: 'number',
@@ -168,7 +182,8 @@ export function buildSnapshotRows(
     },
     {
       label: 'Volume',
-      value: `${computeVolume(general.floorArea, general.storeys, general.roomHeight).toFixed(0)} m³`,
+      labelKey: 'snapshot.row.volume',
+      value: `${formatNumber(language, computeVolume(general.floorArea, general.storeys, general.roomHeight), 0)} m³`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea)
         && general.storeys === baseGeneral.storeys
         && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
@@ -177,7 +192,12 @@ export function buildSnapshotRows(
     },
     {
       label: 'Envelope',
-      value: `${totalArea.toFixed(1)} m²  ·  ${Object.keys(elements).length} surfaces`,
+      labelKey: 'snapshot.row.envelope',
+      value: `${formatNumber(language, totalArea, 1)} m²  ·  ${Object.keys(elements).length} surfaces`,
+      valueMessage: {
+        key: 'snapshot.envelopeValue',
+        values: { area: formatNumber(language, totalArea, 1), count: Object.keys(elements).length },
+      },
       status: isCloseTo(totalArea, baseTotalArea)
         && Object.keys(elements).length === baseElementCount
         ? 'default'

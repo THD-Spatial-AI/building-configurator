@@ -3,6 +3,7 @@
 
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { RoofConfig } from '@/app/components/BuildingConfigurator/configure/model/roof';
+import type { Translate } from '@/app/i18n';
 
 // ─── Face group ───────────────────────────────────────────────────────────────
 
@@ -95,13 +96,16 @@ export function getFaceGroups(elements: Record<string, BuildingElement>): FaceGr
 
 export type ElementGroupKey = 'wall' | 'window' | 'door' | 'roof' | 'floor';
 
-export const ELEMENT_GROUP_LABELS: Record<ElementGroupKey, string> = {
-  wall:   'Walls',
-  window: 'Windows',
-  door:   'Doors',
-  roof:   'Roof',
-  floor:  'Floor',
-};
+/** Display label for each element group. */
+export function elementGroupLabels(t: Translate): Record<ElementGroupKey, string> {
+  return {
+    wall:   t('envelope.group.walls'),
+    window: t('envelope.group.windows'),
+    door:   t('envelope.group.doors'),
+    roof:   t('envelope.group.roof'),
+    floor:  t('envelope.group.floor'),
+  };
+}
 
 /** Partitions the elements record into buckets by type. */
 export function getGroupedElements(
@@ -120,15 +124,15 @@ export function getGroupedElements(
  * Returns a short shape description for the roof configuration.
  * Does NOT include a surface count — callers should use the actual element count instead.
  */
-export function getRoofGroupInfo(roofConfig: RoofConfig): { description: string } {
+export function getRoofGroupInfo(roofConfig: RoofConfig, t: Translate): { description: string } {
   const descriptions: Record<string, string> = {
-    flat:         'low-slope',
-    'mono-pitch': 'single slope',
-    gabled:       'S + N',
-    hipped:       'S/N/E/W',
-    'v-shape':    'inward slopes',
-    'saw-tooth':  'S-facing',
-    custom:       'custom',
+    flat:         t('envelope.roofShape.flat'),
+    'mono-pitch': t('envelope.roofShape.monoPitch'),
+    gabled:       t('envelope.roofShape.gabled'),
+    hipped:       t('envelope.roofShape.hipped'),
+    'v-shape':    t('envelope.roofShape.vShape'),
+    'saw-tooth':  t('envelope.roofShape.sawTooth'),
+    custom:       t('envelope.roofShape.custom'),
   };
 
   return {

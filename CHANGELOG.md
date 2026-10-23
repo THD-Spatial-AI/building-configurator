@@ -4,6 +4,20 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.11.0] - 2026-10-23
+
+### Added
+
+- `Building3DView` takes an optional `language` prop: `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`, EnerPlanET's languages. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. Changing it re-renders the open view without losing edits. The view's own text comes from the package's translation files under `src/app/i18n/locales/`; a text missing from a language shows in English. Text the host passes in is shown as given. The `Language` type is exported. All eight languages are bundled, which takes `dist/index.js` from about 196 kB to about 350 kB (94 kB gzipped).
+- Numbers follow the view's language: 0,40 and 21.356 in German, 0.40 and 21,356 in English. Number fields are text fields that show the language's decimal separator and accept a comma or a point; the arrow keys still step the value. `lang` is set on the view's root.
+- The view follows the host's light or dark theme. Its colours come from the host's theme variables (`--background`, `--card`, `--foreground`, `--muted`, `--muted-foreground`, `--border`, `--primary` and the rest of the shadcn set), so a host that switches them, for example with a `.dark` class, switches the view; there is no theme prop. The 3D model's background is the host's muted colour.
+
+### Changed
+
+- Cooking with (BuEM `cooking_carrier`) is set per building: electric (default), gas or none. The "Model default" option is gone and the building always sends its value, so the model's cooking setting no longer applies to a building opened in the view. A stored building that names none opens as electric.
+- `EnergyTotals.*ComparisonLabel` holds a translation key instead of English text.
+- A single surface reads "1 surface", not "1 surfaces".
+
 ## [0.10.1] - 2026-10-21
 
 ### Fixed

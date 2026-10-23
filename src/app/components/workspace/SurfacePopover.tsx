@@ -10,6 +10,7 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
+import { useT } from '../../i18n';
 
 const WIDTH = 360;
 const MARGIN = 12;
@@ -94,6 +95,7 @@ interface SurfacePopoverProps {
 }
 
 export function SurfacePopover({ at, cardRef, title, subtitle, onClose, children }: SurfacePopoverProps) {
+  const t = useT();
   const wide = useMediaQuery(WIDE_LAYOUT);
   const ownRef = useRef<HTMLDivElement>(null);
 
@@ -131,7 +133,7 @@ export function SurfacePopover({ at, cardRef, title, subtitle, onClose, children
       onPointerDownCapture={() => { if (ownRef.current) ownRef.current.dataset.pinned = 'true'; }}
       style={{ position: 'fixed', ...(wide ? anchored : docked) }}
       className={cn(
-        'z-30 flex flex-col border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.28)]',
+        'z-30 flex flex-col border-border bg-card shadow-[0_18px_50px_rgba(15,23,42,0.28)]',
         // Not overflow-hidden while wide: the tail hangs outside the card's edge.
         wide ? 'rounded-xl border' : 'overflow-hidden rounded-t-2xl border-t',
       )}
@@ -152,26 +154,26 @@ export function SurfacePopover({ at, cardRef, title, subtitle, onClose, children
         <span
           data-role="tail"
           aria-hidden
-          className="absolute size-3.5 -translate-y-1/2 rotate-45 border-slate-300 bg-white"
+          className="absolute size-3.5 -translate-y-1/2 rotate-45 border-border bg-card"
           style={{ top: 24, left: -TAIL_OFFSET, borderWidth: '0 0 1px 1px' }}
         />
       )}
       <div className={cn(
-        'flex w-full shrink-0 items-start gap-2 border-b border-slate-200 px-3 py-2.5',
+        'flex w-full shrink-0 items-start gap-2 border-b border-border px-3 py-2.5',
         // A form stretched across a tablet's full width reads worse than a column.
         !wide && 'mx-auto max-w-[560px] border-b-0 pt-4',
       )}>
         {!wide && (
-          <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-slate-300" aria-hidden />
+          <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-muted-foreground/40" aria-hidden />
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[12px] font-semibold text-slate-700">{title}</p>
+          <p className="truncate text-[12px] font-semibold text-foreground">{title}</p>
           {subtitle && <p className="truncate text-[10px] text-muted-foreground">{subtitle}</p>}
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('surface.close')}
           className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
         >
           <X />

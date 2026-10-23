@@ -11,6 +11,8 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { AlertTriangle, Info, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDecimal, parseDecimal, useFormatNumber, useLanguage, useT } from '@/app/i18n';
+import { formatTotal } from '@/app/lib/loadProfile';
 
 // ─── Design tokens — CSS variable references for use in SVG attributes ─────────
 // SVG stroke/fill attributes accept var() directly, so these strings work as-is.
@@ -98,8 +100,9 @@ const DELTA_DISPLAY_CAP = 300;
  * ordinary/default state and doesn't need calling out.
  */
 export function SourceTag({ source }: { source?: 'ignis' | 'buem' | 'user' }) {
-  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">estimated</span>;
-  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-slate-400">user defined</span>;
+  const t = useT();
+  if (source === 'ignis') return <span className="ml-1.5 text-[10px] font-medium text-muted-foreground">{t('common.source.estimated')}</span>;
+  if (source === 'user') return <span className="ml-1.5 text-[10px] font-medium text-muted-foreground">{t('common.source.userDefined')}</span>;
   return null;
 }
 
@@ -117,17 +120,80 @@ export function EnergyComparisonNote({
   referenceKwh?: string;
   referenceLabel?: string;
 }) {
+  const t = useT();
+  const format = useFormatNumber();
   if (deltaPercent === null || deltaPercent === undefined || !referenceKwh || !referenceLabel) return null;
   if (Math.abs(deltaPercent) < 0.5) return null;
 
   const isIncrease = deltaPercent > 0;
   const magnitude = Math.abs(deltaPercent);
-  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${DELTA_DISPLAY_CAP}` : magnitude.toFixed(0);
+  const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${format(DELTA_DISPLAY_CAP, 0)}` : format(magnitude, 0);
 
   return (
     <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
-      {displayValue}% {isIncrease ? 'higher' : 'lower'} than {referenceLabel} ({referenceKwh} kWh)
+      {t(isIncrease ? 'common.comparison.higher' : 'common.comparison.lower', {
+        percent: displayValue, reference: referenceLabel, kwh: formatTotal(referenceKwh, format),
+      })}
     </p>
+  );
+}
+
+// ─── DecimalInput ─────────────────────────────────────────────────────────────
+
+type DecimalInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step'> & {
+  /** '' or null shows an empty field. */
+  value: number | '' | null;
+  /** A typed number, or null when the field is cleared. Text that is not a number yet is not passed on. */
+  onChange?: (value: number | null) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+};
+
+/**
+ * A number field in the view's language: 0,4 in de, 0.4 in en. A browser's
+ * type="number" field shows the browser's locale, not the page's, so this is a
+ * text field that formats while not being edited and reads either separator.
+ * The arrow keys step by `step` within min and max.
+ */
+export function DecimalInput({ value, onChange, min, max, step = 1, onFocus, onBlur, onKeyDown, ...rest }: DecimalInputProps) {
+  const language = useLanguage();
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft ?? (typeof value === 'number' ? formatDecimal(language, value) : '');
+
+  const commit = (text: string) => {
+    setDraft(text);
+    const parsed = parseDecimal(text);
+    if (parsed !== undefined) onChange?.(parsed);
+  };
+
+  const stepBy = (direction: 1 | -1) => {
+    const current = parseDecimal(shown) ?? 0;
+    const precision = (String(step).split('.')[1] ?? '').length;
+    let next = Number((current + direction * step).toFixed(precision));
+    if (min !== undefined) next = Math.max(min, next);
+    if (max !== undefined) next = Math.min(max, next);
+    setDraft(formatDecimal(language, next));
+    onChange?.(next);
+  };
+
+  return (
+    <input
+      {...rest}
+      type="text"
+      inputMode="decimal"
+      value={shown}
+      onChange={(e) => commit(e.target.value)}
+      onFocus={(e) => { setDraft(shown); onFocus?.(e); }}
+      onBlur={(e) => { setDraft(null); onBlur?.(e); }}
+      onKeyDown={(e) => {
+        if (!rest.readOnly && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+          e.preventDefault();
+          stepBy(e.key === 'ArrowUp' ? 1 : -1);
+        }
+        onKeyDown?.(e);
+      }}
+    />
   );
 }
 
@@ -159,19 +225,15 @@ export function NumberInput({
         </div>
       )}
       <div className="cfg-input-wrap">
-        <input
+        <DecimalInput
           className="cfg-number"
-          type="number"
-          value={value}
+          value={typeof value === 'number' ? value : value === '' ? '' : Number(value)}
           min={min}
           max={max}
           step={step}
           readOnly={readOnly}
-          onChange={(e) => {
-            if (!onChange) return;
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v)) onChange(v);
-          }}
+          aria-label={label}
+          onChange={(v) => { if (v !== null) onChange?.(v); }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
         />
         <div className="px-2.5 flex items-center justify-center bg-muted border-l border-border text-[11px] text-muted-foreground whitespace-nowrap shrink-0 select-none">
@@ -343,11 +405,11 @@ interface ConfigSectionProps {
 
 export function ConfigSection({ title, expanded, onToggle, children }: ConfigSectionProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-11 w-full items-center justify-between bg-slate-50 px-3 cursor-pointer select-none transition-colors duration-100 hover:bg-muted"
+        className="flex h-11 w-full items-center justify-between bg-muted px-3 cursor-pointer select-none transition-colors duration-100 hover:bg-muted"
       >
         <span className="text-[11px] font-semibold text-muted-foreground tracking-[0.08em] uppercase">
           {title}
@@ -364,7 +426,7 @@ export function ConfigSection({ title, expanded, onToggle, children }: ConfigSec
         'overflow-hidden transition-[max-height] duration-300 ease-in-out',
         expanded ? 'max-h-[600px]' : 'max-h-0',
       )}>
-        <div className={cn('bg-white px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
+        <div className={cn('bg-card px-3 pb-3 pt-1.5', expanded && 'border-t border-border/80')}>
           {children}
         </div>
       </div>
@@ -462,6 +524,7 @@ export function ScrollHintContainer({
   children: React.ReactNode;
   className?: string;
 }) {
+  const t = useT();
   const scrollRef  = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const rafRef     = useRef<number | null>(null);
@@ -532,13 +595,13 @@ export function ScrollHintContainer({
         )}
         style={{
           height: 80,
-          background: 'linear-gradient(to top, rgba(241,245,249,1) 0%, rgba(241,245,249,0.85) 40%, transparent 100%)',
+          background: 'linear-gradient(to top, var(--card, #ffffff) 0%, color-mix(in oklab, var(--card, #ffffff) 85%, transparent) 40%, transparent 100%)',
         }}
       >
         {/* Pill badge — clearly visible against the gradient */}
-        <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 shadow-sm">
-          <ChevronDown className="size-3.5 text-slate-500" />
-          <span className="text-[10px] font-semibold text-slate-500">scroll</span>
+        <div className="flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 shadow-sm">
+          <ChevronDown className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-semibold text-muted-foreground">{t('common.scroll')}</span>
         </div>
       </div>
     </div>
@@ -579,6 +642,7 @@ export function ElementConfiguratorModal({
   children: React.ReactNode;
   size?: keyof typeof MODAL_SIZE;
 }) {
+  const t = useT();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
       <DialogPrimitive.Portal>
@@ -593,7 +657,7 @@ export function ElementConfiguratorModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('common.close')}
             className="absolute right-3 top-3 z-10 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
           >
             <X />
@@ -613,8 +677,8 @@ export function UnsavedChangesDialog({
   onCancel,
   onSave,
   onDiscard,
-  message = 'You have unsaved changes to this building configuration. What would you like to do?',
-  note = 'Closing without saving will discard all modifications made since the last save.',
+  message,
+  note,
 }: {
   open: boolean;
   onCancel: () => void;
@@ -623,6 +687,7 @@ export function UnsavedChangesDialog({
   message?: string;
   note?: string;
 }) {
+  const t = useT();
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
       <DialogPrimitive.Portal>
@@ -631,17 +696,17 @@ export function UnsavedChangesDialog({
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="size-4 text-amber-500 shrink-0" />
             <DialogPrimitive.Title className="text-base font-semibold text-foreground">
-              Unsaved Changes
+              {t('common.unsaved.title')}
             </DialogPrimitive.Title>
           </div>
 
           <div className="mb-4">
             <DialogPrimitive.Description className="text-sm text-foreground mb-2">
-              {message}
+              {message ?? t('common.unsaved.message')}
             </DialogPrimitive.Description>
             <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
               <p className="text-xs text-amber-800">
-                {note}
+                {note ?? t('common.unsaved.note')}
               </p>
             </div>
           </div>
@@ -652,21 +717,21 @@ export function UnsavedChangesDialog({
               onClick={onCancel}
               className="px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-[6px] hover:bg-muted transition-colors cursor-pointer"
             >
-              Continue Editing
+              {t('common.unsaved.continueEditing')}
             </button>
             <button
               type="button"
               onClick={onSave}
               className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              Save &amp; Close
+              {t('common.unsaved.saveAndClose')}
             </button>
             <button
               type="button"
               onClick={onDiscard}
               className="px-3 py-1.5 text-sm font-medium rounded-[6px] transition-colors cursor-pointer text-destructive border border-destructive/30 hover:bg-destructive/5"
             >
-              Discard Changes
+              {t('common.unsaved.discard')}
             </button>
           </div>
         </DialogPrimitive.Content>

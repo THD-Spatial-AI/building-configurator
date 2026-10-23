@@ -1,5 +1,9 @@
 // Predefined option lists for building parameters.
 
+import type { Translate } from '@/app/i18n';
+
+type Label = (t: Translate) => string;
+
 /** BuEM building_type code to UI label. Residential types first, then service types. */
 export const BUILDING_TYPE_LABELS: Record<string, string> = {
   SFH: 'Single-family House',
@@ -20,6 +24,32 @@ const RESIDENTIAL_CODES = ['SFH', 'TH', 'MFH', 'AB'];
 
 export const BUILDING_TYPE_OPTIONS = Object.values(BUILDING_TYPE_LABELS).map((label) => ({ value: label, label }));
 
+const BUILDING_TYPE_NAMES: Record<string, Label> = {
+  SFH: (t) => t('options.buildingType.sfh'),
+  TH:  (t) => t('options.buildingType.th'),
+  MFH: (t) => t('options.buildingType.mfh'),
+  AB:  (t) => t('options.buildingType.ab'),
+  bakery:      (t) => t('options.buildingType.bakery'),
+  clinic:      (t) => t('options.buildingType.clinic'),
+  hotel:       (t) => t('options.buildingType.hotel'),
+  office:      (t) => t('options.buildingType.office'),
+  restaurant:  (t) => t('options.buildingType.restaurant'),
+  school:      (t) => t('options.buildingType.school'),
+  supermarket: (t) => t('options.buildingType.supermarket'),
+  warehouse:   (t) => t('options.buildingType.warehouse'),
+};
+
+/** A building type value (a BUILDING_TYPE_LABELS label) as shown in the UI; an unknown value is shown as given. */
+export function buildingTypeName(t: Translate, label: string): string {
+  const code = Object.keys(BUILDING_TYPE_LABELS).find((c) => BUILDING_TYPE_LABELS[c] === label);
+  return code ? BUILDING_TYPE_NAMES[code](t) : label;
+}
+
+/** BUILDING_TYPE_OPTIONS with translated labels; the values stay the stored type labels. */
+export function buildingTypeOptions(t: Translate) {
+  return BUILDING_TYPE_OPTIONS.map(({ value }) => ({ value, label: buildingTypeName(t, value) }));
+}
+
 const SERVICE_LABELS = Object.entries(BUILDING_TYPE_LABELS)
   .filter(([code]) => !RESIDENTIAL_CODES.includes(code))
   .map(([, label]) => label);
@@ -35,95 +65,102 @@ export function requiresResidentialUnits(label: string): boolean {
 }
 
 /** Household composition driving BuEM's occupancy schedule. Empty means BuEM's per-type default. */
-export const ARCHETYPE_OPTIONS = [
-  { value: '',                     label: 'Default for the building type' },
-  { value: 'generic',              label: 'Generic household' },
-  { value: 'working_couple',       label: 'Working couple' },
-  { value: 'family_with_children', label: 'Family with children' },
-  { value: 'retired_single',       label: 'Retired, living alone' },
-  { value: 'student_shared',       label: 'Students sharing' },
-];
+export function archetypeOptions(t: Translate) {
+  return [
+    { value: '',                     label: t('options.archetype.default') },
+    { value: 'generic',              label: t('options.archetype.generic') },
+    { value: 'working_couple',       label: t('options.archetype.workingCouple') },
+    { value: 'family_with_children', label: t('options.archetype.familyWithChildren') },
+    { value: 'retired_single',       label: t('options.archetype.retiredSingle') },
+    { value: 'student_shared',       label: t('options.archetype.studentShared') },
+  ];
+}
 
-export const SETBACK_OPTIONS = [
-  { value: 'none',           label: 'None' },
-  { value: 'night_only',     label: 'At night' },
-  { value: 'night_and_away', label: 'At night and when away' },
-  { value: 'deep',           label: 'Deep setback' },
-];
+export function setbackOptions(t: Translate) {
+  return [
+    { value: 'none',           label: t('options.setback.none') },
+    { value: 'night_only',     label: t('options.setback.nightOnly') },
+    { value: 'night_and_away', label: t('options.setback.nightAndAway') },
+    { value: 'deep',           label: t('options.setback.deep') },
+  ];
+}
 
-export const COOKING_CARRIER_OPTIONS = [
-  { value: '',         label: 'Model default' },
-  { value: 'electric', label: 'Electric' },
-  { value: 'gas',      label: 'Gas' },
-  { value: 'none',     label: 'Not reported' },
-];
+export function cookingCarrierOptions(t: Translate) {
+  return [
+    { value: 'electric', label: t('options.cookingCarrier.electric') },
+    { value: 'gas',      label: t('options.cookingCarrier.gas') },
+    { value: 'none',     label: t('options.cookingCarrier.none') },
+  ];
+}
 
 /** BuEM load profiles a run can return, in the order they are shown. */
 export const OUTPUT_PROFILES = [
-  { key: 'heating',     label: 'Space heating' },
-  { key: 'cooling',     label: 'Space cooling' },
-  { key: 'electricity', label: 'Electricity' },
-  { key: 'hot_water',   label: 'Hot water' },
-  { key: 'kitchen',     label: 'Cooking gas' },
+  { key: 'heating',     label: (t: Translate) => t('options.output.heating') },
+  { key: 'cooling',     label: (t: Translate) => t('options.output.cooling') },
+  { key: 'electricity', label: (t: Translate) => t('options.output.electricity') },
+  { key: 'hot_water',   label: (t: Translate) => t('options.output.hotWater') },
+  { key: 'kitchen',     label: (t: Translate) => t('options.output.kitchen') },
 ] as const;
 
 export type OutputProfile = typeof OUTPUT_PROFILES[number]['key'];
 export type OutputLevel = 'none' | 'summary' | 'series';
 
-export const OUTPUT_LEVEL_OPTIONS: { value: OutputLevel; label: string }[] = [
-  { value: 'none',    label: 'Off' },
-  { value: 'summary', label: 'Annual' },
-  { value: 'series',  label: 'Hourly' },
-];
+export function outputLevelOptions(t: Translate): { value: OutputLevel; label: string }[] {
+  return [
+    { value: 'none',    label: t('options.outputLevel.none') },
+    { value: 'summary', label: t('options.outputLevel.summary') },
+    { value: 'series',  label: t('options.outputLevel.series') },
+  ];
+}
 
 /**
  * BuEM household appliances by group. Each id is one appliance: BuEM cannot
  * express counts, so TVs are the three ids tv_1, tv_2 and tv_3.
  */
-export const EQUIPMENT_GROUPS: { label: string; items: { id: string; label: string }[] }[] = [
-  { label: 'Cooking', items: [
-    { id: 'hob', label: 'Hob' },
-    { id: 'oven', label: 'Oven' },
-    { id: 'microwave', label: 'Microwave' },
-    { id: 'kettle', label: 'Kettle' },
-    { id: 'small_cooking_group', label: 'Small cooking appliances' },
-    { id: 'air_fryer', label: 'Air fryer' },
-    { id: 'coffee_machine', label: 'Coffee machine' },
+export const EQUIPMENT_GROUPS: { id: string; label: Label; items: { id: string; label: Label }[] }[] = [
+  { id: 'cooking', label: (t) => t('options.equipmentGroup.cooking'), items: [
+    { id: 'hob', label: (t) => t('options.equipment.hob') },
+    { id: 'oven', label: (t) => t('options.equipment.oven') },
+    { id: 'microwave', label: (t) => t('options.equipment.microwave') },
+    { id: 'kettle', label: (t) => t('options.equipment.kettle') },
+    { id: 'small_cooking_group', label: (t) => t('options.equipment.smallCookingGroup') },
+    { id: 'air_fryer', label: (t) => t('options.equipment.airFryer') },
+    { id: 'coffee_machine', label: (t) => t('options.equipment.coffeeMachine') },
   ] },
-  { label: 'Cold', items: [
-    { id: 'fridge_freezer', label: 'Fridge-freezer' },
-    { id: 'refrigerator', label: 'Refrigerator' },
-    { id: 'chest_freezer', label: 'Chest freezer' },
-    { id: 'upright_freezer', label: 'Upright freezer' },
+  { id: 'cold', label: (t) => t('options.equipmentGroup.cold'), items: [
+    { id: 'fridge_freezer', label: (t) => t('options.equipment.fridgeFreezer') },
+    { id: 'refrigerator', label: (t) => t('options.equipment.refrigerator') },
+    { id: 'chest_freezer', label: (t) => t('options.equipment.chestFreezer') },
+    { id: 'upright_freezer', label: (t) => t('options.equipment.uprightFreezer') },
   ] },
-  { label: 'Laundry and cleaning', items: [
-    { id: 'washing_machine', label: 'Washing machine' },
-    { id: 'tumble_dryer', label: 'Tumble dryer' },
-    { id: 'washer_dryer', label: 'Washer-dryer' },
-    { id: 'dish_washer', label: 'Dishwasher' },
-    { id: 'iron', label: 'Iron' },
-    { id: 'vacuum', label: 'Vacuum cleaner' },
-    { id: 'robot_vacuum', label: 'Robot vacuum' },
+  { id: 'laundry', label: (t) => t('options.equipmentGroup.laundry'), items: [
+    { id: 'washing_machine', label: (t) => t('options.equipment.washingMachine') },
+    { id: 'tumble_dryer', label: (t) => t('options.equipment.tumbleDryer') },
+    { id: 'washer_dryer', label: (t) => t('options.equipment.washerDryer') },
+    { id: 'dish_washer', label: (t) => t('options.equipment.dishWasher') },
+    { id: 'iron', label: (t) => t('options.equipment.iron') },
+    { id: 'vacuum', label: (t) => t('options.equipment.vacuum') },
+    { id: 'robot_vacuum', label: (t) => t('options.equipment.robotVacuum') },
   ] },
-  { label: 'Electronics', items: [
-    { id: 'tv_receiver_box', label: 'TV receiver box' },
-    { id: 'personal_computer', label: 'Personal computer' },
-    { id: 'printer', label: 'Printer' },
-    { id: 'hi_fi', label: 'Hi-fi' },
-    { id: 'cassette_cd_player', label: 'Cassette or CD player' },
-    { id: 'vcr_dvd', label: 'VCR or DVD player' },
-    { id: 'laptop', label: 'Laptop' },
-    { id: 'smart_speaker', label: 'Smart speaker' },
-    { id: 'streaming_stick', label: 'Streaming stick' },
-    { id: 'wifi_router', label: 'Wi-Fi router' },
+  { id: 'electronics', label: (t) => t('options.equipmentGroup.electronics'), items: [
+    { id: 'tv_receiver_box', label: (t) => t('options.equipment.tvReceiverBox') },
+    { id: 'personal_computer', label: (t) => t('options.equipment.personalComputer') },
+    { id: 'printer', label: (t) => t('options.equipment.printer') },
+    { id: 'hi_fi', label: (t) => t('options.equipment.hiFi') },
+    { id: 'cassette_cd_player', label: (t) => t('options.equipment.cassetteCdPlayer') },
+    { id: 'vcr_dvd', label: (t) => t('options.equipment.vcrDvd') },
+    { id: 'laptop', label: (t) => t('options.equipment.laptop') },
+    { id: 'smart_speaker', label: (t) => t('options.equipment.smartSpeaker') },
+    { id: 'streaming_stick', label: (t) => t('options.equipment.streamingStick') },
+    { id: 'wifi_router', label: (t) => t('options.equipment.wifiRouter') },
   ] },
-  { label: 'Other', items: [
-    { id: 'lighting', label: 'Lighting' },
-    { id: 'clock', label: 'Clock' },
-    { id: 'answer_machine', label: 'Answering machine' },
-    { id: 'cordless_telephone', label: 'Cordless telephone' },
-    { id: 'fax', label: 'Fax' },
-    { id: 'ev_charger', label: 'EV charger' },
+  { id: 'other', label: (t) => t('options.equipmentGroup.misc'), items: [
+    { id: 'lighting', label: (t) => t('options.equipment.lighting') },
+    { id: 'clock', label: (t) => t('options.equipment.clock') },
+    { id: 'answer_machine', label: (t) => t('options.equipment.answerMachine') },
+    { id: 'cordless_telephone', label: (t) => t('options.equipment.cordlessTelephone') },
+    { id: 'fax', label: (t) => t('options.equipment.fax') },
+    { id: 'ev_charger', label: (t) => t('options.equipment.evCharger') },
   ] },
 ];
 
@@ -138,6 +175,16 @@ export const COUNTRY_OPTIONS = [
   { value: 'NL', label: 'NL - Netherlands' },
   { value: 'CZ', label: 'CZ - Czechia'     },
 ];
+
+/** COUNTRY_OPTIONS with translated labels. */
+export function countryOptions(t: Translate) {
+  return [
+    { value: 'DE', label: t('options.country.de') },
+    { value: 'AT', label: t('options.country.at') },
+    { value: 'NL', label: t('options.country.nl') },
+    { value: 'CZ', label: t('options.country.cz') },
+  ];
+}
 
 /**
  * Maps a construction year to the TABULA period label it falls in. The label is

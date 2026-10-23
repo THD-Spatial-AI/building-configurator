@@ -7,6 +7,7 @@
 // set surface by surface survive a preset.
 
 import { tabulaUValue, type IgnisVariantLevel } from './ignisAdapter';
+import type { Translate } from '../i18n';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 
 export type RefurbElementType = BuildingElement['type'];
@@ -21,6 +22,21 @@ export interface Refurbishment {
   /** City2TABULA's tabula_variant_code for the building, e.g. "NL.N.SFH.02.Deta.ReEx.001.002". */
   variantCode?: string;
   states?: Partial<RefurbStates>;
+}
+
+/** TABULA's names for variants 1 to 3, used where ignis gives a generic label. */
+export const TABULA_VARIANT_NAMES = ['Existing state', 'Usual refurbishment', 'Advanced refurbishment'];
+
+const VARIANT_KEYS = ['existing', 'usual', 'advanced'];
+
+/**
+ * A variant's name in the view's language: TABULA's own name translated, or
+ * the specific description ignis gives (for example a construction standard)
+ * as it is. `short` is the form for a preset chip.
+ */
+export function variantName(t: Translate, label: string, number: number, short = false): string {
+  if (TABULA_VARIANT_NAMES[number - 1] !== label) return label;
+  return t(`insulation.variant.${short ? 'short' : 'full'}.${VARIANT_KEYS[number - 1]}`);
 }
 
 /** U-values closer than this count as equal; TABULA gives two decimals. */

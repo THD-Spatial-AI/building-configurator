@@ -5,6 +5,7 @@
 
 import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useFormatNumber, useT, type Translate } from '../../i18n';
 
 /** Pointer position as an angle in degrees, clockwise from north (up). */
 function pointerAngle(element: HTMLElement, clientX: number, clientY: number): number {
@@ -46,13 +47,14 @@ function arrowStep(key: string, value: number, step: number): number | null {
 }
 
 const COMPASS_POINTS = [
-  { label: 'N', deg: 0 }, { label: 'E', deg: 90 }, { label: 'S', deg: 180 }, { label: 'W', deg: 270 },
+  { point: 'n', deg: 0 }, { point: 'e', deg: 90 }, { point: 's', deg: 180 }, { point: 'w', deg: 270 },
 ];
 
 /** Compass label for an azimuth, e.g. 135° -> "SE-facing". */
-export function facingLabel(azimuth: number): string {
-  const names = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  return `${names[Math.round(normalize360(azimuth) / 45) % 8]}-facing`;
+export function facingLabel(azimuth: number, t: Translate): string {
+  const points = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
+  const point = points[Math.round(normalize360(azimuth) / 45) % 8];
+  return t('surface.facingDirection', { direction: t(`surface.compass.${point}`) });
 }
 
 interface AzimuthDialProps {
@@ -64,19 +66,20 @@ interface AzimuthDialProps {
 
 /** Compass whose needle is dragged to set which way the surface faces. */
 export function AzimuthDial({ value, onChange, reference }: AzimuthDialProps) {
+  const t = useT();
   const drag = useDragValue((element, x, y) => onChange(Math.round(normalize360(pointerAngle(element, x, y)))));
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-[10px] font-medium text-muted-foreground">Facing</span>
+      <span className="text-[10px] font-medium text-muted-foreground">{t('surface.facing')}</span>
       <div
         {...drag}
         role="slider"
-        aria-label="Azimuth"
+        aria-label={t('surface.azimuth')}
         aria-valuemin={0}
         aria-valuemax={359}
         aria-valuenow={Math.round(value)}
-        aria-valuetext={`${Math.round(value)} degrees, ${facingLabel(value)}`}
+        aria-valuetext={t('surface.degrees', { degrees: Math.round(value), label: facingLabel(value, t) })}
         tabIndex={0}
         onKeyDown={(e) => {
           const next = arrowStep(e.key, value, e.shiftKey ? 1 : 5);
@@ -84,25 +87,25 @@ export function AzimuthDial({ value, onChange, reference }: AzimuthDialProps) {
           e.preventDefault();
           onChange(normalize360(next));
         }}
-        className="relative size-[86px] cursor-grab touch-none rounded-full border border-slate-200 bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
+        className="relative size-[86px] cursor-grab touch-none rounded-full border border-border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
       >
-        {COMPASS_POINTS.map(({ label, deg }) => (
+        {COMPASS_POINTS.map(({ point, deg }) => (
           <span
-            key={label}
-            className={cn('absolute text-[9px] font-bold', label === 'N' ? 'text-red-500' : 'text-slate-400')}
+            key={point}
+            className={cn('absolute text-[9px] font-bold', point === 'n' ? 'text-red-500' : 'text-muted-foreground')}
             style={{
               left: `${50 + 40 * Math.sin((deg * Math.PI) / 180)}%`,
               top: `${50 - 40 * Math.cos((deg * Math.PI) / 180)}%`,
               transform: 'translate(-50%, -50%)',
             }}
           >
-            {label}
+            {t(`surface.compass.${point}`)}
           </span>
         ))}
 
         {reference !== undefined && Math.round(reference) !== Math.round(value) && (
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[30px] w-px origin-bottom bg-slate-300"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[30px] w-px origin-bottom bg-muted-foreground/40"
             style={{ transform: `translate(-50%, -100%) rotate(${reference}deg)`, transformOrigin: '50% 100%' }}
           />
         )}
@@ -112,18 +115,18 @@ export function AzimuthDial({ value, onChange, reference }: AzimuthDialProps) {
         />
         <div className="pointer-events-none absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
       </div>
-      <span className="text-[10px] font-semibold text-slate-600">
-        {Math.round(value)}° · {facingLabel(value)}
+      <span className="text-[10px] font-semibold text-muted-foreground">
+        {Math.round(value)}° · {facingLabel(value, t)}
       </span>
     </div>
   );
 }
 
 /** Tilt in words, matching how the surface actually sits. */
-export function tiltLabel(tilt: number): string {
-  if (tilt <= 5) return 'Flat';
-  if (tilt >= 85) return 'Vertical';
-  return 'Pitched';
+export function tiltLabel(tilt: number, t: Translate): string {
+  if (tilt <= 5) return t('surface.tiltShape.flat');
+  if (tilt >= 85) return t('surface.tiltShape.vertical');
+  return t('surface.tiltShape.pitched');
 }
 
 interface TiltDialProps {
@@ -134,6 +137,7 @@ interface TiltDialProps {
 /** Side-on profile of the surface, hinged at the base: drag it up to stand it
  *  vertical, down to lay it flat. */
 export function TiltDial({ value, onChange }: TiltDialProps) {
+  const t = useT();
   const drag = useDragValue((element, x, y) => {
     const rect = element.getBoundingClientRect();
     // Hinged at the bottom-left, so the pointer's angle above the ground line is the tilt.
@@ -147,15 +151,15 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-[10px] font-medium text-muted-foreground">Tilt</span>
+      <span className="text-[10px] font-medium text-muted-foreground">{t('surface.tilt')}</span>
       <div
         {...drag}
         role="slider"
-        aria-label="Tilt"
+        aria-label={t('surface.tilt')}
         aria-valuemin={0}
         aria-valuemax={90}
         aria-valuenow={Math.round(value)}
-        aria-valuetext={`${Math.round(value)} degrees, ${tiltLabel(value).toLowerCase()}`}
+        aria-valuetext={t('surface.degrees', { degrees: Math.round(value), label: tiltLabel(value, t).toLowerCase() })}
         tabIndex={0}
         onKeyDown={(e) => {
           const next = arrowStep(e.key, value, e.shiftKey ? 1 : 5);
@@ -163,7 +167,7 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
           e.preventDefault();
           onChange(Math.min(90, Math.max(0, next)));
         }}
-        className="relative size-[86px] cursor-grab touch-none rounded-lg border border-slate-200 bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
+        className="relative size-[86px] cursor-grab touch-none rounded-lg border border-border bg-muted outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:cursor-grabbing"
       >
         <svg viewBox="0 0 86 86" className="pointer-events-none absolute inset-0">
           <path d="M 68 76 A 60 60 0 0 0 8 16" fill="none" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
@@ -181,8 +185,8 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
           />
         </svg>
       </div>
-      <span className="text-[10px] font-semibold text-slate-600">
-        {Math.round(value)}° · {tiltLabel(value)}
+      <span className="text-[10px] font-semibold text-muted-foreground">
+        {Math.round(value)}° · {tiltLabel(value, t)}
       </span>
     </div>
   );
@@ -207,12 +211,13 @@ interface PresetSliderProps {
 export function PresetSlider({
   label, value, min, max, step, unit, decimals = 2, presets = [], quality, onChange,
 }: PresetSliderProps) {
+  const format = useFormatNumber();
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
         <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
-        <span className="text-[12px] font-semibold text-slate-700">
-          {value.toFixed(decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-slate-400">{unit}</span>}
+        <span className="text-[12px] font-semibold text-foreground">
+          {format(value, decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-muted-foreground">{unit}</span>}
         </span>
       </div>
       <input
@@ -223,24 +228,24 @@ export function PresetSlider({
         step={step}
         value={Math.min(max, Math.max(min, value))}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       />
       {(quality || presets.length > 0) && (
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
           {quality && (
-            <span className="mr-auto text-[10px] font-medium text-slate-500">{quality}</span>
+            <span className="mr-auto text-[10px] font-medium text-muted-foreground">{quality}</span>
           )}
           {presets.map((preset) => (
             <button
               key={preset.label}
               type="button"
-              title={`${preset.label}: ${preset.value.toFixed(decimals)}${unit ? ` ${unit}` : ''}`}
+              title={`${preset.label}: ${format(preset.value, decimals)}${unit ? ` ${unit}` : ''}`}
               onClick={() => onChange(preset.value)}
               className={cn(
                 'cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-medium transition-colors',
                 Math.abs(preset.value - value) < step / 2
                   ? 'border-primary/40 bg-primary/10 text-primary'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300',
+                  : 'border-border bg-card text-muted-foreground hover:border-border',
               )}
             >
               {preset.label}
