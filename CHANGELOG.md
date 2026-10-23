@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [Unreleased]
+## [0.12.0] - 2026-10-23
 
 ### Added
 
