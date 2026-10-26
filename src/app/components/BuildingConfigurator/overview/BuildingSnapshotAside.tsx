@@ -2,7 +2,8 @@
 // Building parameters and envelope now live in the right column's merged details card.
 
 import React from 'react';
-import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot, Sun } from '@/app/components/icons';
+import { AlertTriangle, Gauge } from '@/app/components/icons';
+import { TOPICS } from '@/app/config/topics';
 import { cn } from '@/lib/utils';
 import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
 import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';
@@ -25,11 +26,11 @@ export interface BuildingSnapshotAsideProps {
 }
 
 const ENERGY_ITEMS = [
-  { key: 'heating',     labelKey: 'snapshot.energy.heating',     Icon: Flame,     iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300' },
-  { key: 'electricity', labelKey: 'snapshot.energy.electricity', Icon: Zap,       iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300' },
-  { key: 'hotwater',    labelKey: 'snapshot.energy.cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'   },
-  { key: 'dhw',         labelKey: 'snapshot.energy.hotWater',   Icon: Droplets,  iconBg: 'bg-red-500/20',    iconColor: 'text-red-400',   valueColor: 'text-red-300'     },
-  { key: 'kitchen',     labelKey: 'snapshot.energy.kitchen', Icon: CookingPot, iconBg: 'bg-violet-500/20', iconColor: 'text-violet-400', valueColor: 'text-violet-300' },
+  { key: 'heating',     labelKey: 'snapshot.energy.heating',     topic: TOPICS.heat },
+  { key: 'electricity', labelKey: 'snapshot.energy.electricity', topic: TOPICS.electricity },
+  { key: 'hotwater',    labelKey: 'snapshot.energy.cooling',     topic: TOPICS.cooling },
+  { key: 'dhw',         labelKey: 'snapshot.energy.hotWater',    topic: TOPICS.hotWater },
+  { key: 'kitchen',     labelKey: 'snapshot.energy.kitchen',     topic: TOPICS.cooking },
 ] as const;
 
 /** The message for each annual unit the totals carry; any other unit shows as given. */
@@ -90,7 +91,7 @@ export function BuildingSnapshotAside({
           </div>
 
           <div className="flex flex-col gap-3">
-            {ENERGY_ITEMS.map(({ key, labelKey, Icon, iconBg, iconColor, valueColor }) => {
+            {ENERGY_ITEMS.map(({ key, labelKey, topic: { Icon, onDark: { iconBg, iconColor, valueColor } } }) => {
               const value = energyTotals[key] ?? '—';
               const unit = energyTotals[`${key}Unit` as keyof EnergyTotals] as string | undefined ?? energyTotals.unit;
               const source = energyTotals[`${key}Source` as keyof EnergyTotals] as EnergySource | undefined;
@@ -127,13 +128,13 @@ export function BuildingSnapshotAside({
             {typeof pvAnnualKwh === 'number' && (
             <div className="flex items-center justify-between border-t border-slate-700/60 pt-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex size-7 items-center justify-center rounded-md bg-amber-500/20">
-                  <Sun className="size-4 text-amber-400" />
+                <div className={cn('flex size-7 items-center justify-center rounded-md', TOPICS.pv.onDark.iconBg)}>
+                  <TOPICS.pv.Icon className={cn('size-4', TOPICS.pv.onDark.iconColor)} />
                 </div>
                 <span className="text-sm text-slate-300">{t('snapshot.pvGeneration')}</span>
               </div>
               <div>
-                <span className="text-xl font-bold leading-none text-amber-300">{format(pvAnnualKwh, 0)}</span>
+                <span className={cn('text-xl font-bold leading-none', TOPICS.pv.onDark.valueColor)}>{format(pvAnnualKwh, 0)}</span>
                 <span className="ml-1.5 text-[11px] text-slate-500">{t('snapshot.unit.kWhPerYear')}</span>
               </div>
             </div>
