@@ -623,13 +623,6 @@
       "default": "default",
       "modified": "modified"
     },
-    "thermalRating": {
-      "excellent": "Excellent",
-      "good": "Good",
-      "fair": "Fair",
-      "poor": "Poor",
-      "veryPoor": "Very Poor"
-    },
     "row": {
       "type": "Type",
       "constructionYear": "Construction year",

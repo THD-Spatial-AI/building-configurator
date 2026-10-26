@@ -56,7 +56,6 @@ graph TD
 |---|---|---|
 | `energyTotals` | `computeEnergyTotals(timeseries, thermalSummary)` | Energy hero numbers |
 | `snapshotRows` | `buildSnapshotRows(general, elements)` | Parameters table |
-| `thermalRating` | `getThermalRating(avgUValue)` | Thermal efficiency badge |
 | `installedTechIds` | `otherTechIds + batteryConfig.installed` | Technology cards |
 | `pvSummary` | derived from `surfacePvConfigs` | Solar PV card |
 | `initialTimeseries` | `buildingData.thematic.timeseries` | Load profile chart |

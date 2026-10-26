@@ -623,13 +623,6 @@
       "default": "standaard",
       "modified": "gewijzigd"
     },
-    "thermalRating": {
-      "excellent": "Uitstekend",
-      "good": "Goed",
-      "fair": "Redelijk",
-      "poor": "Slecht",
-      "veryPoor": "Zeer slecht"
-    },
     "row": {
       "type": "Type",
       "constructionYear": "Bouwjaar",

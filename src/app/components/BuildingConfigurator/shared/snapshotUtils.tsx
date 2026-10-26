@@ -66,16 +66,6 @@ export function SnapshotStatusBadge({ status }: { status: SnapshotStatus }) {
   );
 }
 
-// Maps area-weighted avg U-value to a human-readable thermal efficiency label.
-// `labelKey` is the translation of `label`, looked up where it is shown.
-export function getThermalRating(u: number): { label: string; labelKey: string; color: string; bg: string } {
-  if (u < 0.20) return { label: 'Excellent', labelKey: 'snapshot.thermalRating.excellent', color: '#059669', bg: '#ecfdf5' };
-  if (u < 0.30) return { label: 'Good',      labelKey: 'snapshot.thermalRating.good',      color: '#16a34a', bg: '#f0fdf4' };
-  if (u < 0.50) return { label: 'Fair',      labelKey: 'snapshot.thermalRating.fair',      color: '#d97706', bg: '#fffbeb' };
-  if (u < 0.80) return { label: 'Poor',      labelKey: 'snapshot.thermalRating.poor',      color: '#dc2626', bg: '#fef2f2' };
-  return             { label: 'Very Poor',   labelKey: 'snapshot.thermalRating.veryPoor',  color: '#9f1239', bg: '#fff1f2' };
-}
-
 export interface SnapshotRow {
   label: string;
   /** Translation key for `label`. */

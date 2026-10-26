@@ -637,13 +637,6 @@
       "default": "výchozí",
       "modified": "upraveno"
     },
-    "thermalRating": {
-      "excellent": "Vynikající",
-      "good": "Dobrá",
-      "fair": "Průměrná",
-      "poor": "Špatná",
-      "veryPoor": "Velmi špatná"
-    },
     "row": {
       "type": "Typ",
       "constructionYear": "Rok výstavby",

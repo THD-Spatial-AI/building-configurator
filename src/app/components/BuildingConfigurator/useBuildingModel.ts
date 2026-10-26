@@ -35,9 +35,8 @@ import type { PvLayout } from '../../lib/pvLayout';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { Language, Message } from '../../i18n';
-import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
+import { buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
-import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -751,12 +750,6 @@ export function useBuildingModel(
   const avgUValue = totalArea > 0
     ? Object.values(elements).reduce((sum, e) => sum + e.uValue * e.area, 0) / totalArea
     : 0;
-  // Prefer a demand-based rating (kWh/(m²·a), matching real EPC-style classification —
-  // see thermalRatingStandards.ts for the country-configurable band source) once ignis
-  // has a result; fall back to the simpler U-value-based rating otherwise.
-  const thermalRating = ignis?.result
-    ? getThermalRatingFromDemand(ignis.result.qHnd, general.country as string | undefined)
-    : getThermalRating(avgUValue);
   const snapshotRows = buildSnapshotRows(general, elements, totalArea, language, baselineRef.current);
 
   // BuEM's confirmed result, or a user-uploaded ground-truth profile compared
@@ -787,7 +780,7 @@ export function useBuildingModel(
     undoLabel: history[history.length - 1]?.label ?? null,
     baselineElements: baselineRef.current.elements,
     // derived
-    buildingLabel, buildingType, coordinates, totalArea, avgUValue, thermalRating,
+    buildingLabel, buildingType, coordinates, totalArea, avgUValue,
     snapshotRows, displayEnergyTotals,
     // handlers
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
