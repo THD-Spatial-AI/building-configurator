@@ -159,7 +159,8 @@
       "done": "Gotowe",
       "add": "Dodaj PV do tej przegrody",
       "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
-      "noFit": "Na tej powierzchni nie mieści się żaden cały moduł."
+      "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
+      "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego."
     },
     "mounting": {
       "label": "Montaż",

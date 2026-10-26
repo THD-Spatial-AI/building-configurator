@@ -38,6 +38,8 @@ export interface PvLayout {
   kwp: number;
   /** Module surface, m². */
   area: number;
+  /** True when the usable share removed modules that would fit; false when the surface's space is the limit. */
+  capped: boolean;
   /** The modules' tilt (degrees from horizontal) and facing (degrees clockwise from north). */
   tilt: number;
   azimuth: number;
@@ -242,7 +244,8 @@ function layoutFor(
 
   // The usable share caps how many: keep those nearest the middle.
   const cap = Math.floor((Math.max(0, Math.min(1, usableShare)) * area) / (module.width * module.height));
-  if (rects.length > cap) {
+  const capped = rects.length > cap;
+  if (capped) {
     const cu = poly.reduce((s, p) => s + p[0], 0) / poly.length;
     const cv = poly.reduce((s, p) => s + p[1], 0) / poly.length;
     const distance = (r: Rect) => Math.hypot(r.u + r.du / 2 - cu, r.v + r.dv / 2 - cv);
@@ -266,6 +269,7 @@ function layoutFor(
     count: modules.length,
     kwp: modules.length * module.kwp,
     area: modules.length * module.width * module.height,
+    capped,
     tilt: mounting.kind === 'racked' ? mounting.tilt : roof.tilt,
     azimuth: mounting.kind === 'racked' ? mounting.azimuth : roof.azimuth,
     mounting,

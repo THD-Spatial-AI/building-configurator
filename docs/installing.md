@@ -231,7 +231,7 @@ host stores match what the user saw:
 import { pvLayout } from '@thd-spatial-ai/building-configurator';
 
 const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientation });
-// { count, kwp, area, tilt, azimuth, mounting, orientation, modules }
+// { count, kwp, area, capped, tilt, azimuth, mounting, orientation, modules }
 ```
 
 | Rule | Value |
@@ -242,6 +242,7 @@ const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientati
 | Racked row spacing | No row shades the next with the sun 20° above the horizon |
 | `tilt`, `azimuth` of the result | The modules' own angles: the surface's when flush, the rack's when racked |
 | Orientation without one chosen | Flush: the most modules of portrait only, landscape only, or either one with the room it leaves filled by the other (`orientation: 'mixed'`). Racked: portrait or landscape, one per surface |
+| `capped` | True when the usable share removed modules that would fit. False when the surface's space is the limit, as on most racked flat roofs, where a larger usable share adds no modules |
 | `modules` | Four `[x, y, z]` corners per module, in the polygon's coordinates |
 
 ## Technologies

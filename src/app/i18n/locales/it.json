@@ -155,7 +155,8 @@
       "done": "Fatto",
       "add": "Aggiungi FV a questa superficie",
       "modules": "Moduli: {count} · {kwp} kWp · {area} m²",
-      "noFit": "Su questa superficie non entra nessun modulo intero."
+      "noFit": "Su questa superficie non entra nessun modulo intero.",
+      "spaceLimited": "Lo spazio su questa superficie limita i moduli; una quota utilizzabile maggiore non ne aggiunge."
     },
     "mounting": {
       "label": "Montaggio",

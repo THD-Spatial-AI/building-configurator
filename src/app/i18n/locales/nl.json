@@ -155,7 +155,8 @@
       "done": "Klaar",
       "add": "PV op dit vlak plaatsen",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
-      "noFit": "Er past geen hele module op dit vlak."
+      "noFit": "Er past geen hele module op dit vlak.",
+      "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe."
     },
     "mounting": {
       "label": "Montage",

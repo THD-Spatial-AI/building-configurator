@@ -123,6 +123,9 @@ function LayoutResult({ layout, pv, surfaceId }: { layout: PvLayout; pv: PvMode;
       {layout.count === 0
         ? t('pv.card.noFit')
         : t('pv.card.modules', { count: layout.count, kwp: format(layout.kwp, 1), area: format(layout.area, 0) })}
+      {layout.count > 0 && !layout.capped && (
+        <span className="text-[11px] font-normal text-muted-foreground">{t('pv.card.spaceLimited')}</span>
+      )}
       {layout.count > 0 && investment !== undefined && (
         <span className="text-[11px] font-normal text-muted-foreground">
           {t('pv.cost.investmentEstimate', { amount: `${format(investment, 0)} ${productCurrency(product)}`.trim() })}

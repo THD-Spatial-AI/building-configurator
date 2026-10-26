@@ -155,7 +155,8 @@
       "done": "Done",
       "add": "Add PV to this surface",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
-      "noFit": "No whole module fits on this surface."
+      "noFit": "No whole module fits on this surface.",
+      "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none."
     },
     "mounting": {
       "label": "Mounting",

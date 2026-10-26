@@ -17,6 +17,7 @@ Breaking: there is no PV mode. `pv` now feeds the Technologies tab and draws the
 - Product values: basic mode asks cost per kWp, yearly upkeep per kWp and lifetime; expert mode adds every value the product carries that reaches Calliope or the PV yield service. Changes go to this building's copy (`onConstraintChange`); "Save as a new technology" calls `onSaveAsTechnology`.
 - The `runPvBuilding` request carries each surface's `product_id`.
 - `defaultTab` opens the view on a given tab.
+- `pvLayout`'s result carries `capped`: whether the usable share or the surface's space limits the modules. A surface's panel says when it is the space, as on most racked flat roofs, where the usable share then changes nothing.
 
 ### Changed
 

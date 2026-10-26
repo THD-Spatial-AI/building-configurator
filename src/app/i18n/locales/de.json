@@ -155,7 +155,8 @@
       "done": "Fertig",
       "add": "PV auf dieser Fläche hinzufügen",
       "modules": "Module: {count} · {kwp} kWp · {area} m²",
-      "noFit": "Auf diese Fläche passt kein ganzes Modul."
+      "noFit": "Auf diese Fläche passt kein ganzes Modul.",
+      "spaceLimited": "Der Platz auf dieser Fläche begrenzt die Module; ein größerer nutzbarer Anteil fügt keine hinzu."
     },
     "mounting": {
       "label": "Montage",

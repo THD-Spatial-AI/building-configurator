@@ -54,7 +54,7 @@ const withCatalogue: PvMode = {
 };
 
 const flush: PvLayout = {
-  count: 24, kwp: 9.6, area: 48, tilt: 35, azimuth: 180,
+  count: 24, kwp: 9.6, area: 48, capped: true, tilt: 35, azimuth: 180,
   mounting: { kind: 'flush' }, orientation: 'portrait', modules: [],
 };
 const racked: PvLayout = { ...flush, tilt: 15, mounting: { kind: 'racked', tilt: 15, azimuth: 180 } };
@@ -190,6 +190,15 @@ describe('PvSurfaceSection', () => {
     expect(html).toContain('Panel tilt');
     expect(html).toContain('value="15"');
     expect(html).toContain('Panel facing');
+  });
+
+  it('says when the surface\'s space, not the usable share, limits the modules', () => {
+    const html = renderToStaticMarkup(
+      <PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={{ ...flush, capped: false }} />,
+    );
+    expect(html).toContain('The space on this surface limits the modules; a larger usable share adds none.');
+    const capped = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />);
+    expect(capped).not.toContain('limits the modules');
   });
 
   it('says when no whole module fits', () => {
