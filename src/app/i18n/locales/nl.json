@@ -178,6 +178,7 @@
     },
     "orientation": {
       "label": "Stand",
+      "auto": "Optimaal",
       "portrait": "Staand",
       "landscape": "Liggend"
     },

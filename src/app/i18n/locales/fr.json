@@ -181,6 +181,7 @@
     },
     "orientation": {
       "label": "Format",
+      "auto": "Optimal",
       "portrait": "Portrait",
       "landscape": "Paysage"
     },

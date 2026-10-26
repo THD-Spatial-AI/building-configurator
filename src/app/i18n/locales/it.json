@@ -178,6 +178,7 @@
     },
     "orientation": {
       "label": "Formato",
+      "auto": "Ottimale",
       "portrait": "Verticale",
       "landscape": "Orizzontale"
     },

@@ -268,12 +268,17 @@ function MountingControls({ surfaceId, surface, layout, canRack, pv }: {
           />
         </>
       )}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col gap-1">
         <span className="text-[11px] font-medium text-muted-foreground">{t('pv.orientation.label')}</span>
         <SegmentedControl
-          options={[{ value: 'portrait', label: t('pv.orientation.portrait') }, { value: 'landscape', label: t('pv.orientation.landscape') }]}
-          value={layout.orientation}
-          onChange={(orientation) => pv.onMountingChange(surfaceId, mounting, orientation as PvOrientation)}
+          fullWidth
+          options={[
+            { value: 'auto', label: t('pv.orientation.auto') },
+            { value: 'portrait', label: t('pv.orientation.portrait') },
+            { value: 'landscape', label: t('pv.orientation.landscape') },
+          ]}
+          value={surface.orientation ?? 'auto'}
+          onChange={(value) => pv.onMountingChange(surfaceId, mounting, value === 'auto' ? undefined : value as PvOrientation)}
         />
       </div>
     </div>

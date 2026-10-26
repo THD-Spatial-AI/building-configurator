@@ -55,6 +55,30 @@ describe('pvLayout flush', () => {
     expect(best.orientation).toBe('portrait');
   });
 
+  it('fills the strip one orientation leaves with modules turned the other way', () => {
+    // 10 m by 3.34 m: one portrait row (9) leaves room for one landscape row (5).
+    const strip: SurfacePolygon = { id: 's', type: 'roof', coordinates: [[[0, 0, 3], [10, 0, 3], [10, 3.34, 3], [0, 3.34, 3], [0, 0, 3]]] };
+    const flush = { usableShare: 1, mounting: { kind: 'flush' } } as const;
+    const mixed = pvLayout(strip, module, flush);
+    expect(pvLayout(strip, module, { ...flush, orientation: 'portrait' }).count).toBe(9);
+    expect(pvLayout(strip, module, { ...flush, orientation: 'landscape' }).count).toBe(10);
+    expect(mixed.count).toBe(14);
+    expect(mixed.orientation).toBe('mixed');
+
+    const boxes = mixed.modules.map((corners) => {
+      const xs = corners.map((c) => c[0]);
+      const ys = corners.map((c) => c[1]);
+      return [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    });
+    for (const [i, a] of boxes.entries()) {
+      for (const b of boxes.slice(i + 1)) {
+        const apart = a[1] <= b[0] + 1e-6 || b[1] <= a[0] + 1e-6 || a[3] <= b[2] + 1e-6 || b[3] <= a[2] + 1e-6;
+        expect(apart).toBe(true);
+      }
+      for (const corner of mixed.modules[i]) expect(insideFlat(corner, strip.coordinates[0], 0.3)).toBe(true);
+    }
+  });
+
   it('caps the modules at the usable share of the area', () => {
     const layout = pvLayout(southRoof(30), module, { usableShare: 0.5, mounting: { kind: 'flush' } });
     expect(layout.count).toBe(Math.floor((0.5 * 60) / 1.7));

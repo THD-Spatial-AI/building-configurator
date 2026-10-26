@@ -149,7 +149,9 @@ describe('PV with module layouts', () => {
       <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />,
     );
     expect(html).toContain('Modules: 24 · 9.6 kWp · 48 m²');
-    for (const label of ['Flush', 'Racked', 'Portrait', 'Landscape']) expect(html).toContain(`>${label}<`);
+    for (const label of ['Flush', 'Racked', 'Best fit', 'Portrait', 'Landscape']) expect(html).toContain(`>${label}<`);
+    // No orientation chosen, so best fit is the active choice, whatever the layout picked.
+    expect(html).toMatch(/font-semibold[^"]*"[^>]*>Best fit</);
     expect(html).not.toContain('Panel tilt');
   });
 

@@ -184,6 +184,7 @@
     },
     "orientation": {
       "label": "Formát",
+      "auto": "Optimálně",
       "portrait": "Na výšku",
       "landscape": "Na šířku"
     },

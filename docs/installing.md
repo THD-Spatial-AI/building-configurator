@@ -179,7 +179,7 @@ const pv = useMemo<PvMode>(() => ({
 | `surfaces[id].tilt`, `azimuth`, `area` | Optional. Degrees from horizontal, degrees clockwise from north (180 is south), m². Shown in the surface list and card for a surface that is not among the building's elements; an element's own geometry takes precedence |
 | `surfaces[id].maxKwp` | Capacity at the current usable share, in kWp. Shown only for a surface the view has no polygon for; any other surface shows its module layout's capacity |
 | `surfaces[id].mounting` | Optional. `{ kind: 'flush' }` or `{ kind: 'racked', tilt, azimuth }`. Absent: racked at 15° facing 180° on a surface under 10°, otherwise flush |
-| `surfaces[id].orientation` | Optional. `portrait` or `landscape`. Absent: whichever fits more modules |
+| `surfaces[id].orientation` | Optional. `portrait` or `landscape` for every module on the surface. Absent: whichever fits more modules, which on a flush surface may mix both |
 | `notice` | Shown for as long as PV mode is open. Pass it in the user's language |
 | `typeLabel` | Name of the PV type, shown at the top of the panel |
 | `module` | Optional. `{ width, height, kwp }`: one module of the PV type, portrait width and height in m. Absent: `DEFAULT_PV_MODULE`, 1.134 by 1.762 m and 0.4 kWp |
@@ -211,6 +211,7 @@ const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientati
 | Most modules on a surface | `floor(usableShare × surface area / module area)`, keeping those nearest the middle |
 | Racked row spacing | No row shades the next with the sun 20° above the horizon |
 | `tilt`, `azimuth` of the result | The modules' own angles: the surface's when flush, the rack's when racked |
+| Orientation without one chosen | Flush: the most modules of portrait only, landscape only, or either one with the room it leaves filled by the other (`orientation: 'mixed'`). Racked: portrait or landscape, one per surface |
 | `modules` | Four `[x, y, z]` corners per module, in the polygon's coordinates |
 
 ## Technologies

@@ -26,7 +26,10 @@ export interface PvLayoutOptions {
   usableShare: number;
   /** Absent: racked at 15° south on a surface under 10°, otherwise flush. */
   mounting?: PvMounting;
-  /** Absent: whichever fits more modules. */
+  /**
+   * Absent: whichever fits more modules. On a flush surface that includes
+   * filling the room one orientation leaves with modules turned the other way.
+   */
   orientation?: PvOrientation;
 }
 
@@ -39,7 +42,8 @@ export interface PvLayout {
   tilt: number;
   azimuth: number;
   mounting: PvMounting;
-  orientation: PvOrientation;
+  /** mixed when a flush surface carries both. */
+  orientation: PvOrientation | 'mixed';
   /** Each module's four corners, [x, y, z], in the surface's coordinates. */
   modules: number[][][];
 }
@@ -47,6 +51,8 @@ export interface PvLayout {
 /** Kept clear along every edge of the surface. */
 export const EDGE_CLEARANCE_M = 0.3;
 const MODULE_GAP_M = 0.02;
+/** Spacing of the extra positions tried when filling the room a first layout leaves. */
+const FILL_STEP_M = 0.1;
 /** Racked rows are spaced so a row does not shade the next with the sun this high. */
 const SHADING_ELEVATION_DEG = 20;
 /** Surfaces flatter than this are racked by default. */
@@ -56,7 +62,7 @@ export const DEFAULT_RACK: PvMounting = { kind: 'racked', tilt: 15, azimuth: 180
 const RACK_FOOT_M = 0.05;
 
 type Vec = [number, number, number];
-type Rect = { u: number; v: number; du: number; dv: number };
+type Rect = { u: number; v: number; du: number; dv: number; portrait: boolean };
 
 const deg = (r: number) => (r * 180) / Math.PI;
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -109,7 +115,7 @@ function fits(r: Rect, poly: number[][]): boolean {
 }
 
 /** The most rectangles of one size that fit, over a few grid offsets. */
-function grid(poly: number[][], du: number, dv: number, pitchU: number, pitchV: number): Rect[] {
+function grid(poly: number[][], du: number, dv: number, pitchU: number, pitchV: number, portrait: boolean): Rect[] {
   const us = poly.map((p) => p[0]);
   const vs = poly.map((p) => p[1]);
   const [minU, maxU, minV, maxV] = [Math.min(...us), Math.max(...us), Math.min(...vs), Math.max(...vs)];
@@ -119,7 +125,7 @@ function grid(poly: number[][], du: number, dv: number, pitchU: number, pitchV: 
       const placed: Rect[] = [];
       for (let v = minV + EDGE_CLEARANCE_M + fv * pitchV; v + dv <= maxV - EDGE_CLEARANCE_M + 1e-9; v += pitchV) {
         for (let u = minU + EDGE_CLEARANCE_M + fu * pitchU; u + du <= maxU - EDGE_CLEARANCE_M + 1e-9; u += pitchU) {
-          const r = { u, v, du, dv };
+          const r = { u, v, du, dv, portrait };
           if (fits(r, poly)) placed.push(r);
         }
       }
@@ -129,6 +135,48 @@ function grid(poly: number[][], du: number, dv: number, pitchU: number, pitchV: 
   return best;
 }
 
+/** Closer than the module gap, which counts as overlapping. */
+function overlaps(a: Rect, b: Rect): boolean {
+  const g = MODULE_GAP_M - 1e-9;
+  return a.u < b.u + b.du + g && b.u < a.u + a.du + g && a.v < b.v + b.dv + g && b.v < a.v + a.dv + g;
+}
+
+/** Positions from min to max every FILL_STEP_M, plus the given ones, ascending. */
+function positions(min: number, max: number, extra: number[]): number[] {
+  const out = [...extra];
+  for (let x = min; x <= max + 1e-9; x += FILL_STEP_M) out.push(x);
+  return out.sort((a, b) => a - b);
+}
+
+/** Rectangles of one size added in the room `placed` leaves, each row packed from its low end. */
+function fill(poly: number[][], placed: Rect[], du: number, dv: number, portrait: boolean): Rect[] {
+  const us = poly.map((p) => p[0]);
+  const vs = poly.map((p) => p[1]);
+  const c = EDGE_CLEARANCE_M;
+  const rowsAt = positions(Math.min(...vs) + c, Math.max(...vs) - c - dv, placed.flatMap((r) => [r.v + r.dv + MODULE_GAP_M, r.v - MODULE_GAP_M - dv]));
+  const columnsAt = positions(Math.min(...us) + c, Math.max(...us) - c - du, placed.flatMap((r) => [r.u + r.du + MODULE_GAP_M, r.u - MODULE_GAP_M - du]));
+  const all = [...placed];
+  const added: Rect[] = [];
+  for (const v of rowsAt) {
+    let next = -Infinity;
+    for (const at of columnsAt) {
+      const r = { u: Math.max(at, next), v, du, dv, portrait };
+      if (all.some((o) => overlaps(r, o)) || !fits(r, poly)) continue;
+      all.push(r);
+      added.push(r);
+      next = r.u + du + MODULE_GAP_M;
+    }
+  }
+  return added;
+}
+
+function orientationOf(rects: Rect[], requested: PvOrientation | undefined): PvLayout['orientation'] {
+  if (rects.length === 0) return requested ?? 'portrait';
+  const portraits = rects.filter((r) => r.portrait).length;
+  if (portraits === rects.length) return 'portrait';
+  return portraits === 0 ? 'landscape' : 'mixed';
+}
+
 function layoutFor(
   ring: Vec[],
   normal: Vec,
@@ -136,19 +184,15 @@ function layoutFor(
   module: PvModule,
   usableShare: number,
   mounting: PvMounting,
-  orientation: PvOrientation,
+  orientation: PvOrientation | undefined,
   roof: { tilt: number; azimuth: number },
 ): PvLayout {
-  const [w, h] = orientation === 'portrait' ? [module.width, module.height] : [module.height, module.width];
   const origin = ring[0];
 
   // A 2D frame (u, v) and the way back to 3D for each mounting.
   let axisU: Vec;
   let axisV: Vec;
   let toWorld: (u: number, v: number, lift: number) => Vec;
-  let du = w;
-  let dv = h;
-  let pitchV = h + MODULE_GAP_M;
   if (mounting.kind === 'flush') {
     axisU = Math.abs(normal[2]) > 0.999 ? [1, 0, 0] : norm(cross(normal, [0, 0, 1]));
     axisV = norm(cross(normal, axisU));
@@ -161,8 +205,6 @@ function layoutFor(
     const a = rad(mounting.azimuth);
     axisV = [Math.sin(a), Math.cos(a), 0];
     axisU = [axisV[1], -axisV[0], 0];
-    dv = h * Math.cos(rad(mounting.tilt));
-    pitchV = dv + (h * Math.sin(rad(mounting.tilt))) / Math.tan(rad(SHADING_ELEVATION_DEG)) + MODULE_GAP_M;
     const planeZ = (x: number, y: number) => (Math.abs(normal[2]) < 1e-6
       ? origin[2]
       : origin[2] - (normal[0] * (x - origin[0]) + normal[1] * (y - origin[1])) / normal[2]);
@@ -174,7 +216,29 @@ function layoutFor(
   }
 
   const poly = ring.map((p) => [dot(sub(p, origin), axisU), dot(sub(p, origin), axisV)]);
-  let rects = grid(poly, du, dv, du + MODULE_GAP_M, pitchV);
+
+  // A module's footprint in the (u, v) frame, and the row pitch: racked rows
+  // are spaced against self-shading.
+  const size = (o: PvOrientation) => {
+    const [w, h] = o === 'portrait' ? [module.width, module.height] : [module.height, module.width];
+    if (mounting.kind === 'flush') return { du: w, dv: h, pitchV: h + MODULE_GAP_M };
+    const dv = h * Math.cos(rad(mounting.tilt));
+    return { du: w, dv, pitchV: dv + (h * Math.sin(rad(mounting.tilt))) / Math.tan(rad(SHADING_ELEVATION_DEG)) + MODULE_GAP_M };
+  };
+  const place = (o: PvOrientation) => {
+    const { du, dv, pitchV } = size(o);
+    return grid(poly, du, dv, du + MODULE_GAP_M, pitchV, o === 'portrait');
+  };
+  const withFill = (base: Rect[], o: PvOrientation) => {
+    const { du, dv } = size(o);
+    return [...base, ...fill(poly, base, du, dv, o === 'portrait')];
+  };
+  const candidates: Rect[][] = orientation ? [place(orientation)] : [place('portrait'), place('landscape')];
+  // Racked rows keep one orientation: a row's spacing follows its modules' height.
+  if (!orientation && mounting.kind === 'flush') {
+    candidates.push(withFill(candidates[0], 'landscape'), withFill(candidates[1], 'portrait'));
+  }
+  let rects = candidates.reduce((best, next) => (next.length > best.length ? next : best));
 
   // The usable share caps how many: keep those nearest the middle.
   const cap = Math.floor((Math.max(0, Math.min(1, usableShare)) * area) / (module.width * module.height));
@@ -185,11 +249,14 @@ function layoutFor(
     rects = [...rects].sort((a, b) => distance(a) - distance(b)).slice(0, cap);
   }
 
-  const rise = mounting.kind === 'racked' ? h * Math.sin(rad(mounting.tilt)) : 0;
-  const modules = rects.map((r) => (mounting.kind === 'racked'
+  const modules = rects.map((r) => {
+    if (mounting.kind === 'flush') {
+      return [toWorld(r.u, r.v, 0), toWorld(r.u + r.du, r.v, 0), toWorld(r.u + r.du, r.v + r.dv, 0), toWorld(r.u, r.v + r.dv, 0)];
+    }
     // The edge towards the facing (higher v) is the low one.
-    ? [toWorld(r.u, r.v, RACK_FOOT_M + rise), toWorld(r.u + r.du, r.v, RACK_FOOT_M + rise), toWorld(r.u + r.du, r.v + r.dv, RACK_FOOT_M), toWorld(r.u, r.v + r.dv, RACK_FOOT_M)]
-    : [toWorld(r.u, r.v, 0), toWorld(r.u + r.du, r.v, 0), toWorld(r.u + r.du, r.v + r.dv, 0), toWorld(r.u, r.v + r.dv, 0)]));
+    const rise = (r.portrait ? module.height : module.width) * Math.sin(rad(mounting.tilt));
+    return [toWorld(r.u, r.v, RACK_FOOT_M + rise), toWorld(r.u + r.du, r.v, RACK_FOOT_M + rise), toWorld(r.u + r.du, r.v + r.dv, RACK_FOOT_M), toWorld(r.u, r.v + r.dv, RACK_FOOT_M)];
+  });
 
   return {
     count: modules.length,
@@ -198,7 +265,7 @@ function layoutFor(
     tilt: mounting.kind === 'racked' ? mounting.tilt : roof.tilt,
     azimuth: mounting.kind === 'racked' ? mounting.azimuth : roof.azimuth,
     mounting,
-    orientation,
+    orientation: orientationOf(rects, orientation),
     modules,
   };
 }
@@ -215,9 +282,5 @@ export function pvLayout(surface: SurfacePolygon, module: PvModule, options: PvL
     azimuth: (deg(Math.atan2(normal[0], normal[1])) + 360) % 360,
   };
   const mounting = options.mounting ?? (roof.tilt < FLAT_MAX_TILT_DEG ? DEFAULT_RACK : { kind: 'flush' });
-  const args = [ring, normal, area, module, options.usableShare, mounting] as const;
-  if (options.orientation) return layoutFor(...args, options.orientation, roof);
-  const portrait = layoutFor(...args, 'portrait', roof);
-  const landscape = layoutFor(...args, 'landscape', roof);
-  return landscape.count > portrait.count ? landscape : portrait;
+  return layoutFor(ring, normal, area, module, options.usableShare, mounting, options.orientation, roof);
 }

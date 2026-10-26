@@ -178,6 +178,7 @@
     },
     "orientation": {
       "label": "Format",
+      "auto": "Optimal",
       "portrait": "Hochformat",
       "landscape": "Querformat"
     },

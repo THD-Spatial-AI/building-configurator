@@ -184,6 +184,7 @@
     },
     "orientation": {
       "label": "Układ",
+      "auto": "Optymalnie",
       "portrait": "Pionowo",
       "landscape": "Poziomo"
     },
