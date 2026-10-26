@@ -732,6 +732,11 @@
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
     "storey": "Planta {number}",
     "floorArea": "Superficie modelada",
-    "heightNote": "En el modelo 3D una planta mide {height} m de alto; BuEM usa una altura de estancia de {room} m."
+    "heightNote": "En el modelo 3D una planta mide {height} m de alto; BuEM usa una altura de estancia de {room} m.",
+    "pick": "Plantas",
+    "pickHint": "Haga clic en una planta del modelo para ver si está incluida.",
+    "inModel": "En el modelo",
+    "groundFloor": "Planta baja",
+    "lastOne": "Al menos una planta permanece en el modelo."
   }
 }

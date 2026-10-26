@@ -742,6 +742,11 @@
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
     "storey": "Kondygnacja {number}",
     "floorArea": "Modelowana powierzchnia",
-    "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m."
+    "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m.",
+    "pick": "Kondygnacje",
+    "pickHint": "Kliknij kondygnację w modelu, aby zobaczyć, czy jest modelowana.",
+    "inModel": "W modelu",
+    "groundFloor": "Parter",
+    "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu."
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { leftOutParts, storeyBands, storeyLines, storeyShares } from './storeys';
+import { storeyAt, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -46,12 +46,19 @@ describe('storeyLines', () => {
   });
 });
 
-describe('leftOutParts', () => {
-  it('cuts each surface to the storeys left out, for drawing them lighter', () => {
-    const parts = leftOutParts(polygons, 3, [1, 3]);
+describe('storeyParts', () => {
+  it('cuts each surface to the given storeys, for drawing them over the model', () => {
+    const parts = storeyParts(polygons, 3, [2]);
     expect(parts.map((part) => part.id)).toEqual(['w1']);
     const zs = parts[0].coordinates[0].map((p) => p[2]);
     expect([Math.min(...zs), Math.max(...zs)]).toEqual([3, 6]);
+  });
+});
+
+describe('storeyAt', () => {
+  it('finds the storey at a height, the outer storeys extending beyond the ground and eaves', () => {
+    const bands = storeyBands(polygons, 3);
+    expect([-1, 0, 2.9, 3, 7, 11].map((z) => storeyAt(z, bands, 3))).toEqual([1, 1, 1, 2, 3, 3]);
   });
 });
 

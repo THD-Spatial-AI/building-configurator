@@ -4,6 +4,39 @@
 import { cn } from '@/lib/utils';
 import { TOPICS } from '@/app/config/topics';
 import { useFormatNumber, useT } from '../../i18n';
+import { Switch } from './PvMode';
+
+/** The storeys modelled with one storey switched on or off; null when all are on, undefined when it would leave none. */
+export function toggleStorey(modelled: number[] | null, storeys: number, storey: number): number[] | null | undefined {
+  const all = Array.from({ length: storeys }, (_, i) => i + 1);
+  const on = new Set(modelled ?? all);
+  const next = all.filter((s) => (s === storey ? !on.has(s) : on.has(s)));
+  if (next.length === 0) return undefined;
+  return next.length === storeys ? null : next;
+}
+
+/** A storey picked in the model: whether it is in the model, with a switch. */
+export function StoreyPanel({ storey, modelled, storeys, onChange }: {
+  storey: number;
+  modelled: number[] | null;
+  storeys: number;
+  onChange: (modelled: number[] | null) => void;
+}) {
+  const t = useT();
+  const on = modelled === null || modelled.includes(storey);
+  const next = toggleStorey(modelled, storeys, storey);
+  return (
+    <div className="flex flex-col gap-3 p-3">
+      <div className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2">
+        <span className="text-[12px] font-semibold text-foreground">{t('storeys.inModel')}</span>
+        <Switch on={on} label={t('storeys.inModel')} onChange={() => { if (next !== undefined) onChange(next); }} />
+      </div>
+      <p className="text-[11px] leading-snug text-muted-foreground">
+        {next === undefined ? t('storeys.lastOne') : t('storeys.hint')}
+      </p>
+    </div>
+  );
+}
 
 /** Above this gap between the model's storey height and BuEM's room height, the panel says so. */
 const HEIGHT_NOTE_GAP_M = 0.5;
@@ -26,9 +59,8 @@ export function StoreysModelled({ storeys, modelled, floorAreaPerStorey, storeyH
   const all = Array.from({ length: storeys }, (_, i) => i + 1);
   const on = new Set(modelled ?? all);
   const toggle = (storey: number) => {
-    const next = all.filter((s) => (s === storey ? !on.has(s) : on.has(s)));
-    if (next.length === 0) return;
-    onChange(next.length === storeys ? null : next);
+    const next = toggleStorey(modelled, storeys, storey);
+    if (next !== undefined) onChange(next);
   };
   const { Icon, tile } = TOPICS.building;
   return (

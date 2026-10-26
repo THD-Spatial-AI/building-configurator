@@ -726,6 +726,11 @@
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
     "storey": "Storey {number}",
     "floorArea": "Floor area modelled",
-    "heightNote": "In the 3D model a storey is {height} m tall; BuEM uses a room height of {room} m."
+    "heightNote": "In the 3D model a storey is {height} m tall; BuEM uses a room height of {room} m.",
+    "pick": "Storeys",
+    "pickHint": "Click a storey in the model to see whether it is in the model.",
+    "inModel": "In the model",
+    "groundFloor": "Ground floor",
+    "lastOne": "At least one storey stays in the model."
   }
 }

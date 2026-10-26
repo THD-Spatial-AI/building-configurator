@@ -726,6 +726,11 @@
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
     "storey": "Piano {number}",
     "floorArea": "Superficie modellata",
-    "heightNote": "Nel modello 3D un piano è alto {height} m; BuEM usa un'altezza dei locali di {room} m."
+    "heightNote": "Nel modello 3D un piano è alto {height} m; BuEM usa un'altezza dei locali di {room} m.",
+    "pick": "Piani",
+    "pickHint": "Fai clic su un piano del modello per vedere se è incluso.",
+    "inModel": "Nel modello",
+    "groundFloor": "Piano terra",
+    "lastOne": "Almeno un piano resta nel modello."
   }
 }

@@ -6,7 +6,7 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
+import { AlertTriangle, ArrowLeft, Download, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
@@ -26,7 +26,7 @@ import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type P
 import { PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologyCards, type Technologies } from './TechnologyCards';
-import { StoreysModelled } from './StoreysModelled';
+import { StoreyPanel, StoreysModelled } from './StoreysModelled';
 import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
@@ -132,6 +132,10 @@ export function Building3DView({
   const onTech = tab === 'technology' && pv !== undefined;
   /** The PV surface under the pointer on the Technologies tab, for its hover card. */
   const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
+  /** While on, a click in the model picks a storey instead of a surface. */
+  const [storeyMode, setStoreyMode] = useState(false);
+  const [pickedStorey, setPickedStorey] = useState<number | null>(null);
+  const leaveStoreyMode = () => { setStoreyMode(false); setPickedStorey(null); };
 
   const openSurface = (next: SurfaceSelection | null) => {
     setSelected(next);
@@ -152,6 +156,7 @@ export function Building3DView({
 
   /** Picks a surface from a list: shows it in the model and opens it in the panel. */
   const selectFromList = (id: string) => {
+    leaveStoreyMode();
     setFocus((prev) => ({ id, token: (prev?.token ?? 0) + 1 }));
     requestSurface({ id });
   };
@@ -176,6 +181,11 @@ export function Building3DView({
     [elements],
   );
   const surfaces = geometry?.surfaces ?? [];
+  /** Models only these storeys (null: all), each surface cut to its share inside them. */
+  const setModelledStoreys = (modelled: number[] | null) => model.setStoreysModelled(
+    modelled,
+    modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
+  );
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
   }, [pv]);
@@ -208,6 +218,7 @@ export function Building3DView({
       // An open prompt's own dialog closes itself on Escape.
       if (exitPromptOpen || pendingSurface) return;
       if (exportOpen) setExportOpen(false);
+      else if (storeyMode) leaveStoreyMode();
       else if (selected) requestSurface(null);
       else requestExit();
       return;
@@ -280,13 +291,23 @@ export function Building3DView({
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
   ], [elements, pv]);
+  const storeyBody = storeyMode && pickedStorey !== null ? (
+    <StoreyPanel
+      storey={pickedStorey}
+      modelled={model.general.storeysModelled}
+      storeys={model.general.storeys}
+      onChange={setModelledStoreys}
+    />
+  ) : null;
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
-      open={panelBody !== null}
-      title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-      subtitle={panelSubtitle}
-      emptyText={t('view.panel.empty')}
+      open={(storeyMode ? storeyBody : panelBody) !== null}
+      title={storeyMode && pickedStorey !== null
+        ? t('storeys.storey', { number: pickedStorey })
+        : selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
+      subtitle={storeyMode ? (pickedStorey === 1 ? t('storeys.groundFloor') : undefined) : panelSubtitle}
+      emptyText={t(storeyMode ? 'storeys.pickHint' : 'view.panel.empty')}
       picker={(
         <select
           aria-label={t('surface.pick')}
@@ -298,9 +319,9 @@ export function Building3DView({
           {pickable.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
         </select>
       )}
-      onClose={() => requestSurface(null)}
+      onClose={() => (storeyMode ? setPickedStorey(null) : requestSurface(null))}
     >
-      {panelBody}
+      {storeyMode ? storeyBody : panelBody}
     </SurfacePanel>
   );
 
@@ -415,7 +436,8 @@ export function Building3DView({
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
-              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled }}
+              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: storeyMode ? pickedStorey : null }}
+              onSelectStorey={storeyMode ? setPickedStorey : undefined}
               onSelectSurface={selectInModel}
             />
           ) : (
@@ -433,7 +455,26 @@ export function Building3DView({
             </div>
           )}
 
-          {onTech && geometry && !geometry.note && <PvHintPill />}
+          {onTech && geometry && !geometry.note && !storeyMode && <PvHintPill />}
+
+          {model.general.storeys > 1 && surfaces.length > 0 && !detached && (
+            <button
+              type="button"
+              aria-pressed={storeyMode}
+              onClick={() => {
+                if (storeyMode) { leaveStoreyMode(); return; }
+                requestSurface(null);
+                setStoreyMode(true);
+              }}
+              className={cn(
+                'absolute left-3 top-3 flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[11px] font-semibold shadow-sm transition-colors',
+                storeyMode ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card/90 text-foreground hover:bg-muted',
+              )}
+            >
+              <Layers className="size-3.5" />
+              {t('storeys.pick')}
+            </button>
+          )}
 
           <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
             {invalidIds.size > 0 && (
@@ -481,10 +522,7 @@ export function Building3DView({
                       storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
                       roomHeight={model.general.roomHeight}
                       disabled={surfaces.length === 0}
-                      onChange={(modelled) => model.setStoreysModelled(
-                        modelled,
-                        modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
-                      )}
+                      onChange={setModelledStoreys}
                     />
                   )}
                   <BuildingEditor

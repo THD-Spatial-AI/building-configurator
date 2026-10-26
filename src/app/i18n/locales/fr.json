@@ -732,6 +732,11 @@
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
     "storey": "Étage {number}",
     "floorArea": "Surface modélisée",
-    "heightNote": "Dans le modèle 3D, un étage mesure {height} m de haut ; BuEM utilise une hauteur sous plafond de {room} m."
+    "heightNote": "Dans le modèle 3D, un étage mesure {height} m de haut ; BuEM utilise une hauteur sous plafond de {room} m.",
+    "pick": "Étages",
+    "pickHint": "Cliquez sur un étage du modèle pour voir s'il est modélisé.",
+    "inModel": "Dans le modèle",
+    "groundFloor": "Rez-de-chaussée",
+    "lastOne": "Au moins un étage reste dans le modèle."
   }
 }

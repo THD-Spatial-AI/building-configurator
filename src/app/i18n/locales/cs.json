@@ -742,6 +742,11 @@
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
     "storey": "Podlaží {number}",
     "floorArea": "Modelovaná plocha",
-    "heightNote": "Ve 3D modelu je podlaží vysoké {height} m; BuEM počítá s výškou místnosti {room} m."
+    "heightNote": "Ve 3D modelu je podlaží vysoké {height} m; BuEM počítá s výškou místnosti {room} m.",
+    "pick": "Podlaží",
+    "pickHint": "Klikněte na podlaží v modelu a uvidíte, zda je modelováno.",
+    "inModel": "V modelu",
+    "groundFloor": "Přízemí",
+    "lastOne": "Alespoň jedno podlaží zůstává v modelu."
   }
 }

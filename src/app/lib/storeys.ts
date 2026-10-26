@@ -98,13 +98,18 @@ function polygonShare(polygon: SurfacePolygon, bands: StoreyBands, storeys: numb
   return Math.min(1, inside / total);
 }
 
-/** Every surface cut to the storeys not modelled, one closed polygon per surface and storey. */
-export function leftOutParts(polygons: SurfacePolygon[], storeys: number, modelled: readonly number[]): SurfacePolygon[] {
+/** The storey (1-based) at a height; below the ground is storey 1, above the eaves the top storey. */
+export function storeyAt(z: number, bands: StoreyBands, storeys: number): number {
+  if (bands.height <= 0) return 1;
+  return Math.min(storeys, Math.max(1, Math.floor((z - bands.ground) / bands.height) + 1));
+}
+
+/** Every surface cut to the given storeys, one closed polygon per surface and storey. */
+export function storeyParts(polygons: SurfacePolygon[], storeys: number, chosen: readonly number[]): SurfacePolygon[] {
   const bands = storeyBands(polygons, storeys);
-  const leftOut = Array.from({ length: storeys }, (_, i) => i + 1).filter((storey) => !modelled.includes(storey));
   return polygons.flatMap((polygon) => {
     const ring = polygon.coordinates[0].slice(0, -1);
-    return leftOut
+    return chosen
       .map((storey) => clipToStorey(ring, bands, storeys, storey))
       .filter((part) => part.length > 0 && ringArea(part) > 0)
       .map((part) => ({ ...polygon, coordinates: [[...part, part[0]]] }));

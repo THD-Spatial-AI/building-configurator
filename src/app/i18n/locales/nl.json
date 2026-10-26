@@ -726,6 +726,11 @@
     "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
     "storey": "Verdieping {number}",
     "floorArea": "Gemodelleerd vloeroppervlak",
-    "heightNote": "In het 3D-model is een verdieping {height} m hoog; BuEM rekent met een kamerhoogte van {room} m."
+    "heightNote": "In het 3D-model is een verdieping {height} m hoog; BuEM rekent met een kamerhoogte van {room} m.",
+    "pick": "Verdiepingen",
+    "pickHint": "Klik op een verdieping in het model om te zien of die wordt meegenomen.",
+    "inModel": "In het model",
+    "groundFloor": "Begane grond",
+    "lastOne": "Minstens één verdieping blijft in het model."
   }
 }

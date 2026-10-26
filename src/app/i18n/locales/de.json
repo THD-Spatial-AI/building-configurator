@@ -726,6 +726,11 @@
     "noGeometry": "Geschosse lassen sich weglassen, sobald das 3D-Modell geladen ist.",
     "storey": "Geschoss {number}",
     "floorArea": "Modellierte Fläche",
-    "heightNote": "Im 3D-Modell ist ein Geschoss {height} m hoch; BuEM rechnet mit einer Raumhöhe von {room} m."
+    "heightNote": "Im 3D-Modell ist ein Geschoss {height} m hoch; BuEM rechnet mit einer Raumhöhe von {room} m.",
+    "pick": "Geschosse",
+    "pickHint": "Klicken Sie auf ein Geschoss im Modell, um zu sehen, ob es modelliert wird.",
+    "inModel": "Im Modell",
+    "groundFloor": "Erdgeschoss",
+    "lastOne": "Mindestens ein Geschoss bleibt im Modell."
   }
 }
