@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [Unreleased]
+## [0.14.0] - 2026-10-26
 
 Breaking: there is no PV mode. `pv` now feeds the Technologies tab and draws the building's modules on every tab; open a building there with `defaultTab="technologies"`. `Building3DView`'s `pvSurfaceIds`, `pvSurfaces` and `pvModule` are removed: the installed surfaces, their settings and the module come from `pv`.
 
