@@ -629,6 +629,23 @@ function clippedToStoreys(elements: Record<string, any>, fallback: number): Reco
   ]));
 }
 
+/**
+ * BuEM needs a roof and a floor and fills a missing one with a default that
+ * loses heat. Where clipping removed every roof or floor of `whole`, the
+ * ceiling or floor to the storey left out stands in, the size of one storey,
+ * with b_transmission 0: a neighbour at the same temperature.
+ */
+function withInternalBoundaries(clipped: Record<string, any>, whole: Record<string, any>, storeyArea: number): Record<string, any> {
+  const result = { ...clipped };
+  const has = (elements: Record<string, any>, type: string) => Object.values(elements).some((el) => el.type === type && Number(el.area) > 0);
+  for (const type of ['roof', 'floor'] as const) {
+    if (has(clipped, type) || !has(whole, type)) continue;
+    const id = type === 'roof' ? 'internal_ceiling' : 'internal_floor';
+    result[id] = { id, label: id, type, area: storeyArea, uValue: 1, gValue: null, tilt: 0, azimuth: 0, bTransmission: 0 };
+  }
+  return result;
+}
+
 /** Below this tilt a window is a skylight and sits in a roof. */
 const SKYLIGHT_MAX_TILT = 60;
 
@@ -724,7 +741,12 @@ export function serializeToBuemFeature(
   // the contract drops the envelope requirement.
   let envelopeFull: Record<string, any> | undefined;
   if (needsEnvelope(outputs)) {
-    building.envelope = { elements: buildElementsToBuemEnvelope(modelled ? clippedToStoreys(elements, storeyShare) : elements) };
+    const storeyArea = Number(building.A_ref?.value ?? 0) / Math.max(1, modelled?.length ?? storeys);
+    building.envelope = {
+      elements: buildElementsToBuemEnvelope(modelled
+        ? withInternalBoundaries(clippedToStoreys(elements, storeyShare), elements, storeyArea)
+        : elements),
+    };
     if (modelled) envelopeFull = { elements: buildElementsToBuemEnvelope(elements) };
   }
 

@@ -47,6 +47,15 @@ describe('a building with storeys left out', () => {
     expect(sent.r1).toBeUndefined();
   });
 
+  it('sends a ceiling with no heat loss in place of a roof left out, since BuEM needs one', () => {
+    const ceilings = buem.building.envelope.elements.filter((el: { type: string }) => el.type === 'roof');
+    expect(ceilings).toHaveLength(1);
+    expect(ceilings[0]).toMatchObject({ area: { value: 100 }, tilt: { value: 0 }, b_transmission: { value: 0 } });
+    expect(buem.envelope_full.elements.some((el: { id: string }) => el.id === ceilings[0].id)).toBe(false);
+    // The building had no floor to begin with, so none stands in for one.
+    expect(buem.building.envelope.elements.some((el: { type: string }) => el.type === 'floor')).toBe(false);
+  });
+
   it('keeps the whole envelope and the storeys modelled beside the block', () => {
     expect(buem.storey_list).toEqual([{ storey: 1, modelled: true }, { storey: 2, modelled: true }, { storey: 3, modelled: false }]);
     expect(buem.envelope_full.elements.map((el: { id: string; area: { value: number } }) => [el.id, el.area.value]))
