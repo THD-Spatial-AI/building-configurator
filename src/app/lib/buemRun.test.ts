@@ -178,16 +178,11 @@ describe('adaptBuemFeature on stored blocks', () => {
   });
 
   it('reopens with the same building parameters and solver choice', () => {
-    const { floorArea, storeys, ...rest } = general;
-    expect(generalFrom(reopened)).toMatchObject(rest);
+    expect(generalFrom(reopened)).toMatchObject(general);
   });
 
-  // v6-draft deprecates n_storeys, so the block keeps the total floor area but
-  // not how it splits across storeys.
-  it('reopens with the same total floor area but the default storey count', () => {
-    const reopenedGeneral = generalFrom(reopened);
-    expect(reopenedGeneral.floorArea * reopenedGeneral.storeys).toBe(general.floorArea * general.storeys);
-    expect(reopenedGeneral.storeys).toBe(DEFAULT_GENERAL.storeys);
+  it('keeps the storey count beside the block, never as the deprecated n_storeys', () => {
+    expect(toBuem(edited).storeys).toBe(general.storeys);
     expect(toBuem(edited).building).not.toHaveProperty('n_storeys');
   });
 

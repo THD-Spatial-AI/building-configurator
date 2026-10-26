@@ -79,6 +79,8 @@ export function toBuem(building: BuildingState): {
   building: Record<string, any>;
   /** Kept beside the block: BuEM's construction_period is a TABULA class code, not a year. */
   construction_year?: number;
+  /** Kept beside the block: BuEM takes no storey count, and A_ref alone does not say how it splits. */
+  storeys?: number;
   /** Kept beside the block and never sent to BuEM: the TABULA variant and the state per element type. */
   refurbishment?: { variant_code?: string; states?: Record<string, number> };
   outputs: BuemBuildingRunRequest['outputs'];
@@ -91,6 +93,7 @@ export function toBuem(building: BuildingState): {
   return {
     building: buem.building,
     construction_year: buem.construction_year,
+    ...(buem.storeys ? { storeys: buem.storeys } : {}),
     ...(buem.refurbishment ? { refurbishment: buem.refurbishment } : {}),
     outputs: buem.outputs,
     solver: buem.solver,
