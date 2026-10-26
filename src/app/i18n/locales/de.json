@@ -47,8 +47,7 @@
       "note": "Verwerfen setzt die Fläche auf den Stand beim Öffnen des Editors zurück."
     },
     "panel": {
-      "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen.",
-      "emptyPv": "Klicken Sie auf ein Dach oder eine Wand, um dort PV einzurichten."
+      "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen."
     }
   },
   "surface": {
@@ -100,7 +99,12 @@
       "vertical": "Senkrecht",
       "pitched": "Geneigt"
     },
-    "degrees": "{degrees} Grad, {label}"
+    "degrees": "{degrees} Grad, {label}",
+    "section": {
+      "envelope": "Gebäudehülle",
+      "pv": "PV"
+    },
+    "pick": "Fläche wählen"
   },
   "profile": {
     "title": "Stündliches Lastprofil",

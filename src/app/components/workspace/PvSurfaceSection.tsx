@@ -1,6 +1,6 @@
-// The PV section of the surface panel on the Technologies tab: the surface's
-// geometry, its PV switch, and with PV its product, usable share, mounting,
-// module format, the resulting modules and cost, and products that fit more.
+// The PV section of the surface panel: the surface's geometry, its PV switch,
+// and with PV its product, usable share, mounting, module format, the
+// resulting modules and cost, and products that fit more.
 
 import { PresetSlider } from './surfaceControls';
 import { SegmentedControl } from '../BuildingConfigurator/shared/ui';
@@ -176,7 +176,7 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
 }
 
 /** The PV section of a clicked surface. */
-export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout, polygon, onClose }: {
+export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout, polygon, showGeometry = true, onClose }: {
   surfaceId: string;
   surface: PvSurface;
   pv: PvMode;
@@ -184,6 +184,8 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
   /** The surface's module layout, when the view has its polygon. */
   layout?: PvLayout;
   polygon?: SurfacePolygon;
+  /** Off where the envelope section above already shows the geometry. */
+  showGeometry?: boolean;
   /** Closes the panel, from its Done button. */
   onClose?: () => void;
 }) {
@@ -196,7 +198,7 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      <GeometryTiles id={surfaceId} elements={elements} surface={surface} />
+      {showGeometry && <GeometryTiles id={surfaceId} elements={elements} surface={surface} />}
 
       <div className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2">
         <span className="text-[12px] font-semibold text-foreground">{t('pv.thisSurface')}</span>

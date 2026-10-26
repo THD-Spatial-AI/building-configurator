@@ -49,8 +49,7 @@
       "note": "Abandonner rétablit la surface telle qu'elle était à l'ouverture de l'éditeur."
     },
     "panel": {
-      "empty": "Cliquez sur une surface du modèle pour la voir ici.",
-      "emptyPv": "Cliquez sur un toit ou un mur pour y configurer le PV."
+      "empty": "Cliquez sur une surface du modèle pour la voir ici."
     }
   },
   "surface": {
@@ -102,7 +101,12 @@
       "vertical": "Vertical",
       "pitched": "Incliné"
     },
-    "degrees": "{degrees} degrés, {label}"
+    "degrees": "{degrees} degrés, {label}",
+    "section": {
+      "envelope": "Enveloppe",
+      "pv": "PV"
+    },
+    "pick": "Choisir une surface"
   },
   "profile": {
     "title": "Profil de charge horaire",

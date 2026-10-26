@@ -47,8 +47,7 @@
       "note": "Discarding puts the surface back as it was when its editor opened."
     },
     "panel": {
-      "empty": "Click a surface in the model to see it here.",
-      "emptyPv": "Click a roof or wall to set up PV on it."
+      "empty": "Click a surface in the model to see it here."
     }
   },
   "surface": {
@@ -100,7 +99,12 @@
       "vertical": "Vertical",
       "pitched": "Pitched"
     },
-    "degrees": "{degrees} degrees, {label}"
+    "degrees": "{degrees} degrees, {label}",
+    "section": {
+      "envelope": "Envelope",
+      "pv": "PV"
+    },
+    "pick": "Choose a surface"
   },
   "profile": {
     "title": "Hourly load profile",

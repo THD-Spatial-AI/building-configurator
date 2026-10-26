@@ -47,8 +47,7 @@
       "note": "Scartando, la superficie torna com'era all'apertura dell'editor."
     },
     "panel": {
-      "empty": "Fai clic su una superficie del modello per vederla qui.",
-      "emptyPv": "Fai clic su un tetto o una parete per configurarvi il FV."
+      "empty": "Fai clic su una superficie del modello per vederla qui."
     }
   },
   "surface": {
@@ -100,7 +99,12 @@
       "vertical": "Verticale",
       "pitched": "Inclinato"
     },
-    "degrees": "{degrees} gradi, {label}"
+    "degrees": "{degrees} gradi, {label}",
+    "section": {
+      "envelope": "Involucro",
+      "pv": "FV"
+    },
+    "pick": "Scegli una superficie"
   },
   "profile": {
     "title": "Profilo di carico orario",

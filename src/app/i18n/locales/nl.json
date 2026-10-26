@@ -47,8 +47,7 @@
       "note": "Verwerpen zet het vlak terug zoals het was toen de editor werd geopend."
     },
     "panel": {
-      "empty": "Klik op een vlak in het model om het hier te zien.",
-      "emptyPv": "Klik op een dak of muur om er PV op in te stellen."
+      "empty": "Klik op een vlak in het model om het hier te zien."
     }
   },
   "surface": {
@@ -100,7 +99,12 @@
       "vertical": "Verticaal",
       "pitched": "Hellend"
     },
-    "degrees": "{degrees} graden, {label}"
+    "degrees": "{degrees} graden, {label}",
+    "section": {
+      "envelope": "Schil",
+      "pv": "PV"
+    },
+    "pick": "Kies een vlak"
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",

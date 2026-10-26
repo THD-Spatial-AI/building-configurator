@@ -51,8 +51,7 @@
       "note": "Odrzucenie przywraca przegrodę do stanu z chwili otwarcia edytora."
     },
     "panel": {
-      "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj.",
-      "emptyPv": "Kliknij dach lub ścianę, aby skonfigurować na niej PV."
+      "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
     }
   },
   "surface": {
@@ -104,7 +103,12 @@
       "vertical": "Pionowa",
       "pitched": "Nachylona"
     },
-    "degrees": "{degrees}°, {label}"
+    "degrees": "{degrees}°, {label}",
+    "section": {
+      "envelope": "Przegrody",
+      "pv": "PV"
+    },
+    "pick": "Wybierz przegrodę"
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",

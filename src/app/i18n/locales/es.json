@@ -49,8 +49,7 @@
       "note": "Al descartar, la superficie vuelve a como estaba al abrir su editor."
     },
     "panel": {
-      "empty": "Haga clic en una superficie del modelo para verla aquí.",
-      "emptyPv": "Haga clic en un tejado o una pared para configurar FV en él."
+      "empty": "Haga clic en una superficie del modelo para verla aquí."
     }
   },
   "surface": {
@@ -102,7 +101,12 @@
       "vertical": "Vertical",
       "pitched": "Inclinada"
     },
-    "degrees": "{degrees} grados, {label}"
+    "degrees": "{degrees} grados, {label}",
+    "section": {
+      "envelope": "Envolvente",
+      "pv": "FV"
+    },
+    "pick": "Elegir una superficie"
   },
   "profile": {
     "title": "Perfil de carga horario",

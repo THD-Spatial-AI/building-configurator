@@ -51,8 +51,7 @@
       "note": "Zahozením se plocha vrátí do stavu z okamžiku otevření editoru."
     },
     "panel": {
-      "empty": "Klikněte na plochu v modelu, a uvidíte ji zde.",
-      "emptyPv": "Klikněte na střechu nebo stěnu a nastavte na ní FV."
+      "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
     }
   },
   "surface": {
@@ -104,7 +103,12 @@
       "vertical": "Svislá",
       "pitched": "Šikmá"
     },
-    "degrees": "{degrees} stupňů, {label}"
+    "degrees": "{degrees} stupňů, {label}",
+    "section": {
+      "envelope": "Obálka",
+      "pv": "FV"
+    },
+    "pick": "Vyberte plochu"
   },
   "profile": {
     "title": "Hodinový profil zatížení",

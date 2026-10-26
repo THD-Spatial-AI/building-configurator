@@ -20,7 +20,8 @@ import { cn } from '@/lib/utils';
 import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
-import { SurfacePanel } from './SurfacePanel';
+import { SurfacePanel, SurfaceSection } from './SurfacePanel';
+import { TOPICS } from '@/app/config/topics';
 import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
@@ -62,9 +63,9 @@ export interface Building3DViewProps {
   /** Credits for the building's data, as its licences require; shown in a corner of the 3D view. */
   attribution?: ReactNode;
   /**
-   * The building's PV. Its modules are drawn on every tab; on the Technologies
-   * tab suggested surfaces are highlighted, a clicked surface opens its PV
-   * settings, and products can be dropped on surfaces. Controlled; hold it
+   * The building's PV. Its modules are drawn and a clicked surface shows its
+   * PV settings on every tab; on the Technologies tab suggested surfaces are
+   * highlighted and products can be dropped on surfaces. Controlled; hold it
    * stable as for `services`.
    */
   pv?: PvMode;
@@ -153,9 +154,9 @@ export function Building3DView({
     requestSurface({ id });
   };
 
-  /** A click in the model opens an envelope surface, or on the Technologies tab any surface that takes PV. */
+  /** A click in the model opens an envelope surface or a surface that takes PV. */
   const selectInModel = (id: string | null) => {
-    requestSurface(id && (elements[id] || (onTech && pv?.surfaces[id])) ? { id } : null);
+    requestSurface(id && (elements[id] || pv?.surfaces[id]) ? { id } : null);
   };
 
   /** A product dropped on a surface: it goes on that surface, which gets PV if it had none, and opens. */
@@ -227,7 +228,7 @@ export function Building3DView({
   }, []);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
-  const selectedPv = onTech && selected ? pv?.surfaces[selected.id] : undefined;
+  const selectedPv = selected ? pv?.surfaces[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
   // figure is missing or disagrees with it.
   const selectedGeometryArea = selected
@@ -237,40 +238,64 @@ export function Building3DView({
       })()
     : null;
 
-  const panelBody = selected && selectedPv && pv ? (
-    <PvSurfaceSection
-      key={selected.id}
-      surfaceId={selected.id}
-      surface={selectedPv}
-      pv={pv}
-      elements={elements}
-      layout={layouts[selected.id]}
-      polygon={surfaces.find((surface) => surface.id === selected.id)}
-      onClose={() => openSurface(null)}
-    />
-  ) : selected && selectedElement ? (
-    <SurfaceQuickEditor
-      key={selected.id}
-      element={selectedElement}
-      geometryArea={selectedGeometryArea}
-      uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
-      mode={mode}
-      onUpdate={(patch) => model.updateElement(selected.id, patch)}
-      onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
-    />
+  // Envelope, then PV where the surface takes it; a roof of another building has only PV.
+  const panelBody = selected && (selectedElement || selectedPv) ? (
+    <div key={selected.id}>
+      {selectedElement && (
+        <SurfaceSection topic={TOPICS.envelope} title={t('surface.section.envelope')}>
+          <SurfaceQuickEditor
+            element={selectedElement}
+            geometryArea={selectedGeometryArea}
+            uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
+            mode={mode}
+            onUpdate={(patch) => model.updateElement(selected.id, patch)}
+            onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
+          />
+        </SurfaceSection>
+      )}
+      {selectedPv && pv && (
+        <SurfaceSection topic={TOPICS.pv} title={t('surface.section.pv')}>
+          <PvSurfaceSection
+            surfaceId={selected.id}
+            surface={selectedPv}
+            pv={pv}
+            elements={elements}
+            layout={layouts[selected.id]}
+            polygon={surfaces.find((surface) => surface.id === selected.id)}
+            showGeometry={!selectedElement}
+            onClose={() => openSurface(null)}
+          />
+        </SurfaceSection>
+      )}
+    </div>
   ) : null;
   const panelSubtitle = selectedElement
-    ? (selectedPv
-        ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m²`
-        : `${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`)
+    ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`
     : selectedPv?.label;
+  const pickable = useMemo(() => [
+    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label })),
+    ...Object.entries(pv?.surfaces ?? {})
+      .filter(([id]) => !elements[id])
+      .map(([id, surface]) => ({ id, label: surface.label ?? id })),
+  ], [elements, pv]);
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
       open={panelBody !== null}
       title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
       subtitle={panelSubtitle}
-      emptyText={t(onTech ? 'view.panel.emptyPv' : 'view.panel.empty')}
+      emptyText={t('view.panel.empty')}
+      picker={(
+        <select
+          aria-label={t('surface.pick')}
+          value={selected?.id ?? ''}
+          onChange={(e) => selectFromList(e.target.value)}
+          className="h-8 w-full cursor-pointer rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
+        >
+          <option value="" disabled>{t('surface.pick')}</option>
+          {pickable.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+        </select>
+      )}
       onClose={() => requestSurface(null)}
     >
       {panelBody}

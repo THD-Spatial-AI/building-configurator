@@ -9,6 +9,7 @@ import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT, type Translate } from '../../i18n';
 import { variantName } from '../../lib/refurbishment';
+import { isFlat } from '../../lib/pvSurfaces';
 import { DecimalInput } from '../BuildingConfigurator/shared/ui';
 
 /** Widest U-value the slider covers: a single-glazed window sits near 5. */
@@ -148,11 +149,15 @@ export function SurfaceQuickEditor({
 
       {/* ── Orientation ── */}
       <div className="flex items-start justify-center gap-4">
-        <AzimuthDial
-          value={element.azimuth}
-          reference={element.defaultAzimuth}
-          onChange={(azimuth) => onUpdate({ azimuth })}
-        />
+        {isFlat(element.tilt, element.azimuth) ? (
+          <span className="self-center rounded-md bg-muted px-2.5 py-1.5 text-[12px] font-semibold text-foreground">{t('surface.tiltShape.flat')}</span>
+        ) : (
+          <AzimuthDial
+            value={element.azimuth}
+            reference={element.defaultAzimuth}
+            onChange={(azimuth) => onUpdate({ azimuth })}
+          />
+        )}
         <TiltDial value={element.tilt} onChange={(tilt) => onUpdate({ tilt })} />
       </div>
 

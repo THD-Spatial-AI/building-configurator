@@ -18,7 +18,8 @@ export interface PvGeometry {
   flat: boolean;
 }
 
-const isFlat = (tilt: number, azimuth: number) => azimuth === -1 || tilt < FLAT_MAX_TILT_DEG;
+/** Whether a surface is shown as flat, with no facing. */
+export const isFlat = (tilt: number, azimuth: number) => azimuth === -1 || tilt < FLAT_MAX_TILT_DEG;
 
 /**
  * A PV surface's tilt, facing and area: the building's own element where it
