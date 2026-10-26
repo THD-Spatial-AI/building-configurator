@@ -49,15 +49,12 @@ export function BuildingWorkspace({ language }: { language: Language }) {
       )}
 
       {selectedId && selectedBuilding && (
-        <Building3DView
+        <DemoBuildingView
           key={selectedId}
+          osmId={selectedId}
           language={language}
           building={selectedBuilding}
           geometry={surfaceGeometry(selectedObjectId)}
-          services={fixtureServices}
-          demandProfile={fixtureDemandProfile(selectedId)}
-          seriesCsvUrl={fixtureSeriesCsvUrl(selectedId)}
-          attribution={FIXTURE_ATTRIBUTION}
           onExit={(building) => {
             if (building && building !== data.buildings?.[selectedId]) {
               setEdited((prev) => ({ ...prev, [selectedId]: building }));
@@ -71,15 +68,13 @@ export function BuildingWorkspace({ language }: { language: Language }) {
 }
 
 /** Bundled Loenen building with surfaces that have no area, so every part of the 3D view has something to show. */
-const FIXTURE_OSM_ID = '268428620';
+export const FIXTURE_OSM_ID = '268428620';
+/** Bundled Loenen building with a 51 m² flat roof and one at 3°, for racked PV. */
+export const FLAT_ROOF_OSM_ID = '268425771';
 
-/**
- * The 3D view on one bundled building, opened straight away with no backend
- * calls. The dev shell plays the host for its technologies and PV: the PV
- * card's button opens PV mode, and leaving it returns to the normal view.
- */
-export function FixtureWorkspace({ language }: { language: Language }) {
-  const fixture = useFixtureBuilding(FIXTURE_OSM_ID);
+/** The 3D view on one bundled building, opened straight away with no backend calls. */
+export function FixtureWorkspace({ osmId, language }: { osmId: string; language: Language }) {
+  const fixture = useFixtureBuilding(osmId);
   if (!fixture) {
     return (
       <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -88,21 +83,13 @@ export function FixtureWorkspace({ language }: { language: Language }) {
       </div>
     );
   }
-  return <FixtureView building={fixture.building} geometry={fixture.geometry} language={language} />;
+  return <FixtureView osmId={osmId} building={fixture.building} geometry={fixture.geometry} language={language} />;
 }
 
-function FixtureView({ building, geometry, language }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'> & { language: Language }) {
+function FixtureView({ osmId, building, geometry, language }: Pick<Parameters<typeof Building3DView>[0], 'building' | 'geometry'> & { osmId: string; language: Language }) {
   const [open, setOpen] = useState(true);
-  const [pvOpen, setPvOpen] = useState(false);
   /** What was saved on leaving, reopened in place of the bundled building. */
   const [saved, setSaved] = useState<BuildingState | null>(null);
-  const pv = useDemoPvHost(building.envelope);
-  const openPv = useCallback(() => setPvOpen(true), []);
-  const technologies = useDemoTechnologies(pv, openPv);
-  const installedPvIds = useMemo(
-    () => Object.entries(pv.surfaces).filter(([, surface]) => surface.state === 'installed').map(([id]) => id),
-    [pv.surfaces],
-  );
 
   if (!open) {
     return (
@@ -112,18 +99,53 @@ function FixtureView({ building, geometry, language }: Pick<Parameters<typeof Bu
           className="flex cursor-pointer items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors duration-100 hover:bg-primary/90"
         >
           <Box className="size-4" />
-          Reopen building {FIXTURE_OSM_ID}
+          Reopen building {osmId}
         </button>
       </div>
     );
   }
+
+  return (
+    <DemoBuildingView
+      osmId={osmId}
+      language={language}
+      building={saved ?? building}
+      geometry={geometry}
+      onExit={(edited) => {
+        if (edited) setSaved(edited);
+        setOpen(false);
+      }}
+    />
+  );
+}
+
+/**
+ * One bundled building with the dev shell playing host for its technologies
+ * and PV: the PV card's button opens PV mode, and leaving it returns to the
+ * normal view.
+ */
+function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
+  osmId: string;
+  building: BuildingState;
+  geometry: Parameters<typeof Building3DView>[0]['geometry'];
+  language: Language;
+  onExit: (edited: BuildingState | undefined) => void;
+}) {
+  const [pvOpen, setPvOpen] = useState(false);
+  const pv = useDemoPvHost(building.envelope);
+  const openPv = useCallback(() => setPvOpen(true), []);
+  const technologies = useDemoTechnologies(pv, openPv);
+  const installedPvIds = useMemo(
+    () => Object.entries(pv.surfaces).filter(([, surface]) => surface.state === 'installed').map(([id]) => id),
+    [pv.surfaces],
+  );
 
   if (pvOpen) {
     return (
       <Building3DView
         key="pv"
         language={language}
-        building={saved ?? building}
+        building={building}
         geometry={geometry}
         services={fixtureServices}
         attribution={FIXTURE_ATTRIBUTION}
@@ -137,18 +159,16 @@ function FixtureView({ building, geometry, language }: Pick<Parameters<typeof Bu
     <Building3DView
       key="normal"
       language={language}
-      building={saved ?? building}
+      building={building}
       geometry={geometry}
       services={fixtureServices}
-      demandProfile={fixtureDemandProfile(FIXTURE_OSM_ID)}
-      seriesCsvUrl={fixtureSeriesCsvUrl(FIXTURE_OSM_ID)}
+      demandProfile={fixtureDemandProfile(osmId)}
+      seriesCsvUrl={fixtureSeriesCsvUrl(osmId)}
       attribution={FIXTURE_ATTRIBUTION}
       pvSurfaceIds={installedPvIds}
+      pvSurfaces={pv.surfaces}
       technologies={technologies}
-      onExit={(edited) => {
-        if (edited) setSaved(edited);
-        setOpen(false);
-      }}
+      onExit={onExit}
     />
   );
 }

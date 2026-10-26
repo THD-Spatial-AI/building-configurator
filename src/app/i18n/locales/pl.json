@@ -147,7 +147,49 @@
     "thisSurface": "PV na tej przegrodzie",
     "usableShare": "Udział użyteczny",
     "usableShareNote": "tej przegrody, po odjęciu przeszkód",
-    "capacity": "Moc"
+    "capacity": "Moc",
+    "title": "Konfigurator PV",
+    "hint": "Kliknij dach lub ścianę, aby dodać PV. Kliknij ponownie, aby je usunąć.",
+    "summary": {
+      "capacity": "Moc",
+      "count": "{installed} z {total}",
+      "surfaces": "Przegrody z PV",
+      "panelArea": "Powierzchnia modułów"
+    },
+    "geometry": "{tilt}° · kierunek {azimuth}° · {area} m²",
+    "upTo": "do {kwp} kWp",
+    "useSuggested": "Użyj sugerowanych przegród",
+    "legend": {
+      "installed": "PV zainstalowane",
+      "suggested": "Sugerowana",
+      "available": "Dostępna"
+    },
+    "card": {
+      "fromModel": "Nachylenie, orientacja i powierzchnia pochodzą z modelu 3D budynku.",
+      "panels": "{kwp} kWp na {area} m² modułów",
+      "remove": "Usuń PV",
+      "done": "Gotowe",
+      "add": "Dodaj PV do tej przegrody",
+      "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
+      "noFit": "Na tej powierzchni nie mieści się żaden cały moduł."
+    },
+    "hover": {
+      "add": "Kliknij, aby dodać PV",
+      "remove": "Kliknij, aby usunąć PV"
+    },
+    "mounting": {
+      "label": "Montaż",
+      "flush": "Równolegle",
+      "racked": "Na stelażu"
+    },
+    "orientation": {
+      "label": "Układ",
+      "auto": "Optymalnie",
+      "portrait": "Pionowo",
+      "landscape": "Poziomo"
+    },
+    "panelTilt": "Nachylenie modułów",
+    "panelFacing": "Orientacja modułów"
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",

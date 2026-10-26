@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, polygonArea, surfacesFromGeometryResponse } from './surfaceMesh';
+import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, polygonArea, pvModulesGeometry, surfacesFromGeometryResponse } from './surfaceMesh';
 import type { BuildingGeometry } from './enerplanet';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
@@ -133,5 +133,32 @@ describe('polygonArea', () => {
 
   it('returns 0 for a ring with too few vertices', () => {
     expect(polygonArea([[[0, 0, 0], [1, 0, 0], [0, 0, 0]]])).toBe(0);
+  });
+});
+
+describe('pvModulesGeometry', () => {
+  const origin: [number, number, number] = [0, 0, 0];
+  const uvAt = (geometry: THREE.BufferGeometry, i: number) => {
+    const uv = geometry.getAttribute('uv');
+    return [uv.getX(i), uv.getY(i)];
+  };
+
+  it('draws one quad per module, at its corners', () => {
+    const geometry = pvModulesGeometry([
+      [[0, 0, 3], [1, 0, 3], [1, 1.7, 3], [0, 1.7, 3]],
+      [[2, 0, 3], [3, 0, 3], [3, 1.7, 3], [2, 1.7, 3]],
+    ], origin);
+    expect(geometry.getAttribute('position').count).toBe(8);
+    expect(geometry.getIndex()!.count).toBe(12);
+    const position = geometry.getAttribute('position');
+    // Storage (2, 0, 3) is three.js (2, 3, 0).
+    expect([position.getX(4), position.getY(4), position.getZ(4)]).toEqual([2, 3, -0]);
+  });
+
+  it('runs the cells along the long side, portrait or landscape', () => {
+    const portrait = pvModulesGeometry([[[0, 0, 0], [1, 0, 0], [1, 1.7, 0], [0, 1.7, 0]]], origin);
+    const landscape = pvModulesGeometry([[[0, 0, 0], [1.7, 0, 0], [1.7, 1, 0], [0, 1, 0]]], origin);
+    expect(uvAt(portrait, 1)).toEqual([1, 0]);
+    expect(uvAt(landscape, 1)).toEqual([0, 1]);
   });
 });

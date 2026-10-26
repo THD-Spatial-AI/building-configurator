@@ -154,12 +154,7 @@ const SURFACE_COLOR: Record<string, number> = {
   WallSurface: 0x8ab4d0,
 };
 
-/** A crystalline module, metres. The array is drawn to this scale, so a roof
- *  shows the number of panels that would really fit on it. */
-const MODULE_WIDTH_M = 1.7;
-const MODULE_HEIGHT_M = 1.05;
-
-/** One module, drawn once and shared: cells, busbars and a light frame. */
+/** One portrait module, drawn once and shared: cells and a light frame. */
 let moduleTexture: THREE.Texture | null = null;
 function panelTexture(): THREE.Texture {
   if (moduleTexture) return moduleTexture;
@@ -170,7 +165,7 @@ function panelTexture(): THREE.Texture {
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#16304f';
+  ctx.fillStyle = '#1f3a5f';
   ctx.fillRect(0, 0, size, size);
 
   // Cells: 6 across, 10 down on a portrait module.
@@ -191,7 +186,7 @@ function panelTexture(): THREE.Texture {
     ctx.stroke();
   }
 
-  ctx.strokeStyle = '#b9cbdd';
+  ctx.strokeStyle = '#9fb3cc';
   ctx.lineWidth = 7;
   ctx.strokeRect(0, 0, size, size);
 
@@ -202,44 +197,33 @@ function panelTexture(): THREE.Texture {
 }
 
 /**
- * UVs measured in modules: the polygon is projected onto its own plane and
- * divided by a module's size, so the texture tiles at the scale of real panels
- * whatever the surface's orientation. City2TABULA polygons carry no UVs of
- * their own.
+ * A quad per module at the corners pvLayout gives. UVs put the texture's 10
+ * cells along each module's long side, so portrait and landscape look alike.
  */
-function applyModuleUvs(geometry: THREE.BufferGeometry) {
-  const position = geometry.getAttribute('position');
-  const normals = geometry.getAttribute('normal');
-  const normal = new THREE.Vector3(normals.getX(0), normals.getY(0), normals.getZ(0)).normalize();
-
-  // Any axis not parallel to the normal gives a usable in-plane basis; for a
-  // roof or a wall, world up keeps the rows level.
-  const reference = Math.abs(normal.y) > 0.9 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0);
-  const across = new THREE.Vector3().crossVectors(reference, normal).normalize();
-  const down = new THREE.Vector3().crossVectors(normal, across).normalize();
-  const origin = new THREE.Vector3(position.getX(0), position.getY(0), position.getZ(0));
-
-  const uvs = new Float32Array(position.count * 2);
-  const vertex = new THREE.Vector3();
-  for (let i = 0; i < position.count; i++) {
-    vertex.fromBufferAttribute(position, i).sub(origin);
-    uvs[i * 2] = vertex.dot(across) / MODULE_WIDTH_M;
-    uvs[i * 2 + 1] = vertex.dot(down) / MODULE_HEIGHT_M;
+export function pvModulesGeometry(modules: number[][][], origin: [number, number, number]): THREE.BufferGeometry {
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+  for (const corners of modules) {
+    const points = corners.map((c) => toLocal(c, origin));
+    const portrait = points[0].distanceTo(points[1]) <= points[0].distanceTo(points[3]);
+    const base = positions.length / 3;
+    for (const point of points) positions.push(point.x, point.y, point.z);
+    uvs.push(...(portrait ? [0, 0, 1, 0, 1, 1, 0, 1] : [0, 0, 0, 1, 1, 1, 1, 0]));
+    indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
   }
-  geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
 }
 
-/**
- * A PV array covering a surface: its own copy of the polygon, textured as
- * modules and drawn just in front of the surface.
- *
- * polygonOffset rather than a position offset along the normal: city2tabula
- * winding is inconsistent, so "in front" cannot be derived from the geometry.
- */
-export function buildPvPanel(surface: THREE.BufferGeometry): THREE.Mesh {
-  const geometry = surface.clone();
-  applyModuleUvs(geometry);
-
+/** The modules of one PV array as one textured mesh. */
+export function buildPvModules(modules: number[][][], origin: [number, number, number]): THREE.Mesh {
+  // polygonOffset rather than a lift along the normal for flush modules:
+  // city2tabula winding is inconsistent, so "in front" of a wall is unknown.
   const material = new THREE.MeshStandardMaterial({
     map: panelTexture(),
     color: 0xdfe8f2,
@@ -250,7 +234,7 @@ export function buildPvPanel(surface: THREE.BufferGeometry): THREE.Mesh {
     polygonOffsetFactor: -4,
     polygonOffsetUnits: -4,
   });
-  const mesh = new THREE.Mesh(geometry, material);
+  const mesh = new THREE.Mesh(pvModulesGeometry(modules, origin), material);
   mesh.name = 'pv-panel';
   return mesh;
 }

@@ -95,7 +95,9 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
 | `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
-| `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
+| `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with modules in the normal view. Ignored in PV mode |
+| `pvSurfaces` | Optional. `{ usableShare, mounting?, orientation? }` of each surface in `pvSurfaceIds`, as stored from PV mode, so the normal view lays out the same modules. A surface missing here is laid out at a usable share of 0.8. Ignored in PV mode |
+| `pvModule` | Optional. `{ width, height, kwp }` of the building's PV module, see [Module layout](#module-layout). Ignored in PV mode, which uses `pv.module` |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
@@ -118,7 +120,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
 | `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
-| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when `pvSurfaceIds` is not empty. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as currently edited (m², degrees from horizontal, degrees clockwise from north). Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
+| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when `pvSurfaceIds` is not empty. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as currently edited (m², degrees from horizontal, degrees clockwise from north), plus `modules`, `kwp`, `panel_tilt` and `panel_azimuth` from its [module layout](#module-layout) when the view has its polygon. Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.
@@ -156,11 +158,13 @@ the view follows the next `pv` the host passes.
 
 ```tsx
 const pv = useMemo<PvMode>(() => ({
-  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp } }
+  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp, mounting?, orientation? } }
   notice: t('pv.shadingNotice'),
   typeLabel: pvType.name,
+  module: { width: 1.134, height: 1.762, kwp: 0.4 },
   onToggle: (surfaceId, installed) => setInstalled(surfaceId, installed),
   onShareChange: (surfaceId, usableShare) => setShare(surfaceId, usableShare),
+  onMountingChange: (surfaceId, mounting, orientation) => setMounting(surfaceId, mounting, orientation),
 }), [surfaces, pvType, t]);
 
 <Building3DView building={building} geometry={geometry} services={services} onExit={onExit} pv={pv} />
@@ -172,14 +176,43 @@ const pv = useMemo<PvMode>(() => ({
 | `surfaces[id].state` | `installed` draws panels on the surface, `suggested` lights and outlines it, `available` draws it as usual |
 | `surfaces[id].usableShare` | Share of the surface usable for panels, 0 to 1, shown as a percentage |
 | `surfaces[id].label` | Optional. Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. An element's own label takes precedence |
-| `surfaces[id].maxKwp` | Capacity of the panels at the current usable share, in kWp, shown on its card. Pass the new value after `onShareChange` |
+| `surfaces[id].tilt`, `azimuth`, `area` | Optional. Degrees from horizontal, degrees clockwise from north (180 is south), m². Shown in the surface list and card for a surface that is not among the building's elements; an element's own geometry takes precedence |
+| `surfaces[id].maxKwp` | Capacity at the current usable share, in kWp. Shown only for a surface the view has no polygon for; any other surface shows its module layout's capacity |
+| `surfaces[id].mounting` | Optional. `{ kind: 'flush' }` or `{ kind: 'racked', tilt, azimuth }`; the card offers racking on surfaces under 10° only. Absent: racked at 15° facing 180° on a surface under 10°, otherwise flush |
+| `surfaces[id].orientation` | Optional. `portrait` or `landscape` for every module on the surface. Absent: whichever fits more modules, which on a flush surface may mix both |
 | `notice` | Shown for as long as PV mode is open. Pass it in the user's language |
 | `typeLabel` | Name of the PV type, shown at the top of the panel |
+| `module` | Optional. `{ width, height, kwp }`: one module of the PV type, portrait width and height in m. Absent: `DEFAULT_PV_MODULE`, 1.134 by 1.762 m and 0.4 kWp |
 | `onToggle(surfaceId, installed)` | A surface was switched. Clicking a surface without PV calls it with `true` |
 | `onShareChange(surfaceId, usableShare)` | The usable share of a surface with PV was changed, 0 to 1 |
+| `onMountingChange(surfaceId, mounting, orientation)` | The mounting or module orientation of a surface was changed on its card. Store both and pass them back on the surface; `orientation` is `undefined` while the best fit applies |
 
 Clicking a surface opens its card: the PV switch, and on a surface with PV the
-usable share. The panel lists every offered surface with its own switch.
+usable share, mounting, module orientation and the resulting module count and
+capacity. The panel lists every offered surface with its own switch.
+
+### Module layout
+
+The view places whole modules on each surface from its polygon and draws them
+in 3D. The same calculation is exported, so the module count and capacity a
+host stores match what the user saw:
+
+```ts
+import { pvLayout } from '@thd-spatial-ai/building-configurator';
+
+const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientation });
+// { count, kwp, area, tilt, azimuth, mounting, orientation, modules }
+```
+
+| Rule | Value |
+|---|---|
+| Clearance from every edge of the surface | 0.3 m |
+| Gap between modules | 0.02 m |
+| Most modules on a surface | `floor(usableShare × surface area / module area)`, keeping those nearest the middle |
+| Racked row spacing | No row shades the next with the sun 20° above the horizon |
+| `tilt`, `azimuth` of the result | The modules' own angles: the surface's when flush, the rack's when racked |
+| Orientation without one chosen | Flush: the most modules of portrait only, landscape only, or either one with the room it leaves filled by the other (`orientation: 'mixed'`). Racked: portrait or landscape, one per surface |
+| `modules` | Four `[x, y, z]` corners per module, in the polygon's coordinates |
 
 ## Technologies
 
@@ -224,7 +257,7 @@ const technologies = useMemo<Technologies>(() => ({
 | `onRemove(id)` | The card's remove button was pressed; the view does not ask first |
 
 To show which surfaces carry PV in the normal view, pass their ids as
-`pvSurfaceIds`.
+`pvSurfaceIds`, with `pvSurfaces` and `pvModule` so the modules match PV mode.
 
 ## Geometry
 

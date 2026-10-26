@@ -141,7 +141,49 @@
     "thisSurface": "PV op dit vlak",
     "usableShare": "Bruikbaar aandeel",
     "usableShareNote": "van dit vlak, na obstakels",
-    "capacity": "Vermogen"
+    "capacity": "Vermogen",
+    "title": "PV-configurator",
+    "hint": "Klik op een dak of wand om PV toe te voegen. Klik nogmaals om het te verwijderen.",
+    "summary": {
+      "capacity": "Vermogen",
+      "count": "{installed} van {total}",
+      "surfaces": "Vlakken met PV",
+      "panelArea": "Paneeloppervlak"
+    },
+    "geometry": "{tilt}° · gericht op {azimuth}° · {area} m²",
+    "upTo": "tot {kwp} kWp",
+    "useSuggested": "Voorgestelde vlakken gebruiken",
+    "legend": {
+      "installed": "PV geplaatst",
+      "suggested": "Voorgesteld",
+      "available": "Beschikbaar"
+    },
+    "card": {
+      "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",
+      "panels": "{kwp} kWp op {area} m² panelen",
+      "remove": "PV verwijderen",
+      "done": "Klaar",
+      "add": "PV op dit vlak plaatsen",
+      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
+      "noFit": "Er past geen hele module op dit vlak."
+    },
+    "hover": {
+      "add": "Klik om PV toe te voegen",
+      "remove": "Klik om PV te verwijderen"
+    },
+    "mounting": {
+      "label": "Montage",
+      "flush": "Parallel",
+      "racked": "Op frame"
+    },
+    "orientation": {
+      "label": "Stand",
+      "auto": "Optimaal",
+      "portrait": "Staand",
+      "landscape": "Liggend"
+    },
+    "panelTilt": "Hellingshoek modules",
+    "panelFacing": "Oriëntatie modules"
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",

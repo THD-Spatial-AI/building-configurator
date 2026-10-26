@@ -141,7 +141,49 @@
     "thisSurface": "PV on this surface",
     "usableShare": "Usable share",
     "usableShareNote": "of this surface, after obstructions",
-    "capacity": "Capacity"
+    "capacity": "Capacity",
+    "title": "PV configurator",
+    "hint": "Click a roof or wall to add PV. Click it again to remove it.",
+    "summary": {
+      "capacity": "Capacity",
+      "count": "{installed} of {total}",
+      "surfaces": "Surfaces with PV",
+      "panelArea": "Panel area"
+    },
+    "geometry": "{tilt}° · facing {azimuth}° · {area} m²",
+    "upTo": "up to {kwp} kWp",
+    "useSuggested": "Use suggested surfaces",
+    "legend": {
+      "installed": "PV installed",
+      "suggested": "Suggested",
+      "available": "Available"
+    },
+    "card": {
+      "fromModel": "Tilt, facing and area come from the building's 3D model.",
+      "panels": "{kwp} kWp on {area} m² of panels",
+      "remove": "Remove PV",
+      "done": "Done",
+      "add": "Add PV to this surface",
+      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
+      "noFit": "No whole module fits on this surface."
+    },
+    "hover": {
+      "add": "Click to add PV",
+      "remove": "Click to remove PV"
+    },
+    "mounting": {
+      "label": "Mounting",
+      "flush": "Flush",
+      "racked": "Racked"
+    },
+    "orientation": {
+      "label": "Format",
+      "auto": "Best fit",
+      "portrait": "Portrait",
+      "landscape": "Landscape"
+    },
+    "panelTilt": "Panel tilt",
+    "panelFacing": "Panel facing"
   },
   "tech": {
     "none": "No technologies on this building.",

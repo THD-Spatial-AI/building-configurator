@@ -28,8 +28,8 @@ const ENERGY_ITEMS = [
   { key: 'heating',     labelKey: 'snapshot.energy.heating',     Icon: Flame,     iconBg: 'bg-orange-500/20', iconColor: 'text-orange-400', valueColor: 'text-orange-300' },
   { key: 'electricity', labelKey: 'snapshot.energy.electricity', Icon: Zap,       iconBg: 'bg-yellow-500/20', iconColor: 'text-yellow-400', valueColor: 'text-yellow-300' },
   { key: 'hotwater',    labelKey: 'snapshot.energy.cooling',     Icon: Snowflake, iconBg: 'bg-blue-500/20',   iconColor: 'text-blue-400',   valueColor: 'text-blue-300'   },
-  { key: 'dhw',         labelKey: 'snapshot.energy.hotWater',   Icon: Droplets,  iconBg: 'bg-sky-500/20',    iconColor: 'text-sky-400',   valueColor: 'text-sky-300'     },
-  { key: 'kitchen',     labelKey: 'snapshot.energy.kitchen', Icon: CookingPot, iconBg: 'bg-rose-500/20', iconColor: 'text-rose-400', valueColor: 'text-rose-300'   },
+  { key: 'dhw',         labelKey: 'snapshot.energy.hotWater',   Icon: Droplets,  iconBg: 'bg-red-500/20',    iconColor: 'text-red-400',   valueColor: 'text-red-300'     },
+  { key: 'kitchen',     labelKey: 'snapshot.energy.kitchen', Icon: CookingPot, iconBg: 'bg-violet-500/20', iconColor: 'text-violet-400', valueColor: 'text-violet-300' },
 ] as const;
 
 /** The message for each annual unit the totals carry; any other unit shows as given. */

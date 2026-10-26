@@ -31,6 +31,7 @@ import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
 import { applyState, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
 import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
+import type { PvLayout } from '../../lib/pvLayout';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { Language, Message } from '../../i18n';
@@ -222,7 +223,7 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [] }: {
+  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
     demandProfile?: BuildingDemandProfile | null;
@@ -230,6 +231,8 @@ export function useBuildingModel(
     language?: Language;
     /** The host's PV surfaces; with any, a run also asks the host for PV generation. */
     pvSurfaceIds?: readonly string[];
+    /** Module layouts of those surfaces, sent with the PV run. */
+    pvLayouts?: Readonly<Record<string, PvLayout>>;
   } = {},
 ) {
   const thematicData = buildingData?.thematic;
@@ -603,7 +606,7 @@ export function useBuildingModel(
     try {
       // PV runs beside BuEM; its failure is reported on its own and does not
       // hold back the demand result.
-      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds) : null;
+      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts) : null;
       const [result, pvKwh] = await Promise.all([
         runBuildingSimulation(services, identity, elements, general, runContext),
         pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),
