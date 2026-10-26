@@ -141,7 +141,35 @@
     "thisSurface": "PV on this surface",
     "usableShare": "Usable share",
     "usableShareNote": "of this surface, after obstructions",
-    "capacity": "Capacity"
+    "capacity": "Capacity",
+    "title": "PV configurator",
+    "hint": "Click a roof or wall to add PV. Click it again to remove it.",
+    "summary": {
+      "capacity": "Capacity",
+      "count": "{installed} of {total}",
+      "surfaces": "Surfaces with PV",
+      "panelArea": "Panel area"
+    },
+    "geometry": "{tilt}° · facing {azimuth}° · {area} m²",
+    "upTo": "up to {kwp} kWp",
+    "useSuggested": "Use suggested surfaces",
+    "legend": {
+      "installed": "PV installed",
+      "suggested": "Suggested",
+      "available": "Available"
+    },
+    "card": {
+      "fromModel": "Tilt, facing and area come from the building's 3D model.",
+      "layout": "Panel layout inside the usable share of the surface",
+      "panels": "{kwp} kWp on {area} m² of panels",
+      "remove": "Remove PV",
+      "done": "Done",
+      "add": "Add PV to this surface"
+    },
+    "hover": {
+      "add": "Click to add PV",
+      "remove": "Click to remove PV"
+    }
   },
   "tech": {
     "none": "No technologies on this building.",

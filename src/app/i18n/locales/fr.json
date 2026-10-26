@@ -144,7 +144,35 @@
     "thisSurface": "PV sur cette surface",
     "usableShare": "Part utilisable",
     "usableShareNote": "de cette surface, hors obstacles",
-    "capacity": "Puissance"
+    "capacity": "Puissance",
+    "title": "Configurateur PV",
+    "hint": "Cliquez sur un toit ou un mur pour ajouter du PV. Cliquez à nouveau pour le retirer.",
+    "summary": {
+      "capacity": "Puissance",
+      "count": "{installed} sur {total}",
+      "surfaces": "Surfaces avec PV",
+      "panelArea": "Surface de modules"
+    },
+    "geometry": "{tilt}° · orienté {azimuth}° · {area} m²",
+    "upTo": "jusqu'à {kwp} kWp",
+    "useSuggested": "Utiliser les surfaces suggérées",
+    "legend": {
+      "installed": "PV installé",
+      "suggested": "Suggérée",
+      "available": "Disponible"
+    },
+    "card": {
+      "fromModel": "L'inclinaison, l'orientation et l'aire viennent du modèle 3D du bâtiment.",
+      "layout": "Disposition des modules dans la part utilisable de la surface",
+      "panels": "{kwp} kWp sur {area} m² de modules",
+      "remove": "Retirer le PV",
+      "done": "Terminé",
+      "add": "Ajouter du PV sur cette surface"
+    },
+    "hover": {
+      "add": "Cliquer pour ajouter du PV",
+      "remove": "Cliquer pour retirer le PV"
+    }
   },
   "tech": {
     "none": "Aucune technologie sur ce bâtiment.",

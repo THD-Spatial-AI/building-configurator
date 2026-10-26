@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, polygonArea, surfacesFromGeometryResponse } from './surfaceMesh';
+import { buildSurfaceGroup, computeOrigin, insetGeometry, isEnvelopeDetached, polygonArea, surfacesFromGeometryResponse } from './surfaceMesh';
 import type { BuildingGeometry } from './enerplanet';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
@@ -133,5 +133,42 @@ describe('polygonArea', () => {
 
   it('returns 0 for a ring with too few vertices', () => {
     expect(polygonArea([[[0, 0, 0], [1, 0, 0], [0, 0, 0]]])).toBe(0);
+  });
+});
+
+describe('insetGeometry', () => {
+  function meshArea(geometry: THREE.BufferGeometry): number {
+    const position = geometry.getAttribute('position');
+    const index = geometry.getIndex()!;
+    const [a, b, c] = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+    let area = 0;
+    for (let i = 0; i < index.count; i += 3) {
+      a.fromBufferAttribute(position, index.getX(i));
+      b.fromBufferAttribute(position, index.getX(i + 1));
+      c.fromBufferAttribute(position, index.getX(i + 2));
+      area += new THREE.Triangle(a, b, c).getArea();
+    }
+    return area;
+  }
+
+  const rectangle = (): THREE.BufferGeometry => {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 10, 0, 0, 10, 0, 6, 0, 0, 6], 3));
+    geometry.setIndex([0, 1, 2, 0, 2, 3]);
+    return geometry;
+  };
+
+  it('shrinks the surface to the usable share of its area, about its middle', () => {
+    const inset = insetGeometry(rectangle(), 0.64);
+    expect(meshArea(inset)).toBeCloseTo(60 * 0.64);
+    inset.computeBoundingBox();
+    const centre = inset.boundingBox!.getCenter(new THREE.Vector3());
+    expect(centre.distanceTo(new THREE.Vector3(5, 0, 3))).toBeLessThan(1e-5);
+  });
+
+  it('leaves the original geometry as it was', () => {
+    const original = rectangle();
+    insetGeometry(original, 0.25);
+    expect(meshArea(original)).toBeCloseTo(60);
   });
 });

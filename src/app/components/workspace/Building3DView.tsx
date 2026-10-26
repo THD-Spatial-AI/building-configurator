@@ -21,7 +21,7 @@ import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePopover, anchorCard } from './SurfacePopover';
-import { PvPanel, PvSurfaceCard, pvRenderSets, type PvMode } from './PvMode';
+import { PvHintPill, PvHoverCard, PvLegend, PvPanel, PvSurfaceCard, pvRenderSets, type PvMode } from './PvMode';
 import { TechnologyCards, type Technologies } from './TechnologyCards';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
@@ -63,6 +63,12 @@ export interface Building3DViewProps {
   pv?: PvMode;
   /** Surfaces the host has PV on, drawn with panels in the normal view. Ignored in PV mode, which draws its own. */
   pvSurfaceIds?: readonly string[];
+  /**
+   * Usable share (0 to 1) of each surface in pvSurfaceIds, so the normal view
+   * draws modules over that share; a surface missing here is drawn at 80 %.
+   * Ignored in PV mode, which takes each surface's usableShare.
+   */
+  pvSurfaceShares?: Readonly<Record<string, number>>;
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
@@ -75,7 +81,7 @@ export interface Building3DViewProps {
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, technologies, defaultMode = 'basic', language: languageCode,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, pvSurfaceShares, technologies, defaultMode = 'basic', language: languageCode,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
@@ -101,6 +107,8 @@ export function Building3DView({
   const [exitPromptOpen, setExitPromptOpen] = useState(false);
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
+  /** The PV surface under the pointer in PV mode, for its hover card. */
+  const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
 
   const openSurface = (next: SurfaceSelection | null) => {
     setSelected(next);
@@ -156,6 +164,13 @@ export function Building3DView({
   const surfaces = geometry?.surfaces ?? [];
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
   const installedPvIds = useMemo(() => new Set(pvSurfaceIds ?? []), [pvSurfaceIds]);
+  const pvShares = useMemo(
+    () => (pv ? Object.fromEntries(Object.entries(pv.surfaces).map(([id, surface]) => [id, surface.usableShare])) : pvSurfaceShares),
+    [pv, pvSurfaceShares],
+  );
+  const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
+    setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
+  }, [pv]);
 
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
@@ -198,7 +213,10 @@ export function Building3DView({
     }
   };
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => onKeyRef.current(e);
+    // A view mounted by a key press (Escape leaving PV mode opens the normal
+    // view) is still in that press's dispatch and would take it as its own.
+    const mountedAt = performance.now();
+    const onKey = (e: KeyboardEvent) => { if (e.timeStamp >= mountedAt) onKeyRef.current(e); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
@@ -321,7 +339,9 @@ export function Building3DView({
               invalidIds={invalidIds}
               visibleIds={envelopeIds}
               pvIds={pvSets ? pvSets.installed : installedPvIds}
+              pvShares={pvShares}
               candidateIds={pvSets?.suggested}
+              onHoverSurface={pv ? hoverPv : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
               onSelectSurface={pv
@@ -344,12 +364,17 @@ export function Building3DView({
             </div>
           )}
 
-          {invalidIds.size > 0 && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-card/90 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm">
-              <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-              {t('view.invalidSurfaces', { count: invalidIds.size })}
-            </div>
-          )}
+          {pv && geometry && !geometry.note && <PvHintPill />}
+
+          <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
+            {invalidIds.size > 0 && (
+              <div className="flex items-center gap-1.5 rounded-md bg-card/90 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm">
+                <span className="inline-block size-2.5 rounded-sm bg-destructive" />
+                {t('view.invalidSurfaces', { count: invalidIds.size })}
+              </div>
+            )}
+            {pv && <PvLegend />}
+          </div>
 
           {attribution && (
             <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm">
@@ -447,6 +472,10 @@ export function Building3DView({
         </div>
       </div>
 
+      {pv && hover && !selected && pv.surfaces[hover.id] && (
+        <PvHoverCard surfaceId={hover.id} surface={pv.surfaces[hover.id]} elements={elements} at={hover.at} />
+      )}
+
       {pv && selected && pv.surfaces[selected.id] && (
         <SurfacePopover
           at={selected.at}
@@ -455,7 +484,14 @@ export function Building3DView({
           subtitle={selectedElement ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m²` : pv.surfaces[selected.id].label}
           onClose={() => openSurface(null)}
         >
-          <PvSurfaceCard key={selected.id} surfaceId={selected.id} surface={pv.surfaces[selected.id]} pv={pv} />
+          <PvSurfaceCard
+            key={selected.id}
+            surfaceId={selected.id}
+            surface={pv.surfaces[selected.id]}
+            pv={pv}
+            elements={elements}
+            onClose={() => openSurface(null)}
+          />
         </SurfacePopover>
       )}
 

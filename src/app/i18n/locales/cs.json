@@ -147,7 +147,35 @@
     "thisSurface": "FV na této ploše",
     "usableShare": "Využitelný podíl",
     "usableShareNote": "této plochy po odečtení překážek",
-    "capacity": "Výkon"
+    "capacity": "Výkon",
+    "title": "Konfigurátor FV",
+    "hint": "Klikněte na střechu nebo stěnu a přidejte FV. Dalším kliknutím ji odeberete.",
+    "summary": {
+      "capacity": "Výkon",
+      "count": "{installed} z {total}",
+      "surfaces": "Plochy s FV",
+      "panelArea": "Plocha panelů"
+    },
+    "geometry": "{tilt}° · orientace {azimuth}° · {area} m²",
+    "upTo": "až {kwp} kWp",
+    "useSuggested": "Použít navržené plochy",
+    "legend": {
+      "installed": "FV instalována",
+      "suggested": "Navrženo",
+      "available": "Dostupné"
+    },
+    "card": {
+      "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",
+      "layout": "Rozmístění panelů ve využitelném podílu plochy",
+      "panels": "{kwp} kWp na {area} m² panelů",
+      "remove": "Odebrat FV",
+      "done": "Hotovo",
+      "add": "Přidat FV na tuto plochu"
+    },
+    "hover": {
+      "add": "Kliknutím přidáte FV",
+      "remove": "Kliknutím odeberete FV"
+    }
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",

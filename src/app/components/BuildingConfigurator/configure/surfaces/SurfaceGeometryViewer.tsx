@@ -20,10 +20,17 @@ interface SurfaceGeometryViewerProps {
   invalidIds?: ReadonlySet<string>;
   /** Surfaces to render. Undefined renders all of them. */
   visibleIds?: ReadonlySet<string>;
-  /** Surfaces carrying PV, drawn with an array over them. */
+  /** Surfaces carrying PV, drawn with modules over their usable share. */
   pvIds?: ReadonlySet<string>;
-  /** Surfaces suggested for PV, lit and outlined so they invite a click. */
+  /** Usable share (0 to 1) of each PV surface; a surface missing here uses DEFAULT_PV_SHARE. */
+  pvShares?: Readonly<Record<string, number>>;
+  /** Surfaces suggested for PV: a light fill and a dashed outline, no modules. */
   candidateIds?: ReadonlySet<string>;
+  /**
+   * The surface under the pointer, or null when it leaves one, with the
+   * pointer's client position. Fires on a change of surface only.
+   */
+  onHoverSurface?: (id: string | null, at?: { x: number; y: number }) => void;
   /** Turns the model to face this surface. Acts whenever `focusToken` changes,
    *  so picking the same surface again re-frames it. */
   focusId?: string | null;
@@ -41,9 +48,11 @@ interface SurfaceGeometryViewerProps {
 
 const HIGHLIGHT_COLOR = 0x2563eb;
 const INVALID_COLOR = 0x991b1b;
-/** A surface suggested for PV: lit and outlined so it can be picked out at a glance. */
-const CANDIDATE_COLOR = 0x92610a;
-const CANDIDATE_EDGE_COLOR = 0xf59e0b;
+/** A surface suggested for PV: a light fill inside a dashed outline. */
+const CANDIDATE_FILL = 0xf2d9b8;
+const CANDIDATE_EDGE_COLOR = 0xb45309;
+/** The usable share drawn for a PV surface the host gives none for. */
+const DEFAULT_PV_SHARE = 0.8;
 const EDGE_COLOR = 0x1e293b;
 const INVALID_EDGE_COLOR = 0xdc2626;
 // A plain DOM 'click' fires on pointerup regardless of drag distance, so an
@@ -61,11 +70,13 @@ export function SurfaceGeometryViewer({
   invalidIds,
   visibleIds,
   pvIds,
+  pvShares,
   candidateIds,
   focusId,
   focusToken,
   onSelectSurface,
   onSelectedAnchorMove,
+  onHoverSurface,
 }: SurfaceGeometryViewerProps) {
   const t = useT();
   const mountRef = useRef<HTMLDivElement>(null);
@@ -87,6 +98,8 @@ export function SurfaceGeometryViewer({
   }, [focusToken, focusId]);
 
   useEffect(() => { selectRef.current = onSelectSurface; });
+  const hoverRef = useRef(onHoverSurface);
+  useEffect(() => { hoverRef.current = onHoverSurface; });
   useEffect(() => { anchorMoveRef.current = onSelectedAnchorMove; });
 
   useEffect(() => {
@@ -131,7 +144,8 @@ export function SurfaceGeometryViewer({
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    function selectAt(clientX: number, clientY: number) {
+    /** The id of the surface at a client position, or null. */
+    function surfaceAt(clientX: number, clientY: number): string | null {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
@@ -140,8 +154,24 @@ export function SurfaceGeometryViewer({
       // unless its hits are dropped here.
       const hit = raycaster.intersectObjects(groups, true)
         .find((h) => h.object.name === 'surface-fill' && h.object.parent?.visible !== false);
-      const group = hit?.object.parent as THREE.Group | undefined;
-      selectRef.current?.((group?.userData.id as string | undefined) ?? null, { x: clientX, y: clientY });
+      return ((hit?.object.parent as THREE.Group | undefined)?.userData.id as string | undefined) ?? null;
+    }
+    function selectAt(clientX: number, clientY: number) {
+      selectRef.current?.(surfaceAt(clientX, clientY), { x: clientX, y: clientY });
+    }
+
+    let hovered: string | null = null;
+    function handlePointerMove(event: PointerEvent) {
+      if (!hoverRef.current || event.buttons !== 0 || event.pointerType !== 'mouse') return;
+      const id = surfaceAt(event.clientX, event.clientY);
+      if (id === hovered) return;
+      hovered = id;
+      hoverRef.current(id, { x: event.clientX, y: event.clientY });
+    }
+    function handlePointerLeave() {
+      if (hovered === null) return;
+      hovered = null;
+      hoverRef.current?.(null);
     }
 
     let pointerDown: { x: number; y: number; touch: boolean } | null = null;
@@ -160,6 +190,8 @@ export function SurfaceGeometryViewer({
     }
     renderer.domElement.addEventListener('pointerdown', handlePointerDown);
     renderer.domElement.addEventListener('pointerup', handlePointerUp);
+    renderer.domElement.addEventListener('pointermove', handlePointerMove);
+    renderer.domElement.addEventListener('pointerleave', handlePointerLeave);
 
     /** Eases a turn around the target rather than sliding the camera through it. */
     let flight: { from: THREE.Spherical; to: THREE.Spherical; progress: number } | null = null;
@@ -299,6 +331,8 @@ export function SurfaceGeometryViewer({
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener('pointerdown', handlePointerDown);
       renderer.domElement.removeEventListener('pointerup', handlePointerUp);
+      renderer.domElement.removeEventListener('pointermove', handlePointerMove);
+      renderer.domElement.removeEventListener('pointerleave', handlePointerLeave);
       controls.dispose();
       groups.forEach((group) => {
         group.children.forEach((child) => {
@@ -322,30 +356,49 @@ export function SurfaceGeometryViewer({
       const invalid = invalidIds?.has(id) ?? false;
       group.visible = visibleIds ? visibleIds.has(id) : true;
 
+      const candidate = !invalid && (candidateIds?.has(id) ?? false);
       const fill = group.children.find((c) => c.name === 'surface-fill') as THREE.Mesh | undefined;
       const fillMaterial = fill?.material as THREE.MeshStandardMaterial | undefined;
+      if (fill && fill.userData.baseColor === undefined) fill.userData.baseColor = fillMaterial?.color.getHex();
+      fillMaterial?.color.setHex(candidate ? CANDIDATE_FILL : fill?.userData.baseColor);
       fillMaterial?.emissive.setHex(
-        id === selectedId ? HIGHLIGHT_COLOR
-          : invalid ? INVALID_COLOR
-          : candidateIds?.has(id) ? CANDIDATE_COLOR
-          : 0x000000,
+        id === selectedId ? HIGHLIGHT_COLOR : invalid ? INVALID_COLOR : 0x000000,
       );
 
-      // The array itself, added once per surface and kept for as long as the
-      // scene lives — toggling visibility is cheaper than rebuilding geometry.
+      // Modules over the usable share, kept while the scene lives and rebuilt
+      // only when the share changes: toggling visibility is cheaper.
       let panel = group.children.find((c) => c.name === 'pv-panel') as THREE.Mesh | undefined;
       const hasPv = pvIds?.has(id) ?? false;
+      const share = pvShares?.[id] ?? DEFAULT_PV_SHARE;
+      if (hasPv && panel && panel.userData.share !== share) {
+        group.remove(panel);
+        panel.geometry.dispose();
+        panel = undefined;
+      }
       if (hasPv && !panel && fill) {
-        panel = buildPvPanel(fill.geometry);
+        panel = buildPvPanel(fill.geometry, share);
+        panel.userData.share = share;
         group.add(panel);
       }
       if (panel) panel.visible = hasPv;
 
-      const edges = group.children.find((c) => c instanceof THREE.LineSegments) as THREE.LineSegments | undefined;
+      const edges = group.children.find((c) => c.name !== 'candidate-outline' && c instanceof THREE.LineSegments) as THREE.LineSegments | undefined;
       const edgeMaterial = edges?.material as THREE.LineBasicMaterial | undefined;
-      edgeMaterial?.color.setHex(
-        invalid ? INVALID_EDGE_COLOR : candidateIds?.has(id) ? CANDIDATE_EDGE_COLOR : EDGE_COLOR,
-      );
+      edgeMaterial?.color.setHex(invalid ? INVALID_EDGE_COLOR : EDGE_COLOR);
+      if (edges) edges.visible = !candidate;
+
+      // A dashed copy of the edges, made the first time the surface is suggested.
+      let outline = group.children.find((c) => c.name === 'candidate-outline') as THREE.LineSegments | undefined;
+      if (candidate && !outline && edges) {
+        outline = new THREE.LineSegments(
+          edges.geometry,
+          new THREE.LineDashedMaterial({ color: CANDIDATE_EDGE_COLOR, dashSize: 0.6, gapSize: 0.4 }),
+        );
+        outline.computeLineDistances();
+        outline.name = 'candidate-outline';
+        group.add(outline);
+      }
+      if (outline) outline.visible = candidate;
 
       // The surface's middle, not the point that was clicked: it stays put as
       // the model turns, which is what an editor beside it should track.
@@ -362,7 +415,7 @@ export function SurfaceGeometryViewer({
         anchorDirtyRef.current = true;
       }
     }
-  }, [surfaces, selectedId, invalidIds, visibleIds, pvIds, candidateIds]);
+  }, [surfaces, selectedId, invalidIds, visibleIds, pvIds, pvShares, candidateIds]);
 
   return (
     <div className="bg-muted" style={{ width: '100%', height: '100%', position: 'relative' }}>

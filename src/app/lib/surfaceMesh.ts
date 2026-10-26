@@ -170,7 +170,7 @@ function panelTexture(): THREE.Texture {
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#16304f';
+  ctx.fillStyle = '#1f3a5f';
   ctx.fillRect(0, 0, size, size);
 
   // Cells: 6 across, 10 down on a portrait module.
@@ -191,7 +191,7 @@ function panelTexture(): THREE.Texture {
     ctx.stroke();
   }
 
-  ctx.strokeStyle = '#b9cbdd';
+  ctx.strokeStyle = '#9fb3cc';
   ctx.lineWidth = 7;
   ctx.strokeRect(0, 0, size, size);
 
@@ -236,8 +236,29 @@ function applyModuleUvs(geometry: THREE.BufferGeometry) {
  * polygonOffset rather than a position offset along the normal: city2tabula
  * winding is inconsistent, so "in front" cannot be derived from the geometry.
  */
-export function buildPvPanel(surface: THREE.BufferGeometry): THREE.Mesh {
+/**
+ * A copy of a surface shrunk about the mean of its vertices so its area is
+ * `share` of the original: scaling by the square root scales area by share.
+ */
+export function insetGeometry(surface: THREE.BufferGeometry, share: number): THREE.BufferGeometry {
   const geometry = surface.clone();
+  const position = geometry.getAttribute('position');
+  const centre = new THREE.Vector3();
+  const vertex = new THREE.Vector3();
+  for (let i = 0; i < position.count; i++) centre.add(vertex.fromBufferAttribute(position, i));
+  centre.divideScalar(position.count);
+  const scale = Math.sqrt(Math.min(1, Math.max(0, share)));
+  for (let i = 0; i < position.count; i++) {
+    vertex.fromBufferAttribute(position, i).sub(centre).multiplyScalar(scale).add(centre);
+    position.setXYZ(i, vertex.x, vertex.y, vertex.z);
+  }
+  position.needsUpdate = true;
+  return geometry;
+}
+
+/** Modules over the usable share of a surface, the roof showing around them. */
+export function buildPvPanel(surface: THREE.BufferGeometry, share = 1): THREE.Mesh {
+  const geometry = insetGeometry(surface, share);
   applyModuleUvs(geometry);
 
   const material = new THREE.MeshStandardMaterial({

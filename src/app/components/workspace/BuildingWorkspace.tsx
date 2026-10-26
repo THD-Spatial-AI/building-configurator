@@ -103,6 +103,10 @@ function FixtureView({ building, geometry, language }: Pick<Parameters<typeof Bu
     () => Object.entries(pv.surfaces).filter(([, surface]) => surface.state === 'installed').map(([id]) => id),
     [pv.surfaces],
   );
+  const pvShares = useMemo(
+    () => Object.fromEntries(Object.entries(pv.surfaces).map(([id, surface]) => [id, surface.usableShare])),
+    [pv.surfaces],
+  );
 
   if (!open) {
     return (
@@ -144,6 +148,7 @@ function FixtureView({ building, geometry, language }: Pick<Parameters<typeof Bu
       seriesCsvUrl={fixtureSeriesCsvUrl(FIXTURE_OSM_ID)}
       attribution={FIXTURE_ATTRIBUTION}
       pvSurfaceIds={installedPvIds}
+      pvSurfaceShares={pvShares}
       technologies={technologies}
       onExit={(edited) => {
         if (edited) setSaved(edited);

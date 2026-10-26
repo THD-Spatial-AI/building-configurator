@@ -141,7 +141,35 @@
     "thisSurface": "FV su questa superficie",
     "usableShare": "Quota utilizzabile",
     "usableShareNote": "di questa superficie, al netto degli ostacoli",
-    "capacity": "Potenza"
+    "capacity": "Potenza",
+    "title": "Configuratore FV",
+    "hint": "Fai clic su un tetto o una parete per aggiungere FV. Fai di nuovo clic per rimuoverlo.",
+    "summary": {
+      "capacity": "Potenza",
+      "count": "{installed} di {total}",
+      "surfaces": "Superfici con FV",
+      "panelArea": "Superficie moduli"
+    },
+    "geometry": "{tilt}° · esposta a {azimuth}° · {area} m²",
+    "upTo": "fino a {kwp} kWp",
+    "useSuggested": "Usa le superfici consigliate",
+    "legend": {
+      "installed": "FV installato",
+      "suggested": "Consigliata",
+      "available": "Disponibile"
+    },
+    "card": {
+      "fromModel": "Inclinazione, esposizione e area provengono dal modello 3D dell'edificio.",
+      "layout": "Disposizione dei moduli nella quota utilizzabile della superficie",
+      "panels": "{kwp} kWp su {area} m² di moduli",
+      "remove": "Rimuovi FV",
+      "done": "Fatto",
+      "add": "Aggiungi FV a questa superficie"
+    },
+    "hover": {
+      "add": "Fai clic per aggiungere FV",
+      "remove": "Fai clic per rimuovere FV"
+    }
   },
   "tech": {
     "none": "Nessuna tecnologia su questo edificio.",

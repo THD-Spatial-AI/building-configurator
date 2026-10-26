@@ -95,7 +95,8 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
 | `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
-| `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with panels in the normal view. Ignored in PV mode |
+| `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with modules in the normal view. Ignored in PV mode |
+| `pvSurfaceShares` | Optional. Usable share, 0 to 1, of each surface in `pvSurfaceIds`; modules are drawn over that share of the surface. A surface missing here is drawn at 0.8. Ignored in PV mode, which uses `surfaces[id].usableShare` |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
@@ -172,6 +173,7 @@ const pv = useMemo<PvMode>(() => ({
 | `surfaces[id].state` | `installed` draws panels on the surface, `suggested` lights and outlines it, `available` draws it as usual |
 | `surfaces[id].usableShare` | Share of the surface usable for panels, 0 to 1, shown as a percentage |
 | `surfaces[id].label` | Optional. Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. An element's own label takes precedence |
+| `surfaces[id].tilt`, `azimuth`, `area` | Optional. Degrees from horizontal, degrees clockwise from north (180 is south), m². Shown in the surface list and card for a surface that is not among the building's elements; an element's own geometry takes precedence |
 | `surfaces[id].maxKwp` | Capacity of the panels at the current usable share, in kWp, shown on its card. Pass the new value after `onShareChange` |
 | `notice` | Shown for as long as PV mode is open. Pass it in the user's language |
 | `typeLabel` | Name of the PV type, shown at the top of the panel |

@@ -77,3 +77,53 @@ describe('PvSurfaceCard', () => {
     expect(suggested).not.toContain('Usable share');
   });
 });
+
+describe('PvPanel layout', () => {
+  const html = renderToStaticMarkup(<PvPanel pv={pv} elements={elements} onSelect={() => {}} />);
+
+  it('titles the panel and says how to add PV', () => {
+    expect(html).toContain('PV configurator');
+    expect(html).toContain('Click a roof or wall to add PV. Click it again to remove it.');
+  });
+
+  it('sums the installed capacity and panel area and counts the surfaces with PV', () => {
+    expect(html).toContain('7.2 kWp');
+    expect(html).toContain('1 of 3');
+    expect(html).toContain('24 m²');
+  });
+
+  it('gives each surface its geometry, and the reachable capacity where it has no PV', () => {
+    expect(html).toContain('35° · facing 180° · 40 m²');
+    expect(html).toContain('up to 4.1 kWp');
+    expect(html).toContain('Suggested');
+  });
+
+  it('offers to use the suggested surfaces only when there are any', () => {
+    expect(html).toContain('Use suggested surfaces');
+    const none = renderToStaticMarkup(
+      <PvPanel pv={{ ...pv, surfaces: { r1: pv.surfaces.r1 } }} elements={elements} onSelect={() => {}} />,
+    );
+    expect(none).toMatch(/<button[^>]*disabled=""[^>]*>Use suggested surfaces/);
+  });
+});
+
+describe('PvSurfaceCard layout', () => {
+  it('shows the surface geometry from the 3D model and offers to add PV to a suggested surface', () => {
+    const html = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="r2" surface={pv.surfaces.r2} pv={pv} elements={elements} onClose={() => {}} />,
+    );
+    expect(html).toContain('35°');
+    expect(html).toContain('0° N');
+    expect(html).toContain('40 m²');
+    expect(html).toContain('Add PV to this surface');
+  });
+
+  it('shows the panels on an installed surface and offers to remove them', () => {
+    const html = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} onClose={() => {}} />,
+    );
+    expect(html).toContain('7.2 kWp on 24 m² of panels');
+    expect(html).toContain('Remove PV');
+    expect(html).toContain('Done');
+  });
+});

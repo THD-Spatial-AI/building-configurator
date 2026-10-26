@@ -4,6 +4,23 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Added
+
+- PV mode is redesigned. The panel has a "PV configurator" title, a hint that clicking a roof or wall adds or removes PV (also shown over the 3D view), totals for capacity, surfaces with PV and panel area, and per surface its tilt, facing, area and capacity ("up to" without PV) with a Suggested chip and a switch. "Use suggested surfaces" turns on every suggested surface through `onToggle`. The host's `notice` moves below the list.
+- Hovering a surface in PV mode shows its name, geometry, state and what a click does. A clicked surface's card shows its tilt, facing and area, the PV switch, the usable share, a drawing of the modules with their capacity and panel area, and Remove PV and Done; a suggested surface without PV offers "Add PV to this surface".
+- In 3D, modules are drawn over the surface's usable share with the roof around them, suggested surfaces have a light fill and a dashed orange outline, and a legend explains the three states.
+- `PvSurface` takes optional `tilt`, `azimuth` and `area` for a surface that is not among the building's elements. `Building3DView` takes an optional `pvSurfaceShares` so the normal view draws modules over each surface's usable share.
+
+### Changed
+
+- Hot water is shown in red and cooking gas in violet in the energy overview.
+
+### Fixed
+
+- Leaving PV mode with Escape also closed the normal view that replaced it: the view mounted by the key press took the same press. A view now ignores key presses from before it mounted.
+
 ## [0.12.0] - 2026-10-23
 
 ### Added

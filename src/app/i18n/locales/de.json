@@ -141,7 +141,35 @@
     "thisSurface": "PV auf dieser Fläche",
     "usableShare": "Nutzbarer Anteil",
     "usableShareNote": "dieser Fläche, abzüglich Verschattung",
-    "capacity": "Leistung"
+    "capacity": "Leistung",
+    "title": "PV-Konfigurator",
+    "hint": "Klicken Sie auf ein Dach oder eine Wand, um PV hinzuzufügen. Erneut klicken entfernt sie.",
+    "summary": {
+      "capacity": "Leistung",
+      "count": "{installed} von {total}",
+      "surfaces": "Flächen mit PV",
+      "panelArea": "Modulfläche"
+    },
+    "geometry": "{tilt}° · nach {azimuth}° · {area} m²",
+    "upTo": "bis {kwp} kWp",
+    "useSuggested": "Vorgeschlagene Flächen nutzen",
+    "legend": {
+      "installed": "PV installiert",
+      "suggested": "Vorgeschlagen",
+      "available": "Verfügbar"
+    },
+    "card": {
+      "fromModel": "Neigung, Ausrichtung und Fläche stammen aus dem 3D-Modell des Gebäudes.",
+      "layout": "Modulbelegung innerhalb des nutzbaren Anteils der Fläche",
+      "panels": "{kwp} kWp auf {area} m² Modulfläche",
+      "remove": "PV entfernen",
+      "done": "Fertig",
+      "add": "PV auf dieser Fläche hinzufügen"
+    },
+    "hover": {
+      "add": "Klicken, um PV hinzuzufügen",
+      "remove": "Klicken, um PV zu entfernen"
+    }
   },
   "tech": {
     "none": "Keine Technologien an diesem Gebäude.",
