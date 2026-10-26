@@ -724,5 +724,12 @@
     "comparison": {
       "lastRun": "la última simulación completa"
     }
+  },
+  "storeys": {
+    "title": "Plantas modeladas",
+    "hint": "La planta 1 es la planta baja. Excluya las plantas que no forman parte de este modelo, como una tienda en la planta baja; la superficie y la envolvente cuentan solo las plantas modeladas.",
+    "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
+    "storey": "Planta {number}",
+    "floorArea": "Superficie modelada"
   }
 }

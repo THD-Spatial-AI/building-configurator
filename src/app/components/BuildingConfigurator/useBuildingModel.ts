@@ -576,8 +576,25 @@ export function useBuildingModel(
     });
   };
 
-  const setGen = (key: string, value: any) =>
+  const setGen = (key: string, value: any) => {
+    // A new storey count moves every storey band, so the storeys modelled no longer apply.
+    if (key === 'storeys' && value !== general.storeys && general.storeysModelled) {
+      setStoreysModelled(null, {});
+    }
     setGeneralRaw((prev) => ({ ...prev, [key]: value }));
+  };
+
+  /**
+   * Models only the given storeys (1-based), with each surface's share inside
+   * them from storeyShares; null models them all again.
+   */
+  const setStoreysModelled = (modelled: number[] | null, shares: Record<string, number>) => {
+    setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => {
+      const { modelledShare: _, ...whole } = el;
+      return [id, modelled ? { ...whole, modelledShare: shares[id] ?? modelled.length / Math.max(1, general.storeys) } : whole];
+    })));
+    setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled }));
+  };
 
   // --- Model-wide actions -----------------------------------------------------
 
@@ -742,7 +759,7 @@ export function useBuildingModel(
     snapshotRows, displayEnergyTotals,
     // handlers
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
-    setRefurbishment, setTypeUValue, setTypeLossFactor, undo,
+    setRefurbishment, setTypeUValue, setTypeLossFactor, setStoreysModelled, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
     setUploadError, setGroundTruthTimeseries,
   };
@@ -783,7 +800,7 @@ export function withEdits(
   elements: Record<string, BuildingElement>,
   general: typeof DEFAULT_GENERAL,
 ): BuildingState {
-  const base = building.thematic?.identity ?? building.identity;
+  const { storeysModelled: _loaded, ...base } = building.thematic?.identity ?? building.identity;
   const identity = {
     ...base,
     label: general.buildingName || base.label,
@@ -793,6 +810,7 @@ export function withEdits(
     floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
     roomHeight: general.roomHeight,
     storeys: general.storeys,
+    ...(general.storeysModelled ? { storeysModelled: general.storeysModelled } : {}),
   };
   return {
     ...building,

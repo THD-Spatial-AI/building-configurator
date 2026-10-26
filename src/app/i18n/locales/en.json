@@ -718,5 +718,12 @@
     "comparison": {
       "lastRun": "the last full simulation"
     }
+  },
+  "storeys": {
+    "title": "Storeys modelled",
+    "hint": "Storey 1 is the ground floor. Leave out storeys that are not part of this model, such as a shop on the ground floor; floor area and envelope count the modelled storeys only.",
+    "noGeometry": "Storeys can be left out once the 3D model has loaded.",
+    "storey": "Storey {number}",
+    "floorArea": "Floor area modelled"
   }
 }

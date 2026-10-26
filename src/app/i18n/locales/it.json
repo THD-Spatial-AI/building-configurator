@@ -718,5 +718,12 @@
     "comparison": {
       "lastRun": "all'ultima simulazione completa"
     }
+  },
+  "storeys": {
+    "title": "Piani modellati",
+    "hint": "Il piano 1 è il piano terra. Escludi i piani che non fanno parte di questo modello, come un negozio al piano terra; superficie e involucro contano solo i piani modellati.",
+    "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
+    "storey": "Piano {number}",
+    "floorArea": "Superficie modellata"
   }
 }

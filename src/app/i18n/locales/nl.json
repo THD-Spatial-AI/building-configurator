@@ -718,5 +718,12 @@
     "comparison": {
       "lastRun": "de laatste volledige simulatie"
     }
+  },
+  "storeys": {
+    "title": "Gemodelleerde verdiepingen",
+    "hint": "Verdieping 1 is de begane grond. Laat verdiepingen weg die niet bij dit model horen, zoals een winkel op de begane grond; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
+    "storey": "Verdieping {number}",
+    "floorArea": "Gemodelleerd vloeroppervlak"
   }
 }

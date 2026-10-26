@@ -718,5 +718,12 @@
     "comparison": {
       "lastRun": "die letzte vollständige Simulation"
     }
+  },
+  "storeys": {
+    "title": "Modellierte Geschosse",
+    "hint": "Geschoss 1 ist das Erdgeschoss. Lassen Sie Geschosse weg, die nicht zu diesem Modell gehören, etwa einen Laden im Erdgeschoss; Fläche und Hülle zählen nur die modellierten Geschosse.",
+    "noGeometry": "Geschosse lassen sich weglassen, sobald das 3D-Modell geladen ist.",
+    "storey": "Geschoss {number}",
+    "floorArea": "Modellierte Fläche"
   }
 }

@@ -35,6 +35,8 @@ export const DEFAULT_GENERAL = {
   floorArea:          90.9, // per-storey footprint; 4 storeys ≈ 363.4 m² total
   roomHeight:         2.7,
   storeys:            4,
+  /** The storeys in the model, 1-based from the ground; null models them all. */
+  storeysModelled:    null as number[] | null,
   // The thermal values are the v6-draft request schema's defaults.
   n_air_infiltration: 0.5,
   n_air_use:          0.5,
@@ -87,6 +89,7 @@ export function generalFrom(building?: BuildingState): typeof DEFAULT_GENERAL {
     floorArea:        identity.floorArea ? identity.floorArea / Math.max(1, storeys) : DEFAULT_GENERAL.floorArea,
     roomHeight:       identity.roomHeight || DEFAULT_GENERAL.roomHeight,
     storeys,
+    storeysModelled:  identity.storeysModelled ?? null,
   };
 }
 

@@ -724,5 +724,12 @@
     "comparison": {
       "lastRun": "la dernière simulation complète"
     }
+  },
+  "storeys": {
+    "title": "Étages modélisés",
+    "hint": "L'étage 1 est le rez-de-chaussée. Excluez les étages qui ne font pas partie de ce modèle, comme un commerce au rez-de-chaussée ; la surface et l'enveloppe ne comptent que les étages modélisés.",
+    "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
+    "storey": "Étage {number}",
+    "floorArea": "Surface modélisée"
   }
 }
