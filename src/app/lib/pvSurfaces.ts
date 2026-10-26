@@ -1,9 +1,10 @@
-// Figures for the PV panel and cards, from the host's PV surfaces and the
-// building's own elements.
+// Figures for the PV overview and surface panel, from the host's PV surfaces
+// and the building's own elements.
 
 import type { PvSurface } from '@/app/components/workspace/PvMode';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
-import { pvLayout, type PvLayout, type PvLayoutOptions, type PvModule } from './pvLayout';
+import { FLAT_MAX_TILT_DEG, pvLayout, type PvLayout, type PvLayoutOptions, type PvModule } from './pvLayout';
+import { pvCosts, type TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
 
 export interface PvGeometry {
@@ -13,7 +14,11 @@ export interface PvGeometry {
   azimuth: number;
   /** m² */
   area: number;
+  /** Under 10°, or marked horizontal (azimuth -1): shown as flat, with no facing. */
+  flat: boolean;
 }
+
+const isFlat = (tilt: number, azimuth: number) => azimuth === -1 || tilt < FLAT_MAX_TILT_DEG;
 
 /**
  * A PV surface's tilt, facing and area: the building's own element where it
@@ -25,44 +30,55 @@ export function pvGeometry(
   surface: PvSurface | undefined,
 ): PvGeometry | null {
   const element = elements[id];
-  if (element) return { tilt: element.tilt, azimuth: element.azimuth, area: element.area };
+  if (element) return { tilt: element.tilt, azimuth: element.azimuth, area: element.area, flat: isFlat(element.tilt, element.azimuth) };
   if (surface?.tilt === undefined || surface.azimuth === undefined || surface.area === undefined) return null;
-  return { tilt: surface.tilt, azimuth: surface.azimuth, area: surface.area };
+  return { tilt: surface.tilt, azimuth: surface.azimuth, area: surface.area, flat: isFlat(surface.tilt, surface.azimuth) };
 }
 
-/** The module layout of each surface in `surfaces` that has a polygon among `polygons`. */
+/** The module layout of each surface in `surfaces` that has a polygon among `polygons`, with one module for all or one per surface. */
 export function pvLayouts(
   polygons: readonly SurfacePolygon[],
   surfaces: Readonly<Record<string, PvLayoutOptions>>,
-  module: PvModule,
+  module: PvModule | ((surfaceId: string) => PvModule),
 ): Record<string, PvLayout> {
   const layouts: Record<string, PvLayout> = {};
   for (const polygon of polygons) {
     const options = surfaces[polygon.id];
-    if (options) layouts[polygon.id] = pvLayout(polygon, module, options);
+    if (options) layouts[polygon.id] = pvLayout(polygon, typeof module === 'function' ? module(polygon.id) : module, options);
   }
   return layouts;
 }
 
+/** Adds b to a, where a stays undefined until some value is added. */
+const add = (a: number | undefined, b: number | undefined) => (b === undefined ? a : (a ?? 0) + b);
+
 /**
- * Installed capacity (kWp), panel area (m²) and how many of the offered
- * surfaces carry PV. A surface's module layout counts where it has one, else
- * the host's maxKwp and the usable share of its area.
+ * Installed capacity (kWp), panel area (m²), investment and yearly O&M, and
+ * how many of the offered surfaces carry PV. A surface's module layout counts
+ * where it has one, else the host's maxKwp and the usable share of its area.
+ * Costs come from each surface's product; undefined where none carries them.
  */
 export function pvSummary(
   surfaces: Record<string, PvSurface>,
   elements: Record<string, BuildingElement>,
   layouts: Readonly<Record<string, PvLayout>> = {},
-): { kwp: number; panelArea: number; installed: number; total: number } {
+  productFor: (surfaceId: string) => TechnologyProduct | undefined = () => undefined,
+): { kwp: number; panelArea: number; installed: number; total: number; investment?: number; omPerYear?: number } {
   let kwp = 0;
   let panelArea = 0;
   let installed = 0;
+  let investment: number | undefined;
+  let omPerYear: number | undefined;
   for (const [id, surface] of Object.entries(surfaces)) {
     if (surface.state !== 'installed') continue;
     installed += 1;
     const layout = layouts[id];
-    kwp += layout?.kwp ?? surface.maxKwp;
+    const surfaceKwp = layout?.kwp ?? surface.maxKwp;
+    kwp += surfaceKwp;
     panelArea += layout?.area ?? (elements[id]?.area ?? surface.area ?? 0) * surface.usableShare;
+    const costs = pvCosts(productFor(id), surfaceKwp);
+    investment = add(investment, costs.investment);
+    omPerYear = add(omPerYear, costs.omPerYear);
   }
-  return { kwp, panelArea, installed, total: Object.keys(surfaces).length };
+  return { kwp, panelArea, installed, total: Object.keys(surfaces).length, investment, omPerYear };
 }

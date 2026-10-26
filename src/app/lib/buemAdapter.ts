@@ -629,6 +629,9 @@ export function serializeToBuemFeature(
   // construction_period is a per-country TABULA class code, never a year, so it
   // is not sent. The year travels beside the block as buem.construction_year.
   const constructionYear = Number(identity.constructionYear || general.constructionYear) || 0;
+  // BuEM takes no storey count (n_storeys is deprecated and ignored), so the
+  // count travels beside the block too, to split A_ref again on reopening.
+  const storeys = Number(general.storeys || identity.storeys) || 0;
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
@@ -705,6 +708,7 @@ export function serializeToBuemFeature(
       buem: {
         building,
         ...(constructionYear ? { construction_year: constructionYear } : {}),
+        ...(storeys ? { storeys } : {}),
         ...(refurbishment ? { refurbishment } : {}),
         outputs,
         solver: {
@@ -826,7 +830,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
 
   // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
   // is per-storey, so divide by the building's own storey count.
-  const importedStoreys = Number(bldg.n_storeys ?? 0);
+  const importedStoreys = Number(buem.storeys ?? bldg.n_storeys ?? 0);
   const importedYear = Number(buem.construction_year ?? bldg.construction_period) || 0;
   const general: Record<string, any> = {
     // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.

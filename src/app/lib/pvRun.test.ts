@@ -20,12 +20,18 @@ describe('pvRunRequest', () => {
 
   it('adds the module count, capacity and panel angles of a surface with a layout', () => {
     const layout: PvLayout = {
-      count: 20, kwp: 8, area: 40, tilt: 15, azimuth: 170,
+      count: 20, kwp: 8, area: 40, capped: true, tilt: 15, azimuth: 170,
       mounting: { kind: 'racked', tilt: 15, azimuth: 170 }, orientation: 'portrait', modules: [],
     };
     expect(pvRunRequest('osm-1', elements, ['r1'], { r1: layout })?.surfaces).toEqual([
       { id: 'r1', area: 40, tilt: 35, azimuth: 180, modules: 20, kwp: 8, panel_tilt: 15, panel_azimuth: 170 },
     ]);
+  });
+
+  it('adds the product of each surface that has one', () => {
+    const surfaces = pvRunRequest('osm-1', elements, ['r1', 'r2'], {}, (id) => (id === 'r1' ? 'mono-420' : undefined))?.surfaces;
+    expect(surfaces?.[0]).toMatchObject({ id: 'r1', product_id: 'mono-420' });
+    expect(surfaces?.[1]).not.toHaveProperty('product_id');
   });
 
   it('leaves out a PV surface that is not among the building\'s elements', () => {

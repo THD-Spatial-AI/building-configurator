@@ -1,38 +1,23 @@
-// The dev shell playing host for the Technologies tab: it decides which
-// technologies a building has and holds their values. A real host takes them
-// from its own technology catalogue and stores them.
+// The dev shell playing host for the Technologies tab's technology cards: it
+// decides which technologies besides PV a building has and holds their values.
+// A real host takes them from its own technology catalogue and stores them.
 
 import { useCallback, useMemo, useState } from 'react';
-import type { PvMode } from '../app/components/workspace/PvMode';
 import type { TechCard, Technologies } from '../app/components/workspace/TechnologyCards';
 
 type Values = Record<string, Record<string, number | null>>;
 
 const INITIAL: Values = {
-  pv: { cost: 1100 },
   battery: { power: 10, energy: 20, cost: 600 },
   heat_pump: { size: null, cop: 3.3, cost: 1400 },
 };
 
-/** The building's technologies, with PV's capacity derived from the PV surfaces and its action opening PV mode. */
-export function useDemoTechnologies(pv: PvMode, onEditPv: () => void): Technologies {
+/** The building's technologies other than PV, which has its own overview. */
+export function useDemoTechnologies(): Technologies {
   const [values, setValues] = useState<Values>(INITIAL);
-
-  const installed = Object.values(pv.surfaces).filter((surface) => surface.state === 'installed');
-  const capacity = Number(installed.reduce((sum, surface) => sum + surface.maxKwp, 0).toFixed(1));
 
   const items = useMemo<TechCard[]>(() => {
     const cards: TechCard[] = [];
-    if (values.pv) cards.push({
-      id: 'pv',
-      title: pv.typeLabel,
-      subtitle: `${installed.length} ${installed.length === 1 ? 'surface' : 'surfaces'}`,
-      fields: [
-        { key: 'capacity', label: 'Capacity', value: capacity, unit: 'kWp' },
-        { key: 'cost', label: 'Investment', value: values.pv.cost, unit: 'EUR/kW', editable: true, min: 0, step: 50 },
-      ],
-      action: { label: 'PV surfaces', onClick: onEditPv },
-    });
     if (values.battery) cards.push({
       id: 'battery',
       title: 'Battery',
@@ -52,7 +37,7 @@ export function useDemoTechnologies(pv: PvMode, onEditPv: () => void): Technolog
       ],
     });
     return cards;
-  }, [values, pv.typeLabel, installed.length, capacity, onEditPv]);
+  }, [values]);
 
   const onChange = useCallback((id: string, fieldKey: string, value: number | null) => {
     setValues((prev) => ({ ...prev, [id]: { ...prev[id], [fieldKey]: value } }));

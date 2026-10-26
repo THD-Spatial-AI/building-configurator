@@ -3,7 +3,7 @@
 // well it insulates and which way it faces.
 
 import React from 'react';
-import { AlertTriangle, Ruler, RotateCcw, Trash2 } from 'lucide-react';
+import { AlertTriangle, Ruler, RotateCcw, Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';

@@ -82,6 +82,11 @@ describe('pvLayout flush', () => {
   it('caps the modules at the usable share of the area', () => {
     const layout = pvLayout(southRoof(30), module, { usableShare: 0.5, mounting: { kind: 'flush' } });
     expect(layout.count).toBe(Math.floor((0.5 * 60) / 1.7));
+    expect(layout.capped).toBe(true);
+  });
+
+  it('says when the space on the surface, not the usable share, limits the modules', () => {
+    expect(pvLayout(southRoof(30), module, { usableShare: 1, mounting: { kind: 'flush' } }).capped).toBe(false);
   });
 
   it('places no module, or part of one, outside a triangular roof', () => {

@@ -38,16 +38,9 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
-        'lucide-react',
-        'clsx',
-        'tailwind-merge',
-        'fflate',
-        // Declared dependencies, so a host installing this package gets them
-        // without a second copy of three in its bundle.
+        // A peer dependency, so the host's copy of three is the only one in its bundle.
         'three',
         /^three\//,
-        'earcut',
-        /^@radix-ui\//,
       ],
     },
   },

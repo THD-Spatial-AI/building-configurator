@@ -37,7 +37,7 @@ The outermost dashed box (barely visible at the image edge) is region **1**, the
 | 21 | Badge | Same as #8 | — | `SnapshotStatusBadge` ("Default") |
 
 !!! note "Not visible in this screenshot"
-    **Modal / Dialog** (`ElementConfiguratorModal`, built on `@radix-ui/react-dialog`) and **menu-bar tabs** (Parameters/Envelope plain underline tabs on card #17) only appear once the user opens an editor or switches to Expert mode — neither is on screen in this Basic-mode, no-editor-open capture. **Overlay/backdrop** — the dimmed, blurred layer the whole panel floats on — is also cropped out; it's the page behind the panel, not the panel itself.
+    **Modal / Dialog** (`UnsavedChangesDialog`, the browser's `<dialog>`) and **menu-bar tabs** (Parameters/Envelope plain underline tabs on card #17) only appear once the user opens an editor or switches to Expert mode — neither is on screen in this Basic-mode, no-editor-open capture. **Overlay/backdrop** — the dimmed, blurred layer the whole panel floats on — is also cropped out; it's the page behind the panel, not the panel itself.
 
 ## Naming rules already encoded in the code
 

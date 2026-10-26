@@ -49,6 +49,10 @@
     "discardSurface": {
       "message": "Ta przegroda została zmieniona. Zachować zmiany?",
       "note": "Odrzucenie przywraca przegrodę do stanu z chwili otwarcia edytora."
+    },
+    "panel": {
+      "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj.",
+      "emptyPv": "Kliknij dach lub ścianę, aby skonfigurować na niej PV."
     }
   },
   "surface": {
@@ -125,36 +129,20 @@
     }
   },
   "pv": {
-    "surfacesWithPv": {
-      "one": "{count} przegroda z PV",
-      "few": "{count} przegrody z PV",
-      "many": "{count} przegród z PV",
-      "other": "{count} przegrody z PV"
-    },
     "state": {
       "installed": "Z PV",
       "suggested": "Sugerowana",
       "available": "Dostępna"
     },
     "toggle": "PV: {surface}",
-    "surfaceType": {
-      "wall": "ściana",
-      "window": "okno",
-      "roof": "dach",
-      "floor": "podłoga",
-      "door": "drzwi"
-    },
     "thisSurface": "PV na tej przegrodzie",
     "usableShare": "Udział użyteczny",
     "usableShareNote": "tej przegrody, po odjęciu przeszkód",
-    "capacity": "Moc",
-    "title": "Konfigurator PV",
-    "hint": "Kliknij dach lub ścianę, aby dodać PV. Kliknij ponownie, aby je usunąć.",
+    "hint": "Kliknij dach lub ścianę, aby skonfigurować PV, albo upuść na nią produkt.",
     "summary": {
       "capacity": "Moc",
       "count": "{installed} z {total}",
-      "surfaces": "Przegrody z PV",
-      "panelArea": "Powierzchnia modułów"
+      "surfaces": "Przegrody z PV"
     },
     "geometry": "{tilt}° · kierunek {azimuth}° · {area} m²",
     "upTo": "do {kwp} kWp",
@@ -171,11 +159,8 @@
       "done": "Gotowe",
       "add": "Dodaj PV do tej przegrody",
       "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
-      "noFit": "Na tej powierzchni nie mieści się żaden cały moduł."
-    },
-    "hover": {
-      "add": "Kliknij, aby dodać PV",
-      "remove": "Kliknij, aby usunąć PV"
+      "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
+      "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego."
     },
     "mounting": {
       "label": "Montaż",
@@ -189,7 +174,52 @@
       "landscape": "Poziomo"
     },
     "panelTilt": "Nachylenie modułów",
-    "panelFacing": "Orientacja modułów"
+    "panelFacing": "Orientacja modułów",
+    "hover": {
+      "open": "Kliknij, aby skonfigurować PV"
+    },
+    "geometryFlat": "płaski · {area} m²",
+    "overview": {
+      "title": "PV na tym budynku"
+    },
+    "surfaces": {
+      "toggle": "Powierzchnie z PV ({installed} z {total})"
+    },
+    "cost": {
+      "investment": "Inwestycja",
+      "omPerYear": "Eksploatacja i utrzymanie rocznie",
+      "estimateNote": "Szacunki na podstawie kosztów produktów, przed symulacją.",
+      "investmentEstimate": "Inwestycja około {amount}, szacunek"
+    },
+    "catalogue": {
+      "title": "Katalog",
+      "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
+      "module": "{width} × {height} m · {watts} W"
+    },
+    "product": {
+      "label": "Produkt",
+      "none": "Wybierz produkt"
+    },
+    "fitsMore": {
+      "title": "Tu zmieści się więcej",
+      "reach": "Moduły: {count} · {kwp} kWp",
+      "use": "Użyj na tej powierzchni"
+    },
+    "values": {
+      "title": "Wartości technologii",
+      "product": "Produkt",
+      "buildingOnly": "Zmiany w {name} dotyczą tylko tego budynku.",
+      "question": {
+        "cost_energy_cap": "Ile kosztuje za kWp?",
+        "cost_om_annual": "Jakie jest roczne utrzymanie za kWp?",
+        "cont_lifetime": "Ile lat wytrzyma?"
+      },
+      "saveAs": "Zapisz jako nową technologię",
+      "copyName": "{name} (kopia)",
+      "save": "Zapisz",
+      "saved": "Zapisano jako {name}.",
+      "saveFailed": "Nie udało się zapisać technologii. Spróbuj ponownie."
+    }
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",

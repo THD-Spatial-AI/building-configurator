@@ -2,6 +2,8 @@
 
 This project includes components from [shadcn/ui](https://ui.shadcn.com/) used under [MIT license](https://github.com/shadcn-ui/ui/blob/main/LICENSE.md).
 
+The icons in `src/app/components/icons.tsx` are copied from [Lucide](https://lucide.dev/) 0.487.0, used under the [ISC license](https://lucide.dev/license): copyright Lucide Contributors 2022, and for portions from Feather, Cole Bemis 2013-2022 (MIT).
+
 ## Data bundled with the demo application
 
 `src/assets/data/` holds captures for buildings in Loenen, Netherlands, used only by the demo application (`npm run dev`). None of it is part of the published package. The demo shows the credits below on its map and in the 3D view (`src/demo/attribution.tsx`).

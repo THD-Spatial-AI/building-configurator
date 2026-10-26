@@ -4,7 +4,7 @@
 //
 // Load profiles are not here: the chart downloads those as their own CSVs.
 
-import { strToU8, zipSync } from 'fflate';
+import { zipStored } from '@/app/lib/zip';
 import type { BuildingElement } from '../configure/model/buildingElements';
 import { computeTotalFloorArea, computeVolume } from './buildingDefaults';
 
@@ -84,9 +84,9 @@ export function modelTablesZip(
   elements: Record<string, BuildingElement>,
   general: Record<string, any>,
   extras: { totalEnvelopeArea: number; avgUValue: number; heatDemandKwhM2a?: number | null },
-): Uint8Array {
-  return zipSync({
-    'building.csv': strToU8(buildingCsv(general, extras)),
-    'surfaces.csv': strToU8(surfacesCsv(elements)),
+): Uint8Array<ArrayBuffer> {
+  return zipStored({
+    'building.csv': buildingCsv(general, extras),
+    'surfaces.csv': surfacesCsv(elements),
   });
 }

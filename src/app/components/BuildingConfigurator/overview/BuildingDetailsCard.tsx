@@ -2,7 +2,7 @@
 // group cards — one card, one header tab switch, no separate section below.
 
 import React, { useState } from 'react';
-import { Pencil, Check } from 'lucide-react';
+import { Pencil, Check } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
@@ -36,6 +36,8 @@ function rowValue(row: SnapshotRow, t: Translate): string {
 
 const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-card shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
 
+export type DetailsTab = 'overview' | 'parameters' | 'envelope' | 'technology';
+
 export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
   /** Commits a single field's new value (key maps to the `general` state object). */
@@ -53,6 +55,9 @@ export interface BuildingDetailsCardProps {
   parametersSlot?: React.ReactNode | ((openEnvelope: () => void) => React.ReactNode);
   /** Adds a Technologies tab, e.g. the host's technology cards. */
   technologySlot?: React.ReactNode;
+  /** The open tab, for a caller that acts on it. Absent: the card keeps its own. */
+  activeTab?: DetailsTab;
+  onTabChange?: (tab: DetailsTab) => void;
 }
 
 /** Building parameters table, or building envelope cards — one merged card. */
@@ -67,6 +72,8 @@ export function BuildingDetailsCard({
   overviewSlot,
   parametersSlot,
   technologySlot,
+  activeTab: controlledTab,
+  onTabChange,
 }: BuildingDetailsCardProps) {
   // Off by default — edits only ever apply while explicitly toggled on, so a stray
   // click on the table never changes the building's data.
@@ -75,9 +82,14 @@ export function BuildingDetailsCard({
   // Whichever tab carries the most for this caller opens first: the energy
   // overview where there is one, otherwise the envelope where it carries the 3D
   // model. The others are one click away either way.
-  const [activeTab, setActiveTab] = useState<'overview' | 'parameters' | 'envelope' | 'technology'>(
+  const [ownTab, setOwnTab] = useState<DetailsTab>(
     overviewSlot ? 'overview' : envelopeSlot ? 'envelope' : 'parameters',
   );
+  const activeTab = controlledTab ?? ownTab;
+  const setActiveTab = (tab: DetailsTab) => {
+    setOwnTab(tab);
+    onTabChange?.(tab);
+  };
 
   return (
     <div className={cn(CARD, 'shrink-0')}>

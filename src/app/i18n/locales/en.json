@@ -45,6 +45,10 @@
     "discardSurface": {
       "message": "You changed this surface. Keep the changes?",
       "note": "Discarding puts the surface back as it was when its editor opened."
+    },
+    "panel": {
+      "empty": "Click a surface in the model to see it here.",
+      "emptyPv": "Click a roof or wall to set up PV on it."
     }
   },
   "surface": {
@@ -121,34 +125,20 @@
     }
   },
   "pv": {
-    "surfacesWithPv": {
-      "one": "{count} surface with PV",
-      "other": "{count} surfaces with PV"
-    },
     "state": {
       "installed": "With PV",
       "suggested": "Suggested",
       "available": "Available"
     },
     "toggle": "PV on {surface}",
-    "surfaceType": {
-      "wall": "wall",
-      "window": "window",
-      "roof": "roof",
-      "floor": "floor",
-      "door": "door"
-    },
     "thisSurface": "PV on this surface",
     "usableShare": "Usable share",
     "usableShareNote": "of this surface, after obstructions",
-    "capacity": "Capacity",
-    "title": "PV configurator",
-    "hint": "Click a roof or wall to add PV. Click it again to remove it.",
+    "hint": "Click a roof or wall to set up PV, or drop a product on it.",
     "summary": {
       "capacity": "Capacity",
       "count": "{installed} of {total}",
-      "surfaces": "Surfaces with PV",
-      "panelArea": "Panel area"
+      "surfaces": "Surfaces with PV"
     },
     "geometry": "{tilt}° · facing {azimuth}° · {area} m²",
     "upTo": "up to {kwp} kWp",
@@ -165,11 +155,8 @@
       "done": "Done",
       "add": "Add PV to this surface",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
-      "noFit": "No whole module fits on this surface."
-    },
-    "hover": {
-      "add": "Click to add PV",
-      "remove": "Click to remove PV"
+      "noFit": "No whole module fits on this surface.",
+      "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none."
     },
     "mounting": {
       "label": "Mounting",
@@ -183,7 +170,52 @@
       "landscape": "Landscape"
     },
     "panelTilt": "Panel tilt",
-    "panelFacing": "Panel facing"
+    "panelFacing": "Panel facing",
+    "hover": {
+      "open": "Click to set up PV"
+    },
+    "geometryFlat": "flat · {area} m²",
+    "overview": {
+      "title": "PV on this building"
+    },
+    "surfaces": {
+      "toggle": "Surfaces with PV ({installed} of {total})"
+    },
+    "cost": {
+      "investment": "Investment",
+      "omPerYear": "O&M per year",
+      "estimateNote": "Estimates from the products’ costs, before a simulation.",
+      "investmentEstimate": "Investment about {amount}, an estimate"
+    },
+    "catalogue": {
+      "title": "Catalogue",
+      "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
+      "module": "{width} × {height} m · {watts} W"
+    },
+    "product": {
+      "label": "Product",
+      "none": "Choose a product"
+    },
+    "fitsMore": {
+      "title": "Fits more here",
+      "reach": "Modules: {count} · {kwp} kWp",
+      "use": "Use on this surface"
+    },
+    "values": {
+      "title": "Technology values",
+      "product": "Product",
+      "buildingOnly": "Changes to {name} apply to this building only.",
+      "question": {
+        "cost_energy_cap": "What does it cost per kWp?",
+        "cost_om_annual": "What is the yearly upkeep per kWp?",
+        "cont_lifetime": "How many years does it last?"
+      },
+      "saveAs": "Save as a new technology",
+      "copyName": "{name} (copy)",
+      "save": "Save",
+      "saved": "Saved as {name}.",
+      "saveFailed": "Could not save the technology. Try again."
+    }
   },
   "tech": {
     "none": "No technologies on this building.",

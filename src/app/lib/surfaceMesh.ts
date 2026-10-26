@@ -4,7 +4,6 @@
 // storage-CRS coordinate magnitudes, and triangulating a polygon in arbitrary 3D
 // orientation (walls in particular) without Three.js's own 2D-only ShapeUtils.
 import * as THREE from 'three';
-import earcut from 'earcut';
 import type { BuildingGeometry } from './enerplanet';
 
 export interface SurfacePolygon {
@@ -127,7 +126,7 @@ function newellNormal(points: THREE.Vector3[]): THREE.Vector3 {
 }
 
 /** Projects the ring onto the 2D plane most aligned with its normal, triangulates
- * with earcut, then remaps the resulting indices back onto the original 3D points. */
+ * it, then remaps the resulting indices back onto the original 3D points. */
 function triangulateRing(points: THREE.Vector3[]): { positions: number[]; indices: number[] } {
   const normal = newellNormal(points);
   const absX = Math.abs(normal.x);
@@ -135,14 +134,12 @@ function triangulateRing(points: THREE.Vector3[]): { positions: number[]; indice
   const absZ = Math.abs(normal.z);
   const dropAxis = absX > absY && absX > absZ ? 0 : absY > absZ ? 1 : 2;
 
-  const flat: number[] = [];
-  for (const p of points) {
-    if (dropAxis === 0) flat.push(p.y, p.z);
-    else if (dropAxis === 1) flat.push(p.x, p.z);
-    else flat.push(p.x, p.y);
-  }
+  const flat = points.map((p) => (dropAxis === 0
+    ? new THREE.Vector2(p.y, p.z)
+    : dropAxis === 1 ? new THREE.Vector2(p.x, p.z) : new THREE.Vector2(p.x, p.y)));
 
-  const indices = earcut(flat) as number[];
+  // three.js's own earcut; the ring arrives without its closing vertex.
+  const indices = THREE.ShapeUtils.triangulateShape(flat, []).flat();
   const positions: number[] = [];
   for (const p of points) positions.push(p.x, p.y, p.z);
   return { positions, indices };

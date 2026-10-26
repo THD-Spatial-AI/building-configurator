@@ -2,7 +2,7 @@
 // Building parameters and envelope now live in the right column's merged details card.
 
 import React from 'react';
-import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot, Sun } from 'lucide-react';
+import { AlertTriangle, Zap, Flame, Snowflake, Gauge, Droplets, CookingPot, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
 import { SourceTag, EnergyComparisonNote, ScrollHintContainer } from '../shared/ui';

@@ -1,11 +1,9 @@
-import type { NextRequest } from '@vercel/edge';
-
 export const config = {
   // Protect everything except the feedback API endpoint
   matcher: '/((?!api/feedback).*)',
 };
 
-export default function middleware(req: NextRequest) {
+export default function middleware(req: Request) {
   const authHeader = req.headers.get('authorization');
 
   if (authHeader?.startsWith('Basic ')) {

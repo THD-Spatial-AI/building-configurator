@@ -111,6 +111,8 @@ export interface PvBuildingRunRequest {
     /** The modules' own angles: the surface's when flush, the rack's when racked. */
     panel_tilt?: number;
     panel_azimuth?: number;
+    /** The surface's PV product, from `PvSurface.productId` or the building's `PvMode.productId`. */
+    product_id?: string;
   }[];
 }
 
