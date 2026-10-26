@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
-import { BuildingDetailsCard } from '../BuildingConfigurator/overview/BuildingDetailsCard';
+import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
 import { BuildingSnapshotAside } from '../BuildingConfigurator/overview/BuildingSnapshotAside';
 import { LoadProfileBar } from './LoadProfileBar';
 import { ConfiguratorStyles, SegmentedControl, UnsavedChangesDialog } from '../BuildingConfigurator/shared/ui';
@@ -20,20 +20,23 @@ import { cn } from '@/lib/utils';
 import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
-import { SurfacePopover, anchorCard } from './SurfacePopover';
-import { PvHintPill, PvHoverCard, PvLegend, PvPanel, PvSurfaceCard, pvRenderSets, type PvMode } from './PvMode';
+import { SurfacePanel } from './SurfacePanel';
+import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
+import { PvOverview } from './PvOverview';
+import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologyCards, type Technologies } from './TechnologyCards';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { DEFAULT_PV_MODULE, type PvLayoutOptions, type PvModule } from '../../lib/pvLayout';
+import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
+import { productModule } from '../../lib/pvProducts';
 import { pvLayouts } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
 
-type SurfaceSelection = { id: string; at: { x: number; y: number } };
+type SurfaceSelection = { id: string };
 
 export interface Building3DViewProps {
   building: BuildingState;
@@ -59,24 +62,18 @@ export interface Building3DViewProps {
   /** Credits for the building's data, as its licences require; shown in a corner of the 3D view. */
   attribution?: ReactNode;
   /**
-   * Opens the view in PV mode: only the PV panel, and clicks on the offered
-   * surfaces switch PV. Controlled; hold it stable as for `services`.
+   * The building's PV. Its modules are drawn on every tab; on the Technologies
+   * tab suggested surfaces are highlighted, a clicked surface opens its PV
+   * settings, and products can be dropped on surfaces. Controlled; hold it
+   * stable as for `services`.
    */
   pv?: PvMode;
-  /** Surfaces the host has PV on, drawn with modules in the normal view. Ignored in PV mode, which draws its own. */
-  pvSurfaceIds?: readonly string[];
-  /**
-   * Usable share, mounting and orientation of each surface in pvSurfaceIds,
-   * as stored from PV mode, so the normal view lays out the same modules. A
-   * surface missing here is laid out at a usable share of 0.8. Ignored in PV mode.
-   */
-  pvSurfaces?: Readonly<Record<string, PvLayoutOptions>>;
-  /** One module of the building's PV type, for the normal view. Absent: DEFAULT_PV_MODULE. Ignored in PV mode. */
-  pvModule?: PvModule;
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
   defaultMode?: 'basic' | 'expert';
+  /** The tab the view opens on. Absent: the energy overview. */
+  defaultTab?: 'overview' | 'parameters' | 'envelope' | 'technologies';
   /**
    * The language of the view's own text: en, de, es, fr, it, nl, pl or cs. A region tag counts as its
    * language (de-DE), anything else as en. Host-supplied text (PV notice, technology cards) is shown as passed.
@@ -84,31 +81,30 @@ export interface Building3DViewProps {
   language?: string;
 }
 
-/** Laid out for a host PV surface that comes without its own settings. */
-const DEFAULT_USABLE_SHARE = 0.8;
-
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, pvSurfaces, pvModule, technologies, defaultMode = 'basic', language: languageCode,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'basic', defaultTab, language: languageCode,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
   const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
-  // In PV mode every offered surface is laid out, for its capacity; in the
-  // normal view only the host's PV surfaces.
+  // Every surface that takes PV is laid out, with its own product's module,
+  // for its capacity; only those with PV are drawn.
   const layouts = useMemo(() => {
-    const options = pv
-      ? pv.surfaces
-      : Object.fromEntries((pvSurfaceIds ?? []).map((id) => [id, pvSurfaces?.[id] ?? { usableShare: DEFAULT_USABLE_SHARE }]));
-    return pvLayouts(geometry?.surfaces ?? [], options, (pv ? pv.module : pvModule) ?? DEFAULT_PV_MODULE);
-  }, [pv, pvSurfaceIds, pvSurfaces, pvModule, geometry]);
+    if (!pv) return {};
+    const fallback = pv.module ?? DEFAULT_PV_MODULE;
+    return pvLayouts(geometry?.surfaces ?? [], pv.surfaces, (id) => productModule(surfaceProduct(pv, id), fallback));
+  }, [pv, geometry]);
   const pvModules = useMemo(
     () => Object.fromEntries(Object.entries(layouts).map(([id, layout]) => [id, layout.modules])),
     [layouts],
   );
+  const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
+  const installedPvIds = useMemo(() => [...(pvSets?.installed ?? [])], [pvSets]);
   const model = useBuildingModel(services, building, {
     estimateHeatDemand: false, runContext, demandProfile, language,
-    pvSurfaceIds: pv ? undefined : pvSurfaceIds, pvLayouts: pv ? undefined : layouts,
+    pvSurfaceIds: installedPvIds, pvLayouts: layouts,
+    pvProductFor: pv ? (id) => surfaceProduct(pv, id)?.id : undefined,
   });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
@@ -127,7 +123,11 @@ export function Building3DView({
   const [exitPromptOpen, setExitPromptOpen] = useState(false);
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
-  /** The PV surface under the pointer in PV mode, for its hover card. */
+  /** The open tab of the panel on the right. */
+  const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : defaultTab ?? 'overview');
+  /** On the Technologies tab, surfaces open their PV settings and take dropped products. */
+  const onTech = tab === 'technology' && pv !== undefined;
+  /** The PV surface under the pointer on the Technologies tab, for its hover card. */
   const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
 
   const openSurface = (next: SurfaceSelection | null) => {
@@ -147,34 +147,25 @@ export function Building3DView({
     else openSurface(next);
   };
 
-  /** Picks a surface from a list: shows it in the model and opens its editor. */
+  /** Picks a surface from a list: shows it in the model and opens it in the panel. */
   const selectFromList = (id: string) => {
     setFocus((prev) => ({ id, token: (prev?.token ?? 0) + 1 }));
-    // The card places itself against the surface as soon as the turn starts, so
-    // this is only where it appears from.
-    const at = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    if (pv) openSurface({ id, at });
-    else requestSurface({ id, at });
+    requestSurface({ id });
   };
 
-  /** A click in PV mode: an offered surface without PV gets it, and any offered surface opens its card. */
-  const selectPvSurface = (id: string | null, at?: { x: number; y: number }) => {
-    if (!pv) return;
-    const surface = id ? pv.surfaces[id] : undefined;
-    if (!id || !surface || !at) {
-      if (!id) openSurface(null);
-      return;
-    }
-    if (surface.state !== 'installed') pv.onToggle(id, true);
-    openSurface({ id, at });
+  /** A click in the model opens an envelope surface, or on the Technologies tab any surface that takes PV. */
+  const selectInModel = (id: string | null) => {
+    requestSurface(id && (elements[id] || (onTech && pv?.surfaces[id])) ? { id } : null);
   };
-  // The editor follows its surface while the model turns. That is a per-frame
-  // move, so the viewer writes to the node instead of pushing state through a
-  // tree that carries a chart and a parameter table.
-  const popoverRef = useRef<HTMLDivElement | null>(null);
-  const movePopover = useCallback((at: { x: number; y: number }) => {
-    if (popoverRef.current) anchorCard(popoverRef.current, at);
-  }, []);
+
+  /** A product dropped on a surface: it goes on that surface, which gets PV if it had none, and opens. */
+  const dropProduct = (surfaceId: string, productId: string) => {
+    const surface = pv?.surfaces[surfaceId];
+    if (!pv || !surface) return;
+    pv.onAssignProduct?.(surfaceId, productId);
+    if (surface.state !== 'installed') pv.onToggle(surfaceId, true);
+    requestSurface({ id: surfaceId });
+  };
 
   const envelopeIds = useMemo(() => new Set(Object.keys(elements)), [elements]);
   const invalidIds = useMemo(
@@ -182,8 +173,6 @@ export function Building3DView({
     [elements],
   );
   const surfaces = geometry?.surfaces ?? [];
-  const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
-  const installedPvIds = useMemo(() => new Set(pvSurfaceIds ?? []), [pvSurfaceIds]);
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
   }, [pv]);
@@ -229,8 +218,8 @@ export function Building3DView({
     }
   };
   useEffect(() => {
-    // A view mounted by a key press (Escape leaving PV mode opens the normal
-    // view) is still in that press's dispatch and would take it as its own.
+    // A view mounted by a key press is still in that press's dispatch and
+    // would take it as its own.
     const mountedAt = performance.now();
     const onKey = (e: KeyboardEvent) => { if (e.timeStamp >= mountedAt) onKeyRef.current(e); };
     window.addEventListener('keydown', onKey);
@@ -238,6 +227,7 @@ export function Building3DView({
   }, []);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
+  const selectedPv = onTech && selected ? pv?.surfaces[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
   // figure is missing or disagrees with it.
   const selectedGeometryArea = selected
@@ -246,6 +236,46 @@ export function Building3DView({
         return polygon ? polygonArea(polygon.coordinates) : null;
       })()
     : null;
+
+  const panelBody = selected && selectedPv && pv ? (
+    <PvSurfaceSection
+      key={selected.id}
+      surfaceId={selected.id}
+      surface={selectedPv}
+      pv={pv}
+      elements={elements}
+      layout={layouts[selected.id]}
+      polygon={surfaces.find((surface) => surface.id === selected.id)}
+      onClose={() => openSurface(null)}
+    />
+  ) : selected && selectedElement ? (
+    <SurfaceQuickEditor
+      key={selected.id}
+      element={selectedElement}
+      geometryArea={selectedGeometryArea}
+      uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
+      mode={mode}
+      onUpdate={(patch) => model.updateElement(selected.id, patch)}
+      onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
+    />
+  ) : null;
+  const panelSubtitle = selectedElement
+    ? (selectedPv
+        ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m²`
+        : `${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`)
+    : selectedPv?.label;
+  const surfacePanel = (
+    <SurfacePanel
+      docked={!wide}
+      open={panelBody !== null}
+      title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
+      subtitle={panelSubtitle}
+      emptyText={t(onTech ? 'view.panel.emptyPv' : 'view.panel.empty')}
+      onClose={() => requestSurface(null)}
+    >
+      {panelBody}
+    </SurfacePanel>
+  );
 
   return (
     <LanguageProvider language={language}>
@@ -274,8 +304,6 @@ export function Building3DView({
             <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>
           </p>
         </div>
-        {!pv && (
-        <>
         <div className="relative shrink-0">
           <button
             type="button"
@@ -335,12 +363,11 @@ export function Building3DView({
           <Undo2 className="size-3.5" />
           <span className="hidden sm:inline">{undoLabel ? t('view.undo.action', { action: t(undoLabel.key, undoLabel.values) }) : t('view.undo.label')}</span>
         </button>
-        </>
-        )}
       </div>
 
       {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
+        {wide && surfacePanel}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
         <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
           {!geometry ? (
@@ -354,16 +381,14 @@ export function Building3DView({
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
               visibleIds={envelopeIds}
-              pvIds={pvSets ? pvSets.installed : installedPvIds}
+              pvIds={pvSets?.installed}
               pvModules={pvModules}
-              candidateIds={pvSets?.suggested}
-              onHoverSurface={pv ? hoverPv : undefined}
+              candidateIds={onTech ? pvSets?.suggested : undefined}
+              onHoverSurface={onTech ? hoverPv : undefined}
+              onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
-              onSelectSurface={pv
-                ? selectPvSurface
-                : (id, at) => requestSurface(id && elements[id] && at ? { id, at } : null)}
-              onSelectedAnchorMove={wide ? movePopover : undefined}
+              onSelectSurface={selectInModel}
             />
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-xs leading-snug text-muted-foreground">
@@ -380,7 +405,7 @@ export function Building3DView({
             </div>
           )}
 
-          {pv && geometry && !geometry.note && <PvHintPill />}
+          {onTech && geometry && !geometry.note && <PvHintPill />}
 
           <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
             {invalidIds.size > 0 && (
@@ -389,7 +414,7 @@ export function Building3DView({
                 {t('view.invalidSurfaces', { count: invalidIds.size })}
               </div>
             )}
-            {pv && <PvLegend />}
+            {onTech && <PvLegend />}
           </div>
 
           {attribution && (
@@ -404,12 +429,6 @@ export function Building3DView({
           'flex shrink-0 flex-col gap-3',
           wide ? 'w-[400px] xl:w-[520px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
-          {pv ? (
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <PvPanel pv={pv} elements={elements} layouts={layouts} onSelect={selectFromList} />
-            </div>
-          ) : (
-          <>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
@@ -418,7 +437,14 @@ export function Building3DView({
               baselineElements={model.baselineElements}
               roofConfig={model.roofConfig}
               onSelectSurface={selectFromList}
-              technologySlot={technologies ? <TechnologyCards technologies={technologies} /> : undefined}
+              activeTab={tab}
+              onTabChange={setTab}
+              technologySlot={pv || technologies ? (
+                <div className="flex flex-col gap-3">
+                  {pv && <PvOverview pv={pv} elements={elements} layouts={layouts} mode={mode} onSelect={selectFromList} />}
+                  {technologies && <TechnologyCards technologies={technologies} />}
+                </div>
+              ) : undefined}
               parametersSlot={(openEnvelope) => (
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
@@ -483,54 +509,14 @@ export function Building3DView({
               ? <><Loader2 className="size-4 animate-spin" /> {t('view.run.working')}</>
               : <><Play className="size-4" /> {t('view.run.start')}</>}
           </button>
-          </>
-          )}
         </div>
       </div>
 
-      {pv && hover && !selected && pv.surfaces[hover.id] && (
+      {onTech && hover && pv?.surfaces[hover.id] && (
         <PvHoverCard surfaceId={hover.id} surface={pv.surfaces[hover.id]} elements={elements} at={hover.at} />
       )}
 
-      {pv && selected && pv.surfaces[selected.id] && (
-        <SurfacePopover
-          at={selected.at}
-          cardRef={popoverRef}
-          title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-          subtitle={selectedElement ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m²` : pv.surfaces[selected.id].label}
-          onClose={() => openSurface(null)}
-        >
-          <PvSurfaceCard
-            key={selected.id}
-            surfaceId={selected.id}
-            surface={pv.surfaces[selected.id]}
-            pv={pv}
-            elements={elements}
-            layout={layouts[selected.id]}
-            onClose={() => openSurface(null)}
-          />
-        </SurfacePopover>
-      )}
-
-      {!pv && selected && selectedElement && (
-        <SurfacePopover
-          at={selected.at}
-          cardRef={popoverRef}
-          title={t(`surface.type.${selectedElement.type}`)}
-          subtitle={`${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`}
-          onClose={() => requestSurface(null)}
-        >
-          <SurfaceQuickEditor
-            key={selected.id}
-            element={selectedElement}
-            geometryArea={selectedGeometryArea}
-            uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
-            mode={mode}
-            onUpdate={(patch) => model.updateElement(selected.id, patch)}
-            onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
-          />
-        </SurfacePopover>
-      )}
+      {!wide && surfacePanel}
 
       <UnsavedChangesDialog
         open={pendingSurface !== null}

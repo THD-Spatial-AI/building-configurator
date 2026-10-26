@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { buildPvModules, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { PV_PRODUCT_DRAG_TYPE } from '@/app/lib/pvProducts';
 import { useT } from '@/app/i18n';
 
 interface SurfaceGeometryViewerProps {
@@ -31,19 +32,14 @@ interface SurfaceGeometryViewerProps {
    * pointer's client position. Fires on a change of surface only.
    */
   onHoverSurface?: (id: string | null, at?: { x: number; y: number }) => void;
+  /** A PV product (dragged with PV_PRODUCT_DRAG_TYPE) was dropped on a surface. Without it nothing can be dropped. */
+  onDropProduct?: (surfaceId: string, productId: string) => void;
   /** Turns the model to face this surface. Acts whenever `focusToken` changes,
    *  so picking the same surface again re-frames it. */
   focusId?: string | null;
   focusToken?: number;
-  /** `at` is the click position in client coordinates, for anchoring a popover. */
+  /** `at` is the click position in client coordinates. */
   onSelectSurface?: (id: string | null, at?: { x: number; y: number }) => void;
-  /**
-   * Where the selected surface currently is on screen, in client coordinates,
-   * with the radius it occupies there. Fires as the camera moves, so an editor
-   * anchored to it follows its surface and can stand clear of it.
-   * Called outside React's render cycle — move a node, do not set state.
-   */
-  onSelectedAnchorMove?: (at: { x: number; y: number; radius: number }) => void;
 }
 
 const HIGHLIGHT_COLOR = 0x2563eb;
@@ -73,20 +69,14 @@ export function SurfaceGeometryViewer({
   focusId,
   focusToken,
   onSelectSurface,
-  onSelectedAnchorMove,
   onHoverSurface,
+  onDropProduct,
 }: SurfaceGeometryViewerProps) {
   const t = useT();
   const mountRef = useRef<HTMLDivElement>(null);
   const compassRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
   const selectRef = useRef(onSelectSurface);
-  const anchorMoveRef = useRef(onSelectedAnchorMove);
-  /** Centre and corners of the selected surface in world space, for projecting
-   *  its position and on-screen size. Null when nothing is selected. */
-  const anchorRef = useRef<{ centre: THREE.Vector3; corners: THREE.Vector3[] } | null>(null);
-  /** Forces the next frame to report even if the projection has not moved. */
-  const anchorDirtyRef = useRef(false);
   /** A surface to turn towards, picked up by the next frame. */
   const focusRequestRef = useRef<string | null>(null);
 
@@ -98,7 +88,8 @@ export function SurfaceGeometryViewer({
   useEffect(() => { selectRef.current = onSelectSurface; });
   const hoverRef = useRef(onHoverSurface);
   useEffect(() => { hoverRef.current = onHoverSurface; });
-  useEffect(() => { anchorMoveRef.current = onSelectedAnchorMove; });
+  const dropRef = useRef(onDropProduct);
+  useEffect(() => { dropRef.current = onDropProduct; });
   const origin = useMemo(() => computeOrigin(surfaces), [surfaces]);
 
   useEffect(() => {
@@ -186,10 +177,32 @@ export function SurfaceGeometryViewer({
       if (Math.hypot(dx, dy) > threshold) return;
       selectAt(event.clientX, event.clientY);
     }
+    // A product dragged over the model shows the surface it would land on
+    // through the hover callback, as the pointer does.
+    function handleDragOver(event: DragEvent) {
+      if (!dropRef.current || !event.dataTransfer?.types.includes(PV_PRODUCT_DRAG_TYPE)) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      const id = surfaceAt(event.clientX, event.clientY);
+      if (id === hovered) return;
+      hovered = id;
+      hoverRef.current?.(id, { x: event.clientX, y: event.clientY });
+    }
+    function handleDrop(event: DragEvent) {
+      const productId = event.dataTransfer?.getData(PV_PRODUCT_DRAG_TYPE);
+      if (!dropRef.current || !productId) return;
+      event.preventDefault();
+      const id = surfaceAt(event.clientX, event.clientY);
+      handlePointerLeave();
+      if (id) dropRef.current(id, productId);
+    }
     renderer.domElement.addEventListener('pointerdown', handlePointerDown);
     renderer.domElement.addEventListener('pointerup', handlePointerUp);
     renderer.domElement.addEventListener('pointermove', handlePointerMove);
     renderer.domElement.addEventListener('pointerleave', handlePointerLeave);
+    renderer.domElement.addEventListener('dragover', handleDragOver);
+    renderer.domElement.addEventListener('dragleave', handlePointerLeave);
+    renderer.domElement.addEventListener('drop', handleDrop);
 
     /** Eases a turn around the target rather than sliding the camera through it. */
     let flight: { from: THREE.Spherical; to: THREE.Spherical; progress: number } | null = null;
@@ -245,48 +258,6 @@ export function SurfaceGeometryViewer({
       return true;
     }
 
-    const projected = new THREE.Vector3();
-    let lastAnchorX = Number.NaN;
-    let lastAnchorY = Number.NaN;
-    /** Projects the selected surface to the screen so an anchored editor can
-     *  follow it, with the radius it covers there so the editor can clear it. */
-    function reportAnchor() {
-      const anchor = anchorRef.current;
-      const report = anchorMoveRef.current;
-      if (!anchor || !report) return;
-
-      const rect = renderer.domElement.getBoundingClientRect();
-      const toScreen = (point: THREE.Vector3) => {
-        projected.copy(point).project(camera);
-        return {
-          x: rect.left + (projected.x * 0.5 + 0.5) * rect.width,
-          y: rect.top + (-projected.y * 0.5 + 0.5) * rect.height,
-          behind: projected.z > 1,
-        };
-      };
-
-      const centre = toScreen(anchor.centre);
-      // Behind the camera the projection mirrors, which would throw the editor
-      // to the opposite edge. Leave it where it was until the surface is in front again.
-      if (centre.behind) return;
-
-      const dirty = anchorDirtyRef.current;
-      if (!dirty
-        && Math.abs(centre.x - lastAnchorX) < 0.5
-        && Math.abs(centre.y - lastAnchorY) < 0.5) return;
-      anchorDirtyRef.current = false;
-      lastAnchorX = centre.x;
-      lastAnchorY = centre.y;
-
-      let radius = 0;
-      for (const corner of anchor.corners) {
-        const screen = toScreen(corner);
-        if (screen.behind) continue;
-        radius = Math.max(radius, Math.hypot(screen.x - centre.x, screen.y - centre.y));
-      }
-      report({ x: centre.x, y: centre.y, radius });
-    }
-
     let frameId: number;
     let lastFrame = performance.now();
     function animate() {
@@ -301,11 +272,10 @@ export function SurfaceGeometryViewer({
         focusRequestRef.current = null;
         if (group) startFlyTo(group);
       }
-      if (advanceFlight(delta)) anchorDirtyRef.current = true;
+      advanceFlight(delta);
 
       controls.update();
       renderer.render(scene, camera);
-      reportAnchor();
       // Approximate compass: rotates the needle opposite the camera's orbit so it
       // keeps pointing at world north (scene -Z, per surfaceMesh's axis mapping).
       if (compassRef.current) {
@@ -331,6 +301,9 @@ export function SurfaceGeometryViewer({
       renderer.domElement.removeEventListener('pointerup', handlePointerUp);
       renderer.domElement.removeEventListener('pointermove', handlePointerMove);
       renderer.domElement.removeEventListener('pointerleave', handlePointerLeave);
+      renderer.domElement.removeEventListener('dragover', handleDragOver);
+      renderer.domElement.removeEventListener('dragleave', handlePointerLeave);
+      renderer.domElement.removeEventListener('drop', handleDrop);
       controls.dispose();
       groups.forEach((group) => {
         group.children.forEach((child) => {
@@ -348,7 +321,6 @@ export function SurfaceGeometryViewer({
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {
-    anchorRef.current = null;
     for (const group of groupsRef.current) {
       const id = group.userData.id as string;
       const invalid = invalidIds?.has(id) ?? false;
@@ -397,21 +369,6 @@ export function SurfaceGeometryViewer({
         group.add(outline);
       }
       if (outline) outline.visible = candidate;
-
-      // The surface's middle, not the point that was clicked: it stays put as
-      // the model turns, which is what an editor beside it should track.
-      if (id === selectedId) {
-        const box = new THREE.Box3().setFromObject(group);
-        const centre = box.getCenter(new THREE.Vector3());
-        const corners: THREE.Vector3[] = [];
-        for (const x of [box.min.x, box.max.x]) {
-          for (const y of [box.min.y, box.max.y]) {
-            for (const z of [box.min.z, box.max.z]) corners.push(new THREE.Vector3(x, y, z));
-          }
-        }
-        anchorRef.current = { centre, corners };
-        anchorDirtyRef.current = true;
-      }
     }
   }, [surfaces, origin, selectedId, invalidIds, visibleIds, pvIds, pvModules, candidateIds]);
 

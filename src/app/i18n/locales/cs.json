@@ -49,6 +49,10 @@
     "discardSurface": {
       "message": "Tuto plochu jste změnili. Ponechat změny?",
       "note": "Zahozením se plocha vrátí do stavu z okamžiku otevření editoru."
+    },
+    "panel": {
+      "empty": "Klikněte na plochu v modelu, a uvidíte ji zde.",
+      "emptyPv": "Klikněte na střechu nebo stěnu a nastavte na ní FV."
     }
   },
   "surface": {
@@ -125,36 +129,20 @@
     }
   },
   "pv": {
-    "surfacesWithPv": {
-      "one": "{count} plocha s FV",
-      "few": "{count} plochy s FV",
-      "many": "{count} plochy s FV",
-      "other": "{count} ploch s FV"
-    },
     "state": {
       "installed": "S FV",
       "suggested": "Navrženo",
       "available": "Dostupné"
     },
     "toggle": "FV: {surface}",
-    "surfaceType": {
-      "wall": "stěna",
-      "window": "okno",
-      "roof": "střecha",
-      "floor": "podlaha",
-      "door": "dveře"
-    },
     "thisSurface": "FV na této ploše",
     "usableShare": "Využitelný podíl",
     "usableShareNote": "této plochy po odečtení překážek",
-    "capacity": "Výkon",
-    "title": "Konfigurátor FV",
-    "hint": "Klikněte na střechu nebo stěnu a přidejte FV. Dalším kliknutím ji odeberete.",
+    "hint": "Klikněte na střechu nebo stěnu a nastavte FV, nebo na ni přetáhněte produkt.",
     "summary": {
       "capacity": "Výkon",
       "count": "{installed} z {total}",
-      "surfaces": "Plochy s FV",
-      "panelArea": "Plocha panelů"
+      "surfaces": "Plochy s FV"
     },
     "geometry": "{tilt}° · orientace {azimuth}° · {area} m²",
     "upTo": "až {kwp} kWp",
@@ -173,10 +161,6 @@
       "modules": "Moduly: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tuto plochu se nevejde žádný celý modul."
     },
-    "hover": {
-      "add": "Kliknutím přidáte FV",
-      "remove": "Kliknutím odeberete FV"
-    },
     "mounting": {
       "label": "Montáž",
       "flush": "Rovnoběžně",
@@ -189,7 +173,52 @@
       "landscape": "Na šířku"
     },
     "panelTilt": "Sklon modulů",
-    "panelFacing": "Orientace modulů"
+    "panelFacing": "Orientace modulů",
+    "hover": {
+      "open": "Klikněte pro nastavení FV"
+    },
+    "geometryFlat": "rovná · {area} m²",
+    "overview": {
+      "title": "FV na této budově"
+    },
+    "surfaces": {
+      "toggle": "Plochy s FV ({installed} z {total})"
+    },
+    "cost": {
+      "investment": "Investice",
+      "omPerYear": "Provoz a údržba za rok",
+      "estimateNote": "Odhady z nákladů produktů, před simulací.",
+      "investmentEstimate": "Investice zhruba {amount}, odhad"
+    },
+    "catalogue": {
+      "title": "Katalog",
+      "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
+      "module": "{width} × {height} m · {watts} W"
+    },
+    "product": {
+      "label": "Produkt",
+      "none": "Vyberte produkt"
+    },
+    "fitsMore": {
+      "title": "Sem se vejde víc",
+      "reach": "Moduly: {count} · {kwp} kWp",
+      "use": "Použít na této ploše"
+    },
+    "values": {
+      "title": "Hodnoty technologie",
+      "product": "Produkt",
+      "buildingOnly": "Změny produktu {name} platí jen pro tuto budovu.",
+      "question": {
+        "cost_energy_cap": "Kolik stojí za kWp?",
+        "cost_om_annual": "Jaká je roční údržba za kWp?",
+        "cont_lifetime": "Kolik let vydrží?"
+      },
+      "saveAs": "Uložit jako novou technologii",
+      "copyName": "{name} (kopie)",
+      "save": "Uložit",
+      "saved": "Uloženo jako {name}.",
+      "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu."
+    }
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",

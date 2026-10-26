@@ -94,10 +94,8 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `runContext` | Optional. `{ startDate, endDate }` (RFC 3339 dates): the period a BuEM run covers. Without it, a run covers 2018 |
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
-| `pv` | Optional. Opens the view in PV mode, see [PV mode](#pv-mode) |
-| `pvSurfaceIds` | Optional. Surface ids the host has PV on, drawn with modules in the normal view. Ignored in PV mode |
-| `pvSurfaces` | Optional. `{ usableShare, mounting?, orientation? }` of each surface in `pvSurfaceIds`, as stored from PV mode, so the normal view lays out the same modules. A surface missing here is laid out at a usable share of 0.8. Ignored in PV mode |
-| `pvModule` | Optional. `{ width, height, kwp }` of the building's PV module, see [Module layout](#module-layout). Ignored in PV mode, which uses `pv.module` |
+| `pv` | Optional. The building's PV, placed on the Technologies tab, see [PV](#pv) |
+| `defaultTab` | Optional. `overview`, `parameters`, `envelope` or `technologies`: the tab the view opens on. Absent: `overview` |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
@@ -120,7 +118,7 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
 | `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
-| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when `pvSurfaceIds` is not empty. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as currently edited (m², degrees from horizontal, degrees clockwise from north), plus `modules`, `kwp`, `panel_tilt` and `panel_azimuth` from its [module layout](#module-layout) when the view has its polygon. Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
+| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when a surface in `pv` has PV. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as currently edited (m², degrees from horizontal, degrees clockwise from north), plus `modules`, `kwp`, `panel_tilt` and `panel_azimuth` from its [module layout](#module-layout) when the view has its polygon, and `product_id` when it has a product. Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.
@@ -150,46 +148,78 @@ classes the component names are compiled into the host's CSS:
 Without the `@source` line the component renders unstyled, because Tailwind
 only emits utilities it has seen used.
 
-## PV mode
+## PV
 
-Pass `pv` to open the building for placing PV. The view then shows only the
-model and a PV panel, and stores nothing: every change goes to a callback, and
-the view follows the next `pv` the host passes.
+Pass `pv` to give the building PV. Its modules are drawn on every tab. On the
+Technologies tab, suggested surfaces are highlighted, a clicked surface opens
+its PV settings in the surface panel, products from the catalogue can be
+dropped on surfaces, and the PV overview shows the totals, the catalogue and
+the product values. The view stores nothing: every change goes to a callback,
+and the view follows the next `pv` the host passes.
 
 ```tsx
 const pv = useMemo<PvMode>(() => ({
-  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp, mounting?, orientation? } }
+  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp, mounting?, orientation?, productId? } }
   notice: t('pv.shadingNotice'),
   typeLabel: pvType.name,
-  module: { width: 1.134, height: 1.762, kwp: 0.4 },
+  catalogue,         // the PV products in EnerPlanET's technology DTO shape
+  products,          // this building's copies of the products it uses, by id
+  productId,         // the building's product
   onToggle: (surfaceId, installed) => setInstalled(surfaceId, installed),
   onShareChange: (surfaceId, usableShare) => setShare(surfaceId, usableShare),
   onMountingChange: (surfaceId, mounting, orientation) => setMounting(surfaceId, mounting, orientation),
-}), [surfaces, pvType, t]);
+  onAssignProduct: (surfaceId, productId) => setProduct(surfaceId, productId),
+  onConstraintChange: (productId, key, value) => setBuildingValue(productId, key, value),
+  onSaveAsTechnology: (productId, name) => createUserProduct(productId, name),
+}), [/* the values above */]);
 
-<Building3DView building={building} geometry={geometry} services={services} onExit={onExit} pv={pv} />
+<Building3DView building={building} geometry={geometry} services={services} onExit={onExit} pv={pv} defaultTab="technologies" />
 ```
 
 | Field | Meaning |
 |---|---|
-| `surfaces` | Keyed by surface id, the id the geometry and the envelope elements carry. Only these surfaces can be clicked |
-| `surfaces[id].state` | `installed` draws panels on the surface, `suggested` lights and outlines it, `available` draws it as usual |
+| `surfaces` | Keyed by surface id, the id the geometry and the envelope elements carry. Only these surfaces take PV |
+| `surfaces[id].state` | `installed` draws modules on the surface, `suggested` lights and outlines it on the Technologies tab, `available` draws it as usual |
 | `surfaces[id].usableShare` | Share of the surface usable for panels, 0 to 1, shown as a percentage |
 | `surfaces[id].label` | Optional. Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. An element's own label takes precedence |
 | `surfaces[id].tilt`, `azimuth`, `area` | Optional. Degrees from horizontal, degrees clockwise from north (180 is south), m². Shown in the surface list and card for a surface that is not among the building's elements; an element's own geometry takes precedence |
 | `surfaces[id].maxKwp` | Capacity at the current usable share, in kWp. Shown only for a surface the view has no polygon for; any other surface shows its module layout's capacity |
 | `surfaces[id].mounting` | Optional. `{ kind: 'flush' }` or `{ kind: 'racked', tilt, azimuth }`; the card offers racking on surfaces under 10° only. Absent: racked at 15° facing 180° on a surface under 10°, otherwise flush |
 | `surfaces[id].orientation` | Optional. `portrait` or `landscape` for every module on the surface. Absent: whichever fits more modules, which on a flush surface may mix both |
-| `notice` | Shown for as long as PV mode is open. Pass it in the user's language |
-| `typeLabel` | Name of the PV type, shown at the top of the panel |
-| `module` | Optional. `{ width, height, kwp }`: one module of the PV type, portrait width and height in m. Absent: `DEFAULT_PV_MODULE`, 1.134 by 1.762 m and 0.4 kWp |
-| `onToggle(surfaceId, installed)` | A surface was switched. Clicking a surface without PV calls it with `true` |
+| `surfaces[id].productId` | Optional. The surface's product. Absent: `productId` |
+| `notice` | Shown under the PV overview. Pass it in the user's language |
+| `typeLabel` | Name of the building's PV type, shown at the top of the PV overview |
+| `catalogue` | Optional. The PV products the user may choose from, see [Products](#products). Absent: no catalogue, and every surface uses `module` |
+| `products` | Optional. This building's copies of the products it uses, by product id, with the values edited for it. A surface's product is looked up here first, then in `catalogue` |
+| `productId` | Optional. The building's product, for surfaces without their own |
+| `module` | Optional. `{ width, height, kwp }`, portrait width and height in m: the module of a product without module dimensions. Absent: `DEFAULT_PV_MODULE`, 1.134 by 1.762 m and 0.4 kWp |
+| `onToggle(surfaceId, installed)` | A surface's PV was switched on or off. Dropping a product on a surface without PV also calls it with `true` |
 | `onShareChange(surfaceId, usableShare)` | The usable share of a surface with PV was changed, 0 to 1 |
-| `onMountingChange(surfaceId, mounting, orientation)` | The mounting or module orientation of a surface was changed on its card. Store both and pass them back on the surface; `orientation` is `undefined` while the best fit applies |
+| `onMountingChange(surfaceId, mounting, orientation)` | The mounting or module orientation of a surface was changed. Store both and pass them back on the surface; `orientation` is `undefined` while the best fit applies |
+| `onAssignProduct(surfaceId, productId)` | Optional. A product was dropped on a surface or chosen for it. Store it as `surfaces[id].productId`. Without it products cannot be dropped or chosen |
+| `onConstraintChange(productId, key, value)` | Optional. A value of this building's copy of a product was changed; `value` is a number, an option or `"INF"`. Store it in `products[productId]`. Without it the values are not shown |
+| `onSaveAsTechnology(productId, name)` | Optional. Saves this building's copy of a product as a new product of the user's own; resolves to its id, rejects on failure |
 
-Clicking a surface opens its card: the PV switch, and on a surface with PV the
-usable share, mounting, module orientation and the resulting module count and
-capacity. The panel lists every offered surface with its own switch.
+Clicking a surface on the Technologies tab opens it in the surface panel: its
+geometry, the PV switch, and on a surface with PV its product, usable share,
+mounting, module format, the resulting modules, capacity and investment, and
+up to three catalogue products that reach more capacity on it. On other tabs
+the panel shows the surface's envelope values.
+
+### Products
+
+A product follows EnerPlanET's technology DTO: `{ id, key, type, manufacturer?,
+model?, alias?, constraints }`, each constraint `{ key, alias?, unit?,
+default_value, min?, max?, options? }` with `"INF"` for an unbounded value.
+
+| Constraint keys | Used for |
+|---|---|
+| `module_width_m`, `module_height_m`, `module_power_kwp` | The module of the layout. A product without all three uses `module` |
+| `cost_energy_cap`, `cost_om_annual` | Investment and yearly O&M before a run: each times the layout's kWp, shown as estimates. The currency is the part of `cost_energy_cap`'s unit before the slash |
+| `cost_energy_cap`, `cost_om_annual`, `cont_lifetime` | Asked in basic mode as plain questions |
+| `cost_interest_rate`, `cost_om_annual_investment_fraction`, `cost_om_prod`, `cont_energy_cap_max_systemwide`, `losses`, `dc_ac_ratio`, `inv_eff`, `module_type` | Also shown in expert mode, under the constraint's `alias` |
+
+A key the product does not carry is not shown, and any other key is never shown.
 
 ### Module layout
 
@@ -216,23 +246,13 @@ const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientati
 
 ## Technologies
 
-Pass `technologies` to show the building's technologies as cards in a
-Technologies tab. The host owns every value and label; the cards show them and
+Pass `technologies` to show the building's technologies other than PV as cards
+in the Technologies tab, under the PV overview. The host owns every value and label; the cards show them and
 report edits, and the view stores nothing.
 
 ```tsx
 const technologies = useMemo<Technologies>(() => ({
   items: [
-    {
-      id: 'pv',
-      title: pvType.name,
-      subtitle: `${surfaceCount} surfaces`,
-      fields: [
-        { key: 'capacity', label: t('capacity'), value: 18.2, unit: 'kWp' },
-        { key: 'cost', label: t('investment'), value: 1100, unit: 'EUR/kW', editable: true },
-      ],
-      action: { label: t('pvSurfaces'), onClick: openPvMode },
-    },
     {
       id: 'heat_pump',
       title: t('heatPump'),
@@ -248,16 +268,13 @@ const technologies = useMemo<Technologies>(() => ({
 |---|---|
 | `items[].id` | Passed back to `onChange` and `onRemove` |
 | `items[].title`, `subtitle` | Shown at the top of the card, in the user's language |
-| `items[].action` | Optional button, `{ label, onClick }`; for example one that opens PV mode |
+| `items[].action` | Optional button, `{ label, onClick }` |
 | `fields[].value` | A number, or `null` for unbounded, shown as "∞" |
 | `fields[].editable` | A number input when true, plain text otherwise |
 | `fields[].min`, `max`, `step` | Passed to the input as hints; the host clamps |
 | `fields[].error` | Shown under the field with a red ring until the host clears it |
 | `onChange(id, fieldKey, value)` | Fires with each valid number typed, and with `null` when the input is cleared |
 | `onRemove(id)` | The card's remove button was pressed; the view does not ask first |
-
-To show which surfaces carry PV in the normal view, pass their ids as
-`pvSurfaceIds`, with `pvSurfaces` and `pvModule` so the modules match PV mode.
 
 ## Geometry
 

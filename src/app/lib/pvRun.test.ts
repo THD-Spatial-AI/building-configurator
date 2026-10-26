@@ -28,6 +28,12 @@ describe('pvRunRequest', () => {
     ]);
   });
 
+  it('adds the product of each surface that has one', () => {
+    const surfaces = pvRunRequest('osm-1', elements, ['r1', 'r2'], {}, (id) => (id === 'r1' ? 'mono-420' : undefined))?.surfaces;
+    expect(surfaces?.[0]).toMatchObject({ id: 'r1', product_id: 'mono-420' });
+    expect(surfaces?.[1]).not.toHaveProperty('product_id');
+  });
+
   it('leaves out a PV surface that is not among the building\'s elements', () => {
     expect(pvRunRequest('osm-1', elements, ['r1', 'neighbour-roof'])?.surfaces.map((s) => s.id)).toEqual(['r1']);
   });

@@ -223,7 +223,7 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts }: {
+  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
     demandProfile?: BuildingDemandProfile | null;
@@ -233,6 +233,8 @@ export function useBuildingModel(
     pvSurfaceIds?: readonly string[];
     /** Module layouts of those surfaces, sent with the PV run. */
     pvLayouts?: Readonly<Record<string, PvLayout>>;
+    /** Each PV surface's product id, sent with the PV run. */
+    pvProductFor?: (surfaceId: string) => string | undefined;
   } = {},
 ) {
   const thematicData = buildingData?.thematic;
@@ -606,7 +608,7 @@ export function useBuildingModel(
     try {
       // PV runs beside BuEM; its failure is reported on its own and does not
       // hold back the demand result.
-      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts) : null;
+      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts, pvProductFor) : null;
       const [result, pvKwh] = await Promise.all([
         runBuildingSimulation(services, identity, elements, general, runContext),
         pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),

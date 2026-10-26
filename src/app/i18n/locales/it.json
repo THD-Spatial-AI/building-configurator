@@ -45,6 +45,10 @@
     "discardSurface": {
       "message": "Hai modificato questa superficie. Vuoi mantenere le modifiche?",
       "note": "Scartando, la superficie torna com'era all'apertura dell'editor."
+    },
+    "panel": {
+      "empty": "Fai clic su una superficie del modello per vederla qui.",
+      "emptyPv": "Fai clic su un tetto o una parete per configurarvi il FV."
     }
   },
   "surface": {
@@ -121,34 +125,20 @@
     }
   },
   "pv": {
-    "surfacesWithPv": {
-      "one": "{count} superficie con FV",
-      "other": "{count} superfici con FV"
-    },
     "state": {
       "installed": "Con FV",
       "suggested": "Consigliata",
       "available": "Disponibile"
     },
     "toggle": "FV su {surface}",
-    "surfaceType": {
-      "wall": "parete",
-      "window": "finestra",
-      "roof": "tetto",
-      "floor": "pavimento",
-      "door": "porta"
-    },
     "thisSurface": "FV su questa superficie",
     "usableShare": "Quota utilizzabile",
     "usableShareNote": "di questa superficie, al netto degli ostacoli",
-    "capacity": "Potenza",
-    "title": "Configuratore FV",
-    "hint": "Fai clic su un tetto o una parete per aggiungere FV. Fai di nuovo clic per rimuoverlo.",
+    "hint": "Fai clic su un tetto o una parete per configurare il FV, oppure trascinaci un prodotto.",
     "summary": {
       "capacity": "Potenza",
       "count": "{installed} di {total}",
-      "surfaces": "Superfici con FV",
-      "panelArea": "Superficie moduli"
+      "surfaces": "Superfici con FV"
     },
     "geometry": "{tilt}° · esposta a {azimuth}° · {area} m²",
     "upTo": "fino a {kwp} kWp",
@@ -167,10 +157,6 @@
       "modules": "Moduli: {count} · {kwp} kWp · {area} m²",
       "noFit": "Su questa superficie non entra nessun modulo intero."
     },
-    "hover": {
-      "add": "Fai clic per aggiungere FV",
-      "remove": "Fai clic per rimuovere FV"
-    },
     "mounting": {
       "label": "Montaggio",
       "flush": "Complanare",
@@ -183,7 +169,52 @@
       "landscape": "Orizzontale"
     },
     "panelTilt": "Inclinazione dei moduli",
-    "panelFacing": "Orientamento dei moduli"
+    "panelFacing": "Orientamento dei moduli",
+    "hover": {
+      "open": "Fai clic per configurare il FV"
+    },
+    "geometryFlat": "piano · {area} m²",
+    "overview": {
+      "title": "FV su questo edificio"
+    },
+    "surfaces": {
+      "toggle": "Superfici con FV ({installed} di {total})"
+    },
+    "cost": {
+      "investment": "Investimento",
+      "omPerYear": "Gestione e manutenzione all’anno",
+      "estimateNote": "Stime dai costi dei prodotti, prima di una simulazione.",
+      "investmentEstimate": "Investimento di circa {amount}, stimato"
+    },
+    "catalogue": {
+      "title": "Catalogo",
+      "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
+      "module": "{width} × {height} m · {watts} W"
+    },
+    "product": {
+      "label": "Prodotto",
+      "none": "Scegli un prodotto"
+    },
+    "fitsMore": {
+      "title": "Qui ne stanno di più",
+      "reach": "Moduli: {count} · {kwp} kWp",
+      "use": "Usa su questa superficie"
+    },
+    "values": {
+      "title": "Valori della tecnologia",
+      "product": "Prodotto",
+      "buildingOnly": "Le modifiche a {name} valgono solo per questo edificio.",
+      "question": {
+        "cost_energy_cap": "Quanto costa per kWp?",
+        "cost_om_annual": "Qual è la manutenzione annua per kWp?",
+        "cont_lifetime": "Quanti anni dura?"
+      },
+      "saveAs": "Salva come nuova tecnologia",
+      "copyName": "{name} (copia)",
+      "save": "Salva",
+      "saved": "Salvato come {name}.",
+      "saveFailed": "Impossibile salvare la tecnologia. Riprova."
+    }
   },
   "tech": {
     "none": "Nessuna tecnologia su questo edificio.",

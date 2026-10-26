@@ -45,6 +45,10 @@
     "discardSurface": {
       "message": "U hebt dit vlak gewijzigd. Wijzigingen behouden?",
       "note": "Verwerpen zet het vlak terug zoals het was toen de editor werd geopend."
+    },
+    "panel": {
+      "empty": "Klik op een vlak in het model om het hier te zien.",
+      "emptyPv": "Klik op een dak of muur om er PV op in te stellen."
     }
   },
   "surface": {
@@ -121,34 +125,20 @@
     }
   },
   "pv": {
-    "surfacesWithPv": {
-      "one": "{count} vlak met PV",
-      "other": "{count} vlakken met PV"
-    },
     "state": {
       "installed": "Met PV",
       "suggested": "Voorgesteld",
       "available": "Beschikbaar"
     },
     "toggle": "PV op {surface}",
-    "surfaceType": {
-      "wall": "wand",
-      "window": "raam",
-      "roof": "dak",
-      "floor": "vloer",
-      "door": "deur"
-    },
     "thisSurface": "PV op dit vlak",
     "usableShare": "Bruikbaar aandeel",
     "usableShareNote": "van dit vlak, na obstakels",
-    "capacity": "Vermogen",
-    "title": "PV-configurator",
-    "hint": "Klik op een dak of wand om PV toe te voegen. Klik nogmaals om het te verwijderen.",
+    "hint": "Klik op een dak of muur om PV in te stellen, of sleep er een product op.",
     "summary": {
       "capacity": "Vermogen",
       "count": "{installed} van {total}",
-      "surfaces": "Vlakken met PV",
-      "panelArea": "Paneeloppervlak"
+      "surfaces": "Vlakken met PV"
     },
     "geometry": "{tilt}° · gericht op {azimuth}° · {area} m²",
     "upTo": "tot {kwp} kWp",
@@ -167,10 +157,6 @@
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "Er past geen hele module op dit vlak."
     },
-    "hover": {
-      "add": "Klik om PV toe te voegen",
-      "remove": "Klik om PV te verwijderen"
-    },
     "mounting": {
       "label": "Montage",
       "flush": "Parallel",
@@ -183,7 +169,52 @@
       "landscape": "Liggend"
     },
     "panelTilt": "Hellingshoek modules",
-    "panelFacing": "Oriëntatie modules"
+    "panelFacing": "Oriëntatie modules",
+    "hover": {
+      "open": "Klik om PV in te stellen"
+    },
+    "geometryFlat": "plat · {area} m²",
+    "overview": {
+      "title": "PV op dit gebouw"
+    },
+    "surfaces": {
+      "toggle": "Vlakken met PV ({installed} van {total})"
+    },
+    "cost": {
+      "investment": "Investering",
+      "omPerYear": "Beheer en onderhoud per jaar",
+      "estimateNote": "Schattingen op basis van de productkosten, vóór een simulatie.",
+      "investmentEstimate": "Investering ongeveer {amount}, geschat"
+    },
+    "catalogue": {
+      "title": "Catalogus",
+      "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
+      "module": "{width} × {height} m · {watts} W"
+    },
+    "product": {
+      "label": "Product",
+      "none": "Kies een product"
+    },
+    "fitsMore": {
+      "title": "Past hier beter",
+      "reach": "Modules: {count} · {kwp} kWp",
+      "use": "Op dit vlak gebruiken"
+    },
+    "values": {
+      "title": "Technologiewaarden",
+      "product": "Product",
+      "buildingOnly": "Wijzigingen aan {name} gelden alleen voor dit gebouw.",
+      "question": {
+        "cost_energy_cap": "Wat kost het per kWp?",
+        "cost_om_annual": "Wat is het jaarlijkse onderhoud per kWp?",
+        "cont_lifetime": "Hoeveel jaar gaat het mee?"
+      },
+      "saveAs": "Opslaan als nieuwe technologie",
+      "copyName": "{name} (kopie)",
+      "save": "Opslaan",
+      "saved": "Opgeslagen als {name}.",
+      "saveFailed": "De technologie kon niet worden opgeslagen. Probeer het opnieuw."
+    }
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",

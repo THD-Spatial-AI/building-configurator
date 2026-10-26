@@ -5,7 +5,7 @@
  * fetched or rendered.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Box, Loader2 } from '@/app/components/icons';
 import { LoenenLiveMap } from '../LoenenLiveMap';
 import { surfaceGeometry, useFixtureBuilding, useLoenenBuildings } from '../../../demo/useLoenen';
@@ -119,11 +119,7 @@ function FixtureView({ osmId, building, geometry, language }: Pick<Parameters<ty
   );
 }
 
-/**
- * One bundled building with the dev shell playing host for its technologies
- * and PV: the PV card's button opens PV mode, and leaving it returns to the
- * normal view.
- */
+/** One bundled building with the dev shell playing host for its technologies and PV. */
 function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
   osmId: string;
   building: BuildingState;
@@ -131,33 +127,11 @@ function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
   language: Language;
   onExit: (edited: BuildingState | undefined) => void;
 }) {
-  const [pvOpen, setPvOpen] = useState(false);
   const pv = useDemoPvHost(building.envelope);
-  const openPv = useCallback(() => setPvOpen(true), []);
-  const technologies = useDemoTechnologies(pv, openPv);
-  const installedPvIds = useMemo(
-    () => Object.entries(pv.surfaces).filter(([, surface]) => surface.state === 'installed').map(([id]) => id),
-    [pv.surfaces],
-  );
-
-  if (pvOpen) {
-    return (
-      <Building3DView
-        key="pv"
-        language={language}
-        building={building}
-        geometry={geometry}
-        services={fixtureServices}
-        attribution={FIXTURE_ATTRIBUTION}
-        pv={pv}
-        onExit={() => setPvOpen(false)}
-      />
-    );
-  }
+  const technologies = useDemoTechnologies();
 
   return (
     <Building3DView
-      key="normal"
       language={language}
       building={building}
       geometry={geometry}
@@ -165,8 +139,7 @@ function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
       demandProfile={fixtureDemandProfile(osmId)}
       seriesCsvUrl={fixtureSeriesCsvUrl(osmId)}
       attribution={FIXTURE_ATTRIBUTION}
-      pvSurfaceIds={installedPvIds}
-      pvSurfaces={pv.surfaces}
+      pv={pv}
       technologies={technologies}
       onExit={onExit}
     />

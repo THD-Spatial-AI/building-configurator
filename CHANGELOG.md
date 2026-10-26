@@ -6,7 +6,21 @@ Each version's GitHub release entry carries the full notes.
 
 ## [Unreleased]
 
+Breaking: there is no PV mode. `pv` now feeds the Technologies tab and draws the building's modules on every tab; open a building there with `defaultTab="technologies"`. `Building3DView`'s `pvSurfaceIds`, `pvSurfaces` and `pvModule` are removed: the installed surfaces, their settings and the module come from `pv`.
+
+### Added
+
+- PV is placed on the Technologies tab. Suggested surfaces are highlighted there, a clicked surface opens its PV settings in the surface panel, and the PV overview shows capacity, surfaces with PV, investment and yearly O&M, the surfaces as a collapsed list, the catalogue and the product values.
+- A PV catalogue: `PvMode.catalogue` (products in EnerPlanET's technology DTO shape, exported as `TechnologyProduct`), `products` (this building's copies), `productId` and `PvSurface.productId`. A product is dragged onto a surface or chosen in its panel (`onAssignProduct`); its module comes from `module_width_m`, `module_height_m` and `module_power_kwp`.
+- "Fits more here" in a surface's panel: up to three catalogue products that reach more capacity on that surface, with their cost per kWp and "Use on this surface".
+- Investment and yearly O&M before a run, from each product's `cost_energy_cap` and `cost_om_annual` times its layout's kWp, marked as estimates.
+- Product values: basic mode asks cost per kWp, yearly upkeep per kWp and lifetime; expert mode adds every value the product carries that reaches Calliope or the PV yield service. Changes go to this building's copy (`onConstraintChange`); "Save as a new technology" calls `onSaveAsTechnology`.
+- The `runPvBuilding` request carries each surface's `product_id`.
+- `defaultTab` opens the view on a given tab.
+
 ### Changed
+
+- The clicked surface's panel is a fixed column left of the model on a wide screen, so it no longer covers the building while it turns, and a sheet over the bottom of the screen on a narrow one. A flat surface shows "Flat" and no facing.
 
 - The package installs no dependencies of its own; `react`, `react-dom` and `three` stay peer dependencies. Removed: `@radix-ui/react-dialog`, `@radix-ui/react-switch` and `@radix-ui/react-tooltip` (the browser's `<dialog>`, a plain switch and a small tooltip instead), `lucide-react` (the 26 icons used are copied into the package under their ISC licence), `clsx` and `tailwind-merge`, `fflate` (a small writer for the stored ZIP of the model tables) and `earcut` (three.js's own triangulation). The demo application also drops `@vercel/analytics`, `@vercel/edge` and the unused `@thd-spatial-ai/feedback-kit`.
 

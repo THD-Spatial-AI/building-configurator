@@ -9,22 +9,27 @@ import type { PvLayout } from './pvLayout';
 
 /**
  * The request for the host's PV surfaces, or null when the building has none
- * among its elements. A surface with a module layout also carries its modules.
+ * among its elements. A surface with a module layout also carries its modules,
+ * and one with a product its product id.
  */
 export function pvRunRequest(
   osmId: string,
   elements: Record<string, BuildingElement>,
   pvSurfaceIds: readonly string[],
   layouts: Readonly<Record<string, PvLayout>> = {},
+  productFor: (surfaceId: string) => string | undefined = () => undefined,
 ): PvBuildingRunRequest | null {
   const surfaces = pvSurfaceIds
     .filter((id) => elements[id])
     .map((id) => {
       const { area, tilt, azimuth } = elements[id];
       const layout = layouts[id];
-      return layout
-        ? { id, area, tilt, azimuth, modules: layout.count, kwp: layout.kwp, panel_tilt: layout.tilt, panel_azimuth: layout.azimuth }
-        : { id, area, tilt, azimuth };
+      const productId = productFor(id);
+      return {
+        id, area, tilt, azimuth,
+        ...(layout && { modules: layout.count, kwp: layout.kwp, panel_tilt: layout.tilt, panel_azimuth: layout.azimuth }),
+        ...(productId && { product_id: productId }),
+      };
     });
   return surfaces.length > 0 ? { osm_id: osmId, surfaces } : null;
 }

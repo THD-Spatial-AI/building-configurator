@@ -47,6 +47,10 @@
     "discardSurface": {
       "message": "Vous avez modifié cette surface. Conserver les modifications ?",
       "note": "Abandonner rétablit la surface telle qu'elle était à l'ouverture de l'éditeur."
+    },
+    "panel": {
+      "empty": "Cliquez sur une surface du modèle pour la voir ici.",
+      "emptyPv": "Cliquez sur un toit ou un mur pour y configurer le PV."
     }
   },
   "surface": {
@@ -123,35 +127,20 @@
     }
   },
   "pv": {
-    "surfacesWithPv": {
-      "one": "{count} surface avec PV",
-      "many": "{count} de surfaces avec PV",
-      "other": "{count} surfaces avec PV"
-    },
     "state": {
       "installed": "Avec PV",
       "suggested": "Suggérée",
       "available": "Disponible"
     },
     "toggle": "PV sur {surface}",
-    "surfaceType": {
-      "wall": "mur",
-      "window": "fenêtre",
-      "roof": "toiture",
-      "floor": "plancher",
-      "door": "porte"
-    },
     "thisSurface": "PV sur cette surface",
     "usableShare": "Part utilisable",
     "usableShareNote": "de cette surface, hors obstacles",
-    "capacity": "Puissance",
-    "title": "Configurateur PV",
-    "hint": "Cliquez sur un toit ou un mur pour ajouter du PV. Cliquez à nouveau pour le retirer.",
+    "hint": "Cliquez sur un toit ou un mur pour configurer le PV, ou déposez-y un produit.",
     "summary": {
       "capacity": "Puissance",
       "count": "{installed} sur {total}",
-      "surfaces": "Surfaces avec PV",
-      "panelArea": "Surface de modules"
+      "surfaces": "Surfaces avec PV"
     },
     "geometry": "{tilt}° · orienté {azimuth}° · {area} m²",
     "upTo": "jusqu'à {kwp} kWp",
@@ -170,10 +159,6 @@
       "modules": "Modules : {count} · {kwp} kWp · {area} m²",
       "noFit": "Aucun module entier ne tient sur cette surface."
     },
-    "hover": {
-      "add": "Cliquer pour ajouter du PV",
-      "remove": "Cliquer pour retirer le PV"
-    },
     "mounting": {
       "label": "Pose",
       "flush": "Coplanaire",
@@ -186,7 +171,52 @@
       "landscape": "Paysage"
     },
     "panelTilt": "Inclinaison des modules",
-    "panelFacing": "Orientation des modules"
+    "panelFacing": "Orientation des modules",
+    "hover": {
+      "open": "Cliquez pour configurer le PV"
+    },
+    "geometryFlat": "plat · {area} m²",
+    "overview": {
+      "title": "PV sur ce bâtiment"
+    },
+    "surfaces": {
+      "toggle": "Surfaces avec PV ({installed} sur {total})"
+    },
+    "cost": {
+      "investment": "Investissement",
+      "omPerYear": "Exploitation et maintenance par an",
+      "estimateNote": "Estimations à partir des coûts des produits, avant une simulation.",
+      "investmentEstimate": "Investissement d’environ {amount}, estimé"
+    },
+    "catalogue": {
+      "title": "Catalogue",
+      "hint": "Faites glisser un produit sur un toit ou un mur, ou choisissez-le dans le panneau d’une surface.",
+      "module": "{width} × {height} m · {watts} W"
+    },
+    "product": {
+      "label": "Produit",
+      "none": "Choisir un produit"
+    },
+    "fitsMore": {
+      "title": "Plus de modules ici",
+      "reach": "Modules : {count} · {kwp} kWp",
+      "use": "Utiliser sur cette surface"
+    },
+    "values": {
+      "title": "Valeurs de la technologie",
+      "product": "Produit",
+      "buildingOnly": "Les modifications de {name} ne concernent que ce bâtiment.",
+      "question": {
+        "cost_energy_cap": "Combien coûte-t-il par kWp ?",
+        "cost_om_annual": "Quel est l’entretien annuel par kWp ?",
+        "cont_lifetime": "Combien d’années dure-t-il ?"
+      },
+      "saveAs": "Enregistrer comme nouvelle technologie",
+      "copyName": "{name} (copie)",
+      "save": "Enregistrer",
+      "saved": "Enregistré sous {name}.",
+      "saveFailed": "La technologie n’a pas pu être enregistrée. Réessayez."
+    }
   },
   "tech": {
     "none": "Aucune technologie sur ce bâtiment.",
