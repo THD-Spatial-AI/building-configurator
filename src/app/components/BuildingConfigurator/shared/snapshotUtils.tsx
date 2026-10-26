@@ -122,6 +122,14 @@ export function buildSnapshotRows(
   const baseGeneral      = baseline?.general      ?? DEFAULT_GENERAL;
   const baseTotalArea    = baseline?.totalArea    ?? DEFAULT_TOTAL_AREA;
   const baseElementCount = baseline?.elementCount ?? Object.keys(DEFAULT_ELEMENTS).length;
+  // With storeys left out the table describes what BuEM receives: the modelled
+  // storeys, and each surface for its share inside them.
+  const modelled = general.storeysModelled;
+  const modelledStoreys = modelled?.length ?? general.storeys;
+  const sent = modelled
+    ? Object.values(elements).filter((el) => (el.modelledShare ?? 1) > 0)
+    : Object.values(elements);
+  const envelopeArea = modelled ? sent.reduce((sum, el) => sum + el.area * (el.modelledShare ?? 1), 0) : totalArea;
 
   return [
     {
@@ -166,7 +174,8 @@ export function buildSnapshotRows(
       label: 'Storeys',
       labelKey: 'snapshot.row.storeys',
       value: `${general.storeys}`,
-      status: general.storeys === baseGeneral.storeys ? 'default' : 'modified',
+      ...(modelled ? { valueMessage: { key: 'snapshot.storeysModelled', values: { modelled: modelled.length, total: general.storeys } } } : {}),
+      status: general.storeys === baseGeneral.storeys && !modelled ? 'default' : 'modified',
       editKey: 'storeys',
       editType: 'number',
       rawValue: general.storeys,
@@ -183,9 +192,10 @@ export function buildSnapshotRows(
     {
       label: 'Volume',
       labelKey: 'snapshot.row.volume',
-      value: `${formatNumber(language, computeVolume(general.floorArea, general.storeys, general.roomHeight), 0)} m³`,
+      value: `${formatNumber(language, computeVolume(general.floorArea, modelledStoreys, general.roomHeight), 0)} m³`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea)
         && general.storeys === baseGeneral.storeys
+        && !modelled
         && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
         ? 'default'
         : 'modified',
@@ -193,13 +203,13 @@ export function buildSnapshotRows(
     {
       label: 'Envelope',
       labelKey: 'snapshot.row.envelope',
-      value: `${formatNumber(language, totalArea, 1)} m²  ·  ${Object.keys(elements).length} surfaces`,
+      value: `${formatNumber(language, envelopeArea, 1)} m²  ·  ${sent.length} surfaces`,
       valueMessage: {
         key: 'snapshot.envelopeValue',
-        values: { area: formatNumber(language, totalArea, 1), count: Object.keys(elements).length },
+        values: { area: formatNumber(language, envelopeArea, 1), count: sent.length },
       },
-      status: isCloseTo(totalArea, baseTotalArea)
-        && Object.keys(elements).length === baseElementCount
+      status: isCloseTo(envelopeArea, baseTotalArea)
+        && sent.length === baseElementCount
         ? 'default'
         : 'modified',
     },

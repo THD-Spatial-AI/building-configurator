@@ -667,7 +667,8 @@
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh plynu/rok"
     },
-    "pvGeneration": "Výroba FV"
+    "pvGeneration": "Výroba FV",
+    "storeysModelled": "{modelled} z {total} modelováno"
   },
   "envelope": {
     "compassNorth": "S"

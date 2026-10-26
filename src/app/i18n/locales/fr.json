@@ -657,7 +657,8 @@
       "kWhPerYear": "kWh/an",
       "kWhGasPerYear": "kWh gaz/an"
     },
-    "pvGeneration": "Production PV"
+    "pvGeneration": "Production PV",
+    "storeysModelled": "{modelled} sur {total} modélisés"
   },
   "envelope": {
     "compassNorth": "N"
