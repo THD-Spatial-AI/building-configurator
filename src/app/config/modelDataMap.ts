@@ -39,7 +39,10 @@ export const MODEL_DATA_MAP = {
       country:            'properties.buem.building.country',
       floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
       roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
-      storeys:            'properties.buem.building.n_storeys',          // deprecated in v6-draft; read from older sources, never written
+      storeys: [
+        'properties.buem.storeys',                                        // beside the block, see buemAdapter
+        'properties.buem.building.n_storeys',                             // deprecated in v6-draft; read from older sources, never written
+      ],
     },
 
     // Building parameters beyond the descriptor, each absent unless set.

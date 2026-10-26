@@ -19,6 +19,10 @@ Breaking: there is no PV mode. `pv` now feeds the Technologies tab and draws the
 - `defaultTab` opens the view on a given tab.
 - `pvLayout`'s result carries `capped`: whether the usable share or the surface's space limits the modules. A surface's panel says when it is the space, as on most racked flat roofs, where the usable share then changes nothing.
 
+### Fixed
+
+- A building saved by the configurator reopened with 4 storeys (or 0 from an imported file) and its floor area split across them, because BuEM takes no storey count and none was stored. The count is now stored beside the BuEM block as `properties.buem.storeys`, like `construction_year`. Buildings saved before this keep the old behaviour until saved again.
+
 ### Changed
 
 - The clicked surface's panel is a fixed column left of the model on a wide screen, so it no longer covers the building while it turns, and a sheet over the bottom of the screen on a narrow one. A flat surface shows "Flat" and no facing.
