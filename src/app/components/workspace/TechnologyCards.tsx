@@ -2,7 +2,7 @@
 // host owns every value and label; the cards show them and report edits.
 // Nothing is stored here.
 
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { useFormatNumber, useT, type FormatNumber } from '../../i18n';
 import { DecimalInput } from '../BuildingConfigurator/shared/ui';

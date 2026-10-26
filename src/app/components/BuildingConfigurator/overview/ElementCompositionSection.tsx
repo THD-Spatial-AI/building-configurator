@@ -2,7 +2,7 @@
 // opens the group's surface configurator, or expands to list its surfaces.
 
 import React, { useState } from 'react';
-import { AlertTriangle, ChevronDown } from 'lucide-react';
+import { AlertTriangle, ChevronDown } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { ELEMENT_DOTS } from '../shared/ui';
 import { hasInvalidArea } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';

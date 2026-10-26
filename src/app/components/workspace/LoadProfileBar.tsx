@@ -3,7 +3,7 @@
 // Hourly only, which is the resolution the whole stack runs at.
 
 import { useRef } from 'react';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload } from '@/app/components/icons';
 import { useLoadProfileState } from '../BuildingConfigurator/overview/useLoadProfileState';
 import type { LoadDataPoint } from '../../lib/loadProfile';
 import { useT } from '../../i18n';

@@ -1,7 +1,7 @@
 // Building-level parameters panel of the 3D view; Expert shows more groups.
 
 import { useState } from 'react';
-import { Building2, ChevronDown } from 'lucide-react';
+import { Building2, ChevronDown } from '@/app/components/icons';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import {
   SelectInput, NumberInput, FieldLabel,

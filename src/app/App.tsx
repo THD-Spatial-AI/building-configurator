@@ -1,4 +1,3 @@
-import { Analytics } from '@vercel/analytics/react';
 import { useEffect, useState } from 'react';
 import { BuildingWorkspace, FIXTURE_OSM_ID, FixtureWorkspace, FLAT_ROOF_OSM_ID } from './components/workspace/BuildingWorkspace';
 import { SegmentedControl } from './components/BuildingConfigurator/shared/ui';
@@ -56,7 +55,6 @@ export default function App() {
         {view === 'flat' && <FixtureWorkspace key="flat" osmId={FLAT_ROOF_OSM_ID} language={language} />}
 
       </div>
-      <Analytics />
     </>
   );
 }

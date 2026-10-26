@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Loader2 } from 'lucide-react';
+import { Box, Loader2 } from '@/app/components/icons';
 import { LoenenLiveMap } from '../LoenenLiveMap';
 import { surfaceGeometry, useFixtureBuilding, useLoenenBuildings } from '../../../demo/useLoenen';
 import { fixtureDemandProfile, fixtureSeriesCsvUrl, fixtureServices } from '../../../demo/services';

@@ -2,7 +2,7 @@
 // group cards — one card, one header tab switch, no separate section below.
 
 import React, { useState } from 'react';
-import { Pencil, Check } from 'lucide-react';
+import { Pencil, Check } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';

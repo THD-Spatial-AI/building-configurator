@@ -6,7 +6,7 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard } from '../BuildingConfigurator/overview/BuildingDetailsCard';

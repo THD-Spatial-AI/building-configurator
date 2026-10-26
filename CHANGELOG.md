@@ -4,6 +4,12 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Changed
+
+- The package installs no dependencies of its own; `react`, `react-dom` and `three` stay peer dependencies. Removed: `@radix-ui/react-dialog`, `@radix-ui/react-switch` and `@radix-ui/react-tooltip` (the browser's `<dialog>`, a plain switch and a small tooltip instead), `lucide-react` (the 26 icons used are copied into the package under their ISC licence), `clsx` and `tailwind-merge`, `fflate` (a small writer for the stored ZIP of the model tables) and `earcut` (three.js's own triangulation). The demo application also drops `@vercel/analytics`, `@vercel/edge` and the unused `@thd-spatial-ai/feedback-kit`.
+
 ## [0.13.0] - 2026-10-26
 
 Breaking: `PvMode` requires `onMountingChange(surfaceId, mounting, orientation)`. Store both values per surface and pass them back as `surfaces[id].mounting` and `orientation`.

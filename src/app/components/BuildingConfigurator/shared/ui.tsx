@@ -3,13 +3,10 @@
  * Shared primitive components and design tokens.
  *
  * Styled with Tailwind CSS + CSS variables to match the EnerPlanET UI.
- * Radix UI is used for Tooltip and Switch; all other components are plain HTML.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
-import * as SwitchPrimitive from '@radix-ui/react-switch';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { AlertTriangle, Info, ChevronDown, X } from 'lucide-react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { AlertTriangle, Info, ChevronDown } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { formatDecimal, parseDecimal, useFormatNumber, useLanguage, useT } from '@/app/i18n';
 import { formatTotal } from '@/app/lib/loadProfile';
@@ -61,26 +58,51 @@ export function ConfiguratorStyles() {
 
 // ─── InfoTip ──────────────────────────────────────────────────────────────────
 
+/** Half the tip's maximum width plus a margin, kept between the tip's middle and the window's edges. */
+const TIP_HALF_WIDTH = 108;
+
+/**
+ * An info icon whose tip shows on hover or keyboard focus. The tip is drawn
+ * into document.body so a scrolling panel cannot clip it; it sits above the
+ * icon, or below it near the top of the window.
+ */
 export function InfoTip({ tip }: { tip: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const id = useId();
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const show = () => setRect(ref.current?.getBoundingClientRect() ?? null);
+  const hide = () => setRect(null);
+  const below = rect !== null && rect.top < 64;
   return (
-    <TooltipPrimitive.Provider delayDuration={0}>
-      <TooltipPrimitive.Root>
-        <TooltipPrimitive.Trigger asChild>
-          <span className="inline-flex items-center cursor-help shrink-0">
-            <Info className="size-3 text-muted-foreground" />
-          </span>
-        </TooltipPrimitive.Trigger>
-        <TooltipPrimitive.Portal>
-          <TooltipPrimitive.Content
-            sideOffset={4}
-            className="z-[9999] bg-foreground text-background text-[11px] leading-snug rounded-[6px] px-2.5 py-1.5 max-w-[200px] shadow-md animate-in fade-in-0 zoom-in-95"
-          >
-            {tip}
-            <TooltipPrimitive.Arrow className="fill-foreground" />
-          </TooltipPrimitive.Content>
-        </TooltipPrimitive.Portal>
-      </TooltipPrimitive.Root>
-    </TooltipPrimitive.Provider>
+    <span
+      ref={ref}
+      tabIndex={0}
+      aria-describedby={rect ? id : undefined}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+      className="inline-flex shrink-0 cursor-help items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Info className="size-3 text-muted-foreground" />
+      {rect && createPortal(
+        <span
+          id={id}
+          role="tooltip"
+          className={cn(
+            'pointer-events-none fixed z-[9999] max-w-[200px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
+            below ? 'translate-y-0' : '-translate-y-full',
+          )}
+          style={{
+            left: Math.min(window.innerWidth - TIP_HALF_WIDTH, Math.max(TIP_HALF_WIDTH, rect.left + rect.width / 2)),
+            top: below ? rect.bottom + 4 : rect.top - 4,
+          }}
+        >
+          {tip}
+        </span>,
+        document.body,
+      )}
+    </span>
   );
 }
 
@@ -293,8 +315,8 @@ interface SegmentedControlProps {
 export function SegmentedControl({ options, value, onChange, fullWidth }: SegmentedControlProps) {
   return (
     <div className={cn(
-      'inline-flex bg-muted rounded-[6px] p-0.5 gap-0.5',
-      fullWidth && 'flex w-full',
+      'bg-muted rounded-[6px] p-0.5 gap-0.5',
+      fullWidth ? 'flex w-full' : 'inline-flex',
     )}>
       {options.map((opt) => {
         const active = value === opt.value;
@@ -373,13 +395,19 @@ export function ToggleSwitch({ checked, onChange, label, tip }: ToggleSwitchProp
         <span className="text-xs text-foreground">{label}</span>
         {tip && <InfoTip tip={tip} />}
       </div>
-      <SwitchPrimitive.Root
-        checked={checked}
-        onCheckedChange={onChange}
-        className="peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch-background inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={cn(
+          'inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          checked ? 'bg-primary' : 'bg-switch-background',
+        )}
       >
-        <SwitchPrimitive.Thumb className="bg-background pointer-events-none block size-4 rounded-full shadow-sm ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0" />
-      </SwitchPrimitive.Root>
+        <span className={cn('bg-background pointer-events-none block size-4 rounded-full shadow-sm transition-transform', checked ? 'translate-x-4' : 'translate-x-0')} />
+      </button>
     </div>
   );
 }
@@ -608,69 +636,6 @@ export function ScrollHintContainer({
   );
 }
 
-// ─── Element configurator modal ────────────────────────────────────────────────
-
-/**
- * Blurred-backdrop overlay that hosts a single element's editor (a surface
- * group or the building's advanced settings). Replaces the old
- * persistent "active editor" column — the editor now only exists while the
- * user is actively configuring one thing, instead of always occupying space.
- */
-const MODAL_SIZE = {
-  default: 'h-[min(760px,85vh)] w-[min(1060px,94vw)]',
-  // For an editor with little content, which would leave most of the default
-  // size blank.
-  compact: 'h-[min(520px,80vh)] w-[min(640px,94vw)]',
-  // Surface-group editor: a fixed 200px sidebar list + one surface's
-  // properties form — neither needs the full default width, which left a
-  // few hundred px of blank card on the right. Height stays fairly tall
-  // since groups with many surfaces (or Roof's expandable type gallery)
-  // still need room; the sidebar/editor panes scroll independently anyway.
-  medium: 'h-[min(660px,85vh)] w-[min(820px,94vw)]',
-} as const;
-
-export function ElementConfiguratorModal({
-  open,
-  onClose,
-  title,
-  children,
-  size = 'default',
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  size?: keyof typeof MODAL_SIZE;
-}) {
-  const t = useT();
-  return (
-    <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
-          className={cn(
-            'fixed top-1/2 left-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-            MODAL_SIZE[size],
-          )}
-        >
-          <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('common.close')}
-            className="absolute right-3 top-3 z-10 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
-          >
-            <X />
-          </button>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            {children}
-          </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
-  );
-}
-
 /** Asked before closing something (a building, a surface) that has edits since it was last saved. */
 export function UnsavedChangesDialog({
   open,
@@ -688,22 +653,48 @@ export function UnsavedChangesDialog({
   note?: string;
 }) {
   const t = useT();
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const messageId = useId();
+
+  // showModal, not the open attribute: it traps focus, puts the dialog in the
+  // top layer over everything, and makes the rest of the page inert. Opened a
+  // frame later: shown during the Escape press that asked for it, the dialog
+  // would take that same press as its own cancel and close at once.
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (!open) {
+      if (dialog.open) dialog.close();
+      return;
+    }
+    const frame = requestAnimationFrame(() => { if (!dialog.open) dialog.showModal(); });
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background border border-border rounded-md p-6 shadow-xl w-full max-w-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      aria-describedby={messageId}
+      // Escape: the parent decides whether it closes.
+      onCancel={(e) => { e.preventDefault(); onCancel(); }}
+      // A click on the dialog element itself, not its content, is on the backdrop.
+      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+      className="m-auto w-full max-w-sm rounded-md border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+    >
+      <div className="p-6">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="size-4 text-amber-500 shrink-0" />
-            <DialogPrimitive.Title className="text-base font-semibold text-foreground">
+            <h2 id={titleId} className="text-base font-semibold text-foreground">
               {t('common.unsaved.title')}
-            </DialogPrimitive.Title>
+            </h2>
           </div>
 
           <div className="mb-4">
-            <DialogPrimitive.Description className="text-sm text-foreground mb-2">
+            <p id={messageId} className="text-sm text-foreground mb-2">
               {message ?? t('common.unsaved.message')}
-            </DialogPrimitive.Description>
+            </p>
             <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
               <p className="text-xs text-amber-800">
                 {note ?? t('common.unsaved.note')}
@@ -734,8 +725,7 @@ export function UnsavedChangesDialog({
               {t('common.unsaved.discard')}
             </button>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+      </div>
+    </dialog>
   );
 }

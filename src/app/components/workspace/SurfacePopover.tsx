@@ -7,7 +7,7 @@
 // on the node — rather than through React.
 
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { useT } from '../../i18n';
@@ -159,9 +159,9 @@ export function SurfacePopover({ at, cardRef, title, subtitle, onClose, children
         />
       )}
       <div className={cn(
-        'flex w-full shrink-0 items-start gap-2 border-b border-border px-3 py-2.5',
+        'flex w-full shrink-0 items-start gap-2 border-border px-3',
         // A form stretched across a tablet's full width reads worse than a column.
-        !wide && 'mx-auto max-w-[560px] border-b-0 pt-4',
+        wide ? 'border-b py-2.5' : 'mx-auto max-w-[560px] pt-4 pb-2.5',
       )}>
         {!wide && (
           <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-muted-foreground/40" aria-hidden />

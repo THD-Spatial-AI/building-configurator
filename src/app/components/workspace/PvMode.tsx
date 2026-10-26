@@ -3,7 +3,7 @@
 // props, and every change goes back out through a callback. Nothing is stored
 // here.
 
-import { Info, MousePointerClick, Sun } from 'lucide-react';
+import { Info, MousePointerClick, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { PresetSlider } from './surfaceControls';
 import { SegmentedControl } from '../BuildingConfigurator/shared/ui';

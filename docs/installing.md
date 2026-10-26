@@ -36,7 +36,7 @@ npm install @thd-spatial-ai/building-configurator
 
 `react`, `react-dom` and `three` are peer dependencies: the host provides them,
 so the component shares its React and Three.js instances rather than shipping a
-second copy.
+second copy. The package installs no other dependencies.
 
 ## Mount it
 

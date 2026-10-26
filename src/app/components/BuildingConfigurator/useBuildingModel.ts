@@ -655,9 +655,7 @@ export function useBuildingModel(
         avgUValue,
         heatDemandKwhM2a: ignis?.result?.qHnd ?? null,
       });
-      // fflate's Uint8Array is not narrowed to an ArrayBuffer-backed view,
-      // which BlobPart requires.
-      saveFile(zip as BlobPart, `building-${identity.id}-tables.zip`, 'application/zip');
+      saveFile(zip, `building-${identity.id}-tables.zip`, 'application/zip');
     } catch (err) {
       setUploadError({ key: 'model.error.exportFailed', values: { reason: err instanceof Error ? err.message : String(err) } });
     }
