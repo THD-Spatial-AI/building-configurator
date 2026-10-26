@@ -1,7 +1,7 @@
 // Building-level parameters panel of the 3D view; Expert shows more groups.
 
 import { useState } from 'react';
-import { Building2, ChevronDown } from '@/app/components/icons';
+import { ChevronDown } from '@/app/components/icons';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import {
   SelectInput, NumberInput, FieldLabel,
@@ -271,8 +271,8 @@ export function BuildingEditor({
   const format = useFormatNumber();
   const [openSection, setActiveSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort', 'outputs'];
-  const EXPERT_SECTIONS: SectionKey[] = ['equipment', 'solver'];
+  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort'];
+  const EXPERT_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
   const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert'
     ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
@@ -284,21 +284,6 @@ export function BuildingEditor({
 
   const toggle = (id: SectionKey) =>
     setActiveSection((prev) => (prev === id ? null : id));
-
-  // ── Shared header ────────────────────────────────────────────────────────────
-  const header = (
-    <div className="flex shrink-0 items-center gap-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-        <Building2 className="size-4 text-muted-foreground" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-bold text-foreground">{general.buildingName || t('editor.header.fallbackName')}</p>
-        <p className="truncate text-[11px] text-muted-foreground">
-          {buildingTypeName(t, general.buildingType)} ·{general.constructionYear} · {format(computeTotalFloorArea(general.floorArea, general.storeys), 0)} m²
-        </p>
-      </div>
-    </div>
-  );
 
   // ── Insulation and windows — always visible, no click needed ──
   const inlineSections = insulation && (
@@ -322,7 +307,6 @@ export function BuildingEditor({
 
     return (
       <ScrollHintContainer className="flex flex-col gap-3 p-4">
-        {header}
         {inlineSections}
 
         {/* Inactive sections as compact chips */}
@@ -371,7 +355,6 @@ export function BuildingEditor({
   // ── No section active: header + inline sections + grid of summary cards ──────
   return (
     <ScrollHintContainer className="flex flex-col gap-3 p-4">
-      {header}
       {inlineSections}
 
       <div className="grid grid-cols-2 gap-1.5">

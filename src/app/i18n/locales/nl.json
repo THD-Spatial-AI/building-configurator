@@ -297,9 +297,6 @@
       "dwellingsNotSet": "Woningen niet ingesteld",
       "perDwelling": "{dwellings} · {persons} per woning"
     },
-    "header": {
-      "fallbackName": "Gebouw"
-    },
     "insulationTitle": "Isolatie en ramen"
   },
   "comfort": {
@@ -417,7 +414,6 @@
       "averageU": "gemiddelde U {value} W/m²K"
     },
     "averageU": "Gemiddelde U-waarde",
-    "editSurfaces": "Vlakken één voor één bewerken",
     "preset": {
       "label": "Heel het gebouw instellen op",
       "tip": "TABULA-renovatievarianten voor dit gebouwtype en deze bouwperiode. Een keuze stelt elk elementtype in; afzonderlijk ingestelde vlakken behouden hun waarden.",
@@ -590,18 +586,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Energieoverzicht",
-      "envelope": "Gebouwschil",
-      "technology": "Technologieën",
-      "parameters": "Gebouwparameters"
+      "technology": "Technologieën"
     },
     "tab": {
-      "overview": "Overzicht",
-      "parameters": "Parameters",
-      "envelope": "Schil"
+      "building": "Gebouw"
     },
     "doneEditing": "Klaar met bewerken",
-    "editParameters": "Gebouwparameters bewerken"
+    "editParameters": "Gebouwparameters bewerken",
+    "section": {
+      "identity": "Gebouwgegevens"
+    }
   },
   "snapshot": {
     "status": {
@@ -647,24 +641,6 @@
     "pvGeneration": "PV-opwekking"
   },
   "envelope": {
-    "group": {
-      "walls": "Wanden",
-      "windows": "Ramen",
-      "doors": "Deuren",
-      "roof": "Dak",
-      "floor": "Vloer"
-    },
-    "roofShape": {
-      "flat": "flauw hellend",
-      "monoPitch": "lessenaarsdak",
-      "gabled": "Z + N",
-      "hipped": "Z/N/O/W",
-      "vShape": "naar binnen hellend",
-      "sawTooth": "op het zuiden",
-      "custom": "aangepast"
-    },
-    "invalidAreaTip": "{count} zonder oppervlakte, herstellen vóór een simulatie",
-    "noArea": "geen oppervlakte",
     "compassNorth": "N"
   },
   "common": {

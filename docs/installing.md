@@ -95,7 +95,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
 | `pv` | Optional. The building's PV, placed on the Technologies tab, see [PV](#pv) |
-| `defaultTab` | Optional. `overview`, `parameters`, `envelope` or `technologies`: the tab the view opens on. Absent: `overview` |
+| `defaultTab` | Optional. `building` or `technologies`: the tab the view opens on. Absent: `building` |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |

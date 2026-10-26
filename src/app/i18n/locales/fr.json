@@ -300,9 +300,6 @@
       "dwellingsNotSet": "Logements non définis",
       "perDwelling": "{dwellings} · {persons} par logement"
     },
-    "header": {
-      "fallbackName": "Bâtiment"
-    },
     "insulationTitle": "Isolation et fenêtres"
   },
   "comfort": {
@@ -420,7 +417,6 @@
       "averageU": "U moyen {value} W/m²K"
     },
     "averageU": "Valeur U moyenne",
-    "editSurfaces": "Modifier les surfaces une à une",
     "preset": {
       "label": "Appliquer à tout le bâtiment",
       "tip": "Variantes de rénovation TABULA pour ce type et cet âge de bâtiment. Un choix s'applique à chaque type d'élément ; les surfaces réglées une à une gardent leurs valeurs.",
@@ -595,18 +591,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Aperçu énergétique",
-      "envelope": "Enveloppe du bâtiment",
-      "technology": "Technologies",
-      "parameters": "Paramètres du bâtiment"
+      "technology": "Technologies"
     },
     "tab": {
-      "overview": "Aperçu",
-      "parameters": "Paramètres",
-      "envelope": "Enveloppe"
+      "building": "Bâtiment"
     },
     "doneEditing": "Terminer",
-    "editParameters": "Modifier les paramètres du bâtiment"
+    "editParameters": "Modifier les paramètres du bâtiment",
+    "section": {
+      "identity": "Données du bâtiment"
+    }
   },
   "snapshot": {
     "status": {
@@ -653,24 +647,6 @@
     "pvGeneration": "Production PV"
   },
   "envelope": {
-    "group": {
-      "walls": "Murs",
-      "windows": "Fenêtres",
-      "doors": "Portes",
-      "roof": "Toiture",
-      "floor": "Plancher"
-    },
-    "roofShape": {
-      "flat": "faible pente",
-      "monoPitch": "monopente",
-      "gabled": "S + N",
-      "hipped": "S/N/E/O",
-      "vShape": "en V",
-      "sawTooth": "orienté S",
-      "custom": "personnalisé"
-    },
-    "invalidAreaTip": "{count} sans aire, à corriger avant une simulation",
-    "noArea": "sans aire",
     "compassNorth": "N"
   },
   "common": {

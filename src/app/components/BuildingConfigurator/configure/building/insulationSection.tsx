@@ -25,8 +25,6 @@ export interface InsulationProps {
   onSetState: (types: RefurbElementType[], number: number) => void;
   onSetTypeUValue: (type: RefurbElementType, uValue: number) => void;
   onSetTypeLossFactor: (type: RefurbElementType, b: number) => void;
-  /** Opens the Envelope tab, where surfaces are edited one by one. */
-  onOpenEnvelope?: () => void;
   /** Adds a surface the 3D data lacks, such as a wall against ground. */
   onAddSurface?: (type: RefurbElementType, values: Partial<BuildingElement>) => void;
 }
@@ -63,22 +61,17 @@ export function insulationSummary(t: Translate, format: FormatNumber, { levels, 
 export function InsulationSection(props: Props) {
   const t = useT();
   const format = useFormatNumber();
-  const { mode, levels, onOpenEnvelope, avgUValue } = props;
+  const { mode, levels, avgUValue } = props;
   return (
     <div className="flex flex-col gap-4">
       {levels.length > 0 && <BuildingPreset {...props} />}
       {mode === 'expert' && <ElementTable {...props} />}
       {mode === 'expert' && props.onAddSurface && <AddSurface onAdd={props.onAddSurface} />}
       {mode === 'expert' && <SynthesisedWindows {...props} />}
-      <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2">
+      <div className="border-t border-border/60 pt-2">
         <span className="text-[11px] text-muted-foreground">
           {t('insulation.averageU')} <span className="font-semibold text-foreground">{format(avgUValue, 2)} W/m²K</span>
         </span>
-        {onOpenEnvelope && (
-          <button type="button" onClick={onOpenEnvelope} className="cursor-pointer text-[11px] font-medium text-primary hover:underline">
-            {t('insulation.editSurfaces')}
-          </button>
-        )}
       </div>
     </div>
   );

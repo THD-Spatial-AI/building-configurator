@@ -303,9 +303,6 @@
       "dwellingsNotSet": "Nie podano mieszkań",
       "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
     },
-    "header": {
-      "fallbackName": "Budynek"
-    },
     "insulationTitle": "Izolacja i okna"
   },
   "comfort": {
@@ -423,7 +420,6 @@
       "averageU": "średnie U {value} W/m²K"
     },
     "averageU": "Średni współczynnik U",
-    "editSurfaces": "Edytuj przegrody pojedynczo",
     "preset": {
       "label": "Ustaw cały budynek na",
       "tip": "Warianty termomodernizacji TABULA dla tego typu i wieku budynku. Wybór ustawia każdy typ przegrody; przegrody ustawione pojedynczo zachowują swoje wartości.",
@@ -600,18 +596,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Przegląd energii",
-      "envelope": "Przegrody budynku",
-      "technology": "Technologie",
-      "parameters": "Parametry budynku"
+      "technology": "Technologie"
     },
     "tab": {
-      "overview": "Przegląd",
-      "parameters": "Parametry",
-      "envelope": "Przegrody"
+      "building": "Budynek"
     },
     "doneEditing": "Zakończ edycję",
-    "editParameters": "Edytuj parametry budynku"
+    "editParameters": "Edytuj parametry budynku",
+    "section": {
+      "identity": "Dane budynku"
+    }
   },
   "snapshot": {
     "status": {
@@ -659,24 +653,6 @@
     "pvGeneration": "Produkcja PV"
   },
   "envelope": {
-    "group": {
-      "walls": "Ściany",
-      "windows": "Okna",
-      "doors": "Drzwi",
-      "roof": "Dach",
-      "floor": "Podłoga"
-    },
-    "roofShape": {
-      "flat": "niski spadek",
-      "monoPitch": "jednospadowy",
-      "gabled": "S + N",
-      "hipped": "S/N/E/W",
-      "vShape": "spadki do środka",
-      "sawTooth": "na S",
-      "custom": "własny"
-    },
-    "invalidAreaTip": "{count} bez powierzchni, popraw przed uruchomieniem symulacji",
-    "noArea": "brak powierzchni",
     "compassNorth": "N"
   },
   "common": {

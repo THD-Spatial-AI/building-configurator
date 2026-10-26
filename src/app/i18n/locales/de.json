@@ -297,9 +297,6 @@
       "dwellingsNotSet": "Wohneinheiten nicht gesetzt",
       "perDwelling": "{dwellings} · {persons} je Wohneinheit"
     },
-    "header": {
-      "fallbackName": "Gebäude"
-    },
     "insulationTitle": "Dämmung und Fenster"
   },
   "comfort": {
@@ -417,7 +414,6 @@
       "averageU": "mittlerer U-Wert {value} W/m²K"
     },
     "averageU": "Mittlerer U-Wert",
-    "editSurfaces": "Flächen einzeln bearbeiten",
     "preset": {
       "label": "Ganzes Gebäude setzen auf",
       "tip": "TABULA-Sanierungsvarianten für diesen Gebäudetyp und dieses Baualter. Eine Auswahl setzt alle Bauteiltypen; einzeln gesetzte Flächen behalten ihre Werte.",
@@ -590,18 +586,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Energieübersicht",
-      "envelope": "Gebäudehülle",
-      "technology": "Technologien",
-      "parameters": "Gebäudeparameter"
+      "technology": "Technologien"
     },
     "tab": {
-      "overview": "Übersicht",
-      "parameters": "Parameter",
-      "envelope": "Gebäudehülle"
+      "building": "Gebäude"
     },
     "doneEditing": "Bearbeitung beenden",
-    "editParameters": "Gebäudeparameter bearbeiten"
+    "editParameters": "Gebäudeparameter bearbeiten",
+    "section": {
+      "identity": "Gebäudedaten"
+    }
   },
   "snapshot": {
     "status": {
@@ -647,24 +641,6 @@
     "pvGeneration": "PV-Erzeugung"
   },
   "envelope": {
-    "group": {
-      "walls": "Wände",
-      "windows": "Fenster",
-      "doors": "Türen",
-      "roof": "Dach",
-      "floor": "Boden"
-    },
-    "roofShape": {
-      "flat": "flach geneigt",
-      "monoPitch": "einseitig geneigt",
-      "gabled": "S + N",
-      "hipped": "S/N/O/W",
-      "vShape": "nach innen geneigt",
-      "sawTooth": "nach S",
-      "custom": "individuell"
-    },
-    "invalidAreaTip": "{count} ohne Flächeninhalt, vor einer Simulation korrigieren",
-    "noArea": "kein Flächeninhalt",
     "compassNorth": "N"
   },
   "common": {

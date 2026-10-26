@@ -297,9 +297,6 @@
       "dwellingsNotSet": "Dwellings not set",
       "perDwelling": "{dwellings} · {persons} per dwelling"
     },
-    "header": {
-      "fallbackName": "Building"
-    },
     "insulationTitle": "Insulation and windows"
   },
   "comfort": {
@@ -417,7 +414,6 @@
       "averageU": "average U {value} W/m²K"
     },
     "averageU": "Average U-value",
-    "editSurfaces": "Edit surfaces one by one",
     "preset": {
       "label": "Set the whole building to",
       "tip": "TABULA's refurbishment variants for this building type and age. A choice sets every element type; surfaces set one by one keep their values.",
@@ -590,18 +586,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Energy overview",
-      "envelope": "Building Envelope",
-      "technology": "Technologies",
-      "parameters": "Building Parameters"
+      "technology": "Technologies"
     },
     "tab": {
-      "overview": "Overview",
-      "parameters": "Parameters",
-      "envelope": "Envelope"
+      "building": "Building"
     },
     "doneEditing": "Done editing",
-    "editParameters": "Edit building parameters"
+    "editParameters": "Edit building parameters",
+    "section": {
+      "identity": "Building data"
+    }
   },
   "snapshot": {
     "status": {
@@ -647,24 +641,6 @@
     "pvGeneration": "PV generation"
   },
   "envelope": {
-    "group": {
-      "walls": "Walls",
-      "windows": "Windows",
-      "doors": "Doors",
-      "roof": "Roof",
-      "floor": "Floor"
-    },
-    "roofShape": {
-      "flat": "low-slope",
-      "monoPitch": "single slope",
-      "gabled": "S + N",
-      "hipped": "S/N/E/W",
-      "vShape": "inward slopes",
-      "sawTooth": "S-facing",
-      "custom": "custom"
-    },
-    "invalidAreaTip": "{count} with no area, fix before running a simulation",
-    "noArea": "no area",
     "compassNorth": "N"
   },
   "common": {

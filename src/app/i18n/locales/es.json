@@ -300,9 +300,6 @@
       "dwellingsNotSet": "Viviendas sin definir",
       "perDwelling": "{dwellings} · {persons} por vivienda"
     },
-    "header": {
-      "fallbackName": "Edificio"
-    },
     "insulationTitle": "Aislamiento y ventanas"
   },
   "comfort": {
@@ -420,7 +417,6 @@
       "averageU": "U medio {value} W/m²K"
     },
     "averageU": "Valor U medio",
-    "editSurfaces": "Editar superficies una a una",
     "preset": {
       "label": "Aplicar a todo el edificio",
       "tip": "Variantes de rehabilitación TABULA para este tipo y antigüedad de edificio. Una elección fija cada tipo de elemento; las superficies definidas una a una conservan sus valores.",
@@ -595,18 +591,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Resumen energético",
-      "envelope": "Envolvente del edificio",
-      "technology": "Tecnologías",
-      "parameters": "Parámetros del edificio"
+      "technology": "Tecnologías"
     },
     "tab": {
-      "overview": "Resumen",
-      "parameters": "Parámetros",
-      "envelope": "Envolvente"
+      "building": "Edificio"
     },
     "doneEditing": "Terminar edición",
-    "editParameters": "Editar parámetros del edificio"
+    "editParameters": "Editar parámetros del edificio",
+    "section": {
+      "identity": "Datos del edificio"
+    }
   },
   "snapshot": {
     "status": {
@@ -653,24 +647,6 @@
     "pvGeneration": "Generación FV"
   },
   "envelope": {
-    "group": {
-      "walls": "Muros",
-      "windows": "Ventanas",
-      "doors": "Puertas",
-      "roof": "Cubierta",
-      "floor": "Suelo"
-    },
-    "roofShape": {
-      "flat": "poca pendiente",
-      "monoPitch": "a un agua",
-      "gabled": "S + N",
-      "hipped": "S/N/E/O",
-      "vShape": "pendientes hacia dentro",
-      "sawTooth": "orientada al S",
-      "custom": "personalizada"
-    },
-    "invalidAreaTip": "{count} sin área, corrígelo antes de simular",
-    "noArea": "sin área",
     "compassNorth": "N"
   },
   "common": {

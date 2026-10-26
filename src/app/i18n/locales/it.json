@@ -297,9 +297,6 @@
       "dwellingsNotSet": "Alloggi non impostati",
       "perDwelling": "{dwellings} · {persons} per alloggio"
     },
-    "header": {
-      "fallbackName": "Edificio"
-    },
     "insulationTitle": "Isolamento e finestre"
   },
   "comfort": {
@@ -417,7 +414,6 @@
       "averageU": "U medio {value} W/m²K"
     },
     "averageU": "Valore U medio",
-    "editSurfaces": "Modifica le superfici una per una",
     "preset": {
       "label": "Imposta l'intero edificio a",
       "tip": "Varianti di riqualificazione TABULA per questo tipo ed età di edificio. Una scelta imposta ogni tipo di elemento; le superfici impostate una per una mantengono i loro valori.",
@@ -590,18 +586,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Panoramica energetica",
-      "envelope": "Involucro edilizio",
-      "technology": "Tecnologie",
-      "parameters": "Parametri dell'edificio"
+      "technology": "Tecnologie"
     },
     "tab": {
-      "overview": "Panoramica",
-      "parameters": "Parametri",
-      "envelope": "Involucro"
+      "building": "Edificio"
     },
     "doneEditing": "Fine modifica",
-    "editParameters": "Modifica i parametri dell'edificio"
+    "editParameters": "Modifica i parametri dell'edificio",
+    "section": {
+      "identity": "Dati dell'edificio"
+    }
   },
   "snapshot": {
     "status": {
@@ -647,24 +641,6 @@
     "pvGeneration": "Produzione FV"
   },
   "envelope": {
-    "group": {
-      "walls": "Pareti",
-      "windows": "Finestre",
-      "doors": "Porte",
-      "roof": "Tetto",
-      "floor": "Pavimento"
-    },
-    "roofShape": {
-      "flat": "bassa pendenza",
-      "monoPitch": "una falda",
-      "gabled": "S + N",
-      "hipped": "S/N/E/O",
-      "vShape": "falde verso l'interno",
-      "sawTooth": "esposto a S",
-      "custom": "personalizzato"
-    },
-    "invalidAreaTip": "{count} senza area, da correggere prima di una simulazione",
-    "noArea": "senza area",
     "compassNorth": "N"
   },
   "common": {

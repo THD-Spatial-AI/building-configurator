@@ -303,9 +303,6 @@
       "dwellingsNotSet": "Počet bytů nenastaven",
       "perDwelling": "{dwellings} · {persons} na byt"
     },
-    "header": {
-      "fallbackName": "Budova"
-    },
     "insulationTitle": "Izolace a okna"
   },
   "comfort": {
@@ -423,7 +420,6 @@
       "averageU": "průměrné U {value} W/m²K"
     },
     "averageU": "Průměrný součinitel U",
-    "editSurfaces": "Upravit plochy jednotlivě",
     "preset": {
       "label": "Nastavit celou budovu na",
       "tip": "Varianty renovace TABULA pro tento typ a stáří budovy. Volba nastaví všechny typy konstrukcí; jednotlivě nastavené plochy si ponechají své hodnoty.",
@@ -600,18 +596,16 @@
   },
   "panel": {
     "title": {
-      "overview": "Energetický přehled",
-      "envelope": "Obálka budovy",
-      "technology": "Technologie",
-      "parameters": "Parametry budovy"
+      "technology": "Technologie"
     },
     "tab": {
-      "overview": "Přehled",
-      "parameters": "Parametry",
-      "envelope": "Obálka"
+      "building": "Budova"
     },
     "doneEditing": "Hotovo",
-    "editParameters": "Upravit parametry budovy"
+    "editParameters": "Upravit parametry budovy",
+    "section": {
+      "identity": "Údaje o budově"
+    }
   },
   "snapshot": {
     "status": {
@@ -659,24 +653,6 @@
     "pvGeneration": "Výroba FV"
   },
   "envelope": {
-    "group": {
-      "walls": "Stěny",
-      "windows": "Okna",
-      "doors": "Dveře",
-      "roof": "Střecha",
-      "floor": "Podlaha"
-    },
-    "roofShape": {
-      "flat": "plochá",
-      "monoPitch": "pultová",
-      "gabled": "J + S",
-      "hipped": "J/S/V/Z",
-      "vShape": "sklon dovnitř",
-      "sawTooth": "orientace J",
-      "custom": "vlastní"
-    },
-    "invalidAreaTip": "{count} s nulovou výměrou, opravte před spuštěním simulace",
-    "noArea": "nulová výměra",
     "compassNorth": "S"
   },
   "common": {

@@ -73,8 +73,8 @@ export interface Building3DViewProps {
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
   defaultMode?: 'basic' | 'expert';
-  /** The tab the view opens on. Absent: the energy overview. */
-  defaultTab?: 'overview' | 'parameters' | 'envelope' | 'technologies';
+  /** The tab the view opens on. Absent: Building. */
+  defaultTab?: 'building' | 'technologies';
   /**
    * The language of the view's own text: en, de, es, fr, it, nl, pl or cs. A region tag counts as its
    * language (de-DE), anything else as en. Host-supplied text (PV notice, technology cards) is shown as passed.
@@ -125,7 +125,7 @@ export function Building3DView({
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
   /** The open tab of the panel on the right. */
-  const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : defaultTab ?? 'overview');
+  const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : 'building');
   /** On the Technologies tab, surfaces open their PV settings and take dropped products. */
   const onTech = tab === 'technology' && pv !== undefined;
   /** The PV surface under the pointer on the Technologies tab, for its hover card. */
@@ -458,10 +458,6 @@ export function Building3DView({
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
               onEditField={model.setGen}
-              elements={elements}
-              baselineElements={model.baselineElements}
-              roofConfig={model.roofConfig}
-              onSelectSurface={selectFromList}
               activeTab={tab}
               onTabChange={setTab}
               technologySlot={pv || technologies ? (
@@ -470,7 +466,7 @@ export function Building3DView({
                   {technologies && <TechnologyCards technologies={technologies} />}
                 </div>
               ) : undefined}
-              parametersSlot={(openEnvelope) => (
+              parametersSlot={(
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
                 <div className="border-t border-border">
@@ -488,7 +484,6 @@ export function Building3DView({
                       onSetState: model.setRefurbishment,
                       onSetTypeUValue: model.setTypeUValue,
                       onSetTypeLossFactor: model.setTypeLossFactor,
-                      onOpenEnvelope: openEnvelope,
                       onAddSurface: (type, values) => { model.createSurface(type, values); },
                     }}
                     hideIdentity
