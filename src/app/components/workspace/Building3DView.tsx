@@ -415,6 +415,7 @@ export function Building3DView({
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
+              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled }}
               onSelectSurface={selectInModel}
             />
           ) : (

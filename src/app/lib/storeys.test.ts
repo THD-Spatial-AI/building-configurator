@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { storeyBands, storeyShares } from './storeys';
+import { leftOutParts, storeyBands, storeyLines, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
 /** A 10 m wide wall in the x-z plane from z0 to z1. */
 const wall = (id: string, z0: number, z1: number): SurfacePolygon => ({
-  id, type: 'wall', coordinates: [[[0, 0, z0], [10, 0, z0], [10, 0, z1], [0, 0, z1], [0, 0, z0]]],
+  id, type: 'WallSurface', coordinates: [[[0, 0, z0], [10, 0, z0], [10, 0, z1], [0, 0, z1], [0, 0, z0]]],
 });
 /** A 10 x 10 m horizontal surface at height z. */
 const flat = (id: string, type: string, z: number): SurfacePolygon => ({
@@ -13,7 +13,7 @@ const flat = (id: string, type: string, z: number): SurfacePolygon => ({
 });
 /** A gable triangle on top of a wall, from z0 up to the ridge at z1. */
 const gable = (id: string, z0: number, z1: number): SurfacePolygon => ({
-  id, type: 'wall', coordinates: [[[0, 0, z0], [10, 0, z0], [5, 0, z1], [0, 0, z0]]],
+  id, type: 'WallSurface', coordinates: [[[0, 0, z0], [10, 0, z0], [5, 0, z1], [0, 0, z0]]],
 });
 
 const element = (id: string, type: BuildingElement['type'], extra: Partial<BuildingElement> = {}): BuildingElement => ({
@@ -21,7 +21,7 @@ const element = (id: string, type: BuildingElement['type'], extra: Partial<Build
 });
 
 // Three storeys of 3 m from ground at 0 to eaves at 9, a pitched roof above.
-const polygons = [wall('w1', 0, 9), gable('g1', 9, 12), flat('f1', 'floor', 0), flat('r1', 'roof', 9)];
+const polygons = [wall('w1', 0, 9), gable('g1', 9, 12), flat('f1', 'GroundSurface', 0), flat('r1', 'RoofSurface', 9)];
 
 describe('storeyBands', () => {
   it('splits the height from ground to eaves evenly by the storey count', () => {
@@ -29,7 +29,29 @@ describe('storeyBands', () => {
   });
 
   it('takes the eaves of the highest roof, not of a lower annex', () => {
-    expect(storeyBands([...polygons, flat('annex', 'roof', 3)], 3).height).toBe(3);
+    expect(storeyBands([...polygons, flat('annex', 'RoofSurface', 3)], 3).height).toBe(3);
+  });
+});
+
+describe('storeyLines', () => {
+  it('draws a line across every wall at each floor level, clipped to the wall', () => {
+    const lines = storeyLines(polygons, 3);
+    // w1 crosses z = 3 and z = 6 along its 10 m width; the gable, roof and floor have none.
+    expect(lines).toHaveLength(2);
+    expect(lines.map(([a, b]) => [a[2], Math.abs(b[0] - a[0])])).toEqual([[3, 10], [6, 10]]);
+  });
+
+  it('draws nothing for a building of one storey', () => {
+    expect(storeyLines(polygons, 1)).toEqual([]);
+  });
+});
+
+describe('leftOutParts', () => {
+  it('cuts each surface to the storeys left out, for drawing them lighter', () => {
+    const parts = leftOutParts(polygons, 3, [1, 3]);
+    expect(parts.map((part) => part.id)).toEqual(['w1']);
+    const zs = parts[0].coordinates[0].map((p) => p[2]);
+    expect([Math.min(...zs), Math.max(...zs)]).toEqual([3, 6]);
   });
 });
 

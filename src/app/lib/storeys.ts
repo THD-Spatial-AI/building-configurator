@@ -14,15 +14,48 @@ export interface StoreyBands {
   height: number;
 }
 
+/** City2TABULA geometry names surfaces as CityGML does (WallSurface, RoofSurface); other sources as BuEM (wall, roof). */
+const isKind = (polygon: SurfacePolygon, kind: 'wall' | 'roof') => polygon.type.toLowerCase().startsWith(kind);
+
 /** The ground is the lowest vertex; the eaves the lowest edge of the highest roof. */
 export function storeyBands(polygons: SurfacePolygon[], storeys: number): StoreyBands {
   const zs = (polygon: SurfacePolygon) => polygon.coordinates[0].map((p) => p[2]);
   const ground = Math.min(...polygons.flatMap(zs));
-  const roofs = polygons.filter((polygon) => polygon.type === 'roof');
+  const roofs = polygons.filter((polygon) => isKind(polygon, 'roof'));
   const eaves = roofs.length > 0
     ? Math.max(...roofs.map((roof) => Math.min(...zs(roof))))
     : Math.max(...polygons.flatMap(zs));
   return { ground, height: (eaves - ground) / Math.max(1, storeys) };
+}
+
+/** Where a ring's edges cross the plane z = level, in order along the ring's horizontal direction. */
+function crossings(ring: Point[], level: number): Point[] {
+  const points: Point[] = [];
+  for (let i = 0; i < ring.length; i += 1) {
+    const a = ring[i];
+    const b = ring[(i + 1) % ring.length];
+    if ((a[2] < level) === (b[2] < level)) continue;
+    const t = (level - a[2]) / (b[2] - a[2]);
+    points.push([a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]), level]);
+  }
+  if (points.length < 2) return points;
+  const [dx, dy] = [points[1][0] - points[0][0], points[1][1] - points[0][1]];
+  return points.sort((p, q) => (p[0] - q[0]) * dx + (p[1] - q[1]) * dy);
+}
+
+/** A line across every wall at each floor level between storeys, as [start, end] in the geometry's coordinates. */
+export function storeyLines(polygons: SurfacePolygon[], storeys: number): [Point, Point][] {
+  if (storeys < 2) return [];
+  const bands = storeyBands(polygons, storeys);
+  const lines: [Point, Point][] = [];
+  for (const wall of polygons.filter((polygon) => isKind(polygon, 'wall'))) {
+    const ring = wall.coordinates[0].slice(0, -1);
+    for (let storey = 1; storey < storeys; storey += 1) {
+      const points = crossings(ring, bands.ground + storey * bands.height);
+      for (let i = 0; i + 1 < points.length; i += 2) lines.push([points[i], points[i + 1]]);
+    }
+  }
+  return lines;
 }
 
 /** Area of an open ring, for polygonArea, which takes a closed one. */
@@ -43,21 +76,39 @@ function clipZ(ring: Point[], inside: (z: number) => boolean, plane: number): Po
   return out;
 }
 
-/** Share of a polygon's area inside the given storeys; a band is [lower, upper), the outer ones unbounded. */
+/** The part of an open ring inside one storey's band, [lower, upper), the outer bands unbounded. */
+function clipToStorey(ring: Point[], bands: StoreyBands, storeys: number, storey: number): Point[] {
+  const lower = storey === 1 ? -Infinity : bands.ground + (storey - 1) * bands.height;
+  const upper = storey === storeys ? Infinity : bands.ground + storey * bands.height;
+  let part = ring;
+  if (lower > -Infinity) part = clipZ(part, (z) => z >= lower, lower);
+  if (upper < Infinity) part = clipZ(part, (z) => z < upper, upper);
+  return part.length >= 3 ? part : [];
+}
+
+/** Share of a polygon's area inside the given storeys. */
 function polygonShare(polygon: SurfacePolygon, bands: StoreyBands, storeys: number, modelled: readonly number[]): number {
   const ring = polygon.coordinates[0].slice(0, -1);
   const total = ringArea(ring);
   if (total === 0) return 0;
-  let inside = 0;
-  for (const storey of modelled) {
-    const lower = storey === 1 ? -Infinity : bands.ground + (storey - 1) * bands.height;
-    const upper = storey === storeys ? Infinity : bands.ground + storey * bands.height;
-    let part = ring;
-    if (lower > -Infinity) part = clipZ(part, (z) => z >= lower, lower);
-    if (upper < Infinity) part = clipZ(part, (z) => z < upper, upper);
-    inside += part.length >= 3 ? ringArea(part) : 0;
-  }
+  const inside = modelled.reduce((sum, storey) => {
+    const part = clipToStorey(ring, bands, storeys, storey);
+    return sum + (part.length > 0 ? ringArea(part) : 0);
+  }, 0);
   return Math.min(1, inside / total);
+}
+
+/** Every surface cut to the storeys not modelled, one closed polygon per surface and storey. */
+export function leftOutParts(polygons: SurfacePolygon[], storeys: number, modelled: readonly number[]): SurfacePolygon[] {
+  const bands = storeyBands(polygons, storeys);
+  const leftOut = Array.from({ length: storeys }, (_, i) => i + 1).filter((storey) => !modelled.includes(storey));
+  return polygons.flatMap((polygon) => {
+    const ring = polygon.coordinates[0].slice(0, -1);
+    return leftOut
+      .map((storey) => clipToStorey(ring, bands, storeys, storey))
+      .filter((part) => part.length > 0 && ringArea(part) > 0)
+      .map((part) => ({ ...polygon, coordinates: [[...part, part[0]]] }));
+  });
 }
 
 /**

@@ -9,7 +9,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildPvModules, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { buildPvModules, buildSurfaceGroup, computeOrigin, toLocal, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { leftOutParts, storeyLines } from '@/app/lib/storeys';
 import { PV_PRODUCT_DRAG_TYPE } from '@/app/lib/pvProducts';
 import { useT } from '@/app/i18n';
 
@@ -38,6 +39,8 @@ interface SurfaceGeometryViewerProps {
    *  so picking the same surface again re-frames it. */
   focusId?: string | null;
   focusToken?: number;
+  /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled. */
+  storeys?: { count: number; modelled: readonly number[] | null };
   /** `at` is the click position in client coordinates. */
   onSelectSurface?: (id: string | null, at?: { x: number; y: number }) => void;
 }
@@ -68,12 +71,14 @@ export function SurfaceGeometryViewer({
   candidateIds,
   focusId,
   focusToken,
+  storeys,
   onSelectSurface,
   onHoverSurface,
   onDropProduct,
 }: SurfaceGeometryViewerProps) {
   const t = useT();
   const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
   const compassRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
   const selectRef = useRef(onSelectSurface);
@@ -118,6 +123,7 @@ export function SurfaceGeometryViewer({
     const groups = surfaces.map((surface) => buildSurfaceGroup(surface, origin));
     groups.forEach((group) => scene.add(group));
     groupsRef.current = groups;
+    sceneRef.current = scene;
 
     // Framed from the geometry rather than a fixed distance: a real building is
     // anything from a garage to a terrace block, and the origin is the mean
@@ -314,10 +320,53 @@ export function SurfaceGeometryViewer({
         });
       });
       groupsRef.current = [];
+      sceneRef.current = null;
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
   }, [surfaces, origin]);
+
+  // Display only: the geometry has no storeys, so these follow storeyBands.
+  const storeyCount = storeys?.count ?? 0;
+  const leftOutKey = storeys?.modelled
+    ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)).join(',')
+    : '';
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || storeyCount < 2 || surfaces.length === 0) return;
+    const overlay = new THREE.Group();
+    const points = storeyLines(surfaces, storeyCount).flat().map((p) => toLocal(p, origin));
+    overlay.add(new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints(points),
+      new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.55 }),
+    ));
+    // A left-out storey's part of each surface is drawn again over it, light.
+    const veil = new THREE.MeshBasicMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false,
+      side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+    });
+    const leftOut = leftOutKey ? leftOutKey.split(',').map(Number) : [];
+    const modelled = Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !leftOut.includes(s));
+    for (const part of leftOut.length > 0 ? leftOutParts(surfaces, storeyCount, modelled) : []) {
+      const built = buildSurfaceGroup(part, origin);
+      const fill = built.children.find((c) => c.name === 'surface-fill') as THREE.Mesh | undefined;
+      built.children.forEach((child) => {
+        if (child !== fill) (child as THREE.Mesh).geometry.dispose();
+        ((child as THREE.Mesh).material as THREE.Material).dispose();
+      });
+      if (!fill) continue;
+      fill.material = veil;
+      fill.raycast = () => {};
+      overlay.add(fill);
+    }
+    scene.add(overlay);
+    return () => {
+      scene.remove(overlay);
+      overlay.children.forEach((child) => (child as THREE.Mesh).geometry.dispose());
+      veil.dispose();
+      ((overlay.children[0] as THREE.LineSegments).material as THREE.Material).dispose();
+    };
+  }, [surfaces, origin, storeyCount, leftOutKey]);
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {

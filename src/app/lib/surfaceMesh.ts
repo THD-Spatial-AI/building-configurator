@@ -106,7 +106,7 @@ export function computeOrigin(surfaces: SurfacePolygon[]): [number, number, numb
 }
 
 /** Storage CRS (x east, y north, z up) to three.js (x east, y up, z south). */
-function toLocal([x, y, z]: number[], origin: [number, number, number]): THREE.Vector3 {
+export function toLocal([x, y, z]: number[], origin: [number, number, number]): THREE.Vector3 {
   return new THREE.Vector3(x - origin[0], z - origin[2], -(y - origin[1]));
 }
 
