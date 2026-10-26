@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { runBuildingSimulation, runIdentity, toBuem, type RunContext } from './buemRun';
+import { previewHeatingPerM2, runBuildingSimulation, runIdentity, toBuem, type RunContext } from './buemRun';
 import type { BuemBuildingRunRequest } from './services';
 import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
@@ -193,5 +193,28 @@ describe('adaptBuemFeature on stored blocks', () => {
 
   it('serialises to the blocks it was opened from', () => {
     expect(toBuem(reopened)).toEqual(toBuem(edited));
+  });
+});
+
+describe('previewHeatingPerM2', () => {
+  const context: RunContext = { startDate: '2019-01-01T00:00:00Z', endDate: '2019-12-31T23:00:00Z' };
+
+  it('asks for the heating summary only and gives space heating per A_ref', async () => {
+    const previewBuemBuilding = vi.fn(async (_request: BuemBuildingRunRequest) => ({
+      buem: { thermal_load_profile: { summary: { heating: { total: 8000 } } } },
+    }));
+    const perM2 = await previewHeatingPerM2({ previewBuemBuilding }, identity, elements, general, context);
+    const request = previewBuemBuilding.mock.calls[0][0];
+    expect(request.outputs).toEqual({ heating: 'summary', cooling: 'none', electricity: 'none', hot_water: 'none', kitchen: 'none' });
+    expect(request.start_date).toBe(context.startDate);
+    expect(request.building).toHaveProperty('envelope');
+    expect(perM2).toBe(8000 / 100);
+  });
+
+  it('gives null without a preview service, or when the run fails', async () => {
+    expect(await previewHeatingPerM2({}, identity, elements, general)).toBeNull();
+    const failing = async () => { throw new Error('gateway down'); };
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(await previewHeatingPerM2({ previewBuemBuilding: failing }, identity, elements, general)).toBeNull();
   });
 });

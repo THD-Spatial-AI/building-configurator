@@ -28,8 +28,8 @@ import {
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
-import { applyState, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
-import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
+import { applyState, REFURB_TYPES, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
+import { previewHeatingPerM2, runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
 import type { PvLayout } from '../../lib/pvLayout';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
@@ -607,6 +607,34 @@ export function useBuildingModel(
 
   const buildIdentity = () => runIdentity(buildingData, general);
 
+  // Each refurbishment level's space heating per m², from BuEM runs the host
+  // does not store. Kept while only the level changes: any other edit makes
+  // them describe a different building.
+  const [levelPreview, setLevelPreview] = useState<{ key: string; perM2: Record<number, number | null> } | null>(null);
+  const [isComparingLevels, setIsComparingLevels] = useState(false);
+  const previewKey = JSON.stringify({
+    general: { ...general, refurbishment: null },
+    shape: Object.values(elements).map((el) => [el.id, el.area, el.tilt, el.azimuth, el.modelledShare]),
+  });
+  const levelHeating = levelPreview?.key === previewKey ? levelPreview.perM2 : null;
+
+  /** Runs every refurbishment level of the building through BuEM's preview. */
+  const compareLevels = async () => {
+    const levels = ignis?.variants ?? [];
+    if (levels.length === 0 || !services.previewBuemBuilding) return;
+    setIsComparingLevels(true);
+    const identity = buildIdentity();
+    const results = await Promise.all(levels.map(async (level) => {
+      const levelElements = REFURB_TYPES.reduce(
+        (acc, type) => applyState(acc, type, refurbStates[type], level.number, refurbInitial, levels),
+        elements,
+      );
+      return [level.number, await previewHeatingPerM2(services, identity, levelElements, general, runContext)] as const;
+    }));
+    setLevelPreview({ key: previewKey, perM2: Object.fromEntries(results) });
+    setIsComparingLevels(false);
+  };
+
   /**
    * Commits the working draft, then runs it through BuEM via the host and
    * shows the stored totals the host returns.
@@ -765,6 +793,7 @@ export function useBuildingModel(
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
     setRefurbishment, setTypeUValue, setTypeLossFactor, setStoreysModelled, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
+    levelHeating, isComparingLevels, compareLevels, canCompareLevels: Boolean(services.previewBuemBuilding),
     setUploadError, setGroundTruthTimeseries,
   };
 }

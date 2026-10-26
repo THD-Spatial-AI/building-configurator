@@ -86,6 +86,15 @@ export interface ConfiguratorServices {
   runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse>;
 
   /**
+   * Optional. One building through BuEM with nothing stored, to compare
+   * refurbishment levels: the same request as runBuemBuilding, with the
+   * heating summary only. Resolves to BuEM's `buem` block unchanged; the
+   * package reads thermal_load_profile.summary.heating.total from it.
+   * Without it no level shows an energy class. Expected budget: 15 s.
+   */
+  previewBuemBuilding?(request: BuemBuildingRunRequest): Promise<{ buem: Record<string, unknown> }>;
+
+  /**
    * Optional. PV generation for the building's PV surfaces, run with Save &
    * Preview when the host passes pvSurfaceIds. Without it there is no PV run
    * and no PV row. Expected budget: 30 s.

@@ -51,6 +51,20 @@ export const fixtureServices: ConfiguratorServices = {
     return profile;
   },
 
+  // A stand-in for BuEM's heating: transmission only, sum of U x A x b over
+  // 75 kKh a year, so refurbishment levels rank as they would. A real host
+  // runs BuEM and stores nothing.
+  async previewBuemBuilding(request) {
+    await new Promise((resolve) => setTimeout(resolve, RUN_DELAY_MS));
+    const value = (q: unknown) => Number((q as { value?: unknown } | undefined)?.value ?? 0);
+    const elements = ((request.building as { envelope?: { elements?: Record<string, unknown>[] } }).envelope?.elements ?? []);
+    const conductance = elements.reduce((sum, el) => {
+      const b = el.b_transmission === undefined ? 1 : value(el.b_transmission);
+      return sum + value(el.U) * value(el.area) * b;
+    }, 0);
+    return { buem: { thermal_load_profile: { summary: { heating: { total: conductance * 75 } } } } };
+  },
+
   // A stand-in for the host's PV model: 0.2 kWp/m², 900 kWh/kWp a year.
   async runPvBuilding(request) {
     await new Promise((resolve) => setTimeout(resolve, RUN_DELAY_MS));

@@ -499,6 +499,13 @@
         "usual": "Standard",
         "advanced": "Avanzata"
       }
+    },
+    "classes": {
+      "compare": "Mostra la classe energetica di ogni livello",
+      "comparing": "BuEM calcola ogni livello…",
+      "perM2": "{value} kWh/m²",
+      "note": "Classe indicativa per questo edificio: riscaldamento per m² sulla scala austriaca HWB, da A++ a G. Simulata, non un attestato energetico.",
+      "failed": "L'ultimo tentativo non è riuscito. Riprova."
     }
   },
   "options": {

@@ -545,6 +545,9 @@ export function Building3DView({
                       onSetTypeUValue: model.setTypeUValue,
                       onSetTypeLossFactor: model.setTypeLossFactor,
                       onAddSurface: (type, values) => { model.createSurface(type, values); },
+                      ...(model.canCompareLevels ? {
+                        classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
+                      } : {}),
                     }}
                     hideIdentity
                   />

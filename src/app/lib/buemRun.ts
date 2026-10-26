@@ -9,6 +9,8 @@ import {
   generalFrom,
 } from '../components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingDemandProfile } from './demandProfile';
+import { MODEL_DATA_MAP } from '../config/modelDataMap';
+import { getMappedNumber } from '../config/modelDataResolver';
 import type { BuemBuildingRunRequest, ConfiguratorServices } from './services';
 
 /** The period a run covers, supplied by the host. Dates are RFC 3339. */
@@ -47,6 +49,47 @@ export async function runBuildingSimulation(
     });
   } catch (err) {
     console.error('[buem/building] request failed', err);
+    return null;
+  }
+}
+
+/** A preview asks for the heating total only, so BuEM returns no series. */
+const PREVIEW_OUTPUTS: BuemBuildingRunRequest['outputs'] = {
+  heating: 'summary', cooling: 'none', electricity: 'none', hot_water: 'none', kitchen: 'none',
+};
+
+/**
+ * Annual space heating per A_ref, kWh/(m²·a), of the building as given, from
+ * a BuEM run the host does not store. Null without a preview service or when
+ * the run fails, so a missing class reads as unknown rather than an error.
+ */
+export async function previewHeatingPerM2(
+  services: Pick<ConfiguratorServices, 'previewBuemBuilding'>,
+  identity: BuildingIdentity,
+  elements: Record<string, any>,
+  general: Record<string, any>,
+  runContext?: RunContext,
+): Promise<number | null> {
+  if (!services.previewBuemBuilding) return null;
+  const feature = serializeToBuemFeature(
+    identity, elements, { ...general, outputs: PREVIEW_OUTPUTS }, runContext?.startDate, runContext?.endDate,
+  );
+  const aRef = Number(feature.properties.buem.building.A_ref?.value);
+  try {
+    const { buem } = await services.previewBuemBuilding({
+      osm_id:     String(feature.id),
+      geometry:   feature.geometry,
+      building:   feature.properties.buem.building,
+      solver:     feature.properties.buem.solver,
+      outputs:    PREVIEW_OUTPUTS,
+      start_date: feature.properties.start_time,
+      end_date:   feature.properties.end_time,
+      resolution: Number(feature.properties.resolution),
+    });
+    const heating = getMappedNumber({ properties: { buem } }, MODEL_DATA_MAP.thematic.results.heatingTotal);
+    return aRef > 0 && heating > 0 ? heating / aRef : null;
+  } catch (err) {
+    console.error('[buem/preview] request failed', err);
     return null;
   }
 }
