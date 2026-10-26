@@ -104,6 +104,20 @@ describe('pvLayout racked', () => {
     expect(layout.azimuth).toBe(180);
   });
 
+  it('keeps the rack\'s tilt on a roof that slopes a little', () => {
+    // 5° roof falling to the east, rack facing south at 15°.
+    const dz = 6 * Math.tan((5 * Math.PI) / 180);
+    const sloped: SurfacePolygon = { id: 'e', type: 'roof', coordinates: [[[0, 0, 3 + dz], [6, 0, 3], [6, 10, 3], [0, 10, 3 + dz], [0, 0, 3 + dz]]] };
+    const layout = pvLayout(sloped, module, { usableShare: 1, mounting: { kind: 'racked', tilt: 15, azimuth: 180 } });
+    expect(layout.count).toBeGreaterThan(0);
+    for (const [a, b, , d] of layout.modules) {
+      const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      const e2 = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+      const n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+      expect((Math.acos(Math.abs(n[2]) / Math.hypot(...n)) * 180) / Math.PI).toBeCloseTo(15, 3);
+    }
+  });
+
   it('raises each module\'s upper edge by its tilt', () => {
     const layout = pvLayout(flat, module, { usableShare: 1, mounting: { kind: 'racked', tilt: 15, azimuth: 180 }, orientation: 'portrait' });
     const heights = layout.modules[0].map((corner) => corner[2]);

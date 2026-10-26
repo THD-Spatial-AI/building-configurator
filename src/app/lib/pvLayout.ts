@@ -55,10 +55,10 @@ const MODULE_GAP_M = 0.02;
 const FILL_STEP_M = 0.1;
 /** Racked rows are spaced so a row does not shade the next with the sun this high. */
 const SHADING_ELEVATION_DEG = 20;
-/** Surfaces flatter than this are racked by default. */
-const FLAT_MAX_TILT_DEG = 10;
+/** Surfaces flatter than this are racked by default, and only they are offered racking. */
+export const FLAT_MAX_TILT_DEG = 10;
 export const DEFAULT_RACK: PvMounting = { kind: 'racked', tilt: 15, azimuth: 180 };
-/** Racked modules' low edge sits this far above the surface. */
+/** Racked modules' low edge sits at least this far above the surface. */
 const RACK_FOOT_M = 0.05;
 
 type Vec = [number, number, number];
@@ -253,9 +253,13 @@ function layoutFor(
     if (mounting.kind === 'flush') {
       return [toWorld(r.u, r.v, 0), toWorld(r.u + r.du, r.v, 0), toWorld(r.u + r.du, r.v + r.dv, 0), toWorld(r.u, r.v + r.dv, 0)];
     }
-    // The edge towards the facing (higher v) is the low one.
+    // One level for the whole module, clear of the surface under every
+    // corner, so its tilt is the rack's whatever the surface's slope. The
+    // edge towards the facing (higher v) is the low one.
+    const footprint = [toWorld(r.u, r.v, 0), toWorld(r.u + r.du, r.v, 0), toWorld(r.u + r.du, r.v + r.dv, 0), toWorld(r.u, r.v + r.dv, 0)];
+    const base = Math.max(...footprint.map((c) => c[2])) + RACK_FOOT_M;
     const rise = (r.portrait ? module.height : module.width) * Math.sin(rad(mounting.tilt));
-    return [toWorld(r.u, r.v, RACK_FOOT_M + rise), toWorld(r.u + r.du, r.v, RACK_FOOT_M + rise), toWorld(r.u + r.du, r.v + r.dv, RACK_FOOT_M), toWorld(r.u, r.v + r.dv, RACK_FOOT_M)];
+    return footprint.map(([x, y], i): Vec => [x, y, base + (i < 2 ? rise : 0)]);
   });
 
   return {

@@ -10,7 +10,7 @@ import { SegmentedControl } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry, pvSummary } from '../../lib/pvSurfaces';
-import { DEFAULT_RACK, type PvLayout, type PvModule, type PvMounting, type PvOrientation } from '../../lib/pvLayout';
+import { DEFAULT_RACK, FLAT_MAX_TILT_DEG, type PvLayout, type PvModule, type PvMounting, type PvOrientation } from '../../lib/pvLayout';
 
 /** One surface the host offers for PV. */
 export interface PvSurface {
@@ -59,8 +59,6 @@ export interface PvMode {
 }
 
 const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'];
-/** Racks stand on roofs; steeper surfaces, walls among them, take flush modules only. */
-const RACK_MAX_SURFACE_TILT = 60;
 
 /** The surface ids to draw with panels and to highlight as suggested. */
 export function pvRenderSets(surfaces: Record<string, PvSurface>): { installed: Set<string>; suggested: Set<string> } {
@@ -345,7 +343,7 @@ export function PvSurfaceCard({ surfaceId, surface, pv, elements = {}, layout, o
               surfaceId={surfaceId}
               surface={surface}
               layout={layout}
-              canRack={(geometry?.tilt ?? 0) < RACK_MAX_SURFACE_TILT}
+              canRack={(geometry?.tilt ?? 0) < FLAT_MAX_TILT_DEG || layout.mounting.kind === 'racked'}
               pv={pv}
             />
           )}

@@ -149,16 +149,29 @@ describe('PV with module layouts', () => {
       <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />,
     );
     expect(html).toContain('Modules: 24 · 9.6 kWp · 48 m²');
-    for (const label of ['Flush', 'Racked', 'Best fit', 'Portrait', 'Landscape']) expect(html).toContain(`>${label}<`);
+    for (const label of ['Best fit', 'Portrait', 'Landscape']) expect(html).toContain(`>${label}<`);
     // No orientation chosen, so best fit is the active choice, whatever the layout picked.
     expect(html).toMatch(/font-semibold[^"]*"[^>]*>Best fit</);
     expect(html).not.toContain('Panel tilt');
   });
 
-  it('offers the panel tilt and facing of a racked surface', () => {
+  it('offers racking on a flat roof only', () => {
+    const flat: BuildingElement = { ...elements.r1, id: 'f1', tilt: 0, azimuth: -1 };
+    const onFlat = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="f1" surface={pv.surfaces.r1} pv={pv} elements={{ f1: flat }} layout={flush} />,
+    );
+    const onPitched = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />,
+    );
+    expect(onFlat).toContain('>Racked<');
+    expect(onPitched).not.toContain('>Racked<');
+  });
+
+  it('offers the panel tilt and facing of a racked surface, and the way back to flush', () => {
     const html = renderToStaticMarkup(
       <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={racked} />,
     );
+    expect(html).toContain('>Flush<');
     expect(html).toContain('Panel tilt');
     expect(html).toContain('value="15"');
     expect(html).toContain('Panel facing');
