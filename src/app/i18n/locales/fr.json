@@ -730,6 +730,7 @@
     "hint": "L'étage 1 est le rez-de-chaussée. Excluez les étages qui ne font pas partie de ce modèle, comme un commerce au rez-de-chaussée ; la surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
     "storey": "Étage {number}",
-    "floorArea": "Surface modélisée"
+    "floorArea": "Surface modélisée",
+    "heightNote": "Dans le modèle 3D, un étage mesure {height} m de haut ; BuEM utilise une hauteur sous plafond de {room} m."
   }
 }

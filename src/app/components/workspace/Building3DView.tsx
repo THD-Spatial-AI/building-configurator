@@ -27,7 +27,7 @@ import { PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologyCards, type Technologies } from './TechnologyCards';
 import { StoreysModelled } from './StoreysModelled';
-import { storeyShares } from '../../lib/storeys';
+import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -478,6 +478,8 @@ export function Building3DView({
                       storeys={model.general.storeys}
                       modelled={model.general.storeysModelled}
                       floorAreaPerStorey={model.general.floorArea}
+                      storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
+                      roomHeight={model.general.roomHeight}
                       disabled={surfaces.length === 0}
                       onChange={(modelled) => model.setStoreysModelled(
                         modelled,

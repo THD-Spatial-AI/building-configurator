@@ -5,11 +5,18 @@ import { cn } from '@/lib/utils';
 import { TOPICS } from '@/app/config/topics';
 import { useFormatNumber, useT } from '../../i18n';
 
+/** Above this gap between the model's storey height and BuEM's room height, the panel says so. */
+const HEIGHT_NOTE_GAP_M = 0.5;
+
 /** `modelled` null means every storey; `onChange` gets null back when all are on again. */
-export function StoreysModelled({ storeys, modelled, floorAreaPerStorey, disabled, onChange }: {
+export function StoreysModelled({ storeys, modelled, floorAreaPerStorey, storeyHeight, roomHeight, disabled, onChange }: {
   storeys: number;
   modelled: number[] | null;
   floorAreaPerStorey: number;
+  /** Height of one storey band in the 3D model, ground to eaves over the storey count. */
+  storeyHeight?: number;
+  /** BuEM's h_room. */
+  roomHeight: number;
   /** No geometry to cut the envelope with. */
   disabled?: boolean;
   onChange: (modelled: number[] | null) => void;
@@ -49,6 +56,11 @@ export function StoreysModelled({ storeys, modelled, floorAreaPerStorey, disable
           >{storey}</button>
         ))}
       </div>
+      {storeyHeight !== undefined && Math.abs(storeyHeight - roomHeight) > HEIGHT_NOTE_GAP_M && (
+        <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
+          {t('storeys.heightNote', { height: format(storeyHeight, 1), room: format(roomHeight, 1) })}
+        </p>
+      )}
       <div className="flex justify-between gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
         <span>{t('storeys.floorArea')}</span>
         <span className="font-semibold tabular-nums text-foreground">

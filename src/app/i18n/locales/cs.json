@@ -740,6 +740,7 @@
     "hint": "Podlaží 1 je přízemí. Vynechte podlaží, která do tohoto modelu nepatří, například obchod v přízemí; plocha a obálka počítají jen modelovaná podlaží.",
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
     "storey": "Podlaží {number}",
-    "floorArea": "Modelovaná plocha"
+    "floorArea": "Modelovaná plocha",
+    "heightNote": "Ve 3D modelu je podlaží vysoké {height} m; BuEM počítá s výškou místnosti {room} m."
   }
 }

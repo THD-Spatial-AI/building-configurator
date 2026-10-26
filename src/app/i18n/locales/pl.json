@@ -740,6 +740,7 @@
     "hint": "Kondygnacja 1 to parter. Pomiń kondygnacje, które nie należą do tego modelu, np. sklep na parterze; powierzchnia i przegrody obejmują tylko modelowane kondygnacje.",
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
     "storey": "Kondygnacja {number}",
-    "floorArea": "Modelowana powierzchnia"
+    "floorArea": "Modelowana powierzchnia",
+    "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m."
   }
 }
