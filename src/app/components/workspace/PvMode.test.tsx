@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { PvPanel, PvSurfaceCard, pvRenderSets, type PvMode } from './PvMode';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
+import type { PvLayout } from '../../lib/pvLayout';
 
 const elements: Record<string, BuildingElement> = {
   r1: { id: 'r1', label: 'Roof south', type: 'roof', area: 40, uValue: 0.2, gValue: null, tilt: 35, azimuth: 180 },
@@ -19,6 +20,7 @@ const pv: PvMode = {
   typeLabel: 'Monocrystalline 400 W',
   onToggle: () => {},
   onShareChange: () => {},
+  onMountingChange: () => {},
 };
 
 describe('pvRenderSets', () => {
@@ -125,5 +127,45 @@ describe('PvSurfaceCard layout', () => {
     expect(html).toContain('7.2 kWp on 24 m² of panels');
     expect(html).toContain('Remove PV');
     expect(html).toContain('Done');
+  });
+});
+
+describe('PV with module layouts', () => {
+  const flush: PvLayout = {
+    count: 24, kwp: 9.6, area: 48, tilt: 35, azimuth: 180,
+    mounting: { kind: 'flush' }, orientation: 'portrait', modules: [],
+  };
+  const racked: PvLayout = { ...flush, tilt: 15, mounting: { kind: 'racked', tilt: 15, azimuth: 180 } };
+
+  it('takes capacity and panel area from the layouts in the panel', () => {
+    const html = renderToStaticMarkup(<PvPanel pv={pv} elements={elements} layouts={{ r1: flush }} onSelect={() => {}} />);
+    expect(html).toContain('9.6 kWp');
+    expect(html).toContain('48 m²');
+    expect(html).not.toContain('7.2 kWp');
+  });
+
+  it('shows the module count and offers mounting and orientation in the card', () => {
+    const html = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />,
+    );
+    expect(html).toContain('Modules: 24 · 9.6 kWp · 48 m²');
+    for (const label of ['Flush', 'Racked', 'Portrait', 'Landscape']) expect(html).toContain(`>${label}<`);
+    expect(html).not.toContain('Panel tilt');
+  });
+
+  it('offers the panel tilt and facing of a racked surface', () => {
+    const html = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={racked} />,
+    );
+    expect(html).toContain('Panel tilt');
+    expect(html).toContain('value="15"');
+    expect(html).toContain('Panel facing');
+  });
+
+  it('says when no whole module fits', () => {
+    const html = renderToStaticMarkup(
+      <PvSurfaceCard surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={{ ...flush, count: 0, kwp: 0, area: 0 }} />,
+    );
+    expect(html).toContain('No whole module fits on this surface.');
   });
 });

@@ -163,16 +163,29 @@
     },
     "card": {
       "fromModel": "La inclinación, la orientación y el área proceden del modelo 3D del edificio.",
-      "layout": "Disposición de los módulos dentro de la fracción útil de la superficie",
       "panels": "{kwp} kWp en {area} m² de módulos",
       "remove": "Quitar FV",
       "done": "Listo",
-      "add": "Añadir FV a esta superficie"
+      "add": "Añadir FV a esta superficie",
+      "modules": "Módulos: {count} · {kwp} kWp · {area} m²",
+      "noFit": "En esta superficie no cabe ningún módulo entero."
     },
     "hover": {
       "add": "Haz clic para añadir FV",
       "remove": "Haz clic para quitar FV"
-    }
+    },
+    "mounting": {
+      "label": "Montaje",
+      "flush": "Coplanar",
+      "racked": "Sobre estructura"
+    },
+    "orientation": {
+      "label": "Formato",
+      "portrait": "Vertical",
+      "landscape": "Horizontal"
+    },
+    "panelTilt": "Inclinación de los módulos",
+    "panelFacing": "Orientación de los módulos"
   },
   "tech": {
     "none": "Ninguna tecnología en este edificio.",

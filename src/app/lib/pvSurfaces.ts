@@ -3,6 +3,8 @@
 
 import type { PvSurface } from '@/app/components/workspace/PvMode';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
+import { pvLayout, type PvLayout, type PvLayoutOptions, type PvModule } from './pvLayout';
+import type { SurfacePolygon } from './surfaceMesh';
 
 export interface PvGeometry {
   /** Degrees from horizontal. */
@@ -28,10 +30,29 @@ export function pvGeometry(
   return { tilt: surface.tilt, azimuth: surface.azimuth, area: surface.area };
 }
 
-/** Installed capacity (kWp), panel area (m²) and how many of the offered surfaces carry PV. */
+/** The module layout of each surface in `surfaces` that has a polygon among `polygons`. */
+export function pvLayouts(
+  polygons: readonly SurfacePolygon[],
+  surfaces: Readonly<Record<string, PvLayoutOptions>>,
+  module: PvModule,
+): Record<string, PvLayout> {
+  const layouts: Record<string, PvLayout> = {};
+  for (const polygon of polygons) {
+    const options = surfaces[polygon.id];
+    if (options) layouts[polygon.id] = pvLayout(polygon, module, options);
+  }
+  return layouts;
+}
+
+/**
+ * Installed capacity (kWp), panel area (m²) and how many of the offered
+ * surfaces carry PV. A surface's module layout counts where it has one, else
+ * the host's maxKwp and the usable share of its area.
+ */
 export function pvSummary(
   surfaces: Record<string, PvSurface>,
   elements: Record<string, BuildingElement>,
+  layouts: Readonly<Record<string, PvLayout>> = {},
 ): { kwp: number; panelArea: number; installed: number; total: number } {
   let kwp = 0;
   let panelArea = 0;
@@ -39,8 +60,9 @@ export function pvSummary(
   for (const [id, surface] of Object.entries(surfaces)) {
     if (surface.state !== 'installed') continue;
     installed += 1;
-    kwp += surface.maxKwp;
-    panelArea += (elements[id]?.area ?? surface.area ?? 0) * surface.usableShare;
+    const layout = layouts[id];
+    kwp += layout?.kwp ?? surface.maxKwp;
+    panelArea += layout?.area ?? (elements[id]?.area ?? surface.area ?? 0) * surface.usableShare;
   }
   return { kwp, panelArea, installed, total: Object.keys(surfaces).length };
 }

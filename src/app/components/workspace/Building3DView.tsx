@@ -28,6 +28,8 @@ import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
+import { DEFAULT_PV_MODULE, type PvLayoutOptions, type PvModule } from '../../lib/pvLayout';
+import { pvLayouts } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
 
@@ -61,14 +63,16 @@ export interface Building3DViewProps {
    * surfaces switch PV. Controlled; hold it stable as for `services`.
    */
   pv?: PvMode;
-  /** Surfaces the host has PV on, drawn with panels in the normal view. Ignored in PV mode, which draws its own. */
+  /** Surfaces the host has PV on, drawn with modules in the normal view. Ignored in PV mode, which draws its own. */
   pvSurfaceIds?: readonly string[];
   /**
-   * Usable share (0 to 1) of each surface in pvSurfaceIds, so the normal view
-   * draws modules over that share; a surface missing here is drawn at 80 %.
-   * Ignored in PV mode, which takes each surface's usableShare.
+   * Usable share, mounting and orientation of each surface in pvSurfaceIds,
+   * as stored from PV mode, so the normal view lays out the same modules. A
+   * surface missing here is laid out at a usable share of 0.8. Ignored in PV mode.
    */
-  pvSurfaceShares?: Readonly<Record<string, number>>;
+  pvSurfaces?: Readonly<Record<string, PvLayoutOptions>>;
+  /** One module of the building's PV type, for the normal view. Absent: DEFAULT_PV_MODULE. Ignored in PV mode. */
+  pvModule?: PvModule;
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
@@ -80,15 +84,31 @@ export interface Building3DViewProps {
   language?: string;
 }
 
+/** Laid out for a host PV surface that comes without its own settings. */
+const DEFAULT_USABLE_SHARE = 0.8;
+
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, pvSurfaceShares, technologies, defaultMode = 'basic', language: languageCode,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, pvSurfaceIds, pvSurfaces, pvModule, technologies, defaultMode = 'basic', language: languageCode,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
   const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
+  // In PV mode every offered surface is laid out, for its capacity; in the
+  // normal view only the host's PV surfaces.
+  const layouts = useMemo(() => {
+    const options = pv
+      ? pv.surfaces
+      : Object.fromEntries((pvSurfaceIds ?? []).map((id) => [id, pvSurfaces?.[id] ?? { usableShare: DEFAULT_USABLE_SHARE }]));
+    return pvLayouts(geometry?.surfaces ?? [], options, (pv ? pv.module : pvModule) ?? DEFAULT_PV_MODULE);
+  }, [pv, pvSurfaceIds, pvSurfaces, pvModule, geometry]);
+  const pvModules = useMemo(
+    () => Object.fromEntries(Object.entries(layouts).map(([id, layout]) => [id, layout.modules])),
+    [layouts],
+  );
   const model = useBuildingModel(services, building, {
-    estimateHeatDemand: false, runContext, demandProfile, language, pvSurfaceIds: pv ? undefined : pvSurfaceIds,
+    estimateHeatDemand: false, runContext, demandProfile, language,
+    pvSurfaceIds: pv ? undefined : pvSurfaceIds, pvLayouts: pv ? undefined : layouts,
   });
   const { elements } = model;
   // Below this the panel cannot sit beside the model, so it stacks under it and
@@ -164,10 +184,6 @@ export function Building3DView({
   const surfaces = geometry?.surfaces ?? [];
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
   const installedPvIds = useMemo(() => new Set(pvSurfaceIds ?? []), [pvSurfaceIds]);
-  const pvShares = useMemo(
-    () => (pv ? Object.fromEntries(Object.entries(pv.surfaces).map(([id, surface]) => [id, surface.usableShare])) : pvSurfaceShares),
-    [pv, pvSurfaceShares],
-  );
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
   }, [pv]);
@@ -339,7 +355,7 @@ export function Building3DView({
               invalidIds={invalidIds}
               visibleIds={envelopeIds}
               pvIds={pvSets ? pvSets.installed : installedPvIds}
-              pvShares={pvShares}
+              pvModules={pvModules}
               candidateIds={pvSets?.suggested}
               onHoverSurface={pv ? hoverPv : undefined}
               focusId={focus?.id}
@@ -390,7 +406,7 @@ export function Building3DView({
         )}>
           {pv ? (
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <PvPanel pv={pv} elements={elements} onSelect={selectFromList} />
+              <PvPanel pv={pv} elements={elements} layouts={layouts} onSelect={selectFromList} />
             </div>
           ) : (
           <>
@@ -490,6 +506,7 @@ export function Building3DView({
             surface={pv.surfaces[selected.id]}
             pv={pv}
             elements={elements}
+            layout={layouts[selected.id]}
             onClose={() => openSurface(null)}
           />
         </SurfacePopover>

@@ -4,6 +4,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { PvMode, PvSurface } from '../app/components/workspace/PvMode';
+import type { PvMounting, PvOrientation } from '../app/lib/pvLayout';
 import type { BuildingElement } from '../app/components/BuildingConfigurator/configure/model/buildingElements';
 
 /** Demo module density; a real host takes it from the PV type. */
@@ -49,11 +50,16 @@ export function useDemoPvHost(elements: Record<string, BuildingElement>): PvMode
     }));
   }, [elements]);
 
+  const onMountingChange = useCallback((surfaceId: string, mounting: PvMounting, orientation: PvOrientation | undefined) => {
+    setSurfaces((prev) => ({ ...prev, [surfaceId]: { ...prev[surfaceId], mounting, orientation } }));
+  }, []);
+
   return useMemo(() => ({
     surfaces,
     notice: 'The simulation does not consider shading from trees or neighbouring buildings.',
     typeLabel: `Demo PV module, ${KWP_PER_M2} kWp/m²`,
     onToggle,
     onShareChange,
-  }), [surfaces, onToggle, onShareChange]);
+    onMountingChange,
+  }), [surfaces, onToggle, onShareChange, onMountingChange]);
 }

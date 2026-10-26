@@ -13,6 +13,16 @@
 export { Building3DView } from './app/components/workspace/Building3DView';
 export type { Building3DViewProps } from './app/components/workspace/Building3DView';
 export type { PvMode, PvSurface } from './app/components/workspace/PvMode';
+// The same module layout the view draws, for the module count and kWp a host stores and sends to its yield model.
+export {
+  DEFAULT_PV_MODULE,
+  pvLayout,
+  type PvLayout,
+  type PvLayoutOptions,
+  type PvModule,
+  type PvMounting,
+  type PvOrientation,
+} from './app/lib/pvLayout';
 export type { TechCard, TechField, Technologies } from './app/components/workspace/TechnologyCards';
 export type { Language } from './app/i18n';
 

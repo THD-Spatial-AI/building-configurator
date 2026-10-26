@@ -6,10 +6,10 @@
 // Selection is controlled: a click reports the surface id and the caller
 // decides what is selected. The scene is rebuilt only when `surfaces` changes
 // identity, so selection, highlighting and hiding never reset the camera.
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildPvPanel, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { buildPvModules, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
 import { useT } from '@/app/i18n';
 
 interface SurfaceGeometryViewerProps {
@@ -20,10 +20,10 @@ interface SurfaceGeometryViewerProps {
   invalidIds?: ReadonlySet<string>;
   /** Surfaces to render. Undefined renders all of them. */
   visibleIds?: ReadonlySet<string>;
-  /** Surfaces carrying PV, drawn with modules over their usable share. */
+  /** Surfaces carrying PV, drawn with the modules in pvModules. */
   pvIds?: ReadonlySet<string>;
-  /** Usable share (0 to 1) of each PV surface; a surface missing here uses DEFAULT_PV_SHARE. */
-  pvShares?: Readonly<Record<string, number>>;
+  /** Each PV surface's modules, four [x, y, z] corners each, from pvLayout. Hold each array stable while unchanged. */
+  pvModules?: Readonly<Record<string, number[][][]>>;
   /** Surfaces suggested for PV: a light fill and a dashed outline, no modules. */
   candidateIds?: ReadonlySet<string>;
   /**
@@ -51,8 +51,6 @@ const INVALID_COLOR = 0x991b1b;
 /** A surface suggested for PV: a light fill inside a dashed outline. */
 const CANDIDATE_FILL = 0xf2d9b8;
 const CANDIDATE_EDGE_COLOR = 0xb45309;
-/** The usable share drawn for a PV surface the host gives none for. */
-const DEFAULT_PV_SHARE = 0.8;
 const EDGE_COLOR = 0x1e293b;
 const INVALID_EDGE_COLOR = 0xdc2626;
 // A plain DOM 'click' fires on pointerup regardless of drag distance, so an
@@ -70,7 +68,7 @@ export function SurfaceGeometryViewer({
   invalidIds,
   visibleIds,
   pvIds,
-  pvShares,
+  pvModules,
   candidateIds,
   focusId,
   focusToken,
@@ -101,6 +99,7 @@ export function SurfaceGeometryViewer({
   const hoverRef = useRef(onHoverSurface);
   useEffect(() => { hoverRef.current = onHoverSurface; });
   useEffect(() => { anchorMoveRef.current = onSelectedAnchorMove; });
+  const origin = useMemo(() => computeOrigin(surfaces), [surfaces]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -125,7 +124,6 @@ export function SurfaceGeometryViewer({
     sun.position.set(12, 22, 10);
     scene.add(sun);
 
-    const origin = computeOrigin(surfaces);
     const groups = surfaces.map((surface) => buildSurfaceGroup(surface, origin));
     groups.forEach((group) => scene.add(group));
     groupsRef.current = groups;
@@ -346,7 +344,7 @@ export function SurfaceGeometryViewer({
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
-  }, [surfaces]);
+  }, [surfaces, origin]);
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {
@@ -365,19 +363,19 @@ export function SurfaceGeometryViewer({
         id === selectedId ? HIGHLIGHT_COLOR : invalid ? INVALID_COLOR : 0x000000,
       );
 
-      // Modules over the usable share, kept while the scene lives and rebuilt
-      // only when the share changes: toggling visibility is cheaper.
+      // Modules kept while the scene lives and rebuilt only when the layout
+      // changes: toggling visibility is cheaper.
       let panel = group.children.find((c) => c.name === 'pv-panel') as THREE.Mesh | undefined;
       const hasPv = pvIds?.has(id) ?? false;
-      const share = pvShares?.[id] ?? DEFAULT_PV_SHARE;
-      if (hasPv && panel && panel.userData.share !== share) {
+      const modules = pvModules?.[id];
+      if (hasPv && panel && panel.userData.modules !== modules) {
         group.remove(panel);
         panel.geometry.dispose();
         panel = undefined;
       }
-      if (hasPv && !panel && fill) {
-        panel = buildPvPanel(fill.geometry, share);
-        panel.userData.share = share;
+      if (hasPv && !panel && modules) {
+        panel = buildPvModules(modules, origin);
+        panel.userData.modules = modules;
         group.add(panel);
       }
       if (panel) panel.visible = hasPv;
@@ -415,7 +413,7 @@ export function SurfaceGeometryViewer({
         anchorDirtyRef.current = true;
       }
     }
-  }, [surfaces, selectedId, invalidIds, visibleIds, pvIds, pvShares, candidateIds]);
+  }, [surfaces, origin, selectedId, invalidIds, visibleIds, pvIds, pvModules, candidateIds]);
 
   return (
     <div className="bg-muted" style={{ width: '100%', height: '100%', position: 'relative' }}>

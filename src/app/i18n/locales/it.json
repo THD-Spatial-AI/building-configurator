@@ -160,16 +160,29 @@
     },
     "card": {
       "fromModel": "Inclinazione, esposizione e area provengono dal modello 3D dell'edificio.",
-      "layout": "Disposizione dei moduli nella quota utilizzabile della superficie",
       "panels": "{kwp} kWp su {area} m² di moduli",
       "remove": "Rimuovi FV",
       "done": "Fatto",
-      "add": "Aggiungi FV a questa superficie"
+      "add": "Aggiungi FV a questa superficie",
+      "modules": "Moduli: {count} · {kwp} kWp · {area} m²",
+      "noFit": "Su questa superficie non entra nessun modulo intero."
     },
     "hover": {
       "add": "Fai clic per aggiungere FV",
       "remove": "Fai clic per rimuovere FV"
-    }
+    },
+    "mounting": {
+      "label": "Montaggio",
+      "flush": "Complanare",
+      "racked": "Su struttura"
+    },
+    "orientation": {
+      "label": "Formato",
+      "portrait": "Verticale",
+      "landscape": "Orizzontale"
+    },
+    "panelTilt": "Inclinazione dei moduli",
+    "panelFacing": "Orientamento dei moduli"
   },
   "tech": {
     "none": "Nessuna tecnologia su questo edificio.",

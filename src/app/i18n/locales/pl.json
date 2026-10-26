@@ -166,16 +166,29 @@
     },
     "card": {
       "fromModel": "Nachylenie, orientacja i powierzchnia pochodzą z modelu 3D budynku.",
-      "layout": "Układ modułów w użytecznej części przegrody",
       "panels": "{kwp} kWp na {area} m² modułów",
       "remove": "Usuń PV",
       "done": "Gotowe",
-      "add": "Dodaj PV do tej przegrody"
+      "add": "Dodaj PV do tej przegrody",
+      "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
+      "noFit": "Na tej powierzchni nie mieści się żaden cały moduł."
     },
     "hover": {
       "add": "Kliknij, aby dodać PV",
       "remove": "Kliknij, aby usunąć PV"
-    }
+    },
+    "mounting": {
+      "label": "Montaż",
+      "flush": "Równolegle",
+      "racked": "Na stelażu"
+    },
+    "orientation": {
+      "label": "Układ",
+      "portrait": "Pionowo",
+      "landscape": "Poziomo"
+    },
+    "panelTilt": "Nachylenie modułów",
+    "panelFacing": "Orientacja modułów"
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",

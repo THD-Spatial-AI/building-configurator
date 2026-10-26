@@ -160,16 +160,29 @@
     },
     "card": {
       "fromModel": "Tilt, facing and area come from the building's 3D model.",
-      "layout": "Panel layout inside the usable share of the surface",
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
-      "add": "Add PV to this surface"
+      "add": "Add PV to this surface",
+      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
+      "noFit": "No whole module fits on this surface."
     },
     "hover": {
       "add": "Click to add PV",
       "remove": "Click to remove PV"
-    }
+    },
+    "mounting": {
+      "label": "Mounting",
+      "flush": "Flush",
+      "racked": "Racked"
+    },
+    "orientation": {
+      "label": "Format",
+      "portrait": "Portrait",
+      "landscape": "Landscape"
+    },
+    "panelTilt": "Panel tilt",
+    "panelFacing": "Panel facing"
   },
   "tech": {
     "none": "No technologies on this building.",

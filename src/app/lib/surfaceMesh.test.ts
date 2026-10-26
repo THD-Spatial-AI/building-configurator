@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { buildSurfaceGroup, computeOrigin, insetGeometry, isEnvelopeDetached, polygonArea, surfacesFromGeometryResponse } from './surfaceMesh';
+import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, polygonArea, pvModulesGeometry, surfacesFromGeometryResponse } from './surfaceMesh';
 import type { BuildingGeometry } from './enerplanet';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
@@ -136,39 +136,29 @@ describe('polygonArea', () => {
   });
 });
 
-describe('insetGeometry', () => {
-  function meshArea(geometry: THREE.BufferGeometry): number {
-    const position = geometry.getAttribute('position');
-    const index = geometry.getIndex()!;
-    const [a, b, c] = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-    let area = 0;
-    for (let i = 0; i < index.count; i += 3) {
-      a.fromBufferAttribute(position, index.getX(i));
-      b.fromBufferAttribute(position, index.getX(i + 1));
-      c.fromBufferAttribute(position, index.getX(i + 2));
-      area += new THREE.Triangle(a, b, c).getArea();
-    }
-    return area;
-  }
-
-  const rectangle = (): THREE.BufferGeometry => {
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 10, 0, 0, 10, 0, 6, 0, 0, 6], 3));
-    geometry.setIndex([0, 1, 2, 0, 2, 3]);
-    return geometry;
+describe('pvModulesGeometry', () => {
+  const origin: [number, number, number] = [0, 0, 0];
+  const uvAt = (geometry: THREE.BufferGeometry, i: number) => {
+    const uv = geometry.getAttribute('uv');
+    return [uv.getX(i), uv.getY(i)];
   };
 
-  it('shrinks the surface to the usable share of its area, about its middle', () => {
-    const inset = insetGeometry(rectangle(), 0.64);
-    expect(meshArea(inset)).toBeCloseTo(60 * 0.64);
-    inset.computeBoundingBox();
-    const centre = inset.boundingBox!.getCenter(new THREE.Vector3());
-    expect(centre.distanceTo(new THREE.Vector3(5, 0, 3))).toBeLessThan(1e-5);
+  it('draws one quad per module, at its corners', () => {
+    const geometry = pvModulesGeometry([
+      [[0, 0, 3], [1, 0, 3], [1, 1.7, 3], [0, 1.7, 3]],
+      [[2, 0, 3], [3, 0, 3], [3, 1.7, 3], [2, 1.7, 3]],
+    ], origin);
+    expect(geometry.getAttribute('position').count).toBe(8);
+    expect(geometry.getIndex()!.count).toBe(12);
+    const position = geometry.getAttribute('position');
+    // Storage (2, 0, 3) is three.js (2, 3, 0).
+    expect([position.getX(4), position.getY(4), position.getZ(4)]).toEqual([2, 3, -0]);
   });
 
-  it('leaves the original geometry as it was', () => {
-    const original = rectangle();
-    insetGeometry(original, 0.25);
-    expect(meshArea(original)).toBeCloseTo(60);
+  it('runs the cells along the long side, portrait or landscape', () => {
+    const portrait = pvModulesGeometry([[[0, 0, 0], [1, 0, 0], [1, 1.7, 0], [0, 1.7, 0]]], origin);
+    const landscape = pvModulesGeometry([[[0, 0, 0], [1.7, 0, 0], [1.7, 1, 0], [0, 1, 0]]], origin);
+    expect(uvAt(portrait, 1)).toEqual([1, 0]);
+    expect(uvAt(landscape, 1)).toEqual([0, 1]);
   });
 });

@@ -105,6 +105,12 @@ export interface PvBuildingRunRequest {
     tilt: number;
     /** Degrees clockwise from north; 180 is south. */
     azimuth: number;
+    /** Whole modules on the surface, from its layout. Absent without one, as are the next three. */
+    modules?: number;
+    kwp?: number;
+    /** The modules' own angles: the surface's when flush, the rack's when racked. */
+    panel_tilt?: number;
+    panel_azimuth?: number;
   }[];
 }
 

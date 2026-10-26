@@ -160,16 +160,29 @@
     },
     "card": {
       "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",
-      "layout": "Paneelindeling binnen het bruikbare deel van het vlak",
       "panels": "{kwp} kWp op {area} m² panelen",
       "remove": "PV verwijderen",
       "done": "Klaar",
-      "add": "PV op dit vlak plaatsen"
+      "add": "PV op dit vlak plaatsen",
+      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
+      "noFit": "Er past geen hele module op dit vlak."
     },
     "hover": {
       "add": "Klik om PV toe te voegen",
       "remove": "Klik om PV te verwijderen"
-    }
+    },
+    "mounting": {
+      "label": "Montage",
+      "flush": "Parallel",
+      "racked": "Op frame"
+    },
+    "orientation": {
+      "label": "Stand",
+      "portrait": "Staand",
+      "landscape": "Liggend"
+    },
+    "panelTilt": "Hellingshoek modules",
+    "panelFacing": "Oriëntatie modules"
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",

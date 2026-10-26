@@ -163,16 +163,29 @@
     },
     "card": {
       "fromModel": "L'inclinaison, l'orientation et l'aire viennent du modèle 3D du bâtiment.",
-      "layout": "Disposition des modules dans la part utilisable de la surface",
       "panels": "{kwp} kWp sur {area} m² de modules",
       "remove": "Retirer le PV",
       "done": "Terminé",
-      "add": "Ajouter du PV sur cette surface"
+      "add": "Ajouter du PV sur cette surface",
+      "modules": "Modules : {count} · {kwp} kWp · {area} m²",
+      "noFit": "Aucun module entier ne tient sur cette surface."
     },
     "hover": {
       "add": "Cliquer pour ajouter du PV",
       "remove": "Cliquer pour retirer le PV"
-    }
+    },
+    "mounting": {
+      "label": "Pose",
+      "flush": "Coplanaire",
+      "racked": "Sur châssis"
+    },
+    "orientation": {
+      "label": "Format",
+      "portrait": "Portrait",
+      "landscape": "Paysage"
+    },
+    "panelTilt": "Inclinaison des modules",
+    "panelFacing": "Orientation des modules"
   },
   "tech": {
     "none": "Aucune technologie sur ce bâtiment.",

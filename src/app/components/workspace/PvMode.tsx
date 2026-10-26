@@ -6,9 +6,11 @@
 import { Info, MousePointerClick, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PresetSlider } from './surfaceControls';
+import { SegmentedControl } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry, pvSummary } from '../../lib/pvSurfaces';
+import { DEFAULT_RACK, type PvLayout, type PvModule, type PvMounting, type PvOrientation } from '../../lib/pvLayout';
 
 /** One surface the host offers for PV. */
 export interface PvSurface {
@@ -16,8 +18,15 @@ export interface PvSurface {
   state: 'installed' | 'suggested' | 'available';
   /** Share of the surface usable for panels, 0 to 1. */
   usableShare: number;
-  /** Capacity of the panels at the current usable share, in kWp. */
+  /**
+   * Capacity at the current usable share, in kWp. Shown only for a surface
+   * the view has no polygon for; otherwise its module layout gives it.
+   */
   maxKwp: number;
+  /** Absent: racked at 15° south on a surface under 10°, otherwise flush. */
+  mounting?: PvMounting;
+  /** Absent: whichever fits more modules. */
+  orientation?: PvOrientation;
   /** Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. */
   label?: string;
   /**
@@ -43,9 +52,15 @@ export interface PvMode {
   typeLabel: string;
   onToggle: (surfaceId: string, installed: boolean) => void;
   onShareChange: (surfaceId: string, usableShare: number) => void;
+  /** From the surface card. Store both and pass them back on the surface; orientation undefined means best fit. */
+  onMountingChange: (surfaceId: string, mounting: PvMounting, orientation: PvOrientation | undefined) => void;
+  /** One module of the building's PV type. Absent: DEFAULT_PV_MODULE. */
+  module?: PvModule;
 }
 
 const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'];
+/** Racks stand on roofs; steeper surfaces, walls among them, take flush modules only. */
+const RACK_MAX_SURFACE_TILT = 60;
 
 /** The surface ids to draw with panels and to highlight as suggested. */
 export function pvRenderSets(surfaces: Record<string, PvSurface>): { installed: Set<string>; suggested: Set<string> } {
@@ -131,15 +146,17 @@ function GeometryLine({ id, elements, surface }: { id: string; elements: Record<
 }
 
 /** The side panel in PV mode: title, hint, totals, every offered surface with its switch, and the host's notice. */
-export function PvPanel({ pv, elements, onSelect }: {
+export function PvPanel({ pv, elements, layouts = {}, onSelect }: {
   pv: PvMode;
   elements: Record<string, BuildingElement>;
+  /** Module layouts of the surfaces the view has polygons for. */
+  layouts?: Readonly<Record<string, PvLayout>>;
   /** Shows a surface in the model and opens its card. */
   onSelect: (surfaceId: string) => void;
 }) {
   const t = useT();
   const format = useFormatNumber();
-  const summary = pvSummary(pv.surfaces, elements);
+  const summary = pvSummary(pv.surfaces, elements, layouts);
   const entries = Object.entries(pv.surfaces);
   const suggestedIds = entries.filter(([, surface]) => surface.state === 'suggested').map(([id]) => id);
   const ordered = STATE_ORDER.flatMap((state) => entries
@@ -177,6 +194,7 @@ export function PvPanel({ pv, elements, onSelect }: {
         {ordered.map(([id, surface]) => {
           const name = surfaceName(id, elements, pv.surfaces);
           const installed = surface.state === 'installed';
+          const kwp = layouts[id]?.kwp ?? surface.maxKwp;
           return (
             <li key={id} className={cn('flex items-center gap-2.5 px-3 py-2', surface.state === 'suggested' && 'bg-amber-500/5')}>
               <div className="min-w-0 flex-1">
@@ -195,7 +213,7 @@ export function PvPanel({ pv, elements, onSelect }: {
                 </div>
               </div>
               <span className={cn('shrink-0 text-[12px]', installed ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
-                {installed ? `${format(surface.maxKwp, 1)} kWp` : t('pv.upTo', { kwp: format(surface.maxKwp, 1) })}
+                {installed ? `${format(kwp, 1)} kWp` : t('pv.upTo', { kwp: format(kwp, 1) })}
               </span>
               <Switch on={installed} label={t('pv.toggle', { surface: name })} onChange={(on) => pv.onToggle(id, on)} />
             </li>
@@ -215,36 +233,61 @@ export function PvPanel({ pv, elements, onSelect }: {
   );
 }
 
-/** A small drawing of the modules inside the usable share of a surface. */
-function LayoutPreview({ share }: { share: number }) {
+/** Mounting, panel angles when racked, and module orientation for one surface's layout. */
+function MountingControls({ surfaceId, surface, layout, canRack, pv }: {
+  surfaceId: string;
+  surface: PvSurface;
+  layout: PvLayout;
+  canRack: boolean;
+  pv: PvMode;
+}) {
   const t = useT();
-  const scale = Math.sqrt(Math.min(1, Math.max(0, share)));
-  const w = 112 * scale;
-  const h = 70 * scale;
-  const x0 = 10 + (112 - w) / 2;
-  const y0 = 9 + (70 - h) / 2;
-  const cols = Math.max(1, Math.floor(w / 14));
-  const rows = Math.max(1, Math.floor(h / 17));
-  const modules = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      modules.push(<rect key={`${r}-${c}`} x={x0 + c * (w / cols) + 1} y={y0 + r * (h / rows) + 1} width={w / cols - 2} height={h / rows - 2} />);
-    }
-  }
+  const { mounting } = layout;
+  const setMounting = (next: PvMounting) => pv.onMountingChange(surfaceId, next, surface.orientation);
   return (
-    <svg width="132" height="88" viewBox="0 0 132 88" role="img" aria-label={t('pv.card.layout')} className="shrink-0">
-      <rect x="1" y="1" width="130" height="86" rx="4" fill="#B4664A" />
-      <g fill="#1F3A5F" stroke="#9FB3CC" strokeWidth="0.8">{modules}</g>
-    </svg>
+    <div className="flex flex-col gap-2.5">
+      {canRack && (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-medium text-muted-foreground">{t('pv.mounting.label')}</span>
+          <SegmentedControl
+            options={[{ value: 'flush', label: t('pv.mounting.flush') }, { value: 'racked', label: t('pv.mounting.racked') }]}
+            value={mounting.kind}
+            onChange={(kind) => setMounting(kind === 'racked' ? DEFAULT_RACK : { kind: 'flush' })}
+          />
+        </div>
+      )}
+      {mounting.kind === 'racked' && (
+        <>
+          <PresetSlider
+            label={t('pv.panelTilt')} value={mounting.tilt} min={0} max={45} step={5} unit="°" decimals={0}
+            onChange={(tilt) => setMounting({ ...mounting, tilt })}
+          />
+          <PresetSlider
+            label={t('pv.panelFacing')} value={mounting.azimuth} min={0} max={355} step={5} unit="°" decimals={0}
+            onChange={(azimuth) => setMounting({ ...mounting, azimuth })}
+          />
+        </>
+      )}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-medium text-muted-foreground">{t('pv.orientation.label')}</span>
+        <SegmentedControl
+          options={[{ value: 'portrait', label: t('pv.orientation.portrait') }, { value: 'landscape', label: t('pv.orientation.landscape') }]}
+          value={layout.orientation}
+          onChange={(orientation) => pv.onMountingChange(surfaceId, mounting, orientation as PvOrientation)}
+        />
+      </div>
+    </div>
   );
 }
 
 /** The card beside a clicked surface: its geometry, PV switch, usable share and panels. */
-export function PvSurfaceCard({ surfaceId, surface, pv, elements = {}, onClose }: {
+export function PvSurfaceCard({ surfaceId, surface, pv, elements = {}, layout, onClose }: {
   surfaceId: string;
   surface: PvSurface;
   pv: PvMode;
   elements?: Record<string, BuildingElement>;
+  /** The surface's module layout, when the view has its polygon. */
+  layout?: PvLayout;
   /** Closes the card, from its Done button. */
   onClose?: () => void;
 }) {
@@ -292,13 +335,21 @@ export function PvSurfaceCard({ surfaceId, surface, pv, elements = {}, onClose }
             quality={t('pv.usableShareNote')}
             onChange={(percent) => pv.onShareChange(surfaceId, percent / 100)}
           />
-          <div className="flex items-center gap-3 rounded-md bg-muted p-2">
-            <LayoutPreview share={surface.usableShare} />
-            <span className="text-[12px] text-foreground">
-              {area === undefined
-                ? `${format(surface.maxKwp, 1)} kWp`
-                : t('pv.card.panels', { kwp: format(surface.maxKwp, 1), area: format(area * surface.usableShare, 0) })}
-            </span>
+          {layout && (
+            <MountingControls
+              surfaceId={surfaceId}
+              surface={surface}
+              layout={layout}
+              canRack={(geometry?.tilt ?? 0) < RACK_MAX_SURFACE_TILT}
+              pv={pv}
+            />
+          )}
+          <div className="rounded-md bg-muted px-3 py-2 text-[12px] font-medium text-foreground">
+            {layout && layout.count === 0 && t('pv.card.noFit')}
+            {layout && layout.count > 0 && t('pv.card.modules', { count: layout.count, kwp: format(layout.kwp, 1), area: format(layout.area, 0) })}
+            {!layout && (area === undefined
+              ? `${format(surface.maxKwp, 1)} kWp`
+              : t('pv.card.panels', { kwp: format(surface.maxKwp, 1), area: format(area * surface.usableShare, 0) }))}
           </div>
           <div className="flex justify-between gap-2">
             <button
@@ -317,7 +368,7 @@ export function PvSurfaceCard({ surfaceId, surface, pv, elements = {}, onClose }
         </>
       ) : (
         <>
-          <span className="text-[12px] text-muted-foreground">{t('pv.upTo', { kwp: format(surface.maxKwp, 1) })}</span>
+          <span className="text-[12px] text-muted-foreground">{t('pv.upTo', { kwp: format(layout?.kwp ?? surface.maxKwp, 1) })}</span>
           {surface.state === 'suggested' && (
             <button
               type="button"

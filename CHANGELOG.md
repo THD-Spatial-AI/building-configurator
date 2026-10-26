@@ -6,15 +6,23 @@ Each version's GitHub release entry carries the full notes.
 
 ## [Unreleased]
 
+Breaking: `PvMode` requires `onMountingChange(surfaceId, mounting, orientation)`. Store both values per surface and pass them back as `surfaces[id].mounting` and `orientation`.
+
 ### Added
 
+- PV is laid out as whole modules from each surface's geometry instead of a module pattern trimmed to the surface. Modules keep 0.3 m from every edge, cover at most the usable share of the surface, and are drawn in 3D at their own tilt and facing. `PvMode.module` and `Building3DView`'s `pvModule` give the module size and kWp; without them a 1.134 by 1.762 m, 0.4 kWp module is used (`DEFAULT_PV_MODULE`).
+- Mounting per surface: flush in the surface's plane, or racked at its own tilt and facing in rows spaced so no row shades the next with the sun 20° up. A surface under 10° starts racked at 15° facing south, any other flush. Walls and surfaces steeper than 60° are flush only. Module orientation is the best fit of portrait and landscape until the user picks one. The surface card offers all three and shows the module count, capacity and module area, or that no whole module fits.
+- `pvLayout`, the same calculation, is exported with its types so a host can store the module count and capacity the user saw.
+- The `runPvBuilding` request carries each surface's `modules`, `kwp`, `panel_tilt` and `panel_azimuth` from its layout.
+
 - PV mode is redesigned. The panel has a "PV configurator" title, a hint that clicking a roof or wall adds or removes PV (also shown over the 3D view), totals for capacity, surfaces with PV and panel area, and per surface its tilt, facing, area and capacity ("up to" without PV) with a Suggested chip and a switch. "Use suggested surfaces" turns on every suggested surface through `onToggle`. The host's `notice` moves below the list.
-- Hovering a surface in PV mode shows its name, geometry, state and what a click does. A clicked surface's card shows its tilt, facing and area, the PV switch, the usable share, a drawing of the modules with their capacity and panel area, and Remove PV and Done; a suggested surface without PV offers "Add PV to this surface".
-- In 3D, modules are drawn over the surface's usable share with the roof around them, suggested surfaces have a light fill and a dashed orange outline, and a legend explains the three states.
-- `PvSurface` takes optional `tilt`, `azimuth` and `area` for a surface that is not among the building's elements. `Building3DView` takes an optional `pvSurfaceShares` so the normal view draws modules over each surface's usable share.
+- Hovering a surface in PV mode shows its name, geometry, state and what a click does. A clicked surface's card shows its tilt, facing and area, the PV switch and the usable share, and Remove PV and Done; a suggested surface without PV offers "Add PV to this surface".
+- In 3D, suggested surfaces have a light fill and a dashed orange outline, and a legend explains the three states.
+- `PvSurface` takes optional `tilt`, `azimuth` and `area` for a surface that is not among the building's elements. `Building3DView` takes an optional `pvSurfaces`, each surface's usable share, mounting and orientation, so the normal view lays out the same modules as PV mode.
 
 ### Changed
 
+- `PvSurface.maxKwp` is shown only for a surface the view has no polygon for; every other surface shows its layout's capacity.
 - Hot water is shown in red and cooking gas in violet in the energy overview.
 
 ### Fixed

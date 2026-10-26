@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { pvGeometry, pvSummary } from './pvSurfaces';
+import { pvGeometry, pvLayouts, pvSummary } from './pvSurfaces';
+import type { PvLayout } from './pvLayout';
+import type { SurfacePolygon } from './surfaceMesh';
 import type { PvSurface } from '../components/workspace/PvMode';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -39,7 +41,28 @@ describe('pvSummary', () => {
     expect(summary.panelArea).toBeCloseTo(50 * 0.8 + 40 * 0.5);
   });
 
+  it('takes capacity and panel area from a surface\'s module layout where it has one', () => {
+    const layout = { count: 20, kwp: 8, area: 40 } as PvLayout;
+    const summary = pvSummary({ r1: surface('installed', { maxKwp: 99 }) }, { r1: roof }, { r1: layout });
+    expect(summary.kwp).toBe(8);
+    expect(summary.panelArea).toBe(40);
+  });
+
   it('leaves out the panel area of an installed surface without geometry', () => {
     expect(pvSummary({ x: surface('installed') }, {}).panelArea).toBe(0);
+  });
+});
+
+describe('pvLayouts', () => {
+  const flat: SurfacePolygon = { id: 'f', type: 'RoofSurface', coordinates: [[[0, 0, 3], [10, 0, 3], [10, 6, 3], [0, 6, 3], [0, 0, 3]]] };
+
+  it('lays out each offered surface that has a polygon, with its own settings', () => {
+    const layouts = pvLayouts([flat], {
+      f: { usableShare: 1, mounting: { kind: 'flush' }, orientation: 'portrait' },
+      elsewhere: { usableShare: 1 },
+    }, { width: 1, height: 1.7, kwp: 0.4 });
+    expect(Object.keys(layouts)).toEqual(['f']);
+    expect(layouts.f.count).toBe(27);
+    expect(layouts.f.area).toBeCloseTo(27 * 1.7);
   });
 });
