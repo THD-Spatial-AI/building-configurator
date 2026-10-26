@@ -192,9 +192,10 @@
       "investmentEstimate": "Investition etwa {amount}, geschätzt"
     },
     "catalogue": {
-      "title": "Katalog",
       "hint": "Ziehen Sie ein Produkt auf ein Dach oder eine Wand, oder wählen Sie es im Bereich einer Fläche.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Katalog ({count})",
+      "search": "Katalog durchsuchen"
     },
     "product": {
       "label": "Produkt",
@@ -219,6 +220,18 @@
       "save": "Speichern",
       "saved": "Gespeichert als {name}.",
       "saveFailed": "Die Technologie konnte nicht gespeichert werden. Versuchen Sie es erneut."
+    },
+    "installed": {
+      "title": "Auf diesem Gebäude installiert",
+      "empty": "Noch keine PV. Öffnen Sie den Katalog und ziehen Sie ein Produkt auf ein Dach oder eine Wand.",
+      "surfaces": {
+        "one": "auf {count} Fläche",
+        "other": "auf {count} Flächen"
+      },
+      "modules": {
+        "one": "{count} Modul",
+        "other": "{count} Module"
+      }
     }
   },
   "tech": {

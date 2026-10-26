@@ -192,9 +192,10 @@
       "investmentEstimate": "Investering ongeveer {amount}, geschat"
     },
     "catalogue": {
-      "title": "Catalogus",
       "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Catalogus ({count})",
+      "search": "Catalogus doorzoeken"
     },
     "product": {
       "label": "Product",
@@ -219,6 +220,18 @@
       "save": "Opslaan",
       "saved": "Opgeslagen als {name}.",
       "saveFailed": "De technologie kon niet worden opgeslagen. Probeer het opnieuw."
+    },
+    "installed": {
+      "title": "Geïnstalleerd op dit gebouw",
+      "empty": "Nog geen PV. Open de catalogus en sleep een product op een dak of muur.",
+      "surfaces": {
+        "one": "op {count} vlak",
+        "other": "op {count} vlakken"
+      },
+      "modules": {
+        "one": "{count} module",
+        "other": "{count} modules"
+      }
     }
   },
   "tech": {

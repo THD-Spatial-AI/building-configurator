@@ -196,9 +196,10 @@
       "investmentEstimate": "Inwestycja około {amount}, szacunek"
     },
     "catalogue": {
-      "title": "Katalog",
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Katalog ({count})",
+      "search": "Szukaj w katalogu"
     },
     "product": {
       "label": "Produkt",
@@ -223,6 +224,22 @@
       "save": "Zapisz",
       "saved": "Zapisano jako {name}.",
       "saveFailed": "Nie udało się zapisać technologii. Spróbuj ponownie."
+    },
+    "installed": {
+      "title": "Zainstalowane na tym budynku",
+      "empty": "Brak PV. Otwórz katalog i przeciągnij produkt na dach lub ścianę.",
+      "surfaces": {
+        "one": "na {count} przegrodzie",
+        "few": "na {count} przegrodach",
+        "many": "na {count} przegrodach",
+        "other": "na {count} przegrodach"
+      },
+      "modules": {
+        "one": "{count} moduł",
+        "few": "{count} moduły",
+        "many": "{count} modułów",
+        "other": "{count} modułu"
+      }
     }
   },
   "tech": {

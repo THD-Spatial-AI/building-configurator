@@ -127,6 +127,15 @@ describe('PvOverview with a catalogue', () => {
     expect(html).toContain('Estimates from the products');
   });
 
+  it('lists the installed products with their modules and capacity, the catalogue closed behind a drop-down', () => {
+    const installed = html.slice(html.indexOf('Installed on this building'), html.indexOf('Surfaces with PV ('));
+    expect(installed).toContain('Demo Mono 420 W');
+    expect(installed).not.toContain('Demo Compact 300 W');
+    expect(installed).toContain('24 modules');
+    expect(installed).toContain('on 1 surface');
+    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>Catalogue \(2\)/);
+  });
+
   it('lists the catalogue as draggable products with their module and price', () => {
     expect(html).toContain('Demo Mono 420 W');
     expect(html).toContain('1.13 × 1.76 m · 420 W · 500 EUR/kWp');

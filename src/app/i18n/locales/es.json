@@ -194,9 +194,10 @@
       "investmentEstimate": "Inversión de unos {amount}, estimada"
     },
     "catalogue": {
-      "title": "Catálogo",
       "hint": "Arrastre un producto a un tejado o una pared, o elíjalo en el panel de una superficie.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Catálogo ({count})",
+      "search": "Buscar en el catálogo"
     },
     "product": {
       "label": "Producto",
@@ -221,6 +222,18 @@
       "save": "Guardar",
       "saved": "Guardado como {name}.",
       "saveFailed": "No se pudo guardar la tecnología. Inténtelo de nuevo."
+    },
+    "installed": {
+      "title": "Instalado en este edificio",
+      "empty": "Aún no hay FV. Abra el catálogo y arrastre un producto a un tejado o una pared.",
+      "surfaces": {
+        "one": "en {count} superficie",
+        "other": "en {count} superficies"
+      },
+      "modules": {
+        "one": "{count} módulo",
+        "other": "{count} módulos"
+      }
     }
   },
   "tech": {

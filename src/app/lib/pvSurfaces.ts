@@ -36,6 +36,35 @@ export function pvGeometry(
   return { tilt: surface.tilt, azimuth: surface.azimuth, area: surface.area, flat: isFlat(surface.tilt, surface.azimuth) };
 }
 
+/** One product the building uses: on how many surfaces, with how many modules (unknown without every layout) and kWp. */
+export interface InstalledProduct {
+  product?: TechnologyProduct;
+  surfaces: number;
+  modules?: number;
+  kwp: number;
+}
+
+/** The installed surfaces grouped by product, in the order the products first appear. */
+export function installedByProduct(
+  surfaces: Record<string, PvSurface>,
+  layouts: Readonly<Record<string, PvLayout>>,
+  productFor: (surfaceId: string) => TechnologyProduct | undefined,
+): InstalledProduct[] {
+  const rows = new Map<string, InstalledProduct>();
+  for (const [id, surface] of Object.entries(surfaces)) {
+    if (surface.state !== 'installed') continue;
+    const product = productFor(id);
+    const key = product?.id ?? '';
+    const row = rows.get(key) ?? { product, surfaces: 0, modules: 0, kwp: 0 };
+    const layout = layouts[id];
+    row.surfaces += 1;
+    row.kwp += layout?.kwp ?? surface.maxKwp;
+    row.modules = layout && row.modules !== undefined ? row.modules + layout.count : undefined;
+    rows.set(key, row);
+  }
+  return [...rows.values()];
+}
+
 /** The module layout of each surface in `surfaces` that has a polygon among `polygons`, with one module for all or one per surface. */
 export function pvLayouts(
   polygons: readonly SurfacePolygon[],

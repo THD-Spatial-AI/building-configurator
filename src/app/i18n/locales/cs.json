@@ -196,9 +196,10 @@
       "investmentEstimate": "Investice zhruba {amount}, odhad"
     },
     "catalogue": {
-      "title": "Katalog",
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Katalog ({count})",
+      "search": "Hledat v katalogu"
     },
     "product": {
       "label": "Produkt",
@@ -223,6 +224,22 @@
       "save": "Uložit",
       "saved": "Uloženo jako {name}.",
       "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu."
+    },
+    "installed": {
+      "title": "Instalováno na této budově",
+      "empty": "Zatím žádná FV. Otevřete katalog a přetáhněte produkt na střechu nebo stěnu.",
+      "surfaces": {
+        "one": "na {count} ploše",
+        "few": "na {count} plochách",
+        "many": "na {count} plochách",
+        "other": "na {count} plochách"
+      },
+      "modules": {
+        "one": "{count} modul",
+        "few": "{count} moduly",
+        "many": "{count} modulu",
+        "other": "{count} modulů"
+      }
     }
   },
   "tech": {
