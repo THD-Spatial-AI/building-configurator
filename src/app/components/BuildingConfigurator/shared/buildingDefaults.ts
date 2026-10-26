@@ -37,6 +37,8 @@ export const DEFAULT_GENERAL = {
   storeys:            4,
   /** The storeys in the model, 1-based from the ground; null models them all. */
   storeysModelled:    null as number[] | null,
+  /** Dwellings in the storeys modelled, sent as residential_units while some are left out. */
+  dwellingsModelled:  null as number | null,
   // The thermal values are the v6-draft request schema's defaults.
   n_air_infiltration: 0.5,
   n_air_use:          0.5,

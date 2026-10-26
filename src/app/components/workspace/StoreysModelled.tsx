@@ -42,7 +42,11 @@ export function StoreyPanel({ storey, modelled, storeys, onChange }: {
 const HEIGHT_NOTE_GAP_M = 0.5;
 
 /** `modelled` null means every storey; `onChange` gets null back when all are on again. */
-export function StoreysModelled({ storeys, modelled, floorAreaPerStorey, storeyHeight, roomHeight, disabled, onChange }: {
+export function StoreysModelled({
+  storeys, modelled, floorAreaPerStorey, storeyHeight, roomHeight, dwellings, disabled, onChange,
+}: {
+  /** Asked while a storey is left out of a residential building, since BuEM's gains follow the dwelling count. */
+  dwellings?: { value: number | null; onChange: (value: number | null) => void };
   storeys: number;
   modelled: number[] | null;
   floorAreaPerStorey: number;
@@ -92,6 +96,26 @@ export function StoreysModelled({ storeys, modelled, floorAreaPerStorey, storeyH
         <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
           {t('storeys.heightNote', { height: format(storeyHeight, 1), room: format(roomHeight, 1) })}
         </p>
+      )}
+      {modelled && dwellings && (
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.dwellings')}</span>
+          <input
+            type="number"
+            min={1}
+            step={1}
+            value={dwellings.value ?? ''}
+            onChange={(e) => {
+              const n = Number.parseInt(e.target.value, 10);
+              dwellings.onChange(Number.isInteger(n) && n >= 1 ? n : null);
+            }}
+            className={cn(
+              'h-8 w-24 rounded-md border bg-card px-2 text-[12px] text-foreground',
+              dwellings.value ? 'border-border' : 'border-destructive ring-1 ring-destructive/30',
+            )}
+          />
+          <span className="text-[10px] leading-snug text-muted-foreground">{t('storeys.dwellingsHint')}</span>
+        </label>
       )}
       <div className="flex justify-between gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
         <span>{t('storeys.floorArea')}</span>

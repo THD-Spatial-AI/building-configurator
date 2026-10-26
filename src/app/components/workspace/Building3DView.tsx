@@ -37,7 +37,7 @@ import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
 import { pvLayouts } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
-import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
+import { buildingTypeName, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string };
 
@@ -521,6 +521,10 @@ export function Building3DView({
                       floorAreaPerStorey={model.general.floorArea}
                       storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
                       roomHeight={model.general.roomHeight}
+                      dwellings={isServiceBuildingType(model.general.buildingType) ? undefined : {
+                        value: model.general.dwellingsModelled,
+                        onChange: (value) => model.setGen('dwellingsModelled', value),
+                      }}
                       disabled={surfaces.length === 0}
                       onChange={setModelledStoreys}
                     />

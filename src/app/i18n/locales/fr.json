@@ -720,7 +720,8 @@
       "runFailed": "Échec de la simulation : le backend EnerPlanET est injoignable ou a rejeté la requête. Voir la console du navigateur pour plus de détails.",
       "exportFailed": "Échec de l'export : {reason}",
       "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET.",
-      "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour."
+      "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour.",
+      "dwellingsModelledRequired": "Certains étages ne sont pas dans le modèle. Indiquez le nombre de logements des étages modélisés sous Étages modélisés avant de lancer une simulation."
     },
     "comparison": {
       "lastRun": "la dernière simulation complète"
@@ -737,6 +738,8 @@
     "pickHint": "Cliquez sur un étage du modèle pour voir s'il est modélisé.",
     "inModel": "Dans le modèle",
     "groundFloor": "Rez-de-chaussée",
-    "lastOne": "Au moins un étage reste dans le modèle."
+    "lastOne": "Au moins un étage reste dans le modèle.",
+    "dwellings": "Logements dans les étages modélisés",
+    "dwellingsHint": "Les apports internes de BuEM dépendent du nombre de logements, pas de la surface."
   }
 }

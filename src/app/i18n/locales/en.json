@@ -714,7 +714,8 @@
       "runFailed": "Simulation failed: the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.",
       "exportFailed": "Export failed: {reason}",
       "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json.",
-      "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date."
+      "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date.",
+      "dwellingsModelledRequired": "Some storeys are left out of the model. Give the number of dwellings in the modelled storeys under Storeys modelled before running a simulation."
     },
     "comparison": {
       "lastRun": "the last full simulation"
@@ -731,6 +732,8 @@
     "pickHint": "Click a storey in the model to see whether it is in the model.",
     "inModel": "In the model",
     "groundFloor": "Ground floor",
-    "lastOne": "At least one storey stays in the model."
+    "lastOne": "At least one storey stays in the model.",
+    "dwellings": "Dwellings in the modelled storeys",
+    "dwellingsHint": "BuEM's internal gains follow the number of dwellings, not the floor area."
   }
 }

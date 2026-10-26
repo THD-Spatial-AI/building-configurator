@@ -9,6 +9,7 @@ import {
   getMappedArray,
   getMappedNumber,
   getMappedValue,
+  getStoredValue,
   hasMappedValue,
 } from '../config/modelDataResolver';
 import { faceFromAzimuth, type BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -110,6 +111,8 @@ export interface BuildingParameters {
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
   residential_units?: number | null;
+  /** With storeys left out: the dwellings in the modelled storeys, residential_units being the whole building's. */
+  dwellingsModelled?: number | null;
   num_persons?: number | null;      // per dwelling
   archetype?: string;
   region_code?: string;             // CBS municipality code, e.g. GM0200
@@ -377,6 +380,13 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   const useMilp = getMappedValue(feature, paths.useMilp);
   if (typeof useMilp === 'boolean') parameters.use_milp = useMilp;
   Object.assign(parameters, householdParameters(feature));
+  // With storeys left out the block holds the modelled storeys' dwellings and
+  // the whole building's travel beside it.
+  const fullUnits = getStoredValue(feature, MODEL_DATA_MAP.thematic.household.residential_units_full);
+  if (typeof fullUnits === 'number' || fullUnits === null) {
+    parameters.dwellingsModelled = parameters.residential_units ?? null;
+    parameters.residential_units = fullUnits;
+  }
   return Object.keys(parameters).length > 0 ? parameters : undefined;
 }
 
@@ -731,6 +741,11 @@ export function serializeToBuemFeature(
   }
 
   Object.assign(building, householdFields(identity.buildingType || general.buildingType, general));
+  // BuEM's internal gains follow residential_units, so with storeys left out it
+  // is the count the user gave for them; the whole building's is kept beside.
+  const keepUnits = Boolean(modelled && general.dwellingsModelled && !isServiceBuildingType(identity.buildingType || general.buildingType));
+  const unitsFull: number | null = keepUnits ? building.residential_units ?? null : null;
+  if (keepUnits) building.residential_units = general.dwellingsModelled;
 
   const outputs = { ...general.outputs };
   if (isServiceBuildingType(identity.buildingType || general.buildingType)) {
@@ -798,6 +813,7 @@ export function serializeToBuemFeature(
         ...(storeys ? { storeys } : {}),
         ...(modelled ? { storey_list: storeyList(modelled, storeys) } : {}),
         ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
+        ...(keepUnits ? { residential_units_full: unitsFull } : {}),
         ...(refurbishment ? { refurbishment } : {}),
         outputs,
         solver: {

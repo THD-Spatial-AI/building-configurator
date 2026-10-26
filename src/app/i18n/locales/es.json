@@ -720,7 +720,8 @@
       "runFailed": "La simulación falló: el backend de EnerPlanET no responde o rechazó la solicitud. Revisa la consola del navegador para más detalles.",
       "exportFailed": "Error al exportar: {reason}",
       "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET.",
-      "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada."
+      "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada.",
+      "dwellingsModelledRequired": "Algunas plantas no están en el modelo. Indique el número de viviendas de las plantas modeladas en Plantas modeladas antes de ejecutar una simulación."
     },
     "comparison": {
       "lastRun": "la última simulación completa"
@@ -737,6 +738,8 @@
     "pickHint": "Haga clic en una planta del modelo para ver si está incluida.",
     "inModel": "En el modelo",
     "groundFloor": "Planta baja",
-    "lastOne": "Al menos una planta permanece en el modelo."
+    "lastOne": "Al menos una planta permanece en el modelo.",
+    "dwellings": "Viviendas en las plantas modeladas",
+    "dwellingsHint": "Las ganancias internas de BuEM dependen del número de viviendas, no de la superficie."
   }
 }

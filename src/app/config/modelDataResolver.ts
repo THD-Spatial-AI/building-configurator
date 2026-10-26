@@ -21,6 +21,11 @@ export function getMappedValue<T = unknown>(source: unknown, path: ModelDataPath
   return undefined;
 }
 
+/** The value at a single mapped path as stored, null included, where getMappedValue reads null as absent. */
+export function getStoredValue(source: unknown, path: string): unknown {
+  return getValueAtSinglePath(source, path);
+}
+
 /** Returns an array from a mapped path, or an empty array when the value is absent. */
 export function getMappedArray(source: unknown, path: ModelDataPath): unknown[] {
   const value = getMappedValue<unknown>(source, path);

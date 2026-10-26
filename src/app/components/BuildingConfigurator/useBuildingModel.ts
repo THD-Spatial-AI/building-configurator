@@ -17,7 +17,7 @@ import {
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
-import { requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
+import { isServiceBuildingType, requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
 import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
 import type { IgnisState } from '../../lib/ignisAdapter';
@@ -593,7 +593,7 @@ export function useBuildingModel(
       const { modelledShare: _, ...whole } = el;
       return [id, modelled ? { ...whole, modelledShare: shares[id] ?? modelled.length / Math.max(1, general.storeys) } : whole];
     })));
-    setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled }));
+    setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled, ...(modelled ? {} : { dwellingsModelled: null }) }));
   };
 
   // --- Model-wide actions -----------------------------------------------------
@@ -614,6 +614,10 @@ export function useBuildingModel(
   const runSimulation = async () => {
     if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
       setUploadError({ key: 'model.error.dwellingsRequired' });
+      return;
+    }
+    if (general.storeysModelled && !isServiceBuildingType(general.buildingType) && !general.dwellingsModelled) {
+      setUploadError({ key: 'model.error.dwellingsModelledRequired' });
       return;
     }
 
@@ -830,6 +834,7 @@ export function withEdits(
       window_g_gl:             general.window_g_gl,
       use_milp:                general.use_milp,
       residential_units:       general.residential_units,
+      dwellingsModelled:       general.dwellingsModelled,
       num_persons:             general.num_persons,
       archetype:               general.archetype,
       region_code:             general.region_code,

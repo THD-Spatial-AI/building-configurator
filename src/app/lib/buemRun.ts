@@ -85,6 +85,8 @@ export function toBuem(building: BuildingState): {
   storey_list?: StoreyEntry[];
   /** With storeys left out: the whole envelope, for reopening; never sent to BuEM. */
   envelope_full?: { elements: Record<string, any>[] };
+  /** With storeys left out and their dwellings given: the whole building's residential_units (null: BuEM's default). */
+  residential_units_full?: number | null;
   /** Kept beside the block and never sent to BuEM: the TABULA variant and the state per element type. */
   refurbishment?: { variant_code?: string; states?: Record<string, number> };
   outputs: BuemBuildingRunRequest['outputs'];
@@ -99,6 +101,7 @@ export function toBuem(building: BuildingState): {
     construction_year: buem.construction_year,
     ...(buem.storeys ? { storeys: buem.storeys } : {}),
     ...(buem.storey_list ? { storey_list: buem.storey_list, envelope_full: buem.envelope_full } : {}),
+    ...('residential_units_full' in buem ? { residential_units_full: buem.residential_units_full } : {}),
     ...(buem.refurbishment ? { refurbishment: buem.refurbishment } : {}),
     outputs: buem.outputs,
     solver: buem.solver,

@@ -714,7 +714,8 @@
       "runFailed": "Simulation fehlgeschlagen: Das EnerPlanET-Backend ist nicht erreichbar oder hat die Anfrage abgelehnt. Details in der Browserkonsole.",
       "exportFailed": "Export fehlgeschlagen: {reason}",
       "importFailed": "Datei konnte nicht gelesen werden: {reason}. Es muss ein gültiges BuEM GeoJSON, ein Export des alten Konfigurators oder eine EnerPlanET config.json sein.",
-      "pvFailed": "Die PV-Berechnung ist fehlgeschlagen, daher wird keine PV-Erzeugung angezeigt. Der Energiebedarf oben ist aktuell."
+      "pvFailed": "Die PV-Berechnung ist fehlgeschlagen, daher wird keine PV-Erzeugung angezeigt. Der Energiebedarf oben ist aktuell.",
+      "dwellingsModelledRequired": "Einige Geschosse sind nicht im Modell. Geben Sie unter Modellierte Geschosse die Zahl der Wohnungen in den modellierten Geschossen an, bevor Sie eine Simulation starten."
     },
     "comparison": {
       "lastRun": "die letzte vollständige Simulation"
@@ -731,6 +732,8 @@
     "pickHint": "Klicken Sie auf ein Geschoss im Modell, um zu sehen, ob es modelliert wird.",
     "inModel": "Im Modell",
     "groundFloor": "Erdgeschoss",
-    "lastOne": "Mindestens ein Geschoss bleibt im Modell."
+    "lastOne": "Mindestens ein Geschoss bleibt im Modell.",
+    "dwellings": "Wohnungen in den modellierten Geschossen",
+    "dwellingsHint": "Die inneren Gewinne in BuEM richten sich nach der Zahl der Wohnungen, nicht nach der Fläche."
   }
 }

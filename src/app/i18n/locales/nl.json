@@ -714,7 +714,8 @@
       "runFailed": "Simulatie mislukt: de EnerPlanET-backend is onbereikbaar of heeft het verzoek geweigerd. Zie de browserconsole voor details.",
       "exportFailed": "Export mislukt: {reason}",
       "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
-      "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel."
+      "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel.",
+      "dwellingsModelledRequired": "Sommige verdiepingen zijn niet in het model. Geef onder Gemodelleerde verdiepingen het aantal woningen in de gemodelleerde verdiepingen op voordat u een simulatie start."
     },
     "comparison": {
       "lastRun": "de laatste volledige simulatie"
@@ -731,6 +732,8 @@
     "pickHint": "Klik op een verdieping in het model om te zien of die wordt meegenomen.",
     "inModel": "In het model",
     "groundFloor": "Begane grond",
-    "lastOne": "Minstens één verdieping blijft in het model."
+    "lastOne": "Minstens één verdieping blijft in het model.",
+    "dwellings": "Woningen in de gemodelleerde verdiepingen",
+    "dwellingsHint": "De interne warmtewinst in BuEM volgt het aantal woningen, niet het vloeroppervlak."
   }
 }

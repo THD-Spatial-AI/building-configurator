@@ -730,7 +730,8 @@
       "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
-      "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne."
+      "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne.",
+      "dwellingsModelledRequired": "Niektóre kondygnacje są pominięte w modelu. Podaj liczbę mieszkań w modelowanych kondygnacjach w sekcji Modelowane kondygnacje przed uruchomieniem symulacji."
     },
     "comparison": {
       "lastRun": "w ostatniej pełnej symulacji"
@@ -747,6 +748,8 @@
     "pickHint": "Kliknij kondygnację w modelu, aby zobaczyć, czy jest modelowana.",
     "inModel": "W modelu",
     "groundFloor": "Parter",
-    "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu."
+    "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu.",
+    "dwellings": "Mieszkania w modelowanych kondygnacjach",
+    "dwellingsHint": "Zyski wewnętrzne w BuEM zależą od liczby mieszkań, a nie od powierzchni."
   }
 }

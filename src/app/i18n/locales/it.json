@@ -714,7 +714,8 @@
       "runFailed": "Simulazione non riuscita: il backend EnerPlanET non è raggiungibile o ha rifiutato la richiesta. Vedi la console del browser per i dettagli.",
       "exportFailed": "Esportazione non riuscita: {reason}",
       "importFailed": "Impossibile leggere il file: {reason}. Verifica che sia un BuEM GeoJSON valido, un export del configuratore legacy o un config.json di EnerPlanET.",
-      "pvFailed": "Il calcolo FV non è riuscito, quindi la produzione FV non è mostrata. Il fabbisogno energetico sopra è aggiornato."
+      "pvFailed": "Il calcolo FV non è riuscito, quindi la produzione FV non è mostrata. Il fabbisogno energetico sopra è aggiornato.",
+      "dwellingsModelledRequired": "Alcuni piani sono esclusi dal modello. Indica il numero di abitazioni nei piani modellati in Piani modellati prima di avviare una simulazione."
     },
     "comparison": {
       "lastRun": "all'ultima simulazione completa"
@@ -731,6 +732,8 @@
     "pickHint": "Fai clic su un piano del modello per vedere se è incluso.",
     "inModel": "Nel modello",
     "groundFloor": "Piano terra",
-    "lastOne": "Almeno un piano resta nel modello."
+    "lastOne": "Almeno un piano resta nel modello.",
+    "dwellings": "Abitazioni nei piani modellati",
+    "dwellingsHint": "Gli apporti interni di BuEM dipendono dal numero di abitazioni, non dalla superficie."
   }
 }

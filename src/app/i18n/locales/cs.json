@@ -730,7 +730,8 @@
       "runFailed": "Simulace selhala: backend EnerPlanET je nedostupný nebo požadavek odmítl. Podrobnosti najdete v konzoli prohlížeče.",
       "exportFailed": "Export selhal: {reason}",
       "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET.",
-      "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální."
+      "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální.",
+      "dwellingsModelledRequired": "Některá podlaží nejsou v modelu. Před spuštěním simulace zadejte v části Modelovaná podlaží počet bytů v modelovaných podlažích."
     },
     "comparison": {
       "lastRun": "poslední úplná simulace"
@@ -747,6 +748,8 @@
     "pickHint": "Klikněte na podlaží v modelu a uvidíte, zda je modelováno.",
     "inModel": "V modelu",
     "groundFloor": "Přízemí",
-    "lastOne": "Alespoň jedno podlaží zůstává v modelu."
+    "lastOne": "Alespoň jedno podlaží zůstává v modelu.",
+    "dwellings": "Byty v modelovaných podlažích",
+    "dwellingsHint": "Vnitřní zisky v BuEM se řídí počtem bytů, ne plochou."
   }
 }

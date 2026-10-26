@@ -64,6 +64,8 @@ export const MODEL_DATA_MAP = {
     // Household inputs and output selection, keyed by their BuEM names.
     household: {
       residential_units: 'properties.buem.building.residential_units',
+      // Beside the block, only with storeys left out: the whole building's dwellings.
+      residential_units_full: 'properties.buem.residential_units_full',
       num_persons:       'properties.buem.building.num_persons',
       archetype:         'properties.buem.building.archetype',
       region_code:       'properties.buem.building.region_code',
