@@ -644,16 +644,14 @@
       "hotWater": "Warm tapwater",
       "kitchen": "Keuken (gas)"
     },
-    "estimateNotice": "Gebouwparameters zijn geschat uit openbare registers. Open de configurator om ze te controleren en aan te passen.",
     "annualDemand": "Jaarlijkse energievraag",
-    "totalDemand": "Totale vraag",
-    "thermalEfficiency": "Thermische efficiëntie",
     "unit": {
       "kWhPerYear": "kWh/jaar",
       "kWhGasPerYear": "kWh gas/jaar"
     },
     "pvGeneration": "PV-opwekking",
-    "storeysModelled": "{modelled} van {total} gemodelleerd"
+    "storeysModelled": "{modelled} van {total} gemodelleerd",
+    "heatingPerM2": "Verwarming {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"

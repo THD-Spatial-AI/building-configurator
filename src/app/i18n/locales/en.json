@@ -644,16 +644,14 @@
       "hotWater": "Hot water",
       "kitchen": "Kitchen (gas)"
     },
-    "estimateNotice": "Building parameters are estimated from public records. Open the configurator to review and adjust them.",
     "annualDemand": "Annual energy demand",
-    "totalDemand": "Total demand",
-    "thermalEfficiency": "Thermal efficiency",
     "unit": {
       "kWhPerYear": "kWh/year",
       "kWhGasPerYear": "kWh gas/year"
     },
     "pvGeneration": "PV generation",
-    "storeysModelled": "{modelled} of {total} modelled"
+    "storeysModelled": "{modelled} of {total} modelled",
+    "heatingPerM2": "Heating {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"

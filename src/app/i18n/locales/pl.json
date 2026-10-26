@@ -660,16 +660,14 @@
       "hotWater": "Ciepła woda",
       "kitchen": "Kuchnia (gaz)"
     },
-    "estimateNotice": "Parametry budynku są szacowane na podstawie publicznych rejestrów. Otwórz konfigurator, aby je sprawdzić i dostosować.",
     "annualDemand": "Roczne zapotrzebowanie na energię",
-    "totalDemand": "Całkowite zapotrzebowanie",
-    "thermalEfficiency": "Efektywność cieplna",
     "unit": {
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh gazu/rok"
     },
     "pvGeneration": "Produkcja PV",
-    "storeysModelled": "{modelled} z {total} modelowanych"
+    "storeysModelled": "{modelled} z {total} modelowanych",
+    "heatingPerM2": "Ogrzewanie {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"

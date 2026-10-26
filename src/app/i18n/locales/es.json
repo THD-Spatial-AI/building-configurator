@@ -650,16 +650,14 @@
       "hotWater": "Agua caliente",
       "kitchen": "Cocina (gas)"
     },
-    "estimateNotice": "Los parámetros del edificio se estiman a partir de registros públicos. Abre el configurador para revisarlos y ajustarlos.",
     "annualDemand": "Demanda energética anual",
-    "totalDemand": "Demanda total",
-    "thermalEfficiency": "Eficiencia térmica",
     "unit": {
       "kWhPerYear": "kWh/año",
       "kWhGasPerYear": "kWh gas/año"
     },
     "pvGeneration": "Generación FV",
-    "storeysModelled": "{modelled} de {total} modeladas"
+    "storeysModelled": "{modelled} de {total} modeladas",
+    "heatingPerM2": "Calefacción {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"

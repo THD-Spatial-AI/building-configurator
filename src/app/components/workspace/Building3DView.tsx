@@ -555,12 +555,6 @@ export function Building3DView({
                   {profileBar}
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
-                    thermalRating={model.thermalRating}
-                    showThermalRating={false}
-                    avgUValue={model.avgUValue}
-                    mode="basic"
-                    embedded
-                    showEstimateNotice={false}
                     pvAnnualKwh={model.pvAnnualKwh}
                   />
                 </div>

@@ -152,7 +152,7 @@ export function EnergyComparisonNote({
   const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${format(DELTA_DISPLAY_CAP, 0)}` : format(magnitude, 0);
 
   return (
-    <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
+    <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400')}>
       {t(isIncrease ? 'common.comparison.higher' : 'common.comparison.lower', {
         percent: displayValue, reference: referenceLabel, kwh: formatTotal(referenceKwh, format),
       })}

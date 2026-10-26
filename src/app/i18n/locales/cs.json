@@ -660,16 +660,14 @@
       "hotWater": "Teplá voda",
       "kitchen": "Kuchyň (plyn)"
     },
-    "estimateNotice": "Parametry budovy jsou odhadnuty z veřejných záznamů. Otevřete konfigurátor a zkontrolujte je a upravte.",
     "annualDemand": "Roční potřeba energie",
-    "totalDemand": "Celková potřeba",
-    "thermalEfficiency": "Tepelná účinnost",
     "unit": {
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh plynu/rok"
     },
     "pvGeneration": "Výroba FV",
-    "storeysModelled": "{modelled} z {total} modelováno"
+    "storeysModelled": "{modelled} z {total} modelováno",
+    "heatingPerM2": "Vytápění {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "S"

@@ -19,8 +19,6 @@ export interface Topic {
   icon: string;
   /** A solid fill, for a bar or legend swatch. */
   bar: string;
-  /** Icon tile, icon and figure on the dark demand panel. */
-  onDark: { iconBg: string; iconColor: string; valueColor: string };
 }
 
 type Palette = Omit<Topic, 'Icon'>;
@@ -29,43 +27,36 @@ const AMBER: Palette = {
   tile: 'bg-[#FFF3D1] text-[#7A5300] dark:bg-[#C98A00]/20 dark:text-[#F2C661]',
   icon: 'text-[#C98A00] dark:text-[#F2C661]',
   bar: 'bg-[#C98A00]',
-  onDark: { iconBg: 'bg-[#C98A00]/25', iconColor: 'text-[#F2C661]', valueColor: 'text-[#F2C661]' },
 };
 const ORANGE: Palette = {
   tile: 'bg-[#FDE6DA] text-[#A6431A] dark:bg-[#D2561E]/20 dark:text-[#F0996F]',
   icon: 'text-[#D2561E] dark:text-[#F0996F]',
   bar: 'bg-[#D2561E]',
-  onDark: { iconBg: 'bg-[#D2561E]/25', iconColor: 'text-[#F0996F]', valueColor: 'text-[#F0996F]' },
 };
 const BLUE: Palette = {
   tile: 'bg-[#DFEBF7] text-[#245A8C] dark:bg-[#2F74B5]/25 dark:text-[#8DB9E6]',
   icon: 'text-[#2F74B5] dark:text-[#8DB9E6]',
   bar: 'bg-[#2F74B5]',
-  onDark: { iconBg: 'bg-[#2F74B5]/30', iconColor: 'text-[#8DB9E6]', valueColor: 'text-[#8DB9E6]' },
 };
 const RED: Palette = {
   tile: 'bg-[#F9E1E1] text-[#8E2A2A] dark:bg-[#C23B3B]/25 dark:text-[#EE9A9A]',
   icon: 'text-[#C23B3B] dark:text-[#EE9A9A]',
   bar: 'bg-[#C23B3B]',
-  onDark: { iconBg: 'bg-[#C23B3B]/30', iconColor: 'text-[#EE9A9A]', valueColor: 'text-[#EE9A9A]' },
 };
 const VIOLET: Palette = {
   tile: 'bg-[#EEE6F8] text-[#5E3A92] dark:bg-[#7A4FB5]/25 dark:text-[#C3A6EA]',
   icon: 'text-[#7A4FB5] dark:text-[#C3A6EA]',
   bar: 'bg-[#7A4FB5]',
-  onDark: { iconBg: 'bg-[#7A4FB5]/30', iconColor: 'text-[#C3A6EA]', valueColor: 'text-[#C3A6EA]' },
 };
 const SLATE: Palette = {
   tile: 'bg-[#E6EAF2] text-[#33415C] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]',
   icon: 'text-[#475B7A] dark:text-[#C3CDDD]',
   bar: 'bg-[#475B7A]',
-  onDark: { iconBg: 'bg-[#475B7A]/50', iconColor: 'text-[#C3CDDD]', valueColor: 'text-[#E1E6EF]' },
 };
 const GREEN: Palette = {
   tile: 'bg-[#E2F2E8] text-[#1F5A38] dark:bg-[#2F7A4F]/25 dark:text-[#8FD1A9]',
   icon: 'text-[#2F7A4F] dark:text-[#8FD1A9]',
   bar: 'bg-[#2F7A4F]',
-  onDark: { iconBg: 'bg-[#2F7A4F]/30', iconColor: 'text-[#8FD1A9]', valueColor: 'text-[#8FD1A9]' },
 };
 
 export const TOPICS: Record<TopicKey, Topic> = {
