@@ -5,8 +5,11 @@ import { ChevronDown } from '@/app/components/icons';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import {
   SelectInput, NumberInput, FieldLabel,
-  ToggleSwitch, FieldRow, ScrollHintContainer,
+  ToggleSwitch, FieldRow,
 } from '@/app/components/BuildingConfigurator/shared/ui';
+import { SectionCard } from '@/app/components/BuildingConfigurator/shared/SectionCard';
+import { TOPICS, type Topic } from '@/app/config/topics';
+import { cn } from '@/lib/utils';
 import {
   BUILDING_TYPE_LABELS,
   MIN_CONSTRUCTION_YEAR,
@@ -22,8 +25,7 @@ import { InsulationSection, insulationSummary, type InsulationProps } from './in
 import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
-// Insulation and windows is not part of this click-to-expand card system: it
-// renders inline, always visible. See BuildingEditor's `inlineSections`.
+// Insulation and windows is not one of these: it stays open (see BuildingEditor).
 type SectionKey = 'identity' | 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
 
 // ─── Section components ───────────────────────────────────────────────────────
@@ -173,15 +175,18 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
 
 // ─── Section metadata ─────────────────────────────────────────────────────────
 
-/** Colour dot for each section — mirrors the element-dot pattern used in surfaces. */
-const SECTION_COLORS: Record<SectionKey, string> = {
-  identity:    '#2f5d8a',
-  occupancy:   '#16a34a',
-  comfort:     '#dc2626',
-  outputs:     '#ca8a04',
-  equipment:   '#db2777',
-  solver:      '#7c3aed',
+/** Each section's topic: the building's own data in slate, heating in its carrier's colour, appliances in electricity's. */
+const SECTION_TOPICS: Record<SectionKey, Topic> = {
+  identity:    TOPICS.building,
+  occupancy:   TOPICS.building,
+  comfort:     TOPICS.heat,
+  outputs:     TOPICS.building,
+  equipment:   TOPICS.electricity,
+  solver:      TOPICS.building,
 };
+
+const BASIC_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort'];
+const EXPERT_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
 
 const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
   identity:    (t) => t('editor.section.identity'),
@@ -251,16 +256,10 @@ interface BuildingEditorProps {
 }
 
 /**
- * Building-level parameter editor shown when "Building" is selected in the panel.
- *
- * Layout mirrors the surface ElementList pattern:
- *  - No section active -> 2-column grid of summary cards.
- *  - Section active -> inactive sections collapse to compact chips at the top;
- *    the active section fills the remaining height with a scrollable body.
- *
- * Insulation and windows sits outside that click-to-expand system, pinned
- * inline under the header: the refurbishment state is the first thing most
- * users change.
+ * Building-level parameter editor of the Building tab: one card per section
+ * in its topic's colour, each showing a summary until it is opened. Expert
+ * sections are dashed. Insulation and windows stays open: the refurbishment
+ * state is the first thing most users change.
  */
 export function BuildingEditor({
   general, setGen, mode,
@@ -269,115 +268,63 @@ export function BuildingEditor({
 }: BuildingEditorProps) {
   const t = useT();
   const format = useFormatNumber();
-  const [openSection, setActiveSection] = useState<SectionKey | null>(null);
+  const [openSection, setOpenSection] = useState<SectionKey | null>(null);
 
-  const ALL_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort'];
-  const EXPERT_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
   const service = isServiceBuildingType(general.buildingType);
-  const visibleSections = (mode === 'expert'
-    ? [...ALL_SECTIONS, ...EXPERT_SECTIONS]
-    : ALL_SECTIONS
-  ).filter((key) => (!hideIdentity || key !== 'identity') && (!service || key !== 'equipment'));
+  const visibleSections = (mode === 'expert' ? [...BASIC_SECTIONS, ...EXPERT_SECTIONS] : BASIC_SECTIONS)
+    .filter((key) => (!hideIdentity || key !== 'identity') && (!service || key !== 'equipment'));
 
-  // A building type change can hide the open section (appliances on a service building).
-  const activeSection = openSection && visibleSections.includes(openSection) ? openSection : null;
-
-  const toggle = (id: SectionKey) =>
-    setActiveSection((prev) => (prev === id ? null : id));
-
-  // ── Insulation and windows — always visible, no click needed ──
-  const inlineSections = insulation && (
-    <div className="flex shrink-0 flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
-      <div>
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">
-          <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: '#ea580c' }} />
-          {t('editor.insulationTitle')}
-        </p>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">{insulationSummary(t, format, insulation)}</p>
-      </div>
-      {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}
-      <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
-    </div>
-  );
-
-  // ── Active section: chips row + expanded card ─────────────────────────────────
-  if (activeSection) {
-    const chips = visibleSections.filter((k) => k !== activeSection);
-    const dotColor = SECTION_COLORS[activeSection];
-
-    return (
-      <ScrollHintContainer className="flex flex-col gap-3 p-4">
-        {inlineSections}
-
-        {/* Inactive sections as compact chips */}
-        <div className="shrink-0 flex flex-wrap gap-1.5">
-          {chips.map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => toggle(key)}
-              className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted"
-            >
-              <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
-              {SECTION_LABELS[key](t)}
-            </button>
-          ))}
-        </div>
-
-        {/* Expanded section */}
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-          {/* Card header — click to collapse */}
-          <button
-            type="button"
-            onClick={() => toggle(activeSection)}
-            className="flex w-full shrink-0 items-center gap-2 border-b border-border bg-muted/80 px-3 py-2.5 text-left transition-colors hover:bg-muted/80"
-          >
-            <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">
-                {SECTION_LABELS[activeSection](t)}
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                {sectionSummary(t, format, activeSection, general)}
-              </p>
-            </div>
-            <ChevronDown className="size-3.5 rotate-180 text-muted-foreground transition-transform duration-300 ease-out" />
-          </button>
-
-          <div className="p-4">
-            <SectionBody id={activeSection} general={general} setGen={setGen} mode={mode} />
-          </div>
-        </div>
-      </ScrollHintContainer>
-    );
-  }
-
-  // ── No section active: header + inline sections + grid of summary cards ──────
   return (
-    <ScrollHintContainer className="flex flex-col gap-3 p-4">
-      {inlineSections}
+    <div className="flex flex-col gap-3">
+      {insulation && (
+        <SectionCard
+          topic={TOPICS.envelope}
+          title={t('editor.insulationTitle')}
+          action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation)}</span>}
+        >
+          <div className="flex flex-col gap-3 p-3">
+            {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}
+            <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
+          </div>
+        </SectionCard>
+      )}
 
-      <div className="grid grid-cols-2 gap-1.5">
-        {visibleSections.map((key) => (
-          <button
+      {visibleSections.map((key) => {
+        const open = openSection === key;
+        return (
+          <SectionCard
             key={key}
-            type="button"
-            onClick={() => toggle(key)}
-            className="flex flex-col items-start rounded-lg border border-border bg-card px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-muted"
+            topic={SECTION_TOPICS[key]}
+            title={SECTION_LABELS[key](t)}
+            dashed={EXPERT_SECTIONS.includes(key)}
+            action={(
+              <button
+                type="button"
+                aria-expanded={open}
+                aria-label={SECTION_LABELS[key](t)}
+                onClick={() => setOpenSection(open ? null : key)}
+                className="flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-card/60"
+              >
+                <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} />
+              </button>
+            )}
           >
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SECTION_COLORS[key] }} />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">
-                  {SECTION_LABELS[key](t)}
-                </p>
+            {open ? (
+              <div className="p-3">
+                <SectionBody id={key} general={general} setGen={setGen} mode={mode} />
               </div>
-              <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
-            </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">{sectionSummary(t, format, key, general)}</p>
-          </button>
-        ))}
-      </div>
-    </ScrollHintContainer>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setOpenSection(key)}
+                className="w-full cursor-pointer px-3 py-2 text-left text-[11px] text-muted-foreground hover:bg-muted"
+              >
+                {sectionSummary(t, format, key, general)}
+              </button>
+            )}
+          </SectionCard>
+        );
+      })}
+    </div>
   );
 }

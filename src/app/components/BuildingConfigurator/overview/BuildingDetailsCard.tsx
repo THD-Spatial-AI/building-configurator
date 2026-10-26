@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { Pencil, Check } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { TOPICS } from '@/app/config/topics';
+import { SectionCard } from '../shared/SectionCard';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
 import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryOptions } from '../shared/buildingOptions';
@@ -57,28 +58,26 @@ function BuildingTable({ rows, onEditField }: { rows: SnapshotRow[]; onEditField
   const t = useT();
   // Off by default, so a stray click on the table never changes the building's data.
   const [isEditing, setIsEditing] = useState(false);
-  const { Icon, tile } = TOPICS.building;
   return (
-    <div>
-      <div className="flex items-center justify-between gap-2 px-4 pb-1 pt-3">
-        <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
-          <span className={cn('flex size-5 items-center justify-center rounded', tile)}><Icon className="size-3.5" /></span>
-          {t('panel.section.identity')}
-        </h3>
-        {onEditField && (
-          <button
-            type="button"
-            onClick={() => setIsEditing((v) => !v)}
-            title={isEditing ? t('panel.doneEditing') : t('panel.editParameters')}
-            className={cn(
-              'flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors',
-              isEditing ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-muted-foreground hover:bg-muted hover:text-muted-foreground',
-            )}
-          >
-            {isEditing ? <Check className="size-3.5" /> : <Pencil className="size-3.5" />}
-          </button>
-        )}
-      </div>
+    <SectionCard
+      topic={TOPICS.building}
+      title={t('panel.section.identity')}
+      emphasised={isEditing}
+      action={onEditField && (
+        <button
+          type="button"
+          onClick={() => setIsEditing((v) => !v)}
+          title={isEditing ? t('panel.doneEditing') : t('panel.editParameters')}
+          className={cn(
+            'flex h-6 cursor-pointer items-center gap-1 rounded-md border px-2 text-[11px] font-semibold transition-colors',
+            isEditing ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90' : 'border-current/30 bg-card text-foreground hover:bg-muted',
+          )}
+        >
+          {isEditing ? <Check className="size-3.5" /> : <Pencil className="size-3.5" />}
+          {isEditing ? t('panel.doneEditing') : t('panel.edit')}
+        </button>
+      )}
+    >
       <table className="w-full text-sm bg-card">
         <colgroup>
           <col className="w-[42%]" />
@@ -119,7 +118,7 @@ function BuildingTable({ rows, onEditField }: { rows: SnapshotRow[]; onEditField
           })}
         </tbody>
       </table>
-    </div>
+    </SectionCard>
   );
 }
 
@@ -165,11 +164,11 @@ export function BuildingDetailsCard({
       {activeTab === 'technology' ? (
         <div className="p-4">{technologySlot}</div>
       ) : (
-        <>
-          {overviewSlot && <div className="p-4 pb-1">{overviewSlot}</div>}
+        <div className="flex flex-col gap-3 p-4">
+          {overviewSlot}
           <BuildingTable rows={snapshotRows} onEditField={onEditField} />
           {parametersSlot}
-        </>
+        </div>
       )}
     </div>
   );

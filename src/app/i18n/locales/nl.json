@@ -608,7 +608,8 @@
     "editParameters": "Gebouwparameters bewerken",
     "section": {
       "identity": "Gebouwgegevens"
-    }
+    },
+    "edit": "Bewerken"
   },
   "snapshot": {
     "status": {

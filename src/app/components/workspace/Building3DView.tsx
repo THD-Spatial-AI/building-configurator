@@ -20,7 +20,8 @@ import { cn } from '@/lib/utils';
 import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
-import { SurfacePanel, SurfaceSection } from './SurfacePanel';
+import { SurfacePanel } from './SurfacePanel';
+import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { PvOverview } from './PvOverview';
@@ -253,9 +254,9 @@ export function Building3DView({
 
   // Envelope, then PV where the surface takes it; a roof of another building has only PV.
   const panelBody = selected && (selectedElement || selectedPv) ? (
-    <div key={selected.id}>
+    <div key={selected.id} className="flex flex-col gap-3 p-3">
       {selectedElement && (
-        <SurfaceSection topic={TOPICS.envelope} title={t('surface.section.envelope')}>
+        <SectionCard topic={TOPICS.envelope} title={t('surface.section.envelope')}>
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}
@@ -264,10 +265,10 @@ export function Building3DView({
             onUpdate={(patch) => model.updateElement(selected.id, patch)}
             onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
           />
-        </SurfaceSection>
+        </SectionCard>
       )}
       {selectedPv && pv && (
-        <SurfaceSection topic={TOPICS.pv} title={t('surface.section.pv')}>
+        <SectionCard topic={TOPICS.pv} title={t('surface.section.pv')}>
           <PvSurfaceSection
             surfaceId={selected.id}
             surface={selectedPv}
@@ -278,7 +279,7 @@ export function Building3DView({
             showGeometry={!selectedElement}
             onClose={() => openSurface(null)}
           />
-        </SurfaceSection>
+        </SectionCard>
       )}
     </div>
   ) : null;
@@ -513,7 +514,7 @@ export function Building3DView({
               parametersSlot={(
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
-                <div className="border-t border-border">
+                <div className="flex flex-col gap-3">
                   {model.general.storeys > 1 && (
                     <StoreysModelled
                       storeys={model.general.storeys}

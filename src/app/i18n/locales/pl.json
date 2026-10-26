@@ -622,7 +622,8 @@
     "editParameters": "Edytuj parametry budynku",
     "section": {
       "identity": "Dane budynku"
-    }
+    },
+    "edit": "Edytuj"
   },
   "snapshot": {
     "status": {

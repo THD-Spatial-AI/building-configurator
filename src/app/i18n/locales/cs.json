@@ -622,7 +622,8 @@
     "editParameters": "Upravit parametry budovy",
     "section": {
       "identity": "Údaje o budově"
-    }
+    },
+    "edit": "Upravit"
   },
   "snapshot": {
     "status": {

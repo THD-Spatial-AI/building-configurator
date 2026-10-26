@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { TOPICS } from '@/app/config/topics';
 import { useFormatNumber, useT } from '../../i18n';
 import { Switch } from './PvMode';
+import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 
 /** The storeys modelled with one storey switched on or off; null when all are on, undefined when it would leave none. */
 export function toggleStorey(modelled: number[] | null, storeys: number, storey: number): number[] | null | undefined {
@@ -66,63 +67,60 @@ export function StoreysModelled({
     const next = toggleStorey(modelled, storeys, storey);
     if (next !== undefined) onChange(next);
   };
-  const { Icon, tile } = TOPICS.building;
   return (
-    <div className="flex flex-col gap-2 px-4 pb-2 pt-3">
-      <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
-        <span className={cn('flex size-5 items-center justify-center rounded', tile)}><Icon className="size-3.5" /></span>
-        {t('storeys.title')}
-      </h3>
-      <p className="text-[11px] leading-snug text-muted-foreground">{t(disabled ? 'storeys.noGeometry' : 'storeys.hint')}</p>
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('storeys.title')}>
-        {all.map((storey) => (
-          <button
-            key={storey}
-            type="button"
-            disabled={disabled}
-            aria-pressed={on.has(storey)}
-            aria-label={t('storeys.storey', { number: storey })}
-            onClick={() => toggle(storey)}
-            className={cn(
-              'h-8 min-w-8 cursor-pointer rounded-md border px-2 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-              on.has(storey)
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
-            )}
-          >{storey}</button>
-        ))}
+    <SectionCard topic={TOPICS.building} title={t('storeys.title')} info={t('storeys.hint')}>
+      <div className="flex flex-col gap-2 p-3">
+        {disabled && <p className="text-[11px] leading-snug text-muted-foreground">{t('storeys.noGeometry')}</p>}
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('storeys.title')}>
+          {all.map((storey) => (
+            <button
+              key={storey}
+              type="button"
+              disabled={disabled}
+              aria-pressed={on.has(storey)}
+              aria-label={t('storeys.storey', { number: storey })}
+              onClick={() => toggle(storey)}
+              className={cn(
+                'h-8 min-w-8 cursor-pointer rounded-md border px-2 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                on.has(storey)
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
+              )}
+            >{storey}</button>
+          ))}
+        </div>
+        {storeyHeight !== undefined && Math.abs(storeyHeight - roomHeight) > HEIGHT_NOTE_GAP_M && (
+          <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
+            {t('storeys.heightNote', { height: format(storeyHeight, 1), room: format(roomHeight, 1) })}
+          </p>
+        )}
+        {modelled && dwellings && (
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.dwellings')}</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={dwellings.value ?? ''}
+              onChange={(e) => {
+                const n = Number.parseInt(e.target.value, 10);
+                dwellings.onChange(Number.isInteger(n) && n >= 1 ? n : null);
+              }}
+              className={cn(
+                'h-8 w-24 rounded-md border bg-card px-2 text-[12px] text-foreground',
+                dwellings.value ? 'border-border' : 'border-destructive ring-1 ring-destructive/30',
+              )}
+            />
+            <span className="text-[10px] leading-snug text-muted-foreground">{t('storeys.dwellingsHint')}</span>
+          </label>
+        )}
+        <div className="flex justify-between gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
+          <span>{t('storeys.floorArea')}</span>
+          <span className="font-semibold tabular-nums text-foreground">
+            {on.size} × {format(floorAreaPerStorey, 0)} m² = {format(on.size * floorAreaPerStorey, 0)} m²
+          </span>
+        </div>
       </div>
-      {storeyHeight !== undefined && Math.abs(storeyHeight - roomHeight) > HEIGHT_NOTE_GAP_M && (
-        <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
-          {t('storeys.heightNote', { height: format(storeyHeight, 1), room: format(roomHeight, 1) })}
-        </p>
-      )}
-      {modelled && dwellings && (
-        <label className="flex flex-col gap-1">
-          <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.dwellings')}</span>
-          <input
-            type="number"
-            min={1}
-            step={1}
-            value={dwellings.value ?? ''}
-            onChange={(e) => {
-              const n = Number.parseInt(e.target.value, 10);
-              dwellings.onChange(Number.isInteger(n) && n >= 1 ? n : null);
-            }}
-            className={cn(
-              'h-8 w-24 rounded-md border bg-card px-2 text-[12px] text-foreground',
-              dwellings.value ? 'border-border' : 'border-destructive ring-1 ring-destructive/30',
-            )}
-          />
-          <span className="text-[10px] leading-snug text-muted-foreground">{t('storeys.dwellingsHint')}</span>
-        </label>
-      )}
-      <div className="flex justify-between gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
-        <span>{t('storeys.floorArea')}</span>
-        <span className="font-semibold tabular-nums text-foreground">
-          {on.size} × {format(floorAreaPerStorey, 0)} m² = {format(on.size * floorAreaPerStorey, 0)} m²
-        </span>
-      </div>
-    </div>
+    </SectionCard>
   );
 }

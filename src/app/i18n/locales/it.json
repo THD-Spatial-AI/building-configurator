@@ -608,7 +608,8 @@
     "editParameters": "Modifica i parametri dell'edificio",
     "section": {
       "identity": "Dati dell'edificio"
-    }
+    },
+    "edit": "Modifica"
   },
   "snapshot": {
     "status": {

@@ -613,7 +613,8 @@
     "editParameters": "Modifier les paramètres du bâtiment",
     "section": {
       "identity": "Données du bâtiment"
-    }
+    },
+    "edit": "Modifier"
   },
   "snapshot": {
     "status": {

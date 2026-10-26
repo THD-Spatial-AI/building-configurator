@@ -5,7 +5,6 @@
 
 import { X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import type { Topic } from '@/app/config/topics';
 import { useT } from '../../i18n';
 
 interface SurfacePanelProps {
@@ -20,21 +19,6 @@ interface SurfacePanelProps {
   picker?: React.ReactNode;
   onClose: () => void;
   children?: React.ReactNode;
-}
-
-/** One topic of the open surface, under its icon and name. */
-export function SurfaceSection({ topic, title, children }: { topic: Topic; title: string; children: React.ReactNode }) {
-  return (
-    <section className="border-b border-border last:border-b-0">
-      <h3 className="flex items-center gap-2 px-3 pt-3 text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
-        <span className={cn('flex size-5 items-center justify-center rounded', topic.tile)}>
-          <topic.Icon className="size-3.5" />
-        </span>
-        {title}
-      </h3>
-      {children}
-    </section>
-  );
 }
 
 export function SurfacePanel({ docked, open, title, subtitle, emptyText, picker, onClose, children }: SurfacePanelProps) {

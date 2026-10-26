@@ -608,7 +608,8 @@
     "editParameters": "Edit building parameters",
     "section": {
       "identity": "Building data"
-    }
+    },
+    "edit": "Edit"
   },
   "snapshot": {
     "status": {
