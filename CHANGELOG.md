@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [Unreleased]
+## [0.13.0] - 2026-10-26
 
 Breaking: `PvMode` requires `onMountingChange(surfaceId, mounting, orientation)`. Store both values per surface and pass them back as `surfaces[id].mounting` and `orientation`.
 
