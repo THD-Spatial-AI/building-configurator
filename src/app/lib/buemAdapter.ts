@@ -292,7 +292,9 @@ function adaptThematicData(feature: unknown): ThematicData {
   const buildingType = BUILDING_TYPE_LABELS[typeCode] ?? typeCode;
   const storeys = getMappedNumber(feature, descriptor.storeys);
   const fullElements = getMappedArray(feature, MODEL_DATA_MAP.thematic.envelope.fullElements);
-  const modelled = fullElements.length > 0 ? partialStoreys(getMappedValue(feature, descriptor.storeysModelled), storeys) : undefined;
+  const modelled = fullElements.length > 0
+    ? partialStoreys(modelledFromList(getMappedValue(feature, descriptor.storeyList)), storeys)
+    : undefined;
   const identity: BuildingIdentity = {
     id: rawId,
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
@@ -589,6 +591,25 @@ export function partialStoreys(modelled: unknown, storeys: number): number[] | u
   return valid.length > 0 && valid.length < storeys ? valid : undefined;
 }
 
+/** One storey as stored beside the block, 1-based from the ground. */
+export interface StoreyEntry {
+  storey: number;
+  modelled: boolean;
+}
+
+/** Every storey with whether it is in the model, as stored in properties.buem.storey_list. */
+function storeyList(modelled: readonly number[], storeys: number): StoreyEntry[] {
+  return Array.from({ length: storeys }, (_, i) => ({ storey: i + 1, modelled: modelled.includes(i + 1) }));
+}
+
+/** The modelled storeys of a stored storey_list, or undefined when it is not one. */
+function modelledFromList(list: unknown): number[] | undefined {
+  if (!Array.isArray(list)) return undefined;
+  return list
+    .filter((entry): entry is StoreyEntry => !!entry && typeof entry === 'object' && entry.modelled === true)
+    .map((entry) => entry.storey);
+}
+
 /** The whole envelope with each surface's share of it that was sent; a surface not sent has none. */
 function withModelledShares<T extends { area: number }>(
   full: Record<string, T>,
@@ -753,7 +774,7 @@ export function serializeToBuemFeature(
         building,
         ...(constructionYear ? { construction_year: constructionYear } : {}),
         ...(storeys ? { storeys } : {}),
-        ...(modelled ? { storeys_modelled: modelled } : {}),
+        ...(modelled ? { storey_list: storeyList(modelled, storeys) } : {}),
         ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
         ...(refurbishment ? { refurbishment } : {}),
         outputs,
@@ -848,7 +869,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   const envelopeBlk = (bldg.envelope ?? {}) as Record<string, unknown>;
   const fullBlk = (buem.envelope_full ?? {}) as Record<string, unknown>;
   const importedStoreys = Number(buem.storeys ?? bldg.n_storeys ?? 0);
-  const modelled = Array.isArray(fullBlk.elements) ? partialStoreys(buem.storeys_modelled, importedStoreys) : undefined;
+  const modelled = Array.isArray(fullBlk.elements) ? partialStoreys(modelledFromList(buem.storey_list), importedStoreys) : undefined;
   const sourceElements = modelled ? fullBlk.elements : envelopeBlk.elements;
   let elements: Record<string, any> = {};
 

@@ -1,7 +1,7 @@
 // One building through BuEM: build the request from the edited model, hand it
 // to the host's transport, map the answer into the shapes the UI reads.
 
-import { serializeToBuemFeature, type BuildingIdentity, type BuildingState } from './buemAdapter';
+import { serializeToBuemFeature, type BuildingIdentity, type BuildingState, type StoreyEntry } from './buemAdapter';
 import {
   DEFAULT_ELEMENTS,
   DEFAULT_GENERAL,
@@ -81,8 +81,8 @@ export function toBuem(building: BuildingState): {
   construction_year?: number;
   /** Kept beside the block: BuEM takes no storey count, and A_ref alone does not say how it splits. */
   storeys?: number;
-  /** With storeys left out: the storeys modelled (1-based), the block being cut to them. */
-  storeys_modelled?: number[];
+  /** With storeys left out: every storey and whether it is modelled, the block being cut to those that are. */
+  storey_list?: StoreyEntry[];
   /** With storeys left out: the whole envelope, for reopening; never sent to BuEM. */
   envelope_full?: { elements: Record<string, any>[] };
   /** Kept beside the block and never sent to BuEM: the TABULA variant and the state per element type. */
@@ -98,7 +98,7 @@ export function toBuem(building: BuildingState): {
     building: buem.building,
     construction_year: buem.construction_year,
     ...(buem.storeys ? { storeys: buem.storeys } : {}),
-    ...(buem.storeys_modelled ? { storeys_modelled: buem.storeys_modelled, envelope_full: buem.envelope_full } : {}),
+    ...(buem.storey_list ? { storey_list: buem.storey_list, envelope_full: buem.envelope_full } : {}),
     ...(buem.refurbishment ? { refurbishment: buem.refurbishment } : {}),
     outputs: buem.outputs,
     solver: buem.solver,

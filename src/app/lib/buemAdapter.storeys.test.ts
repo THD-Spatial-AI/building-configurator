@@ -48,7 +48,7 @@ describe('a building with storeys left out', () => {
   });
 
   it('keeps the whole envelope and the storeys modelled beside the block', () => {
-    expect(buem.storeys_modelled).toEqual([1, 2]);
+    expect(buem.storey_list).toEqual([{ storey: 1, modelled: true }, { storey: 2, modelled: true }, { storey: 3, modelled: false }]);
     expect(buem.envelope_full.elements.map((el: { id: string; area: { value: number } }) => [el.id, el.area.value]))
       .toEqual([['w1', 30], ['win', 6], ['r1', 100]]);
   });
@@ -72,14 +72,14 @@ describe('a building with storeys left out', () => {
 
   it('stores the same blocks again after reopening', () => {
     const blocks = toBuem(adaptBuemFeature(stored));
-    expect(blocks.storeys_modelled).toEqual([1, 2]);
+    expect(blocks.storey_list?.filter((s) => s.modelled).map((s) => s.storey)).toEqual([1, 2]);
     expect(toBuem(adaptBuemFeature({ ...stored, properties: { ...stored.properties, buem: blocks } }))).toEqual(blocks);
     expect(blocks.building.A_ref.value).toBe(200);
   });
 
   it('writes neither key when every storey is modelled', () => {
     const all = serializeToBuemFeature(three, elements, { ...general, storeysModelled: [1, 2, 3] }).properties.buem;
-    expect(all).not.toHaveProperty('storeys_modelled');
+    expect(all).not.toHaveProperty('storey_list');
     expect(all).not.toHaveProperty('envelope_full');
     expect(all.building.A_ref.value).toBe(300);
   });

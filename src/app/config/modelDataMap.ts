@@ -43,7 +43,7 @@ export const MODEL_DATA_MAP = {
         'properties.buem.storeys',                                        // beside the block, see buemAdapter
         'properties.buem.building.n_storeys',                             // deprecated in v6-draft; read from older sources, never written
       ],
-      storeysModelled:    'properties.buem.storeys_modelled',             // beside the block: 1-based storeys in the model, absent when all are
+      storeyList:         'properties.buem.storey_list',                  // beside the block: [{ storey: 1-based, modelled: boolean }], absent when all are modelled
     },
 
     // Building parameters beyond the descriptor, each absent unless set.
