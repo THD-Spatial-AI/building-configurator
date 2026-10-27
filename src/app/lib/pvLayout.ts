@@ -31,10 +31,14 @@ export interface PvLayoutOptions {
    * filling the room one orientation leaves with modules turned the other way.
    */
   orientation?: PvOrientation;
+  /** Places at most this many modules, those nearest the middle. Absent: as many as fit. */
+  moduleCount?: number;
 }
 
 export interface PvLayout {
   count: number;
+  /** How many fit within the usable share, before any moduleCount; count is at most this. */
+  fits: number;
   kwp: number;
   /** Module surface, m². */
   area: number;
@@ -188,6 +192,7 @@ function layoutFor(
   mounting: PvMounting,
   orientation: PvOrientation | undefined,
   roof: { tilt: number; azimuth: number },
+  moduleCount: number | undefined,
 ): PvLayout {
   const origin = ring[0];
 
@@ -242,15 +247,16 @@ function layoutFor(
   }
   let rects = candidates.reduce((best, next) => (next.length > best.length ? next : best));
 
-  // The usable share caps how many: keep those nearest the middle.
+  // The usable share caps how many, then the chosen count: keep those nearest the middle.
+  const cu = poly.reduce((s, p) => s + p[0], 0) / poly.length;
+  const cv = poly.reduce((s, p) => s + p[1], 0) / poly.length;
+  const distance = (r: Rect) => Math.hypot(r.u + r.du / 2 - cu, r.v + r.dv / 2 - cv);
+  const nearestMiddle = (n: number) => [...rects].sort((a, b) => distance(a) - distance(b)).slice(0, Math.max(0, n));
   const cap = Math.floor((Math.max(0, Math.min(1, usableShare)) * area) / (module.width * module.height));
   const capped = rects.length > cap;
-  if (capped) {
-    const cu = poly.reduce((s, p) => s + p[0], 0) / poly.length;
-    const cv = poly.reduce((s, p) => s + p[1], 0) / poly.length;
-    const distance = (r: Rect) => Math.hypot(r.u + r.du / 2 - cu, r.v + r.dv / 2 - cv);
-    rects = [...rects].sort((a, b) => distance(a) - distance(b)).slice(0, cap);
-  }
+  if (capped) rects = nearestMiddle(cap);
+  const fits = rects.length;
+  if (moduleCount !== undefined && moduleCount < fits) rects = nearestMiddle(Math.floor(moduleCount));
 
   const modules = rects.map((r) => {
     if (mounting.kind === 'flush') {
@@ -267,6 +273,7 @@ function layoutFor(
 
   return {
     count: modules.length,
+    fits,
     kwp: modules.length * module.kwp,
     area: modules.length * module.width * module.height,
     capped,
@@ -290,5 +297,5 @@ export function pvLayout(surface: SurfacePolygon, module: PvModule, options: PvL
     azimuth: (deg(Math.atan2(normal[0], normal[1])) + 360) % 360,
   };
   const mounting = options.mounting ?? (roof.tilt < FLAT_MAX_TILT_DEG ? DEFAULT_RACK : { kind: 'flush' });
-  return layoutFor(ring, normal, area, module, options.usableShare, mounting, options.orientation, roof);
+  return layoutFor(ring, normal, area, module, options.usableShare, mounting, options.orientation, roof, options.moduleCount);
 }

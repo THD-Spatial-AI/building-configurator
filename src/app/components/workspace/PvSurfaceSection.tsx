@@ -157,7 +157,9 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
   const format = useFormatNumber();
   if (!pv.catalogue?.length || !pv.onAssignProduct) return null;
   const options = { usableShare: surface.usableShare, mounting: surface.mounting, orientation: surface.orientation };
-  const better = fitsMore(polygon, options, pv.catalogue, surfaceProduct(pv, surfaceId)?.id, layout.kwp, pv.module ?? DEFAULT_PV_MODULE);
+  // Against what fits with this product, not the count chosen, so a lower count does not make every product look better.
+  const fullKwp = layout.count > 0 ? (layout.kwp / layout.count) * layout.fits : layout.kwp;
+  const better = fitsMore(polygon, options, pv.catalogue, surfaceProduct(pv, surfaceId)?.id, fullKwp, pv.module ?? DEFAULT_PV_MODULE);
   if (better.length === 0) return null;
   // Closed by default: the list changes as the surface's settings do, and open
   // it would move the rest of the panel each time.
@@ -242,6 +244,20 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
               integer
               onChange={(percent) => pv.onShareChange(surfaceId, Math.min(100, Math.max(0, percent)) / 100)}
             />
+            {layout && pv.onModuleCountChange && layout.fits > 0 && (
+              <NumberInput
+                label={t('pv.moduleCount.label', { fits: layout.fits })}
+                tip={t('pv.moduleCount.tip')}
+                value={Math.min(surface.moduleCount ?? layout.fits, layout.fits)}
+                min={1}
+                max={layout.fits}
+                step={1}
+                unit=""
+                integer
+                // As many as fit is stored as no count, so it follows the usable share.
+                onChange={(count) => pv.onModuleCountChange?.(surfaceId, count >= layout.fits ? null : Math.max(1, count))}
+              />
+            )}
           </div>
           {layout && (
             <MountingControls

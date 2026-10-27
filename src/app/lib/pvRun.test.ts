@@ -25,7 +25,7 @@ describe('pvRunRequest', () => {
 
   it('adds the module count, capacity and panel angles of a surface with a layout', () => {
     const layout: PvLayout = {
-      count: 20, kwp: 8, area: 40, capped: true, tilt: 15, azimuth: 170,
+      count: 20, fits: 20, kwp: 8, area: 40, capped: true, tilt: 15, azimuth: 170,
       mounting: { kind: 'racked', tilt: 15, azimuth: 170 }, orientation: 'portrait', modules: [],
     };
     expect(pvRunRequest('osm-1', elements, ['r1'], { r1: layout })?.surfaces).toEqual([

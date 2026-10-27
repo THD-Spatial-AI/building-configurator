@@ -54,7 +54,7 @@ const withCatalogue: PvMode = {
 };
 
 const flush: PvLayout = {
-  count: 24, kwp: 9.6, area: 48, capped: true, tilt: 35, azimuth: 180,
+  count: 24, fits: 24, kwp: 9.6, area: 48, capped: true, tilt: 35, azimuth: 180,
   mounting: { kind: 'flush' }, orientation: 'portrait', modules: [],
 };
 const racked: PvLayout = { ...flush, tilt: 15, mounting: { kind: 'racked', tilt: 15, azimuth: 180 } };
@@ -234,6 +234,16 @@ describe('PvSurfaceSection', () => {
     expect(onPitched).toMatch(/aria-pressed="true"[^>]*>Best fit</);
   });
 
+  it('offers the module count, up to what fits, where the host stores it', () => {
+    const withCount = renderToStaticMarkup(
+      <PvSurfaceSection surfaceId="r1" surface={{ ...pv.surfaces.r1, moduleCount: 10 }} pv={{ ...pv, onModuleCountChange: () => {} }} elements={elements} layout={{ ...flush, count: 10 }} />,
+    );
+    expect(withCount).toContain('Modules (up to 24)');
+    expect(withCount).toMatch(/aria-label="Modules \(up to 24\)"[^>]*value="10"/);
+    const without = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />);
+    expect(without).not.toContain('Modules (up to');
+  });
+
   it('offers the panel tilt and facing of a racked surface, and the way back to flush', () => {
     const html = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={racked} />);
     expect(html).toContain('>Flush<');
@@ -262,7 +272,7 @@ describe('PvSurfaceSection', () => {
     // 3.3 m by 2.2 m: one Mono module fits, two of the smaller Compact.
     const polygon: SurfacePolygon = { id: 'r1', type: 'RoofSurface', coordinates: [[[0, 0, 3], [3.3, 0, 3], [3.3, 2.2, 3], [0, 2.2, 3], [0, 0, 3]]] };
     const surface = { ...pv.surfaces.r1, usableShare: 1, mounting: { kind: 'flush' as const } };
-    const one: PvLayout = { ...flush, count: 1, kwp: 0.42, area: 2 };
+    const one: PvLayout = { ...flush, count: 1, fits: 1, kwp: 0.42, area: 2 };
     const html = renderToStaticMarkup(
       <PvSurfaceSection surfaceId="r1" surface={surface} pv={withCatalogue} elements={elements} layout={one} polygon={polygon} />,
     );

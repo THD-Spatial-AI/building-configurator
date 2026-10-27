@@ -270,6 +270,10 @@
       "capacity": "Capacity",
       "area": "Panel area",
       "investment": "Investment, estimated"
+    },
+    "moduleCount": {
+      "label": "Modules (up to {fits})",
+      "tip": "How many modules to place on this surface, up to the number that fits in its usable share. The capacity follows from it."
     }
   },
   "tech": {

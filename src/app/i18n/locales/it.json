@@ -270,6 +270,10 @@
       "capacity": "Potenza",
       "area": "Superficie dei pannelli",
       "investment": "Investimento, stimato"
+    },
+    "moduleCount": {
+      "label": "Moduli (fino a {fits})",
+      "tip": "Quanti moduli posare su questa superficie, fino a quelli che entrano nella sua quota utilizzabile. La potenza ne deriva."
     }
   },
   "tech": {

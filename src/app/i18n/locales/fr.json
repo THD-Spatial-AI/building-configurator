@@ -271,6 +271,10 @@
       "capacity": "Puissance",
       "area": "Surface des panneaux",
       "investment": "Investissement, estimé"
+    },
+    "moduleCount": {
+      "label": "Modules (jusqu'à {fits})",
+      "tip": "Le nombre de modules à poser sur cette surface, jusqu'à ceux qui tiennent dans sa part utilisable. La puissance en découle."
     }
   },
   "tech": {
