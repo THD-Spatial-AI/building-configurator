@@ -106,7 +106,18 @@
       }
     },
     "pick": "Scegli una superficie",
-    "geometrySource": "Fonte: modello 3D dell'edificio"
+    "geometrySource": "Fonte: modello 3D dell'edificio",
+    "group": {
+      "roof": "Tetti",
+      "wall": "Pareti",
+      "floor": "Pavimenti",
+      "window": "Finestre",
+      "door": "Porte",
+      "other": "Altre superfici"
+    },
+    "hover": {
+      "open": "Fai clic per aprire questa superficie"
+    }
   },
   "profile": {
     "title": "Profilo di carico orario",
@@ -134,7 +145,7 @@
   "pv": {
     "state": {
       "installed": "Con FV",
-      "suggested": "Consigliata",
+      "suggested": "Consigliata per il FV",
       "available": "Disponibile"
     },
     "toggle": "FV su {surface}",
@@ -152,7 +163,7 @@
     "useSuggested": "Usa le superfici consigliate",
     "legend": {
       "installed": "FV installato",
-      "suggested": "Consigliata"
+      "suggested": "Consigliata per il FV"
     },
     "card": {
       "fromModel": "Inclinazione, esposizione e area provengono dal modello 3D dell'edificio.",
@@ -197,7 +208,8 @@
       "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Opzioni fotovoltaiche ({count})",
-      "search": "Cerca nel catalogo"
+      "search": "Cerca nel catalogo",
+      "drag": "Trascina su un tetto o una parete del modello"
     },
     "product": {
       "label": "Prodotto",
@@ -241,6 +253,20 @@
     "noFitOn": {
       "one": "Nessun modulo FV intero entra su {surfaces}, quindi non ha FV. Scegli un prodotto più piccolo o un'altra superficie.",
       "other": "Nessun modulo FV intero entra su {count} superfici ({surfaces}), quindi non hanno FV. Scegli un prodotto più piccolo o altre superfici."
+    },
+    "help": {
+      "title": "Come installare il FV su una superficie",
+      "drag": "Apri le opzioni fotovoltaiche e trascina un prodotto dalla sua maniglia su un tetto o una parete del modello.",
+      "click": "Oppure fai clic su un tetto o una parete del modello, attiva {install} nel suo pannello e scegli lì un prodotto.",
+      "suggested": "Le superfici contrassegnate {suggested} sono le più adatte al FV. Nell'elenco delle superfici disponibili, {useSuggested} installa il FV su tutte.",
+      "remove": "Per rimuovere il FV, disattiva {install} nel pannello della superficie o nell'elenco delle superfici disponibili."
+    },
+    "sort": {
+      "label": "Ordina per",
+      "name": "Nome, dalla A alla Z",
+      "cost": "Costo per kWp più basso",
+      "capacity": "Potenza del modulo più alta",
+      "size": "Modulo più piccolo"
     }
   },
   "tech": {
@@ -249,7 +275,6 @@
     "inFocus": "In primo piano",
     "product": "Prodotto",
     "add": "Aggiungi una tecnologia",
-    "totalEstimate": "{amount} finora, stima",
     "count": {
       "one": "{count} tecnologia",
       "other": "{count} tecnologie"
@@ -257,6 +282,13 @@
     "pvSurfaces": {
       "one": "{count} superficie",
       "other": "{count} superfici"
+    },
+    "total": {
+      "label": "Costo totale stimato delle tecnologie",
+      "unsized": {
+        "one": "Esclusa {count} tecnologia dimensionata dall'ottimizzatore, il cui costo dipende dalla taglia.",
+        "other": "Escluse {count} tecnologie dimensionate dall'ottimizzatore, il cui costo dipende dalla taglia."
+      }
     }
   },
   "editor": {

@@ -106,7 +106,18 @@
       }
     },
     "pick": "Kies een vlak",
-    "geometrySource": "Bron: 3D-model van het gebouw"
+    "geometrySource": "Bron: 3D-model van het gebouw",
+    "group": {
+      "roof": "Daken",
+      "wall": "Muren",
+      "floor": "Vloeren",
+      "window": "Ramen",
+      "door": "Deuren",
+      "other": "Overige vlakken"
+    },
+    "hover": {
+      "open": "Klik om dit vlak te openen"
+    }
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",
@@ -134,7 +145,7 @@
   "pv": {
     "state": {
       "installed": "Met PV",
-      "suggested": "Voorgesteld",
+      "suggested": "Voorgesteld voor pv",
       "available": "Beschikbaar"
     },
     "toggle": "PV op {surface}",
@@ -152,7 +163,7 @@
     "useSuggested": "Voorgestelde vlakken gebruiken",
     "legend": {
       "installed": "PV geplaatst",
-      "suggested": "Voorgesteld"
+      "suggested": "Voorgesteld voor pv"
     },
     "card": {
       "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",
@@ -197,7 +208,8 @@
       "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Fotovoltaïsche opties ({count})",
-      "search": "Catalogus doorzoeken"
+      "search": "Catalogus doorzoeken",
+      "drag": "Sleep naar een dak of muur in het model"
     },
     "product": {
       "label": "Product",
@@ -241,6 +253,20 @@
     "noFitOn": {
       "one": "Er past geen hele PV-module op {surfaces}, dus het vlak heeft geen PV. Kies een kleiner product of een ander vlak.",
       "other": "Er past geen hele PV-module op {count} vlakken ({surfaces}), dus ze hebben geen PV. Kies een kleiner product of andere vlakken."
+    },
+    "help": {
+      "title": "Zo plaatst u pv op een vlak",
+      "drag": "Open de fotovoltaïsche opties en sleep een product aan zijn greep naar een dak of muur in het model.",
+      "click": "Of klik op een dak of muur in het model, zet {install} aan in het paneel en kies daar een product.",
+      "suggested": "Vlakken met {suggested} zijn het meest geschikt voor pv. In de lijst met beschikbare vlakken plaatst {useSuggested} pv op allemaal.",
+      "remove": "Zet {install} uit in het paneel van het vlak of in de lijst met beschikbare vlakken om pv te verwijderen."
+    },
+    "sort": {
+      "label": "Sorteren op",
+      "name": "Naam, A tot Z",
+      "cost": "Laagste kosten per kWp",
+      "capacity": "Hoogste modulevermogen",
+      "size": "Kleinste module"
     }
   },
   "tech": {
@@ -249,7 +275,6 @@
     "inFocus": "Geselecteerd",
     "product": "Product",
     "add": "Technologie toevoegen",
-    "totalEstimate": "{amount} tot nu toe, schatting",
     "count": {
       "one": "{count} technologie",
       "other": "{count} technologieën"
@@ -257,6 +282,13 @@
     "pvSurfaces": {
       "one": "{count} vlak",
       "other": "{count} vlakken"
+    },
+    "total": {
+      "label": "Geschatte totale kosten van de technologieën",
+      "unsized": {
+        "one": "Zonder {count} technologie die de optimalisatie dimensioneert, waarvan de kosten uit de grootte volgen.",
+        "other": "Zonder {count} technologieën die de optimalisatie dimensioneert, waarvan de kosten uit de grootte volgen."
+      }
     }
   },
   "editor": {

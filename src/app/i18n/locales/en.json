@@ -106,7 +106,18 @@
       }
     },
     "pick": "Choose a surface",
-    "geometrySource": "Source: the building's 3D model"
+    "geometrySource": "Source: the building's 3D model",
+    "group": {
+      "roof": "Roofs",
+      "wall": "Walls",
+      "floor": "Floors",
+      "window": "Windows",
+      "door": "Doors",
+      "other": "Other surfaces"
+    },
+    "hover": {
+      "open": "Click to open this surface"
+    }
   },
   "profile": {
     "title": "Hourly load profile",
@@ -134,7 +145,7 @@
   "pv": {
     "state": {
       "installed": "With PV",
-      "suggested": "Suggested",
+      "suggested": "Suggested for PV",
       "available": "Available"
     },
     "toggle": "PV on {surface}",
@@ -152,7 +163,7 @@
     "useSuggested": "Use suggested surfaces",
     "legend": {
       "installed": "PV installed",
-      "suggested": "Suggested"
+      "suggested": "Suggested for PV"
     },
     "card": {
       "fromModel": "Tilt, facing and area come from the building's 3D model.",
@@ -197,7 +208,8 @@
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Photovoltaic options ({count})",
-      "search": "Search the catalogue"
+      "search": "Search the catalogue",
+      "drag": "Drag onto a roof or wall in the model"
     },
     "product": {
       "label": "Product",
@@ -241,6 +253,20 @@
     "noFitOn": {
       "one": "No whole PV module fits on {surfaces}, so it has no PV. Choose a smaller product or another surface.",
       "other": "No whole PV module fits on {count} surfaces ({surfaces}), so they have no PV. Choose a smaller product or other surfaces."
+    },
+    "help": {
+      "title": "How to install PV on a surface",
+      "drag": "Open the photovoltaic options and drag a product by its handle onto a roof or wall in the model.",
+      "click": "Or click a roof or wall in the model, switch {install} on in its panel and choose a product there.",
+      "suggested": "Surfaces marked {suggested} suit PV best. In the list of available surfaces, {useSuggested} installs PV on all of them.",
+      "remove": "To remove PV, switch {install} off in the surface's panel or in the list of available surfaces."
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Name, A to Z",
+      "cost": "Lowest cost per kWp",
+      "capacity": "Highest module power",
+      "size": "Smallest module"
     }
   },
   "tech": {
@@ -249,7 +275,6 @@
     "inFocus": "In focus",
     "product": "Product",
     "add": "Add a technology",
-    "totalEstimate": "{amount} so far, estimate",
     "count": {
       "one": "{count} technology",
       "other": "{count} technologies"
@@ -257,6 +282,13 @@
     "pvSurfaces": {
       "one": "{count} surface",
       "other": "{count} surfaces"
+    },
+    "total": {
+      "label": "Estimated total cost of technologies",
+      "unsized": {
+        "one": "Without {count} technology the optimiser sizes, whose cost follows from its size.",
+        "other": "Without {count} technologies the optimiser sizes, whose cost follows from their size."
+      }
     }
   },
   "editor": {

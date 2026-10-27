@@ -108,7 +108,18 @@
       }
     },
     "pick": "Wybierz przegrodę",
-    "geometrySource": "Źródło: model 3D budynku"
+    "geometrySource": "Źródło: model 3D budynku",
+    "group": {
+      "roof": "Dachy",
+      "wall": "Ściany",
+      "floor": "Podłogi",
+      "window": "Okna",
+      "door": "Drzwi",
+      "other": "Inne powierzchnie"
+    },
+    "hover": {
+      "open": "Kliknij, aby otworzyć tę powierzchnię"
+    }
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",
@@ -136,7 +147,7 @@
   "pv": {
     "state": {
       "installed": "Z PV",
-      "suggested": "Sugerowana",
+      "suggested": "Sugerowana dla PV",
       "available": "Dostępna"
     },
     "toggle": "PV: {surface}",
@@ -154,7 +165,7 @@
     "useSuggested": "Użyj sugerowanych przegród",
     "legend": {
       "installed": "PV zainstalowane",
-      "suggested": "Sugerowana"
+      "suggested": "Sugerowana dla PV"
     },
     "card": {
       "fromModel": "Nachylenie, orientacja i powierzchnia pochodzą z modelu 3D budynku.",
@@ -199,7 +210,8 @@
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Opcje fotowoltaiczne ({count})",
-      "search": "Szukaj w katalogu"
+      "search": "Szukaj w katalogu",
+      "drag": "Przeciągnij na dach lub ścianę w modelu"
     },
     "product": {
       "label": "Produkt",
@@ -249,6 +261,20 @@
       "few": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
       "many": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
       "other": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie."
+    },
+    "help": {
+      "title": "Jak zainstalować PV na powierzchni",
+      "drag": "Otwórz opcje fotowoltaiczne i przeciągnij produkt za uchwyt na dach lub ścianę w modelu.",
+      "click": "Albo kliknij dach lub ścianę w modelu, włącz {install} w jej panelu i wybierz tam produkt.",
+      "suggested": "Powierzchnie oznaczone {suggested} najlepiej nadają się do PV. Na liście dostępnych powierzchni {useSuggested} instaluje PV na wszystkich.",
+      "remove": "Aby usunąć PV, wyłącz {install} w panelu powierzchni lub na liście dostępnych powierzchni."
+    },
+    "sort": {
+      "label": "Sortuj według",
+      "name": "Nazwa, od A do Z",
+      "cost": "Najniższy koszt za kWp",
+      "capacity": "Najwyższa moc modułu",
+      "size": "Najmniejszy moduł"
     }
   },
   "tech": {
@@ -257,7 +283,6 @@
     "inFocus": "Wybrana",
     "product": "Produkt",
     "add": "Dodaj technologię",
-    "totalEstimate": "{amount} do tej pory, szacunek",
     "count": {
       "one": "{count} technologia",
       "few": "{count} technologie",
@@ -269,6 +294,15 @@
       "few": "{count} przegrody",
       "many": "{count} przegród",
       "other": "{count} przegrody"
+    },
+    "total": {
+      "label": "Szacowany łączny koszt technologii",
+      "unsized": {
+        "one": "Bez {count} technologii dobieranej przez optymalizator, której koszt zależy od wielkości.",
+        "few": "Bez {count} technologii dobieranych przez optymalizator, których koszt zależy od wielkości.",
+        "many": "Bez {count} technologii dobieranych przez optymalizator, których koszt zależy od wielkości.",
+        "other": "Bez {count} technologii dobieranych przez optymalizator, których koszt zależy od wielkości."
+      }
     }
   },
   "editor": {

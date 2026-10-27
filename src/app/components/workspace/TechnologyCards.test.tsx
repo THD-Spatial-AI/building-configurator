@@ -91,7 +91,8 @@ describe('TechnologiesTab', () => {
       <TechnologiesTab technologies={{ ...technologies, onAdd: () => {} }} elements={{}} layouts={{}} mode="basic" onSelectSurface={() => {}} />,
     );
     expect(html).toContain('3 technologies');
-    expect(html).toContain('12,000 EUR so far, estimate');
+    expect(html).toMatch(/Estimated total cost of technologies<\/span><span[^>]*>12,000 EUR</);
+    expect(html).toContain('Without 1 technology the optimiser sizes');
     expect(html).toContain('Add a technology');
   });
 });

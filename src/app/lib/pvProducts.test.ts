@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fitsMore, productModule, pvCosts, shownConstraints, type TechnologyProduct } from './pvProducts';
+import { fitsMore, productModule, pvCosts, shownConstraints, sortProducts, type TechnologyProduct } from './pvProducts';
 import { DEFAULT_PV_MODULE } from './pvLayout';
 import type { SurfacePolygon } from './surfaceMesh';
 
@@ -21,6 +21,19 @@ describe('productModule', () => {
   it('falls back for a product without all three module values', () => {
     expect(productModule(product('x', { module_width_m: 1 }), DEFAULT_PV_MODULE)).toBe(DEFAULT_PV_MODULE);
     expect(productModule(undefined, DEFAULT_PV_MODULE)).toBe(DEFAULT_PV_MODULE);
+  });
+});
+
+describe('sortProducts', () => {
+  const large = product('large', { module_width_m: 1.134, module_height_m: 2.278, module_power_kwp: 0.55, cost_energy_cap: 540 });
+  const noCost = product('bare', { module_width_m: 1, module_height_m: 1.6, module_power_kwp: 0.35 });
+  const ids = (order: Parameters<typeof sortProducts>[1]) => sortProducts([mono, large, noCost, compact], order, DEFAULT_PV_MODULE).map((p) => p.id);
+
+  it('orders by name, cheapest per kWp, most power per module, or smallest module', () => {
+    expect(ids('name')).toEqual(['bare', 'compact', 'large', 'mono']);
+    expect(ids('cost')).toEqual(['large', 'mono', 'compact', 'bare']);
+    expect(ids('capacity')).toEqual(['large', 'mono', 'bare', 'compact']);
+    expect(ids('size')).toEqual(['compact', 'bare', 'mono', 'large']);
   });
 });
 

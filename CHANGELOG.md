@@ -27,6 +27,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - A surface's tilt and facing are edited in Expert only. PV takes its geometry from the 3D model, not from these edits.
 - The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals.
 - "Results to compute" moves to Expert.
+- Drop-downs, search fields, option rows and number fields follow EnerPlanET's select, input and row styles. The Technologies tab pins the estimated total cost below its cards.
 - Breaking: `toBuem` returns `storeys` and `construction_year` inside `configurator` (type `ConfiguratorKeys`), no longer beside the `building` block. Buildings stored by 0.14.0 still reopen with both.
 
 ### Removed

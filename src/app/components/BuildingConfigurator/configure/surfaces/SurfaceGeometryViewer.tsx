@@ -43,7 +43,7 @@ interface SurfaceGeometryViewerProps {
   storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[] };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
-  /** A surface to outline, as while its name is hovered in a list. */
+  /** A surface to fill and outline, as while it is hovered in the model or a list. */
   previewId?: string | null;
   /** `at` is the click position in client coordinates. */
   onSelectSurface?: (id: string | null, at?: { x: number; y: number }) => void;
@@ -388,8 +388,8 @@ export function SurfaceGeometryViewer({
     };
   }, [sides, origin]);
 
-  // The surface named in a list, outlined in the side colour so its place on
-  // the model shows whichever way the building faces.
+  // The previewed surface, filled and outlined in the side colour so its
+  // extent shows whichever way the building faces.
   useEffect(() => {
     const scene = sceneRef.current;
     const polygon = previewId ? surfaces.find((surface) => surface.id === previewId) : undefined;
@@ -400,10 +400,31 @@ export function SurfaceGeometryViewer({
     outline.renderOrder = 10;
     outline.raycast = () => {};
     scene.add(outline);
+    const built = buildSurfaceGroup(polygon, origin);
+    const fill = built.children.find((c) => c.name === 'surface-fill') as THREE.Mesh | undefined;
+    built.children.forEach((child) => {
+      if (child !== fill) (child as THREE.Mesh).geometry.dispose();
+      ((child as THREE.Mesh).material as THREE.Material).dispose();
+    });
+    const fillMaterial = new THREE.MeshBasicMaterial({
+      color: SIDE_COLOR, transparent: true, opacity: 0.4, depthWrite: false,
+      side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    });
+    if (fill) {
+      fill.material = fillMaterial;
+      fill.raycast = () => {};
+      fill.renderOrder = 9;
+      scene.add(fill);
+    }
     return () => {
       scene.remove(outline);
       outline.geometry.dispose();
       material.dispose();
+      if (fill) {
+        scene.remove(fill);
+        fill.geometry.dispose();
+      }
+      fillMaterial.dispose();
     };
   }, [surfaces, origin, previewId]);
 

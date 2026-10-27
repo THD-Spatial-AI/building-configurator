@@ -7,7 +7,7 @@ import { Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { technologyTopic, type Topic } from '@/app/config/topics';
 import { useFormatNumber, useT, type FormatNumber } from '../../i18n';
-import { DecimalInput } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
 
 /** One value on a technology card. */
 export interface TechField {
@@ -130,7 +130,7 @@ export function TechCardFrame({ topic, title, headline, subtitle, cost, focused,
 }) {
   const t = useT();
   return (
-    <section className={cn('overflow-hidden rounded-lg bg-card', focused ? cn('border-2', topic.border) : 'border border-border')}>
+    <section className={cn('overflow-hidden rounded-lg bg-card shadow-sm', focused ? cn('border-2', topic.border) : 'border border-border')}>
       <div className={cn('flex items-center gap-2 px-3 py-2', topic.tile)}>
         <button
           type="button"
@@ -173,25 +173,16 @@ function CatalogueSelect({ catalogue }: { catalogue: NonNullable<TechCard['catal
   const [query, setQuery] = useState('');
   const current = catalogue.products.find((product) => product.id === catalogue.productId);
   const needle = query.trim().toLowerCase();
-  const shown = needle ? catalogue.products.filter((product) => product.name.toLowerCase().includes(needle)) : catalogue.products;
+  const shown = (needle ? catalogue.products.filter((product) => product.name.toLowerCase().includes(needle)) : [...catalogue.products])
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
   return (
-    <details className="group rounded-md border border-border">
-      <summary className="flex cursor-pointer items-center justify-between gap-2 px-2.5 py-1.5 text-[12px] text-foreground">
-        <span className="min-w-0 truncate">
-          <span className="text-muted-foreground">{t('tech.product')}: </span>{current?.name ?? t('pv.product.none')}
-        </span>
-        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <div className="flex flex-col gap-1.5 border-t border-border p-2">
-        <input
-          type="search"
-          aria-label={t('pv.catalogue.search')}
-          placeholder={t('pv.catalogue.search')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="h-8 rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
-        />
-        <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto">
+    <Dropdown title={(
+      <span className="min-w-0 truncate">
+        <span className="text-muted-foreground">{t('tech.product')}: </span>{current?.name ?? t('pv.product.none')}
+      </span>
+    )}>
+        <SearchField label={t('pv.catalogue.search')} value={query} onChange={setQuery} />
+        <ul className={DROPDOWN_LIST}>
           {shown.map((product) => (
             <li key={product.id}>
               <button
@@ -199,8 +190,8 @@ function CatalogueSelect({ catalogue }: { catalogue: NonNullable<TechCard['catal
                 aria-pressed={product.id === catalogue.productId}
                 onClick={() => catalogue.onSelect(product.id)}
                 className={cn(
-                  'w-full cursor-pointer rounded-md border px-2.5 py-1.5 text-left',
-                  product.id === catalogue.productId ? 'border-primary bg-primary/10' : 'border-border bg-card hover:bg-muted',
+                  OPTION_ROW, 'w-full cursor-pointer text-left',
+                  product.id === catalogue.productId && 'border-primary/50 bg-primary/5',
                 )}
               >
                 <span className="block text-[12px] font-semibold text-foreground">{product.name}</span>
@@ -209,8 +200,7 @@ function CatalogueSelect({ catalogue }: { catalogue: NonNullable<TechCard['catal
             </li>
           ))}
         </ul>
-      </div>
-    </details>
+    </Dropdown>
   );
 }
 

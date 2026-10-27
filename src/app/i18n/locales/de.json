@@ -106,7 +106,18 @@
       }
     },
     "pick": "Fläche wählen",
-    "geometrySource": "Quelle: 3D-Modell des Gebäudes"
+    "geometrySource": "Quelle: 3D-Modell des Gebäudes",
+    "group": {
+      "roof": "Dächer",
+      "wall": "Wände",
+      "floor": "Böden",
+      "window": "Fenster",
+      "door": "Türen",
+      "other": "Weitere Flächen"
+    },
+    "hover": {
+      "open": "Klicken, um diese Fläche zu öffnen"
+    }
   },
   "profile": {
     "title": "Stündliches Lastprofil",
@@ -134,7 +145,7 @@
   "pv": {
     "state": {
       "installed": "Mit PV",
-      "suggested": "Vorgeschlagen",
+      "suggested": "Für PV vorgeschlagen",
       "available": "Verfügbar"
     },
     "toggle": "PV auf {surface}",
@@ -152,7 +163,7 @@
     "useSuggested": "Vorgeschlagene Flächen nutzen",
     "legend": {
       "installed": "PV installiert",
-      "suggested": "Vorgeschlagen"
+      "suggested": "Für PV vorgeschlagen"
     },
     "card": {
       "fromModel": "Neigung, Ausrichtung und Fläche stammen aus dem 3D-Modell des Gebäudes.",
@@ -197,7 +208,8 @@
       "hint": "Ziehen Sie ein Produkt auf ein Dach oder eine Wand, oder wählen Sie es im Bereich einer Fläche.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Photovoltaik-Optionen ({count})",
-      "search": "Katalog durchsuchen"
+      "search": "Katalog durchsuchen",
+      "drag": "Auf ein Dach oder eine Wand im Modell ziehen"
     },
     "product": {
       "label": "Produkt",
@@ -241,6 +253,20 @@
     "noFitOn": {
       "one": "Auf {surfaces} passt kein ganzes PV-Modul, daher trägt die Fläche keine PV. Wählen Sie ein kleineres Produkt oder eine andere Fläche.",
       "other": "Auf {count} Flächen ({surfaces}) passt kein ganzes PV-Modul, daher tragen sie keine PV. Wählen Sie ein kleineres Produkt oder andere Flächen."
+    },
+    "help": {
+      "title": "So installieren Sie PV auf einer Fläche",
+      "drag": "Öffnen Sie die Photovoltaik-Optionen und ziehen Sie ein Produkt an seinem Griff auf ein Dach oder eine Wand im Modell.",
+      "click": "Oder klicken Sie im Modell auf ein Dach oder eine Wand, schalten Sie in dessen Bereich {install} ein und wählen Sie dort ein Produkt.",
+      "suggested": "Als {suggested} markierte Flächen eignen sich am besten für PV. In der Liste der verfügbaren Flächen installiert {useSuggested} PV auf allen.",
+      "remove": "Um PV zu entfernen, schalten Sie {install} im Bereich der Fläche oder in der Liste der verfügbaren Flächen aus."
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "name": "Name, A bis Z",
+      "cost": "Niedrigste Kosten pro kWp",
+      "capacity": "Höchste Modulleistung",
+      "size": "Kleinstes Modul"
     }
   },
   "tech": {
@@ -249,7 +275,6 @@
     "inFocus": "Im Fokus",
     "product": "Produkt",
     "add": "Technologie hinzufügen",
-    "totalEstimate": "{amount} bisher, Schätzung",
     "count": {
       "one": "{count} Technologie",
       "other": "{count} Technologien"
@@ -257,6 +282,13 @@
     "pvSurfaces": {
       "one": "{count} Fläche",
       "other": "{count} Flächen"
+    },
+    "total": {
+      "label": "Geschätzte Gesamtkosten der Technologien",
+      "unsized": {
+        "one": "Ohne {count} Technologie, deren Größe der Optimierer bestimmt und deren Kosten daraus folgen.",
+        "other": "Ohne {count} Technologien, deren Größe der Optimierer bestimmt und deren Kosten daraus folgen."
+      }
     }
   },
   "editor": {

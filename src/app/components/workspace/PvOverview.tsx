@@ -3,16 +3,16 @@
 // onto a surface, and the surfaces that take PV.
 
 import { useState } from 'react';
-import { Pencil, Sun } from '@/app/components/icons';
+import { ChevronDown, CircleHelp, GripVertical, Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { DecimalInput } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
-  constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints,
-  type TechnologyConstraint, type TechnologyProduct,
+  constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints, sortProducts,
+  type ProductOrder, type TechnologyConstraint, type TechnologyProduct,
 } from '../../lib/pvProducts';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { GeometryLine, surfaceName, surfaceProduct, Switch, type PvMode, type PvSurface } from './PvMode';
@@ -80,18 +80,14 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
     .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
 
   return (
-    <details className="group rounded-md border border-border">
-      <summary className="flex cursor-pointer items-center justify-between px-3 py-2 text-[12px] font-semibold text-foreground">
-        {t('pv.surfaces.toggle', { installed: installedCount, total: entries.length })}
-        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <ul className="divide-y divide-border border-t border-border">
+    <Dropdown title={t('pv.surfaces.toggle', { installed: installedCount, total: entries.length })}>
+      <ul className={DROPDOWN_LIST}>
         {ordered.map(([id, surface]) => {
           const name = surfaceName(id, elements, pv.surfaces);
           const installed = surface.state === 'installed';
           const kwp = layouts[id]?.kwp ?? surface.maxKwp;
           return (
-            <li key={id} className={cn('flex items-center gap-2.5 px-3 py-2', surface.state === 'suggested' && 'bg-amber-500/5')}>
+            <li key={id} className={cn(OPTION_ROW, 'flex items-center gap-2.5', surface.state === 'suggested' && 'border-amber-500/40 bg-amber-500/5')}>
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <button
@@ -119,7 +115,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
           );
         })}
       </ul>
-      <div className="border-t border-border p-2">
+      <div>
         <button
           type="button"
           disabled={suggestedIds.length === 0}
@@ -127,7 +123,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
           className="h-8 cursor-pointer rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
         >{t('pv.useSuggested')}</button>
       </div>
-    </details>
+    </Dropdown>
   );
 }
 
@@ -192,30 +188,51 @@ function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record
 }
 
 /** The catalogue's PV products behind a drop-down, each draggable onto a surface in the 3D view. */
+/** The steps to install PV on a surface, closed until opened. */
+function InstallHelp() {
+  const t = useT();
+  const steps = ['drag', 'click', 'suggested', 'remove'] as const;
+  // The steps name the controls by their own strings, so they read the same in every language.
+  const labels = { install: t('pv.thisSurface'), suggested: t('pv.state.suggested'), useSuggested: t('pv.useSuggested') };
+  return (
+    <details className="group rounded-lg border border-sky-500/30 bg-sky-500/5">
+      <summary className="flex cursor-pointer select-none list-none items-center gap-2 px-3 py-2 text-[12px] font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+        <CircleHelp className="size-4 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden />
+        <span className="flex-1">{t('pv.help.title')}</span>
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
+      </summary>
+      <ol className="m-0 flex list-decimal flex-col gap-1 py-2 pl-8 pr-3 text-[12px] leading-snug text-foreground">
+        {steps.map((step) => <li key={step}>{t(`pv.help.${step}`, labels)}</li>)}
+      </ol>
+    </details>
+  );
+}
+
+const SORT_ORDERS: readonly ProductOrder[] = ['name', 'cost', 'capacity', 'size'];
+
 function Catalogue({ pv }: { pv: PvMode }) {
   const t = useT();
   const format = useFormatNumber();
   const [query, setQuery] = useState('');
+  const [order, setOrder] = useState<ProductOrder>('name');
   if (!pv.catalogue?.length) return null;
   const needle = query.trim().toLowerCase();
-  const shown = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
+  const found = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
+  const shown = sortProducts(found, order, pv.module ?? DEFAULT_PV_MODULE);
   return (
-    <details className="group rounded-md border border-border">
-      <summary className="flex cursor-pointer items-center justify-between px-3 py-2 text-[12px] font-semibold text-foreground">
-        {t('pv.catalogue.toggle', { count: pv.catalogue.length })}
-        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <div className="flex flex-col gap-1.5 border-t border-border p-2">
-        <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.catalogue.hint')}</p>
-        <input
-          type="search"
-          aria-label={t('pv.options.search')}
-          placeholder={t('pv.options.search')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="h-8 rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
-        />
-        <ul className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
+    <Dropdown title={t('pv.catalogue.toggle', { count: pv.catalogue.length })}>
+        <div className="flex gap-2">
+          <div className="min-w-0 flex-1"><SearchField label={t('pv.options.search')} value={query} onChange={setQuery} /></div>
+          <div className="w-40 shrink-0">
+            <select className="cfg-select" aria-label={t('pv.sort.label')} value={order} onChange={(e) => setOrder(e.target.value as ProductOrder)}>
+              {SORT_ORDERS.map((option) => <option key={option} value={option}>{t(`pv.sort.${option}`)}</option>)}
+            </select>
+          </div>
+        </div>
+        <p className="flex items-center gap-1.5 text-[11px] font-medium leading-snug text-foreground">
+          <GripVertical className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{t('pv.catalogue.hint')}
+        </p>
+        <ul className={DROPDOWN_LIST}>
           {shown.map((product) => {
             const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
             const perKwp = constraintNumber(product, 'cost_energy_cap');
@@ -224,19 +241,22 @@ function Catalogue({ pv }: { pv: PvMode }) {
                 key={product.id}
                 draggable={Boolean(pv.onAssignProduct)}
                 onDragStart={(e) => { e.dataTransfer.setData(PV_PRODUCT_DRAG_TYPE, product.id); e.dataTransfer.effectAllowed = 'copy'; }}
-                className="cursor-grab rounded-md border border-dashed border-border bg-card px-2.5 py-1.5 active:cursor-grabbing"
+                title={t('pv.catalogue.drag')}
+                className={cn(OPTION_ROW, 'flex cursor-grab items-center gap-2 active:cursor-grabbing active:shadow-lg')}
               >
-                <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
-                <div className="text-[11px] text-muted-foreground">
-                  {t('pv.catalogue.module', { width: format(module.width, 2), height: format(module.height, 2), watts: format(module.kwp * 1000, 0) })}
-                  {perKwp !== undefined && ` · ${format(perKwp, 0)} ${productCurrency(product)}/kWp`}
+                <GripVertical className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                <div className="min-w-0">
+                  <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {t('pv.catalogue.module', { width: format(module.width, 2), height: format(module.height, 2), watts: format(module.kwp * 1000, 0) })}
+                    {perKwp !== undefined && ` · ${format(perKwp, 0)} ${productCurrency(product)}/kWp`}
+                  </div>
                 </div>
               </li>
             );
           })}
         </ul>
-      </div>
-    </details>
+    </Dropdown>
   );
 }
 
@@ -367,6 +387,7 @@ export function PvOverview({ pv, available, elements, layouts = {}, mode, onSele
         </div>
       )}
       <Totals pv={pv} available={available} elements={elements} layouts={layouts} />
+      <InstallHelp />
       <Installed pv={pv} layouts={layouts} mode={mode} />
       <Catalogue pv={pv} />
       <SurfaceList pv={pv} available={available} elements={elements} layouts={layouts} onSelect={onSelect} />

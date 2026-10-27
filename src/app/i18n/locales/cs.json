@@ -108,7 +108,18 @@
       }
     },
     "pick": "Vyberte plochu",
-    "geometrySource": "Zdroj: 3D model budovy"
+    "geometrySource": "Zdroj: 3D model budovy",
+    "group": {
+      "roof": "Střechy",
+      "wall": "Stěny",
+      "floor": "Podlahy",
+      "window": "Okna",
+      "door": "Dveře",
+      "other": "Další plochy"
+    },
+    "hover": {
+      "open": "Kliknutím otevřete tuto plochu"
+    }
   },
   "profile": {
     "title": "Hodinový profil zatížení",
@@ -136,7 +147,7 @@
   "pv": {
     "state": {
       "installed": "S FV",
-      "suggested": "Navrženo",
+      "suggested": "Navrženo pro FV",
       "available": "Dostupné"
     },
     "toggle": "FV: {surface}",
@@ -154,7 +165,7 @@
     "useSuggested": "Použít navržené plochy",
     "legend": {
       "installed": "FV instalována",
-      "suggested": "Navrženo"
+      "suggested": "Navrženo pro FV"
     },
     "card": {
       "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",
@@ -199,7 +210,8 @@
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Fotovoltaické možnosti ({count})",
-      "search": "Hledat v katalogu"
+      "search": "Hledat v katalogu",
+      "drag": "Přetáhněte na střechu nebo stěnu v modelu"
     },
     "product": {
       "label": "Produkt",
@@ -249,6 +261,20 @@
       "few": "Na {count} plochy ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy.",
       "many": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy.",
       "other": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy."
+    },
+    "help": {
+      "title": "Jak nainstalovat FV na plochu",
+      "drag": "Otevřete fotovoltaické možnosti a přetáhněte produkt za úchyt na střechu nebo stěnu v modelu.",
+      "click": "Nebo klikněte na střechu či stěnu v modelu, zapněte v jejím panelu {install} a vyberte tam produkt.",
+      "suggested": "Plochy označené {suggested} se pro FV hodí nejlépe. V seznamu dostupných ploch {useSuggested} nainstaluje FV na všechny.",
+      "remove": "Chcete-li FV odebrat, vypněte {install} v panelu plochy nebo v seznamu dostupných ploch."
+    },
+    "sort": {
+      "label": "Seřadit podle",
+      "name": "Název, A až Z",
+      "cost": "Nejnižší cena za kWp",
+      "capacity": "Nejvyšší výkon modulu",
+      "size": "Nejmenší modul"
     }
   },
   "tech": {
@@ -257,7 +283,6 @@
     "inFocus": "Vybraná",
     "product": "Produkt",
     "add": "Přidat technologii",
-    "totalEstimate": "{amount} zatím, odhad",
     "count": {
       "one": "{count} technologie",
       "few": "{count} technologie",
@@ -269,6 +294,15 @@
       "few": "{count} plochy",
       "many": "{count} ploch",
       "other": "{count} plochy"
+    },
+    "total": {
+      "label": "Odhadované celkové náklady na technologie",
+      "unsized": {
+        "one": "Bez {count} technologie, kterou dimenzuje optimalizátor a jejíž cena plyne z velikosti.",
+        "few": "Bez {count} technologií, které dimenzuje optimalizátor a jejichž cena plyne z velikosti.",
+        "many": "Bez {count} technologie, kterou dimenzuje optimalizátor.",
+        "other": "Bez {count} technologií, které dimenzuje optimalizátor a jejichž cena plyne z velikosti."
+      }
     }
   },
   "editor": {
