@@ -15,7 +15,6 @@ import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
 const ROW_UNITS: Record<string, string> = {
-  floorArea:  'm²',
   storeys:    '',
   roomHeight: 'm',
   constructionYear: '',

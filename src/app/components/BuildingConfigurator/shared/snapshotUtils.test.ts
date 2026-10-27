@@ -11,6 +11,12 @@ const surface = (id: string, area: number, modelledShare?: number): BuildingElem
 const general = { ...DEFAULT_GENERAL, floorArea: 100, storeys: 3, roomHeight: 2.5 };
 const row = (rows: ReturnType<typeof buildSnapshotRows>, key: string) => rows.find((r) => r.labelKey === key)!;
 
+describe('buildSnapshotRows', () => {
+  it('keeps the footprint out of the data editor, as it comes from the 3D model', () => {
+    expect(row(buildSnapshotRows(general, {}, 0, 'en'), 'snapshot.row.floorAreaPerStorey').editKey).toBeUndefined();
+  });
+});
+
 describe('buildSnapshotRows with storeys left out', () => {
   const elements = { a: surface('a', 30, 2 / 3), b: surface('b', 50, 0), c: surface('c', 10, 1) };
   const rows = buildSnapshotRows({ ...general, storeysModelled: [1, 2] }, elements, 90, 'en');
