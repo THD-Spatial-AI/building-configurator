@@ -7,6 +7,7 @@ import {
 import { setbackOptions, isServiceBuildingType } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { computeTotalFloorArea } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import { TOPICS } from '@/app/config/topics';
 
 interface ComfortProps {
   general: Record<string, any>;
@@ -26,9 +27,10 @@ function massClasses(t: Translate) {
 // c_m per class from EN ISO 13790 Table 12; Medium is the schema's default.
 const MASS_DEFAULTS: Record<string, number> = { Light: 110, Medium: 165, Heavy: 260 };
 
+/** Hot water included takes the heat topic's soft tile; not included stays plain. */
 function hotWaterOptions(t: Translate) {
   return [
-    { value: 'on',  label: t('comfort.hotWater.on') },
+    { value: 'on',  label: t('comfort.hotWater.on'), activeClassName: TOPICS.heat.tile },
     { value: 'off', label: t('comfort.hotWater.off') },
   ];
 }
