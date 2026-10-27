@@ -199,7 +199,8 @@
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Opcje fotowoltaiczne ({count})",
-      "search": "Szukaj w katalogu"
+      "search": "Szukaj w katalogu",
+      "drag": "Przeciągnij na dach lub ścianę w modelu"
     },
     "product": {
       "label": "Produkt",
@@ -249,6 +250,13 @@
       "few": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
       "many": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
       "other": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie."
+    },
+    "help": {
+      "title": "Jak zainstalować PV na powierzchni",
+      "drag": "Otwórz opcje fotowoltaiczne i przeciągnij produkt za uchwyt na dach lub ścianę w modelu.",
+      "click": "Albo kliknij dach lub ścianę w modelu, włącz {install} w jej panelu i wybierz tam produkt.",
+      "suggested": "Powierzchnie oznaczone {suggested} najlepiej nadają się do PV. Na liście dostępnych powierzchni {useSuggested} instaluje PV na wszystkich.",
+      "remove": "Aby usunąć PV, wyłącz {install} w panelu powierzchni lub na liście dostępnych powierzchni."
     }
   },
   "tech": {

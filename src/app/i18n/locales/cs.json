@@ -199,7 +199,8 @@
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Fotovoltaické možnosti ({count})",
-      "search": "Hledat v katalogu"
+      "search": "Hledat v katalogu",
+      "drag": "Přetáhněte na střechu nebo stěnu v modelu"
     },
     "product": {
       "label": "Produkt",
@@ -249,6 +250,13 @@
       "few": "Na {count} plochy ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy.",
       "many": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy.",
       "other": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy."
+    },
+    "help": {
+      "title": "Jak nainstalovat FV na plochu",
+      "drag": "Otevřete fotovoltaické možnosti a přetáhněte produkt za úchyt na střechu nebo stěnu v modelu.",
+      "click": "Nebo klikněte na střechu či stěnu v modelu, zapněte v jejím panelu {install} a vyberte tam produkt.",
+      "suggested": "Plochy označené {suggested} se pro FV hodí nejlépe. V seznamu dostupných ploch {useSuggested} nainstaluje FV na všechny.",
+      "remove": "Chcete-li FV odebrat, vypněte {install} v panelu plochy nebo v seznamu dostupných ploch."
     }
   },
   "tech": {

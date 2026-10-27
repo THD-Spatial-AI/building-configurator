@@ -197,7 +197,8 @@
       "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Fotovoltaïsche opties ({count})",
-      "search": "Catalogus doorzoeken"
+      "search": "Catalogus doorzoeken",
+      "drag": "Sleep naar een dak of muur in het model"
     },
     "product": {
       "label": "Product",
@@ -241,6 +242,13 @@
     "noFitOn": {
       "one": "Er past geen hele PV-module op {surfaces}, dus het vlak heeft geen PV. Kies een kleiner product of een ander vlak.",
       "other": "Er past geen hele PV-module op {count} vlakken ({surfaces}), dus ze hebben geen PV. Kies een kleiner product of andere vlakken."
+    },
+    "help": {
+      "title": "Zo plaatst u pv op een vlak",
+      "drag": "Open de fotovoltaïsche opties en sleep een product aan zijn greep naar een dak of muur in het model.",
+      "click": "Of klik op een dak of muur in het model, zet {install} aan in het paneel en kies daar een product.",
+      "suggested": "Vlakken met {suggested} zijn het meest geschikt voor pv. In de lijst met beschikbare vlakken plaatst {useSuggested} pv op allemaal.",
+      "remove": "Zet {install} uit in het paneel van het vlak of in de lijst met beschikbare vlakken om pv te verwijderen."
     }
   },
   "tech": {

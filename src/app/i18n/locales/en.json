@@ -197,7 +197,8 @@
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
       "module": "{width} × {height} m · {watts} W",
       "toggle": "Photovoltaic options ({count})",
-      "search": "Search the catalogue"
+      "search": "Search the catalogue",
+      "drag": "Drag onto a roof or wall in the model"
     },
     "product": {
       "label": "Product",
@@ -241,6 +242,13 @@
     "noFitOn": {
       "one": "No whole PV module fits on {surfaces}, so it has no PV. Choose a smaller product or another surface.",
       "other": "No whole PV module fits on {count} surfaces ({surfaces}), so they have no PV. Choose a smaller product or other surfaces."
+    },
+    "help": {
+      "title": "How to install PV on a surface",
+      "drag": "Open the photovoltaic options and drag a product by its handle onto a roof or wall in the model.",
+      "click": "Or click a roof or wall in the model, switch {install} on in its panel and choose a product there.",
+      "suggested": "Surfaces marked {suggested} suit PV best. In the list of available surfaces, {useSuggested} installs PV on all of them.",
+      "remove": "To remove PV, switch {install} off in the surface's panel or in the list of available surfaces."
     }
   },
   "tech": {

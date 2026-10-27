@@ -3,7 +3,7 @@
 // onto a surface, and the surfaces that take PV.
 
 import { useState } from 'react';
-import { Pencil, Sun } from '@/app/components/icons';
+import { ChevronDown, CircleHelp, GripVertical, Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -188,6 +188,26 @@ function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record
 }
 
 /** The catalogue's PV products behind a drop-down, each draggable onto a surface in the 3D view. */
+/** The steps to install PV on a surface, closed until opened. */
+function InstallHelp() {
+  const t = useT();
+  const steps = ['drag', 'click', 'suggested', 'remove'] as const;
+  // The steps name the controls by their own strings, so they read the same in every language.
+  const labels = { install: t('pv.thisSurface'), suggested: t('pv.state.suggested'), useSuggested: t('pv.useSuggested') };
+  return (
+    <details className="group rounded-lg border border-sky-500/30 bg-sky-500/5">
+      <summary className="flex cursor-pointer select-none list-none items-center gap-2 px-3 py-2 text-[12px] font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+        <CircleHelp className="size-4 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden />
+        <span className="flex-1">{t('pv.help.title')}</span>
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
+      </summary>
+      <ol className="m-0 flex list-decimal flex-col gap-1 py-2 pl-8 pr-3 text-[12px] leading-snug text-foreground">
+        {steps.map((step) => <li key={step}>{t(`pv.help.${step}`, labels)}</li>)}
+      </ol>
+    </details>
+  );
+}
+
 function Catalogue({ pv }: { pv: PvMode }) {
   const t = useT();
   const format = useFormatNumber();
@@ -198,7 +218,9 @@ function Catalogue({ pv }: { pv: PvMode }) {
   return (
     <Dropdown title={t('pv.catalogue.toggle', { count: pv.catalogue.length })}>
         <SearchField label={t('pv.options.search')} value={query} onChange={setQuery} />
-        <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.catalogue.hint')}</p>
+        <p className="flex items-center gap-1.5 text-[11px] font-medium leading-snug text-foreground">
+          <GripVertical className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{t('pv.catalogue.hint')}
+        </p>
         <ul className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
           {shown.map((product) => {
             const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
@@ -208,12 +230,16 @@ function Catalogue({ pv }: { pv: PvMode }) {
                 key={product.id}
                 draggable={Boolean(pv.onAssignProduct)}
                 onDragStart={(e) => { e.dataTransfer.setData(PV_PRODUCT_DRAG_TYPE, product.id); e.dataTransfer.effectAllowed = 'copy'; }}
-                className={cn(OPTION_ROW, 'cursor-grab active:cursor-grabbing')}
+                title={t('pv.catalogue.drag')}
+                className={cn(OPTION_ROW, 'flex cursor-grab items-center gap-2 active:cursor-grabbing active:shadow-lg')}
               >
-                <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
-                <div className="text-[11px] text-muted-foreground">
-                  {t('pv.catalogue.module', { width: format(module.width, 2), height: format(module.height, 2), watts: format(module.kwp * 1000, 0) })}
-                  {perKwp !== undefined && ` · ${format(perKwp, 0)} ${productCurrency(product)}/kWp`}
+                <GripVertical className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                <div className="min-w-0">
+                  <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {t('pv.catalogue.module', { width: format(module.width, 2), height: format(module.height, 2), watts: format(module.kwp * 1000, 0) })}
+                    {perKwp !== undefined && ` · ${format(perKwp, 0)} ${productCurrency(product)}/kWp`}
+                  </div>
                 </div>
               </li>
             );
@@ -350,6 +376,7 @@ export function PvOverview({ pv, available, elements, layouts = {}, mode, onSele
         </div>
       )}
       <Totals pv={pv} available={available} elements={elements} layouts={layouts} />
+      <InstallHelp />
       <Installed pv={pv} layouts={layouts} mode={mode} />
       <Catalogue pv={pv} />
       <SurfaceList pv={pv} available={available} elements={elements} layouts={layouts} onSelect={onSelect} />
