@@ -128,7 +128,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Impossible de lire le fichier de profil de charge."
-    }
+    },
+    "uploadSoon": "L'import d'un profil mesuré arrive bientôt."
   },
   "pv": {
     "state": {
@@ -602,6 +603,12 @@
       "at": "AT - Autriche",
       "nl": "NL - Pays-Bas",
       "cz": "CZ - Tchéquie"
+    },
+    "countryName": {
+      "de": "Allemagne",
+      "at": "Autriche",
+      "nl": "Pays-Bas",
+      "cz": "Tchéquie"
     }
   },
   "panel": {
@@ -660,7 +667,8 @@
     },
     "tile": {
       "statisticalDefault": "Valeur statistique"
-    }
+    },
+    "builtIn": "Construit en {year}"
   },
   "envelope": {
     "compassNorth": "N"

@@ -130,7 +130,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Soubor profilu zatížení nelze načíst."
-    }
+    },
+    "uploadSoon": "Nahrání naměřeného profilu bude brzy k dispozici."
   },
   "pv": {
     "state": {
@@ -619,6 +620,12 @@
       "at": "AT - Rakousko",
       "nl": "NL - Nizozemsko",
       "cz": "CZ - Česko"
+    },
+    "countryName": {
+      "de": "Německo",
+      "at": "Rakousko",
+      "nl": "Nizozemsko",
+      "cz": "Česko"
     }
   },
   "panel": {
@@ -678,7 +685,8 @@
     },
     "tile": {
       "statisticalDefault": "Statistická hodnota"
-    }
+    },
+    "builtIn": "Postaveno v roce {year}"
   },
   "envelope": {
     "compassNorth": "S"

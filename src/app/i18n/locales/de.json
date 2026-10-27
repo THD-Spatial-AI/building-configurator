@@ -126,7 +126,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Lastprofil-Datei konnte nicht gelesen werden."
-    }
+    },
+    "uploadSoon": "Das Hochladen eines gemessenen Profils folgt in Kürze."
   },
   "pv": {
     "state": {
@@ -597,6 +598,12 @@
       "at": "AT - Österreich",
       "nl": "NL - Niederlande",
       "cz": "CZ - Tschechien"
+    },
+    "countryName": {
+      "de": "Deutschland",
+      "at": "Österreich",
+      "nl": "Niederlande",
+      "cz": "Tschechien"
     }
   },
   "panel": {
@@ -654,7 +661,8 @@
     },
     "tile": {
       "statisticalDefault": "Statistischer Wert"
-    }
+    },
+    "builtIn": "Baujahr {year}"
   },
   "envelope": {
     "compassNorth": "N"

@@ -130,7 +130,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Nie można odczytać pliku profilu obciążenia."
-    }
+    },
+    "uploadSoon": "Przesyłanie zmierzonego profilu będzie dostępne wkrótce."
   },
   "pv": {
     "state": {
@@ -619,6 +620,12 @@
       "at": "AT - Austria",
       "nl": "NL - Holandia",
       "cz": "CZ - Czechy"
+    },
+    "countryName": {
+      "de": "Niemcy",
+      "at": "Austria",
+      "nl": "Holandia",
+      "cz": "Czechy"
     }
   },
   "panel": {
@@ -678,7 +685,8 @@
     },
     "tile": {
       "statisticalDefault": "Wartość statystyczna"
-    }
+    },
+    "builtIn": "Zbudowany w {year}"
   },
   "envelope": {
     "compassNorth": "N"

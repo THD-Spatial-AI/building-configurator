@@ -126,7 +126,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Bestand met belastingprofiel kon niet worden gelezen."
-    }
+    },
+    "uploadSoon": "Het uploaden van een gemeten profiel komt binnenkort."
   },
   "pv": {
     "state": {
@@ -597,6 +598,12 @@
       "at": "AT - Oostenrijk",
       "nl": "NL - Nederland",
       "cz": "CZ - Tsjechië"
+    },
+    "countryName": {
+      "de": "Duitsland",
+      "at": "Oostenrijk",
+      "nl": "Nederland",
+      "cz": "Tsjechië"
     }
   },
   "panel": {
@@ -654,7 +661,8 @@
     },
     "tile": {
       "statisticalDefault": "Statistische waarde"
-    }
+    },
+    "builtIn": "Bouwjaar {year}"
   },
   "envelope": {
     "compassNorth": "N"

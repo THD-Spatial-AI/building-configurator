@@ -10,6 +10,8 @@ describe('BuildingDetailsCard building data', () => {
   it('shows the building as tiles, the storeys as modelled', () => {
     const html = renderToStaticMarkup(<BuildingDetailsCard snapshotRows={rows} />);
     expect(html).toContain('2 of 3');
+    expect(html).toContain('Built in 2015');
+    expect(html).toContain('Germany');
     expect(html).not.toContain('<table');
     expect(html).not.toContain('Occupants per dwelling');
   });

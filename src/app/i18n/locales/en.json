@@ -126,7 +126,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Could not parse load profile file."
-    }
+    },
+    "uploadSoon": "Uploading a measured profile is coming soon."
   },
   "pv": {
     "state": {
@@ -597,6 +598,12 @@
       "at": "AT - Austria",
       "nl": "NL - Netherlands",
       "cz": "CZ - Czechia"
+    },
+    "countryName": {
+      "de": "Germany",
+      "at": "Austria",
+      "nl": "Netherlands",
+      "cz": "Czechia"
     }
   },
   "panel": {
@@ -654,7 +661,8 @@
     },
     "tile": {
       "statisticalDefault": "Statistical default"
-    }
+    },
+    "builtIn": "Built in {year}"
   },
   "envelope": {
     "compassNorth": "N"
