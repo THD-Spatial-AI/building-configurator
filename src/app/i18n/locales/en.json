@@ -182,7 +182,7 @@
       "title": "PV on this building"
     },
     "surfaces": {
-      "toggle": "Surfaces with PV ({installed} of {total})"
+      "toggle": "Available surfaces for PV ({installed} of {total} with PV)"
     },
     "cost": {
       "investment": "Investment",
@@ -295,7 +295,7 @@
       "dwellingsNotSet": "Dwellings not set",
       "perDwelling": "{dwellings} · {persons} per dwelling"
     },
-    "insulationTitle": "Insulation and windows",
+    "insulationTitle": "Energy grade",
     "expertMore": {
       "title": "Thermal and simulation",
       "detail": "profiles, equipment and solver keep their defaults"

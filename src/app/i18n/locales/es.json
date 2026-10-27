@@ -184,7 +184,7 @@
       "title": "FV en este edificio"
     },
     "surfaces": {
-      "toggle": "Superficies con FV ({installed} de {total})"
+      "toggle": "Superficies disponibles para FV ({installed} de {total} con FV)"
     },
     "cost": {
       "investment": "Inversión",
@@ -298,7 +298,7 @@
       "dwellingsNotSet": "Viviendas sin definir",
       "perDwelling": "{dwellings} · {persons} por vivienda"
     },
-    "insulationTitle": "Aislamiento y ventanas",
+    "insulationTitle": "Nivel energético",
     "expertMore": {
       "title": "Térmica y simulación",
       "detail": "los perfiles, los equipos y el solver mantienen sus valores por defecto"

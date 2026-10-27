@@ -182,7 +182,7 @@
       "title": "FV su questo edificio"
     },
     "surfaces": {
-      "toggle": "Superfici con FV ({installed} di {total})"
+      "toggle": "Superfici disponibili per il FV ({installed} di {total} con FV)"
     },
     "cost": {
       "investment": "Investimento",
@@ -295,7 +295,7 @@
       "dwellingsNotSet": "Alloggi non impostati",
       "perDwelling": "{dwellings} · {persons} per alloggio"
     },
-    "insulationTitle": "Isolamento e finestre",
+    "insulationTitle": "Livello energetico",
     "expertMore": {
       "title": "Termica e simulazione",
       "detail": "profili, apparecchi e solutore mantengono i valori predefiniti"

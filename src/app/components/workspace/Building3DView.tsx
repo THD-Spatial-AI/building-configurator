@@ -40,7 +40,7 @@ import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
-import { fittedPvIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
+import { fittedPvIds, pvAvailableIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
@@ -125,6 +125,13 @@ export function Building3DView({
     [layouts],
   );
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
+  /** The surfaces on which some PV option fits a whole module; the rest are not offered for PV. */
+  const pvAvailable = useMemo(() => {
+    if (!pv) return undefined;
+    const fallback = pv.module ?? DEFAULT_PV_MODULE;
+    const modules = pv.catalogue?.length ? pv.catalogue.map((product) => productModule(product, fallback)) : [fallback];
+    return pvAvailableIds(geometry?.surfaces ?? [], pv.surfaces, modules);
+  }, [pv, geometry]);
   // A surface with PV on that fits no whole module is neither drawn as PV nor run.
   const installedPvIds = useMemo(() => (pv ? fittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
   const installedPvSet = useMemo(() => new Set(installedPvIds), [installedPvIds]);
@@ -581,6 +588,7 @@ export function Building3DView({
               technologySlot={pv || technologies ? (
                 <TechnologiesTab
                   pv={pv}
+                  available={pvAvailable}
                   technologies={technologies}
                   elements={elements}
                   layouts={layouts}

@@ -112,6 +112,23 @@ export function pvLayouts(
   return layouts;
 }
 
+/**
+ * The surfaces that can take PV: those on which at least one of `modules`
+ * fits a whole module with the surface's own settings. A surface without a
+ * polygon is kept, since its fit is not known.
+ */
+export function pvAvailableIds(
+  polygons: readonly SurfacePolygon[],
+  surfaces: Readonly<Record<string, PvLayoutOptions>>,
+  modules: readonly PvModule[],
+): Set<string> {
+  const byId = new Map(polygons.map((polygon) => [polygon.id, polygon]));
+  return new Set(Object.keys(surfaces).filter((id) => {
+    const polygon = byId.get(id);
+    return !polygon || modules.some((module) => pvLayout(polygon, module, surfaces[id]).count > 0);
+  }));
+}
+
 /** Adds b to a, where a stays undefined until some value is added. */
 const add = (a: number | undefined, b: number | undefined) => (b === undefined ? a : (a ?? 0) + b);
 

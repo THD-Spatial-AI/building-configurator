@@ -182,7 +182,7 @@
       "title": "PV op dit gebouw"
     },
     "surfaces": {
-      "toggle": "Vlakken met PV ({installed} van {total})"
+      "toggle": "Beschikbare vlakken voor PV ({installed} van {total} met PV)"
     },
     "cost": {
       "investment": "Investering",
@@ -295,7 +295,7 @@
       "dwellingsNotSet": "Woningen niet ingesteld",
       "perDwelling": "{dwellings} · {persons} per woning"
     },
-    "insulationTitle": "Isolatie en ramen",
+    "insulationTitle": "Energieniveau",
     "expertMore": {
       "title": "Thermiek en simulatie",
       "detail": "profielen, apparatuur en solver houden hun standaardwaarden"

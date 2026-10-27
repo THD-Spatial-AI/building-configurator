@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fittedPvIds, installedByProduct, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
+import { fittedPvIds, installedByProduct, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -131,5 +131,14 @@ describe('pvLayouts', () => {
   it('takes each surface\'s own module where a function gives one per surface', () => {
     const layouts = pvLayouts([flat], { f: { usableShare: 1, mounting: { kind: 'flush' } } }, () => ({ width: 2, height: 2, kwp: 1 }));
     expect(layouts.f.kwp).toBe(layouts.f.count);
+  });
+
+  it('offers a surface for PV only when some module fits on it, and keeps one it cannot check', () => {
+    const tiny: SurfacePolygon = { id: 't', type: 'RoofSurface', coordinates: [[[0, 0, 3], [1, 0, 3], [1, 1, 3], [0, 1, 3], [0, 0, 3]]] };
+    const options = { f: { usableShare: 1 }, t: { usableShare: 1 }, unknown: { usableShare: 1 } };
+    const small = { width: 1, height: 1.7, kwp: 0.4 };
+    const large = { width: 2, height: 3, kwp: 1 };
+    expect([...pvAvailableIds([flat, tiny], options, [small, large])].sort()).toEqual(['f', 'unknown']);
+    expect([...pvAvailableIds([flat, tiny], options, [])].sort()).toEqual(['unknown']);
   });
 });

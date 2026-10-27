@@ -186,7 +186,7 @@
       "title": "PV na tym budynku"
     },
     "surfaces": {
-      "toggle": "Powierzchnie z PV ({installed} z {total})"
+      "toggle": "Powierzchnie dostępne dla PV ({installed} z {total} z PV)"
     },
     "cost": {
       "investment": "Inwestycja",
@@ -311,7 +311,7 @@
       "dwellingsNotSet": "Nie podano mieszkań",
       "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
     },
-    "insulationTitle": "Izolacja i okna",
+    "insulationTitle": "Standard energetyczny",
     "expertMore": {
       "title": "Cieplne i symulacja",
       "detail": "profile, urządzenia i solver zachowują wartości domyślne"

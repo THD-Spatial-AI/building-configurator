@@ -21,8 +21,20 @@ const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'
 /** Plain-language labels for the constraints basic mode asks; others show the catalogue's own name. */
 const QUESTION_KEYS = new Set(['cost_energy_cap', 'cost_om_annual', 'cont_lifetime']);
 
+/** The surfaces offered for PV: those some option fits on, and any with PV on. */
+function offeredIds(pv: PvMode, available: ReadonlySet<string> | undefined): string[] {
+  return Object.entries(pv.surfaces)
+    .filter(([id, surface]) => !available || available.has(id) || surface.state === 'installed')
+    .map(([id]) => id);
+}
+
 /** Capacity, surfaces with PV, investment and yearly O&M, as tiles. */
-function Totals({ pv, elements, layouts }: { pv: PvMode; elements: Record<string, BuildingElement>; layouts: Readonly<Record<string, PvLayout>> }) {
+function Totals({ pv, available, elements, layouts }: {
+  pv: PvMode;
+  available?: ReadonlySet<string>;
+  elements: Record<string, BuildingElement>;
+  layouts: Readonly<Record<string, PvLayout>>;
+}) {
   const t = useT();
   const format = useFormatNumber();
   const summary = pvSummary(pv.surfaces, elements, layouts, (id) => surfaceProduct(pv, id));
@@ -30,7 +42,7 @@ function Totals({ pv, elements, layouts }: { pv: PvMode; elements: Record<string
   const money = (value: number) => `${format(value, 0)} ${currency}`.trim();
   const tiles = [
     [`${format(summary.kwp, 1)} kWp`, t('pv.summary.capacity')],
-    [t('pv.summary.count', { installed: summary.installed, total: summary.total }), t('pv.summary.surfaces')],
+    [t('pv.summary.count', { installed: summary.installed, total: offeredIds(pv, available).length }), t('pv.summary.surfaces')],
     ...(summary.investment === undefined ? [] : [[money(summary.investment), t('pv.cost.investment')]]),
     ...(summary.omPerYear === undefined ? [] : [[money(summary.omPerYear), t('pv.cost.omPerYear')]]),
   ];
@@ -49,16 +61,18 @@ function Totals({ pv, elements, layouts }: { pv: PvMode; elements: Record<string
   );
 }
 
-/** Every surface that takes PV with its switch, collapsed by default since the list can be long. */
-function SurfaceList({ pv, elements, layouts, onSelect }: {
+/** Every surface some PV option fits on, with its switch, collapsed by default since the list can be long. */
+function SurfaceList({ pv, available, elements, layouts, onSelect }: {
   pv: PvMode;
+  available?: ReadonlySet<string>;
   elements: Record<string, BuildingElement>;
   layouts: Readonly<Record<string, PvLayout>>;
   onSelect: (surfaceId: string) => void;
 }) {
   const t = useT();
   const format = useFormatNumber();
-  const entries = Object.entries(pv.surfaces);
+  const offered = new Set(offeredIds(pv, available));
+  const entries = Object.entries(pv.surfaces).filter(([id]) => offered.has(id));
   const installedCount = fittedPvIds(pv.surfaces, layouts).length;
   const suggestedIds = entries.filter(([, s]) => s.state === 'suggested').map(([id]) => id);
   const ordered = STATE_ORDER.flatMap((state) => entries
@@ -328,8 +342,10 @@ export function ProductValues({ pv, product, mode }: { pv: PvMode; product: Tech
 }
 
 /** The PV block of the Technologies tab. */
-export function PvOverview({ pv, elements, layouts = {}, mode, onSelect, framed = false }: {
+export function PvOverview({ pv, available, elements, layouts = {}, mode, onSelect, framed = false }: {
   pv: PvMode;
+  /** The surfaces some PV option fits on; without it every surface the host offers. */
+  available?: ReadonlySet<string>;
   elements: Record<string, BuildingElement>;
   /** Module layouts of the surfaces the view has polygons for. */
   layouts?: Readonly<Record<string, PvLayout>>;
@@ -350,10 +366,10 @@ export function PvOverview({ pv, elements, layouts = {}, mode, onSelect, framed 
           </p>
         </div>
       )}
-      <Totals pv={pv} elements={elements} layouts={layouts} />
+      <Totals pv={pv} available={available} elements={elements} layouts={layouts} />
       <Installed pv={pv} layouts={layouts} mode={mode} />
       <Catalogue pv={pv} />
-      <SurfaceList pv={pv} elements={elements} layouts={layouts} onSelect={onSelect} />
+      <SurfaceList pv={pv} available={available} elements={elements} layouts={layouts} onSelect={onSelect} />
       <p className="text-[11px] leading-snug text-muted-foreground">{pv.notice}</p>
     </section>
   );

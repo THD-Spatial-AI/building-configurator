@@ -186,7 +186,7 @@
       "title": "FV na této budově"
     },
     "surfaces": {
-      "toggle": "Plochy s FV ({installed} z {total})"
+      "toggle": "Plochy vhodné pro FV ({installed} z {total} s FV)"
     },
     "cost": {
       "investment": "Investice",
@@ -311,7 +311,7 @@
       "dwellingsNotSet": "Počet bytů nenastaven",
       "perDwelling": "{dwellings} · {persons} na byt"
     },
-    "insulationTitle": "Izolace a okna",
+    "insulationTitle": "Energetická úroveň",
     "expertMore": {
       "title": "Tepelné vlastnosti a simulace",
       "detail": "profily, spotřebiče a řešič si ponechávají výchozí hodnoty"

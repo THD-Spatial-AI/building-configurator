@@ -182,7 +182,7 @@
       "title": "PV auf diesem Gebäude"
     },
     "surfaces": {
-      "toggle": "Flächen mit PV ({installed} von {total})"
+      "toggle": "Für PV geeignete Flächen ({installed} von {total} mit PV)"
     },
     "cost": {
       "investment": "Investition",
@@ -295,7 +295,7 @@
       "dwellingsNotSet": "Wohneinheiten nicht gesetzt",
       "perDwelling": "{dwellings} · {persons} je Wohneinheit"
     },
-    "insulationTitle": "Dämmung und Fenster",
+    "insulationTitle": "Energetischer Standard",
     "expertMore": {
       "title": "Thermik und Simulation",
       "detail": "Profile, Geräte und Löser behalten ihre Standardwerte"
