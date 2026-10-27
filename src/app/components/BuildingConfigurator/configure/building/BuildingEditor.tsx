@@ -3,117 +3,25 @@
 import { useState } from 'react';
 import { ChevronDown } from '@/app/components/icons';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
-import {
-  SelectInput, NumberInput, FieldLabel,
-  ToggleSwitch, FieldRow,
-} from '@/app/components/BuildingConfigurator/shared/ui';
+import { ToggleSwitch } from '@/app/components/BuildingConfigurator/shared/ui';
 import { SectionCard } from '@/app/components/BuildingConfigurator/shared/SectionCard';
 import { TOPICS, type Topic } from '@/app/config/topics';
 import { cn } from '@/lib/utils';
 import {
   BUILDING_TYPE_LABELS,
-  MIN_CONSTRUCTION_YEAR,
   OUTPUT_PROFILES,
   buildingTypeName,
-  buildingTypeOptions,
-  countryOptions,
   isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
 import { ComfortSection, comfortSummary } from './comfortSection';
 import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
-import { computeTotalFloorArea, computeVolume } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
 // Insulation and windows is not one of these: it stays open (see BuildingEditor).
-type SectionKey = 'identity' | 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
+type SectionKey = 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
 
 // ─── Section components ───────────────────────────────────────────────────────
-
-/** Building identity fields — synced with the overview snapshot panel. */
-function IdentitySection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
-  const t = useT();
-  const format = useFormatNumber();
-  const volume = format(computeVolume(general.floorArea, general.storeys, general.roomHeight), 0);
-  return (
-    <div className="flex flex-col gap-3">
-      <div>
-        <FieldLabel tip={t('editor.identity.name.tip')}>
-          {t('editor.identity.name.label')}
-        </FieldLabel>
-        <input
-          type="text"
-          value={general.buildingName ?? ''}
-          onChange={(e) => setGen('buildingName', e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-          placeholder={t('editor.identity.name.placeholder')}
-          className="cfg-input w-full"
-        />
-      </div>
-      <SelectInput
-        label={t('editor.identity.type.label')}
-        value={general.buildingType}
-        onChange={(v) => setGen('buildingType', v)}
-        options={buildingTypeOptions(t)}
-        tip={t('editor.identity.type.tip')}
-      />
-      <FieldRow>
-        <SelectInput
-          label={t('editor.identity.country.label')}
-          value={general.country}
-          onChange={(v) => setGen('country', v)}
-          options={countryOptions(t)}
-          tip={t('editor.identity.country.tip')}
-        />
-        <NumberInput
-          label={t('editor.identity.year.label')}
-          value={general.constructionYear}
-          onChange={(v) => setGen('constructionYear', Math.round(v))}
-          unit="" min={MIN_CONSTRUCTION_YEAR} max={new Date().getFullYear()} step={1}
-          tip={t('editor.identity.year.tip')}
-        />
-      </FieldRow>
-      <FieldRow>
-        <div>
-          <FieldLabel tip={t('editor.identity.floorArea.tip')}>
-            {t('editor.identity.floorArea.label')}
-          </FieldLabel>
-          <NumberInput
-            value={general.floorArea}
-            onChange={(v) => setGen('floorArea', Math.max(1, v))}
-            unit="m²" min={1} max={50000} step={1}
-          />
-        </div>
-        <div>
-          <FieldLabel tip={t('editor.identity.storeys.tip')}>
-            {t('editor.identity.storeys.label')}
-          </FieldLabel>
-          <NumberInput
-            value={general.storeys}
-            onChange={(v) => setGen('storeys', Math.max(1, Math.round(v)))}
-            unit="" min={1} max={50} step={1}
-          />
-        </div>
-      </FieldRow>
-      <div>
-        <FieldLabel tip={t('editor.identity.roomHeight.tip')}>
-          {t('editor.identity.roomHeight.label')}
-        </FieldLabel>
-        <NumberInput
-          value={general.roomHeight}
-          onChange={(v) => setGen('roomHeight', Math.max(1.5, v))}
-          unit="m" min={1.5} max={10} step={0.1}
-        />
-      </div>
-      <div className="flex items-center justify-between border-t border-border/60 pt-1">
-        <span className="text-[11px] text-muted-foreground">{t('editor.identity.volume')}</span>
-        <span className="text-xs font-semibold text-foreground">
-          {volume} <span className="text-[10px] font-normal text-muted-foreground">m³</span>
-        </span>
-      </div>
-    </div>
-  );
-}
 
 function SolverSection({ general, setGen }: { general: Record<string, any>; setGen: (k: string, v: any) => void }) {
   const t = useT();
@@ -177,7 +85,6 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
 
 /** Each section's topic: the building's own data in slate, heating in its carrier's colour, appliances in electricity's. */
 const SECTION_TOPICS: Record<SectionKey, Topic> = {
-  identity:    TOPICS.building,
   occupancy:   TOPICS.building,
   comfort:     TOPICS.heat,
   outputs:     TOPICS.building,
@@ -185,11 +92,10 @@ const SECTION_TOPICS: Record<SectionKey, Topic> = {
   solver:      TOPICS.building,
 };
 
-const BASIC_SECTIONS: SectionKey[] = ['identity', 'occupancy', 'comfort'];
+const BASIC_SECTIONS: SectionKey[] = ['occupancy', 'comfort'];
 const EXPERT_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
 
 const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
-  identity:    (t) => t('editor.section.identity'),
   occupancy:   (t) => t('editor.section.occupancy'),
   comfort:     (t) => t('editor.section.comfort'),
   outputs:     (t) => t('editor.section.outputs'),
@@ -200,7 +106,6 @@ const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
 /** One-line value summary shown on the grid card and chip. */
 function sectionSummary(t: Translate, format: FormatNumber, key: SectionKey, general: Record<string, any>): string {
   switch (key) {
-    case 'identity':    return `${buildingTypeName(t, general.buildingType)} · ${format(computeTotalFloorArea(general.floorArea, general.storeys), 0)} m²`;
     case 'occupancy':   return occupancySummary(t, format, general);
     case 'comfort':     return comfortSummary(t, format, general);
     case 'outputs':     return t('editor.summary.outputs', {
@@ -234,7 +139,6 @@ function SectionBody({
   mode: 'basic' | 'expert';
 }) {
   switch (id) {
-    case 'identity':    return <IdentitySection    general={general} setGen={setGen} />;
     case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} />;
     case 'comfort':     return <ComfortSection     general={general} setGen={setGen} mode={mode} />;
     case 'outputs':     return <OutputsSection     general={general} setGen={setGen} />;
@@ -251,8 +155,6 @@ interface BuildingEditorProps {
   mode: 'basic' | 'expert';
   /** The Insulation and windows group's model; without it the group is not shown. */
   insulation?: InsulationProps;
-  /** Hides the Basic Info tab — used when the caller already renders those fields elsewhere (the snapshot table's inline edit). */
-  hideIdentity?: boolean;
 }
 
 /**
@@ -264,7 +166,6 @@ interface BuildingEditorProps {
 export function BuildingEditor({
   general, setGen, mode,
   insulation,
-  hideIdentity = false,
 }: BuildingEditorProps) {
   const t = useT();
   const format = useFormatNumber();
@@ -272,7 +173,7 @@ export function BuildingEditor({
 
   const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert' ? [...BASIC_SECTIONS, ...EXPERT_SECTIONS] : BASIC_SECTIONS)
-    .filter((key) => (!hideIdentity || key !== 'identity') && (!service || key !== 'equipment'));
+    .filter((key) => !service || key !== 'equipment');
 
   return (
     <div className="flex flex-col gap-3">

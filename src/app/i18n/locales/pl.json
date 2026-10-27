@@ -247,38 +247,6 @@
     "remove": "Usuń {title}"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Nazwa budynku",
-        "tip": "Czytelna nazwa budynku. Dołączana do eksportowanych plików.",
-        "placeholder": "np. 3434 · Dom jednorodzinny"
-      },
-      "type": {
-        "label": "Typ budynku",
-        "tip": "Kategoria budynku TABULA. Wpływa na domyślne współczynniki U i referencyjne zapotrzebowanie na energię."
-      },
-      "country": {
-        "label": "Kraj",
-        "tip": "Kraj służący do wyboru danych referencyjnych TABULA i stacji pogodowej COSMO."
-      },
-      "year": {
-        "label": "Rok budowy",
-        "tip": "Rok wybudowania budynku. ignis przypisuje go do okresu budowy TABULA, z którego pobiera domyślne współczynniki U."
-      },
-      "floorArea": {
-        "label": "Powierzchnia (na kondygnację)",
-        "tip": "Powierzchnia rzutu jednej kondygnacji; całkowita powierzchnia ogrzewana to ta wartość × liczba kondygnacji."
-      },
-      "storeys": {
-        "label": "Kondygnacje",
-        "tip": "Liczba kondygnacji nadziemnych."
-      },
-      "roomHeight": {
-        "label": "Wysokość pomieszczeń",
-        "tip": "Wysokość wewnętrzna w świetle na kondygnację. Służy do obliczenia kubatury ogrzewanej."
-      },
-      "volume": "Kubatura ogrzewana"
-    },
     "solver": {
       "useMilp": {
         "label": "Użyj solwera MILP",
@@ -296,7 +264,6 @@
       "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna."
     },
     "section": {
-      "identity": "Dane podstawowe",
       "occupancy": "Mieszkańcy",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",

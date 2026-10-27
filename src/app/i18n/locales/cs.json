@@ -247,38 +247,6 @@
     "remove": "Odebrat {title}"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Název budovy",
-        "tip": "Čitelný název této budovy. Je součástí exportovaných souborů.",
-        "placeholder": "např. 3434 · Rodinný dům"
-      },
-      "type": {
-        "label": "Typ budovy",
-        "tip": "Kategorie budovy podle TABULA. Ovlivňuje výchozí součinitele U a referenční průběhy potřeby energie."
-      },
-      "country": {
-        "label": "Země",
-        "tip": "Země pro výběr referenčních dat TABULA a meteorologické stanice COSMO."
-      },
-      "year": {
-        "label": "Rok výstavby",
-        "tip": "Rok, kdy byla budova postavena. ignis jej přiřadí k období výstavby TABULA pro výchozí součinitele U."
-      },
-      "floorArea": {
-        "label": "Podlahová plocha (na podlaží)",
-        "tip": "Půdorysná plocha jednoho podlaží; celková vytápěná podlahová plocha je tato hodnota × počet podlaží."
-      },
-      "storeys": {
-        "label": "Podlaží",
-        "tip": "Počet nadzemních podlaží."
-      },
-      "roomHeight": {
-        "label": "Světlá výška",
-        "tip": "Světlá výška každého podlaží. Slouží k výpočtu vytápěného objemu vzduchu."
-      },
-      "volume": "Vytápěný objem"
-    },
     "solver": {
       "useMilp": {
         "label": "Použít řešič MILP",
@@ -296,7 +264,6 @@
       "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná."
     },
     "section": {
-      "identity": "Základní údaje",
       "occupancy": "Obsazenost",
       "comfort": "Vytápění a komfort",
       "outputs": "Počítané výsledky",

@@ -239,38 +239,6 @@
     "remove": "Remove {title}"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Building name",
-        "tip": "Human-readable name for this building. Included in exported files.",
-        "placeholder": "e.g. 3434 · Single-family House"
-      },
-      "type": {
-        "label": "Building type",
-        "tip": "TABULA building category. Affects default U-values and reference energy demand patterns."
-      },
-      "country": {
-        "label": "Country",
-        "tip": "Country used to select TABULA reference data and COSMO weather station."
-      },
-      "year": {
-        "label": "Construction year",
-        "tip": "Year the building was built. ignis maps it to a TABULA construction-period band for the default U-value lookup."
-      },
-      "floorArea": {
-        "label": "Floor area (per storey)",
-        "tip": "Footprint area of a single storey. The total conditioned floor area is this × storeys."
-      },
-      "storeys": {
-        "label": "Storeys",
-        "tip": "Number of above-ground storeys."
-      },
-      "roomHeight": {
-        "label": "Room height",
-        "tip": "Clear internal height per storey. Used to compute the heated air volume."
-      },
-      "volume": "Heated volume"
-    },
     "solver": {
       "useMilp": {
         "label": "Use MILP solver",
@@ -288,7 +256,6 @@
       "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached."
     },
     "section": {
-      "identity": "Basic info",
       "occupancy": "Occupancy",
       "comfort": "Heating and comfort",
       "outputs": "Results to compute",

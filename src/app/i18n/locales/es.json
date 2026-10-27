@@ -241,38 +241,6 @@
     "remove": "Quitar {title}"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Nombre del edificio",
-        "tip": "Nombre legible del edificio. Se incluye en los archivos exportados.",
-        "placeholder": "p. ej. 3434 · Vivienda unifamiliar"
-      },
-      "type": {
-        "label": "Tipo de edificio",
-        "tip": "Categoría de edificio TABULA. Determina los valores U por defecto y los patrones de demanda de referencia."
-      },
-      "country": {
-        "label": "País",
-        "tip": "País con el que se eligen los datos de referencia TABULA y la estación meteorológica COSMO."
-      },
-      "year": {
-        "label": "Año de construcción",
-        "tip": "Año en que se construyó el edificio. ignis lo asigna a un periodo constructivo TABULA para obtener los valores U por defecto."
-      },
-      "floorArea": {
-        "label": "Superficie (por planta)",
-        "tip": "Superficie en planta de una sola planta; la superficie útil acondicionada total es este valor × plantas."
-      },
-      "storeys": {
-        "label": "Plantas",
-        "tip": "Número de plantas sobre rasante."
-      },
-      "roomHeight": {
-        "label": "Altura libre",
-        "tip": "Altura libre interior por planta. Sirve para calcular el volumen de aire calefactado."
-      },
-      "volume": "Volumen calefactado"
-    },
     "solver": {
       "useMilp": {
         "label": "Usar solver MILP",
@@ -290,7 +258,6 @@
       "noData": "No hay datos TABULA para este edificio: el servicio TABULA no tiene ninguna variante para él o no se pudo contactar."
     },
     "section": {
-      "identity": "Datos básicos",
       "occupancy": "Ocupación",
       "comfort": "Calefacción y confort",
       "outputs": "Resultados a calcular",

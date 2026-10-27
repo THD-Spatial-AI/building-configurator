@@ -239,38 +239,6 @@
     "remove": "Rimuovi {title}"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Nome edificio",
-        "tip": "Nome leggibile dell'edificio. Incluso nei file esportati.",
-        "placeholder": "es. 3434 · Casa unifamiliare"
-      },
-      "type": {
-        "label": "Tipo di edificio",
-        "tip": "Categoria edilizia TABULA. Influisce sui valori U predefiniti e sui fabbisogni energetici di riferimento."
-      },
-      "country": {
-        "label": "Paese",
-        "tip": "Paese usato per scegliere i dati di riferimento TABULA e la stazione meteo COSMO."
-      },
-      "year": {
-        "label": "Anno di costruzione",
-        "tip": "Anno di costruzione dell'edificio. ignis lo associa a un periodo costruttivo TABULA per i valori U predefiniti."
-      },
-      "floorArea": {
-        "label": "Superficie (per piano)",
-        "tip": "Superficie di un singolo piano: la superficie climatizzata totale è questa × piani."
-      },
-      "storeys": {
-        "label": "Piani",
-        "tip": "Numero di piani fuori terra."
-      },
-      "roomHeight": {
-        "label": "Altezza interna",
-        "tip": "Altezza netta interna per piano. Usata per calcolare il volume d'aria riscaldato."
-      },
-      "volume": "Volume riscaldato"
-    },
     "solver": {
       "useMilp": {
         "label": "Usa il solutore MILP",
@@ -288,7 +256,6 @@
       "noData": "Nessun dato TABULA per questo edificio: il servizio TABULA non ha varianti per esso o non è raggiungibile."
     },
     "section": {
-      "identity": "Dati di base",
       "occupancy": "Occupazione",
       "comfort": "Riscaldamento e comfort",
       "outputs": "Risultati da calcolare",

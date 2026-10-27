@@ -241,38 +241,6 @@
     "remove": "Supprimer {title}"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Nom du bâtiment",
-        "tip": "Nom lisible de ce bâtiment. Repris dans les fichiers exportés.",
-        "placeholder": "p. ex. 3434 · Maison individuelle"
-      },
-      "type": {
-        "label": "Type de bâtiment",
-        "tip": "Catégorie de bâtiment TABULA. Influe sur les valeurs U par défaut et les besoins énergétiques de référence."
-      },
-      "country": {
-        "label": "Pays",
-        "tip": "Pays utilisé pour choisir les données de référence TABULA et la station météo COSMO."
-      },
-      "year": {
-        "label": "Année de construction",
-        "tip": "Année de construction du bâtiment. ignis l'associe à une période de construction TABULA pour les valeurs U par défaut."
-      },
-      "floorArea": {
-        "label": "Surface (par niveau)",
-        "tip": "Emprise d'un seul niveau. La surface chauffée totale vaut cette valeur × le nombre de niveaux."
-      },
-      "storeys": {
-        "label": "Niveaux",
-        "tip": "Nombre de niveaux hors sol."
-      },
-      "roomHeight": {
-        "label": "Hauteur sous plafond",
-        "tip": "Hauteur libre intérieure par niveau. Sert au calcul du volume d'air chauffé."
-      },
-      "volume": "Volume chauffé"
-    },
     "solver": {
       "useMilp": {
         "label": "Utiliser le solveur MILP",
@@ -290,7 +258,6 @@
       "noData": "Aucune donnée TABULA pour ce bâtiment : le service TABULA n'a aucune variante pour lui ou est injoignable."
     },
     "section": {
-      "identity": "Infos de base",
       "occupancy": "Occupation",
       "comfort": "Chauffage et confort",
       "outputs": "Résultats à calculer",

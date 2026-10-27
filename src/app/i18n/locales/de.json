@@ -239,38 +239,6 @@
     "remove": "{title} entfernen"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Gebäudename",
-        "tip": "Lesbarer Name für dieses Gebäude. Wird in exportierte Dateien übernommen.",
-        "placeholder": "z. B. 3434 · Einfamilienhaus"
-      },
-      "type": {
-        "label": "Gebäudetyp",
-        "tip": "TABULA-Gebäudekategorie. Beeinflusst Standard-U-Werte und Referenz-Energiebedarf."
-      },
-      "country": {
-        "label": "Land",
-        "tip": "Land zur Auswahl der TABULA-Referenzdaten und der COSMO-Wetterstation."
-      },
-      "year": {
-        "label": "Baujahr",
-        "tip": "Jahr der Errichtung. ignis ordnet es einer TABULA-Baualtersklasse für die Standard-U-Werte zu."
-      },
-      "floorArea": {
-        "label": "Grundfläche (je Geschoss)",
-        "tip": "Grundfläche eines Geschosses; die beheizte Nutzfläche ist dieser Wert × Geschosse."
-      },
-      "storeys": {
-        "label": "Geschosse",
-        "tip": "Anzahl der oberirdischen Geschosse."
-      },
-      "roomHeight": {
-        "label": "Raumhöhe",
-        "tip": "Lichte Raumhöhe je Geschoss. Dient zur Berechnung des beheizten Luftvolumens."
-      },
-      "volume": "Beheiztes Volumen"
-    },
     "solver": {
       "useMilp": {
         "label": "MILP-Solver verwenden",
@@ -288,7 +256,6 @@
       "noData": "Keine TABULA-Daten für dieses Gebäude: Der TABULA-Dienst hat keine Variante dafür oder ist nicht erreichbar."
     },
     "section": {
-      "identity": "Basisdaten",
       "occupancy": "Belegung",
       "comfort": "Heizung und Komfort",
       "outputs": "Zu berechnende Ergebnisse",

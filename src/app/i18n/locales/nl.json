@@ -239,38 +239,6 @@
     "remove": "{title} verwijderen"
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Gebouwnaam",
-        "tip": "Leesbare naam voor dit gebouw. Opgenomen in geëxporteerde bestanden.",
-        "placeholder": "bijv. 3434 · Vrijstaand huis"
-      },
-      "type": {
-        "label": "Gebouwtype",
-        "tip": "TABULA-gebouwcategorie. Bepaalt standaard U-waarden en referentiepatronen van de energievraag."
-      },
-      "country": {
-        "label": "Land",
-        "tip": "Land voor de keuze van TABULA-referentiedata en het COSMO-weerstation."
-      },
-      "year": {
-        "label": "Bouwjaar",
-        "tip": "Jaar waarin het gebouw is gebouwd. ignis koppelt het aan een TABULA-bouwperiode voor de standaard U-waarden."
-      },
-      "floorArea": {
-        "label": "Vloeroppervlakte (per verdieping)",
-        "tip": "Oppervlakte van één verdieping; de totale verwarmde vloeroppervlakte is deze × verdiepingen."
-      },
-      "storeys": {
-        "label": "Verdiepingen",
-        "tip": "Aantal bovengrondse verdiepingen."
-      },
-      "roomHeight": {
-        "label": "Verdiepingshoogte",
-        "tip": "Vrije binnenhoogte per verdieping. Gebruikt om het verwarmde luchtvolume te berekenen."
-      },
-      "volume": "Verwarmd volume"
-    },
     "solver": {
       "useMilp": {
         "label": "MILP-solver gebruiken",
@@ -288,7 +256,6 @@
       "noData": "Geen TABULA-data gevonden voor dit gebouw: de TABULA-service heeft er geen variant voor of was niet bereikbaar."
     },
     "section": {
-      "identity": "Basisgegevens",
       "occupancy": "Bewoning",
       "comfort": "Verwarming en comfort",
       "outputs": "Te berekenen resultaten",

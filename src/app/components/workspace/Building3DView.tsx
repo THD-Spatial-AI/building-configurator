@@ -561,7 +561,6 @@ export function Building3DView({
                         classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
                       } : {}),
                     }}
-                    hideIdentity
                   />
                 </div>
               )}
