@@ -31,10 +31,6 @@
     "loadingGeometry": "Flächengeometrie wird geladen…",
     "detached": "Die gespeicherten Flächen dieses Gebäudes stammen aus einer früheren City2TABULA-Generierung und passen zu keinen aktuellen 3D-Daten. Die gespeicherten Werte gelten weiterhin; das Modell wird nicht angezeigt.",
     "noGeometry": "City2TABULA enthält keine 3D-Geometrie für dieses Gebäude.",
-    "invalidSurfaces": {
-      "one": "{count} Fläche ohne Flächeninhalt, wird in der Simulation ausgelassen",
-      "other": "{count} Flächen ohne Flächeninhalt, werden in der Simulation ausgelassen"
-    },
     "run": {
       "working": "Energie wird berechnet…",
       "start": "Speichern & Energiebedarf anzeigen"
@@ -466,24 +462,6 @@
         "tip": "Anteil der Sonneneinstrahlung auf diese Fenster, der als Wärme eintritt. Standard: der TABULA-Wert für den Gebäudetyp, sonst 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Wand",
-        "floor": "Boden",
-        "roof": "Dach"
-      },
-      "button": {
-        "wall": "Wand hinzufügen",
-        "floor": "Boden hinzufügen",
-        "roof": "Dach hinzufügen"
-      },
-      "title": "Fläche hinzufügen",
-      "note": "Für eine Fläche, die die 3D-Daten nicht zeigen, etwa eine erdberührte Wand (Reduktionsfaktor etwa 0,5) oder einen Boden über einer offenen Durchfahrt (1). Sie erscheint im Tab Gebäudehülle, nicht im Modell.",
-      "typeLabel": "Typ",
-      "name": "Name",
-      "namePlaceholder": "z. B. Kellerwand",
-      "area": "Fläche"
-    },
     "variant": {
       "full": {
         "existing": "Ist-Zustand",
@@ -710,13 +688,6 @@
         "floor": "Gelöschter Boden",
         "door": "Gelöschte Tür",
         "surface": "Gelöschte Fläche"
-      },
-      "added": {
-        "wall": "Hinzugefügte Wand",
-        "window": "Hinzugefügtes Fenster",
-        "roof": "Hinzugefügtes Dach",
-        "floor": "Hinzugefügter Boden",
-        "door": "Hinzugefügte Tür"
       }
     },
     "error": {

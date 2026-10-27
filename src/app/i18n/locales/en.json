@@ -31,10 +31,6 @@
     "loadingGeometry": "Loading surface geometry…",
     "detached": "This building's saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.",
     "noGeometry": "City2TABULA holds no 3D geometry for this building.",
-    "invalidSurfaces": {
-      "one": "{count} surface with no area, left out of a simulation",
-      "other": "{count} surfaces with no area, left out of a simulation"
-    },
     "run": {
       "working": "Working out the energy…",
       "start": "Save & Preview Energy Demand"
@@ -466,24 +462,6 @@
         "tip": "Share of the sunlight on those windows that enters as heat. Default: the TABULA value for the building type, else 0.5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Wall",
-        "floor": "Floor",
-        "roof": "Roof"
-      },
-      "button": {
-        "wall": "Add wall",
-        "floor": "Add floor",
-        "roof": "Add roof"
-      },
-      "title": "Add a surface",
-      "note": "For a surface the 3D data does not show, such as a wall against ground (loss factor about 0.5) or a floor over an open passage (1). It is listed in the Envelope tab, not drawn in the model.",
-      "typeLabel": "Type",
-      "name": "Name",
-      "namePlaceholder": "e.g. Basement wall",
-      "area": "Area"
-    },
     "variant": {
       "full": {
         "existing": "Existing state",
@@ -710,13 +688,6 @@
         "floor": "deleted floor",
         "door": "deleted door",
         "surface": "deleted surface"
-      },
-      "added": {
-        "wall": "added wall",
-        "window": "added window",
-        "roof": "added roof",
-        "floor": "added floor",
-        "door": "added door"
       }
     },
     "error": {

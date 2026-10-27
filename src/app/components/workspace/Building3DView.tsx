@@ -524,12 +524,6 @@ export function Building3DView({
           )}
 
           <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
-            {invalidIds.size > 0 && (
-              <div className="flex items-center gap-1.5 rounded-md bg-card/90 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm">
-                <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-                {t('view.invalidSurfaces', { count: invalidIds.size })}
-              </div>
-            )}
             {onTech && unfittedPv.length > 0 && (
               <div role="alert" className="flex max-w-[360px] items-start gap-1.5 rounded-md border border-destructive/30 bg-card/95 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-destructive shadow-sm">
                 <AlertTriangle className="mt-px size-3.5 shrink-0" />
@@ -640,7 +634,6 @@ export function Building3DView({
                       onSetState: model.setRefurbishment,
                       onSetTypeUValue: model.setTypeUValue,
                       onSetTypeLossFactor: model.setTypeLossFactor,
-                      onAddSurface: (type, values) => { model.createSurface(type, values); },
                       ...(model.canCompareLevels ? {
                         classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
                       } : {}),

@@ -26,12 +26,13 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - Building data shows as tiles (type, country and year, storeys, room height, floor area, dwellings, occupants, volume); Edit switches to the editable table. A dashed card in Basic points to the Expert sections.
 - A section opens from a click anywhere on its header.
 - A surface's tilt and facing are edited in Expert only. PV takes its geometry from the 3D model, not from these edits.
-- The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals and the warning about surfaces a simulation would reject.
+- The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals.
 - "Results to compute" moves to Expert.
 
 ### Removed
 
 - The Envelope tab and its surface groups list, the building editor's identity section and the unused thermal rating.
+- The Expert option to add a surface, which 3D city data has no use for, and the note over the model counting surfaces with no area.
 
 ### Fixed
 

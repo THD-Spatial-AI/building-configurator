@@ -32,11 +32,6 @@
     "loadingGeometry": "Chargement de la géométrie…",
     "detached": "Les surfaces enregistrées de ce bâtiment proviennent d'une génération City2TABULA antérieure et ne correspondent plus aux données 3D actuelles. Les valeurs enregistrées restent valables ; le modèle n'est pas affiché.",
     "noGeometry": "City2TABULA ne contient aucune géométrie 3D pour ce bâtiment.",
-    "invalidSurfaces": {
-      "one": "{count} surface sans aire, exclue de la simulation",
-      "many": "{count} de surfaces sans aire, exclues de la simulation",
-      "other": "{count} surfaces sans aire, exclues de la simulation"
-    },
     "run": {
       "working": "Calcul de l'énergie…",
       "start": "Enregistrer et estimer les besoins"
@@ -471,24 +466,6 @@
         "tip": "Part du rayonnement solaire sur ces fenêtres qui entre sous forme de chaleur. Par défaut : la valeur TABULA du type de bâtiment, sinon 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Mur",
-        "floor": "Plancher",
-        "roof": "Toiture"
-      },
-      "button": {
-        "wall": "Ajouter un mur",
-        "floor": "Ajouter un plancher",
-        "roof": "Ajouter une toiture"
-      },
-      "title": "Ajouter une surface",
-      "note": "Pour une surface absente des données 3D, comme un mur contre terre (coefficient b env. 0,5) ou un plancher sur passage ouvert (1). Elle figure dans l'onglet Enveloppe, sans être dessinée dans le modèle.",
-      "typeLabel": "Type",
-      "name": "Nom",
-      "namePlaceholder": "p. ex. Mur de sous-sol",
-      "area": "Aire"
-    },
     "variant": {
       "full": {
         "existing": "État existant",
@@ -716,13 +693,6 @@
         "floor": "la suppression du plancher",
         "door": "la suppression de la porte",
         "surface": "la suppression de la surface"
-      },
-      "added": {
-        "wall": "l'ajout du mur",
-        "window": "l'ajout de la fenêtre",
-        "roof": "l'ajout de la toiture",
-        "floor": "l'ajout du plancher",
-        "door": "l'ajout de la porte"
       }
     },
     "error": {

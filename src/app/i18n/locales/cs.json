@@ -33,12 +33,6 @@
     "loadingGeometry": "Načítání geometrie ploch…",
     "detached": "Uložené plochy této budovy pocházejí ze starší generace City2TABULA, takže žádná neodpovídá aktuálním 3D datům. Uložené hodnoty stále platí; model se nezobrazuje.",
     "noGeometry": "City2TABULA nemá pro tuto budovu žádnou 3D geometrii.",
-    "invalidSurfaces": {
-      "one": "{count} plocha s nulovou výměrou, vynechána ze simulace",
-      "few": "{count} plochy s nulovou výměrou, vynechány ze simulace",
-      "many": "{count} plochy s nulovou výměrou, vynechány ze simulace",
-      "other": "{count} ploch s nulovou výměrou, vynechány ze simulace"
-    },
     "run": {
       "working": "Výpočet energie…",
       "start": "Uložit a zobrazit potřebu energie"
@@ -488,24 +482,6 @@
         "tip": "Podíl slunečního záření dopadajícího na tato okna, který vstupuje jako teplo. Výchozí: hodnota TABULA pro typ budovy, jinak 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Stěna",
-        "floor": "Podlaha",
-        "roof": "Střecha"
-      },
-      "button": {
-        "wall": "Přidat stěnu",
-        "floor": "Přidat podlahu",
-        "roof": "Přidat střechu"
-      },
-      "title": "Přidat plochu",
-      "note": "Pro plochu, kterou 3D data nezobrazují, např. stěnu přilehlou k zemině (redukční činitel asi 0,5) nebo podlahu nad otevřeným průjezdem (1). Je uvedena na kartě Obálka, v modelu se nevykresluje.",
-      "typeLabel": "Typ",
-      "name": "Název",
-      "namePlaceholder": "např. Suterénní stěna",
-      "area": "Výměra"
-    },
     "variant": {
       "full": {
         "existing": "Současný stav",
@@ -734,13 +710,6 @@
         "floor": "smazání podlahy",
         "door": "smazání dveří",
         "surface": "smazání plochy"
-      },
-      "added": {
-        "wall": "přidání stěny",
-        "window": "přidání okna",
-        "roof": "přidání střechy",
-        "floor": "přidání podlahy",
-        "door": "přidání dveří"
       }
     },
     "error": {

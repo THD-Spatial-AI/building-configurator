@@ -32,11 +32,6 @@
     "loadingGeometry": "Cargando geometría de superficies…",
     "detached": "Las superficies guardadas de este edificio proceden de una generación anterior de City2TABULA, por lo que ninguna coincide con los datos 3D actuales. Los valores guardados siguen vigentes; el modelo no se muestra.",
     "noGeometry": "City2TABULA no tiene geometría 3D para este edificio.",
-    "invalidSurfaces": {
-      "one": "{count} superficie sin área, excluida de la simulación",
-      "many": "{count} superficies sin área, excluidas de la simulación",
-      "other": "{count} superficies sin área, excluidas de la simulación"
-    },
     "run": {
       "working": "Calculando la energía…",
       "start": "Guardar y ver demanda energética"
@@ -471,24 +466,6 @@
         "tip": "Fracción de la radiación solar sobre esas ventanas que entra como calor. Por defecto: el valor TABULA del tipo de edificio, o 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Muro",
-        "floor": "Suelo",
-        "roof": "Cubierta"
-      },
-      "button": {
-        "wall": "Añadir muro",
-        "floor": "Añadir suelo",
-        "roof": "Añadir cubierta"
-      },
-      "title": "Añadir una superficie",
-      "note": "Para una superficie que los datos 3D no muestran, como un muro contra el terreno (coeficiente b aprox. 0,5) o un suelo sobre un paso abierto (1). Aparece en la pestaña Envolvente, no se dibuja en el modelo.",
-      "typeLabel": "Tipo",
-      "name": "Nombre",
-      "namePlaceholder": "p. ej. Muro de sótano",
-      "area": "Área"
-    },
     "variant": {
       "full": {
         "existing": "Estado actual",
@@ -716,13 +693,6 @@
         "floor": "eliminación de suelo",
         "door": "eliminación de puerta",
         "surface": "eliminación de superficie"
-      },
-      "added": {
-        "wall": "adición de muro",
-        "window": "adición de ventana",
-        "roof": "adición de cubierta",
-        "floor": "adición de suelo",
-        "door": "adición de puerta"
       }
     },
     "error": {

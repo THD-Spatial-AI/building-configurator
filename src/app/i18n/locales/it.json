@@ -31,10 +31,6 @@
     "loadingGeometry": "Caricamento geometria delle superfici…",
     "detached": "Le superfici salvate di questo edificio provengono da una generazione City2TABULA precedente, quindi nessuna corrisponde ai dati 3D attuali. I valori salvati restano validi; il modello non viene mostrato.",
     "noGeometry": "City2TABULA non contiene geometria 3D per questo edificio.",
-    "invalidSurfaces": {
-      "one": "{count} superficie senza area, esclusa dalla simulazione",
-      "other": "{count} superfici senza area, escluse dalla simulazione"
-    },
     "run": {
       "working": "Calcolo dell'energia in corso…",
       "start": "Salva e visualizza fabbisogno energetico"
@@ -466,24 +462,6 @@
         "tip": "Quota della radiazione solare su quelle finestre che entra come calore. Predefinito: il valore TABULA per il tipo di edificio, altrimenti 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Parete",
-        "floor": "Pavimento",
-        "roof": "Tetto"
-      },
-      "button": {
-        "wall": "Aggiungi parete",
-        "floor": "Aggiungi pavimento",
-        "roof": "Aggiungi tetto"
-      },
-      "title": "Aggiungi una superficie",
-      "note": "Per una superficie che i dati 3D non mostrano, come una parete contro terra (fattore di correzione circa 0,5) o un pavimento su un passaggio aperto (1). È elencata nella scheda Involucro, non disegnata nel modello.",
-      "typeLabel": "Tipo",
-      "name": "Nome",
-      "namePlaceholder": "es. Parete del seminterrato",
-      "area": "Area"
-    },
     "variant": {
       "full": {
         "existing": "Stato attuale",
@@ -710,13 +688,6 @@
         "floor": "eliminazione pavimento",
         "door": "eliminazione porta",
         "surface": "eliminazione superficie"
-      },
-      "added": {
-        "wall": "aggiunta parete",
-        "window": "aggiunta finestra",
-        "roof": "aggiunta tetto",
-        "floor": "aggiunta pavimento",
-        "door": "aggiunta porta"
       }
     },
     "error": {

@@ -31,10 +31,6 @@
     "loadingGeometry": "Geometrie van vlakken laden…",
     "detached": "De opgeslagen vlakken van dit gebouw komen uit een eerdere City2TABULA-generatie, dus geen ervan past bij de huidige 3D-data. De opgeslagen waarden gelden nog; het model wordt niet getoond.",
     "noGeometry": "City2TABULA heeft geen 3D-geometrie voor dit gebouw.",
-    "invalidSurfaces": {
-      "one": "{count} vlak zonder oppervlakte, buiten de simulatie gelaten",
-      "other": "{count} vlakken zonder oppervlakte, buiten de simulatie gelaten"
-    },
     "run": {
       "working": "Energie wordt berekend…",
       "start": "Opslaan & energievraag bekijken"
@@ -466,24 +462,6 @@
         "tip": "Aandeel van het zonlicht op die ramen dat als warmte binnenkomt. Standaard: de TABULA-waarde voor het gebouwtype, anders 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Wand",
-        "floor": "Vloer",
-        "roof": "Dak"
-      },
-      "button": {
-        "wall": "Wand toevoegen",
-        "floor": "Vloer toevoegen",
-        "roof": "Dak toevoegen"
-      },
-      "title": "Vlak toevoegen",
-      "note": "Voor een vlak dat de 3D-data niet toont, zoals een wand tegen de grond (reductiefactor ca. 0,5) of een vloer boven een open doorgang (1). Het staat in het tabblad Schil, niet in het model getekend.",
-      "typeLabel": "Type",
-      "name": "Naam",
-      "namePlaceholder": "bijv. Kelderwand",
-      "area": "Oppervlakte"
-    },
     "variant": {
       "full": {
         "existing": "Huidige staat",
@@ -710,13 +688,6 @@
         "floor": "verwijderde vloer",
         "door": "verwijderde deur",
         "surface": "verwijderd vlak"
-      },
-      "added": {
-        "wall": "toegevoegde wand",
-        "window": "toegevoegd raam",
-        "roof": "toegevoegd dak",
-        "floor": "toegevoegde vloer",
-        "door": "toegevoegde deur"
       }
     },
     "error": {
