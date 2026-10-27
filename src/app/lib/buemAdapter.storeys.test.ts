@@ -87,13 +87,16 @@ describe('a building with storeys left out', () => {
   });
 
   it('sends the dwellings of the modelled storeys, keeping the whole building\'s beside the block', () => {
-    const withDwellings = { ...general, residential_units: 3, dwellingsModelled: 2 };
+    const withDwellings = { ...general, residential_units: 3, storeyDwellings: { 1: 1, 2: 1, 3: 1 } };
     const sentBlock = serializeToBuemFeature(three, elements, withDwellings).properties;
     expect(sentBlock.buem.building.residential_units).toBe(2);
     expect(sentBlock.buem.residential_units_full).toBe(3);
+    expect(sentBlock.buem.storey_list).toEqual([
+      { storey: 1, modelled: true, dwellings: 1 }, { storey: 2, modelled: true, dwellings: 1 }, { storey: 3, modelled: false, dwellings: 1 },
+    ]);
     const reopenedGeneral = generalFrom(adaptBuemFeature({ ...stored, properties: sentBlock }));
     expect(reopenedGeneral.residential_units).toBe(3);
-    expect(reopenedGeneral.dwellingsModelled).toBe(2);
+    expect(reopenedGeneral.storeyDwellings).toEqual({ 1: 1, 2: 1, 3: 1 });
     const all = serializeToBuemFeature(three, elements, { ...withDwellings, storeysModelled: null }).properties.buem;
     expect(all.building.residential_units).toBe(3);
     expect(all).not.toHaveProperty('residential_units_full');
@@ -102,12 +105,18 @@ describe('a building with storeys left out', () => {
   it('sends the modelled storeys\' dwellings when the whole building has no count of its own', () => {
     const blocks = toBuem(adaptBuemFeature({
       ...stored,
-      properties: serializeToBuemFeature(three, elements, { ...general, residential_units: null, dwellingsModelled: 1 }).properties,
+      properties: serializeToBuemFeature(three, elements, { ...general, residential_units: null, storeyDwellings: { 1: 2, 2: 1 } }).properties,
     }));
-    expect(blocks.building.residential_units).toBe(1);
+    expect(blocks.building.residential_units).toBe(3);
     expect(blocks.residential_units_full).toBeNull();
     expect(generalFrom(adaptBuemFeature({ ...stored, properties: { ...stored.properties, buem: blocks } })))
-      .toMatchObject({ residential_units: null, dwellingsModelled: 1 });
+      .toMatchObject({ residential_units: null, storeyDwellings: { 1: 2, 2: 1 } });
+  });
+
+  it('keeps the whole building\'s dwellings while a modelled storey has no count', () => {
+    const sent = serializeToBuemFeature(three, elements, { ...general, residential_units: 3, storeyDwellings: { 1: 2 } }).properties.buem;
+    expect(sent.building.residential_units).toBe(3);
+    expect(sent).not.toHaveProperty('residential_units_full');
   });
 
   it('writes neither key when every storey is modelled', () => {

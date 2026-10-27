@@ -711,7 +711,7 @@
       "exportFailed": "Échec de l'export : {reason}",
       "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET.",
       "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour.",
-      "dwellingsModelledRequired": "Certains étages ne sont pas dans le modèle. Indiquez le nombre de logements des étages modélisés sous Étages modélisés avant de lancer une simulation."
+      "dwellingsModelledRequired": "Certains étages sont retirés du modèle. Indiquez les logements de chaque étage modélisé dans Étages modélisés avant de lancer une simulation."
     },
     "comparison": {
       "lastRun": "la dernière simulation complète"
@@ -719,18 +719,33 @@
   },
   "storeys": {
     "title": "Étages modélisés",
-    "hint": "L'étage 1 est le rez-de-chaussée. Excluez les étages qui ne font pas partie de ce modèle, comme un commerce au rez-de-chaussée ; la surface et l'enveloppe ne comptent que les étages modélisés.",
+    "hint": "L'étage 1 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ; la surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
-    "storey": "Étage {number}",
     "floorArea": "Surface modélisée",
     "heightNote": "Dans le modèle 3D, un étage mesure {height} m de haut ; BuEM utilise une hauteur sous plafond de {room} m.",
     "pick": "Étages",
-    "pickHint": "Cliquez sur un étage du modèle pour voir s'il est modélisé.",
-    "inModel": "Dans le modèle",
-    "groundFloor": "Rez-de-chaussée",
+    "pickHint": "Cliquez sur des étages dans le modèle pour les sélectionner ; réglez-les dans Étages modélisés, dans l'onglet Bâtiment.",
     "lastOne": "Au moins un étage reste dans le modèle.",
-    "dwellings": "Logements dans les étages modélisés",
-    "dwellingsHint": "Les apports internes de BuEM dépendent du nombre de logements, pas de la surface."
+    "chip": {
+      "in": "Étage {number}, dans le modèle",
+      "out": "Étage {number}, retiré",
+      "dwellings": "{count} lgt"
+    },
+    "select": {
+      "all": "Tout sélectionner",
+      "clear": "Effacer la sélection",
+      "count": {
+        "one": "{count} étage sélectionné",
+        "other": "{count} étages sélectionnés"
+      }
+    },
+    "action": {
+      "leaveOut": "Retirer du modèle",
+      "include": "Remettre dans le modèle"
+    },
+    "dwellingsPerStorey": "Logements par étage",
+    "mixed": "variable",
+    "dwellingsMissing": "Indiquez les logements de chaque étage modélisé. Manquant : étage {storeys}. Les apports internes de BuEM suivent le nombre de logements."
   },
   "help": {
     "envelope": "Comment cette surface retient la chaleur : sa surface et sa valeur U vont à BuEM. Un niveau de rénovation fixe la valeur U depuis TABULA ; une valeur modifiée ici est conservée.",

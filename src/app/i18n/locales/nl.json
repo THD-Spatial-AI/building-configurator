@@ -705,7 +705,7 @@
       "exportFailed": "Export mislukt: {reason}",
       "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
       "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel.",
-      "dwellingsModelledRequired": "Sommige verdiepingen zijn niet in het model. Geef onder Gemodelleerde verdiepingen het aantal woningen in de gemodelleerde verdiepingen op voordat u een simulatie start."
+      "dwellingsModelledRequired": "Sommige verdiepingen zijn weggelaten uit het model. Geef onder Gemodelleerde verdiepingen de woningen van elke gemodelleerde verdieping op voordat u een simulatie start."
     },
     "comparison": {
       "lastRun": "de laatste volledige simulatie"
@@ -713,18 +713,33 @@
   },
   "storeys": {
     "title": "Gemodelleerde verdiepingen",
-    "hint": "Verdieping 1 is de begane grond. Laat verdiepingen weg die niet bij dit model horen, zoals een winkel op de begane grond; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "hint": "Verdieping 1 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
     "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
-    "storey": "Verdieping {number}",
     "floorArea": "Gemodelleerd vloeroppervlak",
     "heightNote": "In het 3D-model is een verdieping {height} m hoog; BuEM rekent met een kamerhoogte van {room} m.",
     "pick": "Verdiepingen",
-    "pickHint": "Klik op een verdieping in het model om te zien of die wordt meegenomen.",
-    "inModel": "In het model",
-    "groundFloor": "Begane grond",
+    "pickHint": "Klik verdiepingen in het model aan om ze te selecteren; stel ze in onder Gemodelleerde verdiepingen op het tabblad Gebouw.",
     "lastOne": "Minstens één verdieping blijft in het model.",
-    "dwellings": "Woningen in de gemodelleerde verdiepingen",
-    "dwellingsHint": "De interne warmtewinst in BuEM volgt het aantal woningen, niet het vloeroppervlak."
+    "chip": {
+      "in": "Verdieping {number}, in het model",
+      "out": "Verdieping {number}, weggelaten",
+      "dwellings": "{count} won."
+    },
+    "select": {
+      "all": "Alles selecteren",
+      "clear": "Selectie wissen",
+      "count": {
+        "one": "{count} verdieping geselecteerd",
+        "other": "{count} verdiepingen geselecteerd"
+      }
+    },
+    "action": {
+      "leaveOut": "Weglaten uit het model",
+      "include": "Terugzetten in het model"
+    },
+    "dwellingsPerStorey": "Woningen per verdieping",
+    "mixed": "gemengd",
+    "dwellingsMissing": "Geef de woningen van elke gemodelleerde verdieping op. Ontbreekt: verdieping {storeys}. De interne warmtelast van BuEM volgt het aantal woningen."
   },
   "help": {
     "envelope": "Hoe dit vlak warmte vasthoudt: oppervlak en U-waarde gaan naar BuEM. Een renovatieniveau zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft staan.",

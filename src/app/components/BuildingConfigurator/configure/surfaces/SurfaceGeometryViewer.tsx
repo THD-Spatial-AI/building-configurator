@@ -39,8 +39,8 @@ interface SurfaceGeometryViewerProps {
    *  so picking the same surface again re-frames it. */
   focusId?: string | null;
   focusToken?: number;
-  /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected one highlighted. */
-  storeys?: { count: number; modelled: readonly number[] | null; selected?: number | null };
+  /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected ones highlighted. */
+  storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[] };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
   /** `at` is the click position in client coordinates. */
@@ -346,7 +346,7 @@ export function SurfaceGeometryViewer({
   const leftOutKey = storeys?.modelled
     ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)).join(',')
     : '';
-  const selectedStorey = storeys?.selected ?? null;
+  const selectedKey = (storeys?.selected ?? []).join(',');
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || storeyCount < 2 || surfaces.length === 0) return;
@@ -359,7 +359,7 @@ export function SurfaceGeometryViewer({
       side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
     });
     // A left-out storey's part of each surface is drawn again over it, light;
-    // the selected storey's in the selection colour.
+    // the selected storeys' in the selection colour.
     const veil = overMaterial(0xffffff, 0.6);
     const picked = overMaterial(HIGHLIGHT_COLOR, 0.35);
     /** Draws each surface's part inside `chosen` over the model with `material`. */
@@ -378,14 +378,14 @@ export function SurfaceGeometryViewer({
       }
     };
     drawOver(leftOutKey ? leftOutKey.split(',').map(Number) : [], veil);
-    drawOver(selectedStorey ? [selectedStorey] : [], picked);
+    drawOver(selectedKey ? selectedKey.split(',').map(Number) : [], picked);
     scene.add(overlay);
     return () => {
       scene.remove(overlay);
       overlay.children.forEach((child) => (child as THREE.Mesh).geometry.dispose());
       [lineMaterial, veil, picked].forEach((material) => material.dispose());
     };
-  }, [surfaces, origin, storeyCount, leftOutKey, selectedStorey]);
+  }, [surfaces, origin, storeyCount, leftOutKey, selectedKey]);
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {

@@ -725,7 +725,7 @@
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
       "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne.",
-      "dwellingsModelledRequired": "Niektóre kondygnacje są pominięte w modelu. Podaj liczbę mieszkań w modelowanych kondygnacjach w sekcji Modelowane kondygnacje przed uruchomieniem symulacji."
+      "dwellingsModelledRequired": "Niektóre kondygnacje są pominięte w modelu. Przed symulacją podaj mieszkania każdej modelowanej kondygnacji w sekcji Modelowane kondygnacje."
     },
     "comparison": {
       "lastRun": "w ostatniej pełnej symulacji"
@@ -733,18 +733,35 @@
   },
   "storeys": {
     "title": "Modelowane kondygnacje",
-    "hint": "Kondygnacja 1 to parter. Pomiń kondygnacje, które nie należą do tego modelu, np. sklep na parterze; powierzchnia i przegrody obejmują tylko modelowane kondygnacje.",
+    "hint": "Kondygnacja 1 to parter. Zaznacz kondygnacje tutaj lub w modelu, a następnie pomiń je w modelu lub podaj ich mieszkania; powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
-    "storey": "Kondygnacja {number}",
     "floorArea": "Modelowana powierzchnia",
     "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m.",
     "pick": "Kondygnacje",
-    "pickHint": "Kliknij kondygnację w modelu, aby zobaczyć, czy jest modelowana.",
-    "inModel": "W modelu",
-    "groundFloor": "Parter",
+    "pickHint": "Kliknij kondygnacje w modelu, aby je zaznaczyć; ustaw je w sekcji Modelowane kondygnacje na karcie Budynek.",
     "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu.",
-    "dwellings": "Mieszkania w modelowanych kondygnacjach",
-    "dwellingsHint": "Zyski wewnętrzne w BuEM zależą od liczby mieszkań, a nie od powierzchni."
+    "chip": {
+      "in": "Kondygnacja {number}, w modelu",
+      "out": "Kondygnacja {number}, pominięta",
+      "dwellings": "{count} mieszk."
+    },
+    "select": {
+      "all": "Zaznacz wszystkie",
+      "clear": "Wyczyść zaznaczenie",
+      "count": {
+        "one": "{count} kondygnacja zaznaczona",
+        "few": "{count} kondygnacje zaznaczone",
+        "many": "{count} kondygnacji zaznaczonych",
+        "other": "{count} kondygnacji zaznaczonej"
+      }
+    },
+    "action": {
+      "leaveOut": "Pomiń w modelu",
+      "include": "Przywróć do modelu"
+    },
+    "dwellingsPerStorey": "Mieszkania na kondygnację",
+    "mixed": "różne",
+    "dwellingsMissing": "Podaj mieszkania każdej modelowanej kondygnacji. Brakuje: kondygnacja {storeys}. Zyski wewnętrzne BuEM zależą od liczby mieszkań."
   },
   "help": {
     "envelope": "Jak ta przegroda zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom modernizacji ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",

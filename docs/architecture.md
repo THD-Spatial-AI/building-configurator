@@ -91,6 +91,6 @@ Schema path changes go in `modelDataMap.ts` only.
 | Key | Holds |
 |---|---|
 | `storeys` | The building's total storey count |
-| `storey_list` | One `{ storey, modelled }` entry per storey |
+| `storey_list` | One `{ storey, modelled, dwellings? }` entry per storey; `dwellings` where the user gave it |
 | `envelope_full` | The envelope of the whole building |
 | `residential_units_full` | The dwellings of the whole building, or null |

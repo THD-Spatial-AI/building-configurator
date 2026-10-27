@@ -705,7 +705,7 @@
       "exportFailed": "Export failed: {reason}",
       "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json.",
       "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date.",
-      "dwellingsModelledRequired": "Some storeys are left out of the model. Give the number of dwellings in the modelled storeys under Storeys modelled before running a simulation."
+      "dwellingsModelledRequired": "Some storeys are left out of the model. Give the dwellings of every modelled storey under Storeys modelled before running a simulation."
     },
     "comparison": {
       "lastRun": "the last full simulation"
@@ -713,18 +713,33 @@
   },
   "storeys": {
     "title": "Storeys modelled",
-    "hint": "Storey 1 is the ground floor. Leave out storeys that are not part of this model, such as a shop on the ground floor; floor area and envelope count the modelled storeys only.",
+    "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model or give their dwellings; floor area and envelope count the modelled storeys only.",
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
-    "storey": "Storey {number}",
     "floorArea": "Floor area modelled",
     "heightNote": "In the 3D model a storey is {height} m tall; BuEM uses a room height of {room} m.",
     "pick": "Storeys",
-    "pickHint": "Click a storey in the model to see whether it is in the model.",
-    "inModel": "In the model",
-    "groundFloor": "Ground floor",
+    "pickHint": "Click storeys in the model to select them; set them in Storeys modelled on the Building tab.",
     "lastOne": "At least one storey stays in the model.",
-    "dwellings": "Dwellings in the modelled storeys",
-    "dwellingsHint": "BuEM's internal gains follow the number of dwellings, not the floor area."
+    "chip": {
+      "in": "Storey {number}, in the model",
+      "out": "Storey {number}, left out",
+      "dwellings": "{count} dw."
+    },
+    "select": {
+      "all": "Select all",
+      "clear": "Clear selection",
+      "count": {
+        "one": "{count} storey selected",
+        "other": "{count} storeys selected"
+      }
+    },
+    "action": {
+      "leaveOut": "Leave out of the model",
+      "include": "Put back in the model"
+    },
+    "dwellingsPerStorey": "Dwellings per storey",
+    "mixed": "mixed",
+    "dwellingsMissing": "Give the dwellings of every modelled storey. Missing: storey {storeys}. BuEM's internal gains follow the dwelling count."
   },
   "help": {
     "envelope": "How this surface holds heat: its area and U-value go to BuEM. A refurbishment level sets the U-value from TABULA; a value changed here is kept.",

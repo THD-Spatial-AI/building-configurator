@@ -725,7 +725,7 @@
       "exportFailed": "Export selhal: {reason}",
       "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET.",
       "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální.",
-      "dwellingsModelledRequired": "Některá podlaží nejsou v modelu. Před spuštěním simulace zadejte v části Modelovaná podlaží počet bytů v modelovaných podlažích."
+      "dwellingsModelledRequired": "Některá podlaží jsou vynechána z modelu. Před simulací zadejte v části Modelovaná podlaží byty každého modelovaného podlaží."
     },
     "comparison": {
       "lastRun": "poslední úplná simulace"
@@ -733,18 +733,35 @@
   },
   "storeys": {
     "title": "Modelovaná podlaží",
-    "hint": "Podlaží 1 je přízemí. Vynechte podlaží, která do tohoto modelu nepatří, například obchod v přízemí; plocha a obálka počítají jen modelovaná podlaží.",
+    "hint": "Podlaží 1 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty; plocha a obálka počítají jen modelovaná podlaží.",
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
-    "storey": "Podlaží {number}",
     "floorArea": "Modelovaná plocha",
     "heightNote": "Ve 3D modelu je podlaží vysoké {height} m; BuEM počítá s výškou místnosti {room} m.",
     "pick": "Podlaží",
-    "pickHint": "Klikněte na podlaží v modelu a uvidíte, zda je modelováno.",
-    "inModel": "V modelu",
-    "groundFloor": "Přízemí",
+    "pickHint": "Kliknutím na podlaží v modelu je vyberete; nastavíte je v části Modelovaná podlaží na kartě Budova.",
     "lastOne": "Alespoň jedno podlaží zůstává v modelu.",
-    "dwellings": "Byty v modelovaných podlažích",
-    "dwellingsHint": "Vnitřní zisky v BuEM se řídí počtem bytů, ne plochou."
+    "chip": {
+      "in": "Podlaží {number}, v modelu",
+      "out": "Podlaží {number}, vynecháno",
+      "dwellings": "{count} b."
+    },
+    "select": {
+      "all": "Vybrat vše",
+      "clear": "Zrušit výběr",
+      "count": {
+        "one": "{count} podlaží vybráno",
+        "few": "{count} podlaží vybrána",
+        "many": "{count} podlaží vybráno",
+        "other": "{count} podlaží vybráno"
+      }
+    },
+    "action": {
+      "leaveOut": "Vynechat z modelu",
+      "include": "Vrátit do modelu"
+    },
+    "dwellingsPerStorey": "Bytů na podlaží",
+    "mixed": "různé",
+    "dwellingsMissing": "Zadejte byty každého modelovaného podlaží. Chybí: podlaží {storeys}. Vnitřní zisky BuEM se řídí počtem bytů."
   },
   "help": {
     "envelope": "Jak tato plocha drží teplo: její plocha a součinitel U jdou do BuEM. Úroveň renovace nastaví součinitel U z TABULA; hodnota změněná zde zůstane.",

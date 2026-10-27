@@ -705,7 +705,7 @@
       "exportFailed": "Esportazione non riuscita: {reason}",
       "importFailed": "Impossibile leggere il file: {reason}. Verifica che sia un BuEM GeoJSON valido, un export del configuratore legacy o un config.json di EnerPlanET.",
       "pvFailed": "Il calcolo FV non è riuscito, quindi la produzione FV non è mostrata. Il fabbisogno energetico sopra è aggiornato.",
-      "dwellingsModelledRequired": "Alcuni piani sono esclusi dal modello. Indica il numero di abitazioni nei piani modellati in Piani modellati prima di avviare una simulazione."
+      "dwellingsModelledRequired": "Alcuni piani sono esclusi dal modello. Indica le abitazioni di ogni piano modellato in Piani modellati prima di avviare una simulazione."
     },
     "comparison": {
       "lastRun": "all'ultima simulazione completa"
@@ -713,18 +713,33 @@
   },
   "storeys": {
     "title": "Piani modellati",
-    "hint": "Il piano 1 è il piano terra. Escludi i piani che non fanno parte di questo modello, come un negozio al piano terra; superficie e involucro contano solo i piani modellati.",
+    "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni; superficie e involucro contano solo i piani modellati.",
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
-    "storey": "Piano {number}",
     "floorArea": "Superficie modellata",
     "heightNote": "Nel modello 3D un piano è alto {height} m; BuEM usa un'altezza dei locali di {room} m.",
     "pick": "Piani",
-    "pickHint": "Fai clic su un piano del modello per vedere se è incluso.",
-    "inModel": "Nel modello",
-    "groundFloor": "Piano terra",
+    "pickHint": "Fai clic sui piani nel modello per selezionarli; impostali in Piani modellati, nella scheda Edificio.",
     "lastOne": "Almeno un piano resta nel modello.",
-    "dwellings": "Abitazioni nei piani modellati",
-    "dwellingsHint": "Gli apporti interni di BuEM dipendono dal numero di abitazioni, non dalla superficie."
+    "chip": {
+      "in": "Piano {number}, nel modello",
+      "out": "Piano {number}, escluso",
+      "dwellings": "{count} ab."
+    },
+    "select": {
+      "all": "Seleziona tutti",
+      "clear": "Annulla la selezione",
+      "count": {
+        "one": "{count} piano selezionato",
+        "other": "{count} piani selezionati"
+      }
+    },
+    "action": {
+      "leaveOut": "Escludi dal modello",
+      "include": "Rimetti nel modello"
+    },
+    "dwellingsPerStorey": "Abitazioni per piano",
+    "mixed": "misto",
+    "dwellingsMissing": "Indica le abitazioni di ogni piano modellato. Manca: piano {storeys}. I guadagni interni di BuEM seguono il numero di abitazioni."
   },
   "help": {
     "envelope": "Come questa superficie trattiene il calore: area e valore U vanno a BuEM. Un livello di riqualificazione imposta il valore U da TABULA; un valore modificato qui resta.",

@@ -711,7 +711,7 @@
       "exportFailed": "Error al exportar: {reason}",
       "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET.",
       "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada.",
-      "dwellingsModelledRequired": "Algunas plantas no están en el modelo. Indique el número de viviendas de las plantas modeladas en Plantas modeladas antes de ejecutar una simulación."
+      "dwellingsModelledRequired": "Algunas plantas están fuera del modelo. Indique las viviendas de cada planta modelada en Plantas modeladas antes de ejecutar una simulación."
     },
     "comparison": {
       "lastRun": "la última simulación completa"
@@ -719,18 +719,33 @@
   },
   "storeys": {
     "title": "Plantas modeladas",
-    "hint": "La planta 1 es la planta baja. Excluya las plantas que no forman parte de este modelo, como una tienda en la planta baja; la superficie y la envolvente cuentan solo las plantas modeladas.",
+    "hint": "La planta 1 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas; la superficie y la envolvente cuentan solo las plantas modeladas.",
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
-    "storey": "Planta {number}",
     "floorArea": "Superficie modelada",
     "heightNote": "En el modelo 3D una planta mide {height} m de alto; BuEM usa una altura de estancia de {room} m.",
     "pick": "Plantas",
-    "pickHint": "Haga clic en una planta del modelo para ver si está incluida.",
-    "inModel": "En el modelo",
-    "groundFloor": "Planta baja",
+    "pickHint": "Haga clic en plantas del modelo para seleccionarlas; configúrelas en Plantas modeladas, en la pestaña Edificio.",
     "lastOne": "Al menos una planta permanece en el modelo.",
-    "dwellings": "Viviendas en las plantas modeladas",
-    "dwellingsHint": "Las ganancias internas de BuEM dependen del número de viviendas, no de la superficie."
+    "chip": {
+      "in": "Planta {number}, en el modelo",
+      "out": "Planta {number}, excluida",
+      "dwellings": "{count} viv."
+    },
+    "select": {
+      "all": "Seleccionar todas",
+      "clear": "Borrar la selección",
+      "count": {
+        "one": "{count} planta seleccionada",
+        "other": "{count} plantas seleccionadas"
+      }
+    },
+    "action": {
+      "leaveOut": "Dejar fuera del modelo",
+      "include": "Volver a incluir en el modelo"
+    },
+    "dwellingsPerStorey": "Viviendas por planta",
+    "mixed": "varios",
+    "dwellingsMissing": "Indique las viviendas de cada planta modelada. Falta: planta {storeys}. Las ganancias internas de BuEM siguen el número de viviendas."
   },
   "help": {
     "envelope": "Cómo retiene el calor esta superficie: su área y su valor U van a BuEM. Un nivel de rehabilitación fija el valor U desde TABULA; un valor cambiado aquí se conserva.",

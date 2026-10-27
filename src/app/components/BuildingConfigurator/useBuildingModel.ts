@@ -31,6 +31,7 @@ import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
 import { applyState, REFURB_TYPES, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
 import { previewHeatingPerM2, runBuildingSimulation, runIdentity, type RunContext, type WeatherChoice } from '../../lib/buemRun';
 import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
+import { modelledDwellings } from '../../lib/storeys';
 import type { PvLayout } from '../../lib/pvLayout';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
@@ -595,7 +596,7 @@ export function useBuildingModel(
       const { modelledShare: _, ...whole } = el;
       return [id, modelled ? { ...whole, modelledShare: shares[id] ?? modelled.length / Math.max(1, general.storeys) } : whole];
     })));
-    setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled, ...(modelled ? {} : { dwellingsModelled: null }) }));
+    setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled }));
   };
 
   // --- Model-wide actions -----------------------------------------------------
@@ -647,7 +648,8 @@ export function useBuildingModel(
       setUploadError({ key: 'model.error.dwellingsRequired' });
       return;
     }
-    if (general.storeysModelled && !isServiceBuildingType(general.buildingType) && !general.dwellingsModelled) {
+    if (general.storeysModelled && !isServiceBuildingType(general.buildingType)
+      && modelledDwellings(general.storeysModelled, general.storeyDwellings) === null) {
       setUploadError({ key: 'model.error.dwellingsModelledRequired' });
       return;
     }
@@ -860,7 +862,7 @@ export function withEdits(
       window_g_gl:             general.window_g_gl,
       use_milp:                general.use_milp,
       residential_units:       general.residential_units,
-      dwellingsModelled:       general.dwellingsModelled,
+      storeyDwellings:         general.storeyDwellings,
       num_persons:             general.num_persons,
       archetype:               general.archetype,
       region_code:             general.region_code,

@@ -30,7 +30,7 @@ import { DEFAULT_WEATHER, WeatherSection, weatherChoice, type WeatherSelection }
 import type { WeatherOptions } from '../../lib/services';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
-import { StoreyPanel, StoreysModelled } from './StoreysModelled';
+import { StoreysModelled, toggleSelected } from './StoreysModelled';
 import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
@@ -167,10 +167,14 @@ export function Building3DView({
   const onTech = tab === 'technology' && pv !== undefined;
   /** The PV surface under the pointer on the Technologies tab, for its hover card. */
   const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
-  /** While on, a click in the model picks a storey instead of a surface. */
+  /** While on, a click in the model selects a storey instead of a surface. */
   const [storeyMode, setStoreyMode] = useState(false);
-  const [pickedStorey, setPickedStorey] = useState<number | null>(null);
-  const leaveStoreyMode = () => { setStoreyMode(false); setPickedStorey(null); };
+  /** The storeys selected in the model or in the storey list, configured together. */
+  const [selectedStoreys, setSelectedStoreys] = useState<number[]>([]);
+  const leaveStoreyMode = () => setStoreyMode(false);
+  const pickStorey = (storey: number | null) => {
+    if (storey !== null) setSelectedStoreys((prev) => toggleSelected(prev, storey));
+  };
   const [touring, setTouring] = useState(tour?.run ?? false);
   const tourRun = tour?.run ?? false;
   useEffect(() => { if (tourRun) setTouring(true); }, [tourRun]);
@@ -336,22 +340,12 @@ export function Building3DView({
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
   ], [elements, pv]);
-  const storeyBody = storeyMode && pickedStorey !== null ? (
-    <StoreyPanel
-      storey={pickedStorey}
-      modelled={model.general.storeysModelled}
-      storeys={model.general.storeys}
-      onChange={setModelledStoreys}
-    />
-  ) : null;
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
-      open={(storeyMode ? storeyBody : panelBody) !== null}
-      title={storeyMode && pickedStorey !== null
-        ? t('storeys.storey', { number: pickedStorey })
-        : selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-      subtitle={storeyMode ? (pickedStorey === 1 ? t('storeys.groundFloor') : undefined) : panelSubtitle}
+      open={!storeyMode && panelBody !== null}
+      title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
+      subtitle={storeyMode ? undefined : panelSubtitle}
       emptyText={t(storeyMode ? 'storeys.pickHint' : 'view.panel.empty')}
       picker={(
         <select
@@ -364,9 +358,9 @@ export function Building3DView({
           {pickable.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
         </select>
       )}
-      onClose={() => (storeyMode ? setPickedStorey(null) : requestSurface(null))}
+      onClose={() => requestSurface(null)}
     >
-      {storeyMode ? storeyBody : panelBody}
+      {storeyMode ? null : panelBody}
     </SurfacePanel>
   );
 
@@ -479,8 +473,8 @@ export function Building3DView({
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
-              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: storeyMode ? pickedStorey : null }}
-              onSelectStorey={storeyMode ? setPickedStorey : undefined}
+              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys }}
+              onSelectStorey={storeyMode ? pickStorey : undefined}
               onSelectSurface={selectInModel}
             />
           ) : (
@@ -586,12 +580,14 @@ export function Building3DView({
                     <StoreysModelled
                       storeys={model.general.storeys}
                       modelled={model.general.storeysModelled}
+                      selected={selectedStoreys}
+                      onSelect={setSelectedStoreys}
                       floorAreaPerStorey={model.general.floorArea}
                       storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
                       roomHeight={model.general.roomHeight}
                       dwellings={isServiceBuildingType(model.general.buildingType) ? undefined : {
-                        value: model.general.dwellingsModelled,
-                        onChange: (value) => model.setGen('dwellingsModelled', value),
+                        values: model.general.storeyDwellings,
+                        onChange: (values) => model.setGen('storeyDwellings', values),
                       }}
                       disabled={surfaces.length === 0}
                       onChange={setModelledStoreys}
