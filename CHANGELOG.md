@@ -35,6 +35,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 
 - The Envelope tab and its surface groups list, the building editor's identity section and the unused thermal rating.
 - The Expert option to add a surface, which 3D city data has no use for, and the note over the model counting surfaces with no area.
+- The unused Vercel feedback function (`api/feedback.ts`) and its `@vercel/node` and `@vercel/blob` dependencies. `@vercel/node` was the last source of esbuild 0.14.
 
 ### Fixed
 
