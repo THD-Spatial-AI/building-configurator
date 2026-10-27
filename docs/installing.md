@@ -322,11 +322,11 @@ Two exported functions build one:
 ## Storing an edited building
 
 `onExit` hands back the edited `BuildingState`. `toBuem(building)` turns it
-into `{ building, construction_year, refurbishment, outputs, solver }`: the
+into `{ building, configurator, refurbishment, outputs, solver }`: the
 same three blocks a run of that building sends as
 `BuemBuildingRunRequest.building`, `.outputs` and `.solver`, plus the
-construction year, which BuEM's `construction_period` cannot hold, and the
-refurbishment states (see below). Store the whole object and send BuEM only its blocks. To reopen,
+configurator's own keys (`ConfiguratorKeys`: construction year, storeys and
+the storeys left out) and the refurbishment states (see below). Store the whole object and send BuEM only its blocks. To reopen,
 pass the stored object as `properties.buem` of a Feature to
 `adaptBuemFeature`:
 

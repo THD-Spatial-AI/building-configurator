@@ -204,7 +204,7 @@
       "none": "Choose a product"
     },
     "fitsMore": {
-      "title": "Fits more here",
+      "title": "See our recommendation ({count})",
       "reach": "Modules: {count} · {kwp} kWp",
       "use": "Use on this surface"
     },
@@ -449,7 +449,6 @@
     "uValue": "U-value",
     "lossFactor": "Loss factor",
     "unitShare": "0 to 1",
-    "buemDefault": "BuEM default.",
     "useDefault": "Use default",
     "windows": {
       "title": "Windows BuEM adds",
@@ -485,6 +484,11 @@
       "note": "Indicative class: space heating per m², graded on one scale for every country (the Austrian HWB scale, G to A++), so buildings compare across countries. National labels such as the Dutch energy label grade primary energy, which this model does not compute. Simulated, not a certificate.",
       "failed": "The energy classes could not be worked out.",
       "retry": "Try again"
+    },
+    "default": {
+      "buem": "BuEM default: {value}",
+      "tabula": "TABULA default for this building: {value}",
+      "tabulaElse": "The TABULA value for this building, else {value}"
     }
   },
   "options": {
@@ -612,7 +616,7 @@
       "type": "Type",
       "constructionYear": "Construction year",
       "country": "Country",
-      "floorAreaPerStorey": "Floor area (per storey)",
+      "floorAreaPerStorey": "Footprint area",
       "storeys": "Storeys",
       "roomHeight": "Room height",
       "volume": "Volume",
@@ -640,7 +644,9 @@
     "tile": {
       "statisticalDefault": "Statistical default"
     },
-    "builtIn": "Built in {year}"
+    "builtIn": "Built in {year}",
+    "eavesHeight": "{value} m to the eaves",
+    "heightConflict": "{storeys} storeys of {room} m are taller than the 3D model, which is {height} m to the eaves. Correct the storeys or the room height."
   },
   "envelope": {
     "compassNorth": "N"
@@ -707,7 +713,6 @@
     "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model or give their dwellings; floor area and envelope count the modelled storeys only.",
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
     "floorArea": "Floor area modelled",
-    "heightNote": "In the 3D model a storey is {height} m tall; BuEM uses a room height of {room} m.",
     "pick": "Storeys",
     "pickHint": "Click storeys in the model to select them; set them in Storeys modelled on the Building tab.",
     "lastOne": "At least one storey stays in the model.",

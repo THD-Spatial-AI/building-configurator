@@ -33,17 +33,19 @@ export const MODEL_DATA_MAP = {
         'properties.buem.building.type',                                  // EnerPlanET topology shape
       ],
       constructionYear: [
-        'properties.buem.construction_year',                              // beside the block, see buemAdapter
+        'properties.buem.configurator.construction_year',                 // the configurator's own keys, see buemAdapter
+        'properties.buem.construction_year',                              // stored by 0.14.0
         'properties.buem.building.construction_period',                   // a year in blocks stored before 0.7.0
       ],
       country:            'properties.buem.building.country',
       floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
       roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
       storeys: [
-        'properties.buem.storeys',                                        // beside the block, see buemAdapter
+        'properties.buem.configurator.storeys',
+        'properties.buem.storeys',                                        // stored by 0.14.0
         'properties.buem.building.n_storeys',                             // deprecated in v6-draft; read from older sources, never written
       ],
-      storeyList:         'properties.buem.storey_list',                  // beside the block: [{ storey: 1-based, modelled: boolean, dwellings?: number }], absent when all are modelled
+      storeyList:         'properties.buem.configurator.storey_list',     // [{ storey: 1-based, modelled: boolean, dwellings?: number }], absent when all are modelled
     },
 
     // Building parameters beyond the descriptor, each absent unless set.
@@ -64,8 +66,8 @@ export const MODEL_DATA_MAP = {
     // Household inputs and output selection, keyed by their BuEM names.
     household: {
       residential_units: 'properties.buem.building.residential_units',
-      // Beside the block, only with storeys left out: the whole building's dwellings.
-      residential_units_full: 'properties.buem.residential_units_full',
+      // Only with storeys left out: the whole building's dwellings.
+      residential_units_full: 'properties.buem.configurator.residential_units_full',
       num_persons:       'properties.buem.building.num_persons',
       archetype:         'properties.buem.building.archetype',
       region_code:       'properties.buem.building.region_code',
@@ -86,7 +88,7 @@ export const MODEL_DATA_MAP = {
       elements: 'properties.buem.building.envelope.elements',
       // With storeys left out, elements above is clipped to them and this is
       // the whole envelope, kept for reopening.
-      fullElements: 'properties.buem.envelope_full.elements',
+      fullElements: 'properties.buem.configurator.envelope_full.elements',
     },
 
     // Thermal output from BUEM response.

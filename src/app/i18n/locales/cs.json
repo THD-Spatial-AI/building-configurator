@@ -206,7 +206,7 @@
       "none": "Vyberte produkt"
     },
     "fitsMore": {
-      "title": "Sem se vejde víc",
+      "title": "Zobrazit naše doporučení ({count})",
       "reach": "Moduly: {count} · {kwp} kWp",
       "use": "Použít na této ploše"
     },
@@ -469,7 +469,6 @@
     "uValue": "Součinitel U",
     "lossFactor": "Redukční činitel",
     "unitShare": "0 až 1",
-    "buemDefault": "Výchozí BuEM.",
     "useDefault": "Použít výchozí",
     "windows": {
       "title": "Okna doplněná BuEM",
@@ -505,6 +504,11 @@
       "note": "Orientační třída: vytápění na m², hodnocené na jedné stupnici pro všechny země (rakouské stupnici HWB, G až A++), aby se budovy daly porovnat mezi zeměmi. Národní štítky, jako nizozemský energetický štítek, hodnotí primární energii, kterou tento model nepočítá. Simulovaná, nejde o certifikát.",
       "failed": "Energetické třídy se nepodařilo určit.",
       "retry": "Zkusit znovu"
+    },
+    "default": {
+      "buem": "Výchozí v BuEM: {value}",
+      "tabula": "Hodnota TABULA pro tuto budovu: {value}",
+      "tabulaElse": "Hodnota TABULA této budovy, jinak {value}"
     }
   },
   "options": {
@@ -632,7 +636,7 @@
       "type": "Typ",
       "constructionYear": "Rok výstavby",
       "country": "Země",
-      "floorAreaPerStorey": "Podlahová plocha (na podlaží)",
+      "floorAreaPerStorey": "Zastavěná plocha",
       "storeys": "Podlaží",
       "roomHeight": "Světlá výška",
       "volume": "Objem",
@@ -662,7 +666,9 @@
     "tile": {
       "statisticalDefault": "Statistická hodnota"
     },
-    "builtIn": "Postaveno v roce {year}"
+    "builtIn": "Postaveno v roce {year}",
+    "eavesHeight": "{value} m k okapu",
+    "heightConflict": "{storeys} podlaží po {room} m je vyšší než 3D model, který má {height} m k okapu. Opravte počet podlaží nebo světlou výšku."
   },
   "envelope": {
     "compassNorth": "S"
@@ -729,7 +735,6 @@
     "hint": "Podlaží 1 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty; plocha a obálka počítají jen modelovaná podlaží.",
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
     "floorArea": "Modelovaná plocha",
-    "heightNote": "Ve 3D modelu je podlaží vysoké {height} m; BuEM počítá s výškou místnosti {room} m.",
     "pick": "Podlaží",
     "pickHint": "Kliknutím na podlaží v modelu je vyberete; nastavíte je v části Modelovaná podlaží na kartě Budova.",
     "lastOne": "Alespoň jedno podlaží zůstává v modelu.",

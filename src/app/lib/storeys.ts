@@ -161,3 +161,27 @@ export function dwellingsTotal(storeys: number, dwellings: StoreyDwellings): num
   const counts = Array.from({ length: storeys }, (_, i) => dwellings[i + 1]).filter((count) => count >= 1);
   return counts.length > 0 ? counts.reduce((a, b) => a + b, 0) : null;
 }
+
+/** The least room height a storey can have, for the storey count the model's height allows. */
+export const MIN_ROOM_HEIGHT_M = 2.2;
+/** Slack for rounding in the model's height before storeys and room height count as too tall. */
+const HEIGHT_SLACK_M = 0.1;
+
+/** The model's height from the ground to the eaves, in metres. */
+export function eavesHeight(polygons: SurfacePolygon[]): number {
+  return storeyBands(polygons, 1).height;
+}
+
+/** How many storeys, and how tall a room, fit in the model's height to the eaves. */
+export function heightLimits(modelHeight: number, storeys: number): { maxStoreys: number; maxRoomHeight: number } {
+  return {
+    maxStoreys: Math.max(1, Math.floor((modelHeight + HEIGHT_SLACK_M) / MIN_ROOM_HEIGHT_M)),
+    // Down to the centimetre, so a capped value reads as a room height.
+    maxRoomHeight: Math.floor(((modelHeight + HEIGHT_SLACK_M) / Math.max(1, storeys)) * 100) / 100,
+  };
+}
+
+/** Whether the storeys at the room height are taller than the model to its eaves. */
+export function tallerThanModel(modelHeight: number, storeys: number, roomHeight: number): boolean {
+  return storeys * roomHeight > modelHeight + HEIGHT_SLACK_M;
+}

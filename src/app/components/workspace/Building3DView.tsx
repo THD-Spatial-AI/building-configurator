@@ -29,7 +29,7 @@ import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickInSelection } from './StoreysModelled';
-import { dwellingsTotal, storeyBands, storeyShares } from '../../lib/storeys';
+import { dwellingsTotal, eavesHeight, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -42,6 +42,18 @@ import { LanguageProvider, formatNumber, resolveLanguage, translate, type Transl
 import { buildingTypeName, hasDwellingsPerStorey, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string };
+
+/**
+ * A field the user types words into, such as a name or a search, where Ctrl+Z
+ * is the browser's own text undo. Number fields, sliders and switches change
+ * the model, so the model's undo applies there.
+ */
+function isFreeText(target: EventTarget | null): boolean {
+  if (target instanceof HTMLTextAreaElement) return true;
+  if (!(target instanceof HTMLInputElement)) return false;
+  const numeric = target.inputMode === 'decimal' || target.inputMode === 'numeric';
+  return (target.type === 'text' || target.type === 'search') && !numeric;
+}
 
 export interface Building3DViewProps {
   building: BuildingState;
@@ -267,11 +279,10 @@ export function Building3DView({
       else requestExit();
       return;
     }
-    // Not while typing into a field, where the browser's own undo applies.
-    const typing = e.target instanceof HTMLElement
-      && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
-    if (!typing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !isFreeText(e.target)) {
       e.preventDefault();
+      // A focused number field shows its own draft until it lets go of focus.
+      if (e.target instanceof HTMLInputElement) e.target.blur();
       undo();
     }
   };
@@ -569,6 +580,7 @@ export function Building3DView({
           <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
+              modelHeight={surfaces.length > 0 && !detached ? eavesHeight(surfaces) : undefined}
               occupancy={isServiceBuildingType(model.general.buildingType) ? undefined : {
                 dwellings: model.general.residential_units,
                 persons: model.general.num_persons,
@@ -610,8 +622,6 @@ export function Building3DView({
                           if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
                         }}
                         floorAreaPerStorey={model.general.floorArea}
-                        storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
-                        roomHeight={model.general.roomHeight}
                         dwellings={hasDwellingsPerStorey(model.general.buildingType) ? {
                           values: model.general.storeyDwellings,
                           onChange: setStoreyDwellings,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dwellingsTotal, modelledDwellings, storeyAt, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { dwellingsTotal, heightLimits, modelledDwellings, storeyAt, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -113,5 +113,17 @@ describe('dwellingsTotal', () => {
   it('sums the counts given per storey', () => {
     expect(dwellingsTotal(3, { 1: 4, 2: 4 })).toBe(8);
     expect(dwellingsTotal(3, {})).toBeNull();
+  });
+});
+
+describe('the model\'s height binds storeys and room height', () => {
+  it('allows as many storeys as fit at the least room height, and a room height that fits the storeys', () => {
+    expect(heightLimits(10, 3)).toEqual({ maxStoreys: 4, maxRoomHeight: 3.36 });
+    expect(heightLimits(1.5, 1).maxStoreys).toBe(1);
+  });
+
+  it('flags storeys and a room height taller than the model', () => {
+    expect(tallerThanModel(2.6, 2, 2.5)).toBe(true);
+    expect(tallerThanModel(6, 2, 2.5)).toBe(false);
   });
 });

@@ -204,7 +204,7 @@
       "none": "Scegli un prodotto"
     },
     "fitsMore": {
-      "title": "Qui ne stanno di più",
+      "title": "Vedi la nostra raccomandazione ({count})",
       "reach": "Moduli: {count} · {kwp} kWp",
       "use": "Usa su questa superficie"
     },
@@ -449,7 +449,6 @@
     "uValue": "Valore U",
     "lossFactor": "Fattore di correzione",
     "unitShare": "da 0 a 1",
-    "buemDefault": "Predefinito BuEM.",
     "useDefault": "Usa predefinito",
     "windows": {
       "title": "Finestre aggiunte da BuEM",
@@ -485,6 +484,11 @@
       "note": "Classe indicativa: riscaldamento per m², valutato su un'unica scala per tutti i paesi (la scala austriaca HWB, da G a A++), così gli edifici si confrontano tra paesi. Le etichette nazionali, come quella energetica olandese, valutano l'energia primaria, che questo modello non calcola. Simulata, non un attestato.",
       "failed": "Non è stato possibile calcolare le classi energetiche.",
       "retry": "Riprova"
+    },
+    "default": {
+      "buem": "Predefinito BuEM: {value}",
+      "tabula": "Valore TABULA per questo edificio: {value}",
+      "tabulaElse": "Il valore TABULA di questo edificio, altrimenti {value}"
     }
   },
   "options": {
@@ -612,7 +616,7 @@
       "type": "Tipo",
       "constructionYear": "Anno di costruzione",
       "country": "Paese",
-      "floorAreaPerStorey": "Superficie (per piano)",
+      "floorAreaPerStorey": "Superficie di ingombro",
       "storeys": "Piani",
       "roomHeight": "Altezza interna",
       "volume": "Volume",
@@ -640,7 +644,9 @@
     "tile": {
       "statisticalDefault": "Valore statistico"
     },
-    "builtIn": "Costruito nel {year}"
+    "builtIn": "Costruito nel {year}",
+    "eavesHeight": "{value} m fino alla gronda",
+    "heightConflict": "{storeys} piani da {room} m sono più alti del modello 3D, alto {height} m fino alla gronda. Correggi il numero di piani o l'altezza dei locali."
   },
   "envelope": {
     "compassNorth": "N"
@@ -707,7 +713,6 @@
     "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni; superficie e involucro contano solo i piani modellati.",
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
     "floorArea": "Superficie modellata",
-    "heightNote": "Nel modello 3D un piano è alto {height} m; BuEM usa un'altezza dei locali di {room} m.",
     "pick": "Piani",
     "pickHint": "Fai clic sui piani nel modello per selezionarli; impostali in Piani modellati, nella scheda Edificio.",
     "lastOne": "Almeno un piano resta nel modello.",

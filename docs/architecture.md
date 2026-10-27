@@ -85,11 +85,14 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 
 Schema path changes go in `modelDataMap.ts` only.
 
-`toBuem` sends the building as BuEM is to model it. While storeys are left out, the `building` block holds only the modelled storeys, with each surface cut to its share inside them. Beside the block the configurator keeps its own keys so the building can be restored in full:
+`toBuem` sends the building as BuEM is to model it. While storeys are left out, the `building` block holds only the modelled storeys, with each surface cut to its share inside them. In `configurator`, an object BuEM ignores and returns unchanged, the configurator keeps its own keys so the building can be restored in full:
 
 | Key | Holds |
 |---|---|
+| `construction_year` | The construction year, which BuEM's `construction_period` cannot hold |
 | `storeys` | The building's total storey count |
 | `storey_list` | One `{ storey, modelled, dwellings? }` entry per storey; `dwellings` where the user gave it |
 | `envelope_full` | The envelope of the whole building |
 | `residential_units_full` | The dwellings of the whole building, or null |
+
+Buildings stored by 0.14.0 keep `storeys` and `construction_year` beside the block, where they are still read.

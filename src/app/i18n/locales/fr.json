@@ -205,7 +205,7 @@
       "none": "Choisir un produit"
     },
     "fitsMore": {
-      "title": "Plus de modules ici",
+      "title": "Voir notre recommandation ({count})",
       "reach": "Modules : {count} · {kwp} kWp",
       "use": "Utiliser sur cette surface"
     },
@@ -453,7 +453,6 @@
     "uValue": "Valeur U",
     "lossFactor": "Coefficient b",
     "unitShare": "0 à 1",
-    "buemDefault": "Défaut BuEM.",
     "useDefault": "Valeur par défaut",
     "windows": {
       "title": "Fenêtres ajoutées par BuEM",
@@ -489,6 +488,11 @@
       "note": "Classe indicative : besoin de chauffage par m², noté sur une même échelle pour tous les pays (l'échelle autrichienne HWB, de G à A++), afin de comparer les bâtiments entre pays. Les étiquettes nationales, comme l'étiquette énergétique néerlandaise, notent l'énergie primaire, que ce modèle ne calcule pas. Simulée, pas un certificat.",
       "failed": "Les classes énergétiques n'ont pas pu être calculées.",
       "retry": "Réessayer"
+    },
+    "default": {
+      "buem": "Par défaut dans BuEM : {value}",
+      "tabula": "Valeur TABULA pour ce bâtiment : {value}",
+      "tabulaElse": "La valeur TABULA de ce bâtiment, sinon {value}"
     }
   },
   "options": {
@@ -616,7 +620,7 @@
       "type": "Type",
       "constructionYear": "Année de construction",
       "country": "Pays",
-      "floorAreaPerStorey": "Surface (par niveau)",
+      "floorAreaPerStorey": "Emprise au sol",
       "storeys": "Niveaux",
       "roomHeight": "Hauteur sous plafond",
       "volume": "Volume",
@@ -645,7 +649,9 @@
     "tile": {
       "statisticalDefault": "Valeur statistique"
     },
-    "builtIn": "Construit en {year}"
+    "builtIn": "Construit en {year}",
+    "eavesHeight": "{value} m jusqu'à l'avant-toit",
+    "heightConflict": "{storeys} étages de {room} m dépassent le modèle 3D, haut de {height} m jusqu'à l'avant-toit. Corrigez le nombre d'étages ou la hauteur sous plafond."
   },
   "envelope": {
     "compassNorth": "N"
@@ -712,7 +718,6 @@
     "hint": "L'étage 1 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ; la surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
     "floorArea": "Surface modélisée",
-    "heightNote": "Dans le modèle 3D, un étage mesure {height} m de haut ; BuEM utilise une hauteur sous plafond de {room} m.",
     "pick": "Étages",
     "pickHint": "Cliquez sur des étages dans le modèle pour les sélectionner ; réglez-les dans Étages modélisés, dans l'onglet Bâtiment.",
     "lastOne": "Au moins un étage reste dans le modèle.",

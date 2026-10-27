@@ -257,19 +257,29 @@ function ElementTable({ elements, levels, states, initial, onSetState, onSetType
   );
 }
 
-/** A number BuEM defaults when it is left empty. */
-function OptionalNumber({ label, value, onChange, unit, min, max, step, tip }: {
+/**
+ * A number BuEM fills in when it is left empty. The value it uses shows greyed
+ * in the empty field, with where it comes from beneath.
+ */
+function OptionalNumber({ label, value, onChange, unit, min, max, step, tip, defaultValue, defaultNote }: {
   label: string;
   value: number | null;
   onChange: (v: number | null) => void;
   unit: string; min: number; max: number; step: number; tip: string;
+  defaultValue: number;
+  /** Where the default comes from, with the value, e.g. "BuEM default: 20 %". */
+  defaultNote: string;
 }) {
   const t = useT();
+  const format = useFormatNumber();
   return (
     <div>
-      <NumberInput label={label} value={value ?? ''} onChange={(v) => onChange(Math.min(max, Math.max(min, v)))} unit={unit} min={min} max={max} step={step} tip={tip} />
+      <NumberInput
+        label={label} value={value ?? ''} placeholder={format(defaultValue, step < 1 ? 2 : 0)}
+        onChange={(v) => onChange(Math.min(max, Math.max(min, v)))} unit={unit} min={min} max={max} step={step} tip={tip}
+      />
       <p className="mt-1 text-[10px] text-muted-foreground">
-        {value === null ? t('insulation.buemDefault') : (
+        {value === null ? defaultNote : (
           <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>{t('insulation.useDefault')}</button>
         )}
       </p>
@@ -277,10 +287,18 @@ function OptionalNumber({ label, value, onChange, unit, min, max, step, tip }: {
   );
 }
 
-function SynthesisedWindows({ elements, general, setGen }: Props) {
+// BuEM's own defaults for windows it synthesises (building_registry and
+// live_synthesis in BuEM); U and g come from the TABULA archetype first.
+const BUEM_WINDOW_SHARE = 0.2;
+const BUEM_WINDOW_U = 2.8;
+const BUEM_WINDOW_G = 0.5;
+
+function SynthesisedWindows({ elements, general, setGen, levels, states }: Props) {
   const t = useT();
+  const format = useFormatNumber();
   if (Object.values(elements).some((el) => el.type === 'window')) return null;
   const share = general.window_to_wall_ratio;
+  const tabulaU = levels.find((level) => level.number === states.wall)?.data.U_Window_1;
   return (
     <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">{t('insulation.windows.title')}</p>
@@ -294,6 +312,8 @@ function SynthesisedWindows({ elements, general, setGen }: Props) {
           onChange={(v) => setGen('window_to_wall_ratio', v === null ? null : Math.min(v, 99) / 100)}
           unit="%" min={0} max={99} step={1}
           tip={t('insulation.windows.share.tip')}
+          defaultValue={BUEM_WINDOW_SHARE * 100}
+          defaultNote={t('insulation.default.buem', { value: `${format(BUEM_WINDOW_SHARE * 100, 0)} %` })}
         />
         <OptionalNumber
           label={t('insulation.windows.u.label')}
@@ -301,6 +321,8 @@ function SynthesisedWindows({ elements, general, setGen }: Props) {
           onChange={(v) => setGen('window_U', v)}
           unit="W/m²K" min={0} max={6} step={0.1}
           tip={t('insulation.windows.u.tip')}
+          defaultValue={tabulaU ?? BUEM_WINDOW_U}
+          defaultNote={t(tabulaU === undefined ? 'insulation.default.buem' : 'insulation.default.tabula', { value: `${format(tabulaU ?? BUEM_WINDOW_U, 2)} W/m²K` })}
         />
         <OptionalNumber
           label={t('insulation.windows.g.label')}
@@ -308,6 +330,8 @@ function SynthesisedWindows({ elements, general, setGen }: Props) {
           onChange={(v) => setGen('window_g_gl', v)}
           unit={t('insulation.unitShare')} min={0} max={1} step={0.05}
           tip={t('insulation.windows.g.tip')}
+          defaultValue={BUEM_WINDOW_G}
+          defaultNote={t('insulation.default.tabulaElse', { value: format(BUEM_WINDOW_G, 2) })}
         />
       </div>
     </div>

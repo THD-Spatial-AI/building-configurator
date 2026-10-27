@@ -205,7 +205,7 @@
       "none": "Elija un producto"
     },
     "fitsMore": {
-      "title": "Aquí cabe más",
+      "title": "Ver nuestra recomendación ({count})",
       "reach": "Módulos: {count} · {kwp} kWp",
       "use": "Usar en esta superficie"
     },
@@ -453,7 +453,6 @@
     "uValue": "Valor U",
     "lossFactor": "Coeficiente b",
     "unitShare": "0 a 1",
-    "buemDefault": "Valor por defecto de BuEM.",
     "useDefault": "Usar valor por defecto",
     "windows": {
       "title": "Ventanas que añade BuEM",
@@ -489,6 +488,11 @@
       "note": "Clase orientativa: calefacción por m², calificada con una misma escala en todos los países (la escala austriaca HWB, de G a A++), para comparar edificios entre países. Las etiquetas nacionales, como la neerlandesa, califican la energía primaria, que este modelo no calcula. Simulada, no es un certificado.",
       "failed": "No se pudieron calcular las clases energéticas.",
       "retry": "Reintentar"
+    },
+    "default": {
+      "buem": "Por defecto en BuEM: {value}",
+      "tabula": "Valor TABULA para este edificio: {value}",
+      "tabulaElse": "El valor TABULA de este edificio, o si no {value}"
     }
   },
   "options": {
@@ -616,7 +620,7 @@
       "type": "Tipo",
       "constructionYear": "Año de construcción",
       "country": "País",
-      "floorAreaPerStorey": "Superficie (por planta)",
+      "floorAreaPerStorey": "Superficie en planta",
       "storeys": "Plantas",
       "roomHeight": "Altura libre",
       "volume": "Volumen",
@@ -645,7 +649,9 @@
     "tile": {
       "statisticalDefault": "Valor estadístico"
     },
-    "builtIn": "Construido en {year}"
+    "builtIn": "Construido en {year}",
+    "eavesHeight": "{value} m hasta el alero",
+    "heightConflict": "{storeys} plantas de {room} m son más altas que el modelo 3D, que tiene {height} m hasta el alero. Corrija el número de plantas o la altura libre."
   },
   "envelope": {
     "compassNorth": "N"
@@ -712,7 +718,6 @@
     "hint": "La planta 1 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas; la superficie y la envolvente cuentan solo las plantas modeladas.",
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
     "floorArea": "Superficie modelada",
-    "heightNote": "En el modelo 3D una planta mide {height} m de alto; BuEM usa una altura de estancia de {room} m.",
     "pick": "Plantas",
     "pickHint": "Haga clic en plantas del modelo para seleccionarlas; configúrelas en Plantas modeladas, en la pestaña Edificio.",
     "lastOne": "Al menos una planta permanece en el modelo.",
