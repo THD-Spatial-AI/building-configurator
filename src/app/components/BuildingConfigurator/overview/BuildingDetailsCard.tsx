@@ -171,7 +171,7 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
       topic={TOPICS.building}
       title={t('panel.section.identity')}
       info={t('help.building')}
-      emphasised={isEditing}
+      emphasised
       action={onEditField && (
         <button
           type="button"
@@ -274,23 +274,26 @@ export function BuildingDetailsCard({
 
   return (
     <div className={cn(CARD, 'shrink-0')}>
-      <div className="flex items-center gap-4 border-b border-border px-4 py-3">
+      {/* Sticky so the tabs stay in reach while either tab scrolls; its fixed height is where the step bar sticks beneath it. */}
+      <div className="sticky top-0 z-20 flex h-[60px] items-center border-b border-border bg-card px-4">
+        <div role="tablist" className="inline-flex h-9 items-center rounded-md bg-muted p-1 text-muted-foreground">
         {tabs.map((tab) => (
           <button
             key={tab}
             type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
             data-tour={tab === 'technology' ? 'technologies' : undefined}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              'cursor-pointer whitespace-nowrap border-b-2 pb-0.5 text-[13px] transition-colors',
-              activeTab === tab
-                ? 'border-primary font-bold text-foreground'
-                : 'border-transparent font-medium text-muted-foreground hover:text-foreground',
+              'cursor-pointer whitespace-nowrap rounded-sm px-3 py-1 text-[13px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'hover:text-foreground',
             )}
           >
             {tab === 'building' ? t('panel.tab.building') : t('panel.title.technology')}
           </button>
         ))}
+        </div>
       </div>
 
       {activeTab === 'technology' ? (
@@ -298,7 +301,7 @@ export function BuildingDetailsCard({
       ) : (
         <div className="flex flex-col gap-3 p-4">
           {overviewSlot}
-          <StepPanel steps={allSteps} active={step} onActive={setStep} />
+          <StepPanel steps={allSteps} active={step} onActive={setStep} stickyTop="top-[60px]" />
         </div>
       )}
     </div>

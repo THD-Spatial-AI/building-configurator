@@ -86,6 +86,18 @@ describe('PvOverview', () => {
     expect(html).toContain(pv.typeLabel);
   });
 
+  it('explains how to add PV as one bullet per method, naming the controls in bold, closed once there is PV', () => {
+    expect(html).toMatch(/<details class="group[^"]*sky[^"]*"><summary/);
+    expect(html).toContain('How to add PV');
+    expect(html).toContain('<li><b class="font-semibold">Drag:</b> Open <b class="font-semibold">Photovoltaic options</b> and drag a product onto a roof or wall.</li>');
+    expect(html).toContain('to add PV to every surface marked <b class="font-semibold">Suggested for PV</b>.');
+    const none = renderToStaticMarkup(
+      <PvOverview pv={{ ...pv, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="basic" onSelect={() => {}} />,
+    );
+    expect(none).toMatch(/<details open="" class="group[^"]*sky/);
+    expect(none).toContain('No PV installed yet.');
+  });
+
   it('sums the installed capacity and counts the surfaces with PV', () => {
     expect(html).toContain('7.2 kWp');
     expect(html).toContain('1 of 3');
@@ -219,7 +231,7 @@ describe('PvSurfaceSection', () => {
     expect(onFlat).toContain('>Racked<');
     expect(onPitched).not.toContain('>Racked<');
     for (const label of ['Best fit', 'Portrait', 'Landscape']) expect(onPitched).toContain(`>${label}<`);
-    expect(onPitched).toMatch(/font-semibold[^"]*"[^>]*>Best fit</);
+    expect(onPitched).toMatch(/aria-pressed="true"[^>]*>Best fit</);
   });
 
   it('offers the panel tilt and facing of a racked surface, and the way back to flush', () => {

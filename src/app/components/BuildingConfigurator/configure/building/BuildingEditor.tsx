@@ -156,8 +156,9 @@ export function useBuildingSteps({
 }: BuildingStepsProps): Step[] {
   const t = useT();
   const format = useFormatNumber();
+  // A step's single card is in focus, like the open technology card; the Expert step's three cards are not.
   const card = (key: SectionKey) => (
-    <SectionCard key={key} topic={SECTION_TOPICS[key]} title={SECTION_LABELS[key](t)} info={t(`help.${key}`)} dashed={EXPERT_SECTIONS.includes(key)}>
+    <SectionCard key={key} topic={SECTION_TOPICS[key]} title={SECTION_LABELS[key](t)} info={t(`help.${key}`)} dashed={EXPERT_SECTIONS.includes(key)} emphasised={!EXPERT_SECTIONS.includes(key)}>
       <div className="flex flex-col gap-3 p-3">
         {key === 'occupancy' && storeys && <div className="border-b border-border pb-3">{storeys}</div>}
         <SectionBody id={key} general={general} setGen={setGen} mode={mode} />
@@ -188,6 +189,7 @@ export function useBuildingSteps({
           topic={TOPICS.building}
           title={t('editor.insulationTitle')}
           info={t('help.insulation')}
+          emphasised
           action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation, mode)}</span>}
         >
           <div className="flex flex-col gap-3 p-3">

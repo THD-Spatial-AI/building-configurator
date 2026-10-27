@@ -116,7 +116,7 @@
     "download": "Herunterladen",
     "source": {
       "buem": "Simuliert",
-      "none": "Kein Profil geladen",
+      "none": "Simuliert nach Speichern & Energiebedarf anzeigen",
       "file": "{name}",
       "aggregated": "{source} · aggregiert aus {from}"
     },
@@ -130,7 +130,8 @@
       "parse": "{reason}",
       "unreadable": "Lastprofil-Datei konnte nicht gelesen werden."
     },
-    "uploadSoon": "Das Hochladen eines gemessenen Profils folgt in Kürze."
+    "uploadSoon": "Das Hochladen eigener Verbrauchsprofile ist bald möglich.",
+    "downloadTip": "Die stündlichen Profile für Heizung, Kühlung, Strom, Warmwasser und Kochgas als eine CSV herunterladen"
   },
   "pv": {
     "state": {
@@ -185,7 +186,8 @@
       "title": "PV auf diesem Gebäude"
     },
     "surfaces": {
-      "toggle": "Für PV geeignete Flächen ({installed} von {total} mit PV)"
+      "toggle": "{name} ({installed} von {total} mit PV)",
+      "name": "Für PV geeignete Flächen"
     },
     "cost": {
       "investment": "Investition",
@@ -195,9 +197,10 @@
     "catalogue": {
       "hint": "Ziehen Sie ein Produkt auf ein Dach oder eine Wand, oder wählen Sie es im Bereich einer Fläche.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Photovoltaik-Optionen ({count})",
+      "toggle": "{name} ({count})",
       "search": "Katalog durchsuchen",
-      "drag": "Auf ein Dach oder eine Wand im Modell ziehen"
+      "drag": "Auf ein Dach oder eine Wand im Modell ziehen",
+      "name": "Photovoltaik-Optionen"
     },
     "product": {
       "label": "Produkt",
@@ -224,7 +227,7 @@
     },
     "installed": {
       "title": "Auf diesem Gebäude installiert",
-      "empty": "Noch keine PV. Öffnen Sie die Photovoltaik-Optionen und ziehen Sie ein Produkt auf ein Dach oder eine Wand.",
+      "empty": "Noch keine PV installiert.",
       "surfaces": {
         "one": "auf {count} Fläche",
         "other": "auf {count} Flächen"
@@ -243,11 +246,17 @@
       "other": "Auf {count} Flächen ({surfaces}) passt kein ganzes PV-Modul, daher tragen sie keine PV. Wählen Sie ein kleineres Produkt oder andere Flächen."
     },
     "help": {
-      "title": "So installieren Sie PV auf einer Fläche",
-      "drag": "Öffnen Sie die Photovoltaik-Optionen und ziehen Sie ein Produkt an seinem Griff auf ein Dach oder eine Wand im Modell.",
-      "click": "Oder klicken Sie im Modell auf ein Dach oder eine Wand, schalten Sie in dessen Bereich {install} ein und wählen Sie dort ein Produkt.",
-      "suggested": "Als {suggested} markierte Flächen eignen sich am besten für PV. In der Liste der verfügbaren Flächen installiert {useSuggested} PV auf allen.",
-      "remove": "Um PV zu entfernen, schalten Sie {install} im Bereich der Fläche oder in der Liste der verfügbaren Flächen aus."
+      "title": "So fügen Sie PV hinzu",
+      "drag": "Öffnen Sie {options} und ziehen Sie ein Produkt auf ein Dach oder eine Wand.",
+      "click": "Wählen Sie ein Dach oder eine Wand, schalten Sie {install} ein und wählen Sie ein Produkt.",
+      "remove": "Schalten Sie {install} im Bereich der Fläche oder unter {surfaces} aus.",
+      "lead": {
+        "drag": "Ziehen",
+        "click": "Klicken",
+        "all": "Alle auf einmal",
+        "remove": "Entfernen"
+      },
+      "all": "Klicken Sie auf {useSuggested}, um PV auf jeder als {suggested} markierten Fläche hinzuzufügen."
     },
     "sort": {
       "label": "Sortieren nach",

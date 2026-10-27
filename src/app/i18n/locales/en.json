@@ -116,7 +116,7 @@
     "download": "Download",
     "source": {
       "buem": "Simulated",
-      "none": "No profile loaded",
+      "none": "Simulated after Save & Preview",
       "file": "{name}",
       "aggregated": "{source} · aggregated from {from}"
     },
@@ -130,7 +130,8 @@
       "parse": "{reason}",
       "unreadable": "Could not parse load profile file."
     },
-    "uploadSoon": "Uploading a measured profile is coming soon."
+    "uploadSoon": "Custom consumption profile uploads will be available soon.",
+    "downloadTip": "Download the hourly heating, cooling, electricity, hot water and cooking gas profiles as one CSV"
   },
   "pv": {
     "state": {
@@ -185,7 +186,8 @@
       "title": "PV on this building"
     },
     "surfaces": {
-      "toggle": "Available surfaces for PV ({installed} of {total} with PV)"
+      "toggle": "{name} ({installed} of {total} with PV)",
+      "name": "Available surfaces for PV"
     },
     "cost": {
       "investment": "Investment",
@@ -195,9 +197,10 @@
     "catalogue": {
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Photovoltaic options ({count})",
+      "toggle": "{name} ({count})",
       "search": "Search the catalogue",
-      "drag": "Drag onto a roof or wall in the model"
+      "drag": "Drag onto a roof or wall in the model",
+      "name": "Photovoltaic options"
     },
     "product": {
       "label": "Product",
@@ -224,7 +227,7 @@
     },
     "installed": {
       "title": "Installed on this building",
-      "empty": "No PV yet. Open the photovoltaic options and drag a product onto a roof or wall.",
+      "empty": "No PV installed yet.",
       "surfaces": {
         "one": "on {count} surface",
         "other": "on {count} surfaces"
@@ -243,11 +246,17 @@
       "other": "No whole PV module fits on {count} surfaces ({surfaces}), so they have no PV. Choose a smaller product or other surfaces."
     },
     "help": {
-      "title": "How to install PV on a surface",
-      "drag": "Open the photovoltaic options and drag a product by its handle onto a roof or wall in the model.",
-      "click": "Or click a roof or wall in the model, switch {install} on in its panel and choose a product there.",
-      "suggested": "Surfaces marked {suggested} suit PV best. In the list of available surfaces, {useSuggested} installs PV on all of them.",
-      "remove": "To remove PV, switch {install} off in the surface's panel or in the list of available surfaces."
+      "title": "How to add PV",
+      "drag": "Open {options} and drag a product onto a roof or wall.",
+      "click": "Select a roof or wall, switch on {install} and choose a product.",
+      "remove": "Switch off {install} in the surface's panel or in {surfaces}.",
+      "lead": {
+        "drag": "Drag",
+        "click": "Click",
+        "all": "All at once",
+        "remove": "Remove"
+      },
+      "all": "Click {useSuggested} to add PV to every surface marked {suggested}."
     },
     "sort": {
       "label": "Sort by",

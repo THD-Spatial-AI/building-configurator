@@ -17,6 +17,17 @@ export interface LoadDataPoint {
 }
 
 /**
+ * The hourly profiles as CSV, one column per use: heating, cooling,
+ * electricity and hot water in kWh, cooking gas in kWh of gas.
+ */
+export function profileCsv(points: readonly LoadDataPoint[]): string {
+  const header = 'timestamp,heating_kwh,cooling_kwh,electricity_kwh,hot_water_kwh,cooking_gas_kwh';
+  // `hotwater` holds cooling and `dhw` hot water (see LoadDataPoint).
+  const rows = points.map((p) => [p.timestamp, p.heating, p.hotwater, p.electricity, p.dhw, p.kitchen].join(','));
+  return [header, ...rows].join('\n');
+}
+
+/**
  * Where a displayed total actually came from — undefined/'buem' means "the
  * last confirmed full simulation", the ordinary/default state that needs no
  * tag. 'ignis' is a fast live estimate (heating only — ignis has no

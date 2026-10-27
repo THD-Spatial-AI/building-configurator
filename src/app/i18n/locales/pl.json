@@ -118,7 +118,7 @@
     "download": "Pobierz",
     "source": {
       "buem": "Symulowany",
-      "none": "Nie wczytano profilu",
+      "none": "Symulowany po Zapisz i pokaż zapotrzebowanie",
       "file": "{name}",
       "aggregated": "{source} · agregacja z danych {from}"
     },
@@ -132,7 +132,8 @@
       "parse": "{reason}",
       "unreadable": "Nie można odczytać pliku profilu obciążenia."
     },
-    "uploadSoon": "Przesyłanie zmierzonego profilu będzie dostępne wkrótce."
+    "uploadSoon": "Przesyłanie własnych profili zużycia będzie wkrótce dostępne.",
+    "downloadTip": "Pobierz godzinowe profile ogrzewania, chłodzenia, prądu, ciepłej wody i gazu do gotowania w jednym pliku CSV"
   },
   "pv": {
     "state": {
@@ -187,7 +188,8 @@
       "title": "PV na tym budynku"
     },
     "surfaces": {
-      "toggle": "Powierzchnie dostępne dla PV ({installed} z {total} z PV)"
+      "toggle": "{name} ({installed} z {total} z PV)",
+      "name": "Powierzchnie dostępne dla PV"
     },
     "cost": {
       "investment": "Inwestycja",
@@ -197,9 +199,10 @@
     "catalogue": {
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Opcje fotowoltaiczne ({count})",
+      "toggle": "{name} ({count})",
       "search": "Szukaj w katalogu",
-      "drag": "Przeciągnij na dach lub ścianę w modelu"
+      "drag": "Przeciągnij na dach lub ścianę w modelu",
+      "name": "Opcje fotowoltaiczne"
     },
     "product": {
       "label": "Produkt",
@@ -226,7 +229,7 @@
     },
     "installed": {
       "title": "Zainstalowane na tym budynku",
-      "empty": "Brak PV. Otwórz opcje fotowoltaiczne i przeciągnij produkt na dach lub ścianę.",
+      "empty": "Nie zainstalowano jeszcze PV.",
       "surfaces": {
         "one": "na {count} przegrodzie",
         "few": "na {count} przegrodach",
@@ -251,11 +254,17 @@
       "other": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie."
     },
     "help": {
-      "title": "Jak zainstalować PV na powierzchni",
-      "drag": "Otwórz opcje fotowoltaiczne i przeciągnij produkt za uchwyt na dach lub ścianę w modelu.",
-      "click": "Albo kliknij dach lub ścianę w modelu, włącz {install} w jej panelu i wybierz tam produkt.",
-      "suggested": "Powierzchnie oznaczone {suggested} najlepiej nadają się do PV. Na liście dostępnych powierzchni {useSuggested} instaluje PV na wszystkich.",
-      "remove": "Aby usunąć PV, wyłącz {install} w panelu powierzchni lub na liście dostępnych powierzchni."
+      "title": "Jak dodać PV",
+      "drag": "Otwórz {options} i przeciągnij produkt na dach lub ścianę.",
+      "click": "Wybierz dach lub ścianę, włącz {install} i wybierz produkt.",
+      "remove": "Wyłącz {install} w panelu powierzchni lub w sekcji {surfaces}.",
+      "lead": {
+        "drag": "Przeciągnij",
+        "click": "Kliknij",
+        "all": "Wszystkie naraz",
+        "remove": "Usuń"
+      },
+      "all": "Kliknij {useSuggested}, aby dodać PV na każdej powierzchni oznaczonej {suggested}."
     },
     "sort": {
       "label": "Sortuj według",

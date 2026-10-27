@@ -117,7 +117,7 @@
     "download": "Descargar",
     "source": {
       "buem": "Simulado",
-      "none": "Ningún perfil cargado",
+      "none": "Simulado tras Guardar y ver demanda energética",
       "file": "{name}",
       "aggregated": "{source} · agregado de datos {from}"
     },
@@ -131,7 +131,8 @@
       "parse": "{reason}",
       "unreadable": "No se pudo leer el archivo del perfil de carga."
     },
-    "uploadSoon": "Pronto se podrá subir un perfil medido."
+    "uploadSoon": "Pronto podrá subir sus propios perfiles de consumo.",
+    "downloadTip": "Descargar los perfiles horarios de calefacción, refrigeración, electricidad, agua caliente y gas de cocina en un CSV"
   },
   "pv": {
     "state": {
@@ -186,7 +187,8 @@
       "title": "FV en este edificio"
     },
     "surfaces": {
-      "toggle": "Superficies disponibles para FV ({installed} de {total} con FV)"
+      "toggle": "{name} ({installed} de {total} con FV)",
+      "name": "Superficies disponibles para FV"
     },
     "cost": {
       "investment": "Inversión",
@@ -196,9 +198,10 @@
     "catalogue": {
       "hint": "Arrastre un producto a un tejado o una pared, o elíjalo en el panel de una superficie.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Opciones fotovoltaicas ({count})",
+      "toggle": "{name} ({count})",
       "search": "Buscar en el catálogo",
-      "drag": "Arrastre a un tejado o una pared del modelo"
+      "drag": "Arrastre a un tejado o una pared del modelo",
+      "name": "Opciones fotovoltaicas"
     },
     "product": {
       "label": "Producto",
@@ -225,7 +228,7 @@
     },
     "installed": {
       "title": "Instalado en este edificio",
-      "empty": "Aún no hay FV. Abra las opciones fotovoltaicas y arrastre un producto a un tejado o una pared.",
+      "empty": "Aún no hay FV instalada.",
       "surfaces": {
         "one": "en {count} superficie",
         "other": "en {count} superficies"
@@ -244,11 +247,17 @@
       "other": "Ningún módulo FV completo cabe en {count} superficies ({surfaces}), así que no tienen FV. Elija un producto más pequeño u otras superficies."
     },
     "help": {
-      "title": "Cómo instalar FV en una superficie",
-      "drag": "Abra las opciones fotovoltaicas y arrastre un producto por su asa a un tejado o una pared del modelo.",
-      "click": "O haga clic en un tejado o una pared del modelo, active {install} en su panel y elija allí un producto.",
-      "suggested": "Las superficies marcadas como {suggested} son las más adecuadas para FV. En la lista de superficies disponibles, {useSuggested} instala FV en todas.",
-      "remove": "Para quitar la FV, desactive {install} en el panel de la superficie o en la lista de superficies disponibles."
+      "title": "Cómo añadir FV",
+      "drag": "Abra {options} y arrastre un producto a un tejado o una pared.",
+      "click": "Seleccione un tejado o una pared, active {install} y elija un producto.",
+      "remove": "Desactive {install} en el panel de la superficie o en {surfaces}.",
+      "lead": {
+        "drag": "Arrastrar",
+        "click": "Clic",
+        "all": "Todas a la vez",
+        "remove": "Quitar"
+      },
+      "all": "Haga clic en {useSuggested} para añadir FV a cada superficie marcada como {suggested}."
     },
     "sort": {
       "label": "Ordenar por",

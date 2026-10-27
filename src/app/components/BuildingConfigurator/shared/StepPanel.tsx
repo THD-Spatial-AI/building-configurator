@@ -49,10 +49,12 @@ function Link({ done, side }: { done: boolean; side: 'left' | 'right' }) {
   );
 }
 
-export function StepPanel({ steps, active, onActive }: {
+export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
   steps: Step[];
   active: string;
   onActive: (key: string) => void;
+  /** Where the step bar sticks, as a Tailwind top class: below any bar that sticks above it. */
+  stickyTop?: string;
 }) {
   const t = useT();
   const index = Math.max(0, steps.findIndex((step) => step.key === active));
@@ -66,8 +68,8 @@ export function StepPanel({ steps, active, onActive }: {
   const next = steps[index + 1];
   return (
     <div className="flex flex-col gap-3">
-      {/* Sticks under the panel's top edge while the section scrolls beneath it. */}
-      <nav aria-label={t('steps.nav')} className="sticky top-0 z-10 -mx-4 border-b border-border bg-card px-4 py-2">
+      {/* Sticks at stickyTop while the section scrolls beneath it. */}
+      <nav aria-label={t('steps.nav')} className={cn('sticky z-10 -mx-4 border-b border-border bg-card px-4 py-2', stickyTop)}>
         <ol className="m-0 flex list-none items-start p-0">
           {steps.map((step, i) => {
             const on = step.key === current.key;

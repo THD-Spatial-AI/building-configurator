@@ -4,8 +4,7 @@
 
 import { cn } from '@/lib/utils';
 import { useFormatNumber, useT } from '../../i18n';
-import { DecimalInput, InfoTip } from '../BuildingConfigurator/shared/ui';
-import { Switch } from './PvMode';
+import { DecimalInput, InfoTip, Switch, TEXT_INPUT } from '../BuildingConfigurator/shared/ui';
 import { missingDwellings, type StoreyDwellings } from '../../lib/storeys';
 
 /** The storeys modelled with `chosen` left out or put back; null when all are in, undefined when none would be. */
@@ -151,7 +150,7 @@ export function StoreysModelled({
                   placeholder={selected.length > 1 ? t('storeys.mixed') : undefined}
                   aria-label={t('storeys.dwellingsPerStorey')}
                   onChange={setDwellings}
-                  className="h-8 w-20 rounded-md border border-border bg-card px-2 text-right text-[12px] text-foreground"
+                  className={`${TEXT_INPUT} w-20 text-right`}
                 />
               </label>
             )}

@@ -1,6 +1,5 @@
 export const config = {
-  // Protect everything except the feedback API endpoint
-  matcher: '/((?!api/feedback).*)',
+  matcher: '/(.*)',
 };
 
 export default function middleware(req: Request) {

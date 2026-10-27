@@ -2,9 +2,7 @@
 // the envelope. Field keys are BuEM's own names, see DEFAULT_GENERAL.
 
 import type { ReactNode } from 'react';
-import {
-  FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput,
-} from '@/app/components/BuildingConfigurator/shared/ui';
+import { Dropdown, FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
   archetypeOptions,
   buildingTypeName,
@@ -190,12 +188,13 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
         {requiresResidentialUnits(general.buildingType) && ` ${t('household.equipment.sameInEveryDwelling')}`}
       </p>
       {EQUIPMENT_GROUPS.map((group) => (
-        <details key={group.id} className="rounded-md border border-border">
-          <summary className="flex cursor-pointer select-none items-baseline justify-between gap-2 px-2.5 py-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">{group.label(t)}</span>
-            <span className="text-[10px] text-muted-foreground">{groupSummary(t, group, equipment)}</span>
-          </summary>
-          <div className="flex flex-col gap-1.5 border-t border-border p-2.5">
+        <Dropdown key={group.id} title={(
+          <span className="flex items-baseline justify-between gap-2">
+            <span>{group.label(t)}</span>
+            <span className="text-[11px] font-normal text-muted-foreground">{groupSummary(t, group, equipment)}</span>
+          </span>
+        )}>
+          <div className="flex flex-col gap-1.5">
             {group.id === 'electronics' && (
               <ApplianceRow label={t('household.equipment.televisions')}>
                 <SegmentedControl options={tvOptions(t)} value={tvCount(equipment)} onChange={setTvCount} />
@@ -211,7 +210,7 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
               </ApplianceRow>
             ))}
           </div>
-        </details>
+        </Dropdown>
       ))}
       {Object.keys(equipment).length > 0 && (
         <button

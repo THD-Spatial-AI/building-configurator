@@ -27,14 +27,16 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - A surface's tilt and facing are edited in Expert only. PV takes its geometry from the 3D model, not from these edits.
 - The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals.
 - "Results to compute" moves to Expert.
-- Drop-downs, search fields, option rows and number fields follow EnerPlanET's select, input and row styles. The Technologies tab pins the estimated total cost below its cards.
+- Drop-downs, search fields, option rows, number fields, switches, segmented choices, the panel tabs and section cards follow EnerPlanET's select, input, switch, tabs and card styles, on the Building and Technologies tabs and in the surface panel. The Technologies tab pins the estimated total cost below its cards.
 - The Building tab shows its sections as steps under the annual demand: a step bar names each with a status mark (complete, needs attention, error), one section shows at a time, with Back and Next beneath it.
 - Breaking: `toBuem` returns `storeys` and `construction_year` inside `configurator` (type `ConfiguratorKeys`), no longer beside the `building` block. Buildings stored by 0.14.0 still reopen with both.
+- The build uses Vite 7, which brings esbuild 0.28 in place of the 0.25 release with a known security advisory.
 
 ### Removed
 
 - The Envelope tab and its surface groups list, the building editor's identity section and the unused thermal rating.
 - The Expert option to add a surface, which 3D city data has no use for, and the note over the model counting surfaces with no area.
+- The unused Vercel feedback function (`api/feedback.ts`) and its `@vercel/node` and `@vercel/blob` dependencies. `@vercel/node` was the last source of esbuild 0.14.
 
 ### Fixed
 
