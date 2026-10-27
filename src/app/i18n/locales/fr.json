@@ -481,7 +481,7 @@
     "classes": {
       "comparing": "BuEM calcule chaque niveau…",
       "perM2": "{value} kWh/m²",
-      "note": "Classe indicative pour ce bâtiment : besoin de chauffage par m² sur l'échelle autrichienne HWB, de G à A++. Simulée, pas un certificat énergétique.",
+      "note": "Classe indicative : besoin de chauffage par m², noté sur une même échelle pour tous les pays (l'échelle autrichienne HWB, de G à A++), afin de comparer les bâtiments entre pays. Les étiquettes nationales, comme l'étiquette énergétique néerlandaise, notent l'énergie primaire, que ce modèle ne calcule pas. Simulée, pas un certificat.",
       "failed": "Les classes énergétiques n'ont pas pu être calculées.",
       "retry": "Réessayer"
     }

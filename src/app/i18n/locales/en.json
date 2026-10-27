@@ -477,7 +477,7 @@
     "classes": {
       "comparing": "Running BuEM for each level…",
       "perM2": "{value} kWh/m²",
-      "note": "Indicative class for this building: space heating per m² on the Austrian HWB scale, G to A++. Simulated, not an energy certificate.",
+      "note": "Indicative class: space heating per m², graded on one scale for every country (the Austrian HWB scale, G to A++), so buildings compare across countries. National labels such as the Dutch energy label grade primary energy, which this model does not compute. Simulated, not a certificate.",
       "failed": "The energy classes could not be worked out.",
       "retry": "Try again"
     }
