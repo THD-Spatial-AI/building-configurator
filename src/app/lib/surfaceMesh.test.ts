@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { buildSurfaceGroup, computeOrigin, isEnvelopeDetached, polygonArea, pvModulesGeometry, surfacesFromGeometryResponse } from './surfaceMesh';
+import { buildSurfaceGroup, computeOrigin, drawnSurfaceIds, isEnvelopeDetached, polygonArea, pvModulesGeometry, surfacesFromGeometryResponse } from './surfaceMesh';
 import type { BuildingGeometry } from './enerplanet';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
@@ -160,5 +160,16 @@ describe('pvModulesGeometry', () => {
     const landscape = pvModulesGeometry([[[0, 0, 0], [1.7, 0, 0], [1.7, 1, 0], [0, 1, 0]]], origin);
     expect(uvAt(portrait, 1)).toEqual([1, 0]);
     expect(uvAt(landscape, 1)).toEqual([0, 1]);
+  });
+});
+
+describe('drawnSurfaceIds', () => {
+  const surfaces = surfacesFromGeometryResponse([Object.values(GEOMETRY)[0]]);
+  const [kept, deleted, sliver] = surfaces.map((s) => s.id);
+  const loaded = { [kept]: {}, [deleted]: {} };
+
+  it('draws a surface the host left out of the envelope, not one deleted in the view', () => {
+    const ids = drawnSurfaceIds(surfaces.slice(0, 3), loaded, new Set([kept]));
+    expect([...ids].sort()).toEqual([kept, sliver].sort());
   });
 });

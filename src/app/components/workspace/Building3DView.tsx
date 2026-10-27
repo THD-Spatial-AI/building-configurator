@@ -17,7 +17,7 @@ import { BuildingEditor } from '../BuildingConfigurator/configure/building/Build
 import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
 import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
 import { cn } from '@/lib/utils';
-import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
+import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePanel } from './SurfacePanel';
@@ -207,6 +207,10 @@ export function Building3DView({
     [elements],
   );
   const surfaces = geometry?.surfaces ?? [];
+  const drawnIds = useMemo(
+    () => drawnSurfaceIds(geometry?.surfaces ?? [], building.envelope, envelopeIds),
+    [geometry, building.envelope, envelopeIds],
+  );
   /** Models only these storeys (null: all), each surface cut to its share inside them. */
   const setModelledStoreys = (modelled: number[] | null) => model.setStoreysModelled(
     modelled,
@@ -462,7 +466,7 @@ export function Building3DView({
               surfaces={surfaces}
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
-              visibleIds={envelopeIds}
+              visibleIds={drawnIds}
               pvIds={pvSets?.installed}
               pvModules={pvModules}
               candidateIds={onTech ? pvSets?.suggested : undefined}
