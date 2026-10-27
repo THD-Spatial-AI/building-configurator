@@ -5,7 +5,7 @@
 
 import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { useFormatNumber, useT, type Translate } from '../../i18n';
+import { useT, type Translate } from '../../i18n';
 
 /** Pointer position as an angle in degrees, clockwise from north (up). */
 function pointerAngle(element: HTMLElement, clientX: number, clientY: number): number {
@@ -188,71 +188,6 @@ export function TiltDial({ value, onChange }: TiltDialProps) {
       <span className="text-[10px] font-semibold text-muted-foreground">
         {Math.round(value)}° · {tiltLabel(value, t)}
       </span>
-    </div>
-  );
-}
-
-interface PresetSliderProps {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  unit?: string;
-  decimals?: number;
-  /** Named values worth one click, e.g. this building's TABULA levels. */
-  presets?: { label: string; value: number }[];
-  /** Words for the current value, e.g. "Uninsulated". */
-  quality?: string;
-  onChange: (value: number) => void;
-}
-
-/** Slider with the value spelled out and one-click named positions. */
-export function PresetSlider({
-  label, value, min, max, step, unit, decimals = 2, presets = [], quality, onChange,
-}: PresetSliderProps) {
-  const format = useFormatNumber();
-  return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between">
-        <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
-        <span className="text-[12px] font-semibold text-foreground">
-          {format(value, decimals)}{unit && <span className="ml-1 text-[10px] font-normal text-muted-foreground">{unit}</span>}
-        </span>
-      </div>
-      <input
-        type="range"
-        aria-label={label}
-        min={min}
-        max={max}
-        step={step}
-        value={Math.min(max, Math.max(min, value))}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-      />
-      {(quality || presets.length > 0) && (
-        <div className="mt-1.5 flex flex-wrap items-center gap-1">
-          {quality && (
-            <span className="mr-auto text-[10px] font-medium text-muted-foreground">{quality}</span>
-          )}
-          {presets.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              title={`${preset.label}: ${format(preset.value, decimals)}${unit ? ` ${unit}` : ''}`}
-              onClick={() => onChange(preset.value)}
-              className={cn(
-                'cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-medium transition-colors',
-                Math.abs(preset.value - value) < step / 2
-                  ? 'border-primary/40 bg-primary/10 text-primary'
-                  : 'border-border bg-card text-muted-foreground hover:border-border',
-              )}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

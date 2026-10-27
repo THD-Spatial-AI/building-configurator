@@ -162,7 +162,6 @@
       "panels": "{kwp} kWp na {area} m² panelů",
       "remove": "Odebrat FV",
       "done": "Hotovo",
-      "modules": "Moduly: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tuto plochu se nevejde žádný celý modul.",
       "spaceLimited": "Místo na této ploše omezuje moduly; větší využitelný podíl žádný nepřidá.",
       "noFitShort": "Žádný modul se nevejde"
@@ -193,8 +192,7 @@
     "cost": {
       "investment": "Investice",
       "omPerYear": "Provoz a údržba za rok",
-      "estimateNote": "Odhady z nákladů produktů, před simulací.",
-      "investmentEstimate": "Investice zhruba {amount}, odhad"
+      "estimateNote": "Odhady z nákladů produktů, před simulací."
     },
     "catalogue": {
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
@@ -265,6 +263,12 @@
       "cost": "Nejnižší cena za kWp",
       "capacity": "Nejvyšší výkon modulu",
       "size": "Nejmenší modul"
+    },
+    "result": {
+      "modules": "Moduly",
+      "capacity": "Výkon",
+      "area": "Plocha panelů",
+      "investment": "Investice, odhad"
     }
   },
   "tech": {

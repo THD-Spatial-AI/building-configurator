@@ -160,7 +160,6 @@
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
-      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "No whole module fits on this surface.",
       "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none.",
       "noFitShort": "No module fits"
@@ -191,8 +190,7 @@
     "cost": {
       "investment": "Investment",
       "omPerYear": "O&M per year",
-      "estimateNote": "Estimates from the products’ costs, before a simulation.",
-      "investmentEstimate": "Investment about {amount}, an estimate"
+      "estimateNote": "Estimates from the products’ costs, before a simulation."
     },
     "catalogue": {
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
@@ -257,6 +255,12 @@
       "cost": "Lowest cost per kWp",
       "capacity": "Highest module power",
       "size": "Smallest module"
+    },
+    "result": {
+      "modules": "Modules",
+      "capacity": "Capacity",
+      "area": "Panel area",
+      "investment": "Investment, estimated"
     }
   },
   "tech": {

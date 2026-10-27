@@ -213,7 +213,9 @@ describe('PvSurfaceSection', () => {
   it('shows the module count, the mounting choice on a flat roof only, and the format', () => {
     const onFlat = renderToStaticMarkup(<PvSurfaceSection surfaceId="f1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />);
     const onPitched = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} layout={flush} />);
-    expect(onPitched).toContain('Modules: 24 · 9.6 kWp · 48 m²');
+    expect(onPitched).toMatch(/>Modules<\/th><td[^>]*>24<\/td>/);
+    expect(onPitched).toContain('>9.6 kWp<');
+    expect(onPitched).toContain('>48 m²<');
     expect(onFlat).toContain('>Racked<');
     expect(onPitched).not.toContain('>Racked<');
     for (const label of ['Best fit', 'Portrait', 'Landscape']) expect(onPitched).toContain(`>${label}<`);
@@ -253,7 +255,7 @@ describe('PvSurfaceSection', () => {
       <PvSurfaceSection surfaceId="r1" surface={surface} pv={withCatalogue} elements={elements} layout={one} polygon={polygon} />,
     );
     expect(html).toMatch(/<option value="mono" selected="">Demo Mono 420 W<\/option>/);
-    expect(html).toContain('Investment about 210 EUR, an estimate');
+    expect(html).toMatch(/>Investment, estimated<\/th><td[^>]*>210 EUR<\/td>/);
     expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*><svg[^>]*>.*?<\/svg><span[^>]*>See our recommendation \(1\)/);
     expect(html).toContain('Demo Compact 300 W');
     expect(html).toContain('Modules: 2 · 0.6 kWp · 600 EUR/kWp');

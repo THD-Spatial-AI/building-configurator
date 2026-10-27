@@ -162,7 +162,6 @@
       "panels": "{kwp} kWp na {area} m² modułów",
       "remove": "Usuń PV",
       "done": "Gotowe",
-      "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
       "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego.",
       "noFitShort": "Żaden moduł się nie mieści"
@@ -193,8 +192,7 @@
     "cost": {
       "investment": "Inwestycja",
       "omPerYear": "Eksploatacja i utrzymanie rocznie",
-      "estimateNote": "Szacunki na podstawie kosztów produktów, przed symulacją.",
-      "investmentEstimate": "Inwestycja około {amount}, szacunek"
+      "estimateNote": "Szacunki na podstawie kosztów produktów, przed symulacją."
     },
     "catalogue": {
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
@@ -265,6 +263,12 @@
       "cost": "Najniższy koszt za kWp",
       "capacity": "Najwyższa moc modułu",
       "size": "Najmniejszy moduł"
+    },
+    "result": {
+      "modules": "Moduły",
+      "capacity": "Moc",
+      "area": "Powierzchnia paneli",
+      "investment": "Inwestycja, szacunkowo"
     }
   },
   "tech": {

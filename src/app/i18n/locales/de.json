@@ -160,7 +160,6 @@
       "panels": "{kwp} kWp auf {area} m² Modulfläche",
       "remove": "PV entfernen",
       "done": "Fertig",
-      "modules": "Module: {count} · {kwp} kWp · {area} m²",
       "noFit": "Auf diese Fläche passt kein ganzes Modul.",
       "spaceLimited": "Der Platz auf dieser Fläche begrenzt die Module; ein größerer nutzbarer Anteil fügt keine hinzu.",
       "noFitShort": "Kein Modul passt"
@@ -191,8 +190,7 @@
     "cost": {
       "investment": "Investition",
       "omPerYear": "Betrieb und Wartung pro Jahr",
-      "estimateNote": "Schätzungen aus den Kosten der Produkte, vor einer Simulation.",
-      "investmentEstimate": "Investition etwa {amount}, geschätzt"
+      "estimateNote": "Schätzungen aus den Kosten der Produkte, vor einer Simulation."
     },
     "catalogue": {
       "hint": "Ziehen Sie ein Produkt auf ein Dach oder eine Wand, oder wählen Sie es im Bereich einer Fläche.",
@@ -257,6 +255,12 @@
       "cost": "Niedrigste Kosten pro kWp",
       "capacity": "Höchste Modulleistung",
       "size": "Kleinstes Modul"
+    },
+    "result": {
+      "modules": "Module",
+      "capacity": "Leistung",
+      "area": "Modulfläche",
+      "investment": "Investition, geschätzt"
     }
   },
   "tech": {

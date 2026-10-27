@@ -161,7 +161,6 @@
       "panels": "{kwp} kWp sur {area} m² de modules",
       "remove": "Retirer le PV",
       "done": "Terminé",
-      "modules": "Modules : {count} · {kwp} kWp · {area} m²",
       "noFit": "Aucun module entier ne tient sur cette surface.",
       "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun.",
       "noFitShort": "Aucun module ne tient"
@@ -192,8 +191,7 @@
     "cost": {
       "investment": "Investissement",
       "omPerYear": "Exploitation et maintenance par an",
-      "estimateNote": "Estimations à partir des coûts des produits, avant une simulation.",
-      "investmentEstimate": "Investissement d’environ {amount}, estimé"
+      "estimateNote": "Estimations à partir des coûts des produits, avant une simulation."
     },
     "catalogue": {
       "hint": "Faites glisser un produit sur un toit ou un mur, ou choisissez-le dans le panneau d’une surface.",
@@ -258,6 +256,12 @@
       "cost": "Coût par kWc le plus bas",
       "capacity": "Puissance de module la plus élevée",
       "size": "Module le plus petit"
+    },
+    "result": {
+      "modules": "Modules",
+      "capacity": "Puissance",
+      "area": "Surface des panneaux",
+      "investment": "Investissement, estimé"
     }
   },
   "tech": {

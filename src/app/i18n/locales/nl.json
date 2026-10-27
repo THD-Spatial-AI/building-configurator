@@ -160,7 +160,6 @@
       "panels": "{kwp} kWp op {area} m² panelen",
       "remove": "PV verwijderen",
       "done": "Klaar",
-      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "Er past geen hele module op dit vlak.",
       "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe.",
       "noFitShort": "Geen module past"
@@ -191,8 +190,7 @@
     "cost": {
       "investment": "Investering",
       "omPerYear": "Beheer en onderhoud per jaar",
-      "estimateNote": "Schattingen op basis van de productkosten, vóór een simulatie.",
-      "investmentEstimate": "Investering ongeveer {amount}, geschat"
+      "estimateNote": "Schattingen op basis van de productkosten, vóór een simulatie."
     },
     "catalogue": {
       "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
@@ -257,6 +255,12 @@
       "cost": "Laagste kosten per kWp",
       "capacity": "Hoogste modulevermogen",
       "size": "Kleinste module"
+    },
+    "result": {
+      "modules": "Modules",
+      "capacity": "Vermogen",
+      "area": "Paneeloppervlak",
+      "investment": "Investering, geschat"
     }
   },
   "tech": {

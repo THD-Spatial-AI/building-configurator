@@ -160,7 +160,6 @@
       "panels": "{kwp} kWp su {area} m² di moduli",
       "remove": "Rimuovi FV",
       "done": "Fatto",
-      "modules": "Moduli: {count} · {kwp} kWp · {area} m²",
       "noFit": "Su questa superficie non entra nessun modulo intero.",
       "spaceLimited": "Lo spazio su questa superficie limita i moduli; una quota utilizzabile maggiore non ne aggiunge.",
       "noFitShort": "Nessun modulo entra"
@@ -191,8 +190,7 @@
     "cost": {
       "investment": "Investimento",
       "omPerYear": "Gestione e manutenzione all’anno",
-      "estimateNote": "Stime dai costi dei prodotti, prima di una simulazione.",
-      "investmentEstimate": "Investimento di circa {amount}, stimato"
+      "estimateNote": "Stime dai costi dei prodotti, prima di una simulazione."
     },
     "catalogue": {
       "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
@@ -257,6 +255,12 @@
       "cost": "Costo per kWp più basso",
       "capacity": "Potenza del modulo più alta",
       "size": "Modulo più piccolo"
+    },
+    "result": {
+      "modules": "Moduli",
+      "capacity": "Potenza",
+      "area": "Superficie dei pannelli",
+      "investment": "Investimento, stimato"
     }
   },
   "tech": {
