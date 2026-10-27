@@ -193,7 +193,7 @@
     "catalogue": {
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Catalogue ({count})",
+      "toggle": "Photovoltaic options ({count})",
       "search": "Search the catalogue"
     },
     "product": {
@@ -206,8 +206,6 @@
       "use": "Use on this surface"
     },
     "values": {
-      "title": "Technology values",
-      "product": "Product",
       "buildingOnly": "Changes to {name} apply to this building only.",
       "question": {
         "cost_energy_cap": "What does it cost per kWp?",
@@ -218,11 +216,12 @@
       "copyName": "{name} (copy)",
       "save": "Save",
       "saved": "Saved as {name}.",
-      "saveFailed": "Could not save the technology. Try again."
+      "saveFailed": "Could not save the technology. Try again.",
+      "edit": "Edit the values of {name}"
     },
     "installed": {
       "title": "Installed on this building",
-      "empty": "No PV yet. Open the catalogue and drag a product onto a roof or wall.",
+      "empty": "No PV yet. Open the photovoltaic options and drag a product onto a roof or wall.",
       "surfaces": {
         "one": "on {count} surface",
         "other": "on {count} surfaces"
@@ -232,7 +231,10 @@
         "other": "{count} modules"
       }
     },
-    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only."
+    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
+    "options": {
+      "search": "Search the photovoltaic options"
+    }
   },
   "tech": {
     "none": "No technologies on this building.",

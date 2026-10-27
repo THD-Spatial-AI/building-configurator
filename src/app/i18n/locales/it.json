@@ -193,7 +193,7 @@
     "catalogue": {
       "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Catalogo ({count})",
+      "toggle": "Opzioni fotovoltaiche ({count})",
       "search": "Cerca nel catalogo"
     },
     "product": {
@@ -206,8 +206,6 @@
       "use": "Usa su questa superficie"
     },
     "values": {
-      "title": "Valori della tecnologia",
-      "product": "Prodotto",
       "buildingOnly": "Le modifiche a {name} valgono solo per questo edificio.",
       "question": {
         "cost_energy_cap": "Quanto costa per kWp?",
@@ -218,11 +216,12 @@
       "copyName": "{name} (copia)",
       "save": "Salva",
       "saved": "Salvato come {name}.",
-      "saveFailed": "Impossibile salvare la tecnologia. Riprova."
+      "saveFailed": "Impossibile salvare la tecnologia. Riprova.",
+      "edit": "Modifica i valori di {name}"
     },
     "installed": {
       "title": "Installato su questo edificio",
-      "empty": "Ancora nessun FV. Apri il catalogo e trascina un prodotto su un tetto o una parete.",
+      "empty": "Ancora nessun FV. Apri le opzioni fotovoltaiche e trascina un prodotto su un tetto o una parete.",
       "surfaces": {
         "one": "su {count} superficie",
         "other": "su {count} superfici"
@@ -232,7 +231,10 @@
         "other": "{count} moduli"
       }
     },
-    "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM."
+    "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM.",
+    "options": {
+      "search": "Cerca nelle opzioni fotovoltaiche"
+    }
   },
   "tech": {
     "none": "Nessuna tecnologia su questo edificio.",

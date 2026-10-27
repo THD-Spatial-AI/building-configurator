@@ -193,7 +193,7 @@
     "catalogue": {
       "hint": "Ziehen Sie ein Produkt auf ein Dach oder eine Wand, oder wählen Sie es im Bereich einer Fläche.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Katalog ({count})",
+      "toggle": "Photovoltaik-Optionen ({count})",
       "search": "Katalog durchsuchen"
     },
     "product": {
@@ -206,8 +206,6 @@
       "use": "Für diese Fläche verwenden"
     },
     "values": {
-      "title": "Technologiewerte",
-      "product": "Produkt",
       "buildingOnly": "Änderungen an {name} gelten nur für dieses Gebäude.",
       "question": {
         "cost_energy_cap": "Was kostet es pro kWp?",
@@ -218,11 +216,12 @@
       "copyName": "{name} (Kopie)",
       "save": "Speichern",
       "saved": "Gespeichert als {name}.",
-      "saveFailed": "Die Technologie konnte nicht gespeichert werden. Versuchen Sie es erneut."
+      "saveFailed": "Die Technologie konnte nicht gespeichert werden. Versuchen Sie es erneut.",
+      "edit": "Werte von {name} bearbeiten"
     },
     "installed": {
       "title": "Auf diesem Gebäude installiert",
-      "empty": "Noch keine PV. Öffnen Sie den Katalog und ziehen Sie ein Produkt auf ein Dach oder eine Wand.",
+      "empty": "Noch keine PV. Öffnen Sie die Photovoltaik-Optionen und ziehen Sie ein Produkt auf ein Dach oder eine Wand.",
       "surfaces": {
         "one": "auf {count} Fläche",
         "other": "auf {count} Flächen"
@@ -232,7 +231,10 @@
         "other": "{count} Module"
       }
     },
-    "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM."
+    "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM.",
+    "options": {
+      "search": "Photovoltaik-Optionen durchsuchen"
+    }
   },
   "tech": {
     "none": "Keine Technologien an diesem Gebäude.",

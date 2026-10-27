@@ -114,7 +114,7 @@ function FieldInput({ field, onChange }: { field: TechField; onChange: (value: n
 /**
  * The frame every technology shares: a header band in its topic's colour with
  * a headline figure, a line with its products and cost, and, in focus, its
- * detail. Clicking the header brings it into focus.
+ * detail. Clicking the header opens or closes it.
  */
 export function TechCardFrame({ topic, title, headline, subtitle, cost, focused, onFocus, onRemove, removeLabel, children }: {
   topic: Topic;
@@ -273,7 +273,8 @@ export function TechnologyCards({ technologies, focusId, onFocus }: {
   technologies: Technologies;
   /** The card in focus; without it the cards keep their own, the first one. */
   focusId?: string | null;
-  onFocus?: (id: string) => void;
+  /** The card to bring into focus, or null when the card in focus was closed. */
+  onFocus?: (id: string | null) => void;
 }) {
   const t = useT();
   const format = useFormatNumber();
@@ -295,7 +296,7 @@ export function TechnologyCards({ technologies, focusId, onFocus }: {
             subtitle={card.subtitle}
             cost={investmentText(card.investment, format)}
             focused={focused === card.id}
-            onFocus={() => (onFocus ?? setOwnFocus)(card.id)}
+            onFocus={() => (onFocus ?? setOwnFocus)(focused === card.id ? null : card.id)}
             onRemove={() => technologies.onRemove(card.id)}
             removeLabel={t('tech.remove', { title: card.title })}
           >

@@ -197,7 +197,7 @@
     "catalogue": {
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Katalog ({count})",
+      "toggle": "Fotovoltaické možnosti ({count})",
       "search": "Hledat v katalogu"
     },
     "product": {
@@ -210,8 +210,6 @@
       "use": "Použít na této ploše"
     },
     "values": {
-      "title": "Hodnoty technologie",
-      "product": "Produkt",
       "buildingOnly": "Změny produktu {name} platí jen pro tuto budovu.",
       "question": {
         "cost_energy_cap": "Kolik stojí za kWp?",
@@ -222,11 +220,12 @@
       "copyName": "{name} (kopie)",
       "save": "Uložit",
       "saved": "Uloženo jako {name}.",
-      "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu."
+      "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu.",
+      "edit": "Upravit hodnoty {name}"
     },
     "installed": {
       "title": "Instalováno na této budově",
-      "empty": "Zatím žádná FV. Otevřete katalog a přetáhněte produkt na střechu nebo stěnu.",
+      "empty": "Zatím žádná FV. Otevřete fotovoltaické možnosti a přetáhněte produkt na střechu nebo stěnu.",
       "surfaces": {
         "one": "na {count} ploše",
         "few": "na {count} plochách",
@@ -240,7 +239,10 @@
         "other": "{count} modulů"
       }
     },
-    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM."
+    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
+    "options": {
+      "search": "Hledat ve fotovoltaických možnostech"
+    }
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",

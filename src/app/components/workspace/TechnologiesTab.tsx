@@ -1,6 +1,6 @@
 // The Technologies tab: how many technologies the building has and what they
-// cost so far, then one card per technology, PV included, one in focus at a
-// time, and the host's way to add another.
+// cost so far, then one card per technology, PV included, at most one open at
+// a time (its header opens and closes it), and the host's way to add another.
 
 import { useState } from 'react';
 import { TOPICS } from '@/app/config/topics';
@@ -59,7 +59,7 @@ export function TechnologiesTab({ pv, technologies, elements, layouts, mode, onS
           subtitle={installed.map((row) => (row.product ? productName(row.product) : pv.typeLabel)).join(' · ') || pv.typeLabel}
           cost={summary.investment === undefined ? undefined : `${format(summary.investment, 0)} ${pvCurrency}`.trim()}
           focused={focusId === PV_CARD}
-          onFocus={() => setFocusId(PV_CARD)}
+          onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
         >
           <PvOverview pv={pv} elements={elements} layouts={layouts} mode={mode} onSelect={onSelectSurface} framed />
         </TechCardFrame>

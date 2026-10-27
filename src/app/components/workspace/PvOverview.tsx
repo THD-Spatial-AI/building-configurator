@@ -1,9 +1,9 @@
-// The building's PV on the Technologies tab: totals and costs, the surfaces
-// that take PV, the catalogue to drag products from, and the values of the
-// products the building uses.
+// The building's PV on the Technologies tab: totals and costs, the products
+// installed (each with its values behind an edit button), the products to drag
+// onto a surface, and the surfaces that take PV.
 
 import { useState } from 'react';
-import { Sun } from '@/app/components/icons';
+import { Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { DecimalInput } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -113,10 +113,14 @@ function SurfaceList({ pv, elements, layouts, onSelect }: {
   );
 }
 
-/** The products installed on this building, one row each with its surfaces, modules and capacity. */
-function Installed({ pv, layouts }: { pv: PvMode; layouts: Readonly<Record<string, PvLayout>> }) {
+/**
+ * The products installed on this building, one row each with its surfaces,
+ * modules and capacity, and an edit button that opens the product's values.
+ */
+function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record<string, PvLayout>>; mode: 'basic' | 'expert' }) {
   const t = useT();
   const format = useFormatNumber();
+  const [editing, setEditing] = useState<string | null>(null);
   const rows = installedByProduct(pv.surfaces, layouts, (id) => surfaceProduct(pv, id));
   return (
     <div className="flex flex-col gap-1.5">
@@ -125,18 +129,44 @@ function Installed({ pv, layouts }: { pv: PvMode; layouts: Readonly<Record<strin
         <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.installed.empty')}</p>
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border">
-          {rows.map((row) => (
-            <li key={row.product?.id ?? ''} className="flex items-baseline justify-between gap-2 px-3 py-2">
-              <div className="min-w-0">
-                <div className="truncate text-[12px] font-semibold text-foreground">{row.product ? productName(row.product) : t('pv.product.none')}</div>
-                <div className="text-[11px] text-muted-foreground">{t('pv.installed.surfaces', { count: row.surfaces })}</div>
-              </div>
-              <div className="shrink-0 text-right text-[12px] tabular-nums text-foreground">
-                {row.modules !== undefined && <div className="font-semibold">{t('pv.installed.modules', { count: row.modules })}</div>}
-                <div className={row.modules === undefined ? 'font-semibold' : 'text-[11px] text-muted-foreground'}>{format(row.kwp, 1)} kWp</div>
-              </div>
-            </li>
-          ))}
+          {rows.map((row) => {
+            const product = row.product && (pv.products?.[row.product.id] ?? row.product);
+            const open = product !== undefined && editing === product.id;
+            return (
+              <li key={row.product?.id ?? ''} className="flex flex-col">
+                <div className="flex items-center justify-between gap-2 px-3 py-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-[12px] font-semibold text-foreground">{product ? productName(product) : t('pv.product.none')}</div>
+                    <div className="text-[11px] text-muted-foreground">{t('pv.installed.surfaces', { count: row.surfaces })}</div>
+                  </div>
+                  <div className="ml-auto shrink-0 text-right text-[12px] tabular-nums text-foreground">
+                    {row.modules !== undefined && <div className="font-semibold">{t('pv.installed.modules', { count: row.modules })}</div>}
+                    <div className={row.modules === undefined ? 'font-semibold' : 'text-[11px] text-muted-foreground'}>{format(row.kwp, 1)} kWp</div>
+                  </div>
+                  {product && pv.onConstraintChange && (
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      aria-label={t('pv.values.edit', { name: productName(product) })}
+                      title={t('pv.values.edit', { name: productName(product) })}
+                      onClick={() => setEditing(open ? null : product.id)}
+                      className={cn(
+                        'flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border transition-colors',
+                        open ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:bg-muted',
+                      )}
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+                {open && product && (
+                  <div className="border-t border-border bg-muted/40 p-3">
+                    <ProductValues pv={pv} product={product} mode={mode} />
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
@@ -161,8 +191,8 @@ function Catalogue({ pv }: { pv: PvMode }) {
         <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.catalogue.hint')}</p>
         <input
           type="search"
-          aria-label={t('pv.catalogue.search')}
-          placeholder={t('pv.catalogue.search')}
+          aria-label={t('pv.options.search')}
+          placeholder={t('pv.options.search')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="h-8 rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
@@ -239,16 +269,6 @@ function ConstraintField({ constraint, label, onChange }: {
   );
 }
 
-/** The ids of the products this building uses: its own and those of its surfaces with PV. */
-function usedProductIds(pv: PvMode): string[] {
-  const ids = new Set<string>();
-  if (pv.productId) ids.add(pv.productId);
-  for (const surface of Object.values(pv.surfaces)) {
-    if (surface.state === 'installed' && surface.productId) ids.add(surface.productId);
-  }
-  return [...ids];
-}
-
 /** Saves the shown product's values for this building as a new product of the user's own. */
 function SaveAsTechnology({ product, onSave }: { product: TechnologyProduct; onSave: (productId: string, name: string) => Promise<string> }) {
   const t = useT();
@@ -281,31 +301,12 @@ function SaveAsTechnology({ product, onSave }: { product: TechnologyProduct; onS
   );
 }
 
-/** The values of a product this building uses: basic questions, or every simulation value in expert mode. */
-function ProductValues({ pv, mode }: { pv: PvMode; mode: 'basic' | 'expert' }) {
+/** One installed product's values: basic questions, or every simulation value in expert mode. */
+export function ProductValues({ pv, product, mode }: { pv: PvMode; product: TechnologyProduct; mode: 'basic' | 'expert' }) {
   const t = useT();
-  const ids = usedProductIds(pv);
-  const [chosen, setChosen] = useState<string | undefined>(undefined);
-  const id = chosen && ids.includes(chosen) ? chosen : ids[0];
-  const product = id ? pv.products?.[id] ?? pv.catalogue?.find((p) => p.id === id) : undefined;
-  if (!product || !pv.onConstraintChange) return null;
   const constraints = shownConstraints(product, mode);
   return (
     <div className="flex flex-col gap-2.5">
-      <h3 className="m-0 text-[13px] font-semibold text-foreground">{t('pv.values.title')}</h3>
-      {ids.length > 1 && (
-        <select
-          aria-label={t('pv.values.product')}
-          value={product.id}
-          onChange={(e) => setChosen(e.target.value)}
-          className="h-8 cursor-pointer rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
-        >
-          {ids.map((pid) => {
-            const p = pv.products?.[pid] ?? pv.catalogue?.find((c) => c.id === pid);
-            return <option key={pid} value={pid}>{p ? productName(p) : pid}</option>;
-          })}
-        </select>
-      )}
       <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.values.buildingOnly', { name: productName(product) })}</p>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {constraints.map((constraint) => (
@@ -346,10 +347,9 @@ export function PvOverview({ pv, elements, layouts = {}, mode, onSelect, framed 
         </div>
       )}
       <Totals pv={pv} elements={elements} layouts={layouts} />
-      <Installed pv={pv} layouts={layouts} />
-      <SurfaceList pv={pv} elements={elements} layouts={layouts} onSelect={onSelect} />
+      <Installed pv={pv} layouts={layouts} mode={mode} />
       <Catalogue pv={pv} />
-      <ProductValues pv={pv} mode={mode} />
+      <SurfaceList pv={pv} elements={elements} layouts={layouts} onSelect={onSelect} />
       <p className="text-[11px] leading-snug text-muted-foreground">{pv.notice}</p>
     </section>
   );
