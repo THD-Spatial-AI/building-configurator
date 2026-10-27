@@ -114,6 +114,9 @@
       "window": "Windows",
       "door": "Doors",
       "other": "Other surfaces"
+    },
+    "hover": {
+      "open": "Click to open this surface"
     }
   },
   "profile": {

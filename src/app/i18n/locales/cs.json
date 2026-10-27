@@ -116,6 +116,9 @@
       "window": "Okna",
       "door": "Dveře",
       "other": "Další plochy"
+    },
+    "hover": {
+      "open": "Kliknutím otevřete tuto plochu"
     }
   },
   "profile": {

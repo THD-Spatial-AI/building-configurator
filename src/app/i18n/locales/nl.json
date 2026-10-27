@@ -114,6 +114,9 @@
       "window": "Ramen",
       "door": "Deuren",
       "other": "Overige vlakken"
+    },
+    "hover": {
+      "open": "Klik om dit vlak te openen"
     }
   },
   "profile": {

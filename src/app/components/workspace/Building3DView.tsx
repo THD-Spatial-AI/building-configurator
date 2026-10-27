@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
-import { SurfacePanel, SurfacePicker } from './SurfacePanel';
+import { SurfaceHoverCard, SurfacePanel, SurfacePicker } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceName, surfaceProduct, type PvMode } from './PvMode';
@@ -242,9 +242,9 @@ export function Building3DView({
     const total = dwellingsTotal(model.general.storeys, values);
     if (total !== null) model.setGen('residential_units', total);
   };
-  const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
-    setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
-  }, [pv]);
+  const hoverSurface = useCallback((id: string | null, at?: { x: number; y: number }) => {
+    setHover(id && at ? { id, at } : null);
+  }, []);
 
   // Held apart from the envelope: a surface edit fires on every pointer move
   // while a dial is dragged, and re-rendering a year of hourly data with it is
@@ -469,10 +469,10 @@ export function Building3DView({
               pvIds={installedPvSet}
               pvModules={pvModules}
               candidateIds={onTech ? pvSets?.suggested : undefined}
-              onHoverSurface={onTech ? hoverPv : undefined}
+              onHoverSurface={storeyMode ? undefined : hoverSurface}
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
-              previewId={previewSurface}
+              previewId={previewSurface ?? (storeyMode ? null : hover?.id ?? null)}
               focusToken={focus?.token}
               storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys }}
               onSelectStorey={storeyMode ? pickStorey : undefined}
@@ -684,7 +684,10 @@ export function Building3DView({
         </div>
       </div>
 
-      {onTech && hover && pv?.surfaces[hover.id] && (
+      {!storeyMode && hover && !(onTech && pv?.surfaces[hover.id]) && elements[hover.id] && (
+        <SurfaceHoverCard element={elements[hover.id]} at={hover.at} />
+      )}
+      {!storeyMode && onTech && hover && pv?.surfaces[hover.id] && (
         <PvHoverCard surfaceId={hover.id} surface={pv.surfaces[hover.id]} elements={elements} at={hover.at} />
       )}
 

@@ -114,6 +114,9 @@
       "window": "Fenster",
       "door": "Türen",
       "other": "Weitere Flächen"
+    },
+    "hover": {
+      "open": "Klicken, um diese Fläche zu öffnen"
     }
   },
   "profile": {

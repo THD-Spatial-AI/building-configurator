@@ -6,7 +6,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { useT } from '../../i18n';
+import { useFormatNumber, useT } from '../../i18n';
+import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 
 interface SurfacePanelProps {
   /** A sheet over the bottom of the screen instead of a column. */
@@ -75,6 +76,22 @@ function CloseButton({ onClose }: { onClose: () => void }) {
     >
       <X />
     </button>
+  );
+}
+
+/** The surface under the pointer in the model: its name, type and area, and that a click opens it. */
+export function SurfaceHoverCard({ element, at }: { element: BuildingElement; at: { x: number; y: number } }) {
+  const t = useT();
+  const format = useFormatNumber();
+  return (
+    <div
+      className="pointer-events-none fixed z-30 flex flex-col gap-0.5 rounded-md border border-border bg-card px-2.5 py-2 text-[12px] shadow-md"
+      style={{ left: at.x + 14, top: at.y + 14 }}
+    >
+      <span className="font-semibold text-foreground">{element.label}</span>
+      <span className="text-muted-foreground">{t(`surface.type.${element.type}`)} · {format(element.area, 1)} m²</span>
+      <span className="font-medium text-primary">{t('surface.hover.open')}</span>
+    </div>
   );
 }
 

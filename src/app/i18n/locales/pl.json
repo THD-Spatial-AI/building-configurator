@@ -116,6 +116,9 @@
       "window": "Okna",
       "door": "Drzwi",
       "other": "Inne powierzchnie"
+    },
+    "hover": {
+      "open": "Kliknij, aby otworzyć tę powierzchnię"
     }
   },
   "profile": {

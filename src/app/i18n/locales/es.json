@@ -115,6 +115,9 @@
       "window": "Ventanas",
       "door": "Puertas",
       "other": "Otras superficies"
+    },
+    "hover": {
+      "open": "Haga clic para abrir esta superficie"
     }
   },
   "profile": {
