@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle, ArrowLeft, CircleHelp, Download, Info, Layers, Loader2, Play, Ruler, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
-import { SurfaceQuickEditor } from './SurfaceQuickEditor';
+import { importedValues, SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
 import { BuildingSnapshotAside } from '../BuildingConfigurator/overview/BuildingSnapshotAside';
 import { LoadProfileBar } from './LoadProfileBar';
@@ -310,7 +310,13 @@ export function Building3DView({
   const panelBody = selected && (selectedElement || selectedPv) ? (
     <div key={selected.id} className="flex flex-col gap-3 p-3">
       {selectedElement && (
-        <SectionCard topic={TOPICS.envelope} title={t(`surface.section.of.${selectedElement.type}`)} info={t('help.envelope')}>
+        <SectionCard
+          topic={TOPICS.envelope}
+          title={t(`surface.section.of.${selectedElement.type}`)}
+          info={t('help.envelope')}
+          onReset={importedValues(selectedElement) ? () => model.updateElement(selected.id, importedValues(selectedElement)!) : undefined}
+          resetLabel={t('surface.reset')}
+        >
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}

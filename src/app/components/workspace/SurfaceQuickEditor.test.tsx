@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { SurfaceQuickEditor } from './SurfaceQuickEditor';
+import { importedValues, SurfaceQuickEditor } from './SurfaceQuickEditor';
+import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
+import { TOPICS } from '@/app/config/topics';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 
 const flat: BuildingElement = { id: 'f1', label: 'Flat roof', type: 'roof', area: 51, uValue: 0.2, gValue: null, tilt: 0, azimuth: -1 };
@@ -37,5 +39,21 @@ describe('SurfaceQuickEditor', () => {
     expect(html).toContain('Facing</div>');
     expect(html).toContain('180° S');
     expect(html).toContain('Source: the building&#x27;s 3D model');
+  });
+});
+
+describe('resetting a surface from its section header', () => {
+  const imported: BuildingElement = { ...pitched, defaultArea: 51, defaultUValue: 0.2, defaultTilt: 35, defaultAzimuth: 180 };
+
+  it('offers a reset only while a value differs from the imported one, and restores just those', () => {
+    expect(importedValues(imported)).toBeNull();
+    expect(importedValues({ ...imported, uValue: 0.5, area: 60 })).toEqual({ uValue: 0.2, area: 51 });
+  });
+
+  it('puts the reset in the header and not beside the delete button', () => {
+    const header = renderToStaticMarkup(<SectionCard topic={TOPICS.envelope} title="Roof surface" onReset={() => {}} resetLabel="Reset" />);
+    expect(header).toMatch(/<header[^>]*>.*aria-label="Reset".*<\/header>/);
+    expect(renderToStaticMarkup(<SectionCard topic={TOPICS.envelope} title="Roof surface" />)).not.toContain('aria-label="Reset"');
+    expect(render({ ...imported, uValue: 0.5 }, 'basic')).not.toContain('Reset');
   });
 });

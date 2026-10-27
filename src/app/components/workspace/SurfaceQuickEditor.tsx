@@ -3,7 +3,7 @@
 // well it insulates and which way it faces.
 
 import React from 'react';
-import { AlertTriangle, Ruler, RotateCcw, Trash2 } from '@/app/components/icons';
+import { AlertTriangle, Ruler, Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { AzimuthDial, TiltDial, tiltLabel } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -45,6 +45,23 @@ function ModelOrientation({ element }: { element: BuildingElement }) {
   );
 }
 
+/**
+ * The patch that returns a surface to the values it was imported with
+ * (stamped by normalizeElementRecord), or null while none of them is changed.
+ */
+export function importedValues(element: BuildingElement): Partial<BuildingElement> | null {
+  const imported = {
+    area: element.defaultArea,
+    uValue: element.defaultUValue,
+    tilt: element.defaultTilt,
+    azimuth: element.defaultAzimuth,
+  };
+  const patch = Object.fromEntries(
+    Object.entries(imported).filter(([key, value]) => value !== undefined && value !== element[key as keyof typeof imported]),
+  );
+  return Object.keys(patch).length > 0 ? patch : null;
+}
+
 interface SurfaceQuickEditorProps {
   element: BuildingElement;
   /** Area of this surface's 3D polygon, when geometry for it was loaded. */
@@ -63,17 +80,6 @@ export function SurfaceQuickEditor({
   // Worth offering only when it would actually change the area.
   const offerGeometryArea = geometryArea != null && geometryArea > 0
     && Math.abs(geometryArea - element.area) > Math.max(0.05, element.area * 0.01);
-
-  // The values this surface arrived with, stamped on import (see
-  // normalizeElementRecord), so a hand-edit can always be walked back.
-  const imported = {
-    area: element.defaultArea,
-    uValue: element.defaultUValue,
-    tilt: element.defaultTilt,
-    azimuth: element.defaultAzimuth,
-  };
-  const edited = (['area', 'uValue', 'tilt', 'azimuth'] as const)
-    .some((key) => imported[key] !== undefined && imported[key] !== element[key]);
 
   return (
     <div className="flex flex-col gap-4 p-3">
@@ -167,32 +173,6 @@ export function SurfaceQuickEditor({
         )}
         <TiltDial value={element.tilt} onChange={(tilt) => onUpdate({ tilt })} />
       </div>
-      )}
-
-      {edited && (
-        <div className="flex items-center justify-between gap-2 border-t border-border pt-2.5">
-          <span className="text-[10px] leading-snug text-muted-foreground">
-            {t('surface.imported', {
-              area: imported.area === undefined ? '' : format(imported.area, 1),
-              uValue: imported.uValue === undefined ? '' : format(imported.uValue, 2),
-              tilt: imported.tilt === undefined ? '' : format(imported.tilt),
-              azimuth: imported.azimuth === undefined ? '' : format(imported.azimuth),
-            })}
-          </span>
-          <button
-            type="button"
-            onClick={() => onUpdate({
-              area: imported.area ?? element.area,
-              uValue: imported.uValue ?? element.uValue,
-              tilt: imported.tilt ?? element.tilt,
-              azimuth: imported.azimuth ?? element.azimuth,
-            })}
-            className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted"
-          >
-            <RotateCcw className="size-3" />
-            {t('surface.reset')}
-          </button>
-        </div>
       )}
 
       <button

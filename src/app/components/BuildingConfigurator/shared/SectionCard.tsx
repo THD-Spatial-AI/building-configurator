@@ -3,16 +3,21 @@
 
 import type { MouseEvent, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { RotateCcw } from '@/app/components/icons';
 import type { Topic } from '@/app/config/topics';
 import { InfoTip } from './ui';
 
-export function SectionCard({ topic, title, info, action, dashed, emphasised, onToggle, children }: {
+export function SectionCard({ topic, title, info, action, onReset, resetLabel, dashed, emphasised, onToggle, children }: {
   topic: Topic;
   title: string;
   /** What the section changes, behind an info icon in the header. */
   info?: string;
   /** A control at the right of the header, such as an Edit button. */
   action?: ReactNode;
+  /** Returns the section to its default values; pass it only while something differs from them. */
+  onReset?: () => void;
+  /** The reset button's name and tooltip. */
+  resetLabel?: string;
   dashed?: boolean;
   /** A thicker border, for the section in focus. */
   emphasised?: boolean;
@@ -37,6 +42,17 @@ export function SectionCard({ topic, title, info, action, dashed, emphasised, on
         <topic.Icon className={cn('size-4 shrink-0', topic.icon)} aria-hidden />
         <h3 className="m-0 min-w-0 flex-1 truncate text-[12px] font-bold">{title}</h3>
         {action}
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            aria-label={resetLabel}
+            title={resetLabel}
+            className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
+          >
+            <RotateCcw className="size-3.5" />
+          </button>
+        )}
         {info && <InfoTip tip={info} />}
       </header>
       {children}
