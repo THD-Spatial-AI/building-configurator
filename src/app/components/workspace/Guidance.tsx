@@ -43,7 +43,9 @@ function cardPosition(rect: DOMRect): { left: number; top: number } {
  */
 export function Tour({ onClose }: { onClose: () => void }) {
   const t = useT();
-  const [steps] = useState(() => TOUR_STEPS.filter((key) => tourTarget(key)));
+  // Read after the first commit: a tour opened with the view renders before the view's areas exist.
+  const [steps, setSteps] = useState<TourStep[]>([]);
+  useLayoutEffect(() => setSteps(TOUR_STEPS.filter((key) => tourTarget(key))), []);
   const [index, setIndex] = useState(0);
   const step = steps[index] ?? TOUR_STEPS[0];
   const rect = useTargetRect(step);
@@ -55,6 +57,7 @@ export function Tour({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKey, true);
   }, [onClose]);
 
+  if (steps.length === 0) return null;
   const position = rect ? cardPosition(rect) : { left: GAP, top: GAP };
   return (
     <div className="fixed inset-0 z-50" aria-live="polite">

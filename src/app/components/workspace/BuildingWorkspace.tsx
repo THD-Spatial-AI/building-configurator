@@ -132,12 +132,15 @@ function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
   const pv = useDemoPvHost(building.envelope);
   const technologies = useDemoTechnologies();
   // The demo's own first-visit memory; a host keeps it with the user's account.
-  const [tourRun] = useState(() => {
+  const [tourRun, setTourRun] = useState(() => {
     try { return window.localStorage.getItem(TOUR_SEEN_KEY) !== '1'; } catch { return false; }
   });
   const tour = useMemo(() => ({
     run: tourRun,
-    onFinish: () => { try { window.localStorage.setItem(TOUR_SEEN_KEY, '1'); } catch { /* the tour runs again next visit */ } },
+    onFinish: () => {
+      setTourRun(false);
+      try { window.localStorage.setItem(TOUR_SEEN_KEY, '1'); } catch { /* the tour runs again next visit */ }
+    },
   }), [tourRun]);
 
   return (
