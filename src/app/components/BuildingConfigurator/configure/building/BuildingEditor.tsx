@@ -202,7 +202,7 @@ export function BuildingEditor({
     <div className="flex flex-col gap-3">
       {insulation && (
         <SectionCard
-          topic={TOPICS.envelope}
+          topic={TOPICS.building}
           title={t('editor.insulationTitle')}
           info={t('help.insulation')}
           action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation)}</span>}

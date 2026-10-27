@@ -616,8 +616,10 @@ export function useBuildingModel(
   // them describe a different building.
   const [levelPreview, setLevelPreview] = useState<{ key: string; perM2: Record<number, number | null> } | null>(null);
   const [isComparingLevels, setIsComparingLevels] = useState(false);
+  // Hot water and the profiles to compute leave space heating unchanged (BuEM
+  // only reports DHW when include_dhw is on), so they do not rerun the levels.
   const previewKey = JSON.stringify({
-    general: { ...general, refurbishment: null },
+    general: { ...general, refurbishment: null, include_dhw: null, outputs: null },
     shape: Object.values(elements).map((el) => [el.id, el.area, el.tilt, el.azimuth, el.modelledShare]),
   });
   const levelHeating = levelPreview?.key === previewKey ? levelPreview.perM2 : null;
