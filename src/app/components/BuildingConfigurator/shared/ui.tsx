@@ -199,11 +199,7 @@ export function DecimalInput({ value, onChange, min, max, step = 1, integer = fa
   };
 
   const stepBy = (direction: 1 | -1) => {
-    const current = parseDecimal(shown) ?? 0;
-    const precision = (String(step).split('.')[1] ?? '').length;
-    let next = Number((current + direction * step).toFixed(precision));
-    if (min !== undefined) next = Math.max(min, next);
-    if (max !== undefined) next = Math.min(max, next);
+    const next = steppedValue(parseDecimal(shown) ?? 0, step, direction, min, max);
     setDraft(formatDecimal(language, next));
     onChange?.(next);
   };
@@ -226,6 +222,21 @@ export function DecimalInput({ value, onChange, min, max, step = 1, integer = fa
       }}
     />
   );
+}
+
+/**
+ * A value one step up or down, rounded to the step's decimals and kept within
+ * min and max. A value already past the limit it steps towards stays put, so a
+ * step never moves it the other way.
+ */
+export function steppedValue(current: number, step: number, direction: 1 | -1, min?: number, max?: number): number {
+  if (direction > 0 && max !== undefined && current >= max) return current;
+  if (direction < 0 && min !== undefined && current <= min) return current;
+  const precision = (String(step).split('.')[1] ?? '').length;
+  let next = Number((current + direction * step).toFixed(precision));
+  if (min !== undefined) next = Math.max(min, next);
+  if (max !== undefined) next = Math.min(max, next);
+  return next;
 }
 
 // ─── NumberInput ──────────────────────────────────────────────────────────────
@@ -270,9 +281,28 @@ export function NumberInput({
           onChange={(v) => { if (v !== null) onChange?.(v); }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
         />
-        <div className="px-2.5 flex items-center justify-center bg-muted border-l border-border text-[11px] text-muted-foreground whitespace-nowrap shrink-0 select-none">
-          {unit}
-        </div>
+        {unit && (
+          <div className="px-2.5 flex items-center justify-center bg-muted border-l border-border text-[11px] text-muted-foreground whitespace-nowrap shrink-0 select-none">
+            {unit}
+          </div>
+        )}
+        {!readOnly && onChange && (
+          // The field is text so it reads either decimal separator, which drops the browser's own stepper.
+          <div className="flex shrink-0 flex-col border-l border-border">
+            {([1, -1] as const).map((direction) => (
+              <button
+                key={direction}
+                type="button"
+                tabIndex={-1}
+                aria-label={label ? `${label} ${direction > 0 ? '+' : '−'}${step}` : `${direction > 0 ? '+' : '−'}${step}`}
+                onClick={() => onChange(steppedValue(Number(value) || 0, step, direction, min, max))}
+                className="flex flex-1 cursor-pointer items-center justify-center px-1 text-muted-foreground hover:bg-muted hover:text-foreground [&+button]:border-t [&+button]:border-border"
+              >
+                <ChevronDown className={cn('size-3', direction > 0 && 'rotate-180')} />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
