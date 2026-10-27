@@ -58,19 +58,8 @@
     "areaRejected": "Eine Simulation lehnt dies ab",
     "useGeometryArea": "{area} m² aus dem Modell übernehmen",
     "uValue": "U-Wert",
-    "insulation": {
-      "veryWell": "Sehr gut gedämmt",
-      "well": "Gut gedämmt",
-      "moderate": "Mäßig gedämmt",
-      "poor": "Schlecht gedämmt",
-      "none": "Ungedämmt"
-    },
     "rValue": "R-Wert (1/U): {value} m²K/W",
     "gValue": "g-Wert",
-    "solar": {
-      "high": "Lässt viel Sonnenwärme durch",
-      "low": "Hält viel Sonnenwärme ab"
-    },
     "sharedWall": "Grenzt an ein Nachbargebäude",
     "imported": "Importiert: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
     "reset": "Zurücksetzen",
@@ -117,7 +106,8 @@
     },
     "hover": {
       "open": "Klicken, um diese Fläche zu öffnen"
-    }
+    },
+    "uValueTip": "Wie viel Wärme pro Grad Temperaturunterschied zwischen innen und außen durch einen m² dieser Fläche geht. Der Wert stammt aus TABULA für Typ, Baujahr und Sanierungsstufe dieses Gebäudes; ein niedrigerer Wert verliert weniger Wärme, das Gebäude braucht also weniger Heizung."
   },
   "profile": {
     "title": "Stündliches Lastprofil",

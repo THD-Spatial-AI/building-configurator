@@ -60,19 +60,8 @@
     "areaRejected": "Simulace tuto hodnotu odmítne",
     "useGeometryArea": "Použít {area} m² z modelu",
     "uValue": "Součinitel U",
-    "insulation": {
-      "veryWell": "Velmi dobře izolováno",
-      "well": "Dobře izolováno",
-      "moderate": "Středně izolováno",
-      "poor": "Špatně izolováno",
-      "none": "Bez izolace"
-    },
     "rValue": "Tepelný odpor R (1/U): {value} m²K/W",
     "gValue": "Propustnost slunečního záření (g)",
-    "solar": {
-      "high": "Propouští většinu slunečního tepla",
-      "low": "Blokuje většinu slunečního tepla"
-    },
     "sharedWall": "Společná se sousední budovou",
     "imported": "Importováno: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
     "reset": "Obnovit",
@@ -119,7 +108,8 @@
     },
     "hover": {
       "open": "Kliknutím otevřete tuto plochu"
-    }
+    },
+    "uValueTip": "Kolik tepla projde jedním m² této plochy na každý stupeň rozdílu mezi vnitřkem a venkem. Hodnota pochází z TABULA pro typ, stáří a úroveň renovace této budovy; nižší hodnota znamená menší ztráty tepla, takže budova potřebuje méně vytápění."
   },
   "profile": {
     "title": "Hodinový profil zatížení",

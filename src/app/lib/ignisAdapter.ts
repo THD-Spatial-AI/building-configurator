@@ -287,33 +287,6 @@ export function tabulaUValue(data: IgnisInputs, type: BuildingElement['type']): 
 /** How many refurbishment levels are worth offering as one-click presets. The
  *  first three are TABULA's own existing/medium/advanced; some tables carry
  *  several more, which do not fit beside a surface. */
-const MAX_UVALUE_PRESETS = 4;
-
-/**
- * The TABULA U-value each refurbishment level gives a surface of this type —
- * the building's own archetype, not a generic table, so they are offered as
- * presets when editing one surface. Levels that land on a U-value already
- * offered are dropped.
- */
-export function tabulaUValueOptions(
-  state: IgnisState | null,
-  type: BuildingElement['type'],
-): { label: string; number: number; uValue: number }[] {
-  if (!state) return [];
-  const options: { label: string; number: number; uValue: number }[] = [];
-  const seen = new Set<number>();
-  for (const variant of state.variants) {
-    const uValue = tabulaUValue(variant.data, type);
-    if (uValue === undefined) continue;
-    const rounded = Math.round(uValue * 100) / 100;
-    if (seen.has(rounded)) continue;
-    seen.add(rounded);
-    options.push({ label: variant.label, number: variant.number, uValue });
-    if (options.length === MAX_UVALUE_PRESETS) break;
-  }
-  return options;
-}
-
 /**
  * Rebases every element's `uValue` AND its stamped `defaultUValue` ("existing
  * state" baseline) onto the new building type/period/country's own TABULA

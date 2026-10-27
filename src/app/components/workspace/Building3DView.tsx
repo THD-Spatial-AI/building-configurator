@@ -19,7 +19,6 @@ import { hasInvalidArea } from '../BuildingConfigurator/configure/model/building
 import { cn } from '@/lib/utils';
 import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
-import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfaceHoverCard, SurfacePanel, SurfacePicker } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
@@ -314,7 +313,6 @@ export function Building3DView({
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}
-            uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
             mode={mode}
             onUpdate={(patch) => model.updateElement(selected.id, patch)}
             onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}

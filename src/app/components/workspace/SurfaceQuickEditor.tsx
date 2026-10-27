@@ -5,31 +5,15 @@
 import React from 'react';
 import { AlertTriangle, Ruler, RotateCcw, Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { AzimuthDial, PresetSlider, TiltDial, tiltLabel } from './surfaceControls';
+import { AzimuthDial, TiltDial, tiltLabel } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { useFormatNumber, useT, type Translate } from '../../i18n';
-import { variantName } from '../../lib/refurbishment';
+import { useFormatNumber, useT } from '../../i18n';
 import { isFlat, modelGeometry } from '../../lib/pvSurfaces';
 import { compassPoint } from './PvMode';
-import { DecimalInput } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, NumberInput } from '../BuildingConfigurator/shared/ui';
 
-/** Widest U-value the slider covers: a single-glazed window sits near 5. */
+/** Highest U-value accepted: a single-glazed window sits near 5. */
 const U_MAX = 5;
-
-/** TABULA level names are long; the chip keeps the distinguishing word and the
- *  title attribute carries the rest. */
-function shortPresetLabel(label: string): string {
-  return label.replace(/\s*(state|refurbishment)\s*$/i, '').trim() || label;
-}
-
-/** Plain words for a U-value, so the number is not the only signal. */
-function insulationLabel(uValue: number, t: Translate): string {
-  if (uValue <= 0.25) return t('surface.insulation.veryWell');
-  if (uValue <= 0.5) return t('surface.insulation.well');
-  if (uValue <= 1) return t('surface.insulation.moderate');
-  if (uValue <= 2) return t('surface.insulation.poor');
-  return t('surface.insulation.none');
-}
 
 /** One labelled figure of the surface's geometry. */
 function GeometryFigure({ label, value }: { label: string; value: string }) {
@@ -65,15 +49,13 @@ interface SurfaceQuickEditorProps {
   element: BuildingElement;
   /** Area of this surface's 3D polygon, when geometry for it was loaded. */
   geometryArea?: number | null;
-  /** This building's TABULA U-values for this surface type. */
-  uValuePresets: { label: string; number: number; uValue: number }[];
   mode?: 'basic' | 'expert';
   onUpdate: (patch: Partial<BuildingElement>) => void;
   onDelete: () => void;
 }
 
 export function SurfaceQuickEditor({
-  element, geometryArea, uValuePresets, mode = 'basic', onUpdate, onDelete,
+  element, geometryArea, mode = 'basic', onUpdate, onDelete,
 }: SurfaceQuickEditorProps) {
   const t = useT();
   const format = useFormatNumber();
@@ -96,75 +78,67 @@ export function SurfaceQuickEditor({
   return (
     <div className="flex flex-col gap-4 p-3">
 
-      {/* ── Area ── */}
-      <div>
-        <div className="mb-1 flex items-baseline justify-between">
-          <span className="text-[11px] font-medium text-muted-foreground">{t('surface.area')}</span>
-          {areaMissing && (
-            <span className="flex items-center gap-1 text-[10px] font-semibold text-destructive">
-              <AlertTriangle className="size-3" />
-              {t('surface.areaRejected')}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <div className={cn(
-            'flex items-center overflow-hidden rounded-lg border bg-card',
-            areaMissing ? 'border-destructive ring-1 ring-destructive/30' : 'border-border',
-          )}>
-            <DecimalInput
-              aria-label={t('surface.area')}
-              min={0}
-              step={0.1}
-              value={element.area}
-              onChange={(next) => { if (next !== null) onUpdate({ area: next }); }}
-              className="w-[92px] px-2.5 py-1.5 text-right text-[13px] font-semibold text-foreground outline-none"
-            />
-            <span className="pr-2.5 text-[10px] text-muted-foreground">m²</span>
+      {/* ── Area, U-value and, for a window, g-value ── */}
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <span className="mb-1 block text-[11px] font-medium leading-tight text-muted-foreground">{t('surface.area')}</span>
+            <div className={cn('cfg-input-wrap', areaMissing && 'border-destructive ring-1 ring-destructive/30')}>
+              <DecimalInput
+                className="cfg-number"
+                aria-label={t('surface.area')}
+                min={0}
+                step={0.1}
+                value={element.area}
+                onChange={(next) => { if (next !== null) onUpdate({ area: next }); }}
+              />
+              <div className="flex shrink-0 select-none items-center border-l border-border bg-muted px-2.5 text-[11px] text-muted-foreground">m²</div>
+            </div>
           </div>
-          {offerGeometryArea && (
-            <button
-              type="button"
-              onClick={() => onUpdate({ area: Math.round(geometryArea! * 100) / 100 })}
-              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/10"
-            >
-              <Ruler className="size-3.5" />
-              {t('surface.useGeometryArea', { area: format(geometryArea!, 1) })}
-            </button>
+          <NumberInput
+            label={t('surface.uValue')}
+            tip={t('surface.uValueTip')}
+            value={element.uValue}
+            min={0.1}
+            max={U_MAX}
+            step={0.01}
+            unit="W/m²K"
+            onChange={(uValue) => onUpdate({ uValue })}
+          />
+          {element.type === 'window' && element.gValue !== null && (
+            <NumberInput
+              label={t('surface.gValue')}
+              unit=""
+              value={element.gValue}
+              min={0.1}
+              max={0.9}
+              step={0.01}
+              onChange={(gValue) => onUpdate({ gValue })}
+            />
           )}
         </div>
+        {areaMissing && (
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-destructive">
+            <AlertTriangle className="size-3" />
+            {t('surface.areaRejected')}
+          </span>
+        )}
+        {offerGeometryArea && (
+          <button
+            type="button"
+            onClick={() => onUpdate({ area: Math.round(geometryArea! * 100) / 100 })}
+            className="flex cursor-pointer items-center gap-1.5 self-start rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <Ruler className="size-3.5" />
+            {t('surface.useGeometryArea', { area: format(geometryArea!, 1) })}
+          </button>
+        )}
+        {mode === 'expert' && (
+          <p className="text-[10px] text-muted-foreground">
+            {t('surface.rValue', { value: format(1 / Math.max(0.01, element.uValue), 2) })}
+          </p>
+        )}
       </div>
-
-      {/* ── Insulation ── */}
-      <PresetSlider
-        label={t('surface.uValue')}
-        value={element.uValue}
-        min={0.1}
-        max={U_MAX}
-        step={0.01}
-        unit="W/m²K"
-        quality={insulationLabel(element.uValue, t)}
-        presets={uValuePresets.map((p) => ({ label: shortPresetLabel(variantName(t, p.label, p.number, true)), value: p.uValue }))}
-        onChange={(uValue) => onUpdate({ uValue })}
-      />
-
-      {mode === 'expert' && (
-        <p className="-mt-2 text-[10px] text-muted-foreground">
-          {t('surface.rValue', { value: format(1 / Math.max(0.01, element.uValue), 2) })}
-        </p>
-      )}
-
-      {element.type === 'window' && element.gValue !== null && (
-        <PresetSlider
-          label={t('surface.gValue')}
-          value={element.gValue}
-          min={0.1}
-          max={0.9}
-          step={0.01}
-          quality={element.gValue >= 0.6 ? t('surface.solar.high') : t('surface.solar.low')}
-          onChange={(gValue) => onUpdate({ gValue })}
-        />
-      )}
 
       {element.type === 'wall' && (
         <label className="flex cursor-pointer items-center gap-2">

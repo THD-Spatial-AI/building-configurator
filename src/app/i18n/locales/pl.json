@@ -60,19 +60,8 @@
     "areaRejected": "Symulacja to odrzuci",
     "useGeometryArea": "Użyj {area} m² z modelu",
     "uValue": "Współczynnik U",
-    "insulation": {
-      "veryWell": "Bardzo dobra izolacja",
-      "well": "Dobra izolacja",
-      "moderate": "Średnia izolacja",
-      "poor": "Słaba izolacja",
-      "none": "Brak izolacji"
-    },
     "rValue": "Opór R (1/U): {value} m²K/W",
     "gValue": "Przepuszczalność energii (g)",
-    "solar": {
-      "high": "Przepuszcza większość ciepła słonecznego",
-      "low": "Blokuje większość ciepła słonecznego"
-    },
     "sharedWall": "Wspólna z sąsiednim budynkiem",
     "imported": "Zaimportowano: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
     "reset": "Resetuj",
@@ -119,7 +108,8 @@
     },
     "hover": {
       "open": "Kliknij, aby otworzyć tę powierzchnię"
-    }
+    },
+    "uValueTip": "Ile ciepła przechodzi przez jeden m² tej powierzchni na każdy stopień różnicy między wnętrzem a otoczeniem. Wartość pochodzi z TABULA dla typu, wieku i poziomu modernizacji tego budynku; niższa wartość oznacza mniejsze straty ciepła, więc budynek potrzebuje mniej ogrzewania."
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",

@@ -58,19 +58,8 @@
     "areaRejected": "Una simulazione la rifiuterà",
     "useGeometryArea": "Usa {area} m² dal modello",
     "uValue": "Valore U",
-    "insulation": {
-      "veryWell": "Molto ben isolato",
-      "well": "Ben isolato",
-      "moderate": "Mediamente isolato",
-      "poor": "Poco isolato",
-      "none": "Non isolato"
-    },
     "rValue": "Valore R (1/U): {value} m²K/W",
     "gValue": "Fattore solare (g)",
-    "solar": {
-      "high": "Lascia passare gran parte del calore solare",
-      "low": "Blocca gran parte del calore solare"
-    },
     "sharedWall": "Condivisa con un edificio adiacente",
     "imported": "Importato: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
     "reset": "Ripristina",
@@ -117,7 +106,8 @@
     },
     "hover": {
       "open": "Fai clic per aprire questa superficie"
-    }
+    },
+    "uValueTip": "Quanto calore attraversa un m² di questa superficie per ogni grado di differenza tra interno ed esterno. Proviene da TABULA per tipo, età e livello di riqualificazione di questo edificio; un valore più basso disperde meno calore, quindi l'edificio richiede meno riscaldamento."
   },
   "profile": {
     "title": "Profilo di carico orario",

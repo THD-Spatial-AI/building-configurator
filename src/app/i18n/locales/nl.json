@@ -58,19 +58,8 @@
     "areaRejected": "Een simulatie zal dit weigeren",
     "useGeometryArea": "{area} m² uit het model gebruiken",
     "uValue": "U-waarde",
-    "insulation": {
-      "veryWell": "Zeer goed geïsoleerd",
-      "well": "Goed geïsoleerd",
-      "moderate": "Matig geïsoleerd",
-      "poor": "Slecht geïsoleerd",
-      "none": "Ongeïsoleerd"
-    },
     "rValue": "R-waarde (1/U): {value} m²K/W",
     "gValue": "Zontoetredingsfactor (g)",
-    "solar": {
-      "high": "Laat de meeste zonnewarmte door",
-      "low": "Houdt de meeste zonnewarmte tegen"
-    },
     "sharedWall": "Gedeeld met een naastgelegen gebouw",
     "imported": "Geïmporteerd: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
     "reset": "Resetten",
@@ -117,7 +106,8 @@
     },
     "hover": {
       "open": "Klik om dit vlak te openen"
-    }
+    },
+    "uValueTip": "Hoeveel warmte per graad verschil tussen binnen en buiten door één m² van dit vlak gaat. De waarde komt uit TABULA voor het type, de bouwperiode en het renovatieniveau van dit gebouw; een lagere waarde verliest minder warmte, dus het gebouw heeft minder verwarming nodig."
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",

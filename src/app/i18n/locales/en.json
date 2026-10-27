@@ -58,19 +58,8 @@
     "areaRejected": "A simulation will reject this",
     "useGeometryArea": "Use {area} m² from the model",
     "uValue": "U-value",
-    "insulation": {
-      "veryWell": "Very well insulated",
-      "well": "Well insulated",
-      "moderate": "Moderately insulated",
-      "poor": "Poorly insulated",
-      "none": "Uninsulated"
-    },
     "rValue": "R-value (1/U): {value} m²K/W",
     "gValue": "Solar transmittance (g)",
-    "solar": {
-      "high": "Lets most solar heat through",
-      "low": "Blocks most solar heat"
-    },
     "sharedWall": "Shared with a neighbouring building",
     "imported": "Imported: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
     "reset": "Reset",
@@ -117,7 +106,8 @@
     },
     "hover": {
       "open": "Click to open this surface"
-    }
+    },
+    "uValueTip": "How much heat passes through one m² of this surface per degree of difference between inside and outside. It comes from TABULA for this building's type, age and refurbishment level; a lower value loses less heat, so the building needs less heating."
   },
   "profile": {
     "title": "Hourly load profile",

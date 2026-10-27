@@ -7,7 +7,7 @@ const flat: BuildingElement = { id: 'f1', label: 'Flat roof', type: 'roof', area
 const pitched: BuildingElement = { ...flat, id: 'r1', tilt: 35, azimuth: 180 };
 
 const render = (element: BuildingElement, mode: 'basic' | 'expert' = 'expert') => renderToStaticMarkup(
-  <SurfaceQuickEditor element={element} uValuePresets={[]} mode={mode} onUpdate={() => {}} onDelete={() => {}} />,
+  <SurfaceQuickEditor element={element} mode={mode} onUpdate={() => {}} onDelete={() => {}} />,
 );
 
 describe('SurfaceQuickEditor', () => {
@@ -20,6 +20,13 @@ describe('SurfaceQuickEditor', () => {
   it('gives a pitched roof its facing dial in Expert', () => {
     expect(render(pitched)).not.toContain('>Flat<');
     expect(render(pitched)).toContain('S-facing');
+  });
+
+  it('takes the U-value in a number field, without a slider or level buttons', () => {
+    const html = render(pitched, 'basic');
+    expect(html).toMatch(/<input[^>]*aria-label="U-value"[^>]*value="0.2"/);
+    expect(html).not.toContain('type="range"');
+    expect(html).not.toContain('Existing');
   });
 
   it('shows tilt and facing read-only from the 3D model in Basic', () => {
