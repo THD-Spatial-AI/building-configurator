@@ -20,6 +20,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 
 ### Changed
 
+- A surface's PV modules can be counted: a Modules field beside Usable share, up to what fits, sets how many are placed and so the capacity. Hosts store it through the new optional `PvMode.onModuleCountChange(surfaceId, moduleCount)` as `PvSurface.moduleCount`; the PV run sends the count placed. `PvLayout` gains `fits`, the count before it.
 - Every section is a card in its topic's colour with the topic's icon; the annual demand is one bar in its carriers' colours.
 - The surface panel shows a surface's envelope and PV together on every tab.
 - Building data shows as tiles (type, country and year, storeys, room height, floor area, dwellings, occupants, volume); Edit switches to the editable table. A dashed card in Basic points to the Expert sections.

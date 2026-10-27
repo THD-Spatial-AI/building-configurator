@@ -272,6 +272,10 @@
       "capacity": "Leistung",
       "area": "Modulfläche",
       "investment": "Investition, geschätzt"
+    },
+    "moduleCount": {
+      "label": "Module (bis {fits})",
+      "tip": "Wie viele Module auf diese Fläche kommen, bis zur Zahl, die in ihren nutzbaren Anteil passt. Die Leistung ergibt sich daraus."
     }
   },
   "tech": {

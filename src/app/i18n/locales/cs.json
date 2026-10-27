@@ -280,6 +280,10 @@
       "capacity": "Výkon",
       "area": "Plocha panelů",
       "investment": "Investice, odhad"
+    },
+    "moduleCount": {
+      "label": "Moduly (až {fits})",
+      "tip": "Kolik modulů na tuto plochu umístit, až do počtu, který se vejde do její využitelné části. Výkon z toho vyplývá."
     }
   },
   "tech": {

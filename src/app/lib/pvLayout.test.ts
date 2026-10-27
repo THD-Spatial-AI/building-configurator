@@ -85,6 +85,15 @@ describe('pvLayout flush', () => {
     expect(layout.capped).toBe(true);
   });
 
+  it('places the chosen number of modules, up to what fits, and says how many fit', () => {
+    const all = pvLayout(southRoof(30), module, { usableShare: 0.5, mounting: { kind: 'flush' } });
+    const four = pvLayout(southRoof(30), module, { usableShare: 0.5, mounting: { kind: 'flush' }, moduleCount: 4 });
+    expect(four.count).toBe(4);
+    expect(four.kwp).toBeCloseTo(1.6);
+    expect(four.fits).toBe(all.count);
+    expect(pvLayout(southRoof(30), module, { usableShare: 0.5, mounting: { kind: 'flush' }, moduleCount: 999 }).count).toBe(all.count);
+  });
+
   it('says when the space on the surface, not the usable share, limits the modules', () => {
     expect(pvLayout(southRoof(30), module, { usableShare: 1, mounting: { kind: 'flush' } }).capped).toBe(false);
   });

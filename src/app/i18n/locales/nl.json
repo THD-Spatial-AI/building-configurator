@@ -272,6 +272,10 @@
       "capacity": "Vermogen",
       "area": "Paneeloppervlak",
       "investment": "Investering, geschat"
+    },
+    "moduleCount": {
+      "label": "Modules (tot {fits})",
+      "tip": "Hoeveel modules op dit vlak komen, tot het aantal dat in het bruikbare deel past. Het vermogen volgt daaruit."
     }
   },
   "tech": {

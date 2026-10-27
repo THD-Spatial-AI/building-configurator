@@ -80,6 +80,10 @@ export function useDemoPvHost(elements: Record<string, BuildingElement>): PvMode
     patchSurface(surfaceId, { mounting, orientation });
   }, [patchSurface]);
 
+  const onModuleCountChange = useCallback((surfaceId: string, moduleCount: number | null) => {
+    patchSurface(surfaceId, { moduleCount: moduleCount ?? undefined });
+  }, [patchSurface]);
+
   const onAssignProduct = useCallback((surfaceId: string, productId: string) => {
     patchSurface(surfaceId, { productId });
   }, [patchSurface]);
@@ -111,8 +115,9 @@ export function useDemoPvHost(elements: Record<string, BuildingElement>): PvMode
     onToggle,
     onShareChange,
     onMountingChange,
+    onModuleCountChange,
     onAssignProduct,
     onConstraintChange,
     onSaveAsTechnology,
-  }), [surfaces, catalogue, products, onToggle, onShareChange, onMountingChange, onAssignProduct, onConstraintChange, onSaveAsTechnology]);
+  }), [surfaces, catalogue, products, onToggle, onShareChange, onMountingChange, onModuleCountChange, onAssignProduct, onConstraintChange, onSaveAsTechnology]);
 }

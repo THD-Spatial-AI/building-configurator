@@ -29,6 +29,8 @@ export interface PvSurface {
   mounting?: PvMounting;
   /** Absent: whichever fits more modules. */
   orientation?: PvOrientation;
+  /** How many modules to place, up to those that fit within the usable share. Absent: as many as fit. */
+  moduleCount?: number;
   /** The product on this surface. Absent: the building's `PvMode.productId`. */
   productId?: string;
   /** Name for a surface that is not among the building's elements, such as a roof of a neighbouring 3D building. */
@@ -59,6 +61,8 @@ export interface PvMode {
   onShareChange: (surfaceId: string, usableShare: number) => void;
   /** Store both and pass them back on the surface; orientation undefined means best fit. */
   onMountingChange: (surfaceId: string, mounting: PvMounting, orientation: PvOrientation | undefined) => void;
+  /** Store it as the surface's moduleCount; null means as many as fit. Absent: the count is not editable. */
+  onModuleCountChange?: (surfaceId: string, moduleCount: number | null) => void;
   /** The module of a product without module_width_m, module_height_m and module_power_kwp. Absent: DEFAULT_PV_MODULE. */
   module?: PvModule;
   /** PV products the user may choose from. Absent: no catalogue, and every surface uses `module`. */

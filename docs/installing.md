@@ -161,7 +161,7 @@ and the view follows the next `pv` the host passes.
 
 ```tsx
 const pv = useMemo<PvMode>(() => ({
-  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp, mounting?, orientation?, productId? } }
+  surfaces,          // { [surfaceId]: { state, usableShare, maxKwp, mounting?, orientation?, moduleCount?, productId? } }
   notice: t('pv.shadingNotice'),
   typeLabel: pvType.name,
   catalogue,         // the PV products in EnerPlanET's technology DTO shape
@@ -170,6 +170,7 @@ const pv = useMemo<PvMode>(() => ({
   onToggle: (surfaceId, installed) => setInstalled(surfaceId, installed),
   onShareChange: (surfaceId, usableShare) => setShare(surfaceId, usableShare),
   onMountingChange: (surfaceId, mounting, orientation) => setMounting(surfaceId, mounting, orientation),
+  onModuleCountChange: (surfaceId, moduleCount) => setModuleCount(surfaceId, moduleCount),
   onAssignProduct: (surfaceId, productId) => setProduct(surfaceId, productId),
   onConstraintChange: (productId, key, value) => setBuildingValue(productId, key, value),
   onSaveAsTechnology: (productId, name) => createUserProduct(productId, name),
@@ -188,6 +189,7 @@ const pv = useMemo<PvMode>(() => ({
 | `surfaces[id].maxKwp` | Capacity at the current usable share, in kWp. Shown only for a surface the view has no polygon for; any other surface shows its module layout's capacity |
 | `surfaces[id].mounting` | Optional. `{ kind: 'flush' }` or `{ kind: 'racked', tilt, azimuth }`; the card offers racking on surfaces under 10° only. Absent: racked at 15° facing 180° on a surface under 10°, otherwise flush |
 | `surfaces[id].orientation` | Optional. `portrait` or `landscape` for every module on the surface. Absent: whichever fits more modules, which on a flush surface may mix both |
+| `surfaces[id].moduleCount` | Optional. How many modules to place, up to those that fit within the usable share; capacity is this times the module's power. Absent: as many as fit |
 | `surfaces[id].productId` | Optional. The surface's product. Absent: `productId` |
 | `notice` | Shown under the PV overview. Pass it in the user's language |
 | `typeLabel` | Name of the building's PV type, shown at the top of the PV overview |
@@ -198,13 +200,14 @@ const pv = useMemo<PvMode>(() => ({
 | `onToggle(surfaceId, installed)` | A surface's PV was switched on or off. Dropping a product on a surface without PV also calls it with `true` |
 | `onShareChange(surfaceId, usableShare)` | The usable share of a surface with PV was changed, 0 to 1 |
 | `onMountingChange(surfaceId, mounting, orientation)` | The mounting or module orientation of a surface was changed. Store both and pass them back on the surface; `orientation` is `undefined` while the best fit applies |
+| `onModuleCountChange(surfaceId, moduleCount)` | Optional. The module count of a surface with PV was changed. Store it as `surfaces[id].moduleCount`; `null` means as many as fit. Without it the count is not editable |
 | `onAssignProduct(surfaceId, productId)` | Optional. A product was dropped on a surface or chosen for it. Store it as `surfaces[id].productId`. Without it products cannot be dropped or chosen |
 | `onConstraintChange(productId, key, value)` | Optional. A value of this building's copy of a product was changed; `value` is a number, an option or `"INF"`. Store it in `products[productId]`. Without it the values are not shown |
 | `onSaveAsTechnology(productId, name)` | Optional. Saves this building's copy of a product as a new product of the user's own; resolves to its id, rejects on failure |
 
 Clicking a surface on the Technologies tab opens it in the surface panel: its
 geometry, the PV switch, and on a surface with PV its product, usable share,
-mounting, module format, the resulting modules, capacity and investment, and
+module count, mounting, module format, the resulting modules, capacity and investment, and
 up to three catalogue products that reach more capacity on it. On other tabs
 the panel shows the surface's envelope values.
 

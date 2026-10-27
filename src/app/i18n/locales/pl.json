@@ -280,6 +280,10 @@
       "capacity": "Moc",
       "area": "Powierzchnia paneli",
       "investment": "Inwestycja, szacunkowo"
+    },
+    "moduleCount": {
+      "label": "Moduły (do {fits})",
+      "tip": "Ile modułów umieścić na tej powierzchni, do liczby mieszczącej się w jej użytecznej części. Moc wynika z tej liczby."
     }
   },
   "tech": {
