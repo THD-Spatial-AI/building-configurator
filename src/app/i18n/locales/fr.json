@@ -169,13 +169,15 @@
     "mounting": {
       "label": "Pose",
       "flush": "Coplanaire",
-      "racked": "Sur châssis"
+      "racked": "Sur châssis",
+      "tip": "La pose des panneaux sur un toit plat. {flush} : ils reposent à plat sur le toit. {racked} : ils sont posés sur des supports à l'inclinaison et l'orientation choisies, captent plus de soleil mais demandent plus d'espace entre les rangées."
     },
     "orientation": {
       "label": "Format",
       "auto": "Optimal",
       "portrait": "Portrait",
-      "landscape": "Paysage"
+      "landscape": "Paysage",
+      "tip": "Le sens des panneaux sur la surface. {portrait} : le grand côté monte le long de la surface. {landscape} : le grand côté la traverse. {auto} prend le sens où tiennent le plus de panneaux, en mêlant les deux là où il en tient plus."
     },
     "panelTilt": "Inclinaison des modules",
     "panelFacing": "Orientation des modules",

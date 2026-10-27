@@ -168,13 +168,15 @@
     "mounting": {
       "label": "Mounting",
       "flush": "Flush",
-      "racked": "Racked"
+      "racked": "Racked",
+      "tip": "How the panels sit on a flat roof. {flush}: they lie flat on the roof. {racked}: they stand on frames at the tilt and facing you set, so they catch more sun but need more space between rows."
     },
     "orientation": {
       "label": "Format",
       "auto": "Best fit",
       "portrait": "Portrait",
-      "landscape": "Landscape"
+      "landscape": "Landscape",
+      "tip": "Which way the panels are turned on the surface. {portrait}: the long side runs up the surface. {landscape}: the long side runs across it. {auto} uses whichever way fits the most panels, mixing both where that fits more."
     },
     "panelTilt": "Panel tilt",
     "panelFacing": "Panel facing",

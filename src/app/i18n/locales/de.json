@@ -168,13 +168,15 @@
     "mounting": {
       "label": "Montage",
       "flush": "Parallel",
-      "racked": "Aufgeständert"
+      "racked": "Aufgeständert",
+      "tip": "Wie die Module auf einem Flachdach liegen. {flush}: Sie liegen direkt auf dem Dach. {racked}: Sie stehen auf Gestellen mit der eingestellten Neigung und Ausrichtung, fangen so mehr Sonne ein, brauchen aber mehr Abstand zwischen den Reihen."
     },
     "orientation": {
       "label": "Format",
       "auto": "Optimal",
       "portrait": "Hochformat",
-      "landscape": "Querformat"
+      "landscape": "Querformat",
+      "tip": "Wie die Module auf der Fläche gedreht sind. {portrait}: Die lange Seite verläuft die Fläche hinauf. {landscape}: Die lange Seite verläuft quer. {auto} nimmt die Ausrichtung, in die die meisten Module passen, und mischt beide, wo mehr hineinpasst."
     },
     "panelTilt": "Modulneigung",
     "panelFacing": "Modulazimut",

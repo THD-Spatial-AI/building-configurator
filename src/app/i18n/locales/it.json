@@ -168,13 +168,15 @@
     "mounting": {
       "label": "Montaggio",
       "flush": "Complanare",
-      "racked": "Su struttura"
+      "racked": "Su struttura",
+      "tip": "Come si posano i pannelli su un tetto piano. {flush}: stanno distesi sul tetto. {racked}: poggiano su telai con l'inclinazione e l'orientamento impostati, raccolgono più sole ma servono più spazio tra le file."
     },
     "orientation": {
       "label": "Formato",
       "auto": "Ottimale",
       "portrait": "Verticale",
-      "landscape": "Orizzontale"
+      "landscape": "Orizzontale",
+      "tip": "Come sono girati i pannelli sulla superficie. {portrait}: il lato lungo sale lungo la superficie. {landscape}: il lato lungo la attraversa. {auto} usa il verso in cui entrano più pannelli e li mescola dove ne entrano di più."
     },
     "panelTilt": "Inclinazione dei moduli",
     "panelFacing": "Orientamento dei moduli",

@@ -170,13 +170,15 @@
     "mounting": {
       "label": "Montaż",
       "flush": "Równolegle",
-      "racked": "Na stelażu"
+      "racked": "Na stelażu",
+      "tip": "Jak panele leżą na płaskim dachu. {flush}: leżą płasko na dachu. {racked}: stoją na konstrukcjach z ustawionym nachyleniem i kierunkiem, łapią więcej słońca, ale potrzebują więcej miejsca między rzędami."
     },
     "orientation": {
       "label": "Układ",
       "auto": "Optymalnie",
       "portrait": "Pionowo",
-      "landscape": "Poziomo"
+      "landscape": "Poziomo",
+      "tip": "Jak panele są obrócone na powierzchni. {portrait}: dłuższy bok biegnie w górę powierzchni. {landscape}: dłuższy bok biegnie w poprzek. {auto} wybiera układ, w którym mieści się najwięcej paneli, łącząc oba tam, gdzie mieści się więcej."
     },
     "panelTilt": "Nachylenie modułów",
     "panelFacing": "Orientacja modułów",

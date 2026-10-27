@@ -2,7 +2,7 @@
 // and with PV its product, usable share, mounting, module format, the
 // resulting modules and cost, and products that fit more.
 
-import { Dropdown, DROPDOWN_LIST, NumberInput, OPTION_ROW, SegmentedControl, Switch } from '../BuildingConfigurator/shared/ui';
+import { Dropdown, DROPDOWN_LIST, InfoTip, NumberInput, OPTION_ROW, SegmentedControl, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry } from '../../lib/pvSurfaces';
@@ -54,7 +54,7 @@ function MountingControls({ surfaceId, surface, layout, canRack, pv }: {
     <div className="flex flex-col gap-2.5">
       {canRack && (
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] font-medium text-muted-foreground">{t('pv.mounting.label')}</span>
+          <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">{t('pv.mounting.label')}<InfoTip tip={t('pv.mounting.tip', { flush: t('pv.mounting.flush'), racked: t('pv.mounting.racked') })} /></span>
           <SegmentedControl
             options={[{ value: 'flush', label: t('pv.mounting.flush') }, { value: 'racked', label: t('pv.mounting.racked') }]}
             value={mounting.kind}
@@ -75,7 +75,7 @@ function MountingControls({ surfaceId, surface, layout, canRack, pv }: {
         </div>
       )}
       <div className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium text-muted-foreground">{t('pv.orientation.label')}</span>
+        <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">{t('pv.orientation.label')}<InfoTip tip={t('pv.orientation.tip', { portrait: t('pv.orientation.portrait'), landscape: t('pv.orientation.landscape'), auto: t('pv.orientation.auto') })} /></span>
         <SegmentedControl
           fullWidth
           options={[
