@@ -131,7 +131,7 @@
       "parse": "{reason}",
       "unreadable": "No se pudo leer el archivo del perfil de carga."
     },
-    "uploadSoon": "Pronto se podrá subir un perfil medido."
+    "uploadSoon": "Pronto podrá subir su propio perfil de consumo."
   },
   "pv": {
     "state": {

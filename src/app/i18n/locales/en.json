@@ -130,7 +130,7 @@
       "parse": "{reason}",
       "unreadable": "Could not parse load profile file."
     },
-    "uploadSoon": "Uploading a measured profile is coming soon."
+    "uploadSoon": "Uploading your own consumption profile is coming soon."
   },
   "pv": {
     "state": {

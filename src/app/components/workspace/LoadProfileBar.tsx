@@ -2,7 +2,7 @@
 // from, an upload that stays in the browser, and a download the host serves.
 // Hourly only, which is the resolution the whole stack runs at.
 
-import { useId, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 import { Download, Upload } from '@/app/components/icons';
 import { useLoadProfileState } from '../BuildingConfigurator/overview/useLoadProfileState';
 import type { LoadDataPoint } from '../../lib/loadProfile';
@@ -20,6 +20,8 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
   const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadSoonId = useId();
+  // A click shows the note too, where there is no hover, as on a touch screen.
+  const [noteOpen, setNoteOpen] = useState(false);
   const {
     handleFileUpload, hasData, sourceCaption, uploadError,
   } = useLoadProfileState({
@@ -29,29 +31,39 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
   });
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-card px-3 py-2">
+    <div className="flex flex-col gap-1 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
       <div className="flex items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold text-foreground">{t('profile.title')}</p>
-          <p className="truncate text-[10px] text-muted-foreground">{!hasData && seriesCsvUrl ? t('profile.stored') : sourceCaption.aggregatedFrom
+        <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
+          <p className="m-0 shrink-0 text-[12px] font-semibold text-foreground">{t('profile.title')}</p>
+          <p className="m-0 truncate text-[10px] text-muted-foreground">{!hasData && seriesCsvUrl ? t('profile.stored') : sourceCaption.aggregatedFrom
             ? t('profile.source.aggregated', {
               source: t(sourceCaption.source.key, sourceCaption.source.values),
               from: t(`profile.resolution.${sourceCaption.aggregatedFrom}`),
             })
             : t(sourceCaption.source.key, sourceCaption.source.values)}</p>
         </div>
-        {/* TODO: enable once the host supports uploaded profiles; the file input below is ready for it. */}
-        <button
-          type="button"
-          disabled
-          title={t('profile.uploadSoon')}
-          aria-describedby={uploadSoonId}
-          onClick={() => fileInputRef.current?.click()}
-          className="flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground opacity-60"
-        >
-          <Upload className="size-3" />
-          {t('profile.upload')}
-        </button>
+        {/* TODO: open fileInputRef once the host supports uploaded profiles; the file input below is ready for it. */}
+        <div className="group relative shrink-0" onMouseLeave={() => setNoteOpen(false)}>
+          {/* aria-disabled, not disabled: a disabled button gets no hover or focus, so its note could not show. */}
+          <button
+            type="button"
+            aria-disabled="true"
+            aria-describedby={uploadSoonId}
+            onClick={() => setNoteOpen((open) => !open)}
+            onBlur={() => setNoteOpen(false)}
+            className="flex cursor-not-allowed items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-muted-foreground opacity-60"
+          >
+            <Upload className="size-3" />
+            {t('profile.upload')}
+          </button>
+          <p
+            id={uploadSoonId}
+            role="tooltip"
+            className={`absolute right-0 top-full z-20 mt-1 w-56 rounded-md border border-border bg-popover px-2.5 py-1.5 text-[11px] leading-snug text-popover-foreground shadow-md ${noteOpen ? 'block' : 'hidden group-hover:block group-focus-within:block'}`}
+          >
+            {t('profile.uploadSoon')}
+          </p>
+        </div>
         {seriesCsvUrl && (
           <a
             href={seriesCsvUrl}
@@ -70,8 +82,6 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
           onChange={handleFileUpload}
         />
       </div>
-
-      <p id={uploadSoonId} className="m-0 text-[10px] leading-snug text-muted-foreground">{t('profile.uploadSoon')}</p>
 
       {uploadError && (
         <p className="text-[10px] leading-snug text-destructive">{t(uploadError.key, uploadError.values)}</p>
