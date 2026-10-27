@@ -9,10 +9,10 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildPvModules, buildSurfaceGroup, computeOrigin, toLocal, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { buildPvModules, buildSurfaceGroup, computeOrigin, surfaceSides, toLocal, type SurfacePolygon } from '@/app/lib/surfaceMesh';
 import { storeyAt, storeyBands, storeyLines, storeyParts } from '@/app/lib/storeys';
 import { PV_PRODUCT_DRAG_TYPE } from '@/app/lib/pvProducts';
-import { useT } from '@/app/i18n';
+import { useFormatNumber, useT } from '@/app/i18n';
 
 interface SurfaceGeometryViewerProps {
   surfaces: SurfacePolygon[];
@@ -101,6 +101,15 @@ export function SurfaceGeometryViewer({
   const storeyPickRef = useRef({ onSelectStorey, count: storeys?.count ?? 0 });
   useEffect(() => { storeyPickRef.current = { onSelectStorey, count: storeys?.count ?? 0 }; });
   const origin = useMemo(() => computeOrigin(surfaces), [surfaces]);
+  const format = useFormatNumber();
+  // The selected surface's side lengths, placed over the model by the render loop.
+  const sides = useMemo(() => {
+    const polygon = selectedId ? surfaces.find((surface) => surface.id === selectedId) : undefined;
+    return polygon ? surfaceSides(polygon) : [];
+  }, [surfaces, selectedId]);
+  const sidePositionsRef = useRef<THREE.Vector3[]>([]);
+  const sideLabelsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  useEffect(() => { sidePositionsRef.current = sides.map((side) => toLocal(side.mid, origin)); }, [sides, origin]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -302,6 +311,14 @@ export function SurfaceGeometryViewer({
       if (compassRef.current) {
         compassRef.current.style.transform = `rotate(${-controls.getAzimuthalAngle()}rad)`;
       }
+      const { clientWidth: width, clientHeight: height } = renderer.domElement;
+      sidePositionsRef.current.forEach((position, i) => {
+        const label = sideLabelsRef.current[i];
+        if (!label) return;
+        const at = position.clone().project(camera);
+        label.style.display = at.z > 1 ? 'none' : '';
+        label.style.transform = `translate(-50%, -50%) translate(${((at.x + 1) / 2) * width}px, ${((1 - at.y) / 2) * height}px)`;
+      });
     }
     animate();
 
@@ -440,6 +457,13 @@ export function SurfaceGeometryViewer({
   return (
     <div className="bg-muted" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%', cursor: 'grab' }} />
+      {sides.map((side, i) => (
+        <span
+          key={i}
+          ref={(el) => { sideLabelsRef.current[i] = el; }}
+          className="pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded bg-foreground/85 px-1.5 py-0.5 text-[10px] font-semibold text-background shadow-sm"
+        >{format(side.length, 2)} m</span>
+      ))}
       <div className="border border-border bg-card/90" style={{
         position: 'absolute', top: 12, right: 12, width: 44, height: 44, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',

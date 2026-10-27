@@ -116,6 +116,25 @@ export function computeOrigin(surfaces: SurfacePolygon[]): [number, number, numb
   return count > 0 ? [sumX / count, sumY / count, sumZ / count] : [0, 0, 0];
 }
 
+/** Shorter edges than this are not labelled: they are seams in the data, not sides. */
+const MIN_EDGE_M = 0.1;
+
+/**
+ * Each side of a surface's outer ring: its length in metres and its midpoint
+ * in the storage CRS. The ring's closing vertex repeats the first, so it is
+ * not a side of its own.
+ */
+export function surfaceSides(polygon: SurfacePolygon): { mid: number[]; length: number }[] {
+  const ring = polygon.coordinates[0] ?? [];
+  const sides: { mid: number[]; length: number }[] = [];
+  for (let i = 0; i + 1 < ring.length; i += 1) {
+    const [a, b] = [ring[i], ring[i + 1]];
+    const length = Math.hypot(b[0] - a[0], b[1] - a[1], (b[2] ?? 0) - (a[2] ?? 0));
+    if (length >= MIN_EDGE_M) sides.push({ mid: a.map((value, axis) => (value + (b[axis] ?? 0)) / 2), length });
+  }
+  return sides;
+}
+
 /** Storage CRS (x east, y north, z up) to three.js (x east, y up, z south). */
 export function toLocal([x, y, z]: number[], origin: [number, number, number]): THREE.Vector3 {
   return new THREE.Vector3(x - origin[0], z - origin[2], -(y - origin[1]));
