@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { previewHeatingPerM2, runBuildingSimulation, runIdentity, toBuem, type RunContext } from './buemRun';
 import type { BuemBuildingRunRequest } from './services';
-import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
+import { adaptBuemFeature, parseBuemFeatureForImport, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
 import { DEFAULT_GENERAL, generalFrom } from '../components/BuildingConfigurator/shared/buildingDefaults';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
@@ -80,10 +80,10 @@ describe('toBuem', () => {
     });
   });
 
-  it('keeps the construction year beside the building block, not in it', () => {
+  it('keeps the construction year in the configurator keys, not in the building block', () => {
     const stored = toBuem(edited);
     expect(stored.building).not.toHaveProperty('construction_period');
-    expect(stored.construction_year).toBe(general.constructionYear);
+    expect(stored.configurator.construction_year).toBe(general.constructionYear);
   });
 
   it('carries the expert-mode parameters and the solver choice', () => {
@@ -167,22 +167,35 @@ describe('adaptBuemFeature on stored blocks', () => {
   });
 
   it('reopens an older block with the year in construction_period', () => {
-    const { construction_year: _year, ...older } = toBuem(edited);
+    const { configurator: { construction_year: _year, ...own }, ...older } = toBuem(edited);
     const legacy = adaptBuemFeature({
       type: 'Feature',
       id: 'osm-42',
       geometry: { type: 'Point', coordinates: [5.9, 52.2] },
-      properties: { buem: { ...older, building: { ...older.building, construction_period: '1962' } } },
+      properties: { buem: { ...older, configurator: own, building: { ...older.building, construction_period: '1962' } } },
     });
     expect(generalFrom(legacy).constructionYear).toBe(1962);
+  });
+
+  it('reopens a block stored by 0.14.0, with the storeys and year beside the building block', () => {
+    const { configurator: { construction_year, storeys }, ...older } = toBuem(edited);
+    const legacy = {
+      type: 'Feature',
+      id: 'osm-42',
+      geometry: { type: 'Point', coordinates: [5.9, 52.2] },
+      properties: { buem: { ...older, construction_year: 1962, storeys: 3 } },
+    };
+    expect([construction_year, storeys]).not.toEqual([1962, 3]);
+    expect(generalFrom(adaptBuemFeature(legacy))).toMatchObject({ constructionYear: 1962, storeys: 3 });
+    expect(parseBuemFeatureForImport(legacy).general).toMatchObject({ constructionYear: 1962, storeys: 3 });
   });
 
   it('reopens with the same building parameters and solver choice', () => {
     expect(generalFrom(reopened)).toMatchObject(general);
   });
 
-  it('keeps the storey count beside the block, never as the deprecated n_storeys', () => {
-    expect(toBuem(edited).storeys).toBe(general.storeys);
+  it('keeps the storey count in the configurator keys, never as the deprecated n_storeys', () => {
+    expect(toBuem(edited).configurator.storeys).toBe(general.storeys);
     expect(toBuem(edited).building).not.toHaveProperty('n_storeys');
   });
 

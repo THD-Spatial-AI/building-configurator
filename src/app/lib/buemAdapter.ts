@@ -603,7 +603,7 @@ export function partialStoreys(modelled: unknown, storeys: number): number[] | u
   return valid.length > 0 && valid.length < storeys ? valid : undefined;
 }
 
-/** One storey as stored beside the block, 1-based from the ground. */
+/** One storey as stored in buem.configurator, 1-based from the ground. */
 export interface StoreyEntry {
   storey: number;
   modelled: boolean;
@@ -611,7 +611,7 @@ export interface StoreyEntry {
   dwellings?: number;
 }
 
-/** Every storey with whether it is in the model and its dwellings, as stored in properties.buem.storey_list. */
+/** Every storey with whether it is in the model and its dwellings, as stored in properties.buem.configurator.storey_list. */
 function storeyList(modelled: readonly number[], storeys: number, dwellings: StoreyDwellings = {}): StoreyEntry[] {
   return Array.from({ length: storeys }, (_, i) => ({
     storey: i + 1,
@@ -730,13 +730,13 @@ export function serializeToBuemFeature(
   else if (general.buildingType) building.building_type = BUILDING_TYPE_CODES[general.buildingType] ?? general.buildingType.replace(/\s+/g, '_').toUpperCase();
 
   // construction_period is a per-country TABULA class code, never a year, so it
-  // is not sent. The year travels beside the block as buem.construction_year.
+  // is not sent. The year travels in buem.configurator, the keys BuEM ignores.
   const constructionYear = Number(identity.constructionYear || general.constructionYear) || 0;
   // BuEM takes no storey count (n_storeys is deprecated and ignored), so the
-  // count travels beside the block too, to split A_ref again on reopening.
+  // count travels in buem.configurator too, to split A_ref again on reopening.
   const storeys = Number(general.storeys || identity.storeys) || 0;
   // BuEM has no storey input either: with storeys left out, the block itself
-  // is cut to them and the whole envelope travels beside it for reopening.
+  // is cut to them and the whole envelope travels in buem.configurator.
   const modelled = partialStoreys(general.storeysModelled, storeys);
   const storeyShare = modelled ? modelled.length / storeys : 1;
 
@@ -831,11 +831,13 @@ export function serializeToBuemFeature(
       resolution_unit: resolutionUnit,
       buem: {
         building,
-        ...(constructionYear ? { construction_year: constructionYear } : {}),
-        ...(storeys ? { storeys } : {}),
-        ...(modelled ? { storey_list: storeyList(modelled, storeys, general.storeyDwellings) } : {}),
-        ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
-        ...(keepUnits ? { residential_units_full: unitsFull } : {}),
+        configurator: {
+          ...(constructionYear ? { construction_year: constructionYear } : {}),
+          ...(storeys ? { storeys } : {}),
+          ...(modelled ? { storey_list: storeyList(modelled, storeys, general.storeyDwellings) } : {}),
+          ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
+          ...(keepUnits ? { residential_units_full: unitsFull } : {}),
+        },
         ...(refurbishment ? { refurbishment } : {}),
         outputs,
         solver: {
@@ -927,9 +929,10 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   const buem = (props.buem ?? {}) as Record<string, unknown>;
   const bldg = (buem.building ?? {}) as Record<string, unknown>;
   const envelopeBlk = (bldg.envelope ?? {}) as Record<string, unknown>;
-  const fullBlk = (buem.envelope_full ?? {}) as Record<string, unknown>;
-  const importedStoreys = Number(buem.storeys ?? bldg.n_storeys ?? 0);
-  const modelled = Array.isArray(fullBlk.elements) ? partialStoreys(modelledFromList(buem.storey_list), importedStoreys) : undefined;
+  const own = (buem.configurator ?? {}) as Record<string, unknown>;
+  const fullBlk = (own.envelope_full ?? {}) as Record<string, unknown>;
+  const importedStoreys = Number(own.storeys ?? buem.storeys ?? bldg.n_storeys ?? 0);
+  const modelled = Array.isArray(fullBlk.elements) ? partialStoreys(modelledFromList(own.storey_list), importedStoreys) : undefined;
   const sourceElements = modelled ? fullBlk.elements : envelopeBlk.elements;
   let elements: Record<string, any> = {};
 
@@ -966,7 +969,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
 
   // Parse general config. bldg.A_ref is the total conditioned floor area of the
   // modelled storeys; general.floorArea is per storey, so divide by their count.
-  const importedYear = Number(buem.construction_year ?? bldg.construction_period) || 0;
+  const importedYear = Number(own.construction_year ?? buem.construction_year ?? bldg.construction_period) || 0;
   const general: Record<string, any> = {
     // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.
     ...(importedYear ? { constructionYear: importedYear } : {}),
