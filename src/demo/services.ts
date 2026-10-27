@@ -43,6 +43,15 @@ export const fixtureServices: ConfiguratorServices = {
     throw new Error(`Heat demand is not calculated in the dev shell (variant ${variantCode})`);
   },
 
+  // ERA5-Land with no scenarios built shows the choice without a solar year.
+  async fetchWeatherOptions() {
+    return {
+      defaultProvider: 'merra-2',
+      providers: { 'merra-2': [2018, 2019, 2020], 'era5-land': [2018] },
+      scenarios: { 'merra-2': ['p10', 'p50', 'p90'], 'era5-land': [] },
+    };
+  },
+
   // Answers with the stored default run whatever was edited; a real host re-runs BuEM.
   async runBuemBuilding(request) {
     await new Promise((resolve) => setTimeout(resolve, RUN_DELAY_MS));

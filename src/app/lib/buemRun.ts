@@ -13,6 +13,9 @@ import { MODEL_DATA_MAP } from '../config/modelDataMap';
 import { getMappedNumber } from '../config/modelDataResolver';
 import type { BuemBuildingRunRequest, ConfiguratorServices } from './services';
 
+/** The weather the user picked; a field is absent where the host's default applies. */
+export type WeatherChoice = Pick<BuemBuildingRunRequest, 'weather_provider' | 'weather_scenario'>;
+
 /** The period a run covers, supplied by the host. Dates are RFC 3339. */
 export interface RunContext {
   startDate: string;
@@ -33,6 +36,7 @@ export async function runBuildingSimulation(
   elements: Record<string, any>,
   general: Record<string, any>,
   runContext?: RunContext,
+  weather: WeatherChoice = {},
 ): Promise<BuildingDemandProfile | null> {
   const feature = serializeToBuemFeature(identity, elements, general, runContext?.startDate, runContext?.endDate);
 
@@ -46,6 +50,7 @@ export async function runBuildingSimulation(
       start_date: feature.properties.start_time,
       end_date:   feature.properties.end_time,
       resolution: Number(feature.properties.resolution),
+      ...weather,
     });
   } catch (err) {
     console.error('[buem/building] request failed', err);
@@ -69,6 +74,7 @@ export async function previewHeatingPerM2(
   elements: Record<string, any>,
   general: Record<string, any>,
   runContext?: RunContext,
+  weather: WeatherChoice = {},
 ): Promise<number | null> {
   if (!services.previewBuemBuilding) return null;
   const feature = serializeToBuemFeature(
@@ -85,6 +91,7 @@ export async function previewHeatingPerM2(
       start_date: feature.properties.start_time,
       end_date:   feature.properties.end_time,
       resolution: Number(feature.properties.resolution),
+      ...weather,
     });
     const heating = getMappedNumber({ properties: { buem } }, MODEL_DATA_MAP.thematic.results.heatingTotal);
     return aRef > 0 && heating > 0 ? heating / aRef : null;

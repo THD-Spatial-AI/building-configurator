@@ -26,6 +26,8 @@ import { TOPICS } from '@/app/config/topics';
 import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
+import { DEFAULT_WEATHER, WeatherSection, weatherChoice, type WeatherSelection } from './WeatherSection';
+import type { WeatherOptions } from '../../lib/services';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreyPanel, StoreysModelled } from './StoreysModelled';
@@ -124,8 +126,21 @@ export function Building3DView({
   );
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
   const installedPvIds = useMemo(() => [...(pvSets?.installed ?? [])], [pvSets]);
+  /** Null without the host's weather options, or while they load or after they failed: no weather choice. */
+  const [weatherOptions, setWeatherOptions] = useState<WeatherOptions | null>(null);
+  const [weatherSelection, setWeatherSelection] = useState<WeatherSelection>(DEFAULT_WEATHER);
+  const { fetchWeatherOptions } = services;
+  useEffect(() => {
+    if (!fetchWeatherOptions) return;
+    let cancelled = false;
+    fetchWeatherOptions()
+      .then((options) => { if (!cancelled) setWeatherOptions(options); })
+      .catch((err) => console.error('[weather] options request failed', err));
+    return () => { cancelled = true; };
+  }, [fetchWeatherOptions]);
+  const weather = useMemo(() => weatherChoice(weatherOptions, weatherSelection), [weatherOptions, weatherSelection]);
   const model = useBuildingModel(services, building, {
-    estimateHeatDemand: false, runContext, demandProfile, language,
+    estimateHeatDemand: false, runContext, weather, demandProfile, language,
     pvSurfaceIds: installedPvIds, pvLayouts: layouts,
     pvProductFor: pv ? (id) => surfaceProduct(pv, id)?.id : undefined,
   });
@@ -577,6 +592,9 @@ export function Building3DView({
                       disabled={surfaces.length === 0}
                       onChange={setModelledStoreys}
                     />
+                  )}
+                  {weatherOptions && Object.keys(weatherOptions.providers).length > 0 && (
+                    <WeatherSection options={weatherOptions} selection={weatherSelection} onChange={setWeatherSelection} />
                   )}
                   <BuildingEditor
                     general={model.general}

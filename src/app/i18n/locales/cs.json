@@ -758,7 +758,8 @@
     "comfort": "Kdy se budova vytápí: požadovaná teplota, zda se v noci nebo při nepřítomnosti snižuje (útlum) a zda je zahrnuta teplá voda.",
     "outputs": "Které profily BuEM vrací pro každé užití: roční souhrn, hodinovou řadu, nebo žádný.",
     "equipment": "Které spotřebiče domácnosti vlastní; spotřeba elektřiny v BuEM se jimi řídí. Nenastavené si ponechají pravděpodobnost BuEM.",
-    "solver": "Jak BuEM řeší hodinový model: výchozím rychlým řídkým řešičem, nebo MILP, pomaleji, ale přesně na mezích."
+    "solver": "Jak BuEM řeší hodinový model: výchozím rychlým řídkým řešičem, nebo MILP, pomaleji, ale přesně na mezích.",
+    "weather": "Hodinové počasí, se kterým BuEM počítá. Solární rok vybere z archivu poskytovatele reprezentativní rok se slabým, typickým nebo silným slunečním zářením; výchozí je typický."
   },
   "tour": {
     "button": "Prohlídka",
@@ -794,5 +795,15 @@
     "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
     "step2": "Změňte hodnotu U nebo úroveň renovace v panelu.",
     "step3": "Uložte a zobrazte náhled nové potřeby budovy."
+  },
+  "weather": {
+    "title": "Počasí",
+    "provider": "Meteorologická data",
+    "year": "Solární rok",
+    "scenario": {
+      "p10": "Slabý",
+      "p50": "Typický",
+      "p90": "Silný"
+    }
   }
 }

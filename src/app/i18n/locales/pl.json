@@ -758,7 +758,8 @@
     "comfort": "Kiedy budynek jest ogrzewany: temperatura zadana, czy jest obniżana w nocy lub pod nieobecność (obniżenie) i czy uwzględniono ciepłą wodę.",
     "outputs": "Jakie profile BuEM zwraca dla każdego zastosowania: podsumowanie roczne, serię godzinową lub żaden.",
     "equipment": "Jakie urządzenia mają gospodarstwa domowe; zapotrzebowanie na energię elektryczną w BuEM od nich zależy. Nieustawione zachowują prawdopodobieństwo BuEM.",
-    "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach."
+    "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach.",
+    "weather": "Godzinowa pogoda, na której liczy BuEM. Rok słoneczny wybiera z archiwum dostawcy reprezentatywny rok o niskim, typowym lub wysokim nasłonecznieniu; domyślnie typowy."
   },
   "tour": {
     "button": "Przewodnik",
@@ -794,5 +795,15 @@
     "step1": "Kliknij ścianę, dach lub podłogę, aby ją otworzyć.",
     "step2": "Zmień współczynnik U lub poziom termomodernizacji w panelu.",
     "step3": "Zapisz i podgląd, aby zobaczyć nowe zapotrzebowanie budynku."
+  },
+  "weather": {
+    "title": "Pogoda",
+    "provider": "Dane pogodowe",
+    "year": "Rok słoneczny",
+    "scenario": {
+      "p10": "Niski",
+      "p50": "Typowy",
+      "p90": "Wysoki"
+    }
   }
 }

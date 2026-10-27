@@ -38,6 +38,22 @@ export interface BuemBuildingRunRequest {
   start_date: string;
   end_date: string;
   resolution: number;
+  /** One of WeatherOptions' providers; absent for the host's default provider. */
+  weather_provider?: string;
+  /** One of that provider's scenarios; absent for p50, the typical year. */
+  weather_scenario?: WeatherScenario;
+}
+
+/** The representative low, typical and high solar years of a weather archive. */
+export type WeatherScenario = 'p10' | 'p50' | 'p90';
+
+/** The weather a host can run BuEM on. */
+export interface WeatherOptions {
+  defaultProvider: string;
+  /** Each provider's processed years, by provider name. */
+  providers: Record<string, number[]>;
+  /** Each provider's complete scenarios; empty when not known, which offers no scenario choice. */
+  scenarios: Record<string, WeatherScenario[]>;
 }
 
 /** The building's stored demand after the run, the same body as its demand-profile route. */
@@ -100,6 +116,13 @@ export interface ConfiguratorServices {
    * and no PV row. Expected budget: 30 s.
    */
   runPvBuilding?(request: PvBuildingRunRequest): Promise<PvBuildingRunResponse>;
+
+  /**
+   * Optional. The weather providers and scenarios BuEM can run on, fetched
+   * once as the view opens. Without it there is no weather choice and runs
+   * use the host's default. Expected budget: 8 s.
+   */
+  fetchWeatherOptions?(): Promise<WeatherOptions>;
 }
 
 /** The host's PV surfaces on the open building, with the geometry as currently edited. */

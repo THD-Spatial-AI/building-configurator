@@ -29,7 +29,7 @@ import {
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
 import { applyState, REFURB_TYPES, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
-import { previewHeatingPerM2, runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
+import { previewHeatingPerM2, runBuildingSimulation, runIdentity, type RunContext, type WeatherChoice } from '../../lib/buemRun';
 import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
 import type { PvLayout } from '../../lib/pvLayout';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
@@ -222,9 +222,11 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
+  { estimateHeatDemand = true, runContext, weather, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
+    /** The weather runs and level previews use. */
+    weather?: WeatherChoice;
     demandProfile?: BuildingDemandProfile | null;
     /** The language the snapshot rows' numbers are written in. */
     language?: Language;
@@ -612,6 +614,7 @@ export function useBuildingModel(
   const [levelPreview, setLevelPreview] = useState<{ key: string; perM2: Record<number, number | null> } | null>(null);
   const [isComparingLevels, setIsComparingLevels] = useState(false);
   const previewKey = JSON.stringify({
+    weather,
     general: { ...general, refurbishment: null },
     shape: Object.values(elements).map((el) => [el.id, el.area, el.tilt, el.azimuth, el.modelledShare]),
   });
@@ -628,7 +631,7 @@ export function useBuildingModel(
         (acc, type) => applyState(acc, type, refurbStates[type], level.number, refurbInitial, levels),
         elements,
       );
-      return [level.number, await previewHeatingPerM2(services, identity, levelElements, general, runContext)] as const;
+      return [level.number, await previewHeatingPerM2(services, identity, levelElements, general, runContext, weather)] as const;
     }));
     setLevelPreview({ key: previewKey, perM2: Object.fromEntries(results) });
     setIsComparingLevels(false);
@@ -658,7 +661,7 @@ export function useBuildingModel(
       // hold back the demand result.
       const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts, pvProductFor) : null;
       const [result, pvKwh] = await Promise.all([
-        runBuildingSimulation(services, identity, elements, general, runContext),
+        runBuildingSimulation(services, identity, elements, general, runContext, weather),
         pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),
       ]);
       if (pvRequest) setPvAnnualKwh(pvKwh);

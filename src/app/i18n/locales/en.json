@@ -738,7 +738,8 @@
     "comfort": "When the building is heated: the temperature it is heated to, whether that is lowered at night or when people are away (set-back), and whether hot water is included.",
     "outputs": "Which profiles BuEM returns for each use: a yearly summary, an hourly series, or none.",
     "equipment": "Which appliances the households own; BuEM's electricity demand follows them. Appliances left unset keep BuEM's own likelihood.",
-    "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits."
+    "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits.",
+    "weather": "The hourly weather BuEM runs on. A solar year picks a representative low, typical or high year for sunshine from the provider's archive; typical is the default."
   },
   "tour": {
     "button": "Tour",
@@ -774,5 +775,15 @@
     "step1": "Click a wall, roof or floor to open it.",
     "step2": "Change its U-value or refurbishment level in the panel.",
     "step3": "Save and preview to see the building's new demand."
+  },
+  "weather": {
+    "title": "Weather",
+    "provider": "Weather data",
+    "year": "Solar year",
+    "scenario": {
+      "p10": "Low",
+      "p50": "Typical",
+      "p90": "High"
+    }
   }
 }

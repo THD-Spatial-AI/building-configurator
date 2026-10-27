@@ -738,7 +738,8 @@
     "comfort": "Quando l'edificio è riscaldato: la temperatura impostata, se si abbassa di notte o in assenza (attenuazione) e se è inclusa l'acqua calda.",
     "outputs": "Quali profili restituisce BuEM per ogni uso: un riepilogo annuo, una serie oraria o nessuno.",
     "equipment": "Quali elettrodomestici hanno le famiglie; la domanda elettrica di BuEM li segue. Quelli non impostati mantengono la probabilità di BuEM.",
-    "solver": "Come BuEM risolve il modello orario: con il solutore sparso predefinito, veloce, o con MILP, più lento ma esatto sui limiti."
+    "solver": "Come BuEM risolve il modello orario: con il solutore sparso predefinito, veloce, o con MILP, più lento ma esatto sui limiti.",
+    "weather": "Il meteo orario su cui calcola BuEM. Un anno solare sceglie dall'archivio del fornitore un anno rappresentativo basso, tipico o alto per l'irraggiamento; tipico è il valore predefinito."
   },
   "tour": {
     "button": "Tour",
@@ -774,5 +775,15 @@
     "step1": "Fai clic su una parete, un tetto o un pavimento per aprirlo.",
     "step2": "Cambia il valore U o il livello di riqualificazione nel pannello.",
     "step3": "Salva e anteprima per vedere la nuova domanda dell'edificio."
+  },
+  "weather": {
+    "title": "Meteo",
+    "provider": "Dati meteo",
+    "year": "Anno solare",
+    "scenario": {
+      "p10": "Basso",
+      "p50": "Tipico",
+      "p90": "Alto"
+    }
   }
 }

@@ -35,7 +35,7 @@ export {
   type SurfacePolygon,
 } from './app/lib/surfaceMesh';
 
-// The calls a host supplies (four, and an optional PV run), and the shapes they carry.
+// The calls a host supplies (four, and optional ones), and the shapes they carry.
 export type {
   BuemBuildingRunRequest,
   BuemBuildingRunResponse,
@@ -44,6 +44,8 @@ export type {
   PvBuildingRunRequest,
   PvBuildingRunResponse,
   VariantLookupServices,
+  WeatherOptions,
+  WeatherScenario,
 } from './app/lib/services';
 
 export type {
