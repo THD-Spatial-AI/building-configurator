@@ -793,7 +793,8 @@
     "status": {
       "complete": "complete",
       "attention": "needs attention",
-      "error": "has an error"
+      "error": "has an error",
+      "incomplete": "not complete"
     }
   }
 }

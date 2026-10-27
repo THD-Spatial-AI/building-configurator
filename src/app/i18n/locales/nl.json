@@ -793,7 +793,8 @@
     "status": {
       "complete": "volledig",
       "attention": "vraagt aandacht",
-      "error": "bevat een fout"
+      "error": "bevat een fout",
+      "incomplete": "onvolledig"
     }
   }
 }

@@ -815,7 +815,8 @@
     "status": {
       "complete": "hotovo",
       "attention": "vyžaduje pozornost",
-      "error": "obsahuje chybu"
+      "error": "obsahuje chybu",
+      "incomplete": "nedokončeno"
     }
   }
 }

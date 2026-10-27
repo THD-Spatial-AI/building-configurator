@@ -815,7 +815,8 @@
     "status": {
       "complete": "kompletne",
       "attention": "wymaga uwagi",
-      "error": "zawiera błąd"
+      "error": "zawiera błąd",
+      "incomplete": "niekompletne"
     }
   }
 }

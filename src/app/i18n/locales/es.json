@@ -797,7 +797,8 @@
     "status": {
       "complete": "completo",
       "attention": "requiere atención",
-      "error": "tiene un error"
+      "error": "tiene un error",
+      "incomplete": "incompleto"
     }
   }
 }
