@@ -516,7 +516,9 @@
       "note": "Indicatieve klasse: ruimteverwarming per m², beoordeeld op één schaal voor alle landen (de Oostenrijkse HWB-schaal, G tot A++), zodat gebouwen over landen heen vergelijkbaar zijn. Nationale labels zoals het Nederlandse energielabel beoordelen primaire energie, die dit model niet berekent. Gesimuleerd, geen certificaat.",
       "failed": "De energieklassen konden niet worden bepaald.",
       "retry": "Opnieuw proberen",
-      "about": "Over deze klassen"
+      "about": "Over deze klassen",
+      "source": "De renovatieniveaus komen uit TABULA, de Europese gebouwtypologie.",
+      "sourceLink": "TABULA WebTool openen"
     },
     "default": {
       "buem": "BuEM-standaard: {value}",

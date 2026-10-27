@@ -388,7 +388,7 @@ export function Building3DView({
           </p>
           <p className="truncate text-[11px] leading-tight text-muted-foreground">
             {t('view.surfaceCount', { count: Object.keys(elements).length })}
-            <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>
+            {mode === 'expert' && <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>}
           </p>
         </div>
         <button

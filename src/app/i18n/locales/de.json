@@ -516,7 +516,9 @@
       "note": "Indikative Klasse: Heizwärmebedarf je m², für alle Länder auf einer Skala bewertet (der österreichischen HWB-Skala, G bis A++), damit Gebäude länderübergreifend vergleichbar sind. Nationale Labels wie das niederländische Energielabel bewerten Primärenergie, die dieses Modell nicht berechnet. Simuliert, kein Energieausweis.",
       "failed": "Die Energieklassen ließen sich nicht ermitteln.",
       "retry": "Erneut versuchen",
-      "about": "Über diese Klassen"
+      "about": "Über diese Klassen",
+      "source": "Die Sanierungsstufen stammen aus TABULA, der europäischen Gebäudetypologie.",
+      "sourceLink": "TABULA WebTool öffnen"
     },
     "default": {
       "buem": "BuEM-Standard: {value}",

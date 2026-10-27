@@ -516,7 +516,9 @@
       "note": "Classe indicativa: riscaldamento per m², valutato su un'unica scala per tutti i paesi (la scala austriaca HWB, da G a A++), così gli edifici si confrontano tra paesi. Le etichette nazionali, come quella energetica olandese, valutano l'energia primaria, che questo modello non calcola. Simulata, non un attestato.",
       "failed": "Non è stato possibile calcolare le classi energetiche.",
       "retry": "Riprova",
-      "about": "Informazioni su queste classi"
+      "about": "Informazioni su queste classi",
+      "source": "I livelli di riqualificazione provengono da TABULA, la tipologia edilizia europea.",
+      "sourceLink": "Apri il TABULA WebTool"
     },
     "default": {
       "buem": "Predefinito BuEM: {value}",

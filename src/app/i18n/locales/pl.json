@@ -538,7 +538,9 @@
       "note": "Klasa orientacyjna: ogrzewanie na m², oceniane w jednej skali dla wszystkich krajów (austriackiej skali HWB, od G do A++), aby budynki dało się porównać między krajami. Krajowe etykiety, takie jak holenderska etykieta energetyczna, oceniają energię pierwotną, której ten model nie oblicza. Symulowana, nie jest świadectwem.",
       "failed": "Nie udało się wyznaczyć klas energetycznych.",
       "retry": "Spróbuj ponownie",
-      "about": "O tych klasach"
+      "about": "O tych klasach",
+      "source": "Poziomy modernizacji pochodzą z TABULA, europejskiej typologii budynków.",
+      "sourceLink": "Otwórz TABULA WebTool"
     },
     "default": {
       "buem": "Domyślnie w BuEM: {value}",
