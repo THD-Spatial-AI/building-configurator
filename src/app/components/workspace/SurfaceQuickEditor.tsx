@@ -10,7 +10,7 @@ import type { BuildingElement } from '../BuildingConfigurator/configure/model/bu
 import { useFormatNumber, useT } from '../../i18n';
 import { isFlat, modelGeometry } from '../../lib/pvSurfaces';
 import { compassPoint } from './PvMode';
-import { DecimalInput, NumberInput } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, NumberInput, ToggleSwitch } from '../BuildingConfigurator/shared/ui';
 
 /** Highest U-value accepted: a single-glazed window sits near 5. */
 const U_MAX = 5;
@@ -147,15 +147,11 @@ export function SurfaceQuickEditor({
       </div>
 
       {element.type === 'wall' && (
-        <label className="flex cursor-pointer items-center gap-2">
-          <input
-            type="checkbox"
-            checked={element.bTransmission === 0}
-            onChange={(e) => onUpdate({ bTransmission: e.target.checked ? 0 : undefined })}
-            className="size-4 cursor-pointer accent-primary"
-          />
-          <span className="text-[12px] text-foreground">{t('surface.sharedWall')}</span>
-        </label>
+        <ToggleSwitch
+          checked={element.bTransmission === 0}
+          label={t('surface.sharedWall')}
+          onChange={(on) => onUpdate({ bTransmission: on ? 0 : undefined })}
+        />
       )}
 
       {/* ── Orientation ── */}

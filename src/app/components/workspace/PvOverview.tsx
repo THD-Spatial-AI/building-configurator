@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { ChevronDown, CircleHelp, GripVertical, Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
@@ -15,7 +15,7 @@ import {
   type ProductOrder, type TechnologyConstraint, type TechnologyProduct,
 } from '../../lib/pvProducts';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
-import { GeometryLine, surfaceName, surfaceProduct, Switch, type PvMode, type PvSurface } from './PvMode';
+import { GeometryLine, surfaceName, surfaceProduct, type PvMode, type PvSurface } from './PvMode';
 
 const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'];
 /** Plain-language labels for the constraints basic mode asks; others show the catalogue's own name. */

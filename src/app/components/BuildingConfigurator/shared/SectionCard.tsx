@@ -31,7 +31,7 @@ export function SectionCard({ topic, title, info, action, onReset, resetLabel, d
   });
   return (
     <section className={cn(
-      'overflow-hidden rounded-lg bg-card',
+      'overflow-hidden rounded-lg bg-card shadow-sm',
       emphasised ? 'border-2 border-[#475B7A] dark:border-[#C3CDDD]' : 'border border-border',
       dashed && 'border-dashed',
     )}>
