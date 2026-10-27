@@ -56,7 +56,7 @@ describe('TechnologyCards', () => {
   });
 
   it('shows a card out of focus with its headline figure and cost, a rate while its size is open', () => {
-    expect(html).toContain('3.3');
+    expect(html).toContain('COP 3.3');
     expect(html).toContain('1,400 EUR/kW');
     expect(html).toContain('12,000 EUR');
   });

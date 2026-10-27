@@ -33,6 +33,12 @@ export interface TechFigure {
   unit?: string;
 }
 
+/** A figure as a card's headline: with its unit, or with its label where it has none (COP 3.3). */
+function headlineText(figure: TechFigure, format: FormatNumber): string {
+  const value = formatValue(figure.value, format);
+  return figure.unit ? `${value} ${figure.unit}` : `${figure.label} ${value}`;
+}
+
 /** A product the host offers for a technology. */
 export interface TechProductOption {
   id: string;
@@ -285,7 +291,7 @@ export function TechnologyCards({ technologies, focusId, onFocus }: {
             key={card.id}
             topic={technologyTopic(card.type ?? '')}
             title={card.title}
-            headline={first ? `${formatValue(first.value, format)} ${first.unit ?? ''}`.trim() : undefined}
+            headline={first && headlineText(first, format)}
             subtitle={card.subtitle}
             cost={investmentText(card.investment, format)}
             focused={focused === card.id}
