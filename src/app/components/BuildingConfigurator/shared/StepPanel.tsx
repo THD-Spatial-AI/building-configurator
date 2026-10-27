@@ -21,18 +21,19 @@ export interface Step {
 }
 
 /**
- * Each status as a node: filled with its mark, or for the open step outlined
- * on white with the mark in the status colour. An incomplete step has no mark.
+ * Each status as a node, the same whether its step is open or not: filled
+ * with its mark, an incomplete step outlined without one. The open step adds
+ * a ring in the status colour, so status and position never share a cue.
  */
-const NODE: Record<StepStatus, { Icon?: typeof Check; filled: string; open: string }> = {
+const NODE: Record<StepStatus, { Icon?: typeof Check; node: string; ring: string }> = {
   complete: {
     Icon: Check,
-    filled: 'border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500',
-    open: 'border-emerald-600 bg-background text-emerald-600 dark:border-emerald-500 dark:text-emerald-400',
+    node: 'border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500',
+    ring: 'ring-emerald-600 dark:ring-emerald-500',
   },
-  incomplete: { filled: 'border-muted-foreground/40 bg-background', open: 'border-primary bg-background' },
-  attention: { Icon: AlertTriangle, filled: 'border-amber-500 bg-amber-500 text-white', open: 'border-amber-500 bg-background text-amber-600' },
-  error: { Icon: X, filled: 'border-destructive bg-destructive text-white', open: 'border-destructive bg-background text-destructive' },
+  incomplete: { node: 'border-muted-foreground/40 bg-background', ring: 'ring-primary' },
+  attention: { Icon: AlertTriangle, node: 'border-amber-500 bg-amber-500 text-white', ring: 'ring-amber-500' },
+  error: { Icon: X, node: 'border-destructive bg-destructive text-white', ring: 'ring-destructive' },
 };
 
 /** The link from one node to the next: green once the step it leaves is complete. */
@@ -73,7 +74,7 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
         <ol className="m-0 flex list-none items-start p-0">
           {steps.map((step, i) => {
             const on = step.key === current.key;
-            const { Icon, filled, open } = NODE[step.status];
+            const { Icon, node, ring } = NODE[step.status];
             return (
               <li key={step.key} className="relative flex min-w-0 flex-1 flex-col items-center">
                 {i > 0 && <Link side="left" done={steps[i - 1].status === 'complete'} />}
@@ -88,8 +89,9 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
                   <span
                     aria-hidden
                     className={cn(
-                      'flex size-8 items-center justify-center rounded-full transition-shadow group-hover:shadow-md group-focus-visible:ring-[3px] group-focus-visible:ring-ring/50',
-                      on ? cn('border-[3px]', open) : cn('border-2', filled),
+                      'flex size-8 items-center justify-center rounded-full border-2 transition-shadow group-hover:shadow-md group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-ring',
+                      node,
+                      on && cn('ring-[3px] ring-offset-2 ring-offset-card', ring),
                     )}
                   >
                     {Icon && <Icon className="size-4" />}

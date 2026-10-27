@@ -32,6 +32,15 @@ describe('StepPanel', () => {
     expect(html).toMatch(/<span aria-hidden="true" class="[^"]*bg-background[^"]*"><\/span><span[^>]*>1. Building data<\/span>/);
   });
 
+  it('fills a node in its status whether its step is open or not, and rings the open one', () => {
+    const node = (html: string, label: string) => html.match(new RegExp(`aria-label="${label}[^"]*"[^>]*><span aria-hidden="true" class="([^"]*)"`))?.[1] ?? '';
+    const open = render('comfort');
+    expect(node(open, '3. Heating')).toContain('bg-emerald-600');
+    expect(node(open, '3. Heating')).toContain('ring-offset-2');
+    expect(node(render('grade'), '3. Heating')).toContain('bg-emerald-600');
+    expect(node(render('grade'), '3. Heating')).not.toContain('ring-offset-2');
+  });
+
   it('offers the steps either side of the open one', () => {
     expect(render('grade')).toContain('Back: Building data');
     expect(render('grade')).toContain('Next: Heating and comfort');
