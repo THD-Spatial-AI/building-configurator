@@ -742,7 +742,9 @@
       "count": {
         "one": "{count} verdieping geselecteerd",
         "other": "{count} verdiepingen geselecteerd"
-      }
+      },
+      "multi": "Meerdere verdiepingen instellen",
+      "one": "Verdieping {number}"
     },
     "dwellingsPerStorey": "Woningen per verdieping",
     "mixed": "gemengd",

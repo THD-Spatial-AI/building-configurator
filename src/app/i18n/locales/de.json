@@ -742,7 +742,9 @@
       "count": {
         "one": "{count} Geschoss ausgewählt",
         "other": "{count} Geschosse ausgewählt"
-      }
+      },
+      "multi": "Mehrere Geschosse bearbeiten",
+      "one": "Geschoss {number}"
     },
     "dwellingsPerStorey": "Wohnungen je Geschoss",
     "mixed": "gemischt",

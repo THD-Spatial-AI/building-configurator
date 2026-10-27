@@ -742,7 +742,9 @@
       "count": {
         "one": "{count} piano selezionato",
         "other": "{count} piani selezionati"
-      }
+      },
+      "multi": "Configura più piani",
+      "one": "Piano {number}"
     },
     "dwellingsPerStorey": "Abitazioni per piano",
     "mixed": "misto",

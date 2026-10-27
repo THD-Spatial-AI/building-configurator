@@ -748,7 +748,9 @@
       "count": {
         "one": "{count} planta seleccionada",
         "other": "{count} plantas seleccionadas"
-      }
+      },
+      "multi": "Configurar varias plantas",
+      "one": "Planta {number}"
     },
     "dwellingsPerStorey": "Viviendas por planta",
     "mixed": "varios",

@@ -28,8 +28,8 @@ import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
-import { StoreysModelled, toggleSelected } from './StoreysModelled';
-import { storeyBands, storeyShares } from '../../lib/storeys';
+import { StoreysModelled, pickInSelection } from './StoreysModelled';
+import { dwellingsTotal, storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -155,9 +155,11 @@ export function Building3DView({
   const [storeyMode, setStoreyMode] = useState(false);
   /** The storeys selected in the model or in the storey list, configured together. */
   const [selectedStoreys, setSelectedStoreys] = useState<number[]>([]);
+  /** Off: a click selects one storey. On: clicks add storeys, to configure several at once. */
+  const [multiStoreys, setMultiStoreys] = useState(false);
   const leaveStoreyMode = () => setStoreyMode(false);
   const pickStorey = (storey: number | null) => {
-    if (storey !== null) setSelectedStoreys((prev) => toggleSelected(prev, storey));
+    if (storey !== null) setSelectedStoreys((prev) => pickInSelection(prev, storey, multiStoreys));
   };
   const [touring, setTouring] = useState(tour?.run ?? false);
   const tourRun = tour?.run ?? false;
@@ -219,11 +221,11 @@ export function Building3DView({
     modelled,
     modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
   );
-  /** Sets the dwellings per storey; once every storey has a count, the building's total is their sum. */
+  /** Sets the dwellings per storey; the building's total is then the sum of the counts given. */
   const setStoreyDwellings = (values: Record<number, number>) => {
     model.setGen('storeyDwellings', values);
-    const counts = Array.from({ length: model.general.storeys }, (_, i) => values[i + 1]);
-    if (counts.every((count) => count >= 1)) model.setGen('residential_units', counts.reduce((a, b) => a + b, 0));
+    const total = dwellingsTotal(model.general.storeys, values);
+    if (total !== null) model.setGen('residential_units', total);
   };
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
@@ -593,6 +595,11 @@ export function Building3DView({
                         modelled={model.general.storeysModelled}
                         selected={selectedStoreys}
                         onSelect={setSelectedStoreys}
+                        multi={multiStoreys}
+                        onMultiChange={(on) => {
+                          setMultiStoreys(on);
+                          if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
+                        }}
                         floorAreaPerStorey={model.general.floorArea}
                         storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
                         roomHeight={model.general.roomHeight}

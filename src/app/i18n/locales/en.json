@@ -742,7 +742,9 @@
       "count": {
         "one": "{count} storey selected",
         "other": "{count} storeys selected"
-      }
+      },
+      "multi": "Configure several storeys",
+      "one": "Storey {number}"
     },
     "dwellingsPerStorey": "Dwellings per storey",
     "mixed": "mixed",

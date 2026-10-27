@@ -768,7 +768,9 @@
         "few": "{count} kondygnacje zaznaczone",
         "many": "{count} kondygnacji zaznaczonych",
         "other": "{count} kondygnacji zaznaczonej"
-      }
+      },
+      "multi": "Konfiguruj kilka kondygnacji",
+      "one": "Kondygnacja {number}"
     },
     "dwellingsPerStorey": "Mieszkania na kondygnację",
     "mixed": "różne",

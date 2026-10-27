@@ -768,7 +768,9 @@
         "few": "{count} podlaží vybrána",
         "many": "{count} podlaží vybráno",
         "other": "{count} podlaží vybráno"
-      }
+      },
+      "multi": "Nastavit více podlaží",
+      "one": "Podlaží {number}"
     },
     "dwellingsPerStorey": "Bytů na podlaží",
     "mixed": "různé",

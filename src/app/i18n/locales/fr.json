@@ -748,7 +748,9 @@
       "count": {
         "one": "{count} étage sélectionné",
         "other": "{count} étages sélectionnés"
-      }
+      },
+      "multi": "Configurer plusieurs étages",
+      "one": "Étage {number}"
     },
     "dwellingsPerStorey": "Logements par étage",
     "mixed": "variable",
