@@ -202,6 +202,7 @@ export function BuildingEditor({
             title={SECTION_LABELS[key](t)}
             info={t(`help.${key}`)}
             dashed={EXPERT_SECTIONS.includes(key)}
+            onToggle={() => setOpenSection(open ? null : key)}
             action={(
               <button
                 type="button"
