@@ -70,7 +70,7 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: Buil
   const total = DEMAND_ITEMS.reduce((sum, { key }) => sum + amount(energyTotals[key]), 0);
 
   return (
-    <section className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3">
+    <section className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm">
       <div className="flex items-baseline justify-between gap-2">
         <h3 className="m-0 flex items-center gap-1 text-[13px] font-semibold text-foreground">{t('snapshot.annualDemand')}<InfoTip tip={t('help.demand')} /></h3>
         <span>

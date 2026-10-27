@@ -19,7 +19,7 @@ export function SectionCard({ topic, title, info, action, onReset, resetLabel, d
   /** The reset button's name and tooltip. */
   resetLabel?: string;
   dashed?: boolean;
-  /** A thicker border, for the section in focus. */
+  /** A thicker border in the topic's colour, for the section in focus, as a technology card in focus. */
   emphasised?: boolean;
   /** Makes the whole header open and close the section. Keep a button for it in `action`: the header is not focusable. */
   onToggle?: () => void;
@@ -32,7 +32,7 @@ export function SectionCard({ topic, title, info, action, onReset, resetLabel, d
   return (
     <section className={cn(
       'overflow-hidden rounded-lg bg-card shadow-sm',
-      emphasised ? 'border-2 border-[#475B7A] dark:border-[#C3CDDD]' : 'border border-border',
+      emphasised ? cn('border-2', topic.border) : 'border border-border',
       dashed && 'border-dashed',
     )}>
       <header

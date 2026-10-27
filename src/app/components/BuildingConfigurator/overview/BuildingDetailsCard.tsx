@@ -171,7 +171,7 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
       topic={TOPICS.building}
       title={t('panel.section.identity')}
       info={t('help.building')}
-      emphasised={isEditing}
+      emphasised
       action={onEditField && (
         <button
           type="button"
