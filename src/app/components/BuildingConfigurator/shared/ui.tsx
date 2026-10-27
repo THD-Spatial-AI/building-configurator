@@ -171,7 +171,14 @@ type DecimalInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'valu
   min?: number;
   max?: number;
   step?: number;
+  /** Takes whole numbers only, such as a year or a count. */
+  integer?: boolean;
 };
+
+/** Whether a number field lets the user type this: digits, a sign and, unless whole, either decimal separator. */
+export function isNumberText(text: string, integer: boolean): boolean {
+  return (integer ? /^-?\d*$/ : /^-?[\d.,]*$/).test(text);
+}
 
 /**
  * A number field in the view's language: 0,4 in de, 0.4 in en. A browser's
@@ -179,12 +186,13 @@ type DecimalInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'valu
  * text field that formats while not being edited and reads either separator.
  * The arrow keys step by `step` within min and max.
  */
-export function DecimalInput({ value, onChange, min, max, step = 1, onFocus, onBlur, onKeyDown, ...rest }: DecimalInputProps) {
+export function DecimalInput({ value, onChange, min, max, step = 1, integer = false, onFocus, onBlur, onKeyDown, ...rest }: DecimalInputProps) {
   const language = useLanguage();
   const [draft, setDraft] = useState<string | null>(null);
   const shown = draft ?? (typeof value === 'number' ? formatDecimal(language, value) : '');
 
   const commit = (text: string) => {
+    if (!isNumberText(text, integer)) return;
     setDraft(text);
     const parsed = parseDecimal(text);
     if (parsed !== undefined) onChange?.(parsed);
@@ -204,7 +212,7 @@ export function DecimalInput({ value, onChange, min, max, step = 1, onFocus, onB
     <input
       {...rest}
       type="text"
-      inputMode="decimal"
+      inputMode={integer ? 'numeric' : 'decimal'}
       value={shown}
       onChange={(e) => commit(e.target.value)}
       onFocus={(e) => { setDraft(shown); onFocus?.(e); }}
@@ -233,11 +241,13 @@ interface NumberInputProps {
   tip?: string;
   readOnly?: boolean;
   width?: number | string;
+  /** Whole numbers only, as in DecimalInput. */
+  integer?: boolean;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width,
+  tip, readOnly = false, width, integer,
 }: NumberInputProps) {
   return (
     <div style={width !== undefined ? { width } : undefined}>
@@ -254,6 +264,7 @@ export function NumberInput({
           min={min}
           max={max}
           step={step}
+          integer={integer}
           readOnly={readOnly}
           aria-label={label}
           onChange={(v) => { if (v !== null) onChange?.(v); }}

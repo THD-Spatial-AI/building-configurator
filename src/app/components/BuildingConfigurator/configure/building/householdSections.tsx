@@ -45,7 +45,7 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
       <NumberInput
         value={value ?? ''}
         onChange={(v) => onChange(Math.max(1, Math.round(v)))}
-        unit="" min={1} step={1}
+        unit="" min={1} step={1} integer
       />
       <p className="mt-1 text-[10px] text-muted-foreground">
         {value === null ? placeholder : (
@@ -87,7 +87,7 @@ export function OccupancySection({ general, setGen }: SectionProps) {
             <NumberInput
               value={general.residential_units ?? ''}
               onChange={(v) => setGen('residential_units', Math.max(1, Math.round(v)))}
-              unit="" min={1} step={1}
+              unit="" min={1} step={1} integer
             />
             {!general.residential_units && (
               <p className="mt-1 text-[10px] text-amber-700">
