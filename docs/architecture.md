@@ -4,196 +4,92 @@ audience: developer
 
 # Architecture
 
-The Building Configurator is a single-page React application. All application state lives in one component (`BuildingConfigurator`), which renders one of two workspace layers depending on the user's current view.
+The package's component is `Building3DView` (`src/app/components/workspace/Building3DView.tsx`). A host passes it one building, that building's surface geometry and a set of service callbacks. When the user leaves, the host gets the edited building back through `onExit`. The view never fetches data itself: every request goes through a callback the host supplies.
 
-## Two-layer structure
+## Components
 
-The diagram shows how the app shell hands state to the two layers.
-
-```mermaid
-graph TD
-    App["App<br>(map shell + data seeding)"]
-    BC["BuildingConfigurator<br>State owner"]
-    OV["Overview layer<br>workspaceView = overview"]
-    CF["Configure layer<br>workspaceView = configure"]
-
-    App --> BC
-    BC --> OV
-    BC --> CF
-```
-
-The header toggle (`Overview ↔ Configure`) switches `workspaceView` in `BuildingConfigurator`. Both layers read from the same state; neither owns its own copy.
-
----
-
-## Overview layer
-
-Displayed when `workspaceView === 'overview'`. The diagram shows its two fixed columns and the components in each.
+The diagram shows how the view is built and which part calls the host.
 
 ```mermaid
 graph TD
-    BC["BuildingConfigurator"]
+    Host["Host<br>(EnerPlanET, or the demo in src/demo)"]
+    View["Building3DView<br>UI state: open surface, tab, mode, tour"]
+    Model["useBuildingModel<br>building state, undo, runs"]
+    Panel["SurfacePanel<br>one surface: envelope, PV"]
+    Viewer["SurfaceGeometryViewer<br>three.js model"]
+    Details["BuildingDetailsCard<br>Building tab, Technologies tab"]
+    Guide["Tour, StepHints<br>Guidance.tsx"]
+    Services["ConfiguratorServices<br>host callbacks"]
 
-    subgraph OV["Overview layout, grid-cols: 430px | flex"]
-        BSA["BuildingSnapshotAside<br>(left column)"]
-        EEC["EnergyEnvelopeColumn<br>(right column)"]
-
-        BSA --> N1["Data quality notice"]
-        BSA --> N2["Energy hero<br>Heating / Electricity / Hot Water / Thermal efficiency"]
-        BSA --> N3["Building parameters table<br>snapshotRows (type, area, U-value, storeys …)"]
-
-        EEC --> LPV["LoadProfileViewer<br>Recharts line chart, hourly to monthly"]
-        EEC --> ECS["ElementCompositionSection<br>Envelope accordion per surface group"]
-        EEC --> TS["TechnologiesSection<br>one card per visible TECH_REGISTRY entry"]
-    end
-
-    BC --> OV
+    Host -->|building, geometry, services, pv, technologies| View
+    View -->|onExit: edited BuildingState| Host
+    View --> Model
+    View --> Panel
+    View --> Viewer
+    View --> Details
+    View --> Guide
+    Model --> Services
+    Services --> Host
 ```
 
-### Data flowing into Overview
+## Layout
 
-| Prop | Source | Destination |
+At 1024 px and wider (`WIDE_LAYOUT` in `src/app/lib/useMediaQuery.ts`) the view has three columns. Below that the model sits above the building panel and the surface panel opens as a sheet from the bottom.
+
+| Region | Component | File |
 |---|---|---|
-| `energyTotals` | `computeEnergyTotals(timeseries, thermalSummary)` | Energy hero numbers |
-| `snapshotRows` | `buildSnapshotRows(general, elements)` | Parameters table |
-| `installedTechIds` | `otherTechIds + batteryConfig.installed` | Technology cards |
-| `pvSummary` | derived from `surfacePvConfigs` | Solar PV card |
-| `initialTimeseries` | `buildingData.thematic.timeseries` | Load profile chart |
-| `elements` | surface state | Envelope composition |
+| Header: back, building name, Tour, Export, Basic/Expert, Undo | `Building3DView` | `workspace/Building3DView.tsx` |
+| Surface panel (left) | `SurfacePanel`, `SurfaceQuickEditor`, `PvSurfaceSection` | `workspace/` |
+| Storey panel, replaces the surface panel while storeys are picked | `StoreyPanel` | `workspace/StoreysModelled.tsx` |
+| 3D model (centre) | `SurfaceGeometryViewer` | `BuildingConfigurator/configure/surfaces/` |
+| Building tab (right) | `LoadProfileBar`, `BuildingSnapshotAside`, `BuildingDetailsCard`, `StoreysModelled`, `BuildingEditor` | `workspace/`, `BuildingConfigurator/overview/`, `BuildingConfigurator/configure/building/` |
+| Technologies tab (right) | `TechnologiesTab`, `PvOverview`, `TechnologyCards` | `workspace/` |
+| Save & Preview button | `Building3DView` | `workspace/Building3DView.tsx` |
+| Tour and step hints | `Tour`, `StepHints` | `workspace/Guidance.tsx` |
 
----
+Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/shared/SectionCard.tsx`) in the colour of its topic. Topics, their icons and colours are defined once in `src/app/config/topics.ts`.
 
-## Configure layer
+## State
 
-Displayed when `workspaceView === 'configure'`. The diagram shows its two columns, the right one divided into a centre panel and a selector column.
+| State | Owner | Notes |
+|---|---|---|
+| Building parameters (`general`), surfaces (`elements`), refurbishment | `useBuildingModel` | Seeded from the `building` prop; `toBuildingState` returns them for `onExit` |
+| Undo history, unsaved-change flag | `useBuildingModel` | Leaving with unsaved changes asks first |
+| TABULA variants and U-values | `useBuildingModel` | Fetched through `fetchMatchingVariants` and `fetchVariantData` |
+| Demand totals and load profile | `useBuildingModel` | From the stored `demandProfile`, replaced by the last run |
+| Open surface, open tab, Basic/Expert, storey picking, tour | `Building3DView` | Not returned to the host |
+| PV surfaces and technologies | Host | Controlled props: the view calls the host's handlers and shows what comes back |
 
-```mermaid
-graph TD
-    BC["BuildingConfigurator"]
+## Service callbacks
 
-    subgraph CF["Configure layout, grid-cols: 430px | flex"]
-        LA["Left aside"]
-        RS["Right section"]
+`ConfiguratorServices` is defined in `src/app/lib/services.ts`.
 
-        LA --> BV["BuildingVisualization<br>Clickable SVG 3D preview<br>Rotates to face direction on element select"]
-        LA --> ED["Energy demand mini-panel<br>Same energyTotals as Overview, read-only"]
+| Callback | Called when | Required |
+|---|---|---|
+| `fetchMatchingVariants` | The view opens, and the type, country or year changes | Yes |
+| `fetchVariantData` | Once per refurbishment level that `fetchMatchingVariants` returns | Yes |
+| `calculateHeatDemand` | An annual demand estimate is asked for (`estimateHeatDemand`); `Building3DView` does not ask for one | Yes |
+| `runBuemBuilding` | Save & Preview | Yes |
+| `previewBuemBuilding` | The refurbishment levels are compared by energy class | No |
+| `runPvBuilding` | Save & Preview, when the building has PV surfaces | No |
 
-        RS --> CP["Center panel<br>switches on panelView"]
-        RS --> SC["Selector column (w-72)<br>SurfaceGroupSelector"]
+## Data formats
 
-        CP --> PB["panelView = building<br>BuildingEditor<br>Type / area / height / storeys"]
-        CP --> PSG["panelView = surface-group<br>(non-roof, element selected)<br>SurfaceGroupEditor<br>Geometry tab + Thermal tab + PV tab"]
-        CP --> PRG["panelView = surface-group (roof)<br>SurfaceGroupGrid (type picker)<br>+ embedded SurfaceGroupEditor"]
-        CP --> PPV["panelView = technology-pv<br>PvSurfaceManager<br>List of PV-enabled surfaces"]
-        CP --> PBT["panelView = technology-battery<br>BatteryEditor<br>Capacity / efficiency / cost params"]
+| Concern | File |
+|---|---|
+| BuEM GeoJSON to and from `BuildingState` | `src/app/lib/buemAdapter.ts` |
+| JSON paths for each BuEM schema version | `src/app/config/modelDataMap.ts`, read through `modelDataResolver.ts` |
+| The BuEM run request (`toBuem`) | `src/app/lib/buemRun.ts` |
+| City2TABULA rows to `BuildingState` | `src/app/lib/city2tabulaAdapter.ts` |
+| ignis responses | `src/app/lib/ignisAdapter.ts` |
 
-        SC --> SNav["Building nav item → panelView = building"]
-        SC --> SGNav["Surface group nav items<br>Wall / Roof / Floor / Window / Door"]
-        SC --> STNav["Technology nav items<br>one per visible TECH_REGISTRY entry<br>opens the entry's panelView"]
-    end
+Schema path changes go in `modelDataMap.ts` only.
 
-    BC --> CF
-```
+`toBuem` sends the building as BuEM is to model it. While storeys are left out, the `building` block holds only the modelled storeys, with each surface cut to its share inside them. Beside the block the configurator keeps its own keys so the building can be restored in full:
 
-### Panel navigation state machine
-
-`panelView` is driven by user interaction. The transitions are:
-
-```mermaid
-stateDiagram-v2
-    [*] --> building : initial / reset
-
-    building --> surface_group : click surface group in selector
-    building --> technology_pv : click Solar PV in selector
-    building --> technology_battery : click Battery in selector
-
-    surface_group --> building : click Building in selector
-    surface_group --> surface_group : click different group or surface
-    surface_group --> technology_pv : click Solar PV
-    surface_group --> technology_battery : click Battery
-
-    technology_pv --> surface_group : click a surface to configure its PV tab
-    technology_pv --> building : click Building
-    technology_battery --> building : click Building
-```
-
----
-
-## State owned by BuildingConfigurator
-
-The diagram shows the state fields held in `BuildingConfigurator` and the types they reference.
-
-```mermaid
-classDiagram
-    class BuildingConfigurator {
-        workspaceView: overview | configure
-        mode: basic | expert
-        panelView: building | surface-group | technology-pv | technology-battery
-        activeGroupType: ElementGroupKey | null
-        selectedId: string | null
-        elements: Record~string, BuildingElement~
-        general: GeneralConfig
-        roofConfig: RoofConfig
-        surfacePvConfigs: Record~string, PvConfig~
-        batteryConfig: BatteryConfig
-        otherTechIds: string[]
-        energyTotals: EnergyTotals
-        pvInvalidated: boolean
-        savedState: snapshot for unsaved-change detection
-    }
-
-    class BuildingElement {
-        id: string
-        label: string
-        type: wall | window | door | roof | floor
-        area: number
-        uValue: number
-        gValue: number | null
-        tilt: number
-        azimuth: number
-        source: city | default | custom
-        customMode: boolean
-    }
-
-    class PvConfig {
-        installed: boolean
-        geometryMode: surface | manual
-        system_capacity: number
-        tilt: number
-        azimuth: number
-        cont_energy_cap_max: number
-        cont_energy_eff: number
-        inv_eff: number
-        cost_energy_cap: number
-    }
-
-    class BatteryConfig {
-        installed: boolean
-        cont_energy_cap_max: number
-        cont_storage_cap_max: number
-        cont_energy_eff: number
-        cont_storage_loss: number
-        cost_energy_cap: number
-        cost_storage_cap: number
-    }
-
-    BuildingConfigurator "1" --> "0..*" BuildingElement : elements
-    BuildingConfigurator "1" --> "0..*" PvConfig : surfacePvConfigs
-    BuildingConfigurator "1" --> "1" BatteryConfig : batteryConfig
-```
-
----
-
-## Data model output (`exportToBuemGeojson`)
-
-The export assembles state into a BUEM GeoJSON FeatureCollection.
-
-```mermaid
-graph LR
-    S["BuildingConfigurator state"]
-
-    S --> ID["identity<br>id / label / coordinates<br>buildingType / constructionPeriod<br>floorArea / roomHeight / storeys"]
-    S --> ENV["envelope<br>one feature per BuildingElement<br>area / uValue / tilt / azimuth"]
-```
-
----
+| Key | Holds |
+|---|---|
+| `storeys` | The building's total storey count |
+| `storey_list` | One `{ storey, modelled }` entry per storey |
+| `envelope_full` | The envelope of the whole building |
+| `residential_units_full` | The dwellings of the whole building, or null |
