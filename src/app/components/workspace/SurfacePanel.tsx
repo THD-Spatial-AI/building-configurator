@@ -26,6 +26,7 @@ export function SurfacePanel({ docked, open, title, subtitle, emptyText, picker,
   if (docked && !open) return null;
   return (
     <aside
+      data-tour="surface"
       aria-label={title}
       className={cn(
         'flex flex-col border-border bg-card',

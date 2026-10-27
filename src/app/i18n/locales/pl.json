@@ -752,5 +752,40 @@
     "outputs": "Jakie profile BuEM zwraca dla każdego zastosowania: podsumowanie roczne, serię godzinową lub żaden.",
     "equipment": "Jakie urządzenia mają gospodarstwa domowe; zapotrzebowanie na energię elektryczną w BuEM od nich zależy. Nieustawione zachowują prawdopodobieństwo BuEM.",
     "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach."
+  },
+  "tour": {
+    "button": "Przewodnik",
+    "stepOf": "Krok {step} z {total}",
+    "skip": "Pomiń przewodnik",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "done": "Gotowe",
+    "model": {
+      "title": "Budynek w 3D",
+      "body": "Przeciągnij, aby obrócić model, przewiń, aby przybliżyć. Kliknij ścianę, dach lub podłogę, aby ją otworzyć."
+    },
+    "surface": {
+      "title": "Jedna powierzchnia naraz",
+      "body": "Kliknięta powierzchnia otwiera się tutaj: jej pole, współczynnik U i okna oraz PV, jeśli je przyjmuje."
+    },
+    "building": {
+      "title": "Cały budynek",
+      "body": "Roczne zapotrzebowanie, dane i parametry budynku. Poziom termomodernizacji ustawiony tutaj zmienia wszystkie powierzchnie naraz."
+    },
+    "technologies": {
+      "title": "Technologie",
+      "body": "PV, magazyn energii i ogrzewanie tego budynku. Otwórz katalog i przeciągnij produkt na powierzchnię, aby go zainstalować."
+    },
+    "run": {
+      "title": "Zapisz i podgląd",
+      "body": "Uruchamia BuEM dla budynku w obecnym stanie i pokazuje zapotrzebowanie godzinowe."
+    }
+  },
+  "hints": {
+    "stepOf": "Krok {step} z {total}",
+    "hide": "Ukryj wskazówki",
+    "step1": "Kliknij ścianę, dach lub podłogę, aby ją otworzyć.",
+    "step2": "Zmień współczynnik U lub poziom termomodernizacji w panelu.",
+    "step3": "Zapisz i podgląd, aby zobaczyć nowe zapotrzebowanie budynku."
   }
 }

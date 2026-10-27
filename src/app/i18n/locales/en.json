@@ -732,5 +732,40 @@
     "outputs": "Which profiles BuEM returns for each use: a yearly summary, an hourly series, or none.",
     "equipment": "Which appliances the households own; BuEM's electricity demand follows them. Appliances left unset keep BuEM's own likelihood.",
     "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits."
+  },
+  "tour": {
+    "button": "Tour",
+    "stepOf": "Step {step} of {total}",
+    "skip": "Skip the tour",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "model": {
+      "title": "The building in 3D",
+      "body": "Drag to turn the model, scroll to zoom. Click a wall, roof or floor to open it."
+    },
+    "surface": {
+      "title": "One surface at a time",
+      "body": "The surface you click opens here: its area, U-value and windows, and its PV where it takes any."
+    },
+    "building": {
+      "title": "The whole building",
+      "body": "Its annual demand, its data and its parameters. A refurbishment level here changes every surface at once."
+    },
+    "technologies": {
+      "title": "Technologies",
+      "body": "PV, storage and heating on this building. Open the catalogue and drag a product onto a surface to install it."
+    },
+    "run": {
+      "title": "Save and preview",
+      "body": "Runs BuEM on the building as it is now and shows its hourly demand."
+    }
+  },
+  "hints": {
+    "stepOf": "Step {step} of {total}",
+    "hide": "Hide hints",
+    "step1": "Click a wall, roof or floor to open it.",
+    "step2": "Change its U-value or refurbishment level in the panel.",
+    "step3": "Save and preview to see the building's new demand."
   }
 }

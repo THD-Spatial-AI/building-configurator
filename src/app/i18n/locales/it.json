@@ -732,5 +732,40 @@
     "outputs": "Quali profili restituisce BuEM per ogni uso: un riepilogo annuo, una serie oraria o nessuno.",
     "equipment": "Quali elettrodomestici hanno le famiglie; la domanda elettrica di BuEM li segue. Quelli non impostati mantengono la probabilità di BuEM.",
     "solver": "Come BuEM risolve il modello orario: con il solutore sparso predefinito, veloce, o con MILP, più lento ma esatto sui limiti."
+  },
+  "tour": {
+    "button": "Tour",
+    "stepOf": "Passo {step} di {total}",
+    "skip": "Salta il tour",
+    "back": "Indietro",
+    "next": "Avanti",
+    "done": "Fine",
+    "model": {
+      "title": "L'edificio in 3D",
+      "body": "Trascina per ruotare il modello, scorri per lo zoom. Fai clic su una parete, un tetto o un pavimento per aprirlo."
+    },
+    "surface": {
+      "title": "Una superficie alla volta",
+      "body": "La superficie cliccata si apre qui: area, valore U e finestre, e il suo FV dove ne ospita."
+    },
+    "building": {
+      "title": "L'intero edificio",
+      "body": "La domanda annua, i dati e i parametri. Un livello di riqualificazione qui cambia tutte le superfici insieme."
+    },
+    "technologies": {
+      "title": "Tecnologie",
+      "body": "FV, accumulo e riscaldamento di questo edificio. Apri il catalogo e trascina un prodotto su una superficie per installarlo."
+    },
+    "run": {
+      "title": "Salva e anteprima",
+      "body": "Esegue BuEM sull'edificio così com'è e mostra la domanda oraria."
+    }
+  },
+  "hints": {
+    "stepOf": "Passo {step} di {total}",
+    "hide": "Nascondi suggerimenti",
+    "step1": "Fai clic su una parete, un tetto o un pavimento per aprirlo.",
+    "step2": "Cambia il valore U o il livello di riqualificazione nel pannello.",
+    "step3": "Salva e anteprima per vedere la nuova domanda dell'edificio."
   }
 }

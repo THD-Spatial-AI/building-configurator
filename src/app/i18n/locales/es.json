@@ -738,5 +738,40 @@
     "outputs": "Qué perfiles devuelve BuEM para cada uso: un resumen anual, una serie horaria o ninguno.",
     "equipment": "Qué aparatos tienen los hogares; la demanda eléctrica de BuEM los sigue. Los que no se fijan conservan la probabilidad propia de BuEM.",
     "solver": "Cómo resuelve BuEM el modelo horario: con su solucionador disperso por defecto, rápido, o con MILP, más lento pero exacto en los límites."
+  },
+  "tour": {
+    "button": "Recorrido",
+    "stepOf": "Paso {step} de {total}",
+    "skip": "Saltar el recorrido",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Listo",
+    "model": {
+      "title": "El edificio en 3D",
+      "body": "Arrastre para girar el modelo y use la rueda para acercar. Haga clic en un muro, una cubierta o un suelo para abrirlo."
+    },
+    "surface": {
+      "title": "Una superficie cada vez",
+      "body": "La superficie que pulse se abre aquí: su área, su valor U y sus ventanas, y su FV si la admite."
+    },
+    "building": {
+      "title": "El edificio completo",
+      "body": "Su demanda anual, sus datos y sus parámetros. Un nivel de rehabilitación aquí cambia todas las superficies a la vez."
+    },
+    "technologies": {
+      "title": "Tecnologías",
+      "body": "FV, almacenamiento y calefacción de este edificio. Abra el catálogo y arrastre un producto a una superficie para instalarlo."
+    },
+    "run": {
+      "title": "Guardar y previsualizar",
+      "body": "Ejecuta BuEM con el edificio tal como está y muestra su demanda horaria."
+    }
+  },
+  "hints": {
+    "stepOf": "Paso {step} de {total}",
+    "hide": "Ocultar sugerencias",
+    "step1": "Haga clic en un muro, una cubierta o un suelo para abrirlo.",
+    "step2": "Cambie su valor U o su nivel de rehabilitación en el panel.",
+    "step3": "Guarde y previsualice para ver la nueva demanda del edificio."
   }
 }

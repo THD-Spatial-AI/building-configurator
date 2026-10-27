@@ -732,5 +732,40 @@
     "outputs": "Welke profielen BuEM per gebruik teruggeeft: een jaaroverzicht, een uurreeks of geen.",
     "equipment": "Welke apparaten de huishoudens bezitten; de elektriciteitsvraag in BuEM volgt ze. Niet ingestelde apparaten houden de kans van BuEM zelf.",
     "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen."
+  },
+  "tour": {
+    "button": "Rondleiding",
+    "stepOf": "Stap {step} van {total}",
+    "skip": "Rondleiding overslaan",
+    "back": "Terug",
+    "next": "Volgende",
+    "done": "Klaar",
+    "model": {
+      "title": "Het gebouw in 3D",
+      "body": "Sleep om het model te draaien, scroll om te zoomen. Klik op een muur, dak of vloer om die te openen."
+    },
+    "surface": {
+      "title": "Eén vlak tegelijk",
+      "body": "Het aangeklikte vlak opent hier: oppervlakte, U-waarde en ramen, en de PV waar het die draagt."
+    },
+    "building": {
+      "title": "Het hele gebouw",
+      "body": "De jaarlijkse vraag, de gegevens en de parameters. Een renovatieniveau hier wijzigt alle vlakken tegelijk."
+    },
+    "technologies": {
+      "title": "Technologieën",
+      "body": "PV, opslag en verwarming van dit gebouw. Open de catalogus en sleep een product op een vlak om het te installeren."
+    },
+    "run": {
+      "title": "Opslaan en voorbeeld",
+      "body": "Rekent BuEM door voor het gebouw zoals het nu is en toont de vraag per uur."
+    }
+  },
+  "hints": {
+    "stepOf": "Stap {step} van {total}",
+    "hide": "Tips verbergen",
+    "step1": "Klik op een muur, dak of vloer om die te openen.",
+    "step2": "Wijzig de U-waarde of het renovatieniveau in het paneel.",
+    "step3": "Opslaan en voorbeeld toont de nieuwe vraag van het gebouw."
   }
 }

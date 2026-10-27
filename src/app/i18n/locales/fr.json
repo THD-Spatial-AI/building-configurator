@@ -738,5 +738,40 @@
     "outputs": "Les profils que BuEM renvoie pour chaque usage : un résumé annuel, une série horaire ou aucun.",
     "equipment": "Les appareils que possèdent les ménages ; la demande d'électricité de BuEM en dépend. Les appareils non renseignés gardent la probabilité de BuEM.",
     "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites."
+  },
+  "tour": {
+    "button": "Visite",
+    "stepOf": "Étape {step} sur {total}",
+    "skip": "Passer la visite",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "model": {
+      "title": "Le bâtiment en 3D",
+      "body": "Faites glisser pour tourner le modèle, la molette zoome. Cliquez sur un mur, un toit ou un plancher pour l'ouvrir."
+    },
+    "surface": {
+      "title": "Une surface à la fois",
+      "body": "La surface cliquée s'ouvre ici : sa surface, sa valeur U et ses fenêtres, et son PV si elle en reçoit."
+    },
+    "building": {
+      "title": "Le bâtiment entier",
+      "body": "Sa demande annuelle, ses données et ses paramètres. Un niveau de rénovation ici change toutes les surfaces à la fois."
+    },
+    "technologies": {
+      "title": "Technologies",
+      "body": "PV, stockage et chauffage de ce bâtiment. Ouvrez le catalogue et faites glisser un produit sur une surface pour l'installer."
+    },
+    "run": {
+      "title": "Enregistrer et prévisualiser",
+      "body": "Lance BuEM sur le bâtiment tel qu'il est et affiche sa demande horaire."
+    }
+  },
+  "hints": {
+    "stepOf": "Étape {step} sur {total}",
+    "hide": "Masquer les conseils",
+    "step1": "Cliquez sur un mur, un toit ou un plancher pour l'ouvrir.",
+    "step2": "Modifiez sa valeur U ou son niveau de rénovation dans le panneau.",
+    "step3": "Enregistrez et prévisualisez pour voir la nouvelle demande du bâtiment."
   }
 }

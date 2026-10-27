@@ -752,5 +752,40 @@
     "outputs": "Které profily BuEM vrací pro každé užití: roční souhrn, hodinovou řadu, nebo žádný.",
     "equipment": "Které spotřebiče domácnosti vlastní; spotřeba elektřiny v BuEM se jimi řídí. Nenastavené si ponechají pravděpodobnost BuEM.",
     "solver": "Jak BuEM řeší hodinový model: výchozím rychlým řídkým řešičem, nebo MILP, pomaleji, ale přesně na mezích."
+  },
+  "tour": {
+    "button": "Prohlídka",
+    "stepOf": "Krok {step} z {total}",
+    "skip": "Přeskočit prohlídku",
+    "back": "Zpět",
+    "next": "Další",
+    "done": "Hotovo",
+    "model": {
+      "title": "Budova ve 3D",
+      "body": "Tažením model otočíte, kolečkem přiblížíte. Kliknutím na stěnu, střechu nebo podlahu ji otevřete."
+    },
+    "surface": {
+      "title": "Jedna plocha po druhé",
+      "body": "Plocha, na kterou kliknete, se otevře zde: její plocha, hodnota U a okna a FV, pokud ji nese."
+    },
+    "building": {
+      "title": "Celá budova",
+      "body": "Roční potřeba, data a parametry budovy. Úroveň renovace zde změní všechny plochy najednou."
+    },
+    "technologies": {
+      "title": "Technologie",
+      "body": "FV, úložiště a vytápění této budovy. Otevřete katalog a přetáhněte produkt na plochu, abyste ho nainstalovali."
+    },
+    "run": {
+      "title": "Uložit a náhled",
+      "body": "Spustí BuEM pro budovu v aktuálním stavu a ukáže hodinovou potřebu."
+    }
+  },
+  "hints": {
+    "stepOf": "Krok {step} z {total}",
+    "hide": "Skrýt nápovědu",
+    "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
+    "step2": "Změňte hodnotu U nebo úroveň renovace v panelu.",
+    "step3": "Uložte a zobrazte náhled nové potřeby budovy."
   }
 }

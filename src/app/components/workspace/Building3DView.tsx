@@ -6,7 +6,7 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, Download, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
+import { AlertTriangle, ArrowLeft, CircleHelp, Download, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
@@ -25,6 +25,7 @@ import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { TechnologiesTab } from './TechnologiesTab';
+import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreyPanel, StoreysModelled } from './StoreysModelled';
@@ -95,10 +96,16 @@ export interface Building3DViewProps {
    * language (de-DE), anything else as en. Host-supplied text (PV notice, technology cards) is shown as passed.
    */
   language?: string;
+  /**
+   * The guided tour. With run true it starts as the view opens; onFinish is
+   * called when it is finished or skipped, for the host to remember the visit.
+   * The header's Tour button starts it again either way.
+   */
+  tour?: { run: boolean; onFinish: () => void };
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'basic', defaultTab, language: languageCode,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'basic', defaultTab, language: languageCode, tour,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
@@ -149,6 +156,12 @@ export function Building3DView({
   const [storeyMode, setStoreyMode] = useState(false);
   const [pickedStorey, setPickedStorey] = useState<number | null>(null);
   const leaveStoreyMode = () => { setStoreyMode(false); setPickedStorey(null); };
+  const [touring, setTouring] = useState(tour?.run ?? false);
+  const tourRun = tour?.run ?? false;
+  useEffect(() => { if (tourRun) setTouring(true); }, [tourRun]);
+  const endTour = () => { setTouring(false); tour?.onFinish(); };
+  /** A run was started in this view, so the step hints have done their work. */
+  const [ran, setRan] = useState(false);
 
   const openSurface = (next: SurfaceSelection | null) => {
     setSelected(next);
@@ -228,8 +241,8 @@ export function Building3DView({
   const onKeyRef = useRef<(e: KeyboardEvent) => void>(() => {});
   onKeyRef.current = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      // An open prompt's own dialog closes itself on Escape.
-      if (exitPromptOpen || pendingSurface) return;
+      // An open prompt's own dialog, and the tour, close themselves on Escape.
+      if (exitPromptOpen || pendingSurface || touring) return;
       if (exportOpen) setExportOpen(false);
       else if (storeyMode) leaveStoreyMode();
       else if (selected) requestSurface(null);
@@ -365,6 +378,14 @@ export function Building3DView({
             <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setTouring(true)}
+          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+        >
+          <CircleHelp className="size-3.5" />
+          <span className="hidden sm:inline">{t('tour.button')}</span>
+        </button>
         <div className="relative shrink-0">
           <button
             type="button"
@@ -430,7 +451,7 @@ export function Building3DView({
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
         {wide && surfacePanel}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-        <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
+        <div data-tour="model" className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
@@ -469,6 +490,9 @@ export function Building3DView({
           )}
 
           {onTech && geometry && !geometry.note && !storeyMode && <PvHintPill />}
+          {!onTech && surfaces.length > 0 && !detached && !geometry?.note && !storeyMode && !touring && (
+            <StepHints surfaceOpened={selected !== null} edited={hasUnsavedChanges} ran={ran} />
+          )}
 
           {model.general.storeys > 1 && surfaces.length > 0 && !detached && (
             <button
@@ -511,7 +535,7 @@ export function Building3DView({
           'flex shrink-0 flex-col gap-3',
           wide ? 'w-[400px] xl:w-[520px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
               onEditField={model.setGen}
@@ -594,7 +618,8 @@ export function Building3DView({
 
           <button
             type="button"
-            onClick={model.runSimulation}
+            data-tour="run"
+            onClick={() => { setRan(true); model.runSimulation(); }}
             disabled={model.isRunningSimulation}
             className="flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
@@ -610,6 +635,8 @@ export function Building3DView({
       )}
 
       {!wide && surfacePanel}
+
+      {touring && <Tour onClose={endTour} />}
 
       <UnsavedChangesDialog
         open={pendingSurface !== null}

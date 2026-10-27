@@ -149,6 +149,7 @@ export function BuildingDetailsCard({
           <button
             key={tab}
             type="button"
+            data-tour={tab === 'technology' ? 'technologies' : undefined}
             onClick={() => setActiveTab(tab)}
             className={cn(
               'cursor-pointer whitespace-nowrap border-b-2 pb-0.5 text-[13px] transition-colors',

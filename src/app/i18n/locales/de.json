@@ -732,5 +732,40 @@
     "outputs": "Welche Profile BuEM je Nutzung liefert: eine Jahresübersicht, eine stündliche Reihe oder keine.",
     "equipment": "Welche Geräte die Haushalte besitzen; der Strombedarf in BuEM folgt ihnen. Nicht gesetzte Geräte behalten die Wahrscheinlichkeit von BuEM.",
     "solver": "Wie BuEM das stündliche Modell löst: mit dem schnellen Standard-Sparse-Löser oder mit MILP, langsamer, aber exakt bei Grenzen."
+  },
+  "tour": {
+    "button": "Rundgang",
+    "stepOf": "Schritt {step} von {total}",
+    "skip": "Rundgang überspringen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "done": "Fertig",
+    "model": {
+      "title": "Das Gebäude in 3D",
+      "body": "Ziehen dreht das Modell, Scrollen zoomt. Ein Klick auf Wand, Dach oder Boden öffnet die Fläche."
+    },
+    "surface": {
+      "title": "Eine Fläche nach der anderen",
+      "body": "Die angeklickte Fläche öffnet sich hier: Fläche, U-Wert und Fenster, und ihre PV, wo sie welche trägt."
+    },
+    "building": {
+      "title": "Das ganze Gebäude",
+      "body": "Jahresbedarf, Gebäudedaten und Parameter. Eine Sanierungsstufe hier ändert alle Flächen auf einmal."
+    },
+    "technologies": {
+      "title": "Technologien",
+      "body": "PV, Speicher und Heizung dieses Gebäudes. Katalog öffnen und ein Produkt auf eine Fläche ziehen, um es zu installieren."
+    },
+    "run": {
+      "title": "Speichern und Vorschau",
+      "body": "Rechnet BuEM für das Gebäude im jetzigen Stand und zeigt den stündlichen Bedarf."
+    }
+  },
+  "hints": {
+    "stepOf": "Schritt {step} von {total}",
+    "hide": "Hinweise ausblenden",
+    "step1": "Wand, Dach oder Boden anklicken, um die Fläche zu öffnen.",
+    "step2": "U-Wert oder Sanierungsstufe im Bereich ändern.",
+    "step3": "Speichern und Vorschau zeigt den neuen Bedarf des Gebäudes."
   }
 }
