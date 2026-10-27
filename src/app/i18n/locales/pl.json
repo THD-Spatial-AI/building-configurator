@@ -108,7 +108,9 @@
       "envelope": "Przegrody",
       "pv": "PV"
     },
-    "pick": "Wybierz przegrodę"
+    "pick": "Wybierz przegrodę",
+    "fromModel": "{tilt}° · orientacja {azimuth}° {compass} · z modelu 3D",
+    "flatFromModel": "Płaska · z modelu 3D"
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",
@@ -240,7 +242,8 @@
         "many": "{count} modułów",
         "other": "{count} modułu"
       }
-    }
+    },
+    "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM."
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",

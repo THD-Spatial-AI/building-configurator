@@ -6,6 +6,7 @@
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import type { ConfiguratorServices, PvBuildingRunRequest } from './services';
 import type { PvLayout } from './pvLayout';
+import { modelGeometry } from './pvSurfaces';
 
 /**
  * The request for the host's PV surfaces, or null when the building has none
@@ -22,7 +23,7 @@ export function pvRunRequest(
   const surfaces = pvSurfaceIds
     .filter((id) => elements[id])
     .map((id) => {
-      const { area, tilt, azimuth } = elements[id];
+      const { area, tilt, azimuth } = modelGeometry(elements[id]);
       const layout = layouts[id];
       const productId = productFor(id);
       return {

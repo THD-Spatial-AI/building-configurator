@@ -106,7 +106,9 @@
       "envelope": "Enveloppe",
       "pv": "PV"
     },
-    "pick": "Choisir une surface"
+    "pick": "Choisir une surface",
+    "fromModel": "{tilt}° · orientation {azimuth}° {compass} · du modèle 3D",
+    "flatFromModel": "Plat · du modèle 3D"
   },
   "profile": {
     "title": "Profil de charge horaire",
@@ -234,7 +236,8 @@
         "one": "{count} module",
         "other": "{count} modules"
       }
-    }
+    },
+    "followsModel": "Le PV suit les {tilt}° du modèle 3D ; l'inclinaison et l'orientation modifiées ci-dessus ne vont qu'à BuEM."
   },
   "tech": {
     "none": "Aucune technologie sur ce bâtiment.",

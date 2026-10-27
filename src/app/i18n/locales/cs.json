@@ -108,7 +108,9 @@
       "envelope": "Obálka",
       "pv": "FV"
     },
-    "pick": "Vyberte plochu"
+    "pick": "Vyberte plochu",
+    "fromModel": "{tilt}° · orientace {azimuth}° {compass} · z 3D modelu",
+    "flatFromModel": "Plochá · z 3D modelu"
   },
   "profile": {
     "title": "Hodinový profil zatížení",
@@ -240,7 +242,8 @@
         "many": "{count} modulu",
         "other": "{count} modulů"
       }
-    }
+    },
+    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM."
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",

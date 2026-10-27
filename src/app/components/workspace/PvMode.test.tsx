@@ -177,6 +177,14 @@ describe('PvSurfaceSection', () => {
     expect(html).toContain('Add PV to this surface');
   });
 
+  it('says PV follows the 3D model when the surface\'s tilt was edited for BuEM', () => {
+    const edited = { ...elements, r1: { ...elements.r1, tilt: 10, defaultTilt: 35, defaultAzimuth: 180 } };
+    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={edited} />))
+      .toContain('PV follows the 3D model&#x27;s 35°');
+    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} />))
+      .not.toContain('PV follows the 3D model');
+  });
+
   it('calls a flat roof flat and gives it no facing', () => {
     const html = renderToStaticMarkup(<PvSurfaceSection surfaceId="f1" surface={pv.surfaces.r1} pv={pv} elements={elements} />);
     expect(html).toContain('>Flat<');

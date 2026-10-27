@@ -195,10 +195,20 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
   const geometry = pvGeometry(surfaceId, elements, surface);
   const area = elements[surfaceId]?.area ?? surface.area;
   const reach = layout?.kwp ?? surface.maxKwp;
+  const element = elements[surfaceId];
+  const orientationEdited = element !== undefined && (
+    (element.defaultTilt !== undefined && element.defaultTilt !== element.tilt)
+    || (element.defaultAzimuth !== undefined && element.defaultAzimuth !== element.azimuth)
+  );
 
   return (
     <div className="flex flex-col gap-3 p-3">
       {showGeometry && <GeometryTiles id={surfaceId} elements={elements} surface={surface} />}
+      {orientationEdited && geometry && (
+        <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
+          {t('pv.followsModel', { tilt: format(geometry.tilt, 0) })}
+        </p>
+      )}
 
       <div className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2">
         <span className="text-[12px] font-semibold text-foreground">{t('pv.thisSurface')}</span>

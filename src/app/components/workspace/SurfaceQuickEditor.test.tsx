@@ -6,8 +6,8 @@ import type { BuildingElement } from '../BuildingConfigurator/configure/model/bu
 const flat: BuildingElement = { id: 'f1', label: 'Flat roof', type: 'roof', area: 51, uValue: 0.2, gValue: null, tilt: 0, azimuth: -1 };
 const pitched: BuildingElement = { ...flat, id: 'r1', tilt: 35, azimuth: 180 };
 
-const render = (element: BuildingElement) => renderToStaticMarkup(
-  <SurfaceQuickEditor element={element} uValuePresets={[]} onUpdate={() => {}} onDelete={() => {}} />,
+const render = (element: BuildingElement, mode: 'basic' | 'expert' = 'expert') => renderToStaticMarkup(
+  <SurfaceQuickEditor element={element} uValuePresets={[]} mode={mode} onUpdate={() => {}} onDelete={() => {}} />,
 );
 
 describe('SurfaceQuickEditor', () => {
@@ -17,7 +17,14 @@ describe('SurfaceQuickEditor', () => {
     expect(html).not.toContain('° N');
   });
 
-  it('gives a pitched roof its facing dial', () => {
+  it('gives a pitched roof its facing dial in Expert', () => {
     expect(render(pitched)).not.toContain('>Flat<');
+    expect(render(pitched)).toContain('S-facing');
+  });
+
+  it('shows tilt and facing read-only from the 3D model in Basic', () => {
+    const html = render(pitched, 'basic');
+    expect(html).not.toContain('S-facing');
+    expect(html).toContain('35° · facing 180° S · from the 3D model');
   });
 });

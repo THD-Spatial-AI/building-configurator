@@ -106,7 +106,9 @@
       "envelope": "Envolvente",
       "pv": "FV"
     },
-    "pick": "Elegir una superficie"
+    "pick": "Elegir una superficie",
+    "fromModel": "{tilt}° · orientación {azimuth}° {compass} · del modelo 3D",
+    "flatFromModel": "Plana · del modelo 3D"
   },
   "profile": {
     "title": "Perfil de carga horario",
@@ -234,7 +236,8 @@
         "one": "{count} módulo",
         "other": "{count} módulos"
       }
-    }
+    },
+    "followsModel": "La FV sigue los {tilt}° del modelo 3D; la inclinación y la orientación editadas arriba solo van a BuEM."
   },
   "tech": {
     "none": "Ninguna tecnología en este edificio.",

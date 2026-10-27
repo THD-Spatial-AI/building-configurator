@@ -22,8 +22,21 @@ export interface PvGeometry {
 export const isFlat = (tilt: number, azimuth: number) => azimuth === -1 || tilt < FLAT_MAX_TILT_DEG;
 
 /**
- * A PV surface's tilt, facing and area: the building's own element where it
- * is one, as the user has edited it, else the host's values, else null.
+ * A surface's tilt, facing and area as the 3D model has them: the values it
+ * was imported with. An expert's edits change what BuEM receives, not the
+ * geometry PV is placed on.
+ */
+export function modelGeometry(element: BuildingElement): { tilt: number; azimuth: number; area: number } {
+  return {
+    tilt: element.defaultTilt ?? element.tilt,
+    azimuth: element.defaultAzimuth ?? element.azimuth,
+    area: element.defaultArea ?? element.area,
+  };
+}
+
+/**
+ * A PV surface's tilt, facing and area: the building's own element as the 3D
+ * model has it where it is one, else the host's values, else null.
  */
 export function pvGeometry(
   id: string,
@@ -31,7 +44,10 @@ export function pvGeometry(
   surface: PvSurface | undefined,
 ): PvGeometry | null {
   const element = elements[id];
-  if (element) return { tilt: element.tilt, azimuth: element.azimuth, area: element.area, flat: isFlat(element.tilt, element.azimuth) };
+  if (element) {
+    const { tilt, azimuth, area } = modelGeometry(element);
+    return { tilt, azimuth, area, flat: isFlat(tilt, azimuth) };
+  }
   if (surface?.tilt === undefined || surface.azimuth === undefined || surface.area === undefined) return null;
   return { tilt: surface.tilt, azimuth: surface.azimuth, area: surface.area, flat: isFlat(surface.tilt, surface.azimuth) };
 }

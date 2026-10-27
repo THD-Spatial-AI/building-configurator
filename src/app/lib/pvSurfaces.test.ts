@@ -13,9 +13,14 @@ function surface(state: PvSurface['state'], extra: Partial<PvSurface> = {}): PvS
 }
 
 describe('pvGeometry', () => {
-  it('takes the building\'s own element, as edited, over the host\'s values', () => {
+  it('takes the building\'s own element over the host\'s values', () => {
     expect(pvGeometry('r1', { r1: roof }, surface('installed', { tilt: 10, azimuth: 90, area: 20 })))
       .toEqual({ tilt: 32, azimuth: 205, area: 50, flat: false });
+  });
+
+  it('follows the 3D model, not an expert\'s edits, which go to BuEM only', () => {
+    const edited = { ...roof, tilt: 5, azimuth: 90, area: 30, defaultTilt: 32, defaultAzimuth: 205, defaultArea: 50 };
+    expect(pvGeometry('r1', { r1: edited }, undefined)).toEqual({ tilt: 32, azimuth: 205, area: 50, flat: false });
   });
 
   it('falls back to the host\'s values for a surface that is not an element', () => {

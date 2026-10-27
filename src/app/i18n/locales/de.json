@@ -104,7 +104,9 @@
       "envelope": "Gebäudehülle",
       "pv": "PV"
     },
-    "pick": "Fläche wählen"
+    "pick": "Fläche wählen",
+    "fromModel": "{tilt}° · Ausrichtung {azimuth}° {compass} · aus dem 3D-Modell",
+    "flatFromModel": "Flach · aus dem 3D-Modell"
   },
   "profile": {
     "title": "Stündliches Lastprofil",
@@ -232,7 +234,8 @@
         "one": "{count} Modul",
         "other": "{count} Module"
       }
-    }
+    },
+    "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM."
   },
   "tech": {
     "none": "Keine Technologien an diesem Gebäude.",

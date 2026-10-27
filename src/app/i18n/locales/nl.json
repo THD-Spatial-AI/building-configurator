@@ -104,7 +104,9 @@
       "envelope": "Schil",
       "pv": "PV"
     },
-    "pick": "Kies een vlak"
+    "pick": "Kies een vlak",
+    "fromModel": "{tilt}° · oriëntatie {azimuth}° {compass} · uit het 3D-model",
+    "flatFromModel": "Plat · uit het 3D-model"
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",
@@ -232,7 +234,8 @@
         "one": "{count} module",
         "other": "{count} modules"
       }
-    }
+    },
+    "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM."
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",

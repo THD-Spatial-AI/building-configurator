@@ -104,7 +104,9 @@
       "envelope": "Envelope",
       "pv": "PV"
     },
-    "pick": "Choose a surface"
+    "pick": "Choose a surface",
+    "fromModel": "{tilt}° · facing {azimuth}° {compass} · from the 3D model",
+    "flatFromModel": "Flat · from the 3D model"
   },
   "profile": {
     "title": "Hourly load profile",
@@ -232,7 +234,8 @@
         "one": "{count} module",
         "other": "{count} modules"
       }
-    }
+    },
+    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only."
   },
   "tech": {
     "none": "No technologies on this building.",
