@@ -152,7 +152,7 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
   // Closed by default: the list changes as the surface's settings do, and open
   // it would move the rest of the panel each time.
   return (
-    <Dropdown title={t('pv.fitsMore.title', { count: better.length })}>
+    <Dropdown tone="recommend" title={t('pv.fitsMore.title', { count: better.length })}>
       <div className={DROPDOWN_LIST}>
       {better.map(({ product, layout: theirs }) => {
         const perKwp = pvCosts(product, 1).investment;

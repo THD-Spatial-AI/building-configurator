@@ -142,7 +142,7 @@ describe('PvOverview with a catalogue', () => {
     expect(installed).not.toContain('Demo Compact 300 W');
     expect(installed).toContain('24 modules');
     expect(installed).toContain('on 1 surface');
-    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>Photovoltaic options \(2\)/);
+    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*><span[^>]*>Photovoltaic options \(2\)/);
   });
 
   it('keeps each installed product\'s values behind its edit button', () => {
@@ -254,7 +254,7 @@ describe('PvSurfaceSection', () => {
     );
     expect(html).toMatch(/<option value="mono" selected="">Demo Mono 420 W<\/option>/);
     expect(html).toContain('Investment about 210 EUR, an estimate');
-    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>See our recommendation \(1\)/);
+    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*><svg[^>]*>.*?<\/svg><span[^>]*>See our recommendation \(1\)/);
     expect(html).toContain('Demo Compact 300 W');
     expect(html).toContain('Modules: 2 · 0.6 kWp · 600 EUR/kWp');
     expect(html).toContain('Use on this surface');
