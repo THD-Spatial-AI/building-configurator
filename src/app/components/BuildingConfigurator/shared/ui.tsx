@@ -254,11 +254,13 @@ interface NumberInputProps {
   width?: number | string;
   /** Whole numbers only, as in DecimalInput. */
   integer?: boolean;
+  /** Shown greyed while the field is empty, such as the value used by default. */
+  placeholder?: string;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width, integer,
+  tip, readOnly = false, width, integer, placeholder,
 }: NumberInputProps) {
   return (
     <div style={width !== undefined ? { width } : undefined}>
@@ -277,6 +279,7 @@ export function NumberInput({
           step={step}
           integer={integer}
           readOnly={readOnly}
+          placeholder={placeholder}
           aria-label={label}
           onChange={(v) => { if (v !== null) onChange?.(v); }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
@@ -295,7 +298,8 @@ export function NumberInput({
                 type="button"
                 tabIndex={-1}
                 aria-label={label ? `${label} ${direction > 0 ? '+' : '−'}${step}` : `${direction > 0 ? '+' : '−'}${step}`}
-                onClick={() => onChange(steppedValue(Number(value) || 0, step, direction, min, max))}
+                // An empty field steps from the default it shows.
+                onClick={() => onChange(steppedValue(value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0, step, direction, min, max))}
                 className="flex flex-1 cursor-pointer items-center justify-center px-1 text-muted-foreground hover:bg-muted hover:text-foreground [&+button]:border-t [&+button]:border-border"
               >
                 <ChevronDown className={cn('size-3', direction > 0 && 'rotate-180')} />

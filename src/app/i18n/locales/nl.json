@@ -449,7 +449,6 @@
     "uValue": "U-waarde",
     "lossFactor": "Reductiefactor",
     "unitShare": "0 tot 1",
-    "buemDefault": "BuEM-standaard.",
     "useDefault": "Standaard gebruiken",
     "windows": {
       "title": "Ramen die BuEM toevoegt",
@@ -485,6 +484,11 @@
       "note": "Indicatieve klasse: ruimteverwarming per m², beoordeeld op één schaal voor alle landen (de Oostenrijkse HWB-schaal, G tot A++), zodat gebouwen over landen heen vergelijkbaar zijn. Nationale labels zoals het Nederlandse energielabel beoordelen primaire energie, die dit model niet berekent. Gesimuleerd, geen certificaat.",
       "failed": "De energieklassen konden niet worden bepaald.",
       "retry": "Opnieuw proberen"
+    },
+    "default": {
+      "buem": "BuEM-standaard: {value}",
+      "tabula": "TABULA-waarde voor dit gebouw: {value}",
+      "tabulaElse": "De TABULA-waarde van dit gebouw, anders {value}"
     }
   },
   "options": {

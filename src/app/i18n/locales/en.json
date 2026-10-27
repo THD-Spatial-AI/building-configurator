@@ -449,7 +449,6 @@
     "uValue": "U-value",
     "lossFactor": "Loss factor",
     "unitShare": "0 to 1",
-    "buemDefault": "BuEM default.",
     "useDefault": "Use default",
     "windows": {
       "title": "Windows BuEM adds",
@@ -485,6 +484,11 @@
       "note": "Indicative class: space heating per m², graded on one scale for every country (the Austrian HWB scale, G to A++), so buildings compare across countries. National labels such as the Dutch energy label grade primary energy, which this model does not compute. Simulated, not a certificate.",
       "failed": "The energy classes could not be worked out.",
       "retry": "Try again"
+    },
+    "default": {
+      "buem": "BuEM default: {value}",
+      "tabula": "TABULA default for this building: {value}",
+      "tabulaElse": "The TABULA value for this building, else {value}"
     }
   },
   "options": {

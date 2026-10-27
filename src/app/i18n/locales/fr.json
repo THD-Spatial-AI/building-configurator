@@ -453,7 +453,6 @@
     "uValue": "Valeur U",
     "lossFactor": "Coefficient b",
     "unitShare": "0 à 1",
-    "buemDefault": "Défaut BuEM.",
     "useDefault": "Valeur par défaut",
     "windows": {
       "title": "Fenêtres ajoutées par BuEM",
@@ -489,6 +488,11 @@
       "note": "Classe indicative : besoin de chauffage par m², noté sur une même échelle pour tous les pays (l'échelle autrichienne HWB, de G à A++), afin de comparer les bâtiments entre pays. Les étiquettes nationales, comme l'étiquette énergétique néerlandaise, notent l'énergie primaire, que ce modèle ne calcule pas. Simulée, pas un certificat.",
       "failed": "Les classes énergétiques n'ont pas pu être calculées.",
       "retry": "Réessayer"
+    },
+    "default": {
+      "buem": "Par défaut dans BuEM : {value}",
+      "tabula": "Valeur TABULA pour ce bâtiment : {value}",
+      "tabulaElse": "La valeur TABULA de ce bâtiment, sinon {value}"
     }
   },
   "options": {

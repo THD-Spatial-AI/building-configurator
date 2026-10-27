@@ -469,7 +469,6 @@
     "uValue": "Współczynnik U",
     "lossFactor": "Współczynnik b",
     "unitShare": "od 0 do 1",
-    "buemDefault": "Domyślne BuEM.",
     "useDefault": "Użyj domyślnej",
     "windows": {
       "title": "Okna dodawane przez BuEM",
@@ -505,6 +504,11 @@
       "note": "Klasa orientacyjna: ogrzewanie na m², oceniane w jednej skali dla wszystkich krajów (austriackiej skali HWB, od G do A++), aby budynki dało się porównać między krajami. Krajowe etykiety, takie jak holenderska etykieta energetyczna, oceniają energię pierwotną, której ten model nie oblicza. Symulowana, nie jest świadectwem.",
       "failed": "Nie udało się wyznaczyć klas energetycznych.",
       "retry": "Spróbuj ponownie"
+    },
+    "default": {
+      "buem": "Domyślnie w BuEM: {value}",
+      "tabula": "Wartość TABULA dla tego budynku: {value}",
+      "tabulaElse": "Wartość TABULA tego budynku, w przeciwnym razie {value}"
     }
   },
   "options": {

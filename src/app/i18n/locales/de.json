@@ -449,7 +449,6 @@
     "uValue": "U-Wert",
     "lossFactor": "Reduktionsfaktor",
     "unitShare": "0 bis 1",
-    "buemDefault": "BuEM-Standard.",
     "useDefault": "Standard verwenden",
     "windows": {
       "title": "Von BuEM ergänzte Fenster",
@@ -485,6 +484,11 @@
       "note": "Indikative Klasse: Heizwärmebedarf je m², für alle Länder auf einer Skala bewertet (der österreichischen HWB-Skala, G bis A++), damit Gebäude länderübergreifend vergleichbar sind. Nationale Labels wie das niederländische Energielabel bewerten Primärenergie, die dieses Modell nicht berechnet. Simuliert, kein Energieausweis.",
       "failed": "Die Energieklassen ließen sich nicht ermitteln.",
       "retry": "Erneut versuchen"
+    },
+    "default": {
+      "buem": "BuEM-Standard: {value}",
+      "tabula": "TABULA-Wert für dieses Gebäude: {value}",
+      "tabulaElse": "Der TABULA-Wert dieses Gebäudes, sonst {value}"
     }
   },
   "options": {
