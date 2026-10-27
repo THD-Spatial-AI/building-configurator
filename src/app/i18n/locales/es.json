@@ -662,8 +662,7 @@
       "statisticalDefault": "Valor estadístico"
     },
     "builtIn": "Construido en {year}",
-    "eavesHeight": "{value} m hasta el alero",
-    "heightConflict": "{storeys} plantas de {room} m son más altas que el modelo 3D, que tiene {height} m hasta el alero. Corrija el número de plantas o la altura libre."
+    "eavesHeight": "{value} m hasta el alero"
   },
   "envelope": {
     "compassNorth": "N"
@@ -727,7 +726,7 @@
   },
   "storeys": {
     "title": "Plantas modeladas",
-    "hint": "La planta 1 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas; la superficie y la envolvente cuentan solo las plantas modeladas.",
+    "hint": "La planta 1 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas o su altura propia; la superficie y la envolvente cuentan solo las plantas modeladas.",
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
     "floorArea": "Superficie modelada",
     "pick": "Plantas",
@@ -751,7 +750,15 @@
     "dwellingsPerStorey": "Viviendas por planta",
     "mixed": "varios",
     "dwellingsMissing": "Indique el número de viviendas de cada planta incluida. Falta: planta {storeys}.",
-    "inModel": "En el modelo"
+    "inModel": "En el modelo",
+    "roomHeightTip": "La altura de cada planta, de suelo a suelo. Una planta con altura propia la conserva.",
+    "ownHeight": "Altura de planta",
+    "useRoomHeight": "Usar la altura de sala",
+    "limit": {
+      "storeys": "Otra planta de {room} m superaría el modelo 3D, que mide {height} m hasta el alero.",
+      "height": "Una planta más alta haría que las plantas superasen el modelo 3D, que mide {height} m hasta el alero."
+    },
+    "heightConflict": "Las plantas suman {total} m de altura, más que el modelo 3D, que mide {height} m hasta el alero. Reduzca el número de plantas o una altura."
   },
   "help": {
     "envelope": "El tamaño de esta superficie y lo bien que retiene el calor. Cambiarlos cambia la calefacción que necesita el edificio.",

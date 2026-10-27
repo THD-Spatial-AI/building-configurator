@@ -91,7 +91,8 @@ Schema path changes go in `modelDataMap.ts` only.
 |---|---|
 | `construction_year` | The construction year, which BuEM's `construction_period` cannot hold |
 | `storeys` | The building's total storey count |
-| `storey_list` | One `{ storey, modelled, dwellings? }` entry per storey; `dwellings` where the user gave it |
+| `storey_list` | One `{ storey, modelled, dwellings?, height? }` entry per storey; `dwellings` and `height` (m) where the user gave them |
+| `room_height` | The room height of the storeys without their own, where any storey has its own; `building.h_room` then holds the mean of the modelled storeys' heights |
 | `envelope_full` | The envelope of the whole building |
 | `residential_units_full` | The dwellings of the whole building, or null |
 

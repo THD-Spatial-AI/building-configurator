@@ -678,8 +678,7 @@
       "statisticalDefault": "Statistická hodnota"
     },
     "builtIn": "Postaveno v roce {year}",
-    "eavesHeight": "{value} m k okapu",
-    "heightConflict": "{storeys} podlaží po {room} m je vyšší než 3D model, který má {height} m k okapu. Opravte počet podlaží nebo světlou výšku."
+    "eavesHeight": "{value} m k okapu"
   },
   "envelope": {
     "compassNorth": "S"
@@ -743,7 +742,7 @@
   },
   "storeys": {
     "title": "Modelovaná podlaží",
-    "hint": "Podlaží 1 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty; plocha a obálka počítají jen modelovaná podlaží.",
+    "hint": "Podlaží 1 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty či vlastní výšku; plocha a obálka počítají jen modelovaná podlaží.",
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
     "floorArea": "Modelovaná plocha",
     "pick": "Podlaží",
@@ -769,7 +768,15 @@
     "dwellingsPerStorey": "Bytů na podlaží",
     "mixed": "různé",
     "dwellingsMissing": "Uveďte počet bytů na každém zahrnutém podlaží. Chybí: podlaží {storeys}.",
-    "inModel": "V modelu"
+    "inModel": "V modelu",
+    "roomHeightTip": "Výška každého podlaží, od podlahy k podlaze. Podlaží s vlastní výškou si ji ponechá.",
+    "ownHeight": "Výška podlaží",
+    "useRoomHeight": "Použít výšku místnosti",
+    "limit": {
+      "storeys": "Další podlaží o výšce {room} m by bylo vyšší než 3D model, který měří {height} m k okapu.",
+      "height": "Vyšší podlaží by udělalo podlaží vyšší než 3D model, který měří {height} m k okapu."
+    },
+    "heightConflict": "Podlaží jsou dohromady vysoká {total} m, více než 3D model, který měří {height} m k okapu. Snižte počet podlaží nebo některou výšku."
   },
   "help": {
     "envelope": "Velikost této plochy a jak dobře drží teplo. Jejich změna mění, kolik vytápění budova potřebuje.",

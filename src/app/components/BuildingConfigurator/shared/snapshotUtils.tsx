@@ -12,6 +12,7 @@ import {
   computeVolume,
 } from './buildingDefaults';
 import { BUILDING_TYPE_OPTIONS, COUNTRY_OPTIONS } from './buildingOptions';
+import { meanStoreyHeight, storeyHeightList } from '@/app/lib/storeys';
 import { formatNumber, useT, type Language, type MessageValues } from '@/app/i18n';
 
 export type SnapshotStatus = 'default' | 'modified';
@@ -116,6 +117,10 @@ export function buildSnapshotRows(
   // storeys, and each surface for its share inside them.
   const modelled = general.storeysModelled;
   const modelledStoreys = modelled?.length ?? general.storeys;
+  // The room height BuEM receives: the mean of the modelled storeys' own heights.
+  const ownHeights = Object.values(general.storeyHeights ?? {}).some((h) => h > 0);
+  const roomHeight = meanStoreyHeight(storeyHeightList(general.storeys, general.roomHeight, general.storeyHeights), modelled ?? null)
+    || general.roomHeight;
   const sent = modelled
     ? Object.values(elements).filter((el) => (el.modelledShare ?? 1) > 0)
     : Object.values(elements);
@@ -166,27 +171,22 @@ export function buildSnapshotRows(
       value: `${general.storeys}`,
       ...(modelled ? { valueMessage: { key: 'snapshot.storeysModelled', values: { modelled: modelled.length, total: general.storeys } } } : {}),
       status: general.storeys === baseGeneral.storeys && !modelled ? 'default' : 'modified',
-      editKey: 'storeys',
-      editType: 'number',
-      rawValue: general.storeys,
     },
     {
       label: 'Room height',
       labelKey: 'snapshot.row.roomHeight',
-      value: `${formatNumber(language, general.roomHeight, 1)} m`,
-      status: isCloseTo(general.roomHeight, baseGeneral.roomHeight) ? 'default' : 'modified',
-      editKey: 'roomHeight',
-      editType: 'number',
-      rawValue: general.roomHeight,
+      value: `${formatNumber(language, roomHeight, 1)} m`,
+      status: isCloseTo(general.roomHeight, baseGeneral.roomHeight) && !ownHeights ? 'default' : 'modified',
     },
     {
       label: 'Volume',
       labelKey: 'snapshot.row.volume',
-      value: `${formatNumber(language, computeVolume(general.floorArea, modelledStoreys, general.roomHeight), 0)} m³`,
+      value: `${formatNumber(language, computeVolume(general.floorArea, modelledStoreys, roomHeight), 0)} m³`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea)
         && general.storeys === baseGeneral.storeys
         && !modelled
         && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
+        && !ownHeights
         ? 'default'
         : 'modified',
     },

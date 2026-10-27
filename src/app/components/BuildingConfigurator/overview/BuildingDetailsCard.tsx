@@ -12,7 +12,6 @@ import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
 import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryName, countryOptions } from '../shared/buildingOptions';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
-import { heightLimits, tallerThanModel } from '@/app/lib/storeys';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
 const ROW_UNITS: Record<string, string> = {
@@ -50,7 +49,7 @@ export interface BuildingOccupancy {
 
 export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
-  /** The 3D model's height to the eaves, in metres; it bounds the storeys and room height. */
+  /** The 3D model's height to the eaves, in metres, shown with the envelope. */
   modelHeight?: number;
   /** Shown as tiles beside the building data; absent for a service building. */
   occupancy?: BuildingOccupancy;
@@ -127,26 +126,6 @@ function BuildingTiles({ rows, occupancy, modelHeight }: { rows: SnapshotRow[]; 
   );
 }
 
-/** The storey count and room height in the rows, and whether together they are taller than the 3D model. */
-function heightConflict(rows: SnapshotRow[], modelHeight?: number): { storeys: number; roomHeight: number; conflict: boolean } {
-  const storeys = Number(rows.find((r) => r.editKey === 'storeys')?.rawValue);
-  const roomHeight = Number(rows.find((r) => r.editKey === 'roomHeight')?.rawValue);
-  return { storeys, roomHeight, conflict: modelHeight !== undefined && tallerThanModel(modelHeight, storeys, roomHeight) };
-}
-
-/** A storey count and room height taller than the 3D model, as loaded or as edited. */
-function HeightConflict({ rows, modelHeight }: { rows: SnapshotRow[]; modelHeight?: number }) {
-  const t = useT();
-  const format = useFormatNumber();
-  const { storeys, roomHeight, conflict } = heightConflict(rows, modelHeight);
-  if (modelHeight === undefined || !conflict) return null;
-  return (
-    <p className="mx-3 mb-3 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
-      {t('snapshot.heightConflict', { storeys, room: format(roomHeight, 1), height: format(modelHeight, 1) })}
-    </p>
-  );
-}
-
 /** The building data: tiles to read, a table to edit while its pencil is on. */
 function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
   rows: SnapshotRow[];
@@ -157,15 +136,7 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
   const t = useT();
   // Off by default, so a stray click on the table never changes the building's data.
   const [isEditing, setIsEditing] = useState(false);
-  const storeys = Number(rows.find((r) => r.editKey === 'storeys')?.rawValue) || 1;
-  const limits = modelHeight !== undefined ? heightLimits(modelHeight, storeys) : null;
-  /** The most a field takes: the year now, and for storeys and room height what fits the model. */
-  const maxFor = (key: string): number | undefined => {
-    if (key === 'constructionYear') return new Date().getFullYear();
-    if (key === 'storeys') return limits?.maxStoreys;
-    if (key === 'roomHeight') return limits?.maxRoomHeight;
-    return undefined;
-  };
+  const maxFor = (key: string): number | undefined => (key === 'constructionYear' ? new Date().getFullYear() : undefined);
   return (
     <SectionCard
       topic={TOPICS.building}
@@ -217,10 +188,10 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
                             onEditField!(row.editKey!, max === undefined ? v : Math.min(v, max));
                           }}
                           unit={ROW_UNITS[row.editKey!] ?? ''}
-                          min={row.editKey === 'storeys' ? 1 : row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
+                          min={row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
                           max={maxFor(row.editKey!)}
-                          step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
-                        integer={row.editKey === 'storeys' || row.editKey === 'constructionYear'}
+                          step={1}
+                          integer={row.editKey === 'constructionYear'}
                         />
                       )
                     ) : rowValue(row, t)}
@@ -234,7 +205,6 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
           </tbody>
         </table>
       )}
-      <HeightConflict rows={rows} modelHeight={modelHeight} />
     </SectionCard>
   );
 }
@@ -267,7 +237,7 @@ export function BuildingDetailsCard({
       key: 'data',
       label: t('panel.section.identity'),
       topic: TOPICS.building,
-      status: heightConflict(snapshotRows, modelHeight).conflict ? 'attention' : 'complete',
+      status: 'complete',
       content: <BuildingTable rows={snapshotRows} occupancy={occupancy} modelHeight={modelHeight} onEditField={onEditField} />,
     },
     ...steps,

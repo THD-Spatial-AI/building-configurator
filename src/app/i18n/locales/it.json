@@ -658,8 +658,7 @@
       "statisticalDefault": "Valore statistico"
     },
     "builtIn": "Costruito nel {year}",
-    "eavesHeight": "{value} m fino alla gronda",
-    "heightConflict": "{storeys} piani da {room} m sono più alti del modello 3D, alto {height} m fino alla gronda. Correggi il numero di piani o l'altezza dei locali."
+    "eavesHeight": "{value} m fino alla gronda"
   },
   "envelope": {
     "compassNorth": "N"
@@ -723,7 +722,7 @@
   },
   "storeys": {
     "title": "Piani modellati",
-    "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni; superficie e involucro contano solo i piani modellati.",
+    "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni o la loro altezza; superficie e involucro contano solo i piani modellati.",
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
     "floorArea": "Superficie modellata",
     "pick": "Piani",
@@ -747,7 +746,15 @@
     "dwellingsPerStorey": "Abitazioni per piano",
     "mixed": "misto",
     "dwellingsMissing": "Indica il numero di abitazioni su ogni piano incluso. Manca: piano {storeys}.",
-    "inModel": "Nel modello"
+    "inModel": "Nel modello",
+    "roomHeightTip": "L'altezza di ogni piano, da pavimento a pavimento. Un piano con un'altezza propria la mantiene.",
+    "ownHeight": "Altezza del piano",
+    "useRoomHeight": "Usa l'altezza dei locali",
+    "limit": {
+      "storeys": "Un altro piano di {room} m sarebbe più alto del modello 3D, che misura {height} m fino alla gronda.",
+      "height": "Un piano più alto renderebbe i piani più alti del modello 3D, che misura {height} m fino alla gronda."
+    },
+    "heightConflict": "I piani sono alti {total} m in tutto, più del modello 3D, che misura {height} m fino alla gronda. Riduci il numero di piani o un'altezza."
   },
   "help": {
     "envelope": "La dimensione di questa superficie e quanto trattiene il calore. Cambiarli cambia il riscaldamento di cui l'edificio ha bisogno.",

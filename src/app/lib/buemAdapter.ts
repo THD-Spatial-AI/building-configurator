@@ -23,7 +23,7 @@ import {
   type OutputProfile,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import type { LoadDataPoint } from './loadProfile';
-import { modelledDwellings, type StoreyDwellings } from './storeys';
+import { meanStoreyHeight, modelledDwellings, storeyHeightList, type StoreyDwellings, type StoreyHeights } from './storeys';
 import { REFURB_TYPES, type RefurbElementType, type Refurbishment } from './refurbishment';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -116,6 +116,8 @@ export interface BuildingParameters {
   /** With storeys left out: the dwellings in the modelled storeys, residential_units being the whole building's. */
   /** Dwellings per storey; while storeys are left out their sum over the modelled ones is residential_units. */
   storeyDwellings?: StoreyDwellings;
+  /** A storey's own height in m, where it differs from roomHeight. */
+  storeyHeights?: StoreyHeights;
   num_persons?: number | null;      // per dwelling
   archetype?: string;
   region_code?: string;             // CBS municipality code, e.g. GM0200
@@ -389,6 +391,8 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (typeof fullUnits === 'number' || fullUnits === null) parameters.residential_units = fullUnits;
   const storeyDwellings = dwellingsFromList(getMappedValue(feature, MODEL_DATA_MAP.thematic.descriptor.storeyList));
   if (storeyDwellings) parameters.storeyDwellings = storeyDwellings;
+  const storeyHeights = heightsFromList(getMappedValue(feature, MODEL_DATA_MAP.thematic.descriptor.storeyList));
+  if (storeyHeights) parameters.storeyHeights = storeyHeights;
   return Object.keys(parameters).length > 0 ? parameters : undefined;
 }
 
@@ -609,15 +613,32 @@ export interface StoreyEntry {
   modelled: boolean;
   /** The dwellings on this storey, where the user gave them. */
   dwellings?: number;
+  /** This storey's own height in m, where it differs from the shared room height. */
+  height?: number;
 }
 
-/** Every storey with whether it is in the model and its dwellings, as stored in properties.buem.configurator.storey_list. */
-function storeyList(modelled: readonly number[], storeys: number, dwellings: StoreyDwellings = {}): StoreyEntry[] {
+/** Every storey with whether it is in the model, its dwellings and its own height, as stored in properties.buem.configurator.storey_list. */
+function storeyList(
+  modelled: readonly number[] | null,
+  storeys: number,
+  dwellings: StoreyDwellings = {},
+  heights: StoreyHeights = {},
+): StoreyEntry[] {
   return Array.from({ length: storeys }, (_, i) => ({
     storey: i + 1,
-    modelled: modelled.includes(i + 1),
+    modelled: modelled ? modelled.includes(i + 1) : true,
     ...(dwellings[i + 1] >= 1 ? { dwellings: dwellings[i + 1] } : {}),
+    ...(heights[i + 1] > 0 ? { height: heights[i + 1] } : {}),
   }));
+}
+
+/** The own heights of a stored storey_list, or undefined when it holds none. */
+function heightsFromList(list: unknown): StoreyHeights | undefined {
+  if (!Array.isArray(list)) return undefined;
+  const entries = list
+    .filter((entry): entry is StoreyEntry => !!entry && typeof entry === 'object' && typeof entry.height === 'number' && entry.height > 0)
+    .map((entry) => [entry.storey, entry.height as number] as const);
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
 
 /** The dwellings per storey of a stored storey_list, or undefined when it holds none. */
@@ -751,11 +772,17 @@ export function serializeToBuemFeature(
     building.A_ref = { value: general.floorArea * (Number(general.storeys) || 1) * storeyShare, unit: 'm2' };
   }
 
-  if (typeof identity.roomHeight === 'number') {
-    building.h_room = { value: identity.roomHeight, unit: 'm' };
-  } else if (typeof general.roomHeight === 'number') {
-    building.h_room = { value: general.roomHeight, unit: 'm' };
+  // BuEM takes one room height: the mean of the modelled storeys' own heights,
+  // which is the shared room height while no storey has its own.
+  const roomHeight = typeof identity.roomHeight === 'number' ? identity.roomHeight
+    : typeof general.roomHeight === 'number' ? general.roomHeight : undefined;
+  const ownHeights: StoreyHeights = general.storeyHeights ?? {};
+  const hasOwnHeights = Object.values(ownHeights).some((h) => h > 0);
+  if (roomHeight !== undefined) {
+    const mean = meanStoreyHeight(storeyHeightList(storeys || 1, roomHeight, ownHeights), modelled ?? null);
+    building.h_room = { value: Math.round((mean || roomHeight) * 1000) / 1000, unit: 'm' };
   }
+  const hasDwellings = Object.values(general.storeyDwellings ?? {}).some((n) => Number(n) >= 1);
 
   // BuEM's internal gains follow residential_units, so with storeys left out it
   // is the count the user gave for them; the whole building's is kept beside.
@@ -834,7 +861,10 @@ export function serializeToBuemFeature(
         configurator: {
           ...(constructionYear ? { construction_year: constructionYear } : {}),
           ...(storeys ? { storeys } : {}),
-          ...(modelled ? { storey_list: storeyList(modelled, storeys, general.storeyDwellings) } : {}),
+          ...(modelled || hasDwellings || hasOwnHeights
+            ? { storey_list: storeyList(modelled ?? null, storeys, general.storeyDwellings, ownHeights) }
+            : {}),
+          ...(hasOwnHeights && roomHeight !== undefined ? { room_height: roomHeight } : {}),
           ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
           ...(keepUnits ? { residential_units_full: unitsFull } : {}),
         },
@@ -976,7 +1006,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
     country: String(bldg.country ?? ''),
     floorArea: qty(bldg.A_ref) / Math.max(1, modelled?.length ?? importedStoreys),
-    roomHeight: qty(bldg.h_room),
+    roomHeight: Number(own.room_height) > 0 ? Number(own.room_height) : qty(bldg.h_room),
     storeys: importedStoreys,
     ...(modelled ? { storeysModelled: modelled } : {}),
     use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,

@@ -134,3 +134,36 @@ describe('a building with storeys left out', () => {
     expect(all.building.A_ref.value).toBe(300);
   });
 });
+
+describe('a building with storeys of their own height', () => {
+  const three = { ...identity, floorArea: 300, storeys: 3, roomHeight: 2.5 };
+  const general = { ...DEFAULT_GENERAL, floorArea: 100, storeys: 3, roomHeight: 2.5, storeyHeights: { 3: 4 } };
+
+  it('sends BuEM the mean height of the modelled storeys, keeping each storey\'s beside the block', () => {
+    const { buem } = serializeToBuemFeature(three, {}, general).properties;
+    expect(buem.building.h_room).toEqual({ value: 3, unit: 'm' });
+    expect(buem.configurator.room_height).toBe(2.5);
+    expect(buem.configurator.storey_list).toEqual([
+      { storey: 1, modelled: true }, { storey: 2, modelled: true }, { storey: 3, modelled: true, height: 4 },
+    ]);
+    const lower = serializeToBuemFeature(three, {}, { ...general, storeysModelled: [1, 2] }).properties.buem;
+    expect(lower.building.h_room).toEqual({ value: 2.5, unit: 'm' });
+  });
+
+  it('reopens with the shared room height and each storey\'s own', () => {
+    const stored = serializeToBuemFeature(three, {}, general);
+    const reopened = generalFrom(adaptBuemFeature(stored));
+    expect(reopened.roomHeight).toBe(2.5);
+    expect(reopened.storeyHeights).toEqual({ 3: 4 });
+    const imported = parseBuemFeatureForImport(stored).general;
+    expect(imported.roomHeight).toBe(2.5);
+    expect(imported.storeyHeights).toEqual({ 3: 4 });
+  });
+
+  it('writes neither key while every storey takes the room height', () => {
+    const { buem } = serializeToBuemFeature(three, {}, { ...general, storeyHeights: {} }).properties;
+    expect(buem.building.h_room).toEqual({ value: 2.5, unit: 'm' });
+    expect(buem.configurator).not.toHaveProperty('room_height');
+    expect(buem.configurator).not.toHaveProperty('storey_list');
+  });
+});

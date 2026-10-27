@@ -1,11 +1,15 @@
-// Which storeys of the building are in the model, and the dwellings on each.
-// Storeys are selected, one or many, here or in the 3D model; the selection is
-// then left out, put back, or given a dwelling count. At least one stays in.
+// The building's storeys: how many, how tall, which are in the model, and the
+// dwellings on each. Storeys are selected, one or many, here or in the 3D
+// model; the selection is then left out, put back, given a dwelling count or
+// its own height. At least one stays in.
 
 import { cn } from '@/lib/utils';
 import { useFormatNumber, useT } from '../../i18n';
-import { DecimalInput, InfoTip, Switch, TEXT_INPUT } from '../BuildingConfigurator/shared/ui';
-import { missingDwellings, type StoreyDwellings } from '../../lib/storeys';
+import { DecimalInput, InfoTip, NumberInput, Switch, TEXT_INPUT } from '../BuildingConfigurator/shared/ui';
+import {
+  MIN_STOREY_HEIGHT_M, heightLimits, missingDwellings, storeyHeightList, storeysTooTall,
+  type StoreyDwellings, type StoreyHeights,
+} from '../../lib/storeys';
 
 /** The storeys modelled with `chosen` left out or put back; null when all are in, undefined when none would be. */
 export function withStoreys(modelled: number[] | null, storeys: number, chosen: readonly number[], inModel: boolean): number[] | null | undefined {
@@ -37,11 +41,25 @@ function sharedCount(chosen: readonly number[], dwellings: StoreyDwellings): num
   return counts.size === 1 ? [...counts][0] : null;
 }
 
+/** The height every chosen storey shares as its own, or null when they differ or have none. */
+function sharedHeight(chosen: readonly number[], heights: StoreyHeights): number | null {
+  const own = new Set(chosen.map((storey) => heights[storey] ?? null));
+  return own.size === 1 ? [...own][0] : null;
+}
+
 /** `modelled` null means every storey; `onChange` gets null back when all are in again. */
 export function StoreysModelled({
   storeys, modelled, selected, onSelect, multi = false, onMultiChange, floorAreaPerStorey, dwellings, disabled, onChange,
+  roomHeight, heights, modelHeight, onStoreysChange, onRoomHeightChange,
 }: {
   storeys: number;
+  roomHeight: number;
+  /** The storeys' own heights; the rest take the room height. */
+  heights: { values: StoreyHeights; onChange: (values: Record<number, number>) => void };
+  /** The 3D model's height to the eaves, in metres; the storeys stop there. */
+  modelHeight?: number;
+  onStoreysChange: (storeys: number) => void;
+  onRoomHeightChange: (roomHeight: number) => void;
   modelled: number[] | null;
   /** The storeys selected, here or in the model. */
   selected: readonly number[];
@@ -64,6 +82,19 @@ export function StoreysModelled({
   /** The switch is on while every selected storey is in the model; turning it on puts them all back. */
   const allIn = selected.every((storey) => on.has(storey));
   const missing = dwellings ? missingDwellings(modelled, dwellings.values) : [];
+  const limits = modelHeight !== undefined ? heightLimits(modelHeight, storeys, roomHeight, heights.values) : null;
+  const eaves = modelHeight !== undefined ? format(modelHeight, 1) : '';
+  const totalHeight = storeyHeightList(storeys, roomHeight, heights.values).reduce((a, b) => a + b, 0);
+  const tooTall = storeysTooTall(storeys, roomHeight, heights.values, modelHeight);
+  const ownHeightMax = limits ? Math.min(...selected.map(limits.maxStoreyHeight)) : undefined;
+  const setHeights = (height: number | null) => {
+    const next: Record<number, number> = { ...heights.values };
+    for (const storey of selected) {
+      if (height && height > 0) next[storey] = height;
+      else delete next[storey];
+    }
+    heights.onChange(next);
+  };
   const setDwellings = (count: number | null) => {
     if (!dwellings) return;
     const next: Record<number, number> = { ...dwellings.values };
@@ -76,6 +107,36 @@ export function StoreysModelled({
 
   return (
     <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-3">
+          <NumberInput
+            label={t('snapshot.row.storeys')}
+            value={storeys}
+            onChange={(next) => onStoreysChange(Math.max(1, Math.round(next)))}
+            min={1}
+            max={limits?.maxStoreys}
+            maxReason={limits ? t('storeys.limit.storeys', { room: format(roomHeight, 1), height: eaves }) : undefined}
+            unit=""
+            step={1}
+            integer
+          />
+          <NumberInput
+            label={t('snapshot.row.roomHeight')}
+            tip={t('storeys.roomHeightTip')}
+            value={roomHeight}
+            onChange={(next) => onRoomHeightChange(Math.max(MIN_STOREY_HEIGHT_M, next))}
+            unit="m"
+            min={MIN_STOREY_HEIGHT_M}
+            max={limits?.maxRoomHeight}
+            maxReason={limits ? t('storeys.limit.height', { height: eaves }) : undefined}
+            step={0.1}
+          />
+        </div>
+        {tooTall && (
+          <p className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+            {t('storeys.heightConflict', { total: format(totalHeight, 1), height: eaves })}
+          </p>
+        )}
+        {storeys > 1 && <>
         <span className="flex items-center gap-1 text-[12px] font-semibold text-foreground">
           {t('storeys.title')}<InfoTip tip={t('storeys.hint')} />
         </span>
@@ -140,6 +201,26 @@ export function StoreysModelled({
                 }}
               />
             </div>
+            <label className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.ownHeight')}</span>
+              <span className="w-28">
+                <NumberInput
+                  value={sharedHeight(selected, heights.values) ?? ''}
+                  placeholder={selected.length > 1 && sharedHeight(selected, heights.values) === null ? t('storeys.mixed') : String(roomHeight)}
+                  onChange={(next) => setHeights(Math.max(MIN_STOREY_HEIGHT_M, next))}
+                  unit="m"
+                  min={MIN_STOREY_HEIGHT_M}
+                  max={ownHeightMax}
+                  maxReason={limits ? t('storeys.limit.height', { height: eaves }) : undefined}
+                  step={0.1}
+                />
+              </span>
+            </label>
+            {selected.some((storey) => heights.values[storey] !== undefined) && (
+              <button type="button" onClick={() => setHeights(null)} className="cursor-pointer self-end text-[11px] font-medium text-primary hover:underline">
+                {t('storeys.useRoomHeight')}
+              </button>
+            )}
             {dwellings && (
               <label className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.dwellingsPerStorey')}</span>
@@ -168,6 +249,7 @@ export function StoreysModelled({
             {on.size} × {format(floorAreaPerStorey, 0)} m² = {format(on.size * floorAreaPerStorey, 0)} m²
           </span>
         </div>
+        </>}
     </div>
   );
 }
