@@ -204,7 +204,7 @@
       "none": "Choose a product"
     },
     "fitsMore": {
-      "title": "Fits more here",
+      "title": "See our recommendation ({count})",
       "reach": "Modules: {count} · {kwp} kWp",
       "use": "Use on this surface"
     },

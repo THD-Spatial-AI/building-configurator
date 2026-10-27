@@ -149,9 +149,15 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
   const options = { usableShare: surface.usableShare, mounting: surface.mounting, orientation: surface.orientation };
   const better = fitsMore(polygon, options, pv.catalogue, surfaceProduct(pv, surfaceId)?.id, layout.kwp, pv.module ?? DEFAULT_PV_MODULE);
   if (better.length === 0) return null;
+  // Closed by default: the list changes as the surface's settings do, and open
+  // it would move the rest of the panel each time.
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-medium text-muted-foreground">{t('pv.fitsMore.title')}</span>
+    <details className="group rounded-md border border-border">
+      <summary className="flex cursor-pointer items-center justify-between px-2.5 py-2 text-[12px] font-semibold text-foreground">
+        {t('pv.fitsMore.title', { count: better.length })}
+        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
+      </summary>
+      <div className="flex flex-col gap-1.5 border-t border-border p-2">
       {better.map(({ product, layout: theirs }) => {
         const perKwp = pvCosts(product, 1).investment;
         return (
@@ -171,7 +177,8 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
           </div>
         );
       })}
-    </div>
+      </div>
+    </details>
   );
 }
 

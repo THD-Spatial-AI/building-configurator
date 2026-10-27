@@ -204,7 +204,7 @@
       "none": "Kies een product"
     },
     "fitsMore": {
-      "title": "Past hier beter",
+      "title": "Bekijk onze aanbeveling ({count})",
       "reach": "Modules: {count} · {kwp} kWp",
       "use": "Op dit vlak gebruiken"
     },

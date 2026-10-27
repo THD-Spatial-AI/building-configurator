@@ -206,7 +206,7 @@
       "none": "Vyberte produkt"
     },
     "fitsMore": {
-      "title": "Sem se vejde víc",
+      "title": "Zobrazit naše doporučení ({count})",
       "reach": "Moduly: {count} · {kwp} kWp",
       "use": "Použít na této ploše"
     },

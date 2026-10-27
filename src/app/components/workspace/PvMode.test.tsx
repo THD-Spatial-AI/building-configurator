@@ -254,7 +254,7 @@ describe('PvSurfaceSection', () => {
     );
     expect(html).toMatch(/<option value="mono" selected="">Demo Mono 420 W<\/option>/);
     expect(html).toContain('Investment about 210 EUR, an estimate');
-    expect(html).toContain('Fits more here');
+    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>See our recommendation \(1\)/);
     expect(html).toContain('Demo Compact 300 W');
     expect(html).toContain('Modules: 2 · 0.6 kWp · 600 EUR/kWp');
     expect(html).toContain('Use on this surface');
