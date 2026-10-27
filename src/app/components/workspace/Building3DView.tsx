@@ -6,7 +6,7 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, CircleHelp, Download, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
+import { AlertTriangle, ArrowLeft, CircleHelp, Download, Info, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
@@ -549,7 +549,7 @@ export function Building3DView({
 
           {attribution && (
             // In full where the model is wide enough to leave the legend its room,
-            // else behind a © button; the licences ask for the credits to stay reachable.
+            // else behind an info button; the licences ask for the credits to stay reachable.
             <>
               <div className="absolute bottom-3 right-3 hidden max-w-[45%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm @4xl:block">
                 {attribution}
@@ -560,8 +560,8 @@ export function Building3DView({
                 aria-label={t('view.credits')}
                 title={t('view.credits')}
                 onClick={() => setCreditsOpen((open) => !open)}
-                className="absolute bottom-3 right-3 flex size-7 cursor-pointer items-center justify-center rounded-full bg-card/90 text-[13px] font-semibold text-muted-foreground shadow-sm hover:text-foreground @4xl:hidden"
-              >©</button>
+                className="absolute bottom-3 right-3 flex size-7 cursor-pointer items-center justify-center rounded-full bg-card/90 text-muted-foreground shadow-sm hover:text-foreground @4xl:hidden"
+              ><Info className="size-4" /></button>
               {creditsOpen && (
                 <div className="absolute bottom-12 right-3 z-20 max-w-[min(320px,80%)] rounded-md border border-border bg-card px-2.5 py-1.5 text-[10px] leading-snug text-muted-foreground shadow-md @4xl:hidden">
                   {attribution}
