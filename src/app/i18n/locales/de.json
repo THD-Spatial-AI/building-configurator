@@ -309,26 +309,6 @@
       "equipment": "Geräte",
       "solver": "Berechnungsmethode"
     },
-    "summary": {
-      "outputs": "{on} von {total} Profilen",
-      "equipmentSet": "{overrides} manuell gesetzt",
-      "equipmentDefault": "Standard",
-      "solverMilp": "MILP",
-      "solverSparse": "Sparse",
-      "occupants": "{capacity} Bewohner",
-      "capacityFromArea": "Personenzahl aus Grundfläche",
-      "dwellings": {
-        "one": "{count} Wohneinheit",
-        "other": "{count} Wohneinheiten"
-      },
-      "dwellingsNotSet": "Wohneinheiten nicht gesetzt",
-      "perDwelling": "{dwellings} · {persons} je Wohneinheit",
-      "storeys": {
-        "one": "{count} Geschoss",
-        "other": "{count} Geschosse"
-      },
-      "storeysModelled": "{modelled} von {total} Geschossen modelliert"
-    },
     "insulationTitle": "Energetischer Standard",
     "expertMore": {
       "title": "Thermik und Simulation",
@@ -353,17 +333,6 @@
       "off": "Nicht enthalten",
       "label": "Warmwasser",
       "tip": "Abschalten, wenn Warmwasser von einem anderweitig erfassten System kommt. Die Raumheizung bleibt unberührt."
-    },
-    "summary": {
-      "setback": {
-        "none": "ohne Absenkung",
-        "nightOnly": "nachts abgesenkt",
-        "nightAndAway": "nachts und bei Abwesenheit abgesenkt",
-        "deep": "stark abgesenkt",
-        "unknown": "abgesenkt: {setback}"
-      },
-      "hotWaterOn": "mit Warmwasser",
-      "hotWaterOff": "ohne Warmwasser"
     },
     "heating": {
       "label": "Solltemperatur Heizen",
@@ -816,5 +785,15 @@
     "roof": "Dach",
     "wall": "Wand",
     "ground": "Bodenplatte"
+  },
+  "steps": {
+    "nav": "Gebäudeabschnitte",
+    "previous": "Zurück: {step}",
+    "next": "Weiter: {step}",
+    "status": {
+      "complete": "vollständig",
+      "attention": "bitte prüfen",
+      "error": "fehlerhaft"
+    }
   }
 }

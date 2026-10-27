@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useFormatNumber, useT } from '../../i18n';
 import { DecimalInput, InfoTip } from '../BuildingConfigurator/shared/ui';
 import { Switch } from './PvMode';
-import type { StoreyDwellings } from '../../lib/storeys';
+import { missingDwellings, type StoreyDwellings } from '../../lib/storeys';
 
 /** The storeys modelled with `chosen` left out or put back; null when all are in, undefined when none would be. */
 export function withStoreys(modelled: number[] | null, storeys: number, chosen: readonly number[], inModel: boolean): number[] | null | undefined {
@@ -64,7 +64,7 @@ export function StoreysModelled({
   const leaveOut = withStoreys(modelled, storeys, selected, false);
   /** The switch is on while every selected storey is in the model; turning it on puts them all back. */
   const allIn = selected.every((storey) => on.has(storey));
-  const missing = modelled && dwellings ? [...on].filter((storey) => !(dwellings.values[storey] >= 1)) : [];
+  const missing = dwellings ? missingDwellings(modelled, dwellings.values) : [];
   const setDwellings = (count: number | null) => {
     if (!dwellings) return;
     const next: Record<number, number> = { ...dwellings.values };

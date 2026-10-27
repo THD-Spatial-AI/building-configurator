@@ -2,11 +2,12 @@
 // its performance, its data and its parameters; Technologies the host's
 // technology cards. Single surfaces live in the surface panel, not here.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pencil, Check } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { TOPICS } from '@/app/config/topics';
 import { SectionCard } from '../shared/SectionCard';
+import { StepPanel, type Step } from '../shared/StepPanel';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
 import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryName, countryOptions } from '../shared/buildingOptions';
@@ -57,8 +58,10 @@ export interface BuildingDetailsCardProps {
   onEditField?: (key: string, value: string | number) => void;
   /** Top of the Building tab, e.g. the load profile and annual demand. */
   overviewSlot?: React.ReactNode;
-  /** Under the building data table, e.g. the BuEM building parameters. */
-  parametersSlot?: React.ReactNode;
+  /** The steps after the building data, e.g. the building parameters from useBuildingSteps. */
+  steps?: Step[];
+  /** Opens this step when it changes, as when storeys are picked in the model. */
+  requestStep?: string;
   /** Adds a Technologies tab, e.g. the host's technology cards. */
   technologySlot?: React.ReactNode;
   /** The open tab, for a caller that acts on it. Absent: the card keeps its own. */
@@ -124,13 +127,19 @@ function BuildingTiles({ rows, occupancy, modelHeight }: { rows: SnapshotRow[]; 
   );
 }
 
+/** The storey count and room height in the rows, and whether together they are taller than the 3D model. */
+function heightConflict(rows: SnapshotRow[], modelHeight?: number): { storeys: number; roomHeight: number; conflict: boolean } {
+  const storeys = Number(rows.find((r) => r.editKey === 'storeys')?.rawValue);
+  const roomHeight = Number(rows.find((r) => r.editKey === 'roomHeight')?.rawValue);
+  return { storeys, roomHeight, conflict: modelHeight !== undefined && tallerThanModel(modelHeight, storeys, roomHeight) };
+}
+
 /** A storey count and room height taller than the 3D model, as loaded or as edited. */
 function HeightConflict({ rows, modelHeight }: { rows: SnapshotRow[]; modelHeight?: number }) {
   const t = useT();
   const format = useFormatNumber();
-  const storeys = Number(rows.find((r) => r.editKey === 'storeys')?.rawValue);
-  const roomHeight = Number(rows.find((r) => r.editKey === 'roomHeight')?.rawValue);
-  if (modelHeight === undefined || !tallerThanModel(modelHeight, storeys, roomHeight)) return null;
+  const { storeys, roomHeight, conflict } = heightConflict(rows, modelHeight);
+  if (modelHeight === undefined || !conflict) return null;
   return (
     <p className="mx-3 mb-3 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
       {t('snapshot.heightConflict', { storeys, room: format(roomHeight, 1), height: format(modelHeight, 1) })}
@@ -236,7 +245,8 @@ export function BuildingDetailsCard({
   occupancy,
   onEditField,
   overviewSlot,
-  parametersSlot,
+  steps = [],
+  requestStep,
   technologySlot,
   activeTab: controlledTab,
   onTabChange,
@@ -249,6 +259,18 @@ export function BuildingDetailsCard({
     onTabChange?.(tab);
   };
   const tabs: DetailsTab[] = technologySlot ? ['building', 'technology'] : ['building'];
+  const [step, setStep] = useState('data');
+  useEffect(() => { if (requestStep) setStep(requestStep); }, [requestStep]);
+  const allSteps: Step[] = [
+    {
+      key: 'data',
+      label: t('panel.section.identity'),
+      topic: TOPICS.building,
+      status: heightConflict(snapshotRows, modelHeight).conflict ? 'attention' : 'complete',
+      content: <BuildingTable rows={snapshotRows} occupancy={occupancy} modelHeight={modelHeight} onEditField={onEditField} />,
+    },
+    ...steps,
+  ];
 
   return (
     <div className={cn(CARD, 'shrink-0')}>
@@ -276,8 +298,7 @@ export function BuildingDetailsCard({
       ) : (
         <div className="flex flex-col gap-3 p-4">
           {overviewSlot}
-          <BuildingTable rows={snapshotRows} occupancy={occupancy} modelHeight={modelHeight} onEditField={onEditField} />
-          {parametersSlot}
+          <StepPanel steps={allSteps} active={step} onActive={setStep} />
         </div>
       )}
     </div>

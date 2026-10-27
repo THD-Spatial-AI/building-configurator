@@ -323,30 +323,6 @@
       "equipment": "Urządzenia",
       "solver": "Metoda obliczeń"
     },
-    "summary": {
-      "outputs": "{on} z {total} profili",
-      "equipmentSet": "ręcznie ustawione: {overrides}",
-      "equipmentDefault": "Domyślne",
-      "solverMilp": "MILP",
-      "solverSparse": "Rzadki",
-      "occupants": "Liczba osób: {capacity}",
-      "capacityFromArea": "Liczba osób z powierzchni",
-      "dwellings": {
-        "one": "{count} mieszkanie",
-        "few": "{count} mieszkania",
-        "many": "{count} mieszkań",
-        "other": "{count} mieszkania"
-      },
-      "dwellingsNotSet": "Nie podano mieszkań",
-      "perDwelling": "{dwellings} · {persons} os. na mieszkanie",
-      "storeys": {
-        "one": "{count} kondygnacja",
-        "few": "{count} kondygnacje",
-        "many": "{count} kondygnacji",
-        "other": "{count} kondygnacji"
-      },
-      "storeysModelled": "{modelled} z {total} kondygnacji modelowanych"
-    },
     "insulationTitle": "Standard energetyczny",
     "expertMore": {
       "title": "Cieplne i symulacja",
@@ -371,17 +347,6 @@
       "off": "Nieuwzględniona",
       "label": "Ciepła woda",
       "tip": "Wyłącz, gdy ciepłą wodę dostarcza system ujęty gdzie indziej. Nie wpływa na ogrzewanie pomieszczeń."
-    },
-    "summary": {
-      "setback": {
-        "none": "bez obniżenia",
-        "nightOnly": "obniżenie nocą",
-        "nightAndAway": "obniżenie nocą i pod nieobecność",
-        "deep": "głębokie obniżenie",
-        "unknown": "obniżenie: {setback}"
-      },
-      "hotWaterOn": "z ciepłą wodą",
-      "hotWaterOff": "bez ciepłej wody"
     },
     "heating": {
       "label": "Temperatura zadana ogrzewania",
@@ -842,5 +807,15 @@
     "roof": "Dach",
     "wall": "Ściana",
     "ground": "Podłoga na gruncie"
+  },
+  "steps": {
+    "nav": "Sekcje budynku",
+    "previous": "Wstecz: {step}",
+    "next": "Dalej: {step}",
+    "status": {
+      "complete": "kompletne",
+      "attention": "wymaga uwagi",
+      "error": "zawiera błąd"
+    }
   }
 }

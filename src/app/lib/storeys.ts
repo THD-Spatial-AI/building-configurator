@@ -156,6 +156,11 @@ export function modelledDwellings(modelled: readonly number[], dwellings: Storey
   return modelled.length > 0 ? sum : null;
 }
 
+/** The modelled storeys with no dwelling count; none while every storey is modelled. */
+export function missingDwellings(modelled: readonly number[] | null, dwellings: StoreyDwellings): number[] {
+  return modelled ? modelled.filter((storey) => !(dwellings[storey] >= 1)) : [];
+}
+
 /** The building's dwellings from its counts per storey: the sum of those given, or null when none is. */
 export function dwellingsTotal(storeys: number, dwellings: StoreyDwellings): number | null {
   const counts = Array.from({ length: storeys }, (_, i) => dwellings[i + 1]).filter((count) => count >= 1);

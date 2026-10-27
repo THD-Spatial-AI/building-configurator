@@ -310,27 +310,6 @@
       "equipment": "Appareils",
       "solver": "Méthode de calcul"
     },
-    "summary": {
-      "outputs": "{on} profils sur {total}",
-      "equipmentSet": "{overrides} définis manuellement",
-      "equipmentDefault": "Par défaut",
-      "solverMilp": "MILP",
-      "solverSparse": "Creux",
-      "occupants": "{capacity} occupants",
-      "capacityFromArea": "Capacité selon la surface",
-      "dwellings": {
-        "one": "{count} logement",
-        "many": "{count} de logements",
-        "other": "{count} logements"
-      },
-      "dwellingsNotSet": "Logements non définis",
-      "perDwelling": "{dwellings} · {persons} par logement",
-      "storeys": {
-        "one": "{count} étage",
-        "other": "{count} étages"
-      },
-      "storeysModelled": "{modelled} étages sur {total} modélisés"
-    },
     "insulationTitle": "Niveau énergétique",
     "expertMore": {
       "title": "Thermique et simulation",
@@ -355,17 +334,6 @@
       "off": "Non incluse",
       "label": "Eau chaude sanitaire",
       "tip": "À désactiver si l'eau chaude est fournie par un système compté ailleurs. Le chauffage n'est pas concerné."
-    },
-    "summary": {
-      "setback": {
-        "none": "sans réduit",
-        "nightOnly": "réduit la nuit",
-        "nightAndAway": "réduit la nuit et en absence",
-        "deep": "réduit profond",
-        "unknown": "réduit {setback}"
-      },
-      "hotWaterOn": "ECS incluse",
-      "hotWaterOff": "sans ECS"
     },
     "heating": {
       "label": "Consigne de chauffage",
@@ -821,5 +789,15 @@
     "roof": "Toit",
     "wall": "Mur",
     "ground": "Plancher bas"
+  },
+  "steps": {
+    "nav": "Sections du bâtiment",
+    "previous": "Retour : {step}",
+    "next": "Suivant : {step}",
+    "status": {
+      "complete": "complet",
+      "attention": "à vérifier",
+      "error": "comporte une erreur"
+    }
   }
 }

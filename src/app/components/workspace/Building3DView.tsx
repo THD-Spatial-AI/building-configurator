@@ -13,7 +13,7 @@ import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/ov
 import { BuildingSnapshotAside } from '../BuildingConfigurator/overview/BuildingSnapshotAside';
 import { LoadProfileBar } from './LoadProfileBar';
 import { ConfiguratorStyles, SegmentedControl, UnsavedChangesDialog } from '../BuildingConfigurator/shared/ui';
-import { BuildingEditor } from '../BuildingConfigurator/configure/building/BuildingEditor';
+import { useBuildingSteps } from '../BuildingConfigurator/configure/building/BuildingEditor';
 import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
 import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
 import { cn } from '@/lib/utils';
@@ -348,6 +348,48 @@ export function Building3DView({
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
   ], [elements, pv, t]);
+  const buildingSteps = useBuildingSteps({
+    general: model.general,
+    setGen: model.setGen,
+    mode,
+    onShowExpert: () => setMode('expert'),
+    onStoreysClosed: () => setSelectedStoreys([]),
+    storeys: model.general.storeys > 1 ? (
+      <StoreysModelled
+        storeys={model.general.storeys}
+        modelled={model.general.storeysModelled}
+        selected={selectedStoreys}
+        onSelect={setSelectedStoreys}
+        multi={multiStoreys}
+        onMultiChange={(on) => {
+          setMultiStoreys(on);
+          if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
+        }}
+        floorAreaPerStorey={model.general.floorArea}
+        dwellings={hasDwellingsPerStorey(model.general.buildingType) ? {
+          values: model.general.storeyDwellings,
+          onChange: setStoreyDwellings,
+        } : undefined}
+        disabled={surfaces.length === 0}
+        onChange={setModelledStoreys}
+      />
+    ) : undefined,
+    insulation: {
+      elements,
+      levels: model.ignis?.variants ?? [],
+      states: model.refurbStates,
+      initial: model.refurbInitial,
+      variantCode: model.general.refurbishment.variantCode,
+      avgUValue: model.avgUValue,
+      onSetState: model.setRefurbishment,
+      onSetTypeUValue: model.setTypeUValue,
+      onSetTypeLossFactor: model.setTypeLossFactor,
+      ...(model.canCompareLevels ? {
+        classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
+      } : {}),
+    },
+  });
+
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
@@ -620,54 +662,8 @@ export function Building3DView({
                   onSelectSurface={selectFromList}
                 />
               ) : undefined}
-              parametersSlot={(
-                // The BuEM building fields the table does not carry; Expert
-                // shows more of them. No fixed height: the panel scrolls once.
-                <div className="flex flex-col gap-3">
-                  <BuildingEditor
-                    general={model.general}
-                    setGen={model.setGen}
-                    mode={mode}
-                    onShowExpert={() => setMode('expert')}
-                    showStoreys={selectedStoreys.length > 0}
-                    onStoreysClosed={() => setSelectedStoreys([])}
-                    storeys={model.general.storeys > 1 ? (
-                      <StoreysModelled
-                        storeys={model.general.storeys}
-                        modelled={model.general.storeysModelled}
-                        selected={selectedStoreys}
-                        onSelect={setSelectedStoreys}
-                        multi={multiStoreys}
-                        onMultiChange={(on) => {
-                          setMultiStoreys(on);
-                          if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
-                        }}
-                        floorAreaPerStorey={model.general.floorArea}
-                        dwellings={hasDwellingsPerStorey(model.general.buildingType) ? {
-                          values: model.general.storeyDwellings,
-                          onChange: setStoreyDwellings,
-                        } : undefined}
-                        disabled={surfaces.length === 0}
-                        onChange={setModelledStoreys}
-                      />
-                    ) : undefined}
-                    insulation={{
-                      elements,
-                      levels: model.ignis?.variants ?? [],
-                      states: model.refurbStates,
-                      initial: model.refurbInitial,
-                      variantCode: model.general.refurbishment.variantCode,
-                      avgUValue: model.avgUValue,
-                      onSetState: model.setRefurbishment,
-                      onSetTypeUValue: model.setTypeUValue,
-                      onSetTypeLossFactor: model.setTypeLossFactor,
-                      ...(model.canCompareLevels ? {
-                        classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
-                      } : {}),
-                    }}
-                  />
-                </div>
-              )}
+              steps={buildingSteps}
+              requestStep={selectedStoreys.length > 0 ? 'occupancy' : undefined}
               overviewSlot={(
                 <div className="flex flex-col gap-3">
                   {profileBar}

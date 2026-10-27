@@ -323,30 +323,6 @@
       "equipment": "Spotřebiče",
       "solver": "Metoda výpočtu"
     },
-    "summary": {
-      "outputs": "{on} z {total} profilů",
-      "equipmentSet": "{overrides} nastaveno ručně",
-      "equipmentDefault": "Výchozí",
-      "solverMilp": "MILP",
-      "solverSparse": "Řídký",
-      "occupants": "{capacity} osob",
-      "capacityFromArea": "Kapacita z podlahové plochy",
-      "dwellings": {
-        "one": "{count} byt",
-        "few": "{count} byty",
-        "many": "{count} bytu",
-        "other": "{count} bytů"
-      },
-      "dwellingsNotSet": "Počet bytů nenastaven",
-      "perDwelling": "{dwellings} · {persons} na byt",
-      "storeys": {
-        "one": "{count} podlaží",
-        "few": "{count} podlaží",
-        "many": "{count} podlaží",
-        "other": "{count} podlaží"
-      },
-      "storeysModelled": "{modelled} z {total} podlaží modelováno"
-    },
     "insulationTitle": "Energetická úroveň",
     "expertMore": {
       "title": "Tepelné vlastnosti a simulace",
@@ -371,17 +347,6 @@
       "off": "Nezahrnuto",
       "label": "Teplá voda",
       "tip": "Vypněte, pokud teplou vodu zajišťuje systém zohledněný jinde. Vytápění tím není ovlivněno."
-    },
-    "summary": {
-      "setback": {
-        "none": "bez útlumu",
-        "nightOnly": "útlum v noci",
-        "nightAndAway": "útlum v noci a při nepřítomnosti",
-        "deep": "hluboký útlum",
-        "unknown": "útlum {setback}"
-      },
-      "hotWaterOn": "včetně teplé vody",
-      "hotWaterOff": "bez teplé vody"
     },
     "heating": {
       "label": "Žádaná teplota vytápění",
@@ -842,5 +807,15 @@
     "roof": "Střecha",
     "wall": "Stěna",
     "ground": "Podlaha na terénu"
+  },
+  "steps": {
+    "nav": "Části budovy",
+    "previous": "Zpět: {step}",
+    "next": "Dále: {step}",
+    "status": {
+      "complete": "hotovo",
+      "attention": "vyžaduje pozornost",
+      "error": "obsahuje chybu"
+    }
   }
 }

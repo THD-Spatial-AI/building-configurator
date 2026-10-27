@@ -309,26 +309,6 @@
       "equipment": "Elettrodomestici",
       "solver": "Metodo di calcolo"
     },
-    "summary": {
-      "outputs": "{on} di {total} profili",
-      "equipmentSet": "{overrides} impostati a mano",
-      "equipmentDefault": "Predefiniti",
-      "solverMilp": "MILP",
-      "solverSparse": "Sparso",
-      "occupants": "{capacity} occupanti",
-      "capacityFromArea": "Capienza dalla superficie",
-      "dwellings": {
-        "one": "{count} alloggio",
-        "other": "{count} alloggi"
-      },
-      "dwellingsNotSet": "Alloggi non impostati",
-      "perDwelling": "{dwellings} · {persons} per alloggio",
-      "storeys": {
-        "one": "{count} piano",
-        "other": "{count} piani"
-      },
-      "storeysModelled": "{modelled} di {total} piani modellati"
-    },
     "insulationTitle": "Livello energetico",
     "expertMore": {
       "title": "Termica e simulazione",
@@ -353,17 +333,6 @@
       "off": "Non inclusa",
       "label": "Acqua calda sanitaria",
       "tip": "Disattiva quando l'acqua calda è fornita da un impianto considerato altrove. Il riscaldamento degli ambienti non cambia."
-    },
-    "summary": {
-      "setback": {
-        "none": "senza attenuazione",
-        "nightOnly": "ridotta di notte",
-        "nightAndAway": "ridotta di notte e in assenza",
-        "deep": "ridotta con attenuazione forte",
-        "unknown": "ridotta {setback}"
-      },
-      "hotWaterOn": "ACS inclusa",
-      "hotWaterOff": "senza ACS"
     },
     "heating": {
       "label": "Setpoint riscaldamento",
@@ -816,5 +785,15 @@
     "roof": "Tetto",
     "wall": "Parete",
     "ground": "Pavimento a terra"
+  },
+  "steps": {
+    "nav": "Sezioni dell'edificio",
+    "previous": "Indietro: {step}",
+    "next": "Avanti: {step}",
+    "status": {
+      "complete": "completo",
+      "attention": "da controllare",
+      "error": "contiene un errore"
+    }
   }
 }
