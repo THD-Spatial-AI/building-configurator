@@ -155,6 +155,8 @@ interface BuildingEditorProps {
   mode: 'basic' | 'expert';
   /** The Insulation and windows group's model; without it the group is not shown. */
   insulation?: InsulationProps;
+  /** Switches to Expert; in Basic a card then says what Expert adds. */
+  onShowExpert?: () => void;
 }
 
 /**
@@ -165,7 +167,7 @@ interface BuildingEditorProps {
  */
 export function BuildingEditor({
   general, setGen, mode,
-  insulation,
+  insulation, onShowExpert,
 }: BuildingEditorProps) {
   const t = useT();
   const format = useFormatNumber();
@@ -228,6 +230,17 @@ export function BuildingEditor({
           </SectionCard>
         );
       })}
+
+      {mode === 'basic' && onShowExpert && (
+        <button
+          type="button"
+          onClick={onShowExpert}
+          className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-dashed border-muted-foreground/40 px-3 py-2.5 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <span><b className="text-foreground">{t('editor.expertMore.title')}</b> · {t('editor.expertMore.detail')}</span>
+          <span className="shrink-0 font-semibold text-primary">{t('view.mode.expert')}</span>
+        </button>
+      )}
     </div>
   );
 }

@@ -292,7 +292,11 @@
       "dwellingsNotSet": "Woningen niet ingesteld",
       "perDwelling": "{dwellings} · {persons} per woning"
     },
-    "insulationTitle": "Isolatie en ramen"
+    "insulationTitle": "Isolatie en ramen",
+    "expertMore": {
+      "title": "Thermiek en simulatie",
+      "detail": "profielen, apparatuur en solver houden hun standaardwaarden"
+    }
   },
   "comfort": {
     "mass": {
@@ -637,6 +641,9 @@
     "heatingClass": {
       "label": "Indicatieve klasse voor de warmtevraag (gesimuleerd, geen energielabel)",
       "tip": "Jaarlijkse ruimteverwarming van BuEM per referentieoppervlak, met het weer en de bezetting van de berekening, ingedeeld volgens de banden van de Oostenrijkse OIB-RL 6 HWB-schaal (A++ tot 10 kWh/m²·a, G boven 250). Warm water, koeling en elektriciteit zijn niet meegeteld."
+    },
+    "tile": {
+      "statisticalDefault": "Statistische waarde"
     }
   },
   "envelope": {

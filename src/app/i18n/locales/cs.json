@@ -306,7 +306,11 @@
       "dwellingsNotSet": "Počet bytů nenastaven",
       "perDwelling": "{dwellings} · {persons} na byt"
     },
-    "insulationTitle": "Izolace a okna"
+    "insulationTitle": "Izolace a okna",
+    "expertMore": {
+      "title": "Tepelné vlastnosti a simulace",
+      "detail": "profily, spotřebiče a řešič si ponechávají výchozí hodnoty"
+    }
   },
   "comfort": {
     "mass": {
@@ -657,6 +661,9 @@
     "heatingClass": {
       "label": "Orientační třída potřeby tepla na vytápění (simulovaná, nejde o energetický štítek)",
       "tip": "Roční potřeba tepla na vytápění z BuEM na referenční plochu, při počasí a užívání výpočtu, zařazená podle pásem rakouské stupnice OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G nad 250). Teplá voda, chlazení a elektřina nejsou zahrnuty."
+    },
+    "tile": {
+      "statisticalDefault": "Statistická hodnota"
     }
   },
   "envelope": {

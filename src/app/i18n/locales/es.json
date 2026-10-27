@@ -295,7 +295,11 @@
       "dwellingsNotSet": "Viviendas sin definir",
       "perDwelling": "{dwellings} · {persons} por vivienda"
     },
-    "insulationTitle": "Aislamiento y ventanas"
+    "insulationTitle": "Aislamiento y ventanas",
+    "expertMore": {
+      "title": "Térmica y simulación",
+      "detail": "los perfiles, los equipos y el solver mantienen sus valores por defecto"
+    }
   },
   "comfort": {
     "mass": {
@@ -643,6 +647,9 @@
     "heatingClass": {
       "label": "Clase orientativa de demanda de calefacción (simulada, no es un certificado energético)",
       "tip": "Calefacción anual de BuEM por superficie de referencia, con el clima y la ocupación del cálculo, clasificada según las bandas de la escala austriaca OIB-RL 6 HWB (A++ hasta 10 kWh/m²·a, G por encima de 250). No incluye agua caliente, refrigeración ni electricidad."
+    },
+    "tile": {
+      "statisticalDefault": "Valor estadístico"
     }
   },
   "envelope": {

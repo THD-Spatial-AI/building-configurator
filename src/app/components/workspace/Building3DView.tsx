@@ -538,6 +538,10 @@ export function Building3DView({
           <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
+              occupancy={isServiceBuildingType(model.general.buildingType) ? undefined : {
+                dwellings: model.general.residential_units,
+                persons: model.general.num_persons,
+              }}
               onEditField={model.setGen}
               activeTab={tab}
               onTabChange={setTab}
@@ -574,6 +578,7 @@ export function Building3DView({
                     general={model.general}
                     setGen={model.setGen}
                     mode={mode}
+                    onShowExpert={() => setMode('expert')}
                     insulation={{
                       elements,
                       levels: model.ignis?.variants ?? [],

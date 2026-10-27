@@ -306,7 +306,11 @@
       "dwellingsNotSet": "Nie podano mieszkań",
       "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
     },
-    "insulationTitle": "Izolacja i okna"
+    "insulationTitle": "Izolacja i okna",
+    "expertMore": {
+      "title": "Cieplne i symulacja",
+      "detail": "profile, urządzenia i solver zachowują wartości domyślne"
+    }
   },
   "comfort": {
     "mass": {
@@ -657,6 +661,9 @@
     "heatingClass": {
       "label": "Orientacyjna klasa zapotrzebowania na ciepło (symulowana, nie jest świadectwem energetycznym)",
       "tip": "Roczne ogrzewanie z BuEM na powierzchnię odniesienia, przy pogodzie i użytkowaniu z obliczenia, sklasyfikowane według przedziałów austriackiej skali OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G powyżej 250). Nie obejmuje ciepłej wody, chłodzenia ani energii elektrycznej."
+    },
+    "tile": {
+      "statisticalDefault": "Wartość statystyczna"
     }
   },
   "envelope": {

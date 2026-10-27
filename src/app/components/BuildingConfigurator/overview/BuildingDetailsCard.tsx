@@ -38,8 +38,16 @@ const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-card shadow-
 
 export type DetailsTab = 'building' | 'technology';
 
+/** A residential building's dwellings and occupants per dwelling; null where BuEM's default applies. */
+export interface BuildingOccupancy {
+  dwellings: number | null;
+  persons: number | null;
+}
+
 export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
+  /** Shown as tiles beside the building data; absent for a service building. */
+  occupancy?: BuildingOccupancy;
   /** Commits a single field's new value (key maps to the `general` state object). */
   onEditField?: (key: string, value: string | number) => void;
   /** Top of the Building tab, e.g. the load profile and annual demand. */
@@ -53,8 +61,64 @@ export interface BuildingDetailsCardProps {
   onTabChange?: (tab: DetailsTab) => void;
 }
 
-/** The building data table, editable only while its pencil is on. */
-function BuildingTable({ rows, onEditField }: { rows: SnapshotRow[]; onEditField?: BuildingDetailsCardProps['onEditField'] }) {
+/** One figure of the building, marked where it differs from the loaded building. */
+function Tile({ label, value, modified }: { label: string; value: string; modified?: boolean }) {
+  const t = useT();
+  return (
+    <div className="min-w-0 rounded-md bg-muted px-2 py-1.5">
+      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <span className="truncate">{label}</span>
+        {modified && <span className="size-1.5 shrink-0 rounded-full bg-primary" title={t('snapshot.status.modified')} />}
+      </div>
+      <b className="block truncate text-[13px] text-foreground">{value}</b>
+    </div>
+  );
+}
+
+/** The building data at a glance: type, country and year, then its main figures as tiles. */
+function BuildingTiles({ rows, occupancy }: { rows: SnapshotRow[]; occupancy?: BuildingOccupancy }) {
+  const t = useT();
+  const row = (key: string) => rows.find((r) => r.labelKey === `snapshot.row.${key}`);
+  const tile = (key: string) => {
+    const r = row(key);
+    return r && <Tile key={key} label={t(r.labelKey)} value={rowValue(r, t)} modified={r.status === 'modified'} />;
+  };
+  const type = row('type');
+  const country = row('country');
+  const year = row('constructionYear');
+  const envelope = row('envelope');
+  const byDefault = t('snapshot.tile.statisticalDefault');
+  return (
+    <div className="flex flex-col gap-2 p-3">
+      <div className="flex items-baseline justify-between gap-2 text-[13px]">
+        <span className="truncate text-foreground">{[type, country].filter(Boolean).map((r) => rowValue(r!, t)).join(' · ')}</span>
+        {year && <b className="text-foreground">{rowValue(year, t)}</b>}
+      </div>
+      <div className="grid grid-cols-3 gap-1.5">
+        {tile('storeys')}
+        {tile('roomHeight')}
+        {tile('floorAreaPerStorey')}
+        {occupancy && (
+          <>
+            <Tile label={t('household.dwellings.label')} value={String(occupancy.dwellings ?? 1)} />
+            <Tile label={t('household.persons.label')} value={occupancy.persons === null ? byDefault : String(occupancy.persons)} />
+          </>
+        )}
+        {tile('volume')}
+      </div>
+      {envelope && (
+        <span className="text-[11px] text-muted-foreground">{t(envelope.labelKey)}: {rowValue(envelope, t)}</span>
+      )}
+    </div>
+  );
+}
+
+/** The building data: tiles to read, a table to edit while its pencil is on. */
+function BuildingTable({ rows, occupancy, onEditField }: {
+  rows: SnapshotRow[];
+  occupancy?: BuildingOccupancy;
+  onEditField?: BuildingDetailsCardProps['onEditField'];
+}) {
   const t = useT();
   // Off by default, so a stray click on the table never changes the building's data.
   const [isEditing, setIsEditing] = useState(false);
@@ -79,46 +143,48 @@ function BuildingTable({ rows, onEditField }: { rows: SnapshotRow[]; onEditField
         </button>
       )}
     >
-      <table className="w-full text-sm bg-card">
-        <colgroup>
-          <col className="w-[42%]" />
-          <col />
-          <col className="w-20" />
-        </colgroup>
-        <tbody>
-          {rows.map((row) => {
-            const editable = isEditing && onEditField && row.editKey && row.editType;
-            return (
-              <tr key={row.label} className="border-t border-border">
-                <td className="px-4 py-2.5 text-muted-foreground">{t(row.labelKey)}</td>
-                <td className="px-4 py-2 text-right font-medium text-foreground">
-                  {editable ? (
-                    row.editType === 'select' ? (
-                      <SelectInput
-                        value={String(row.rawValue ?? '')}
-                        onChange={(v) => onEditField!(row.editKey!, v)}
-                        options={rowOptions(row, t)}
-                      />
-                    ) : (
-                      <NumberInput
-                        value={row.rawValue ?? 0}
-                        onChange={(v) => onEditField!(row.editKey!, v)}
-                        unit={ROW_UNITS[row.editKey!] ?? ''}
-                        min={row.editKey === 'storeys' ? 1 : row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
-                        max={row.editKey === 'constructionYear' ? new Date().getFullYear() : undefined}
-                        step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
-                      />
-                    )
-                  ) : rowValue(row, t)}
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <SnapshotStatusBadge status={row.status} />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {!isEditing ? <BuildingTiles rows={rows} occupancy={occupancy} /> : (
+        <table className="w-full text-sm bg-card">
+          <colgroup>
+            <col className="w-[42%]" />
+            <col />
+            <col className="w-20" />
+          </colgroup>
+          <tbody>
+            {rows.map((row) => {
+              const editable = onEditField && row.editKey && row.editType;
+              return (
+                <tr key={row.label} className="border-t border-border">
+                  <td className="px-4 py-2.5 text-muted-foreground">{t(row.labelKey)}</td>
+                  <td className="px-4 py-2 text-right font-medium text-foreground">
+                    {editable ? (
+                      row.editType === 'select' ? (
+                        <SelectInput
+                          value={String(row.rawValue ?? '')}
+                          onChange={(v) => onEditField!(row.editKey!, v)}
+                          options={rowOptions(row, t)}
+                        />
+                      ) : (
+                        <NumberInput
+                          value={row.rawValue ?? 0}
+                          onChange={(v) => onEditField!(row.editKey!, v)}
+                          unit={ROW_UNITS[row.editKey!] ?? ''}
+                          min={row.editKey === 'storeys' ? 1 : row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
+                          max={row.editKey === 'constructionYear' ? new Date().getFullYear() : undefined}
+                          step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
+                        />
+                      )
+                    ) : rowValue(row, t)}
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <SnapshotStatusBadge status={row.status} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </SectionCard>
   );
 }
@@ -126,6 +192,7 @@ function BuildingTable({ rows, onEditField }: { rows: SnapshotRow[]; onEditField
 /** The building in two tabs: Building, and Technologies where the caller has them. */
 export function BuildingDetailsCard({
   snapshotRows,
+  occupancy,
   onEditField,
   overviewSlot,
   parametersSlot,
@@ -168,7 +235,7 @@ export function BuildingDetailsCard({
       ) : (
         <div className="flex flex-col gap-3 p-4">
           {overviewSlot}
-          <BuildingTable rows={snapshotRows} onEditField={onEditField} />
+          <BuildingTable rows={snapshotRows} occupancy={occupancy} onEditField={onEditField} />
           {parametersSlot}
         </div>
       )}
