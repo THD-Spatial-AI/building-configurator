@@ -276,7 +276,7 @@
       "noData": "Aucune donnée TABULA pour ce bâtiment : le service TABULA n'a aucune variante pour lui ou est injoignable."
     },
     "section": {
-      "occupancy": "Occupation",
+      "occupancy": "Étages et occupation",
       "comfort": "Chauffage et confort",
       "outputs": "Résultats à calculer",
       "equipment": "Appareils",
@@ -296,7 +296,12 @@
         "other": "{count} logements"
       },
       "dwellingsNotSet": "Logements non définis",
-      "perDwelling": "{dwellings} · {persons} par logement"
+      "perDwelling": "{dwellings} · {persons} par logement",
+      "storeys": {
+        "one": "{count} étage",
+        "other": "{count} étages"
+      },
+      "storeysModelled": "{modelled} étages sur {total} modélisés"
     },
     "insulationTitle": "Niveau énergétique",
     "expertMore": {
@@ -745,13 +750,10 @@
         "other": "{count} étages sélectionnés"
       }
     },
-    "action": {
-      "leaveOut": "Retirer du modèle",
-      "include": "Remettre dans le modèle"
-    },
     "dwellingsPerStorey": "Logements par étage",
     "mixed": "variable",
-    "dwellingsMissing": "Indiquez les logements de chaque étage modélisé. Manquant : étage {storeys}. Les apports internes de BuEM suivent le nombre de logements."
+    "dwellingsMissing": "Indiquez les logements de chaque étage modélisé. Manquant : étage {storeys}. Les apports internes de BuEM suivent le nombre de logements.",
+    "inModel": "Dans le modèle"
   },
   "help": {
     "envelope": "Comment cette surface retient la chaleur : sa surface et sa valeur U vont à BuEM. Un niveau de rénovation fixe la valeur U depuis TABULA ; une valeur modifiée ici est conservée.",
@@ -759,7 +761,7 @@
     "building": "Ce qu'est le bâtiment : type, année et pays choisissent ses valeurs TABULA par défaut ; la surface par étage et les étages fixent la surface chauffée par BuEM. Modifiez pour les changer.",
     "demand": "La demande annuelle d'énergie du bâtiment par usage, issue du dernier calcul BuEM ou du résultat enregistré. Le gaz de cuisson est un autre combustible, hors total.",
     "insulation": "Fixe l'isolation de tous les murs, toits, planchers et fenêtres en une fois, d'après la typologie TABULA pour ce type et cet âge. Existant : le bâtiment tel que TABULA le recense pour son âge, sans travaux ultérieurs. Habituelle : une rénovation courante, comme une isolation de toiture ajoutée et de nouvelles fenêtres. Avancée : une rénovation ambitieuse vers le standard du neuf. Une surface modifiée individuellement garde sa valeur.",
-    "occupancy": "Qui vit ou travaille dans le bâtiment : le nombre de logements et de personnes par logement fixent les apports internes et l'eau chaude dans BuEM.",
+    "occupancy": "Comment le bâtiment se divise : ses étages, ceux qui sont dans le modèle et, pour une maison mitoyenne, un immeuble collectif ou un grand ensemble, les logements de chacun. Avec les personnes par logement, ils fixent les apports internes et l'eau chaude de BuEM.",
     "comfort": "Quand le bâtiment est chauffé : la température de consigne, si elle baisse la nuit ou en absence (réduit) et si l'eau chaude est incluse.",
     "outputs": "Les profils que BuEM renvoie pour chaque usage : un résumé annuel, une série horaire ou aucun.",
     "equipment": "Les appareils que possèdent les ménages ; la demande d'électricité de BuEM en dépend. Les appareils non renseignés gardent la probabilité de BuEM.",

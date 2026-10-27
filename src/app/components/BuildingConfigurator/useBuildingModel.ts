@@ -17,7 +17,7 @@ import {
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
-import { isServiceBuildingType, requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
+import { hasDwellingsPerStorey, isServiceBuildingType, requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
 import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
 import type { IgnisState } from '../../lib/ignisAdapter';
@@ -648,7 +648,7 @@ export function useBuildingModel(
       setUploadError({ key: 'model.error.dwellingsRequired' });
       return;
     }
-    if (general.storeysModelled && !isServiceBuildingType(general.buildingType)
+    if (general.storeysModelled && hasDwellingsPerStorey(general.buildingType)
       && modelledDwellings(general.storeysModelled, general.storeyDwellings) === null) {
       setUploadError({ key: 'model.error.dwellingsModelledRequired' });
       return;

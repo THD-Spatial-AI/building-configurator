@@ -274,7 +274,7 @@
       "noData": "Keine TABULA-Daten für dieses Gebäude: Der TABULA-Dienst hat keine Variante dafür oder ist nicht erreichbar."
     },
     "section": {
-      "occupancy": "Belegung",
+      "occupancy": "Geschosse und Belegung",
       "comfort": "Heizung und Komfort",
       "outputs": "Zu berechnende Ergebnisse",
       "equipment": "Geräte",
@@ -293,7 +293,12 @@
         "other": "{count} Wohneinheiten"
       },
       "dwellingsNotSet": "Wohneinheiten nicht gesetzt",
-      "perDwelling": "{dwellings} · {persons} je Wohneinheit"
+      "perDwelling": "{dwellings} · {persons} je Wohneinheit",
+      "storeys": {
+        "one": "{count} Geschoss",
+        "other": "{count} Geschosse"
+      },
+      "storeysModelled": "{modelled} von {total} Geschossen modelliert"
     },
     "insulationTitle": "Energetischer Standard",
     "expertMore": {
@@ -739,13 +744,10 @@
         "other": "{count} Geschosse ausgewählt"
       }
     },
-    "action": {
-      "leaveOut": "Aus dem Modell weglassen",
-      "include": "Wieder ins Modell aufnehmen"
-    },
     "dwellingsPerStorey": "Wohnungen je Geschoss",
     "mixed": "gemischt",
-    "dwellingsMissing": "Geben Sie die Wohnungen jedes modellierten Geschosses an. Es fehlt: Geschoss {storeys}. BuEMs interne Gewinne folgen der Wohnungszahl."
+    "dwellingsMissing": "Geben Sie die Wohnungen jedes modellierten Geschosses an. Es fehlt: Geschoss {storeys}. BuEMs interne Gewinne folgen der Wohnungszahl.",
+    "inModel": "Im Modell"
   },
   "help": {
     "envelope": "Wie diese Fläche Wärme hält: Fläche und U-Wert gehen an BuEM. Eine Sanierungsstufe setzt den U-Wert aus TABULA; ein hier geänderter Wert bleibt erhalten.",
@@ -753,7 +755,7 @@
     "building": "Was das Gebäude ist: Typ, Baujahr und Land bestimmen die TABULA-Vorgaben; Fläche je Geschoss und Geschosse legen die beheizte Fläche für BuEM fest. Zum Ändern bearbeiten.",
     "demand": "Der jährliche Energiebedarf des Gebäudes nach Nutzung, aus dem letzten BuEM-Lauf oder dem gespeicherten Ergebnis. Kochgas ist ein eigener Brennstoff und nicht in der Summe.",
     "insulation": "Setzt die Dämmung aller Wände, Dächer, Böden und Fenster auf einmal, aus der TABULA-Typologie für diesen Gebäudetyp und dieses Alter. Bestand: das Gebäude, wie TABULA es für sein Alter verzeichnet, ohne spätere Arbeiten. Übliche Sanierung: eine in der Praxis verbreitete Sanierung, etwa zusätzliche Dachdämmung und neue Fenster. Ambitionierte Sanierung: eine weitgehende Sanierung in Richtung Neubaustandard. Eine einzeln geänderte Fläche behält ihren Wert.",
-    "occupancy": "Wer im Gebäude wohnt oder arbeitet: Zahl der Wohnungen und Personen je Wohnung bestimmen die inneren Gewinne und den Warmwasserbedarf in BuEM.",
+    "occupancy": "Wie sich das Gebäude gliedert: seine Geschosse, welche davon im Modell sind und bei Reihenhaus, Mehrfamilienhaus oder Wohnblock die Wohnungen je Geschoss. Mit den Personen je Wohnung bestimmen sie BuEMs interne Gewinne und den Warmwasserbedarf.",
     "comfort": "Wann das Gebäude beheizt wird: die Solltemperatur, ob sie nachts oder bei Abwesenheit abgesenkt wird (Absenkung) und ob Warmwasser enthalten ist.",
     "outputs": "Welche Profile BuEM je Nutzung liefert: eine Jahresübersicht, eine stündliche Reihe oder keine.",
     "equipment": "Welche Geräte die Haushalte besitzen; der Strombedarf in BuEM folgt ihnen. Nicht gesetzte Geräte behalten die Wahrscheinlichkeit von BuEM.",

@@ -86,9 +86,12 @@ describe('a building with storeys left out', () => {
     expect(blocks.building.A_ref.value).toBe(200);
   });
 
+  // Dwellings are counted per storey for the types divided into flats.
+  const multiFamily = { ...three, buildingType: 'Multi-family House' };
+
   it('sends the dwellings of the modelled storeys, keeping the whole building\'s beside the block', () => {
     const withDwellings = { ...general, residential_units: 3, storeyDwellings: { 1: 1, 2: 1, 3: 1 } };
-    const sentBlock = serializeToBuemFeature(three, elements, withDwellings).properties;
+    const sentBlock = serializeToBuemFeature(multiFamily, elements, withDwellings).properties;
     expect(sentBlock.buem.building.residential_units).toBe(2);
     expect(sentBlock.buem.residential_units_full).toBe(3);
     expect(sentBlock.buem.storey_list).toEqual([
@@ -97,7 +100,7 @@ describe('a building with storeys left out', () => {
     const reopenedGeneral = generalFrom(adaptBuemFeature({ ...stored, properties: sentBlock }));
     expect(reopenedGeneral.residential_units).toBe(3);
     expect(reopenedGeneral.storeyDwellings).toEqual({ 1: 1, 2: 1, 3: 1 });
-    const all = serializeToBuemFeature(three, elements, { ...withDwellings, storeysModelled: null }).properties.buem;
+    const all = serializeToBuemFeature(multiFamily, elements, { ...withDwellings, storeysModelled: null }).properties.buem;
     expect(all.building.residential_units).toBe(3);
     expect(all).not.toHaveProperty('residential_units_full');
   });
@@ -105,7 +108,7 @@ describe('a building with storeys left out', () => {
   it('sends the modelled storeys\' dwellings when the whole building has no count of its own', () => {
     const blocks = toBuem(adaptBuemFeature({
       ...stored,
-      properties: serializeToBuemFeature(three, elements, { ...general, residential_units: null, storeyDwellings: { 1: 2, 2: 1 } }).properties,
+      properties: serializeToBuemFeature(multiFamily, elements, { ...general, residential_units: null, storeyDwellings: { 1: 2, 2: 1 } }).properties,
     }));
     expect(blocks.building.residential_units).toBe(3);
     expect(blocks.residential_units_full).toBeNull();
@@ -114,9 +117,14 @@ describe('a building with storeys left out', () => {
   });
 
   it('keeps the whole building\'s dwellings while a modelled storey has no count', () => {
-    const sent = serializeToBuemFeature(three, elements, { ...general, residential_units: 3, storeyDwellings: { 1: 2 } }).properties.buem;
+    const sent = serializeToBuemFeature(multiFamily, elements, { ...general, residential_units: 3, storeyDwellings: { 1: 2 } }).properties.buem;
     expect(sent.building.residential_units).toBe(3);
     expect(sent).not.toHaveProperty('residential_units_full');
+  });
+
+  it('sends a single-family house\'s own dwelling count, as it has no dwellings per storey', () => {
+    const sent = serializeToBuemFeature(three, elements, { ...general, residential_units: 1, storeyDwellings: { 1: 2, 2: 2 } }).properties.buem;
+    expect(sent.building.residential_units).toBe(1);
   });
 
   it('writes neither key when every storey is modelled', () => {

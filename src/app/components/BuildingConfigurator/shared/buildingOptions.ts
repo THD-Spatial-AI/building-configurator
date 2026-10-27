@@ -64,6 +64,11 @@ export function requiresResidentialUnits(label: string): boolean {
   return label === BUILDING_TYPE_LABELS.MFH || label === BUILDING_TYPE_LABELS.AB;
 }
 
+/** Building types divided into dwellings storey by storey: a terraced house, multi-family house or apartment block. */
+export function hasDwellingsPerStorey(label: string): boolean {
+  return label === BUILDING_TYPE_LABELS.TH || requiresResidentialUnits(label);
+}
+
 /** Household composition driving BuEM's occupancy schedule. Empty means BuEM's per-type default. */
 export function archetypeOptions(t: Translate) {
   return [

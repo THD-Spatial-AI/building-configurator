@@ -3,10 +3,9 @@
 // then left out, put back, or given a dwelling count. At least one stays in.
 
 import { cn } from '@/lib/utils';
-import { TOPICS } from '@/app/config/topics';
 import { useFormatNumber, useT } from '../../i18n';
-import { DecimalInput } from '../BuildingConfigurator/shared/ui';
-import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
+import { DecimalInput, InfoTip } from '../BuildingConfigurator/shared/ui';
+import { Switch } from './PvMode';
 import type { StoreyDwellings } from '../../lib/storeys';
 
 /** The storeys modelled with `chosen` left out or put back; null when all are in, undefined when none would be. */
@@ -61,6 +60,8 @@ export function StoreysModelled({
   const all = Array.from({ length: storeys }, (_, i) => i + 1);
   const on = new Set(modelled ?? all);
   const leaveOut = withStoreys(modelled, storeys, selected, false);
+  /** The switch is on while every selected storey is in the model; turning it on puts them all back. */
+  const allIn = selected.every((storey) => on.has(storey));
   const missing = modelled && dwellings ? [...on].filter((storey) => !(dwellings.values[storey] >= 1)) : [];
   const setDwellings = (count: number | null) => {
     if (!dwellings) return;
@@ -73,8 +74,10 @@ export function StoreysModelled({
   };
 
   return (
-    <SectionCard topic={TOPICS.building} title={t('storeys.title')} info={t('storeys.hint')}>
-      <div className="flex flex-col gap-2 p-3">
+    <div className="flex flex-col gap-2">
+        <span className="flex items-center gap-1 text-[12px] font-semibold text-foreground">
+          {t('storeys.title')}<InfoTip tip={t('storeys.hint')} />
+        </span>
         {disabled && <p className="text-[11px] leading-snug text-muted-foreground">{t('storeys.noGeometry')}</p>}
         <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('storeys.title')}>
           {all.map((storey) => {
@@ -115,20 +118,16 @@ export function StoreysModelled({
         {selected.length > 0 && (
           <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50/60 p-2.5 dark:border-amber-500/40 dark:bg-amber-500/10">
             <span className="text-[12px] font-semibold text-foreground">{t('storeys.select.count', { count: selected.length })}</span>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={leaveOut === undefined || selected.every((s) => !on.has(s))}
-                title={leaveOut === undefined ? t('storeys.lastOne') : undefined}
-                onClick={() => { if (leaveOut !== undefined) onChange(leaveOut); }}
-                className="h-8 cursor-pointer rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-              >{t('storeys.action.leaveOut')}</button>
-              <button
-                type="button"
-                disabled={selected.every((s) => on.has(s))}
-                onClick={() => onChange(withStoreys(modelled, storeys, selected, true) ?? null)}
-                className="h-8 cursor-pointer rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-              >{t('storeys.action.include')}</button>
+            <div className="flex items-center justify-between gap-2" title={allIn && leaveOut === undefined ? t('storeys.lastOne') : undefined}>
+              <span className="text-[12px] text-foreground">{t('storeys.inModel')}</span>
+              <Switch
+                on={allIn}
+                label={t('storeys.inModel')}
+                onChange={(next) => {
+                  const modelledNext = withStoreys(modelled, storeys, selected, next);
+                  if (modelledNext !== undefined) onChange(modelledNext);
+                }}
+              />
             </div>
             {dwellings && (
               <label className="flex items-center justify-between gap-2">
@@ -163,7 +162,6 @@ export function StoreysModelled({
             {on.size} × {format(floorAreaPerStorey, 0)} m² = {format(on.size * floorAreaPerStorey, 0)} m²
           </span>
         </div>
-      </div>
-    </SectionCard>
+    </div>
   );
 }

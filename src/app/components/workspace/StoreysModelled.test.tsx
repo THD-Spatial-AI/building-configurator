@@ -14,13 +14,14 @@ describe('StoreysModelled', () => {
     expect(html).toContain('2 × 80 m² = 160 m²');
   });
 
-  it('offers the selection\'s actions and its dwellings per storey only while storeys are selected', () => {
+  it('offers the in-model switch and the dwellings per storey only while storeys are selected', () => {
     const dwellings = { values: { 2: 4, 3: 4 }, onChange: () => {} };
     const none = render({ dwellings });
     expect(none).not.toContain('Dwellings per storey');
     const two = render({ dwellings, selected: [2, 3] });
     expect(two).toContain('2 storeys selected');
-    expect(two).toContain('Leave out of the model');
+    expect(two).toContain('aria-label="In the model"');
+    expect(two).toContain('aria-checked="false"');
     expect(two).toContain('Dwellings per storey');
     expect(two).toContain('value="4"');
   });

@@ -288,7 +288,7 @@
       "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna."
     },
     "section": {
-      "occupancy": "Mieszkańcy",
+      "occupancy": "Kondygnacje i użytkowanie",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",
       "equipment": "Urządzenia",
@@ -309,7 +309,14 @@
         "other": "{count} mieszkania"
       },
       "dwellingsNotSet": "Nie podano mieszkań",
-      "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
+      "perDwelling": "{dwellings} · {persons} os. na mieszkanie",
+      "storeys": {
+        "one": "{count} kondygnacja",
+        "few": "{count} kondygnacje",
+        "many": "{count} kondygnacji",
+        "other": "{count} kondygnacji"
+      },
+      "storeysModelled": "{modelled} z {total} kondygnacji modelowanych"
     },
     "insulationTitle": "Standard energetyczny",
     "expertMore": {
@@ -763,13 +770,10 @@
         "other": "{count} kondygnacji zaznaczonej"
       }
     },
-    "action": {
-      "leaveOut": "Pomiń w modelu",
-      "include": "Przywróć do modelu"
-    },
     "dwellingsPerStorey": "Mieszkania na kondygnację",
     "mixed": "różne",
-    "dwellingsMissing": "Podaj mieszkania każdej modelowanej kondygnacji. Brakuje: kondygnacja {storeys}. Zyski wewnętrzne BuEM zależą od liczby mieszkań."
+    "dwellingsMissing": "Podaj mieszkania każdej modelowanej kondygnacji. Brakuje: kondygnacja {storeys}. Zyski wewnętrzne BuEM zależą od liczby mieszkań.",
+    "inModel": "W modelu"
   },
   "help": {
     "envelope": "Jak ta przegroda zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom modernizacji ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",
@@ -777,7 +781,7 @@
     "building": "Czym jest budynek: typ, rok i kraj wybierają wartości domyślne TABULA; powierzchnia kondygnacji i liczba kondygnacji ustalają powierzchnię ogrzewaną przez BuEM. Edytuj, aby je zmienić.",
     "demand": "Roczne zapotrzebowanie budynku na energię według zastosowań, z ostatniego obliczenia BuEM lub zapisanego wyniku. Gaz do gotowania to osobne paliwo, poza sumą.",
     "insulation": "Ustawia izolację wszystkich ścian, dachów, podłóg i okien naraz, z typologii TABULA dla tego typu i wieku budynku. Stan istniejący: budynek tak, jak TABULA opisuje go dla jego wieku, bez późniejszych prac. Typowa: modernizacja częsta w praktyce, np. docieplenie dachu i nowe okna. Zaawansowana: ambitna modernizacja w stronę standardu nowego budynku. Przegroda zmieniona osobno zachowuje swoją wartość.",
-    "occupancy": "Kto mieszka lub pracuje w budynku: liczba mieszkań i osób na mieszkanie ustalają zyski wewnętrzne i zużycie ciepłej wody w BuEM.",
+    "occupancy": "Jak dzieli się budynek: jego kondygnacje, które z nich są w modelu i, w domu szeregowym, wielorodzinnym lub bloku, mieszkania na każdej. Wraz z liczbą osób na mieszkanie wyznaczają zyski wewnętrzne i zużycie ciepłej wody w BuEM.",
     "comfort": "Kiedy budynek jest ogrzewany: temperatura zadana, czy jest obniżana w nocy lub pod nieobecność (obniżenie) i czy uwzględniono ciepłą wodę.",
     "outputs": "Jakie profile BuEM zwraca dla każdego zastosowania: podsumowanie roczne, serię godzinową lub żaden.",
     "equipment": "Jakie urządzenia mają gospodarstwa domowe; zapotrzebowanie na energię elektryczną w BuEM od nich zależy. Nieustawione zachowują prawdopodobieństwo BuEM.",

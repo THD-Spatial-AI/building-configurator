@@ -274,7 +274,7 @@
       "noData": "Nessun dato TABULA per questo edificio: il servizio TABULA non ha varianti per esso o non è raggiungibile."
     },
     "section": {
-      "occupancy": "Occupazione",
+      "occupancy": "Piani e occupazione",
       "comfort": "Riscaldamento e comfort",
       "outputs": "Risultati da calcolare",
       "equipment": "Elettrodomestici",
@@ -293,7 +293,12 @@
         "other": "{count} alloggi"
       },
       "dwellingsNotSet": "Alloggi non impostati",
-      "perDwelling": "{dwellings} · {persons} per alloggio"
+      "perDwelling": "{dwellings} · {persons} per alloggio",
+      "storeys": {
+        "one": "{count} piano",
+        "other": "{count} piani"
+      },
+      "storeysModelled": "{modelled} di {total} piani modellati"
     },
     "insulationTitle": "Livello energetico",
     "expertMore": {
@@ -739,13 +744,10 @@
         "other": "{count} piani selezionati"
       }
     },
-    "action": {
-      "leaveOut": "Escludi dal modello",
-      "include": "Rimetti nel modello"
-    },
     "dwellingsPerStorey": "Abitazioni per piano",
     "mixed": "misto",
-    "dwellingsMissing": "Indica le abitazioni di ogni piano modellato. Manca: piano {storeys}. I guadagni interni di BuEM seguono il numero di abitazioni."
+    "dwellingsMissing": "Indica le abitazioni di ogni piano modellato. Manca: piano {storeys}. I guadagni interni di BuEM seguono il numero di abitazioni.",
+    "inModel": "Nel modello"
   },
   "help": {
     "envelope": "Come questa superficie trattiene il calore: area e valore U vanno a BuEM. Un livello di riqualificazione imposta il valore U da TABULA; un valore modificato qui resta.",
@@ -753,7 +755,7 @@
     "building": "Che cos'è l'edificio: tipo, anno e paese scelgono i valori predefiniti TABULA; superficie per piano e piani fissano la superficie riscaldata da BuEM. Modifica per cambiarli.",
     "demand": "La domanda annua di energia dell'edificio per uso, dall'ultimo calcolo BuEM o dal risultato salvato. Il gas di cottura è un altro combustibile e non è nel totale.",
     "insulation": "Imposta l'isolamento di tutte le pareti, coperture, solai e finestre insieme, dalla tipologia TABULA per questo tipo ed età. Esistente: l'edificio come TABULA lo registra per la sua età, senza interventi successivi. Usuale: una riqualificazione comune, come isolare la copertura e cambiare le finestre. Avanzata: una riqualificazione ambiziosa verso lo standard del nuovo. Una superficie modificata singolarmente mantiene il suo valore.",
-    "occupancy": "Chi vive o lavora nell'edificio: numero di abitazioni e persone per abitazione fissano gli apporti interni e l'acqua calda in BuEM.",
+    "occupancy": "Come si divide l'edificio: i suoi piani, quali sono nel modello e, per una casa a schiera, plurifamiliare o un condominio, le abitazioni di ciascuno. Con le persone per abitazione determinano i guadagni interni e l'acqua calda di BuEM.",
     "comfort": "Quando l'edificio è riscaldato: la temperatura impostata, se si abbassa di notte o in assenza (attenuazione) e se è inclusa l'acqua calda.",
     "outputs": "Quali profili restituisce BuEM per ogni uso: un riepilogo annuo, una serie oraria o nessuno.",
     "equipment": "Quali elettrodomestici hanno le famiglie; la domanda elettrica di BuEM li segue. Quelli non impostati mantengono la probabilità di BuEM.",
