@@ -117,7 +117,7 @@
     "download": "Descargar",
     "source": {
       "buem": "Simulado",
-      "none": "Ningún perfil cargado",
+      "none": "Simulado tras Guardar y ver demanda energética",
       "file": "{name}",
       "aggregated": "{source} · agregado de datos {from}"
     },
@@ -131,7 +131,8 @@
       "parse": "{reason}",
       "unreadable": "No se pudo leer el archivo del perfil de carga."
     },
-    "uploadSoon": "Pronto podrá subir su propio perfil de consumo."
+    "uploadSoon": "Pronto podrá subir sus propios perfiles de consumo.",
+    "downloadTip": "Descargar los perfiles horarios de calefacción, refrigeración, electricidad, agua caliente y gas de cocina en un CSV"
   },
   "pv": {
     "state": {

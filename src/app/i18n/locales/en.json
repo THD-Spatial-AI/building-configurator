@@ -116,7 +116,7 @@
     "download": "Download",
     "source": {
       "buem": "Simulated",
-      "none": "No profile loaded",
+      "none": "Simulated after Save & Preview",
       "file": "{name}",
       "aggregated": "{source} · aggregated from {from}"
     },
@@ -130,7 +130,8 @@
       "parse": "{reason}",
       "unreadable": "Could not parse load profile file."
     },
-    "uploadSoon": "Uploading your own consumption profile is coming soon."
+    "uploadSoon": "Custom consumption profile uploads will be available soon.",
+    "downloadTip": "Download the hourly heating, cooling, electricity, hot water and cooking gas profiles as one CSV"
   },
   "pv": {
     "state": {

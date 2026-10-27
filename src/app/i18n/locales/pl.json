@@ -118,7 +118,7 @@
     "download": "Pobierz",
     "source": {
       "buem": "Symulowany",
-      "none": "Nie wczytano profilu",
+      "none": "Symulowany po Zapisz i pokaż zapotrzebowanie",
       "file": "{name}",
       "aggregated": "{source} · agregacja z danych {from}"
     },
@@ -132,7 +132,8 @@
       "parse": "{reason}",
       "unreadable": "Nie można odczytać pliku profilu obciążenia."
     },
-    "uploadSoon": "Przesyłanie własnego profilu zużycia będzie dostępne wkrótce."
+    "uploadSoon": "Przesyłanie własnych profili zużycia będzie wkrótce dostępne.",
+    "downloadTip": "Pobierz godzinowe profile ogrzewania, chłodzenia, prądu, ciepłej wody i gazu do gotowania w jednym pliku CSV"
   },
   "pv": {
     "state": {

@@ -116,7 +116,7 @@
     "download": "Downloaden",
     "source": {
       "buem": "Gesimuleerd",
-      "none": "Geen profiel geladen",
+      "none": "Gesimuleerd na Opslaan & energievraag bekijken",
       "file": "{name}",
       "aggregated": "{source} · geaggregeerd uit {from}"
     },
@@ -130,7 +130,8 @@
       "parse": "{reason}",
       "unreadable": "Bestand met belastingprofiel kon niet worden gelezen."
     },
-    "uploadSoon": "Het uploaden van uw eigen verbruiksprofiel komt binnenkort."
+    "uploadSoon": "Het uploaden van eigen verbruiksprofielen is binnenkort mogelijk.",
+    "downloadTip": "De uurprofielen voor verwarming, koeling, elektriciteit, warm water en kookgas als één CSV downloaden"
   },
   "pv": {
     "state": {

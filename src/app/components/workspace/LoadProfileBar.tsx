@@ -1,11 +1,12 @@
 // The load profile as data rather than a chart: where the current profile came
-// from, an upload that stays in the browser, and a download the host serves.
+// from, an upload that stays in the browser, and a download of the simulated
+// profiles, built here or served by the host.
 // Hourly only, which is the resolution the whole stack runs at.
 
 import { useId, useRef, useState } from 'react';
 import { Download, Upload } from '@/app/components/icons';
 import { useLoadProfileState } from '../BuildingConfigurator/overview/useLoadProfileState';
-import type { LoadDataPoint } from '../../lib/loadProfile';
+import { profileCsv, type LoadDataPoint } from '../../lib/loadProfile';
 import { useT } from '../../i18n';
 
 interface LoadProfileBarProps {
@@ -14,6 +15,18 @@ interface LoadProfileBarProps {
   /** The host's CSV of the building's stored series; no download without it. */
   seriesCsvUrl?: string;
   onGroundTruthChange?: (rows: LoadDataPoint[] | null, label: string | null) => void;
+}
+
+const PROFILE_FILE = 'hourly-profiles.csv';
+
+/** Saves text as a CSV file through a temporary link. */
+function downloadCsv(text: string, name: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }: LoadProfileBarProps) {
@@ -64,12 +77,19 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
             {t('profile.uploadSoon')}
           </p>
         </div>
-        {seriesCsvUrl && (
-          <a
-            href={seriesCsvUrl}
-            download
-            className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
+        {/* This building's own run first; the host's stored series where it has not run here. */}
+        {timeseries?.length ? (
+          <button
+            type="button"
+            title={t('profile.downloadTip')}
+            onClick={() => downloadCsv(profileCsv(timeseries), PROFILE_FILE)}
+            className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
           >
+            <Download className="size-3" />
+            {t('profile.download')}
+          </button>
+        ) : seriesCsvUrl && (
+          <a href={seriesCsvUrl} download title={t('profile.downloadTip')} className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted">
             <Download className="size-3" />
             {t('profile.download')}
           </a>
