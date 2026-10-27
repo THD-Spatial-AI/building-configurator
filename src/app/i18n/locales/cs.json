@@ -187,7 +187,8 @@
       "title": "FV na této budově"
     },
     "surfaces": {
-      "toggle": "Plochy vhodné pro FV ({installed} z {total} s FV)"
+      "toggle": "{name} ({installed} z {total} s FV)",
+      "name": "Plochy vhodné pro FV"
     },
     "cost": {
       "investment": "Investice",
@@ -197,9 +198,10 @@
     "catalogue": {
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Fotovoltaické možnosti ({count})",
+      "toggle": "{name} ({count})",
       "search": "Hledat v katalogu",
-      "drag": "Přetáhněte na střechu nebo stěnu v modelu"
+      "drag": "Přetáhněte na střechu nebo stěnu v modelu",
+      "name": "Fotovoltaické možnosti"
     },
     "product": {
       "label": "Produkt",
@@ -226,7 +228,7 @@
     },
     "installed": {
       "title": "Instalováno na této budově",
-      "empty": "Zatím žádná FV. Otevřete fotovoltaické možnosti a přetáhněte produkt na střechu nebo stěnu.",
+      "empty": "Zatím není nainstalována žádná FV.",
       "surfaces": {
         "one": "na {count} ploše",
         "few": "na {count} plochách",
@@ -251,11 +253,17 @@
       "other": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy."
     },
     "help": {
-      "title": "Jak nainstalovat FV na plochu",
-      "drag": "Otevřete fotovoltaické možnosti a přetáhněte produkt za úchyt na střechu nebo stěnu v modelu.",
-      "click": "Nebo klikněte na střechu či stěnu v modelu, zapněte v jejím panelu {install} a vyberte tam produkt.",
-      "suggested": "Plochy označené {suggested} se pro FV hodí nejlépe. V seznamu dostupných ploch {useSuggested} nainstaluje FV na všechny.",
-      "remove": "Chcete-li FV odebrat, vypněte {install} v panelu plochy nebo v seznamu dostupných ploch."
+      "title": "Jak přidat FV",
+      "drag": "Otevřete {options} a přetáhněte produkt na střechu nebo stěnu.",
+      "click": "Vyberte střechu nebo stěnu, zapněte {install} a zvolte produkt.",
+      "remove": "Vypněte {install} v panelu plochy nebo v části {surfaces}.",
+      "lead": {
+        "drag": "Přetáhnout",
+        "click": "Kliknout",
+        "all": "Vše najednou",
+        "remove": "Odebrat"
+      },
+      "all": "Klikněte na {useSuggested} a přidejte FV na každou plochu označenou {suggested}."
     },
     "sort": {
       "label": "Seřadit podle",

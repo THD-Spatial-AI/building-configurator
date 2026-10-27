@@ -2,7 +2,7 @@
 // installed (each with its values behind an edit button), the products to drag
 // onto a surface, and the surfaces that take PV.
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ChevronDown, CircleHelp, GripVertical, Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
@@ -80,7 +80,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
     .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
 
   return (
-    <Dropdown title={t('pv.surfaces.toggle', { installed: installedCount, total: entries.length })}>
+    <Dropdown title={t('pv.surfaces.toggle', { name: t('pv.surfaces.name'), installed: installedCount, total: entries.length })}>
       <ul className={DROPDOWN_LIST}>
         {ordered.map(([id, surface]) => {
           const name = surfaceName(id, elements, pv.surfaces);
@@ -189,21 +189,40 @@ function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record
 
 /** The catalogue's PV products behind a drop-down, each draggable onto a surface in the 3D view. */
 /** The steps to install PV on a surface, closed until opened. */
-function InstallHelp() {
+/** A translated line with each {placeholder} drawn bold, as the control it names. */
+function withLabels(template: string, labels: Record<string, string>): ReactNode[] {
+  return template.split(/(\{\w+\})/).map((part, i) => {
+    const name = /^\{(\w+)\}$/.exec(part)?.[1];
+    return name && name in labels ? <b key={i} className="font-semibold">{labels[name]}</b> : part;
+  });
+}
+
+/** The ways to add and remove PV, one bullet each; open until the building has PV. */
+function InstallHelp({ hasPv }: { hasPv: boolean }) {
   const t = useT();
-  const steps = ['drag', 'click', 'suggested', 'remove'] as const;
-  // The steps name the controls by their own strings, so they read the same in every language.
-  const labels = { install: t('pv.thisSurface'), suggested: t('pv.state.suggested'), useSuggested: t('pv.useSuggested') };
+  const methods = ['drag', 'click', 'all', 'remove'] as const;
+  // The lines name the controls by the controls' own strings, so they match in every language.
+  const labels = {
+    options: t('pv.catalogue.name'),
+    surfaces: t('pv.surfaces.name'),
+    install: t('pv.thisSurface'),
+    suggested: t('pv.state.suggested'),
+    useSuggested: t('pv.useSuggested'),
+  };
   return (
-    <details className="group rounded-lg border border-sky-500/30 bg-sky-500/5">
+    <details open={!hasPv} className="group rounded-lg border border-sky-500/30 bg-sky-500/5">
       <summary className="flex cursor-pointer select-none list-none items-center gap-2 px-3 py-2 text-[12px] font-semibold text-foreground [&::-webkit-details-marker]:hidden">
         <CircleHelp className="size-4 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden />
         <span className="flex-1">{t('pv.help.title')}</span>
         <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
       </summary>
-      <ol className="m-0 flex list-decimal flex-col gap-1 py-2 pl-8 pr-3 text-[12px] leading-snug text-foreground">
-        {steps.map((step) => <li key={step}>{t(`pv.help.${step}`, labels)}</li>)}
-      </ol>
+      <ul className="m-0 flex list-disc flex-col gap-1 py-2 pl-8 pr-3 text-[12px] leading-snug text-foreground">
+        {methods.map((method) => (
+          <li key={method}>
+            <b className="font-semibold">{t(`pv.help.lead.${method}`)}:</b> {withLabels(t(`pv.help.${method}`), labels)}
+          </li>
+        ))}
+      </ul>
     </details>
   );
 }
@@ -220,7 +239,7 @@ function Catalogue({ pv }: { pv: PvMode }) {
   const found = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
   const shown = sortProducts(found, order, pv.module ?? DEFAULT_PV_MODULE);
   return (
-    <Dropdown title={t('pv.catalogue.toggle', { count: pv.catalogue.length })}>
+    <Dropdown title={t('pv.catalogue.toggle', { name: t('pv.catalogue.name'), count: pv.catalogue.length })}>
         <div className="flex gap-2">
           <div className="min-w-0 flex-1"><SearchField label={t('pv.options.search')} value={query} onChange={setQuery} /></div>
           <div className="w-40 shrink-0">
@@ -387,7 +406,7 @@ export function PvOverview({ pv, available, elements, layouts = {}, mode, onSele
         </div>
       )}
       <Totals pv={pv} available={available} elements={elements} layouts={layouts} />
-      <InstallHelp />
+      <InstallHelp hasPv={fittedPvIds(pv.surfaces, layouts).length > 0} />
       <Installed pv={pv} layouts={layouts} mode={mode} />
       <Catalogue pv={pv} />
       <SurfaceList pv={pv} available={available} elements={elements} layouts={layouts} onSelect={onSelect} />

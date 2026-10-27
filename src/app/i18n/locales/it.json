@@ -185,7 +185,8 @@
       "title": "FV su questo edificio"
     },
     "surfaces": {
-      "toggle": "Superfici disponibili per il FV ({installed} di {total} con FV)"
+      "toggle": "{name} ({installed} di {total} con FV)",
+      "name": "Superfici disponibili per il FV"
     },
     "cost": {
       "investment": "Investimento",
@@ -195,9 +196,10 @@
     "catalogue": {
       "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Opzioni fotovoltaiche ({count})",
+      "toggle": "{name} ({count})",
       "search": "Cerca nel catalogo",
-      "drag": "Trascina su un tetto o una parete del modello"
+      "drag": "Trascina su un tetto o una parete del modello",
+      "name": "Opzioni fotovoltaiche"
     },
     "product": {
       "label": "Prodotto",
@@ -224,7 +226,7 @@
     },
     "installed": {
       "title": "Installato su questo edificio",
-      "empty": "Ancora nessun FV. Apri le opzioni fotovoltaiche e trascina un prodotto su un tetto o una parete.",
+      "empty": "Nessun FV installato finora.",
       "surfaces": {
         "one": "su {count} superficie",
         "other": "su {count} superfici"
@@ -243,11 +245,17 @@
       "other": "Nessun modulo FV intero entra su {count} superfici ({surfaces}), quindi non hanno FV. Scegli un prodotto più piccolo o altre superfici."
     },
     "help": {
-      "title": "Come installare il FV su una superficie",
-      "drag": "Apri le opzioni fotovoltaiche e trascina un prodotto dalla sua maniglia su un tetto o una parete del modello.",
-      "click": "Oppure fai clic su un tetto o una parete del modello, attiva {install} nel suo pannello e scegli lì un prodotto.",
-      "suggested": "Le superfici contrassegnate {suggested} sono le più adatte al FV. Nell'elenco delle superfici disponibili, {useSuggested} installa il FV su tutte.",
-      "remove": "Per rimuovere il FV, disattiva {install} nel pannello della superficie o nell'elenco delle superfici disponibili."
+      "title": "Come aggiungere il FV",
+      "drag": "Apri {options} e trascina un prodotto su un tetto o una parete.",
+      "click": "Seleziona un tetto o una parete, attiva {install} e scegli un prodotto.",
+      "remove": "Disattiva {install} nel pannello della superficie o in {surfaces}.",
+      "lead": {
+        "drag": "Trascina",
+        "click": "Clic",
+        "all": "Tutte insieme",
+        "remove": "Rimuovi"
+      },
+      "all": "Fai clic su {useSuggested} per aggiungere il FV a ogni superficie contrassegnata {suggested}."
     },
     "sort": {
       "label": "Ordina per",
