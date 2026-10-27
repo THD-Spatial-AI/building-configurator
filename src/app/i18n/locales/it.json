@@ -767,7 +767,7 @@
     "inModel": "Nel modello"
   },
   "help": {
-    "envelope": "Come questa superficie trattiene il calore: area e valore U vanno a BuEM. Un livello di riqualificazione imposta il valore U da TABULA; un valore modificato qui resta.",
+    "envelope": "Come questa superficie trattiene il calore: superficie e valore U vanno a BuEM. Il livello di riqualificazione dell'edificio, scelto in Livello energetico, imposta il valore U da TABULA; un valore cambiato qui viene mantenuto.",
     "pv": "FV su questa superficie: attivalo, scegli un prodotto e quanta superficie può usare. I moduli sono disposti sulla superficie come la mostra il modello 3D.",
     "building": "Che cos'è l'edificio: tipo, anno e paese scelgono i valori predefiniti TABULA; superficie per piano e piani fissano la superficie riscaldata da BuEM. Modifica per cambiarli.",
     "demand": "La domanda annua di energia dell'edificio per uso, dall'ultimo calcolo BuEM o dal risultato salvato. Il gas di cottura è un altro combustibile e non è nel totale.",
@@ -810,7 +810,7 @@
     "stepOf": "Passo {step} di {total}",
     "hide": "Nascondi suggerimenti",
     "step1": "Fai clic su una parete, un tetto o un pavimento per aprirlo.",
-    "step2": "Cambia il valore U o il livello di riqualificazione nel pannello.",
+    "step2": "Cambia la superficie o il valore U nel pannello.",
     "step3": "Salva e anteprima per vedere la nuova domanda dell'edificio."
   },
   "legend": {

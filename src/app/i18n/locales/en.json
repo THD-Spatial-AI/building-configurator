@@ -767,7 +767,7 @@
     "inModel": "In the model"
   },
   "help": {
-    "envelope": "How this surface holds heat: its area and U-value go to BuEM. A refurbishment level sets the U-value from TABULA; a value changed here is kept.",
+    "envelope": "How this surface holds heat: its area and U-value go to BuEM. The building's refurbishment level, chosen in Energy grade, sets the U-value from TABULA; a value changed here is kept.",
     "pv": "PV on this surface: switch it on, choose a product and how much of the surface it may use. The modules are laid out on the surface as the 3D model has it.",
     "building": "What the building is: type, year and country choose its TABULA defaults; floor area per storey and storeys set the area BuEM heats. Edit to change them.",
     "demand": "The building's annual energy demand by use, from its last BuEM run or the stored result. Cooking gas is a separate fuel and not part of the total.",
@@ -810,7 +810,7 @@
     "stepOf": "Step {step} of {total}",
     "hide": "Hide hints",
     "step1": "Click a wall, roof or floor to open it.",
-    "step2": "Change its U-value or refurbishment level in the panel.",
+    "step2": "Change its area or U-value in the panel.",
     "step3": "Save and preview to see the building's new demand."
   },
   "legend": {

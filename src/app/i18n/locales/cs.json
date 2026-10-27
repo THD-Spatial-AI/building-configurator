@@ -793,7 +793,7 @@
     "inModel": "V modelu"
   },
   "help": {
-    "envelope": "Jak tato plocha drží teplo: její plocha a součinitel U jdou do BuEM. Úroveň renovace nastaví součinitel U z TABULA; hodnota změněná zde zůstane.",
+    "envelope": "Jak tato plocha drží teplo: její plocha a hodnota U jdou do BuEM. Úroveň renovace budovy, zvolená v části Energetická úroveň, nastaví hodnotu U z TABULA; hodnota změněná zde zůstane zachována.",
     "pv": "FV na této ploše: zapněte ji, vyberte produkt a jakou část plochy smí využít. Moduly se rozmístí na ploše tak, jak ji ukazuje 3D model.",
     "building": "Co je to za budovu: typ, rok a země volí výchozí hodnoty TABULA; plocha podlaží a počet podlaží určují plochu, kterou BuEM vytápí. Upravte je tlačítkem Upravit.",
     "demand": "Roční potřeba energie budovy podle užití, z posledního výpočtu BuEM nebo uloženého výsledku. Plyn na vaření je samostatné palivo a není v součtu.",
@@ -836,7 +836,7 @@
     "stepOf": "Krok {step} z {total}",
     "hide": "Skrýt nápovědu",
     "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
-    "step2": "Změňte hodnotu U nebo úroveň renovace v panelu.",
+    "step2": "Změňte plochu nebo hodnotu U v panelu.",
     "step3": "Uložte a zobrazte náhled nové potřeby budovy."
   },
   "legend": {

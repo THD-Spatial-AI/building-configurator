@@ -772,7 +772,7 @@
     "inModel": "En el modelo"
   },
   "help": {
-    "envelope": "Cómo retiene el calor esta superficie: su área y su valor U van a BuEM. Un nivel de rehabilitación fija el valor U desde TABULA; un valor cambiado aquí se conserva.",
+    "envelope": "Cómo retiene el calor esta superficie: su superficie y su valor U van a BuEM. El nivel de rehabilitación del edificio, elegido en Nivel energético, fija el valor U desde TABULA; un valor cambiado aquí se conserva.",
     "pv": "FV en esta superficie: actívela, elija un producto y cuánta superficie puede usar. Los módulos se colocan sobre la superficie tal como la muestra el modelo 3D.",
     "building": "Qué es el edificio: tipo, año y país eligen sus valores por defecto de TABULA; la superficie por planta y las plantas fijan la superficie que calienta BuEM. Edite para cambiarlos.",
     "demand": "La demanda anual de energía del edificio por uso, del último cálculo de BuEM o del resultado guardado. El gas de cocina es otro combustible y no entra en el total.",
@@ -815,7 +815,7 @@
     "stepOf": "Paso {step} de {total}",
     "hide": "Ocultar sugerencias",
     "step1": "Haga clic en un muro, una cubierta o un suelo para abrirlo.",
-    "step2": "Cambie su valor U o su nivel de rehabilitación en el panel.",
+    "step2": "Cambie su superficie o su valor U en el panel.",
     "step3": "Guarde y previsualice para ver la nueva demanda del edificio."
   },
   "legend": {

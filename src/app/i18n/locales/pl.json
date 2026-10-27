@@ -793,7 +793,7 @@
     "inModel": "W modelu"
   },
   "help": {
-    "envelope": "Jak ta przegroda zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom modernizacji ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",
+    "envelope": "Jak ta powierzchnia zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom termomodernizacji budynku, wybrany w sekcji Standard energetyczny, ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",
     "pv": "PV na tej przegrodzie: włącz je, wybierz produkt i jaką część powierzchni może zająć. Moduły są rozmieszczane na przegrodzie tak, jak pokazuje ją model 3D.",
     "building": "Czym jest budynek: typ, rok i kraj wybierają wartości domyślne TABULA; powierzchnia kondygnacji i liczba kondygnacji ustalają powierzchnię ogrzewaną przez BuEM. Edytuj, aby je zmienić.",
     "demand": "Roczne zapotrzebowanie budynku na energię według zastosowań, z ostatniego obliczenia BuEM lub zapisanego wyniku. Gaz do gotowania to osobne paliwo, poza sumą.",
@@ -836,7 +836,7 @@
     "stepOf": "Krok {step} z {total}",
     "hide": "Ukryj wskazówki",
     "step1": "Kliknij ścianę, dach lub podłogę, aby ją otworzyć.",
-    "step2": "Zmień współczynnik U lub poziom termomodernizacji w panelu.",
+    "step2": "Zmień powierzchnię lub współczynnik U w panelu.",
     "step3": "Zapisz i podgląd, aby zobaczyć nowe zapotrzebowanie budynku."
   },
   "legend": {

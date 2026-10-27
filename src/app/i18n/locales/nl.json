@@ -767,7 +767,7 @@
     "inModel": "In het model"
   },
   "help": {
-    "envelope": "Hoe dit vlak warmte vasthoudt: oppervlak en U-waarde gaan naar BuEM. Een renovatieniveau zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft staan.",
+    "envelope": "Hoe dit vlak warmte vasthoudt: oppervlakte en U-waarde gaan naar BuEM. Het renovatieniveau van het gebouw, gekozen bij Energieniveau, zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft behouden.",
     "pv": "PV op dit vlak: zet het aan, kies een product en hoeveel van het vlak het mag gebruiken. De modules worden gelegd op het vlak zoals het 3D-model het toont.",
     "building": "Wat het gebouw is: type, bouwjaar en land kiezen de TABULA-standaardwaarden; vloeroppervlak per verdieping en verdiepingen bepalen het oppervlak dat BuEM verwarmt. Bewerk om ze te wijzigen.",
     "demand": "De jaarlijkse energievraag van het gebouw per gebruik, uit de laatste BuEM-berekening of het opgeslagen resultaat. Kookgas is een aparte brandstof en telt niet mee in het totaal.",
@@ -810,7 +810,7 @@
     "stepOf": "Stap {step} van {total}",
     "hide": "Tips verbergen",
     "step1": "Klik op een muur, dak of vloer om die te openen.",
-    "step2": "Wijzig de U-waarde of het renovatieniveau in het paneel.",
+    "step2": "Wijzig de oppervlakte of de U-waarde in het paneel.",
     "step3": "Opslaan en voorbeeld toont de nieuwe vraag van het gebouw."
   },
   "legend": {
