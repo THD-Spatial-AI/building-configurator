@@ -189,18 +189,19 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
     >
       {!isEditing ? <BuildingTiles rows={rows} occupancy={occupancy} modelHeight={modelHeight} /> : (
         <table className="w-full text-sm bg-card">
+          {/* The value column takes the room the labels and badges leave, so the longest type and country names fit. */}
           <colgroup>
-            <col className="w-[42%]" />
+            <col className="w-[30%]" />
             <col />
-            <col className="w-20" />
+            <col className="w-[88px]" />
           </colgroup>
           <tbody>
             {rows.map((row) => {
               const editable = onEditField && row.editKey && row.editType;
               return (
                 <tr key={row.label} className="border-t border-border">
-                  <td className="px-4 py-2.5 text-muted-foreground">{t(row.labelKey)}</td>
-                  <td className="px-4 py-2 text-right font-medium text-foreground">
+                  <td className="py-2.5 pl-4 pr-2 text-[13px] leading-tight text-muted-foreground">{t(row.labelKey)}</td>
+                  <td className="px-2 py-2 text-right font-medium text-foreground">
                     {editable ? (
                       row.editType === 'select' ? (
                         <SelectInput
@@ -224,7 +225,7 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
                       )
                     ) : rowValue(row, t)}
                   </td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="py-2 pl-1 pr-3 text-center">
                     <SnapshotStatusBadge status={row.status} />
                   </td>
                 </tr>
