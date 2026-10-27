@@ -170,13 +170,15 @@
     "mounting": {
       "label": "Montáž",
       "flush": "Rovnoběžně",
-      "racked": "Na konstrukci"
+      "racked": "Na konstrukci",
+      "tip": "Jak panely leží na ploché střeše. {flush}: leží přímo na střeše. {racked}: stojí na rámech se zadaným sklonem a orientací, zachytí víc slunce, ale mezi řadami potřebují víc místa."
     },
     "orientation": {
       "label": "Formát",
       "auto": "Optimálně",
       "portrait": "Na výšku",
-      "landscape": "Na šířku"
+      "landscape": "Na šířku",
+      "tip": "Jak jsou panely na ploše otočené. {portrait}: delší strana vede po ploše nahoru. {landscape}: delší strana vede napříč. {auto} volí směr, do kterého se vejde nejvíc panelů, a kde se vejde víc, oba kombinuje."
     },
     "panelTilt": "Sklon modulů",
     "panelFacing": "Orientace modulů",

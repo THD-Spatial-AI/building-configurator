@@ -133,6 +133,16 @@ describe('locale files', () => {
   });
 });
 
+describe('PV mounting and format tips', () => {
+  it('name the options through their own labels in every language', () => {
+    for (const language of Object.keys(MESSAGES) as Language[]) {
+      const pv = (MESSAGES[language] as Messages).pv as Messages;
+      expect(`${language} ${(pv.mounting as Messages).tip}`).toMatch(/\{flush\}.*\{racked\}/);
+      expect(`${language} ${(pv.orientation as Messages).tip}`).toMatch(/\{portrait\}.*\{landscape\}.*\{auto\}/);
+    }
+  });
+});
+
 describe('section info tips', () => {
   it('say what the section shows, without naming the models or data sources behind it', () => {
     for (const [language, messages] of Object.entries(MESSAGES)) {

@@ -169,13 +169,15 @@
     "mounting": {
       "label": "Montaje",
       "flush": "Coplanar",
-      "racked": "Sobre estructura"
+      "racked": "Sobre estructura",
+      "tip": "Cómo se colocan los paneles en una cubierta plana. {flush}: quedan tumbados sobre la cubierta. {racked}: se apoyan en bastidores con la inclinación y orientación indicadas, captan más sol pero necesitan más espacio entre filas."
     },
     "orientation": {
       "label": "Formato",
       "auto": "Óptimo",
       "portrait": "Vertical",
-      "landscape": "Horizontal"
+      "landscape": "Horizontal",
+      "tip": "Cómo se giran los paneles sobre la superficie. {portrait}: el lado largo sube por la superficie. {landscape}: el lado largo la cruza. {auto} usa la orientación en la que caben más paneles y mezcla ambas donde caben más."
     },
     "panelTilt": "Inclinación de los módulos",
     "panelFacing": "Orientación de los módulos",

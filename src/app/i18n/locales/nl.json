@@ -168,13 +168,15 @@
     "mounting": {
       "label": "Montage",
       "flush": "Parallel",
-      "racked": "Op frame"
+      "racked": "Op frame",
+      "tip": "Hoe de panelen op een plat dak liggen. {flush}: ze liggen plat op het dak. {racked}: ze staan op frames met de ingestelde helling en richting, vangen zo meer zon maar hebben meer ruimte tussen de rijen nodig."
     },
     "orientation": {
       "label": "Stand",
       "auto": "Optimaal",
       "portrait": "Staand",
-      "landscape": "Liggend"
+      "landscape": "Liggend",
+      "tip": "Hoe de panelen op het vlak gedraaid zijn. {portrait}: de lange zijde loopt omhoog over het vlak. {landscape}: de lange zijde loopt dwars. {auto} kiest de richting waarin de meeste panelen passen en mengt beide waar er meer passen."
     },
     "panelTilt": "Hellingshoek modules",
     "panelFacing": "Oriëntatie modules",
