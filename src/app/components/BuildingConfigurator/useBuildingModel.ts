@@ -200,6 +200,8 @@ const UNDO_DEPTH = 30;
 
 interface EnvelopeHistoryEntry {
   elements: Record<string, BuildingElement>;
+  /** The refurbishment state per element type, which the level buttons show. */
+  refurbishment: typeof DEFAULT_GENERAL.refurbishment;
   /** What the step did, for the undo button: a model.history message, e.g. "deleted wall". */
   label: Message;
   /** Identifies the edit for coalescing: same key in quick succession is one step. */
@@ -457,10 +459,8 @@ export function useBuildingModel(
       (acc, type) => applyState(acc, type, refurbStates[type], number, refurbInitial, levels),
       elements,
     );
-    if (nextElements !== elements) {
-      remember(`refurbishment:${Date.now()}`, { key: 'model.history.refurbishment' });
-      setElements(nextElements);
-    }
+    remember(`refurbishment:${Date.now()}`, { key: 'model.history.refurbishment' });
+    if (nextElements !== elements) setElements(nextElements);
     const states = { ...refurbStates, ...Object.fromEntries(types.map((type) => [type, number])) };
     setGen('refurbishment', { ...general.refurbishment, states });
     // ignis's annual demand follows the building-wide preset.
@@ -502,7 +502,7 @@ export function useBuildingModel(
         // Same field still being dragged: keep the older snapshot, extend the window.
         return [...prev.slice(0, -1), { ...top, at }];
       }
-      return [...prev, { elements, label, key, at }].slice(-UNDO_DEPTH);
+      return [...prev, { elements, refurbishment: general.refurbishment, label, key, at }].slice(-UNDO_DEPTH);
     });
   };
 
@@ -511,6 +511,7 @@ export function useBuildingModel(
     const top = history[history.length - 1];
     if (!top) return;
     setElements(top.elements);
+    setGen('refurbishment', top.refurbishment);
     setHistory((prev) => prev.slice(0, -1));
   };
 
