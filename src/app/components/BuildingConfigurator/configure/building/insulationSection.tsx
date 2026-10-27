@@ -2,7 +2,7 @@
 // state for the whole building in Basic, and per element type in Expert with
 // its U-value and loss factor, plus the windows BuEM adds when there are none.
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
@@ -151,11 +151,15 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
               type="button"
               aria-pressed={selected === level.number}
               onClick={() => onSetState(REFURB_TYPES, level.number)}
+              style={energyClass ? { '--class': energyClass.color, '--class-tint': `${energyClass.color}26` } as CSSProperties : undefined}
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-[6px] border px-2 py-1.5 text-left text-[11px] font-medium leading-snug transition-colors',
-                // In its class colour once the class is known, else the slate of the section.
+                // Known classes: the box takes the class colour when selected, and
+                // as a preview on hover; unselected only its badge shows it.
                 energyClass
-                  ? cn(energyClass.frame, 'text-foreground', selected === level.number ? 'border-[3px]' : 'opacity-80 hover:opacity-100')
+                  ? selected === level.number
+                    ? 'border-2 border-[var(--class)] bg-[var(--class-tint)] text-foreground'
+                    : 'border-border bg-card text-foreground hover:border-[var(--class)] hover:bg-[var(--class-tint)]'
                   : selected === level.number
                     ? 'border-2 border-[#475B7A] bg-[#E6EAF2] text-[#33415C] dark:border-[#C3CDDD] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]'
                     : 'border-border bg-card text-muted-foreground hover:bg-muted',
