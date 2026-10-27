@@ -141,3 +141,17 @@ export function storeyShares(
       : own(element.id),
   ]));
 }
+
+/** Dwellings per storey, 1-based from the ground, as the user gave them. */
+export type StoreyDwellings = Readonly<Record<number, number>>;
+
+/** The dwellings in the modelled storeys: their sum, or null while a modelled storey has no count. */
+export function modelledDwellings(modelled: readonly number[], dwellings: StoreyDwellings): number | null {
+  let sum = 0;
+  for (const storey of modelled) {
+    const count = dwellings[storey];
+    if (!(count >= 1)) return null;
+    sum += count;
+  }
+  return modelled.length > 0 ? sum : null;
+}

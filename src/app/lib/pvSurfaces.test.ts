@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { installedByProduct, pvGeometry, pvLayouts, pvSummary } from './pvSurfaces';
+import { fittedPvIds, installedByProduct, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -103,6 +103,18 @@ describe('installedByProduct', () => {
   });
 });
 
+describe('a surface with PV that fits no whole module', () => {
+  const surfaces = { r1: surface('installed'), r2: surface('installed', { maxKwp: 3 }) };
+  const layouts = { r1: { count: 6, kwp: 2.4, area: 12 } as PvLayout, r2: { count: 0, kwp: 0, area: 0 } as PvLayout };
+
+  it('is not installed anywhere: not listed, counted or run', () => {
+    expect(fittedPvIds(surfaces, layouts)).toEqual(['r1']);
+    expect(unfittedPvIds(surfaces, layouts)).toEqual(['r2']);
+    expect(installedByProduct(surfaces, layouts, () => undefined)[0].surfaces).toBe(1);
+    expect(pvSummary(surfaces, {}, layouts).installed).toBe(1);
+  });
+});
+
 describe('pvLayouts', () => {
   const flat: SurfacePolygon = { id: 'f', type: 'RoofSurface', coordinates: [[[0, 0, 3], [10, 0, 3], [10, 6, 3], [0, 6, 3], [0, 0, 3]]] };
 
@@ -119,5 +131,14 @@ describe('pvLayouts', () => {
   it('takes each surface\'s own module where a function gives one per surface', () => {
     const layouts = pvLayouts([flat], { f: { usableShare: 1, mounting: { kind: 'flush' } } }, () => ({ width: 2, height: 2, kwp: 1 }));
     expect(layouts.f.kwp).toBe(layouts.f.count);
+  });
+
+  it('offers a surface for PV only when some module fits on it, and keeps one it cannot check', () => {
+    const tiny: SurfacePolygon = { id: 't', type: 'RoofSurface', coordinates: [[[0, 0, 3], [1, 0, 3], [1, 1, 3], [0, 1, 3], [0, 0, 3]]] };
+    const options = { f: { usableShare: 1 }, t: { usableShare: 1 }, unknown: { usableShare: 1 } };
+    const small = { width: 1, height: 1.7, kwp: 0.4 };
+    const large = { width: 2, height: 3, kwp: 1 };
+    expect([...pvAvailableIds([flat, tiny], options, [small, large])].sort()).toEqual(['f', 'unknown']);
+    expect([...pvAvailableIds([flat, tiny], options, [])].sort()).toEqual(['unknown']);
   });
 });

@@ -162,7 +162,8 @@
       "add": "Dodaj PV do tej przegrody",
       "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
-      "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego."
+      "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego.",
+      "noFitShort": "Żaden moduł się nie mieści"
     },
     "mounting": {
       "label": "Montaż",
@@ -185,7 +186,7 @@
       "title": "PV na tym budynku"
     },
     "surfaces": {
-      "toggle": "Powierzchnie z PV ({installed} z {total})"
+      "toggle": "Powierzchnie dostępne dla PV ({installed} z {total} z PV)"
     },
     "cost": {
       "investment": "Inwestycja",
@@ -241,6 +242,12 @@
     "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM.",
     "options": {
       "search": "Szukaj w opcjach fotowoltaicznych"
+    },
+    "noFitOn": {
+      "one": "Na {surfaces} nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inną powierzchnię.",
+      "few": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
+      "many": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
+      "other": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie."
     }
   },
   "tech": {
@@ -281,7 +288,7 @@
       "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna."
     },
     "section": {
-      "occupancy": "Mieszkańcy",
+      "occupancy": "Kondygnacje i użytkowanie",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",
       "equipment": "Urządzenia",
@@ -302,9 +309,16 @@
         "other": "{count} mieszkania"
       },
       "dwellingsNotSet": "Nie podano mieszkań",
-      "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
+      "perDwelling": "{dwellings} · {persons} os. na mieszkanie",
+      "storeys": {
+        "one": "{count} kondygnacja",
+        "few": "{count} kondygnacje",
+        "many": "{count} kondygnacji",
+        "other": "{count} kondygnacji"
+      },
+      "storeysModelled": "{modelled} z {total} kondygnacji modelowanych"
     },
-    "insulationTitle": "Izolacja i okna",
+    "insulationTitle": "Standard energetyczny",
     "expertMore": {
       "title": "Cieplne i symulacja",
       "detail": "profile, urządzenia i solver zachowują wartości domyślne"
@@ -503,11 +517,11 @@
       }
     },
     "classes": {
-      "compare": "Pokaż klasę energetyczną każdego poziomu",
       "comparing": "BuEM liczy każdy poziom…",
       "perM2": "{value} kWh/m²",
-      "note": "Klasa orientacyjna dla tego budynku: ogrzewanie na m² w austriackiej skali HWB, od A++ do G. Symulowana, nie jest świadectwem energetycznym.",
-      "failed": "Ostatnia próba nie powiodła się. Spróbuj ponownie."
+      "note": "Klasa orientacyjna dla tego budynku: ogrzewanie na m² w austriackiej skali HWB, od G do A++. Symulowana, nie jest świadectwem energetycznym.",
+      "failed": "Nie udało się wyznaczyć klas energetycznych.",
+      "retry": "Spróbuj ponownie"
     }
   },
   "options": {
@@ -658,7 +672,8 @@
     "heatingPerM2": "Ogrzewanie {value} kWh/m²·a",
     "heatingClass": {
       "label": "Orientacyjna klasa zapotrzebowania na ciepło (symulowana, nie jest świadectwem energetycznym)",
-      "tip": "Roczne ogrzewanie z BuEM na powierzchnię odniesienia, przy pogodzie i użytkowaniu z obliczenia, sklasyfikowane według przedziałów austriackiej skali OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G powyżej 250). Nie obejmuje ciepłej wody, chłodzenia ani energii elektrycznej."
+      "tip": "Roczne ogrzewanie z BuEM na powierzchnię odniesienia, przy pogodzie i użytkowaniu z obliczenia, sklasyfikowane według przedziałów austriackiej skali OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G powyżej 250). Nie obejmuje ciepłej wody, chłodzenia ani energii elektrycznej.",
+      "stale": "Dla kondygnacji z ostatniego obliczenia. Zapisz i podgląd, aby uzyskać klasę obecnie modelowanych kondygnacji."
     },
     "tile": {
       "statisticalDefault": "Wartość statystyczna"
@@ -725,7 +740,7 @@
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
       "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne.",
-      "dwellingsModelledRequired": "Niektóre kondygnacje są pominięte w modelu. Podaj liczbę mieszkań w modelowanych kondygnacjach w sekcji Modelowane kondygnacje przed uruchomieniem symulacji."
+      "dwellingsModelledRequired": "Niektóre kondygnacje są pominięte w modelu. Przed symulacją podaj mieszkania każdej modelowanej kondygnacji w sekcji Modelowane kondygnacje."
     },
     "comparison": {
       "lastRun": "w ostatniej pełnej symulacji"
@@ -733,18 +748,32 @@
   },
   "storeys": {
     "title": "Modelowane kondygnacje",
-    "hint": "Kondygnacja 1 to parter. Pomiń kondygnacje, które nie należą do tego modelu, np. sklep na parterze; powierzchnia i przegrody obejmują tylko modelowane kondygnacje.",
+    "hint": "Kondygnacja 1 to parter. Zaznacz kondygnacje tutaj lub w modelu, a następnie pomiń je w modelu lub podaj ich mieszkania; powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
-    "storey": "Kondygnacja {number}",
     "floorArea": "Modelowana powierzchnia",
     "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m.",
     "pick": "Kondygnacje",
-    "pickHint": "Kliknij kondygnację w modelu, aby zobaczyć, czy jest modelowana.",
-    "inModel": "W modelu",
-    "groundFloor": "Parter",
+    "pickHint": "Kliknij kondygnacje w modelu, aby je zaznaczyć; ustaw je w sekcji Modelowane kondygnacje na karcie Budynek.",
     "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu.",
-    "dwellings": "Mieszkania w modelowanych kondygnacjach",
-    "dwellingsHint": "Zyski wewnętrzne w BuEM zależą od liczby mieszkań, a nie od powierzchni."
+    "chip": {
+      "in": "Kondygnacja {number}, w modelu",
+      "out": "Kondygnacja {number}, pominięta",
+      "dwellings": "{count} mieszk."
+    },
+    "select": {
+      "all": "Zaznacz wszystkie",
+      "clear": "Wyczyść zaznaczenie",
+      "count": {
+        "one": "{count} kondygnacja zaznaczona",
+        "few": "{count} kondygnacje zaznaczone",
+        "many": "{count} kondygnacji zaznaczonych",
+        "other": "{count} kondygnacji zaznaczonej"
+      }
+    },
+    "dwellingsPerStorey": "Mieszkania na kondygnację",
+    "mixed": "różne",
+    "dwellingsMissing": "Podaj mieszkania każdej modelowanej kondygnacji. Brakuje: kondygnacja {storeys}. Zyski wewnętrzne BuEM zależą od liczby mieszkań.",
+    "inModel": "W modelu"
   },
   "help": {
     "envelope": "Jak ta przegroda zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom modernizacji ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",
@@ -752,12 +781,11 @@
     "building": "Czym jest budynek: typ, rok i kraj wybierają wartości domyślne TABULA; powierzchnia kondygnacji i liczba kondygnacji ustalają powierzchnię ogrzewaną przez BuEM. Edytuj, aby je zmienić.",
     "demand": "Roczne zapotrzebowanie budynku na energię według zastosowań, z ostatniego obliczenia BuEM lub zapisanego wyniku. Gaz do gotowania to osobne paliwo, poza sumą.",
     "insulation": "Ustawia izolację wszystkich ścian, dachów, podłóg i okien naraz, z typologii TABULA dla tego typu i wieku budynku. Stan istniejący: budynek tak, jak TABULA opisuje go dla jego wieku, bez późniejszych prac. Typowa: modernizacja częsta w praktyce, np. docieplenie dachu i nowe okna. Zaawansowana: ambitna modernizacja w stronę standardu nowego budynku. Przegroda zmieniona osobno zachowuje swoją wartość.",
-    "occupancy": "Kto mieszka lub pracuje w budynku: liczba mieszkań i osób na mieszkanie ustalają zyski wewnętrzne i zużycie ciepłej wody w BuEM.",
+    "occupancy": "Jak dzieli się budynek: jego kondygnacje, które z nich są w modelu i, w domu szeregowym, wielorodzinnym lub bloku, mieszkania na każdej. Wraz z liczbą osób na mieszkanie wyznaczają zyski wewnętrzne i zużycie ciepłej wody w BuEM.",
     "comfort": "Kiedy budynek jest ogrzewany: temperatura zadana, czy jest obniżana w nocy lub pod nieobecność (obniżenie) i czy uwzględniono ciepłą wodę.",
     "outputs": "Jakie profile BuEM zwraca dla każdego zastosowania: podsumowanie roczne, serię godzinową lub żaden.",
     "equipment": "Jakie urządzenia mają gospodarstwa domowe; zapotrzebowanie na energię elektryczną w BuEM od nich zależy. Nieustawione zachowują prawdopodobieństwo BuEM.",
-    "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach.",
-    "weather": "Godzinowa pogoda, na której liczy BuEM. Rok słoneczny wybiera z archiwum dostawcy reprezentatywny rok o niskim, typowym lub wysokim nasłonecznieniu; domyślnie typowy."
+    "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach."
   },
   "tour": {
     "button": "Przewodnik",
@@ -793,16 +821,6 @@
     "step1": "Kliknij ścianę, dach lub podłogę, aby ją otworzyć.",
     "step2": "Zmień współczynnik U lub poziom termomodernizacji w panelu.",
     "step3": "Zapisz i podgląd, aby zobaczyć nowe zapotrzebowanie budynku."
-  },
-  "weather": {
-    "title": "Pogoda",
-    "provider": "Dane pogodowe",
-    "year": "Rok słoneczny",
-    "scenario": {
-      "p10": "Niski",
-      "p50": "Typowy",
-      "p90": "Wysoki"
-    }
   },
   "legend": {
     "roof": "Dach",

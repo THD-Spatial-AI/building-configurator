@@ -89,7 +89,16 @@ describe('PvOverview', () => {
   it('sums the installed capacity and counts the surfaces with PV', () => {
     expect(html).toContain('7.2 kWp');
     expect(html).toContain('1 of 3');
-    expect(html).toContain('Surfaces with PV (1 of 3)');
+    expect(html).toContain('Available surfaces for PV (1 of 3 with PV)');
+  });
+
+  it('offers only the surfaces some PV option fits on, and any with PV on', () => {
+    const offered = renderToStaticMarkup(
+      <PvOverview pv={pv} available={new Set(['r2'])} elements={elements} mode="basic" onSelect={() => {}} />,
+    );
+    expect(offered).toContain('Available surfaces for PV (1 of 2 with PV)');
+    expect(offered).toContain('Roof north');
+    expect(offered).not.toContain('Wall west');
   });
 
   it('lists installed, then suggested, then available surfaces, with their geometry', () => {

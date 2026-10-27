@@ -60,6 +60,23 @@ export interface InstalledProduct {
   kwp: number;
 }
 
+/**
+ * The surfaces with PV that hold at least one whole module. One whose layout
+ * fits none has PV switched on but none on it, so it counts nowhere.
+ */
+export function fittedPvIds(surfaces: Record<string, PvSurface>, layouts: Readonly<Record<string, PvLayout>>): string[] {
+  return Object.entries(surfaces)
+    .filter(([id, surface]) => surface.state === 'installed' && layouts[id]?.count !== 0)
+    .map(([id]) => id);
+}
+
+/** The surfaces with PV switched on that fit no whole module. */
+export function unfittedPvIds(surfaces: Record<string, PvSurface>, layouts: Readonly<Record<string, PvLayout>>): string[] {
+  return Object.entries(surfaces)
+    .filter(([id, surface]) => surface.state === 'installed' && layouts[id]?.count === 0)
+    .map(([id]) => id);
+}
+
 /** The installed surfaces grouped by product, in the order the products first appear. */
 export function installedByProduct(
   surfaces: Record<string, PvSurface>,
@@ -67,8 +84,8 @@ export function installedByProduct(
   productFor: (surfaceId: string) => TechnologyProduct | undefined,
 ): InstalledProduct[] {
   const rows = new Map<string, InstalledProduct>();
-  for (const [id, surface] of Object.entries(surfaces)) {
-    if (surface.state !== 'installed') continue;
+  for (const id of fittedPvIds(surfaces, layouts)) {
+    const surface = surfaces[id];
     const product = productFor(id);
     const key = product?.id ?? '';
     const row = rows.get(key) ?? { product, surfaces: 0, modules: 0, kwp: 0 };
@@ -95,6 +112,23 @@ export function pvLayouts(
   return layouts;
 }
 
+/**
+ * The surfaces that can take PV: those on which at least one of `modules`
+ * fits a whole module with the surface's own settings. A surface without a
+ * polygon is kept, since its fit is not known.
+ */
+export function pvAvailableIds(
+  polygons: readonly SurfacePolygon[],
+  surfaces: Readonly<Record<string, PvLayoutOptions>>,
+  modules: readonly PvModule[],
+): Set<string> {
+  const byId = new Map(polygons.map((polygon) => [polygon.id, polygon]));
+  return new Set(Object.keys(surfaces).filter((id) => {
+    const polygon = byId.get(id);
+    return !polygon || modules.some((module) => pvLayout(polygon, module, surfaces[id]).count > 0);
+  }));
+}
+
 /** Adds b to a, where a stays undefined until some value is added. */
 const add = (a: number | undefined, b: number | undefined) => (b === undefined ? a : (a ?? 0) + b);
 
@@ -115,8 +149,8 @@ export function pvSummary(
   let installed = 0;
   let investment: number | undefined;
   let omPerYear: number | undefined;
-  for (const [id, surface] of Object.entries(surfaces)) {
-    if (surface.state !== 'installed') continue;
+  for (const id of fittedPvIds(surfaces, layouts)) {
+    const surface = surfaces[id];
     installed += 1;
     const layout = layouts[id];
     const surfaceKwp = layout?.kwp ?? surface.maxKwp;

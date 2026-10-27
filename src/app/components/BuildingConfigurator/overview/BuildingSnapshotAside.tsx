@@ -15,6 +15,8 @@ export interface BuildingSnapshotAsideProps {
   pvAnnualKwh?: number | null;
   /** BuEM's space heating per A_ref, kWh/(m²·a); with it the card shows the indicative class. */
   heatingPerM2?: number | null;
+  /** The storeys modelled changed since the result: the class is of the storeys last run. */
+  heatingClassStale?: boolean;
 }
 
 const DEMAND_ITEMS: { key: 'heating' | 'electricity' | 'hotwater' | 'dhw'; labelKey: string; topic: Topic }[] = [
@@ -39,7 +41,7 @@ const amount = (text: string | undefined) => {
   return text && Number.isFinite(value) && value > 0 ? value : 0;
 };
 
-/** One carrier in the legend: swatch, name, figure, and how it compares. */
+/** One carrier in the legend: a box framed in its bar colour, with its name and figure in that colour and its comparison. */
 function LegendItem({ topic, label, value, unit, source, note }: {
   topic: Topic;
   label: string;
@@ -50,26 +52,24 @@ function LegendItem({ topic, label, value, unit, source, note }: {
 }) {
   const format = useFormatNumber();
   return (
-    <div className="flex min-w-0 flex-col">
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-        <span className={cn('size-2.5 shrink-0 rounded-sm', topic.bar)} aria-hidden />
-        <topic.Icon className={cn('size-3.5 shrink-0', topic.icon)} aria-hidden />
+    <div className={cn('flex min-w-0 flex-col rounded-md border bg-card px-2.5 py-1.5', topic.border)}>
+      <div className={cn('flex items-center gap-1 text-[11px] font-semibold', topic.icon)}>
         <span className="truncate">{label}</span>
         <SourceTag source={source} />
       </div>
-      <div className="pl-4">
-        <span className={cn('text-[15px] font-bold tabular-nums', value === '—' ? 'text-muted-foreground' : 'text-foreground')}>
+      <div>
+        <span className={cn('text-[15px] font-bold tabular-nums', value === '—' ? 'text-muted-foreground' : topic.icon)}>
           {formatTotal(value, format)}
         </span>
         {unit && <span className="ml-1 text-[10px] text-muted-foreground">{unit}</span>}
       </div>
-      {note && <div className="pl-4">{note}</div>}
+      {note}
     </div>
   );
 }
 
 /** The indicative class of the building's BuEM heating demand, with what it is and is not. */
-function HeatingClass({ kwhPerM2 }: { kwhPerM2: number }) {
+function HeatingClass({ kwhPerM2, stale }: { kwhPerM2: number; stale: boolean }) {
   const t = useT();
   const format = useFormatNumber();
   const energyClass = hwbClass(kwhPerM2);
@@ -84,13 +84,14 @@ function HeatingClass({ kwhPerM2 }: { kwhPerM2: number }) {
           <InfoTip tip={t('snapshot.heatingClass.tip')} />
         </span>
         <span className="text-[11px] text-muted-foreground">{t('insulation.classes.perM2', { value: format(kwhPerM2, 0) })}</span>
+        {stale && <span className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">{t('snapshot.heatingClass.stale')}</span>}
       </div>
     </div>
   );
 }
 
 /** The building's annual demand by carrier, and its PV generation where there is any. */
-export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatingPerM2 = null }: BuildingSnapshotAsideProps) {
+export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatingPerM2 = null, heatingClassStale = false }: BuildingSnapshotAsideProps) {
   const t = useT();
   const format = useFormatNumber();
   const total = DEMAND_ITEMS.reduce((sum, { key }) => sum + amount(energyTotals[key]), 0);
@@ -116,7 +117,7 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatin
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+      <div className="grid grid-cols-2 gap-2">
         {DEMAND_ITEMS.map(({ key, labelKey, topic }) => {
           const referenceKey = energyTotals[`${key}ComparisonLabel` as keyof EnergyTotals] as string | undefined;
           return (
@@ -152,7 +153,7 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatin
           />
         )}
       </div>
-      {typeof heatingPerM2 === 'number' && heatingPerM2 > 0 && <HeatingClass kwhPerM2={heatingPerM2} />}
+      {typeof heatingPerM2 === 'number' && heatingPerM2 > 0 && <HeatingClass kwhPerM2={heatingPerM2} stale={heatingClassStale} />}
       {energyTotals.heatingPerM2 && (
         <span className="text-[11px] text-muted-foreground">
           {t('snapshot.heatingPerM2', { value: formatTotal(energyTotals.heatingPerM2, format) })}

@@ -16,12 +16,14 @@ import { faceFromAzimuth, type BuildingElement } from '@/app/components/Building
 import {
   BUILDING_TYPE_LABELS,
   OUTPUT_PROFILES,
+  hasDwellingsPerStorey,
   isServiceBuildingType,
   requiresResidentialUnits,
   type OutputLevel,
   type OutputProfile,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import type { LoadDataPoint } from './loadProfile';
+import { modelledDwellings, type StoreyDwellings } from './storeys';
 import { REFURB_TYPES, type RefurbElementType, type Refurbishment } from './refurbishment';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -112,7 +114,8 @@ export interface BuildingParameters {
   use_milp?: boolean;
   residential_units?: number | null;
   /** With storeys left out: the dwellings in the modelled storeys, residential_units being the whole building's. */
-  dwellingsModelled?: number | null;
+  /** Dwellings per storey; while storeys are left out their sum over the modelled ones is residential_units. */
+  storeyDwellings?: StoreyDwellings;
   num_persons?: number | null;      // per dwelling
   archetype?: string;
   region_code?: string;             // CBS municipality code, e.g. GM0200
@@ -383,10 +386,9 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   // With storeys left out the block holds the modelled storeys' dwellings and
   // the whole building's travel beside it.
   const fullUnits = getStoredValue(feature, MODEL_DATA_MAP.thematic.household.residential_units_full);
-  if (typeof fullUnits === 'number' || fullUnits === null) {
-    parameters.dwellingsModelled = parameters.residential_units ?? null;
-    parameters.residential_units = fullUnits;
-  }
+  if (typeof fullUnits === 'number' || fullUnits === null) parameters.residential_units = fullUnits;
+  const storeyDwellings = dwellingsFromList(getMappedValue(feature, MODEL_DATA_MAP.thematic.descriptor.storeyList));
+  if (storeyDwellings) parameters.storeyDwellings = storeyDwellings;
   return Object.keys(parameters).length > 0 ? parameters : undefined;
 }
 
@@ -605,11 +607,26 @@ export function partialStoreys(modelled: unknown, storeys: number): number[] | u
 export interface StoreyEntry {
   storey: number;
   modelled: boolean;
+  /** The dwellings on this storey, where the user gave them. */
+  dwellings?: number;
 }
 
-/** Every storey with whether it is in the model, as stored in properties.buem.storey_list. */
-function storeyList(modelled: readonly number[], storeys: number): StoreyEntry[] {
-  return Array.from({ length: storeys }, (_, i) => ({ storey: i + 1, modelled: modelled.includes(i + 1) }));
+/** Every storey with whether it is in the model and its dwellings, as stored in properties.buem.storey_list. */
+function storeyList(modelled: readonly number[], storeys: number, dwellings: StoreyDwellings = {}): StoreyEntry[] {
+  return Array.from({ length: storeys }, (_, i) => ({
+    storey: i + 1,
+    modelled: modelled.includes(i + 1),
+    ...(dwellings[i + 1] >= 1 ? { dwellings: dwellings[i + 1] } : {}),
+  }));
+}
+
+/** The dwellings per storey of a stored storey_list, or undefined when it holds none. */
+function dwellingsFromList(list: unknown): StoreyDwellings | undefined {
+  if (!Array.isArray(list)) return undefined;
+  const entries = list
+    .filter((entry): entry is StoreyEntry => !!entry && typeof entry === 'object' && typeof entry.dwellings === 'number')
+    .map((entry) => [entry.storey, entry.dwellings as number] as const);
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
 
 /** The modelled storeys of a stored storey_list, or undefined when it is not one. */
@@ -740,12 +757,17 @@ export function serializeToBuemFeature(
     building.h_room = { value: general.roomHeight, unit: 'm' };
   }
 
-  Object.assign(building, householdFields(identity.buildingType || general.buildingType, general));
   // BuEM's internal gains follow residential_units, so with storeys left out it
   // is the count the user gave for them; the whole building's is kept beside.
-  const keepUnits = Boolean(modelled && general.dwellingsModelled && !isServiceBuildingType(identity.buildingType || general.buildingType));
-  const unitsFull: number | null = keepUnits ? building.residential_units ?? null : null;
-  if (keepUnits) building.residential_units = general.dwellingsModelled;
+  const unitsModelled = modelled && hasDwellingsPerStorey(identity.buildingType || general.buildingType)
+    ? modelledDwellings(modelled, general.storeyDwellings ?? {})
+    : null;
+  const keepUnits = unitsModelled !== null;
+  const unitsFull: number | null = keepUnits ? general.residential_units ?? null : null;
+  Object.assign(building, householdFields(
+    identity.buildingType || general.buildingType,
+    keepUnits ? { ...general, residential_units: unitsModelled } : general,
+  ));
 
   const outputs = { ...general.outputs };
   if (isServiceBuildingType(identity.buildingType || general.buildingType)) {
@@ -811,7 +833,7 @@ export function serializeToBuemFeature(
         building,
         ...(constructionYear ? { construction_year: constructionYear } : {}),
         ...(storeys ? { storeys } : {}),
-        ...(modelled ? { storey_list: storeyList(modelled, storeys) } : {}),
+        ...(modelled ? { storey_list: storeyList(modelled, storeys, general.storeyDwellings) } : {}),
         ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
         ...(keepUnits ? { residential_units_full: unitsFull } : {}),
         ...(refurbishment ? { refurbishment } : {}),

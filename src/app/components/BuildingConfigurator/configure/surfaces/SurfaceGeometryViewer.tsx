@@ -9,10 +9,10 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildPvModules, buildSurfaceGroup, computeOrigin, toLocal, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { buildPvModules, buildSurfaceGroup, computeOrigin, surfaceSides, toLocal, type SurfacePolygon } from '@/app/lib/surfaceMesh';
 import { storeyAt, storeyBands, storeyLines, storeyParts } from '@/app/lib/storeys';
 import { PV_PRODUCT_DRAG_TYPE } from '@/app/lib/pvProducts';
-import { useT } from '@/app/i18n';
+import { useFormatNumber, useT } from '@/app/i18n';
 
 interface SurfaceGeometryViewerProps {
   surfaces: SurfacePolygon[];
@@ -39,8 +39,8 @@ interface SurfaceGeometryViewerProps {
    *  so picking the same surface again re-frames it. */
   focusId?: string | null;
   focusToken?: number;
-  /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected one highlighted. */
-  storeys?: { count: number; modelled: readonly number[] | null; selected?: number | null };
+  /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected ones highlighted. */
+  storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[] };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
   /** `at` is the click position in client coordinates. */
@@ -50,6 +50,8 @@ interface SurfaceGeometryViewerProps {
 const HIGHLIGHT_COLOR = 0x2563eb;
 const INVALID_COLOR = 0x991b1b;
 /** A surface suggested for PV: a light fill inside a dashed outline. */
+/** The measured sides of the selected surface and their ends. */
+const SIDE_COLOR = 0xf97316;
 const CANDIDATE_FILL = 0xfde047;
 const CANDIDATE_EDGE_COLOR = 0x92400e;
 const EDGE_COLOR = 0x1e293b;
@@ -101,6 +103,15 @@ export function SurfaceGeometryViewer({
   const storeyPickRef = useRef({ onSelectStorey, count: storeys?.count ?? 0 });
   useEffect(() => { storeyPickRef.current = { onSelectStorey, count: storeys?.count ?? 0 }; });
   const origin = useMemo(() => computeOrigin(surfaces), [surfaces]);
+  const format = useFormatNumber();
+  // The selected surface's side lengths, placed over the model by the render loop.
+  const sides = useMemo(() => {
+    const polygon = selectedId ? surfaces.find((surface) => surface.id === selectedId) : undefined;
+    return polygon ? surfaceSides(polygon) : [];
+  }, [surfaces, selectedId]);
+  const sidePositionsRef = useRef<THREE.Vector3[]>([]);
+  const sideLabelsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  useEffect(() => { sidePositionsRef.current = sides.map((side) => toLocal(side.mid, origin)); }, [sides, origin]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -302,6 +313,14 @@ export function SurfaceGeometryViewer({
       if (compassRef.current) {
         compassRef.current.style.transform = `rotate(${-controls.getAzimuthalAngle()}rad)`;
       }
+      const { clientWidth: width, clientHeight: height } = renderer.domElement;
+      sidePositionsRef.current.forEach((position, i) => {
+        const label = sideLabelsRef.current[i];
+        if (!label) return;
+        const at = position.clone().project(camera);
+        label.style.display = at.z > 1 ? 'none' : '';
+        label.style.transform = `translate(-50%, -50%) translate(${((at.x + 1) / 2) * width}px, ${((1 - at.y) / 2) * height}px)`;
+      });
     }
     animate();
 
@@ -341,12 +360,37 @@ export function SurfaceGeometryViewer({
     };
   }, [surfaces, origin]);
 
+  // Each measured side as a bright line with a dot at either end, drawn over
+  // the model so the label's start and end can be seen on a cut-up surface.
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || sides.length === 0) return;
+    const ends = sides.flatMap((side) => [toLocal(side.from, origin), toLocal(side.to, origin)]);
+    const lineMaterial = new THREE.LineBasicMaterial({ color: SIDE_COLOR, depthTest: false });
+    const dotMaterial = new THREE.PointsMaterial({ color: SIDE_COLOR, size: 7, sizeAttenuation: false, depthTest: false });
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ends), lineMaterial);
+    const dots = new THREE.Points(new THREE.BufferGeometry().setFromPoints(ends), dotMaterial);
+    for (const object of [lines, dots]) {
+      object.renderOrder = 10;
+      object.raycast = () => {};
+      scene.add(object);
+    }
+    return () => {
+      for (const object of [lines, dots]) {
+        scene.remove(object);
+        object.geometry.dispose();
+      }
+      lineMaterial.dispose();
+      dotMaterial.dispose();
+    };
+  }, [sides, origin]);
+
   // Display only: the geometry has no storeys, so these follow storeyBands.
   const storeyCount = storeys?.count ?? 0;
   const leftOutKey = storeys?.modelled
     ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)).join(',')
     : '';
-  const selectedStorey = storeys?.selected ?? null;
+  const selectedKey = (storeys?.selected ?? []).join(',');
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || storeyCount < 2 || surfaces.length === 0) return;
@@ -359,7 +403,7 @@ export function SurfaceGeometryViewer({
       side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
     });
     // A left-out storey's part of each surface is drawn again over it, light;
-    // the selected storey's in the selection colour.
+    // the selected storeys' in the selection colour.
     const veil = overMaterial(0xffffff, 0.6);
     const picked = overMaterial(HIGHLIGHT_COLOR, 0.35);
     /** Draws each surface's part inside `chosen` over the model with `material`. */
@@ -378,14 +422,14 @@ export function SurfaceGeometryViewer({
       }
     };
     drawOver(leftOutKey ? leftOutKey.split(',').map(Number) : [], veil);
-    drawOver(selectedStorey ? [selectedStorey] : [], picked);
+    drawOver(selectedKey ? selectedKey.split(',').map(Number) : [], picked);
     scene.add(overlay);
     return () => {
       scene.remove(overlay);
       overlay.children.forEach((child) => (child as THREE.Mesh).geometry.dispose());
       [lineMaterial, veil, picked].forEach((material) => material.dispose());
     };
-  }, [surfaces, origin, storeyCount, leftOutKey, selectedStorey]);
+  }, [surfaces, origin, storeyCount, leftOutKey, selectedKey]);
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {
@@ -440,6 +484,13 @@ export function SurfaceGeometryViewer({
   return (
     <div className="bg-muted" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%', cursor: 'grab' }} />
+      {sides.map((side, i) => (
+        <span
+          key={i}
+          ref={(el) => { sideLabelsRef.current[i] = el; }}
+          className="pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded bg-foreground/85 px-1.5 py-0.5 text-[10px] font-semibold text-background shadow-sm"
+        >{format(side.length, 2)} m</span>
+      ))}
       <div className="border border-border bg-card/90" style={{
         position: 'absolute', top: 12, right: 12, width: 44, height: 44, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',

@@ -127,7 +127,7 @@ export function Switch({ on, label, onChange }: { on: boolean; label: string; on
 export function PvHintPill() {
   const t = useT();
   return (
-    <div className="pointer-events-none absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-foreground px-3.5 py-2 text-[12px] font-medium text-background shadow-md">
+    <div className="pointer-events-none flex w-fit items-center gap-2 rounded-full bg-foreground px-3.5 py-2 text-[12px] font-medium text-background shadow-md">
       <MousePointerClick className="size-4" aria-hidden />
       {t('pv.hint')}
     </div>

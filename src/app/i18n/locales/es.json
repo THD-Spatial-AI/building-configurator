@@ -160,7 +160,8 @@
       "add": "Añadir FV a esta superficie",
       "modules": "Módulos: {count} · {kwp} kWp · {area} m²",
       "noFit": "En esta superficie no cabe ningún módulo entero.",
-      "spaceLimited": "El espacio de esta superficie limita los módulos; una fracción utilizable mayor no añade ninguno."
+      "spaceLimited": "El espacio de esta superficie limita los módulos; una fracción utilizable mayor no añade ninguno.",
+      "noFitShort": "No cabe ningún módulo"
     },
     "mounting": {
       "label": "Montaje",
@@ -183,7 +184,7 @@
       "title": "FV en este edificio"
     },
     "surfaces": {
-      "toggle": "Superficies con FV ({installed} de {total})"
+      "toggle": "Superficies disponibles para FV ({installed} de {total} con FV)"
     },
     "cost": {
       "investment": "Inversión",
@@ -235,6 +236,10 @@
     "followsModel": "La FV sigue los {tilt}° del modelo 3D; la inclinación y la orientación editadas arriba solo van a BuEM.",
     "options": {
       "search": "Buscar en las opciones fotovoltaicas"
+    },
+    "noFitOn": {
+      "one": "Ningún módulo FV completo cabe en {surfaces}, así que no tiene FV. Elija un producto más pequeño u otra superficie.",
+      "other": "Ningún módulo FV completo cabe en {count} superficies ({surfaces}), así que no tienen FV. Elija un producto más pequeño u otras superficies."
     }
   },
   "tech": {
@@ -271,7 +276,7 @@
       "noData": "No hay datos TABULA para este edificio: el servicio TABULA no tiene ninguna variante para él o no se pudo contactar."
     },
     "section": {
-      "occupancy": "Ocupación",
+      "occupancy": "Plantas y ocupación",
       "comfort": "Calefacción y confort",
       "outputs": "Resultados a calcular",
       "equipment": "Electrodomésticos",
@@ -291,9 +296,14 @@
         "other": "{count} viviendas"
       },
       "dwellingsNotSet": "Viviendas sin definir",
-      "perDwelling": "{dwellings} · {persons} por vivienda"
+      "perDwelling": "{dwellings} · {persons} por vivienda",
+      "storeys": {
+        "one": "{count} planta",
+        "other": "{count} plantas"
+      },
+      "storeysModelled": "{modelled} de {total} plantas modeladas"
     },
-    "insulationTitle": "Aislamiento y ventanas",
+    "insulationTitle": "Nivel energético",
     "expertMore": {
       "title": "Térmica y simulación",
       "detail": "los perfiles, los equipos y el solver mantienen sus valores por defecto"
@@ -490,11 +500,11 @@
       }
     },
     "classes": {
-      "compare": "Mostrar la clase energética de cada nivel",
       "comparing": "BuEM calcula cada nivel…",
       "perM2": "{value} kWh/m²",
-      "note": "Clase orientativa para este edificio: calefacción por m² en la escala austriaca HWB, de A++ a G. Simulada, no es un certificado energético.",
-      "failed": "El último intento falló. Inténtelo de nuevo."
+      "note": "Clase orientativa para este edificio: calefacción por m² en la escala austriaca HWB, de G a A++. Simulada, no es un certificado energético.",
+      "failed": "No se pudieron calcular las clases energéticas.",
+      "retry": "Reintentar"
     }
   },
   "options": {
@@ -644,7 +654,8 @@
     "heatingPerM2": "Calefacción {value} kWh/m²·a",
     "heatingClass": {
       "label": "Clase orientativa de demanda de calefacción (simulada, no es un certificado energético)",
-      "tip": "Calefacción anual de BuEM por superficie de referencia, con el clima y la ocupación del cálculo, clasificada según las bandas de la escala austriaca OIB-RL 6 HWB (A++ hasta 10 kWh/m²·a, G por encima de 250). No incluye agua caliente, refrigeración ni electricidad."
+      "tip": "Calefacción anual de BuEM por superficie de referencia, con el clima y la ocupación del cálculo, clasificada según las bandas de la escala austriaca OIB-RL 6 HWB (A++ hasta 10 kWh/m²·a, G por encima de 250). No incluye agua caliente, refrigeración ni electricidad.",
+      "stale": "Para las plantas de la última ejecución. Guarde y previsualice para obtener la clase de las plantas modeladas ahora."
     },
     "tile": {
       "statisticalDefault": "Valor estadístico"
@@ -711,7 +722,7 @@
       "exportFailed": "Error al exportar: {reason}",
       "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET.",
       "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada.",
-      "dwellingsModelledRequired": "Algunas plantas no están en el modelo. Indique el número de viviendas de las plantas modeladas en Plantas modeladas antes de ejecutar una simulación."
+      "dwellingsModelledRequired": "Algunas plantas están fuera del modelo. Indique las viviendas de cada planta modelada en Plantas modeladas antes de ejecutar una simulación."
     },
     "comparison": {
       "lastRun": "la última simulación completa"
@@ -719,18 +730,30 @@
   },
   "storeys": {
     "title": "Plantas modeladas",
-    "hint": "La planta 1 es la planta baja. Excluya las plantas que no forman parte de este modelo, como una tienda en la planta baja; la superficie y la envolvente cuentan solo las plantas modeladas.",
+    "hint": "La planta 1 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas; la superficie y la envolvente cuentan solo las plantas modeladas.",
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
-    "storey": "Planta {number}",
     "floorArea": "Superficie modelada",
     "heightNote": "En el modelo 3D una planta mide {height} m de alto; BuEM usa una altura de estancia de {room} m.",
     "pick": "Plantas",
-    "pickHint": "Haga clic en una planta del modelo para ver si está incluida.",
-    "inModel": "En el modelo",
-    "groundFloor": "Planta baja",
+    "pickHint": "Haga clic en plantas del modelo para seleccionarlas; configúrelas en Plantas modeladas, en la pestaña Edificio.",
     "lastOne": "Al menos una planta permanece en el modelo.",
-    "dwellings": "Viviendas en las plantas modeladas",
-    "dwellingsHint": "Las ganancias internas de BuEM dependen del número de viviendas, no de la superficie."
+    "chip": {
+      "in": "Planta {number}, en el modelo",
+      "out": "Planta {number}, excluida",
+      "dwellings": "{count} viv."
+    },
+    "select": {
+      "all": "Seleccionar todas",
+      "clear": "Borrar la selección",
+      "count": {
+        "one": "{count} planta seleccionada",
+        "other": "{count} plantas seleccionadas"
+      }
+    },
+    "dwellingsPerStorey": "Viviendas por planta",
+    "mixed": "varios",
+    "dwellingsMissing": "Indique las viviendas de cada planta modelada. Falta: planta {storeys}. Las ganancias internas de BuEM siguen el número de viviendas.",
+    "inModel": "En el modelo"
   },
   "help": {
     "envelope": "Cómo retiene el calor esta superficie: su área y su valor U van a BuEM. Un nivel de rehabilitación fija el valor U desde TABULA; un valor cambiado aquí se conserva.",
@@ -738,12 +761,11 @@
     "building": "Qué es el edificio: tipo, año y país eligen sus valores por defecto de TABULA; la superficie por planta y las plantas fijan la superficie que calienta BuEM. Edite para cambiarlos.",
     "demand": "La demanda anual de energía del edificio por uso, del último cálculo de BuEM o del resultado guardado. El gas de cocina es otro combustible y no entra en el total.",
     "insulation": "Fija el aislamiento de todas las paredes, cubiertas, suelos y ventanas a la vez, desde la tipología TABULA de este tipo y antigüedad. Estado actual: el edificio como lo registra TABULA para su antigüedad, sin obras posteriores. Habitual: una rehabilitación común en la práctica, como aislar la cubierta y cambiar ventanas. Avanzada: una rehabilitación ambiciosa hacia el estándar de obra nueva. Una superficie cambiada una a una conserva su valor.",
-    "occupancy": "Quién vive o trabaja en el edificio: el número de viviendas y de personas por vivienda fijan las ganancias internas y el agua caliente en BuEM.",
+    "occupancy": "Cómo se divide el edificio: sus plantas, cuáles están en el modelo y, en una vivienda adosada, plurifamiliar o un bloque de pisos, las viviendas de cada una. Con las personas por vivienda fijan las ganancias internas y el agua caliente de BuEM.",
     "comfort": "Cuándo se calienta el edificio: la temperatura de consigna, si baja de noche o cuando no hay nadie (reducción) y si incluye agua caliente.",
     "outputs": "Qué perfiles devuelve BuEM para cada uso: un resumen anual, una serie horaria o ninguno.",
     "equipment": "Qué aparatos tienen los hogares; la demanda eléctrica de BuEM los sigue. Los que no se fijan conservan la probabilidad propia de BuEM.",
-    "solver": "Cómo resuelve BuEM el modelo horario: con su solucionador disperso por defecto, rápido, o con MILP, más lento pero exacto en los límites.",
-    "weather": "El clima horario con el que calcula BuEM. Un año solar elige del archivo del proveedor un año representativo bajo, típico o alto en radiación solar; típico es el valor por defecto."
+    "solver": "Cómo resuelve BuEM el modelo horario: con su solucionador disperso por defecto, rápido, o con MILP, más lento pero exacto en los límites."
   },
   "tour": {
     "button": "Recorrido",
@@ -779,16 +801,6 @@
     "step1": "Haga clic en un muro, una cubierta o un suelo para abrirlo.",
     "step2": "Cambie su valor U o su nivel de rehabilitación en el panel.",
     "step3": "Guarde y previsualice para ver la nueva demanda del edificio."
-  },
-  "weather": {
-    "title": "Clima",
-    "provider": "Datos meteorológicos",
-    "year": "Año solar",
-    "scenario": {
-      "p10": "Bajo",
-      "p50": "Típico",
-      "p90": "Alto"
-    }
   },
   "legend": {
     "roof": "Cubierta",

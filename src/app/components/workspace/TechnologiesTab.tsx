@@ -15,8 +15,10 @@ import { TechCardFrame, TechnologyCards, type Technologies } from './TechnologyC
 
 const PV_CARD = 'pv';
 
-export function TechnologiesTab({ pv, technologies, elements, layouts, mode, onSelectSurface }: {
+export function TechnologiesTab({ pv, available, technologies, elements, layouts, mode, onSelectSurface }: {
   pv?: PvMode;
+  /** The surfaces some PV option fits on; without it every surface the host offers. */
+  available?: ReadonlySet<string>;
   technologies?: Technologies;
   elements: Record<string, BuildingElement>;
   layouts: Readonly<Record<string, PvLayout>>;
@@ -61,7 +63,7 @@ export function TechnologiesTab({ pv, technologies, elements, layouts, mode, onS
           focused={focusId === PV_CARD}
           onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
         >
-          <PvOverview pv={pv} elements={elements} layouts={layouts} mode={mode} onSelect={onSelectSurface} framed />
+          <PvOverview pv={pv} available={available} elements={elements} layouts={layouts} mode={mode} onSelect={onSelectSurface} framed />
         </TechCardFrame>
       )}
 

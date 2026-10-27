@@ -158,7 +158,8 @@
       "add": "PV op dit vlak plaatsen",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "Er past geen hele module op dit vlak.",
-      "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe."
+      "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe.",
+      "noFitShort": "Geen module past"
     },
     "mounting": {
       "label": "Montage",
@@ -181,7 +182,7 @@
       "title": "PV op dit gebouw"
     },
     "surfaces": {
-      "toggle": "Vlakken met PV ({installed} van {total})"
+      "toggle": "Beschikbare vlakken voor PV ({installed} van {total} met PV)"
     },
     "cost": {
       "investment": "Investering",
@@ -233,6 +234,10 @@
     "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM.",
     "options": {
       "search": "Fotovoltaïsche opties doorzoeken"
+    },
+    "noFitOn": {
+      "one": "Er past geen hele PV-module op {surfaces}, dus het vlak heeft geen PV. Kies een kleiner product of een ander vlak.",
+      "other": "Er past geen hele PV-module op {count} vlakken ({surfaces}), dus ze hebben geen PV. Kies een kleiner product of andere vlakken."
     }
   },
   "tech": {
@@ -269,7 +274,7 @@
       "noData": "Geen TABULA-data gevonden voor dit gebouw: de TABULA-service heeft er geen variant voor of was niet bereikbaar."
     },
     "section": {
-      "occupancy": "Bewoning",
+      "occupancy": "Verdiepingen en bewoning",
       "comfort": "Verwarming en comfort",
       "outputs": "Te berekenen resultaten",
       "equipment": "Apparaten",
@@ -288,9 +293,14 @@
         "other": "{count} woningen"
       },
       "dwellingsNotSet": "Woningen niet ingesteld",
-      "perDwelling": "{dwellings} · {persons} per woning"
+      "perDwelling": "{dwellings} · {persons} per woning",
+      "storeys": {
+        "one": "{count} verdieping",
+        "other": "{count} verdiepingen"
+      },
+      "storeysModelled": "{modelled} van {total} verdiepingen gemodelleerd"
     },
-    "insulationTitle": "Isolatie en ramen",
+    "insulationTitle": "Energieniveau",
     "expertMore": {
       "title": "Thermiek en simulatie",
       "detail": "profielen, apparatuur en solver houden hun standaardwaarden"
@@ -485,11 +495,11 @@
       }
     },
     "classes": {
-      "compare": "Energieklasse van elk niveau tonen",
       "comparing": "BuEM rekent elk niveau…",
       "perM2": "{value} kWh/m²",
-      "note": "Indicatieve klasse voor dit gebouw: ruimteverwarming per m² op de Oostenrijkse HWB-schaal, A++ tot G. Gesimuleerd, geen energielabel.",
-      "failed": "De laatste poging is mislukt. Probeer opnieuw."
+      "note": "Indicatieve klasse voor dit gebouw: ruimteverwarming per m² op de Oostenrijkse HWB-schaal, G tot A++. Gesimuleerd, geen energielabel.",
+      "failed": "De energieklassen konden niet worden bepaald.",
+      "retry": "Opnieuw proberen"
     }
   },
   "options": {
@@ -638,7 +648,8 @@
     "heatingPerM2": "Verwarming {value} kWh/m²·a",
     "heatingClass": {
       "label": "Indicatieve klasse voor de warmtevraag (gesimuleerd, geen energielabel)",
-      "tip": "Jaarlijkse ruimteverwarming van BuEM per referentieoppervlak, met het weer en de bezetting van de berekening, ingedeeld volgens de banden van de Oostenrijkse OIB-RL 6 HWB-schaal (A++ tot 10 kWh/m²·a, G boven 250). Warm water, koeling en elektriciteit zijn niet meegeteld."
+      "tip": "Jaarlijkse ruimteverwarming van BuEM per referentieoppervlak, met het weer en de bezetting van de berekening, ingedeeld volgens de banden van de Oostenrijkse OIB-RL 6 HWB-schaal (A++ tot 10 kWh/m²·a, G boven 250). Warm water, koeling en elektriciteit zijn niet meegeteld.",
+      "stale": "Voor de verdiepingen van de laatste berekening. Opslaan en voorbeeld geeft de klasse van de nu gemodelleerde verdiepingen."
     },
     "tile": {
       "statisticalDefault": "Statistische waarde"
@@ -705,7 +716,7 @@
       "exportFailed": "Export mislukt: {reason}",
       "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
       "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel.",
-      "dwellingsModelledRequired": "Sommige verdiepingen zijn niet in het model. Geef onder Gemodelleerde verdiepingen het aantal woningen in de gemodelleerde verdiepingen op voordat u een simulatie start."
+      "dwellingsModelledRequired": "Sommige verdiepingen zijn weggelaten uit het model. Geef onder Gemodelleerde verdiepingen de woningen van elke gemodelleerde verdieping op voordat u een simulatie start."
     },
     "comparison": {
       "lastRun": "de laatste volledige simulatie"
@@ -713,18 +724,30 @@
   },
   "storeys": {
     "title": "Gemodelleerde verdiepingen",
-    "hint": "Verdieping 1 is de begane grond. Laat verdiepingen weg die niet bij dit model horen, zoals een winkel op de begane grond; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "hint": "Verdieping 1 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
     "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
-    "storey": "Verdieping {number}",
     "floorArea": "Gemodelleerd vloeroppervlak",
     "heightNote": "In het 3D-model is een verdieping {height} m hoog; BuEM rekent met een kamerhoogte van {room} m.",
     "pick": "Verdiepingen",
-    "pickHint": "Klik op een verdieping in het model om te zien of die wordt meegenomen.",
-    "inModel": "In het model",
-    "groundFloor": "Begane grond",
+    "pickHint": "Klik verdiepingen in het model aan om ze te selecteren; stel ze in onder Gemodelleerde verdiepingen op het tabblad Gebouw.",
     "lastOne": "Minstens één verdieping blijft in het model.",
-    "dwellings": "Woningen in de gemodelleerde verdiepingen",
-    "dwellingsHint": "De interne warmtewinst in BuEM volgt het aantal woningen, niet het vloeroppervlak."
+    "chip": {
+      "in": "Verdieping {number}, in het model",
+      "out": "Verdieping {number}, weggelaten",
+      "dwellings": "{count} won."
+    },
+    "select": {
+      "all": "Alles selecteren",
+      "clear": "Selectie wissen",
+      "count": {
+        "one": "{count} verdieping geselecteerd",
+        "other": "{count} verdiepingen geselecteerd"
+      }
+    },
+    "dwellingsPerStorey": "Woningen per verdieping",
+    "mixed": "gemengd",
+    "dwellingsMissing": "Geef de woningen van elke gemodelleerde verdieping op. Ontbreekt: verdieping {storeys}. De interne warmtelast van BuEM volgt het aantal woningen.",
+    "inModel": "In het model"
   },
   "help": {
     "envelope": "Hoe dit vlak warmte vasthoudt: oppervlak en U-waarde gaan naar BuEM. Een renovatieniveau zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft staan.",
@@ -732,12 +755,11 @@
     "building": "Wat het gebouw is: type, bouwjaar en land kiezen de TABULA-standaardwaarden; vloeroppervlak per verdieping en verdiepingen bepalen het oppervlak dat BuEM verwarmt. Bewerk om ze te wijzigen.",
     "demand": "De jaarlijkse energievraag van het gebouw per gebruik, uit de laatste BuEM-berekening of het opgeslagen resultaat. Kookgas is een aparte brandstof en telt niet mee in het totaal.",
     "insulation": "Zet de isolatie van alle muren, daken, vloeren en ramen tegelijk, uit de TABULA-typologie voor dit gebouwtype en deze leeftijd. Bestaand: het gebouw zoals TABULA het voor zijn leeftijd vastlegt, zonder latere ingrepen. Gangbaar: een renovatie die in de praktijk veel voorkomt, zoals extra dakisolatie en nieuwe ramen. Vergaand: een ambitieuze renovatie richting nieuwbouwniveau. Een vlak dat afzonderlijk is gewijzigd, houdt zijn eigen waarde.",
-    "occupancy": "Wie in het gebouw woont of werkt: het aantal woningen en personen per woning bepalen de interne warmtewinst en het warmwatergebruik in BuEM.",
+    "occupancy": "Hoe het gebouw is ingedeeld: de verdiepingen, welke in het model zitten en, bij een rijwoning, meergezinswoning of flat, de woningen per verdieping. Met de personen per woning bepalen ze de interne warmtelast en het warmwatergebruik van BuEM.",
     "comfort": "Wanneer het gebouw wordt verwarmd: de insteltemperatuur, of die 's nachts of bij afwezigheid wordt verlaagd (nachtverlaging) en of warm water is inbegrepen.",
     "outputs": "Welke profielen BuEM per gebruik teruggeeft: een jaaroverzicht, een uurreeks of geen.",
     "equipment": "Welke apparaten de huishoudens bezitten; de elektriciteitsvraag in BuEM volgt ze. Niet ingestelde apparaten houden de kans van BuEM zelf.",
-    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen.",
-    "weather": "Het weer per uur waarmee BuEM rekent. Een zonnejaar kiest uit het archief van de leverancier een representatief laag, typisch of hoog jaar voor zonnestraling; typisch is de standaard."
+    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen."
   },
   "tour": {
     "button": "Rondleiding",
@@ -773,16 +795,6 @@
     "step1": "Klik op een muur, dak of vloer om die te openen.",
     "step2": "Wijzig de U-waarde of het renovatieniveau in het paneel.",
     "step3": "Opslaan en voorbeeld toont de nieuwe vraag van het gebouw."
-  },
-  "weather": {
-    "title": "Weer",
-    "provider": "Weergegevens",
-    "year": "Zonnejaar",
-    "scenario": {
-      "p10": "Laag",
-      "p50": "Typisch",
-      "p90": "Hoog"
-    }
   },
   "legend": {
     "roof": "Dak",

@@ -72,7 +72,6 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 | `runBuemBuilding` | Save & Preview | Yes |
 | `previewBuemBuilding` | The refurbishment levels are compared by energy class | No |
 | `runPvBuilding` | Save & Preview, when the building has PV surfaces | No |
-| `fetchWeatherOptions` | Once, as the view opens; the Weather section shows only with it | No |
 
 ## Data formats
 
@@ -91,6 +90,6 @@ Schema path changes go in `modelDataMap.ts` only.
 | Key | Holds |
 |---|---|
 | `storeys` | The building's total storey count |
-| `storey_list` | One `{ storey, modelled }` entry per storey |
+| `storey_list` | One `{ storey, modelled, dwellings? }` entry per storey; `dwellings` where the user gave it |
 | `envelope_full` | The envelope of the whole building |
 | `residential_units_full` | The dwellings of the whole building, or null |

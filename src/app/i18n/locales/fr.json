@@ -160,7 +160,8 @@
       "add": "Ajouter du PV sur cette surface",
       "modules": "Modules : {count} · {kwp} kWp · {area} m²",
       "noFit": "Aucun module entier ne tient sur cette surface.",
-      "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun."
+      "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun.",
+      "noFitShort": "Aucun module ne tient"
     },
     "mounting": {
       "label": "Pose",
@@ -183,7 +184,7 @@
       "title": "PV sur ce bâtiment"
     },
     "surfaces": {
-      "toggle": "Surfaces avec PV ({installed} sur {total})"
+      "toggle": "Surfaces disponibles pour le PV ({installed} sur {total} avec PV)"
     },
     "cost": {
       "investment": "Investissement",
@@ -235,6 +236,10 @@
     "followsModel": "Le PV suit les {tilt}° du modèle 3D ; l'inclinaison et l'orientation modifiées ci-dessus ne vont qu'à BuEM.",
     "options": {
       "search": "Rechercher dans les options photovoltaïques"
+    },
+    "noFitOn": {
+      "one": "Aucun module PV entier ne tient sur {surfaces} : elle n'a donc pas de PV. Choisissez un produit plus petit ou une autre surface.",
+      "other": "Aucun module PV entier ne tient sur {count} surfaces ({surfaces}) : elles n'ont donc pas de PV. Choisissez un produit plus petit ou d'autres surfaces."
     }
   },
   "tech": {
@@ -271,7 +276,7 @@
       "noData": "Aucune donnée TABULA pour ce bâtiment : le service TABULA n'a aucune variante pour lui ou est injoignable."
     },
     "section": {
-      "occupancy": "Occupation",
+      "occupancy": "Étages et occupation",
       "comfort": "Chauffage et confort",
       "outputs": "Résultats à calculer",
       "equipment": "Appareils",
@@ -291,9 +296,14 @@
         "other": "{count} logements"
       },
       "dwellingsNotSet": "Logements non définis",
-      "perDwelling": "{dwellings} · {persons} par logement"
+      "perDwelling": "{dwellings} · {persons} par logement",
+      "storeys": {
+        "one": "{count} étage",
+        "other": "{count} étages"
+      },
+      "storeysModelled": "{modelled} étages sur {total} modélisés"
     },
-    "insulationTitle": "Isolation et fenêtres",
+    "insulationTitle": "Niveau énergétique",
     "expertMore": {
       "title": "Thermique et simulation",
       "detail": "les profils, les équipements et le solveur gardent leurs valeurs par défaut"
@@ -490,11 +500,11 @@
       }
     },
     "classes": {
-      "compare": "Afficher la classe énergétique de chaque niveau",
       "comparing": "BuEM calcule chaque niveau…",
       "perM2": "{value} kWh/m²",
-      "note": "Classe indicative pour ce bâtiment : besoin de chauffage par m² sur l'échelle autrichienne HWB, de A++ à G. Simulée, pas un certificat énergétique.",
-      "failed": "La dernière tentative a échoué. Réessayez."
+      "note": "Classe indicative pour ce bâtiment : besoin de chauffage par m² sur l'échelle autrichienne HWB, de G à A++. Simulée, pas un certificat énergétique.",
+      "failed": "Les classes énergétiques n'ont pas pu être calculées.",
+      "retry": "Réessayer"
     }
   },
   "options": {
@@ -644,7 +654,8 @@
     "heatingPerM2": "Chauffage {value} kWh/m²·a",
     "heatingClass": {
       "label": "Classe indicative de besoin de chauffage (simulée, pas un certificat énergétique)",
-      "tip": "Besoin annuel de chauffage de BuEM par surface de référence, avec la météo et l'occupation du calcul, classé selon les bandes de l'échelle autrichienne OIB-RL 6 HWB (A++ jusqu'à 10 kWh/m²·a, G au-delà de 250). Eau chaude, refroidissement et électricité ne sont pas inclus."
+      "tip": "Besoin annuel de chauffage de BuEM par surface de référence, avec la météo et l'occupation du calcul, classé selon les bandes de l'échelle autrichienne OIB-RL 6 HWB (A++ jusqu'à 10 kWh/m²·a, G au-delà de 250). Eau chaude, refroidissement et électricité ne sont pas inclus.",
+      "stale": "Pour les étages du dernier calcul. Enregistrez et prévisualisez pour obtenir la classe des étages modélisés maintenant."
     },
     "tile": {
       "statisticalDefault": "Valeur statistique"
@@ -711,7 +722,7 @@
       "exportFailed": "Échec de l'export : {reason}",
       "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET.",
       "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour.",
-      "dwellingsModelledRequired": "Certains étages ne sont pas dans le modèle. Indiquez le nombre de logements des étages modélisés sous Étages modélisés avant de lancer une simulation."
+      "dwellingsModelledRequired": "Certains étages sont retirés du modèle. Indiquez les logements de chaque étage modélisé dans Étages modélisés avant de lancer une simulation."
     },
     "comparison": {
       "lastRun": "la dernière simulation complète"
@@ -719,18 +730,30 @@
   },
   "storeys": {
     "title": "Étages modélisés",
-    "hint": "L'étage 1 est le rez-de-chaussée. Excluez les étages qui ne font pas partie de ce modèle, comme un commerce au rez-de-chaussée ; la surface et l'enveloppe ne comptent que les étages modélisés.",
+    "hint": "L'étage 1 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ; la surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
-    "storey": "Étage {number}",
     "floorArea": "Surface modélisée",
     "heightNote": "Dans le modèle 3D, un étage mesure {height} m de haut ; BuEM utilise une hauteur sous plafond de {room} m.",
     "pick": "Étages",
-    "pickHint": "Cliquez sur un étage du modèle pour voir s'il est modélisé.",
-    "inModel": "Dans le modèle",
-    "groundFloor": "Rez-de-chaussée",
+    "pickHint": "Cliquez sur des étages dans le modèle pour les sélectionner ; réglez-les dans Étages modélisés, dans l'onglet Bâtiment.",
     "lastOne": "Au moins un étage reste dans le modèle.",
-    "dwellings": "Logements dans les étages modélisés",
-    "dwellingsHint": "Les apports internes de BuEM dépendent du nombre de logements, pas de la surface."
+    "chip": {
+      "in": "Étage {number}, dans le modèle",
+      "out": "Étage {number}, retiré",
+      "dwellings": "{count} lgt"
+    },
+    "select": {
+      "all": "Tout sélectionner",
+      "clear": "Effacer la sélection",
+      "count": {
+        "one": "{count} étage sélectionné",
+        "other": "{count} étages sélectionnés"
+      }
+    },
+    "dwellingsPerStorey": "Logements par étage",
+    "mixed": "variable",
+    "dwellingsMissing": "Indiquez les logements de chaque étage modélisé. Manquant : étage {storeys}. Les apports internes de BuEM suivent le nombre de logements.",
+    "inModel": "Dans le modèle"
   },
   "help": {
     "envelope": "Comment cette surface retient la chaleur : sa surface et sa valeur U vont à BuEM. Un niveau de rénovation fixe la valeur U depuis TABULA ; une valeur modifiée ici est conservée.",
@@ -738,12 +761,11 @@
     "building": "Ce qu'est le bâtiment : type, année et pays choisissent ses valeurs TABULA par défaut ; la surface par étage et les étages fixent la surface chauffée par BuEM. Modifiez pour les changer.",
     "demand": "La demande annuelle d'énergie du bâtiment par usage, issue du dernier calcul BuEM ou du résultat enregistré. Le gaz de cuisson est un autre combustible, hors total.",
     "insulation": "Fixe l'isolation de tous les murs, toits, planchers et fenêtres en une fois, d'après la typologie TABULA pour ce type et cet âge. Existant : le bâtiment tel que TABULA le recense pour son âge, sans travaux ultérieurs. Habituelle : une rénovation courante, comme une isolation de toiture ajoutée et de nouvelles fenêtres. Avancée : une rénovation ambitieuse vers le standard du neuf. Une surface modifiée individuellement garde sa valeur.",
-    "occupancy": "Qui vit ou travaille dans le bâtiment : le nombre de logements et de personnes par logement fixent les apports internes et l'eau chaude dans BuEM.",
+    "occupancy": "Comment le bâtiment se divise : ses étages, ceux qui sont dans le modèle et, pour une maison mitoyenne, un immeuble collectif ou un grand ensemble, les logements de chacun. Avec les personnes par logement, ils fixent les apports internes et l'eau chaude de BuEM.",
     "comfort": "Quand le bâtiment est chauffé : la température de consigne, si elle baisse la nuit ou en absence (réduit) et si l'eau chaude est incluse.",
     "outputs": "Les profils que BuEM renvoie pour chaque usage : un résumé annuel, une série horaire ou aucun.",
     "equipment": "Les appareils que possèdent les ménages ; la demande d'électricité de BuEM en dépend. Les appareils non renseignés gardent la probabilité de BuEM.",
-    "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites.",
-    "weather": "La météo horaire utilisée par BuEM. Une année solaire choisit dans l'archive du fournisseur une année représentative faible, typique ou forte en ensoleillement ; typique est la valeur par défaut."
+    "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites."
   },
   "tour": {
     "button": "Visite",
@@ -779,16 +801,6 @@
     "step1": "Cliquez sur un mur, un toit ou un plancher pour l'ouvrir.",
     "step2": "Modifiez sa valeur U ou son niveau de rénovation dans le panneau.",
     "step3": "Enregistrez et prévisualisez pour voir la nouvelle demande du bâtiment."
-  },
-  "weather": {
-    "title": "Météo",
-    "provider": "Données météo",
-    "year": "Année solaire",
-    "scenario": {
-      "p10": "Faible",
-      "p50": "Typique",
-      "p90": "Fort"
-    }
   },
   "legend": {
     "roof": "Toit",

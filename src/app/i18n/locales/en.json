@@ -158,7 +158,8 @@
       "add": "Add PV to this surface",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "No whole module fits on this surface.",
-      "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none."
+      "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none.",
+      "noFitShort": "No module fits"
     },
     "mounting": {
       "label": "Mounting",
@@ -181,7 +182,7 @@
       "title": "PV on this building"
     },
     "surfaces": {
-      "toggle": "Surfaces with PV ({installed} of {total})"
+      "toggle": "Available surfaces for PV ({installed} of {total} with PV)"
     },
     "cost": {
       "investment": "Investment",
@@ -233,6 +234,10 @@
     "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
     "options": {
       "search": "Search the photovoltaic options"
+    },
+    "noFitOn": {
+      "one": "No whole PV module fits on {surfaces}, so it has no PV. Choose a smaller product or another surface.",
+      "other": "No whole PV module fits on {count} surfaces ({surfaces}), so they have no PV. Choose a smaller product or other surfaces."
     }
   },
   "tech": {
@@ -269,7 +274,7 @@
       "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached."
     },
     "section": {
-      "occupancy": "Occupancy",
+      "occupancy": "Storeys and occupancy",
       "comfort": "Heating and comfort",
       "outputs": "Results to compute",
       "equipment": "Appliances",
@@ -288,9 +293,14 @@
         "other": "{count} dwellings"
       },
       "dwellingsNotSet": "Dwellings not set",
-      "perDwelling": "{dwellings} · {persons} per dwelling"
+      "perDwelling": "{dwellings} · {persons} per dwelling",
+      "storeys": {
+        "one": "{count} storey",
+        "other": "{count} storeys"
+      },
+      "storeysModelled": "{modelled} of {total} storeys modelled"
     },
-    "insulationTitle": "Insulation and windows",
+    "insulationTitle": "Energy grade",
     "expertMore": {
       "title": "Thermal and simulation",
       "detail": "profiles, equipment and solver keep their defaults"
@@ -485,11 +495,11 @@
       }
     },
     "classes": {
-      "compare": "Show the energy class of each level",
       "comparing": "Running BuEM for each level…",
       "perM2": "{value} kWh/m²",
-      "note": "Indicative class for this building: space heating per m² on the Austrian HWB scale, A++ to G. Simulated, not an energy certificate.",
-      "failed": "The last try failed. Try again."
+      "note": "Indicative class for this building: space heating per m² on the Austrian HWB scale, G to A++. Simulated, not an energy certificate.",
+      "failed": "The energy classes could not be worked out.",
+      "retry": "Try again"
     }
   },
   "options": {
@@ -638,7 +648,8 @@
     "heatingPerM2": "Heating {value} kWh/m²·a",
     "heatingClass": {
       "label": "Indicative heating demand class (simulated, not an energy certificate)",
-      "tip": "BuEM's annual space heating per reference floor area, under the run's weather and occupancy, graded on the bands of the Austrian OIB-RL 6 HWB scale (A++ up to 10 kWh/m²·a, G above 250). Hot water, cooling and electricity are not included."
+      "tip": "BuEM's annual space heating per reference floor area, under the run's weather and occupancy, graded on the bands of the Austrian OIB-RL 6 HWB scale (A++ up to 10 kWh/m²·a, G above 250). Hot water, cooling and electricity are not included.",
+      "stale": "For the storeys as last run. Save & Preview to get the class of the storeys now modelled."
     },
     "tile": {
       "statisticalDefault": "Statistical default"
@@ -705,7 +716,7 @@
       "exportFailed": "Export failed: {reason}",
       "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json.",
       "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date.",
-      "dwellingsModelledRequired": "Some storeys are left out of the model. Give the number of dwellings in the modelled storeys under Storeys modelled before running a simulation."
+      "dwellingsModelledRequired": "Some storeys are left out of the model. Give the dwellings of every modelled storey under Storeys modelled before running a simulation."
     },
     "comparison": {
       "lastRun": "the last full simulation"
@@ -713,18 +724,30 @@
   },
   "storeys": {
     "title": "Storeys modelled",
-    "hint": "Storey 1 is the ground floor. Leave out storeys that are not part of this model, such as a shop on the ground floor; floor area and envelope count the modelled storeys only.",
+    "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model or give their dwellings; floor area and envelope count the modelled storeys only.",
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
-    "storey": "Storey {number}",
     "floorArea": "Floor area modelled",
     "heightNote": "In the 3D model a storey is {height} m tall; BuEM uses a room height of {room} m.",
     "pick": "Storeys",
-    "pickHint": "Click a storey in the model to see whether it is in the model.",
-    "inModel": "In the model",
-    "groundFloor": "Ground floor",
+    "pickHint": "Click storeys in the model to select them; set them in Storeys modelled on the Building tab.",
     "lastOne": "At least one storey stays in the model.",
-    "dwellings": "Dwellings in the modelled storeys",
-    "dwellingsHint": "BuEM's internal gains follow the number of dwellings, not the floor area."
+    "chip": {
+      "in": "Storey {number}, in the model",
+      "out": "Storey {number}, left out",
+      "dwellings": "{count} dw."
+    },
+    "select": {
+      "all": "Select all",
+      "clear": "Clear selection",
+      "count": {
+        "one": "{count} storey selected",
+        "other": "{count} storeys selected"
+      }
+    },
+    "dwellingsPerStorey": "Dwellings per storey",
+    "mixed": "mixed",
+    "dwellingsMissing": "Give the dwellings of every modelled storey. Missing: storey {storeys}. BuEM's internal gains follow the dwelling count.",
+    "inModel": "In the model"
   },
   "help": {
     "envelope": "How this surface holds heat: its area and U-value go to BuEM. A refurbishment level sets the U-value from TABULA; a value changed here is kept.",
@@ -732,12 +755,11 @@
     "building": "What the building is: type, year and country choose its TABULA defaults; floor area per storey and storeys set the area BuEM heats. Edit to change them.",
     "demand": "The building's annual energy demand by use, from its last BuEM run or the stored result. Cooking gas is a separate fuel and not part of the total.",
     "insulation": "Sets the insulation of every wall, roof, floor and window at once, from the TABULA typology for this building type and age. Existing: the building as TABULA records it for its age, without later work. Usual: a refurbishment common in practice, such as added roof insulation and new windows. Advanced: an ambitious refurbishment towards new-build standard. A surface changed one by one keeps its own value.",
-    "occupancy": "Who lives or works in the building: the number of dwellings and people per dwelling set BuEM's internal gains and hot water use.",
+    "occupancy": "How the building divides: its storeys, which of them are in the model and, for a terraced house, multi-family house or apartment block, the dwellings on each. With the people per dwelling these set BuEM's internal gains and hot water use.",
     "comfort": "When the building is heated: the temperature it is heated to, whether that is lowered at night or when people are away (set-back), and whether hot water is included.",
     "outputs": "Which profiles BuEM returns for each use: a yearly summary, an hourly series, or none.",
     "equipment": "Which appliances the households own; BuEM's electricity demand follows them. Appliances left unset keep BuEM's own likelihood.",
-    "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits.",
-    "weather": "The hourly weather BuEM runs on. A solar year picks a representative low, typical or high year for sunshine from the provider's archive; typical is the default."
+    "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits."
   },
   "tour": {
     "button": "Tour",
@@ -773,16 +795,6 @@
     "step1": "Click a wall, roof or floor to open it.",
     "step2": "Change its U-value or refurbishment level in the panel.",
     "step3": "Save and preview to see the building's new demand."
-  },
-  "weather": {
-    "title": "Weather",
-    "provider": "Weather data",
-    "year": "Solar year",
-    "scenario": {
-      "p10": "Low",
-      "p50": "Typical",
-      "p90": "High"
-    }
   },
   "legend": {
     "roof": "Roof",

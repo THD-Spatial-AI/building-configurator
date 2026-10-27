@@ -1,55 +1,51 @@
-// Which storeys of the building are in the model: one chip per storey from
-// the ground up, at least one kept. Floor area and envelope follow them.
+// Which storeys of the building are in the model, and the dwellings on each.
+// Storeys are selected, one or many, here or in the 3D model; the selection is
+// then left out, put back, or given a dwelling count. At least one stays in.
 
 import { cn } from '@/lib/utils';
-import { TOPICS } from '@/app/config/topics';
 import { useFormatNumber, useT } from '../../i18n';
+import { DecimalInput, InfoTip } from '../BuildingConfigurator/shared/ui';
 import { Switch } from './PvMode';
-import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
+import type { StoreyDwellings } from '../../lib/storeys';
 
-/** The storeys modelled with one storey switched on or off; null when all are on, undefined when it would leave none. */
-export function toggleStorey(modelled: number[] | null, storeys: number, storey: number): number[] | null | undefined {
+/** The storeys modelled with `chosen` left out or put back; null when all are in, undefined when none would be. */
+export function withStoreys(modelled: number[] | null, storeys: number, chosen: readonly number[], inModel: boolean): number[] | null | undefined {
   const all = Array.from({ length: storeys }, (_, i) => i + 1);
   const on = new Set(modelled ?? all);
-  const next = all.filter((s) => (s === storey ? !on.has(s) : on.has(s)));
+  for (const storey of chosen) {
+    if (inModel) on.add(storey);
+    else on.delete(storey);
+  }
+  const next = all.filter((s) => on.has(s));
   if (next.length === 0) return undefined;
   return next.length === storeys ? null : next;
 }
 
-/** A storey picked in the model: whether it is in the model, with a switch. */
-export function StoreyPanel({ storey, modelled, storeys, onChange }: {
-  storey: number;
-  modelled: number[] | null;
-  storeys: number;
-  onChange: (modelled: number[] | null) => void;
-}) {
-  const t = useT();
-  const on = modelled === null || modelled.includes(storey);
-  const next = toggleStorey(modelled, storeys, storey);
-  return (
-    <div className="flex flex-col gap-3 p-3">
-      <div className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2">
-        <span className="text-[12px] font-semibold text-foreground">{t('storeys.inModel')}</span>
-        <Switch on={on} label={t('storeys.inModel')} onChange={() => { if (next !== undefined) onChange(next); }} />
-      </div>
-      <p className="text-[11px] leading-snug text-muted-foreground">
-        {next === undefined ? t('storeys.lastOne') : t('storeys.hint')}
-      </p>
-    </div>
-  );
+/** The selection with one storey added or taken out. */
+export function toggleSelected(selected: readonly number[], storey: number): number[] {
+  return selected.includes(storey) ? selected.filter((s) => s !== storey) : [...selected, storey].sort((a, b) => a - b);
+}
+
+/** The dwelling count every chosen storey shares, or null when they differ or have none. */
+function sharedCount(chosen: readonly number[], dwellings: StoreyDwellings): number | null {
+  const counts = new Set(chosen.map((storey) => dwellings[storey] ?? null));
+  return counts.size === 1 ? [...counts][0] : null;
 }
 
 /** Above this gap between the model's storey height and BuEM's room height, the panel says so. */
 const HEIGHT_NOTE_GAP_M = 0.5;
 
-/** `modelled` null means every storey; `onChange` gets null back when all are on again. */
+/** `modelled` null means every storey; `onChange` gets null back when all are in again. */
 export function StoreysModelled({
-  storeys, modelled, floorAreaPerStorey, storeyHeight, roomHeight, dwellings, disabled, onChange,
+  storeys, modelled, selected, onSelect, floorAreaPerStorey, storeyHeight, roomHeight, dwellings, disabled, onChange,
 }: {
-  /** Asked while a storey is left out of a residential building, since BuEM's gains follow the dwelling count. */
-  dwellings?: { value: number | null; onChange: (value: number | null) => void };
   storeys: number;
   modelled: number[] | null;
+  /** The storeys selected, here or in the model. */
+  selected: readonly number[];
+  onSelect: (selected: number[]) => void;
+  /** A residential building's dwellings per storey; BuEM's gains follow the count of the storeys modelled. */
+  dwellings?: { values: StoreyDwellings; onChange: (values: Record<number, number>) => void };
   floorAreaPerStorey: number;
   /** Height of one storey band in the 3D model, ground to eaves over the storey count. */
   storeyHeight?: number;
@@ -63,56 +59,102 @@ export function StoreysModelled({
   const format = useFormatNumber();
   const all = Array.from({ length: storeys }, (_, i) => i + 1);
   const on = new Set(modelled ?? all);
-  const toggle = (storey: number) => {
-    const next = toggleStorey(modelled, storeys, storey);
-    if (next !== undefined) onChange(next);
+  const leaveOut = withStoreys(modelled, storeys, selected, false);
+  /** The switch is on while every selected storey is in the model; turning it on puts them all back. */
+  const allIn = selected.every((storey) => on.has(storey));
+  const missing = modelled && dwellings ? [...on].filter((storey) => !(dwellings.values[storey] >= 1)) : [];
+  const setDwellings = (count: number | null) => {
+    if (!dwellings) return;
+    const next: Record<number, number> = { ...dwellings.values };
+    for (const storey of selected) {
+      if (count && count >= 1) next[storey] = count;
+      else delete next[storey];
+    }
+    dwellings.onChange(next);
   };
+
   return (
-    <SectionCard topic={TOPICS.building} title={t('storeys.title')} info={t('storeys.hint')}>
-      <div className="flex flex-col gap-2 p-3">
+    <div className="flex flex-col gap-2">
+        <span className="flex items-center gap-1 text-[12px] font-semibold text-foreground">
+          {t('storeys.title')}<InfoTip tip={t('storeys.hint')} />
+        </span>
         {disabled && <p className="text-[11px] leading-snug text-muted-foreground">{t('storeys.noGeometry')}</p>}
         <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('storeys.title')}>
-          {all.map((storey) => (
-            <button
-              key={storey}
-              type="button"
-              disabled={disabled}
-              aria-pressed={on.has(storey)}
-              aria-label={t('storeys.storey', { number: storey })}
-              onClick={() => toggle(storey)}
-              className={cn(
-                'h-8 min-w-8 cursor-pointer rounded-md border px-2 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-                on.has(storey)
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
-              )}
-            >{storey}</button>
-          ))}
+          {all.map((storey) => {
+            const count = dwellings?.values[storey];
+            return (
+              <button
+                key={storey}
+                type="button"
+                disabled={disabled}
+                aria-pressed={selected.includes(storey)}
+                aria-label={t(on.has(storey) ? 'storeys.chip.in' : 'storeys.chip.out', { number: storey })}
+                onClick={() => onSelect(toggleSelected(selected, storey))}
+                className={cn(
+                  'flex h-9 min-w-9 cursor-pointer flex-col items-center justify-center rounded-md border px-2 text-[12px] font-semibold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                  on.has(storey)
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
+                  selected.includes(storey) && 'ring-2 ring-amber-400 ring-offset-1 ring-offset-card',
+                )}
+              >
+                {storey}
+                {count !== undefined && <span className="mt-0.5 text-[9px] font-medium opacity-80">{t('storeys.chip.dwellings', { count })}</span>}
+              </button>
+            );
+          })}
         </div>
+        <div className="flex gap-3 text-[11px]">
+          <button type="button" disabled={disabled} onClick={() => onSelect(all)} className="cursor-pointer text-[11px] font-medium text-primary hover:underline disabled:cursor-not-allowed">
+            {t('storeys.select.all')}
+          </button>
+          {selected.length > 0 && (
+            <button type="button" onClick={() => onSelect([])} className="cursor-pointer text-[11px] font-medium text-primary hover:underline">
+              {t('storeys.select.clear')}
+            </button>
+          )}
+        </div>
+
+        {selected.length > 0 && (
+          <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50/60 p-2.5 dark:border-amber-500/40 dark:bg-amber-500/10">
+            <span className="text-[12px] font-semibold text-foreground">{t('storeys.select.count', { count: selected.length })}</span>
+            <div className="flex items-center justify-between gap-2" title={allIn && leaveOut === undefined ? t('storeys.lastOne') : undefined}>
+              <span className="text-[12px] text-foreground">{t('storeys.inModel')}</span>
+              <Switch
+                on={allIn}
+                label={t('storeys.inModel')}
+                onChange={(next) => {
+                  const modelledNext = withStoreys(modelled, storeys, selected, next);
+                  if (modelledNext !== undefined) onChange(modelledNext);
+                }}
+              />
+            </div>
+            {dwellings && (
+              <label className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.dwellingsPerStorey')}</span>
+                <DecimalInput
+                  integer
+                  min={1}
+                  value={sharedCount(selected, dwellings.values)}
+                  placeholder={selected.length > 1 ? t('storeys.mixed') : undefined}
+                  aria-label={t('storeys.dwellingsPerStorey')}
+                  onChange={setDwellings}
+                  className="h-8 w-20 rounded-md border border-border bg-card px-2 text-right text-[12px] text-foreground"
+                />
+              </label>
+            )}
+          </div>
+        )}
+
+        {missing.length > 0 && (
+          <p className="text-[11px] leading-snug text-destructive">
+            {t('storeys.dwellingsMissing', { storeys: missing.join(', ') })}
+          </p>
+        )}
         {storeyHeight !== undefined && Math.abs(storeyHeight - roomHeight) > HEIGHT_NOTE_GAP_M && (
           <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
             {t('storeys.heightNote', { height: format(storeyHeight, 1), room: format(roomHeight, 1) })}
           </p>
-        )}
-        {modelled && dwellings && (
-          <label className="flex flex-col gap-1">
-            <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.dwellings')}</span>
-            <input
-              type="number"
-              min={1}
-              step={1}
-              value={dwellings.value ?? ''}
-              onChange={(e) => {
-                const n = Number.parseInt(e.target.value, 10);
-                dwellings.onChange(Number.isInteger(n) && n >= 1 ? n : null);
-              }}
-              className={cn(
-                'h-8 w-24 rounded-md border bg-card px-2 text-[12px] text-foreground',
-                dwellings.value ? 'border-border' : 'border-destructive ring-1 ring-destructive/30',
-              )}
-            />
-            <span className="text-[10px] leading-snug text-muted-foreground">{t('storeys.dwellingsHint')}</span>
-          </label>
         )}
         <div className="flex justify-between gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
           <span>{t('storeys.floorArea')}</span>
@@ -120,7 +162,6 @@ export function StoreysModelled({
             {on.size} × {format(floorAreaPerStorey, 0)} m² = {format(on.size * floorAreaPerStorey, 0)} m²
           </span>
         </div>
-      </div>
-    </SectionCard>
+    </div>
   );
 }

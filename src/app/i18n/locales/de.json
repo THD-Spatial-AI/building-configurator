@@ -158,7 +158,8 @@
       "add": "PV auf dieser Fläche hinzufügen",
       "modules": "Module: {count} · {kwp} kWp · {area} m²",
       "noFit": "Auf diese Fläche passt kein ganzes Modul.",
-      "spaceLimited": "Der Platz auf dieser Fläche begrenzt die Module; ein größerer nutzbarer Anteil fügt keine hinzu."
+      "spaceLimited": "Der Platz auf dieser Fläche begrenzt die Module; ein größerer nutzbarer Anteil fügt keine hinzu.",
+      "noFitShort": "Kein Modul passt"
     },
     "mounting": {
       "label": "Montage",
@@ -181,7 +182,7 @@
       "title": "PV auf diesem Gebäude"
     },
     "surfaces": {
-      "toggle": "Flächen mit PV ({installed} von {total})"
+      "toggle": "Für PV geeignete Flächen ({installed} von {total} mit PV)"
     },
     "cost": {
       "investment": "Investition",
@@ -233,6 +234,10 @@
     "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM.",
     "options": {
       "search": "Photovoltaik-Optionen durchsuchen"
+    },
+    "noFitOn": {
+      "one": "Auf {surfaces} passt kein ganzes PV-Modul, daher trägt die Fläche keine PV. Wählen Sie ein kleineres Produkt oder eine andere Fläche.",
+      "other": "Auf {count} Flächen ({surfaces}) passt kein ganzes PV-Modul, daher tragen sie keine PV. Wählen Sie ein kleineres Produkt oder andere Flächen."
     }
   },
   "tech": {
@@ -269,7 +274,7 @@
       "noData": "Keine TABULA-Daten für dieses Gebäude: Der TABULA-Dienst hat keine Variante dafür oder ist nicht erreichbar."
     },
     "section": {
-      "occupancy": "Belegung",
+      "occupancy": "Geschosse und Belegung",
       "comfort": "Heizung und Komfort",
       "outputs": "Zu berechnende Ergebnisse",
       "equipment": "Geräte",
@@ -288,9 +293,14 @@
         "other": "{count} Wohneinheiten"
       },
       "dwellingsNotSet": "Wohneinheiten nicht gesetzt",
-      "perDwelling": "{dwellings} · {persons} je Wohneinheit"
+      "perDwelling": "{dwellings} · {persons} je Wohneinheit",
+      "storeys": {
+        "one": "{count} Geschoss",
+        "other": "{count} Geschosse"
+      },
+      "storeysModelled": "{modelled} von {total} Geschossen modelliert"
     },
-    "insulationTitle": "Dämmung und Fenster",
+    "insulationTitle": "Energetischer Standard",
     "expertMore": {
       "title": "Thermik und Simulation",
       "detail": "Profile, Geräte und Löser behalten ihre Standardwerte"
@@ -485,11 +495,11 @@
       }
     },
     "classes": {
-      "compare": "Energieklasse jeder Stufe zeigen",
       "comparing": "BuEM rechnet jede Stufe…",
       "perM2": "{value} kWh/m²",
-      "note": "Indikative Klasse für dieses Gebäude: Heizwärmebedarf je m² auf der österreichischen HWB-Skala, A++ bis G. Simuliert, kein Energieausweis.",
-      "failed": "Der letzte Versuch ist fehlgeschlagen. Erneut versuchen."
+      "note": "Indikative Klasse für dieses Gebäude: Heizwärmebedarf je m² auf der österreichischen HWB-Skala, G bis A++. Simuliert, kein Energieausweis.",
+      "failed": "Die Energieklassen ließen sich nicht ermitteln.",
+      "retry": "Erneut versuchen"
     }
   },
   "options": {
@@ -638,7 +648,8 @@
     "heatingPerM2": "Heizung {value} kWh/m²·a",
     "heatingClass": {
       "label": "Indikative Heizwärmebedarfsklasse (simuliert, kein Energieausweis)",
-      "tip": "Jährlicher Heizwärmebedarf aus BuEM je Bezugsfläche, mit dem Wetter und der Nutzung des Laufs, eingestuft nach den Bändern der österreichischen OIB-RL-6-HWB-Skala (A++ bis 10 kWh/m²·a, G über 250). Warmwasser, Kühlung und Strom sind nicht enthalten."
+      "tip": "Jährlicher Heizwärmebedarf aus BuEM je Bezugsfläche, mit dem Wetter und der Nutzung des Laufs, eingestuft nach den Bändern der österreichischen OIB-RL-6-HWB-Skala (A++ bis 10 kWh/m²·a, G über 250). Warmwasser, Kühlung und Strom sind nicht enthalten.",
+      "stale": "Für die Geschosse der letzten Berechnung. Speichern und Vorschau ergibt die Klasse der jetzt modellierten Geschosse."
     },
     "tile": {
       "statisticalDefault": "Statistischer Wert"
@@ -705,7 +716,7 @@
       "exportFailed": "Export fehlgeschlagen: {reason}",
       "importFailed": "Datei konnte nicht gelesen werden: {reason}. Es muss ein gültiges BuEM GeoJSON, ein Export des alten Konfigurators oder eine EnerPlanET config.json sein.",
       "pvFailed": "Die PV-Berechnung ist fehlgeschlagen, daher wird keine PV-Erzeugung angezeigt. Der Energiebedarf oben ist aktuell.",
-      "dwellingsModelledRequired": "Einige Geschosse sind nicht im Modell. Geben Sie unter Modellierte Geschosse die Zahl der Wohnungen in den modellierten Geschossen an, bevor Sie eine Simulation starten."
+      "dwellingsModelledRequired": "Einige Geschosse sind aus dem Modell weggelassen. Geben Sie vor einer Simulation unter Modellierte Geschosse die Wohnungen jedes modellierten Geschosses an."
     },
     "comparison": {
       "lastRun": "die letzte vollständige Simulation"
@@ -713,18 +724,30 @@
   },
   "storeys": {
     "title": "Modellierte Geschosse",
-    "hint": "Geschoss 1 ist das Erdgeschoss. Lassen Sie Geschosse weg, die nicht zu diesem Modell gehören, etwa einen Laden im Erdgeschoss; Fläche und Hülle zählen nur die modellierten Geschosse.",
+    "hint": "Geschoss 1 ist das Erdgeschoss. Wählen Sie Geschosse hier oder im Modell und lassen Sie sie dann aus dem Modell weg oder geben Sie ihre Wohnungen an; Fläche und Hülle zählen nur die modellierten Geschosse.",
     "noGeometry": "Geschosse lassen sich weglassen, sobald das 3D-Modell geladen ist.",
-    "storey": "Geschoss {number}",
     "floorArea": "Modellierte Fläche",
     "heightNote": "Im 3D-Modell ist ein Geschoss {height} m hoch; BuEM rechnet mit einer Raumhöhe von {room} m.",
     "pick": "Geschosse",
-    "pickHint": "Klicken Sie auf ein Geschoss im Modell, um zu sehen, ob es modelliert wird.",
-    "inModel": "Im Modell",
-    "groundFloor": "Erdgeschoss",
+    "pickHint": "Klicken Sie Geschosse im Modell an, um sie auszuwählen; einstellen lassen sie sich unter Modellierte Geschosse im Reiter Gebäude.",
     "lastOne": "Mindestens ein Geschoss bleibt im Modell.",
-    "dwellings": "Wohnungen in den modellierten Geschossen",
-    "dwellingsHint": "Die inneren Gewinne in BuEM richten sich nach der Zahl der Wohnungen, nicht nach der Fläche."
+    "chip": {
+      "in": "Geschoss {number}, im Modell",
+      "out": "Geschoss {number}, weggelassen",
+      "dwellings": "{count} WE"
+    },
+    "select": {
+      "all": "Alle auswählen",
+      "clear": "Auswahl aufheben",
+      "count": {
+        "one": "{count} Geschoss ausgewählt",
+        "other": "{count} Geschosse ausgewählt"
+      }
+    },
+    "dwellingsPerStorey": "Wohnungen je Geschoss",
+    "mixed": "gemischt",
+    "dwellingsMissing": "Geben Sie die Wohnungen jedes modellierten Geschosses an. Es fehlt: Geschoss {storeys}. BuEMs interne Gewinne folgen der Wohnungszahl.",
+    "inModel": "Im Modell"
   },
   "help": {
     "envelope": "Wie diese Fläche Wärme hält: Fläche und U-Wert gehen an BuEM. Eine Sanierungsstufe setzt den U-Wert aus TABULA; ein hier geänderter Wert bleibt erhalten.",
@@ -732,12 +755,11 @@
     "building": "Was das Gebäude ist: Typ, Baujahr und Land bestimmen die TABULA-Vorgaben; Fläche je Geschoss und Geschosse legen die beheizte Fläche für BuEM fest. Zum Ändern bearbeiten.",
     "demand": "Der jährliche Energiebedarf des Gebäudes nach Nutzung, aus dem letzten BuEM-Lauf oder dem gespeicherten Ergebnis. Kochgas ist ein eigener Brennstoff und nicht in der Summe.",
     "insulation": "Setzt die Dämmung aller Wände, Dächer, Böden und Fenster auf einmal, aus der TABULA-Typologie für diesen Gebäudetyp und dieses Alter. Bestand: das Gebäude, wie TABULA es für sein Alter verzeichnet, ohne spätere Arbeiten. Übliche Sanierung: eine in der Praxis verbreitete Sanierung, etwa zusätzliche Dachdämmung und neue Fenster. Ambitionierte Sanierung: eine weitgehende Sanierung in Richtung Neubaustandard. Eine einzeln geänderte Fläche behält ihren Wert.",
-    "occupancy": "Wer im Gebäude wohnt oder arbeitet: Zahl der Wohnungen und Personen je Wohnung bestimmen die inneren Gewinne und den Warmwasserbedarf in BuEM.",
+    "occupancy": "Wie sich das Gebäude gliedert: seine Geschosse, welche davon im Modell sind und bei Reihenhaus, Mehrfamilienhaus oder Wohnblock die Wohnungen je Geschoss. Mit den Personen je Wohnung bestimmen sie BuEMs interne Gewinne und den Warmwasserbedarf.",
     "comfort": "Wann das Gebäude beheizt wird: die Solltemperatur, ob sie nachts oder bei Abwesenheit abgesenkt wird (Absenkung) und ob Warmwasser enthalten ist.",
     "outputs": "Welche Profile BuEM je Nutzung liefert: eine Jahresübersicht, eine stündliche Reihe oder keine.",
     "equipment": "Welche Geräte die Haushalte besitzen; der Strombedarf in BuEM folgt ihnen. Nicht gesetzte Geräte behalten die Wahrscheinlichkeit von BuEM.",
-    "solver": "Wie BuEM das stündliche Modell löst: mit dem schnellen Standard-Sparse-Löser oder mit MILP, langsamer, aber exakt bei Grenzen.",
-    "weather": "Das stündliche Wetter, mit dem BuEM rechnet. Ein Solarjahr wählt aus dem Archiv des Anbieters ein repräsentatives schwaches, typisches oder starkes Jahr für die Sonneneinstrahlung; typisch ist voreingestellt."
+    "solver": "Wie BuEM das stündliche Modell löst: mit dem schnellen Standard-Sparse-Löser oder mit MILP, langsamer, aber exakt bei Grenzen."
   },
   "tour": {
     "button": "Rundgang",
@@ -773,16 +795,6 @@
     "step1": "Wand, Dach oder Boden anklicken, um die Fläche zu öffnen.",
     "step2": "U-Wert oder Sanierungsstufe im Bereich ändern.",
     "step3": "Speichern und Vorschau zeigt den neuen Bedarf des Gebäudes."
-  },
-  "weather": {
-    "title": "Wetter",
-    "provider": "Wetterdaten",
-    "year": "Solarjahr",
-    "scenario": {
-      "p10": "Schwach",
-      "p50": "Typisch",
-      "p90": "Stark"
-    }
   },
   "legend": {
     "roof": "Dach",

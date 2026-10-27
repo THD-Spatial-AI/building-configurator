@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { storeyAt, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { modelledDwellings, storeyAt, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -95,5 +95,16 @@ describe('storeyShares', () => {
     const shares = storeyShares(polygons, elements, 3, [2]);
     expect(shares.win).toBeCloseTo(shares.w1);
     expect(shares.extra).toBeCloseTo(1 / 3);
+  });
+});
+
+describe('modelledDwellings', () => {
+  it('sums the dwellings of the modelled storeys only', () => {
+    expect(modelledDwellings([2, 3], { 1: 1, 2: 4, 3: 4 })).toBe(8);
+  });
+
+  it('is null while a modelled storey has no count', () => {
+    expect(modelledDwellings([2, 3], { 2: 4 })).toBeNull();
+    expect(modelledDwellings([], {})).toBeNull();
   });
 });
