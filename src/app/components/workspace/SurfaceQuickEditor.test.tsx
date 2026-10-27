@@ -24,7 +24,7 @@ describe('SurfaceQuickEditor', () => {
 
   it('takes the U-value in a number field, without a slider or level buttons', () => {
     const html = render(pitched, 'basic');
-    expect(html).toMatch(/<input[^>]*aria-label="U-value"[^>]*value="0.2"/);
+    expect(html).toMatch(/<input[^>]*aria-label="U-value \(W\/m²K\)"[^>]*value="0.2"/);
     expect(html).not.toContain('type="range"');
     expect(html).not.toContain('Existing');
   });

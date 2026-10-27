@@ -96,13 +96,13 @@ export function SurfaceQuickEditor({
             </div>
           </div>
           <NumberInput
-            label={t('surface.uValue')}
+            label={`${t('surface.uValue')} (W/m²K)`}
             tip={t('surface.uValueTip')}
             value={element.uValue}
             min={0.1}
             max={U_MAX}
             step={0.01}
-            unit="W/m²K"
+            unit=""
             onChange={(uValue) => onUpdate({ uValue })}
           />
           {element.type === 'window' && element.gValue !== null && (
