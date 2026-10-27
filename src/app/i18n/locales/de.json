@@ -643,7 +643,8 @@
     "heatingPerM2": "Heizung {value} kWh/m²·a",
     "heatingClass": {
       "label": "Indikative Heizwärmebedarfsklasse (simuliert, kein Energieausweis)",
-      "tip": "Jährlicher Heizwärmebedarf aus BuEM je Bezugsfläche, mit dem Wetter und der Nutzung des Laufs, eingestuft nach den Bändern der österreichischen OIB-RL-6-HWB-Skala (A++ bis 10 kWh/m²·a, G über 250). Warmwasser, Kühlung und Strom sind nicht enthalten."
+      "tip": "Jährlicher Heizwärmebedarf aus BuEM je Bezugsfläche, mit dem Wetter und der Nutzung des Laufs, eingestuft nach den Bändern der österreichischen OIB-RL-6-HWB-Skala (A++ bis 10 kWh/m²·a, G über 250). Warmwasser, Kühlung und Strom sind nicht enthalten.",
+      "stale": "Für die Geschosse der letzten Berechnung. Speichern und Vorschau ergibt die Klasse der jetzt modellierten Geschosse."
     },
     "tile": {
       "statisticalDefault": "Statistischer Wert"

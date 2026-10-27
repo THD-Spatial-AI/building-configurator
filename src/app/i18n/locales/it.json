@@ -643,7 +643,8 @@
     "heatingPerM2": "Riscaldamento {value} kWh/m²·a",
     "heatingClass": {
       "label": "Classe indicativa del fabbisogno di riscaldamento (simulata, non un attestato energetico)",
-      "tip": "Riscaldamento annuo di BuEM per superficie di riferimento, con il meteo e l'occupazione del calcolo, classificato secondo le fasce della scala austriaca OIB-RL 6 HWB (A++ fino a 10 kWh/m²·a, G oltre 250). Acqua calda, raffrescamento ed elettricità non sono inclusi."
+      "tip": "Riscaldamento annuo di BuEM per superficie di riferimento, con il meteo e l'occupazione del calcolo, classificato secondo le fasce della scala austriaca OIB-RL 6 HWB (A++ fino a 10 kWh/m²·a, G oltre 250). Acqua calda, raffrescamento ed elettricità non sono inclusi.",
+      "stale": "Per i piani dell'ultimo calcolo. Salva e anteprima per ottenere la classe dei piani modellati ora."
     },
     "tile": {
       "statisticalDefault": "Valore statistico"

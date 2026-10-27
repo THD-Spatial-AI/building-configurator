@@ -277,6 +277,8 @@ export function useBuildingModel(
   // The building as opened, after the load-time TABULA pass below: what counts
   // as untouched, so opening and leaving hands the host its building back.
   const [loaded, setLoaded] = useState({ elements: initialElements, general: initialGeneral });
+  /** The storeys the shown demand was computed for: the stored building's, then each run's. */
+  const [resultStoreys, setResultStoreys] = useState<number[] | null>(initialGeneral.storeysModelled);
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
   /** Annual PV generation (kWh) from the last run, or null before one or without PV. */
@@ -318,6 +320,7 @@ export function useBuildingModel(
     );
 
     const nextGeneral = generalFrom(buildingData);
+    setResultStoreys(nextGeneral.storeysModelled);
 
     const nextTotals = computeEnergyTotals(
       buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
@@ -670,6 +673,7 @@ export function useBuildingModel(
         return;
       }
       setEnergyTotals(computeEnergyTotals(null, toThermalSummary(result)));
+      setResultStoreys(general.storeysModelled);
       if (pvRequest && pvKwh === null) setUploadError({ key: 'model.error.pvFailed' });
     } finally {
       setIsRunningSimulation(false);
@@ -784,7 +788,7 @@ export function useBuildingModel(
     baselineElements: baselineRef.current.elements,
     // derived
     buildingLabel, buildingType, coordinates, totalArea, avgUValue,
-    snapshotRows, displayEnergyTotals,
+    snapshotRows, displayEnergyTotals, resultStoreys,
     // handlers
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
     setRefurbishment, setTypeUValue, setTypeLossFactor, setStoreysModelled, undo,

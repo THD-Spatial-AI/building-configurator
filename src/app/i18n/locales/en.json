@@ -643,7 +643,8 @@
     "heatingPerM2": "Heating {value} kWh/m²·a",
     "heatingClass": {
       "label": "Indicative heating demand class (simulated, not an energy certificate)",
-      "tip": "BuEM's annual space heating per reference floor area, under the run's weather and occupancy, graded on the bands of the Austrian OIB-RL 6 HWB scale (A++ up to 10 kWh/m²·a, G above 250). Hot water, cooling and electricity are not included."
+      "tip": "BuEM's annual space heating per reference floor area, under the run's weather and occupancy, graded on the bands of the Austrian OIB-RL 6 HWB scale (A++ up to 10 kWh/m²·a, G above 250). Hot water, cooling and electricity are not included.",
+      "stale": "For the storeys as last run. Save & Preview to get the class of the storeys now modelled."
     },
     "tile": {
       "statisticalDefault": "Statistical default"

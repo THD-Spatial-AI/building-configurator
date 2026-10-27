@@ -33,7 +33,7 @@ import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
-import type { EnergyTotals } from '../../lib/loadProfile';
+import { heatingPerM2 } from '../../lib/energyClass';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
@@ -43,17 +43,6 @@ import { LanguageProvider, formatNumber, resolveLanguage, translate, type Transl
 import { buildingTypeName, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string };
-
-/** BuEM's space heating per A_ref of the modelled storeys, or null when the figure is not BuEM's (ignis, an upload) or missing. */
-function buemHeatingPerM2(
-  totals: EnergyTotals,
-  general: { floorArea: number; storeys: number; storeysModelled: number[] | null },
-): number | null {
-  const heating = Number(totals.heating);
-  const aRef = general.floorArea * (general.storeysModelled?.length ?? general.storeys);
-  const fromBuem = totals.heatingSource === undefined || totals.heatingSource === 'buem';
-  return fromBuem && Number.isFinite(heating) && heating > 0 && aRef > 0 ? heating / aRef : null;
-}
 
 export interface Building3DViewProps {
   building: BuildingState;
@@ -631,7 +620,8 @@ export function Building3DView({
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
                     pvAnnualKwh={model.pvAnnualKwh}
-                    heatingPerM2={buemHeatingPerM2(model.displayEnergyTotals, model.general)}
+                    heatingPerM2={heatingPerM2(model.displayEnergyTotals, model.general, model.resultStoreys)}
+                    heatingClassStale={JSON.stringify(model.resultStoreys) !== JSON.stringify(model.general.storeysModelled)}
                   />
                 </div>
               )}

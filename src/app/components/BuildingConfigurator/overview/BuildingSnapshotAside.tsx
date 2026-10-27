@@ -15,6 +15,8 @@ export interface BuildingSnapshotAsideProps {
   pvAnnualKwh?: number | null;
   /** BuEM's space heating per A_ref, kWh/(m²·a); with it the card shows the indicative class. */
   heatingPerM2?: number | null;
+  /** The storeys modelled changed since the result: the class is of the storeys last run. */
+  heatingClassStale?: boolean;
 }
 
 const DEMAND_ITEMS: { key: 'heating' | 'electricity' | 'hotwater' | 'dhw'; labelKey: string; topic: Topic }[] = [
@@ -67,7 +69,7 @@ function LegendItem({ topic, label, value, unit, source, note }: {
 }
 
 /** The indicative class of the building's BuEM heating demand, with what it is and is not. */
-function HeatingClass({ kwhPerM2 }: { kwhPerM2: number }) {
+function HeatingClass({ kwhPerM2, stale }: { kwhPerM2: number; stale: boolean }) {
   const t = useT();
   const format = useFormatNumber();
   const energyClass = hwbClass(kwhPerM2);
@@ -82,13 +84,14 @@ function HeatingClass({ kwhPerM2 }: { kwhPerM2: number }) {
           <InfoTip tip={t('snapshot.heatingClass.tip')} />
         </span>
         <span className="text-[11px] text-muted-foreground">{t('insulation.classes.perM2', { value: format(kwhPerM2, 0) })}</span>
+        {stale && <span className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">{t('snapshot.heatingClass.stale')}</span>}
       </div>
     </div>
   );
 }
 
 /** The building's annual demand by carrier, and its PV generation where there is any. */
-export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatingPerM2 = null }: BuildingSnapshotAsideProps) {
+export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatingPerM2 = null, heatingClassStale = false }: BuildingSnapshotAsideProps) {
   const t = useT();
   const format = useFormatNumber();
   const total = DEMAND_ITEMS.reduce((sum, { key }) => sum + amount(energyTotals[key]), 0);
@@ -150,7 +153,7 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatin
           />
         )}
       </div>
-      {typeof heatingPerM2 === 'number' && heatingPerM2 > 0 && <HeatingClass kwhPerM2={heatingPerM2} />}
+      {typeof heatingPerM2 === 'number' && heatingPerM2 > 0 && <HeatingClass kwhPerM2={heatingPerM2} stale={heatingClassStale} />}
       {energyTotals.heatingPerM2 && (
         <span className="text-[11px] text-muted-foreground">
           {t('snapshot.heatingPerM2', { value: formatTotal(energyTotals.heatingPerM2, format) })}
