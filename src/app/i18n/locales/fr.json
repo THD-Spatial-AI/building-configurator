@@ -135,7 +135,7 @@
   "pv": {
     "state": {
       "installed": "Avec PV",
-      "suggested": "Suggérée",
+      "suggested": "Suggérée pour le PV",
       "available": "Disponible"
     },
     "toggle": "PV sur {surface}",
@@ -153,7 +153,7 @@
     "useSuggested": "Utiliser les surfaces suggérées",
     "legend": {
       "installed": "PV installé",
-      "suggested": "Suggérée"
+      "suggested": "Suggérée pour le PV"
     },
     "card": {
       "fromModel": "L'inclinaison, l'orientation et l'aire viennent du modèle 3D du bâtiment.",

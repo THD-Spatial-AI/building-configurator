@@ -134,7 +134,7 @@
   "pv": {
     "state": {
       "installed": "Con FV",
-      "suggested": "Consigliata",
+      "suggested": "Consigliata per il FV",
       "available": "Disponibile"
     },
     "toggle": "FV su {surface}",
@@ -152,7 +152,7 @@
     "useSuggested": "Usa le superfici consigliate",
     "legend": {
       "installed": "FV installato",
-      "suggested": "Consigliata"
+      "suggested": "Consigliata per il FV"
     },
     "card": {
       "fromModel": "Inclinazione, esposizione e area provengono dal modello 3D dell'edificio.",

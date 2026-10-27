@@ -134,7 +134,7 @@
   "pv": {
     "state": {
       "installed": "Mit PV",
-      "suggested": "Vorgeschlagen",
+      "suggested": "Für PV vorgeschlagen",
       "available": "Verfügbar"
     },
     "toggle": "PV auf {surface}",
@@ -152,7 +152,7 @@
     "useSuggested": "Vorgeschlagene Flächen nutzen",
     "legend": {
       "installed": "PV installiert",
-      "suggested": "Vorgeschlagen"
+      "suggested": "Für PV vorgeschlagen"
     },
     "card": {
       "fromModel": "Neigung, Ausrichtung und Fläche stammen aus dem 3D-Modell des Gebäudes.",

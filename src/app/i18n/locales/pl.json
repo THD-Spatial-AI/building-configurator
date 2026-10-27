@@ -136,7 +136,7 @@
   "pv": {
     "state": {
       "installed": "Z PV",
-      "suggested": "Sugerowana",
+      "suggested": "Sugerowana dla PV",
       "available": "Dostępna"
     },
     "toggle": "PV: {surface}",
@@ -154,7 +154,7 @@
     "useSuggested": "Użyj sugerowanych przegród",
     "legend": {
       "installed": "PV zainstalowane",
-      "suggested": "Sugerowana"
+      "suggested": "Sugerowana dla PV"
     },
     "card": {
       "fromModel": "Nachylenie, orientacja i powierzchnia pochodzą z modelu 3D budynku.",

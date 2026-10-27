@@ -134,7 +134,7 @@
   "pv": {
     "state": {
       "installed": "Met PV",
-      "suggested": "Voorgesteld",
+      "suggested": "Voorgesteld voor pv",
       "available": "Beschikbaar"
     },
     "toggle": "PV op {surface}",
@@ -152,7 +152,7 @@
     "useSuggested": "Voorgestelde vlakken gebruiken",
     "legend": {
       "installed": "PV geplaatst",
-      "suggested": "Voorgesteld"
+      "suggested": "Voorgesteld voor pv"
     },
     "card": {
       "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",

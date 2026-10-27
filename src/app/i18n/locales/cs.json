@@ -136,7 +136,7 @@
   "pv": {
     "state": {
       "installed": "S FV",
-      "suggested": "Navrženo",
+      "suggested": "Navrženo pro FV",
       "available": "Dostupné"
     },
     "toggle": "FV: {surface}",
@@ -154,7 +154,7 @@
     "useSuggested": "Použít navržené plochy",
     "legend": {
       "installed": "FV instalována",
-      "suggested": "Navrženo"
+      "suggested": "Navrženo pro FV"
     },
     "card": {
       "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",

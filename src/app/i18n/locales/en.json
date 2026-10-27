@@ -134,7 +134,7 @@
   "pv": {
     "state": {
       "installed": "With PV",
-      "suggested": "Suggested",
+      "suggested": "Suggested for PV",
       "available": "Available"
     },
     "toggle": "PV on {surface}",
@@ -152,7 +152,7 @@
     "useSuggested": "Use suggested surfaces",
     "legend": {
       "installed": "PV installed",
-      "suggested": "Suggested"
+      "suggested": "Suggested for PV"
     },
     "card": {
       "fromModel": "Tilt, facing and area come from the building's 3D model.",
