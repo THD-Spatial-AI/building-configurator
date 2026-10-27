@@ -515,7 +515,8 @@
       "perM2": "{value} kWh/m²",
       "note": "Indicatieve klasse: ruimteverwarming per m², beoordeeld op één schaal voor alle landen (de Oostenrijkse HWB-schaal, G tot A++), zodat gebouwen over landen heen vergelijkbaar zijn. Nationale labels zoals het Nederlandse energielabel beoordelen primaire energie, die dit model niet berekent. Gesimuleerd, geen certificaat.",
       "failed": "De energieklassen konden niet worden bepaald.",
-      "retry": "Opnieuw proberen"
+      "retry": "Opnieuw proberen",
+      "about": "Over deze klassen"
     },
     "default": {
       "buem": "BuEM-standaard: {value}",

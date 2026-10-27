@@ -537,7 +537,8 @@
       "perM2": "{value} kWh/m²",
       "note": "Orientační třída: vytápění na m², hodnocené na jedné stupnici pro všechny země (rakouské stupnici HWB, G až A++), aby se budovy daly porovnat mezi zeměmi. Národní štítky, jako nizozemský energetický štítek, hodnotí primární energii, kterou tento model nepočítá. Simulovaná, nejde o certifikát.",
       "failed": "Energetické třídy se nepodařilo určit.",
-      "retry": "Zkusit znovu"
+      "retry": "Zkusit znovu",
+      "about": "O těchto třídách"
     },
     "default": {
       "buem": "Výchozí v BuEM: {value}",

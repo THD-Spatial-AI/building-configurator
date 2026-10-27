@@ -519,7 +519,8 @@
       "perM2": "{value} kWh/m²",
       "note": "Clase orientativa: calefacción por m², calificada con una misma escala en todos los países (la escala austriaca HWB, de G a A++), para comparar edificios entre países. Las etiquetas nacionales, como la neerlandesa, califican la energía primaria, que este modelo no calcula. Simulada, no es un certificado.",
       "failed": "No se pudieron calcular las clases energéticas.",
-      "retry": "Reintentar"
+      "retry": "Reintentar",
+      "about": "Sobre estas clases"
     },
     "default": {
       "buem": "Por defecto en BuEM: {value}",

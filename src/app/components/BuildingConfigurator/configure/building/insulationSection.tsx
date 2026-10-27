@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
+import { ChevronDown, Info } from '@/app/components/icons';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
   REFURB_TYPES, customCount, type RefurbElementType, type RefurbStates,
@@ -87,7 +88,8 @@ const COMPARE_DELAY_MS = 1500;
 
 /**
  * The levels' classes, worked out on their own once the building stops
- * changing, then the class scale and what the classes are. A failed run
+ * changing, then the class scale, with what the classes are behind a
+ * closed toggle. A failed run
  * offers to try again rather than retrying by itself.
  */
 function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['classes']> }) {
@@ -120,7 +122,14 @@ function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['class
       <div className="flex h-1.5 overflow-hidden rounded-full" aria-hidden>
         {[...HWB_CLASSES].reverse().map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
       </div>
-      <span className="text-[10px] leading-snug text-muted-foreground">{t('insulation.classes.note')}</span>
+      <details className="group">
+        <summary className="flex w-fit cursor-pointer select-none list-none items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <Info className="size-3.5" aria-hidden />
+          {t('insulation.classes.about')}
+          <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden />
+        </summary>
+        <p className="mt-1 rounded-md bg-muted px-2.5 py-2 text-[11px] leading-snug text-muted-foreground">{t('insulation.classes.note')}</p>
+      </details>
     </div>
   );
 }
