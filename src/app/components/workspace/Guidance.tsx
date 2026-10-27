@@ -118,13 +118,18 @@ function readHintsHidden(): boolean {
 
 /**
  * The next step over the model: click a surface, change it, then save and
- * preview. Hidden for good with "Hide hints", remembered in this browser.
+ * preview. Steps only move forward: undoing a change or closing the surface
+ * keeps the step reached. Hidden for good with "Hide hints", remembered in
+ * this browser.
  */
 export function StepHints({ surfaceOpened, edited, ran }: { surfaceOpened: boolean; edited: boolean; ran: boolean }) {
   const t = useT();
   const [hidden, setHidden] = useState(readHintsHidden);
+  const [reached, setReached] = useState(1);
+  const now = edited ? 3 : surfaceOpened ? 2 : 1;
+  if (now > reached) setReached(now);
   if (hidden || ran) return null;
-  const step = edited ? 3 : surfaceOpened ? 2 : 1;
+  const step = Math.max(now, reached);
   const hide = () => {
     setHidden(true);
     try { window.localStorage.setItem(HINTS_HIDDEN_KEY, '1'); } catch { /* a refused write only means the hints return next time */ }
