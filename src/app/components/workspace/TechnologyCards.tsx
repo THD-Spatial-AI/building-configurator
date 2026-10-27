@@ -7,7 +7,7 @@ import { Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { technologyTopic, type Topic } from '@/app/config/topics';
 import { useFormatNumber, useT, type FormatNumber } from '../../i18n';
-import { DecimalInput, Dropdown, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
 
 /** One value on a technology card. */
 export interface TechField {
@@ -181,7 +181,7 @@ function CatalogueSelect({ catalogue }: { catalogue: NonNullable<TechCard['catal
       </span>
     )}>
         <SearchField label={t('pv.catalogue.search')} value={query} onChange={setQuery} />
-        <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto">
+        <ul className={DROPDOWN_LIST}>
           {shown.map((product) => (
             <li key={product.id}>
               <button

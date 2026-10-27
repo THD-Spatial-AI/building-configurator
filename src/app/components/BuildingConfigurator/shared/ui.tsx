@@ -823,5 +823,8 @@ export function SearchField({ label, value, onChange }: SearchFieldProps) {
   );
 }
 
+/** A Dropdown's list: five rows and the top of a sixth show, the rest scroll. */
+export const DROPDOWN_LIST = 'flex max-h-[19.5rem] flex-col gap-1.5 overflow-y-auto overscroll-contain';
+
 /** A choosable row in a Dropdown list, as EnerPlanET's technology rows. */
 export const OPTION_ROW = 'rounded-lg border border-border bg-card px-2.5 py-2 shadow-xs transition-all hover:bg-muted/50 hover:shadow-md';

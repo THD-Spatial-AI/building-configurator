@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { ChevronDown, CircleHelp, GripVertical, Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { DecimalInput, Dropdown, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
@@ -81,7 +81,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
 
   return (
     <Dropdown title={t('pv.surfaces.toggle', { installed: installedCount, total: entries.length })}>
-      <ul className="flex flex-col gap-1.5">
+      <ul className={DROPDOWN_LIST}>
         {ordered.map(([id, surface]) => {
           const name = surfaceName(id, elements, pv.surfaces);
           const installed = surface.state === 'installed';
@@ -221,7 +221,7 @@ function Catalogue({ pv }: { pv: PvMode }) {
         <p className="flex items-center gap-1.5 text-[11px] font-medium leading-snug text-foreground">
           <GripVertical className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{t('pv.catalogue.hint')}
         </p>
-        <ul className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
+        <ul className={DROPDOWN_LIST}>
           {shown.map((product) => {
             const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
             const perKwp = constraintNumber(product, 'cost_energy_cap');
