@@ -2,8 +2,7 @@
 // and with PV its product, usable share, mounting, module format, the
 // resulting modules and cost, and products that fit more.
 
-import { PresetSlider } from './surfaceControls';
-import { Dropdown, DROPDOWN_LIST, OPTION_ROW, SegmentedControl } from '../BuildingConfigurator/shared/ui';
+import { Dropdown, DROPDOWN_LIST, NumberInput, OPTION_ROW, SegmentedControl } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry } from '../../lib/pvSurfaces';
@@ -64,16 +63,16 @@ function MountingControls({ surfaceId, surface, layout, canRack, pv }: {
         </div>
       )}
       {mounting.kind === 'racked' && (
-        <>
-          <PresetSlider
-            label={t('pv.panelTilt')} value={mounting.tilt} min={0} max={45} step={5} unit="°" decimals={0}
+        <div className="grid grid-cols-2 gap-2">
+          <NumberInput
+            label={t('pv.panelTilt')} value={mounting.tilt} min={0} max={45} step={5} unit="°" integer
             onChange={(tilt) => setMounting({ ...mounting, tilt })}
           />
-          <PresetSlider
-            label={t('pv.panelFacing')} value={mounting.azimuth} min={0} max={355} step={5} unit="°" decimals={0}
+          <NumberInput
+            label={t('pv.panelFacing')} value={mounting.azimuth} min={0} max={355} step={5} unit="°" integer
             onChange={(azimuth) => setMounting({ ...mounting, azimuth })}
           />
-        </>
+        </div>
       )}
       <div className="flex flex-col gap-1">
         <span className="text-[11px] font-medium text-muted-foreground">{t('pv.orientation.label')}</span>
@@ -118,19 +117,30 @@ function LayoutResult({ layout, pv, surfaceId }: { layout: PvLayout; pv: PvMode;
   const format = useFormatNumber();
   const product = surfaceProduct(pv, surfaceId);
   const { investment } = pvCosts(product, layout.kwp);
+  if (layout.count === 0) {
+    return <div className="rounded-md bg-muted px-3 py-2 text-[12px] font-medium text-foreground">{t('pv.card.noFit')}</div>;
+  }
+  const rows: [string, string][] = [
+    [t('pv.result.modules'), format(layout.count, 0)],
+    [t('pv.result.capacity'), `${format(layout.kwp, 1)} kWp`],
+    [t('pv.result.area'), `${format(layout.area, 0)} m²`],
+    ...(investment !== undefined
+      ? [[t('pv.result.investment'), `${format(investment, 0)} ${productCurrency(product)}`.trim()] as [string, string]]
+      : []),
+  ];
   return (
-    <div className="flex flex-col gap-0.5 rounded-md bg-muted px-3 py-2 text-[12px] font-medium text-foreground">
-      {layout.count === 0
-        ? t('pv.card.noFit')
-        : t('pv.card.modules', { count: layout.count, kwp: format(layout.kwp, 1), area: format(layout.area, 0) })}
-      {layout.count > 0 && !layout.capped && (
-        <span className="text-[11px] font-normal text-muted-foreground">{t('pv.card.spaceLimited')}</span>
-      )}
-      {layout.count > 0 && investment !== undefined && (
-        <span className="text-[11px] font-normal text-muted-foreground">
-          {t('pv.cost.investmentEstimate', { amount: `${format(investment, 0)} ${productCurrency(product)}`.trim() })}
-        </span>
-      )}
+    <div className="flex flex-col gap-1.5">
+      <table className="w-full overflow-hidden rounded-md bg-muted text-[12px]">
+        <tbody>
+          {rows.map(([label, value]) => (
+            <tr key={label} className="border-b border-background last:border-b-0">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal text-muted-foreground">{label}</th>
+              <td className="whitespace-nowrap px-3 py-1.5 text-right font-semibold tabular-nums text-foreground">{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {!layout.capped && <p className="m-0 text-[11px] leading-snug text-muted-foreground">{t('pv.card.spaceLimited')}</p>}
     </div>
   );
 }
@@ -152,7 +162,7 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
   // Closed by default: the list changes as the surface's settings do, and open
   // it would move the rest of the panel each time.
   return (
-    <Dropdown title={t('pv.fitsMore.title', { count: better.length })}>
+    <Dropdown tone="recommend" title={t('pv.fitsMore.title', { count: better.length })}>
       <div className={DROPDOWN_LIST}>
       {better.map(({ product, layout: theirs }) => {
         const perKwp = pvCosts(product, 1).investment;
@@ -212,7 +222,7 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
         </p>
       )}
 
-      <div className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2">
+      <div className="flex items-center justify-between gap-2">
         <span className="text-[12px] font-semibold text-foreground">{t('pv.thisSurface')}</span>
         <Switch on={installed} label={t('pv.thisSurface')} onChange={(on) => pv.onToggle(surfaceId, on)} />
       </div>
@@ -220,17 +230,19 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
       {installed ? (
         <>
           <ProductPicker surfaceId={surfaceId} pv={pv} />
-          <PresetSlider
-            label={t('pv.usableShare')}
-            value={surface.usableShare * 100}
-            min={0}
-            max={100}
-            step={5}
-            unit="%"
-            decimals={0}
-            quality={t('pv.usableShareNote')}
-            onChange={(percent) => pv.onShareChange(surfaceId, percent / 100)}
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <NumberInput
+              label={t('pv.usableShare')}
+              tip={t('pv.usableShareNote')}
+              value={Math.round(surface.usableShare * 100)}
+              min={0}
+              max={100}
+              step={5}
+              unit="%"
+              integer
+              onChange={(percent) => pv.onShareChange(surfaceId, Math.min(100, Math.max(0, percent)) / 100)}
+            />
+          </div>
           {layout && (
             <MountingControls
               surfaceId={surfaceId}

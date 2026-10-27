@@ -45,7 +45,8 @@
     "panel": {
       "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
     },
-    "credits": "Źródła danych"
+    "credits": "Źródła danych",
+    "measure": "Pokaż wymiary wybranej powierzchni"
   },
   "surface": {
     "type": {
@@ -60,22 +61,10 @@
     "areaRejected": "Symulacja to odrzuci",
     "useGeometryArea": "Użyj {area} m² z modelu",
     "uValue": "Współczynnik U",
-    "insulation": {
-      "veryWell": "Bardzo dobra izolacja",
-      "well": "Dobra izolacja",
-      "moderate": "Średnia izolacja",
-      "poor": "Słaba izolacja",
-      "none": "Brak izolacji"
-    },
     "rValue": "Opór R (1/U): {value} m²K/W",
     "gValue": "Przepuszczalność energii (g)",
-    "solar": {
-      "high": "Przepuszcza większość ciepła słonecznego",
-      "low": "Blokuje większość ciepła słonecznego"
-    },
     "sharedWall": "Wspólna z sąsiednim budynkiem",
-    "imported": "Zaimportowano: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
-    "reset": "Resetuj",
+    "reset": "Przywróć zaimportowane wartości",
     "delete": "Usuń tę przegrodę",
     "facing": "Orientacja",
     "facingDirection": "kierunek {direction}",
@@ -119,15 +108,16 @@
     },
     "hover": {
       "open": "Kliknij, aby otworzyć tę powierzchnię"
-    }
+    },
+    "uValueTip": "Ile ciepła przechodzi przez jeden m² tej powierzchni na każdy stopień różnicy między wnętrzem a otoczeniem. Wartość pochodzi z TABULA dla typu, wieku i poziomu modernizacji tego budynku; niższa wartość oznacza mniejsze straty ciepła, więc budynek potrzebuje mniej ogrzewania."
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",
-    "stored": "Zapisany wynik BuEM",
+    "stored": "Zapisany wynik",
     "upload": "Prześlij",
     "download": "Pobierz",
     "source": {
-      "buem": "Wynik modelu BuEM",
+      "buem": "Symulowany",
       "none": "Nie wczytano profilu",
       "file": "{name}",
       "aggregated": "{source} · agregacja z danych {from}"
@@ -172,7 +162,6 @@
       "panels": "{kwp} kWp na {area} m² modułów",
       "remove": "Usuń PV",
       "done": "Gotowe",
-      "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
       "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego.",
       "noFitShort": "Żaden moduł się nie mieści"
@@ -203,8 +192,7 @@
     "cost": {
       "investment": "Inwestycja",
       "omPerYear": "Eksploatacja i utrzymanie rocznie",
-      "estimateNote": "Szacunki na podstawie kosztów produktów, przed symulacją.",
-      "investmentEstimate": "Inwestycja około {amount}, szacunek"
+      "estimateNote": "Szacunki na podstawie kosztów produktów, przed symulacją."
     },
     "catalogue": {
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
@@ -275,6 +263,12 @@
       "cost": "Najniższy koszt za kWp",
       "capacity": "Najwyższa moc modułu",
       "size": "Najmniejszy moduł"
+    },
+    "result": {
+      "modules": "Moduły",
+      "capacity": "Moc",
+      "area": "Powierzchnia paneli",
+      "investment": "Inwestycja, szacunkowo"
     }
   },
   "tech": {
@@ -420,14 +414,14 @@
     "capacity": {
       "label": "Liczba osób",
       "placeholder": "Wyznaczana z powierzchni.",
-      "tip": "Liczba użytkowników. Jeśli pole jest puste, BuEM wyznacza ją z powierzchni i gęstości zasiedlenia dla typu budynku."
+      "tip": "Liczba osób. Pozostawione puste oznacza typową liczbę dla wielkości i typu budynku."
     },
     "dwellings": {
       "label": "Mieszkania",
-      "requiredTip": "Liczba mieszkań. Wstępnie uzupełniona z archetypu TABULA. BuEM symuluje jedno reprezentatywne mieszkanie i mnoży wynik przez tę liczbę.",
+      "requiredTip": "Liczba mieszkań w budynku, wstępnie uzupełniona na podstawie typowych budynków tego typu.",
       "required": "Wymagane dla typu: {type}.",
       "placeholder": "Jedno mieszkanie.",
-      "tip": "Liczba mieszkań. BuEM symuluje jedno reprezentatywne mieszkanie i mnoży wynik przez tę liczbę."
+      "tip": "Liczba mieszkań w budynku."
     },
     "persons": {
       "label": "Osoby na mieszkanie",
@@ -476,7 +470,7 @@
     "averageU": "Średni współczynnik U",
     "preset": {
       "label": "Ustaw cały budynek na",
-      "tip": "Warianty termomodernizacji TABULA dla tego typu i wieku budynku. Wybór ustawia każdy typ przegrody; przegrody ustawione pojedynczo zachowują swoje wartości.",
+      "tip": "Wybierz poziom dla całego budynku. Ustawia wszystkie ściany, dachy, podłogi i okna; powierzchnie zmienione pojedynczo zachowują swoje wartości.",
       "fromVariant": "Z danych 3D: TABULA {code}.",
       "fromType": "Warianty TABULA dla typu i wieku budynku.",
       "typesDiffer": "Typy przegród się różnią.",
@@ -533,11 +527,14 @@
       }
     },
     "classes": {
-      "comparing": "BuEM liczy każdy poziom…",
+      "comparing": "Wyznaczanie klasy każdego poziomu…",
       "perM2": "{value} kWh/m²",
       "note": "Klasa orientacyjna: ogrzewanie na m², oceniane w jednej skali dla wszystkich krajów (austriackiej skali HWB, od G do A++), aby budynki dało się porównać między krajami. Krajowe etykiety, takie jak holenderska etykieta energetyczna, oceniają energię pierwotną, której ten model nie oblicza. Symulowana, nie jest świadectwem.",
       "failed": "Nie udało się wyznaczyć klas energetycznych.",
-      "retry": "Spróbuj ponownie"
+      "retry": "Spróbuj ponownie",
+      "about": "O tych klasach",
+      "source": "Poziomy modernizacji pochodzą z TABULA, europejskiej typologii budynków.",
+      "sourceLink": "Otwórz TABULA WebTool"
     },
     "default": {
       "buem": "Domyślnie w BuEM: {value}",
@@ -791,20 +788,20 @@
     },
     "dwellingsPerStorey": "Mieszkania na kondygnację",
     "mixed": "różne",
-    "dwellingsMissing": "Podaj mieszkania każdej modelowanej kondygnacji. Brakuje: kondygnacja {storeys}. Zyski wewnętrzne BuEM zależą od liczby mieszkań.",
+    "dwellingsMissing": "Podaj liczbę mieszkań na każdej uwzględnionej kondygnacji. Brakuje: kondygnacja {storeys}.",
     "inModel": "W modelu"
   },
   "help": {
-    "envelope": "Jak ta przegroda zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom modernizacji ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",
-    "pv": "PV na tej przegrodzie: włącz je, wybierz produkt i jaką część powierzchni może zająć. Moduły są rozmieszczane na przegrodzie tak, jak pokazuje ją model 3D.",
-    "building": "Czym jest budynek: typ, rok i kraj wybierają wartości domyślne TABULA; powierzchnia kondygnacji i liczba kondygnacji ustalają powierzchnię ogrzewaną przez BuEM. Edytuj, aby je zmienić.",
-    "demand": "Roczne zapotrzebowanie budynku na energię według zastosowań, z ostatniego obliczenia BuEM lub zapisanego wyniku. Gaz do gotowania to osobne paliwo, poza sumą.",
-    "insulation": "Ustawia izolację wszystkich ścian, dachów, podłóg i okien naraz, z typologii TABULA dla tego typu i wieku budynku. Stan istniejący: budynek tak, jak TABULA opisuje go dla jego wieku, bez późniejszych prac. Typowa: modernizacja częsta w praktyce, np. docieplenie dachu i nowe okna. Zaawansowana: ambitna modernizacja w stronę standardu nowego budynku. Przegroda zmieniona osobno zachowuje swoją wartość.",
-    "occupancy": "Jak dzieli się budynek: jego kondygnacje, które z nich są w modelu i, w domu szeregowym, wielorodzinnym lub bloku, mieszkania na każdej. Wraz z liczbą osób na mieszkanie wyznaczają zyski wewnętrzne i zużycie ciepłej wody w BuEM.",
-    "comfort": "Kiedy budynek jest ogrzewany: temperatura zadana, czy jest obniżana w nocy lub pod nieobecność (obniżenie) i czy uwzględniono ciepłą wodę.",
-    "outputs": "Jakie profile BuEM zwraca dla każdego zastosowania: podsumowanie roczne, serię godzinową lub żaden.",
-    "equipment": "Jakie urządzenia mają gospodarstwa domowe; zapotrzebowanie na energię elektryczną w BuEM od nich zależy. Nieustawione zachowują prawdopodobieństwo BuEM.",
-    "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach."
+    "envelope": "Wielkość tej powierzchni i to, jak dobrze zatrzymuje ciepło. Ich zmiana zmienia zapotrzebowanie budynku na ogrzewanie.",
+    "pv": "Panele słoneczne na tej powierzchni: włącz je, wybierz produkt i ustal, jaką część powierzchni mogą zająć.",
+    "building": "Podstawowe dane budynku: typ, wiek, kraj, wielkość i kondygnacje. Użyj Edytuj, aby je poprawić.",
+    "demand": "Ile energii budynek potrzebuje w ciągu roku, według zastosowania. Gaz do gotowania jest pokazany osobno i nie wchodzi do sumy.",
+    "insulation": "Jak dobrze cały budynek zatrzymuje ciepło i jaka klasa z tego wynika. Wybierz poziom, aby zobaczyć, co zmieniłaby modernizacja. Obecny: budynek taki, jaki jest. Typowa: zwykła modernizacja, np. ocieplenie dachu i nowe okna. Zaawansowana: głęboka modernizacja, bliska nowemu budynkowi. Powierzchnie zmienione pojedynczo zachowują swoje wartości.",
+    "occupancy": "Ile kondygnacji ma budynek, które z nich są uwzględnione i ile mieszkań jest na każdej. Więcej osób to więcej ciepłej wody i więcej ciepła od wewnątrz.",
+    "comfort": "Kiedy i jak ciepło utrzymuje się budynek: temperatura wewnątrz, czy jest obniżana w nocy lub pod nieobecność i czy liczy się ciepła woda.",
+    "outputs": "Jakie wyniki otrzymujesz dla każdego zastosowania: sumę roczną, profil godzinowy albo żadne.",
+    "equipment": "Jakie urządzenia mają mieszkania. Decydują o zużyciu prądu; nieustawione urządzenia przyjmują typowe wartości.",
+    "solver": "Jak obliczane są wyniki godzinowe: metodą standardową, która jest szybka, albo wolniejszą, dokładnie trzymającą się limitów."
   },
   "tour": {
     "button": "Przewodnik",
@@ -831,14 +828,14 @@
     },
     "run": {
       "title": "Zapisz i podgląd",
-      "body": "Uruchamia BuEM dla budynku w obecnym stanie i pokazuje zapotrzebowanie godzinowe."
+      "body": "Oblicza zapotrzebowanie budynku na energię w obecnym stanie i pokazuje je godzina po godzinie."
     }
   },
   "hints": {
     "stepOf": "Krok {step} z {total}",
     "hide": "Ukryj wskazówki",
     "step1": "Kliknij ścianę, dach lub podłogę, aby ją otworzyć.",
-    "step2": "Zmień współczynnik U lub poziom termomodernizacji w panelu.",
+    "step2": "Zmień powierzchnię lub współczynnik U w panelu.",
     "step3": "Zapisz i podgląd, aby zobaczyć nowe zapotrzebowanie budynku."
   },
   "legend": {

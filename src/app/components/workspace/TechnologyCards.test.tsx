@@ -62,7 +62,7 @@ describe('TechnologyCards', () => {
   });
 
   it('puts the products behind a drop-down with a search field', () => {
-    expect(html).toMatch(/<details[^>]*><summary[^>]*><span[^>]*><span[^>]*>Product: <\/span>Lithium-ion home storage/);
+    expect(html).toMatch(/<details[^>]*><summary[^>]*><span[^>]*><span[^>]*><span[^>]*>Product: <\/span>Lithium-ion home storage/);
     expect(html).toContain('placeholder="Search the catalogue"');
     expect(html).toContain('LFP storage');
   });

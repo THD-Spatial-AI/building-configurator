@@ -6,9 +6,9 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, CircleHelp, Download, Info, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
+import { AlertTriangle, ArrowLeft, CircleHelp, Download, Info, Layers, Loader2, Play, Ruler, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
-import { SurfaceQuickEditor } from './SurfaceQuickEditor';
+import { importedValues, SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
 import { BuildingSnapshotAside } from '../BuildingConfigurator/overview/BuildingSnapshotAside';
 import { LoadProfileBar } from './LoadProfileBar';
@@ -19,7 +19,6 @@ import { hasInvalidArea } from '../BuildingConfigurator/configure/model/building
 import { cn } from '@/lib/utils';
 import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
-import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfaceHoverCard, SurfacePanel, SurfacePicker } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
@@ -171,6 +170,7 @@ export function Building3DView({
   /** Off: a click selects one storey. On: clicks add storeys, to configure several at once. */
   const [multiStoreys, setMultiStoreys] = useState(false);
   const leaveStoreyMode = () => setStoreyMode(false);
+  const [measuring, setMeasuring] = useState(false);
   const pickStorey = (storey: number | null) => {
     if (storey !== null) setSelectedStoreys((prev) => pickInSelection(prev, storey, multiStoreys));
   };
@@ -310,11 +310,16 @@ export function Building3DView({
   const panelBody = selected && (selectedElement || selectedPv) ? (
     <div key={selected.id} className="flex flex-col gap-3 p-3">
       {selectedElement && (
-        <SectionCard topic={TOPICS.envelope} title={t(`surface.section.of.${selectedElement.type}`)} info={t('help.envelope')}>
+        <SectionCard
+          topic={TOPICS.envelope}
+          title={t(`surface.section.of.${selectedElement.type}`)}
+          info={t('help.envelope')}
+          onReset={importedValues(selectedElement) ? () => model.updateElement(selected.id, importedValues(selectedElement)!) : undefined}
+          resetLabel={t('surface.reset')}
+        >
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}
-            uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
             mode={mode}
             onUpdate={(patch) => model.updateElement(selected.id, patch)}
             onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
@@ -388,7 +393,7 @@ export function Building3DView({
           </p>
           <p className="truncate text-[11px] leading-tight text-muted-foreground">
             {t('view.surfaceCount', { count: Object.keys(elements).length })}
-            <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>
+            {mode === 'expert' && <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>}
           </p>
         </div>
         <button
@@ -473,6 +478,7 @@ export function Building3DView({
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
               previewId={previewSurface ?? (storeyMode ? null : hover?.id ?? null)}
+              showSides={measuring}
               focusToken={focus?.token}
               storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys }}
               onSelectStorey={storeyMode ? pickStorey : undefined}
@@ -514,6 +520,21 @@ export function Building3DView({
               <Layers className="size-3.5" />
               {t('storeys.pick')}
             </button>
+          )}
+
+          {surfaces.length > 0 && !detached && (
+            // Below the north arrow, which sits 12 px from the top right and is 44 px across.
+            <button
+              type="button"
+              aria-pressed={measuring}
+              aria-label={t('view.measure')}
+              title={t('view.measure')}
+              onClick={() => setMeasuring((on) => !on)}
+              className={cn(
+                'absolute right-[18px] top-[64px] flex size-8 cursor-pointer items-center justify-center rounded-md border shadow-sm transition-colors',
+                measuring ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card/90 text-foreground hover:bg-muted',
+              )}
+            ><Ruler className="size-4" /></button>
           )}
 
           {undoLabel && (

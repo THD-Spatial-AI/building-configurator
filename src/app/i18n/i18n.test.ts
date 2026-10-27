@@ -132,3 +132,14 @@ describe('locale files', () => {
     expect([...used].filter((key) => !english.includes(key))).toEqual([]);
   });
 });
+
+describe('section info tips', () => {
+  it('say what the section shows, without naming the models or data sources behind it', () => {
+    for (const [language, messages] of Object.entries(MESSAGES)) {
+      const help = (messages as Messages).help as Messages;
+      for (const [key, text] of Object.entries(help)) {
+        expect(`${language} help.${key}: ${String(text)}`).not.toMatch(/BuEM|TABULA/);
+      }
+    }
+  });
+});

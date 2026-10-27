@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, Info, ChevronDown, Search } from '@/app/components/icons';
+import { AlertTriangle, Info, ChevronDown, Lightbulb, Search } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { formatDecimal, parseDecimal, useFormatNumber, useLanguage, useT } from '@/app/i18n';
 import { formatTotal } from '@/app/lib/loadProfile';
@@ -784,13 +784,23 @@ export function UnsavedChangesDialog({
 interface DropdownProps {
   title: React.ReactNode;
   children: React.ReactNode;
+  /** "recommend" draws it in amber with a lightbulb, the colour of what is suggested for PV. */
+  tone?: 'recommend';
 }
 
-export function Dropdown({ title, children }: DropdownProps) {
+export function Dropdown({ title, children, tone }: DropdownProps) {
+  const recommend = tone === 'recommend';
   return (
-    <details className="group rounded-lg border border-border bg-background shadow-xs open:shadow-sm">
-      <summary className="flex min-h-10 cursor-pointer select-none list-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-muted group-open:rounded-b-none [&::-webkit-details-marker]:hidden">
-        {title}
+    <details className={cn(
+      'group rounded-lg border shadow-xs open:shadow-sm',
+      recommend ? 'border-amber-400 bg-amber-50 dark:border-amber-500/60 dark:bg-amber-500/10' : 'border-border bg-background',
+    )}>
+      <summary className={cn(
+        'flex min-h-10 cursor-pointer select-none list-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors group-open:rounded-b-none [&::-webkit-details-marker]:hidden',
+        recommend ? 'text-amber-900 hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-500/20' : 'text-foreground hover:bg-muted',
+      )}>
+        {recommend && <Lightbulb className="size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />}
+        <span className="min-w-0 flex-1">{title}</span>
         <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
       </summary>
       <div className="flex flex-col gap-2 rounded-b-lg border-t border-border bg-muted/40 p-2">{children}</div>

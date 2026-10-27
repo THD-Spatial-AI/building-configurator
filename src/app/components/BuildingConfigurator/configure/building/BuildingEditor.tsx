@@ -205,7 +205,7 @@ export function BuildingEditor({
           topic={TOPICS.building}
           title={t('editor.insulationTitle')}
           info={t('help.insulation')}
-          action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation)}</span>}
+          action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation, mode)}</span>}
         >
           <div className="flex flex-col gap-3 p-3">
             {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}

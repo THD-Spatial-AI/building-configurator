@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
+import { ChevronDown, Info } from '@/app/components/icons';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
   REFURB_TYPES, customCount, type RefurbElementType, type RefurbStates,
@@ -52,15 +53,16 @@ interface Props extends InsulationProps {
   mode: 'basic' | 'expert';
 }
 
-/** One line for the group's header. */
-export function insulationSummary(t: Translate, format: FormatNumber, { levels, states, elements, initial, avgUValue }: InsulationProps): string {
+/** One line for the group's header; the average U-value in Expert only. */
+export function insulationSummary(t: Translate, format: FormatNumber, { levels, states, elements, initial, avgUValue }: InsulationProps, mode: 'basic' | 'expert'): string {
   const present = REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
   const custom = present.some((type) => customCount(elements, type, states[type], initial, levels) > 0);
   const uniform = present.every((type) => states[type] === states[present[0]]);
   const level = levels.find((l) => l.number === states[present[0]]);
   const label = level && variantName(t, level.label, level.number);
   const state = levels.length === 0 ? null : custom || !uniform || !label ? t('insulation.summary.mixed') : label;
-  return [state, t('insulation.summary.averageU', { value: format(avgUValue, 2) })].filter(Boolean).join(' · ');
+  const averageU = mode === 'expert' ? t('insulation.summary.averageU', { value: format(avgUValue, 2) }) : null;
+  return [state, averageU].filter(Boolean).join(' · ');
 }
 
 /** Building-wide preset; in Expert also a state, U-value and loss factor per element type. */
@@ -73,21 +75,25 @@ export function InsulationSection(props: Props) {
       {levels.length > 0 && <BuildingPreset {...props} />}
       {mode === 'expert' && <ElementTable {...props} />}
       {mode === 'expert' && <SynthesisedWindows {...props} />}
-      <div className="border-t border-border/60 pt-2">
-        <span className="text-[11px] text-muted-foreground">
-          {t('insulation.averageU')} <span className="font-semibold text-foreground">{format(avgUValue, 2)} W/m²K</span>
-        </span>
-      </div>
+      {mode === 'expert' && (
+        <div className="border-t border-border/60 pt-2">
+          <span className="text-[11px] text-muted-foreground">
+            {t('insulation.averageU')} <span className="font-semibold text-foreground">{format(avgUValue, 2)} W/m²K</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }
 
 /** Edits this long apart start one comparison, so a dragged slider is not three BuEM runs a step. */
 const COMPARE_DELAY_MS = 1500;
+const TABULA_WEBTOOL_URL = 'https://webtool.building-typology.eu/';
 
 /**
  * The levels' classes, worked out on their own once the building stops
- * changing, then the class scale and what the classes are. A failed run
+ * changing, then the class scale, with what the classes are behind a
+ * closed toggle. A failed run
  * offers to try again rather than retrying by itself.
  */
 function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['classes']> }) {
@@ -120,7 +126,22 @@ function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['class
       <div className="flex h-1.5 overflow-hidden rounded-full" aria-hidden>
         {[...HWB_CLASSES].reverse().map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
       </div>
-      <span className="text-[10px] leading-snug text-muted-foreground">{t('insulation.classes.note')}</span>
+      <details className="group">
+        <summary className="flex w-fit cursor-pointer select-none list-none items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <Info className="size-3.5" aria-hidden />
+          {t('insulation.classes.about')}
+          <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" aria-hidden />
+        </summary>
+        <div className="mt-1 flex flex-col gap-1.5 rounded-md bg-muted px-2.5 py-2 text-[11px] leading-snug text-muted-foreground">
+          <p className="m-0">{t('insulation.classes.note')}</p>
+          <p className="m-0">
+            {t('insulation.classes.source')}{' '}
+            <a href={TABULA_WEBTOOL_URL} target="_blank" rel="noreferrer" className="font-medium text-primary underline underline-offset-2">
+              {t('insulation.classes.sourceLink')}
+            </a>
+          </p>
+        </div>
+      </details>
     </div>
   );
 }
@@ -129,7 +150,7 @@ function presentTypes(elements: Record<string, BuildingElement>): RefurbElementT
   return REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
 }
 
-function BuildingPreset({ levels, states, initial, elements, variantCode, onSetState, classes }: Props) {
+function BuildingPreset({ levels, states, initial, elements, variantCode, onSetState, classes, mode }: Props) {
   const t = useT();
   const format = useFormatNumber();
   const types = presentTypes(elements);
@@ -181,11 +202,13 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
         })}
       </div>
       {classes && <LevelClasses classes={classes} />}
-      <p className="text-[10px] leading-snug text-muted-foreground">
-        {variantCode ? t('insulation.preset.fromVariant', { code: variantCode }) : t('insulation.preset.fromType')}
-        {!uniform && ` ${t('insulation.preset.typesDiffer')}`}
-        {custom > 0 && ` ${t('insulation.preset.customKept', { count: custom })}`}
-      </p>
+      {(mode === 'expert' || !uniform || custom > 0) && (
+        <p className="text-[10px] leading-snug text-muted-foreground">
+          {mode === 'expert' && (variantCode ? t('insulation.preset.fromVariant', { code: variantCode }) : t('insulation.preset.fromType'))}
+          {!uniform && ` ${t('insulation.preset.typesDiffer')}`}
+          {custom > 0 && ` ${t('insulation.preset.customKept', { count: custom })}`}
+        </p>
+      )}
     </div>
   );
 }

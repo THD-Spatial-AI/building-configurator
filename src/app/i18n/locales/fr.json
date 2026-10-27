@@ -44,7 +44,8 @@
     "panel": {
       "empty": "Cliquez sur une surface du modèle pour la voir ici."
     },
-    "credits": "Crédits des données"
+    "credits": "Crédits des données",
+    "measure": "Afficher les dimensions de la surface sélectionnée"
   },
   "surface": {
     "type": {
@@ -59,22 +60,10 @@
     "areaRejected": "Une simulation rejettera cette valeur",
     "useGeometryArea": "Utiliser {area} m² du modèle",
     "uValue": "Valeur U",
-    "insulation": {
-      "veryWell": "Très bien isolé",
-      "well": "Bien isolé",
-      "moderate": "Moyennement isolé",
-      "poor": "Mal isolé",
-      "none": "Non isolé"
-    },
     "rValue": "Valeur R (1/U) : {value} m²K/W",
     "gValue": "Facteur solaire (g)",
-    "solar": {
-      "high": "Laisse passer la chaleur solaire",
-      "low": "Bloque la chaleur solaire"
-    },
     "sharedWall": "Mitoyen avec un bâtiment voisin",
-    "imported": "Importé : {area} m² · U {uValue} · {tilt}° / {azimuth}°",
-    "reset": "Réinitialiser",
+    "reset": "Rétablir les valeurs importées",
     "delete": "Supprimer cette surface",
     "facing": "Orientation",
     "facingDirection": "orienté {direction}",
@@ -118,15 +107,16 @@
     },
     "hover": {
       "open": "Cliquez pour ouvrir cette surface"
-    }
+    },
+    "uValueTip": "La chaleur qui traverse un m² de cette surface par degré d'écart entre l'intérieur et l'extérieur. Elle provient de TABULA pour le type, l'âge et le niveau de rénovation de ce bâtiment ; une valeur plus basse perd moins de chaleur, le bâtiment a donc besoin de moins de chauffage."
   },
   "profile": {
     "title": "Profil de charge horaire",
-    "stored": "Résultat BuEM enregistré",
+    "stored": "Résultat enregistré",
     "upload": "Importer",
     "download": "Télécharger",
     "source": {
-      "buem": "Sortie du modèle BuEM",
+      "buem": "Simulé",
       "none": "Aucun profil chargé",
       "file": "{name}",
       "aggregated": "{source} · agrégé au pas {from}"
@@ -171,7 +161,6 @@
       "panels": "{kwp} kWp sur {area} m² de modules",
       "remove": "Retirer le PV",
       "done": "Terminé",
-      "modules": "Modules : {count} · {kwp} kWp · {area} m²",
       "noFit": "Aucun module entier ne tient sur cette surface.",
       "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun.",
       "noFitShort": "Aucun module ne tient"
@@ -202,8 +191,7 @@
     "cost": {
       "investment": "Investissement",
       "omPerYear": "Exploitation et maintenance par an",
-      "estimateNote": "Estimations à partir des coûts des produits, avant une simulation.",
-      "investmentEstimate": "Investissement d’environ {amount}, estimé"
+      "estimateNote": "Estimations à partir des coûts des produits, avant une simulation."
     },
     "catalogue": {
       "hint": "Faites glisser un produit sur un toit ou un mur, ou choisissez-le dans le panneau d’une surface.",
@@ -268,6 +256,12 @@
       "cost": "Coût par kWc le plus bas",
       "capacity": "Puissance de module la plus élevée",
       "size": "Module le plus petit"
+    },
+    "result": {
+      "modules": "Modules",
+      "capacity": "Puissance",
+      "area": "Surface des panneaux",
+      "investment": "Investissement, estimé"
     }
   },
   "tech": {
@@ -404,14 +398,14 @@
     "capacity": {
       "label": "Capacité",
       "placeholder": "Déduite de la surface.",
-      "tip": "Nombre d'occupants. Si vide, BuEM le déduit de la surface avec une densité propre au type de bâtiment."
+      "tip": "Nombre de personnes. Laissé vide, un nombre typique pour la taille et le type du bâtiment est utilisé."
     },
     "dwellings": {
       "label": "Logements",
-      "requiredTip": "Nombre de logements. Prérempli d'après l'archétype TABULA. BuEM simule un logement représentatif et le multiplie par ce nombre.",
+      "requiredTip": "Nombre de logements dans le bâtiment, prérempli d'après des bâtiments typiques de ce type.",
       "required": "Obligatoire pour : {type}.",
       "placeholder": "Un logement.",
-      "tip": "Nombre de logements. BuEM simule un logement représentatif et le multiplie par ce nombre."
+      "tip": "Nombre de logements dans le bâtiment."
     },
     "persons": {
       "label": "Occupants par logement",
@@ -460,7 +454,7 @@
     "averageU": "Valeur U moyenne",
     "preset": {
       "label": "Appliquer à tout le bâtiment",
-      "tip": "Variantes de rénovation TABULA pour ce type et cet âge de bâtiment. Un choix s'applique à chaque type d'élément ; les surfaces réglées une à une gardent leurs valeurs.",
+      "tip": "Choisissez un niveau pour tout le bâtiment. Il règle tous les murs, toits, planchers et fenêtres ; les surfaces modifiées une à une gardent leurs valeurs.",
       "fromVariant": "D'après les données 3D : TABULA {code}.",
       "fromType": "Variantes TABULA pour le type et l'âge du bâtiment.",
       "typesDiffer": "Les types d'éléments diffèrent.",
@@ -515,11 +509,14 @@
       }
     },
     "classes": {
-      "comparing": "BuEM calcule chaque niveau…",
+      "comparing": "Calcul de la classe de chaque niveau…",
       "perM2": "{value} kWh/m²",
       "note": "Classe indicative : besoin de chauffage par m², noté sur une même échelle pour tous les pays (l'échelle autrichienne HWB, de G à A++), afin de comparer les bâtiments entre pays. Les étiquettes nationales, comme l'étiquette énergétique néerlandaise, notent l'énergie primaire, que ce modèle ne calcule pas. Simulée, pas un certificat.",
       "failed": "Les classes énergétiques n'ont pas pu être calculées.",
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "about": "À propos de ces classes",
+      "source": "Les niveaux de rénovation proviennent de TABULA, la typologie européenne des bâtiments.",
+      "sourceLink": "Ouvrir le TABULA WebTool"
     },
     "default": {
       "buem": "Par défaut dans BuEM : {value}",
@@ -770,20 +767,20 @@
     },
     "dwellingsPerStorey": "Logements par étage",
     "mixed": "variable",
-    "dwellingsMissing": "Indiquez les logements de chaque étage modélisé. Manquant : étage {storeys}. Les apports internes de BuEM suivent le nombre de logements.",
+    "dwellingsMissing": "Indiquez le nombre de logements sur chaque étage inclus. Manquant : étage {storeys}.",
     "inModel": "Dans le modèle"
   },
   "help": {
-    "envelope": "Comment cette surface retient la chaleur : sa surface et sa valeur U vont à BuEM. Un niveau de rénovation fixe la valeur U depuis TABULA ; une valeur modifiée ici est conservée.",
-    "pv": "PV sur cette surface : activez-le, choisissez un produit et la part de la surface qu'il peut occuper. Les modules sont posés sur la surface telle que le modèle 3D la montre.",
-    "building": "Ce qu'est le bâtiment : type, année et pays choisissent ses valeurs TABULA par défaut ; la surface par étage et les étages fixent la surface chauffée par BuEM. Modifiez pour les changer.",
-    "demand": "La demande annuelle d'énergie du bâtiment par usage, issue du dernier calcul BuEM ou du résultat enregistré. Le gaz de cuisson est un autre combustible, hors total.",
-    "insulation": "Fixe l'isolation de tous les murs, toits, planchers et fenêtres en une fois, d'après la typologie TABULA pour ce type et cet âge. Existant : le bâtiment tel que TABULA le recense pour son âge, sans travaux ultérieurs. Habituelle : une rénovation courante, comme une isolation de toiture ajoutée et de nouvelles fenêtres. Avancée : une rénovation ambitieuse vers le standard du neuf. Une surface modifiée individuellement garde sa valeur.",
-    "occupancy": "Comment le bâtiment se divise : ses étages, ceux qui sont dans le modèle et, pour une maison mitoyenne, un immeuble collectif ou un grand ensemble, les logements de chacun. Avec les personnes par logement, ils fixent les apports internes et l'eau chaude de BuEM.",
-    "comfort": "Quand le bâtiment est chauffé : la température de consigne, si elle baisse la nuit ou en absence (réduit) et si l'eau chaude est incluse.",
-    "outputs": "Les profils que BuEM renvoie pour chaque usage : un résumé annuel, une série horaire ou aucun.",
-    "equipment": "Les appareils que possèdent les ménages ; la demande d'électricité de BuEM en dépend. Les appareils non renseignés gardent la probabilité de BuEM.",
-    "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites."
+    "envelope": "La taille de cette surface et sa capacité à garder la chaleur. Les modifier change le chauffage dont le bâtiment a besoin.",
+    "pv": "Panneaux solaires sur cette surface : activez-les, choisissez un produit et indiquez la part de la surface qu'ils peuvent couvrir.",
+    "building": "Les données de base du bâtiment : type, âge, pays, taille et étages. Utilisez Modifier pour les corriger.",
+    "demand": "L'énergie dont le bâtiment a besoin en un an, par usage. Le gaz de cuisson est affiché à part et n'entre pas dans le total.",
+    "insulation": "La capacité de tout le bâtiment à garder la chaleur, et la classe qui en découle. Choisissez un niveau pour voir ce qu'une rénovation changerait. Existant : le bâtiment tel qu'il est. Standard : une rénovation habituelle, comme isoler la toiture et changer les fenêtres. Avancée : une rénovation profonde, proche d'un bâtiment neuf. Les surfaces modifiées une à une gardent leurs valeurs.",
+    "occupancy": "Le nombre d'étages du bâtiment, ceux qui sont inclus et le nombre de logements sur chacun. Plus de personnes signifie plus d'eau chaude et plus de chaleur intérieure.",
+    "comfort": "Quand et à quelle température le bâtiment est chauffé : la température intérieure, si elle baisse la nuit ou en absence, et si l'eau chaude est comptée.",
+    "outputs": "Les résultats obtenus pour chaque usage : un total annuel, un profil horaire ou aucun.",
+    "equipment": "Les appareils dont disposent les logements. Ils déterminent la consommation d'électricité ; ceux non renseignés prennent des valeurs typiques.",
+    "solver": "Comment les résultats horaires sont calculés : la méthode standard, rapide, ou une plus lente qui respecte exactement les limites."
   },
   "tour": {
     "button": "Visite",
@@ -810,14 +807,14 @@
     },
     "run": {
       "title": "Enregistrer et prévisualiser",
-      "body": "Lance BuEM sur le bâtiment tel qu'il est et affiche sa demande horaire."
+      "body": "Calcule la demande d'énergie du bâtiment dans son état actuel et l'affiche heure par heure."
     }
   },
   "hints": {
     "stepOf": "Étape {step} sur {total}",
     "hide": "Masquer les conseils",
     "step1": "Cliquez sur un mur, un toit ou un plancher pour l'ouvrir.",
-    "step2": "Modifiez sa valeur U ou son niveau de rénovation dans le panneau.",
+    "step2": "Modifiez sa surface ou sa valeur U dans le panneau.",
     "step3": "Enregistrez et prévisualisez pour voir la nouvelle demande du bâtiment."
   },
   "legend": {

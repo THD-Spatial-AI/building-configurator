@@ -43,7 +43,8 @@
     "panel": {
       "empty": "Click a surface in the model to see it here."
     },
-    "credits": "Data credits"
+    "credits": "Data credits",
+    "measure": "Show the selected surface's measurements"
   },
   "surface": {
     "type": {
@@ -58,22 +59,10 @@
     "areaRejected": "A simulation will reject this",
     "useGeometryArea": "Use {area} m² from the model",
     "uValue": "U-value",
-    "insulation": {
-      "veryWell": "Very well insulated",
-      "well": "Well insulated",
-      "moderate": "Moderately insulated",
-      "poor": "Poorly insulated",
-      "none": "Uninsulated"
-    },
     "rValue": "R-value (1/U): {value} m²K/W",
     "gValue": "Solar transmittance (g)",
-    "solar": {
-      "high": "Lets most solar heat through",
-      "low": "Blocks most solar heat"
-    },
     "sharedWall": "Shared with a neighbouring building",
-    "imported": "Imported: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
-    "reset": "Reset",
+    "reset": "Reset to the imported values",
     "delete": "Delete this surface",
     "facing": "Facing",
     "facingDirection": "{direction}-facing",
@@ -117,15 +106,16 @@
     },
     "hover": {
       "open": "Click to open this surface"
-    }
+    },
+    "uValueTip": "How much heat passes through one m² of this surface per degree of difference between inside and outside. It comes from TABULA for this building's type, age and refurbishment level; a lower value loses less heat, so the building needs less heating."
   },
   "profile": {
     "title": "Hourly load profile",
-    "stored": "Stored BuEM result",
+    "stored": "Stored result",
     "upload": "Upload",
     "download": "Download",
     "source": {
-      "buem": "BuEM model output",
+      "buem": "Simulated",
       "none": "No profile loaded",
       "file": "{name}",
       "aggregated": "{source} · aggregated from {from}"
@@ -170,7 +160,6 @@
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
-      "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "No whole module fits on this surface.",
       "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none.",
       "noFitShort": "No module fits"
@@ -201,8 +190,7 @@
     "cost": {
       "investment": "Investment",
       "omPerYear": "O&M per year",
-      "estimateNote": "Estimates from the products’ costs, before a simulation.",
-      "investmentEstimate": "Investment about {amount}, an estimate"
+      "estimateNote": "Estimates from the products’ costs, before a simulation."
     },
     "catalogue": {
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
@@ -267,6 +255,12 @@
       "cost": "Lowest cost per kWp",
       "capacity": "Highest module power",
       "size": "Smallest module"
+    },
+    "result": {
+      "modules": "Modules",
+      "capacity": "Capacity",
+      "area": "Panel area",
+      "investment": "Investment, estimated"
     }
   },
   "tech": {
@@ -402,14 +396,14 @@
     "capacity": {
       "label": "Capacity",
       "placeholder": "Derived from the floor area.",
-      "tip": "Number of occupants. Left empty, BuEM derives it from the floor area with a density for the building type."
+      "tip": "Number of people. Left empty, a typical number for the building's size and type is used."
     },
     "dwellings": {
       "label": "Dwellings",
-      "requiredTip": "Number of dwellings. Prefilled from the TABULA archetype. BuEM simulates one representative dwelling and multiplies it by this number.",
+      "requiredTip": "Number of homes in the building, filled in from typical buildings of this type.",
       "required": "Required for a {type}.",
       "placeholder": "One dwelling.",
-      "tip": "Number of dwellings. BuEM simulates one representative dwelling and multiplies it by this number."
+      "tip": "Number of homes in the building."
     },
     "persons": {
       "label": "Occupants per dwelling",
@@ -458,7 +452,7 @@
     "averageU": "Average U-value",
     "preset": {
       "label": "Set the whole building to",
-      "tip": "TABULA's refurbishment variants for this building type and age. A choice sets every element type; surfaces set one by one keep their values.",
+      "tip": "Choose a level for the whole building. It sets every wall, roof, floor and window; surfaces you changed one by one keep their values.",
       "fromVariant": "From 3D data: TABULA {code}.",
       "fromType": "TABULA variants for the building type and age.",
       "typesDiffer": "Element types differ.",
@@ -511,11 +505,14 @@
       }
     },
     "classes": {
-      "comparing": "Running BuEM for each level…",
+      "comparing": "Working out the grade of each level…",
       "perM2": "{value} kWh/m²",
       "note": "Indicative class: space heating per m², graded on one scale for every country (the Austrian HWB scale, G to A++), so buildings compare across countries. National labels such as the Dutch energy label grade primary energy, which this model does not compute. Simulated, not a certificate.",
       "failed": "The energy classes could not be worked out.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "about": "About these grades",
+      "source": "The refurbishment levels come from TABULA, the European building typology.",
+      "sourceLink": "Open the TABULA WebTool"
     },
     "default": {
       "buem": "BuEM default: {value}",
@@ -765,20 +762,20 @@
     },
     "dwellingsPerStorey": "Dwellings per storey",
     "mixed": "mixed",
-    "dwellingsMissing": "Give the dwellings of every modelled storey. Missing: storey {storeys}. BuEM's internal gains follow the dwelling count.",
+    "dwellingsMissing": "Give the number of homes on every included storey. Missing: storey {storeys}.",
     "inModel": "In the model"
   },
   "help": {
-    "envelope": "How this surface holds heat: its area and U-value go to BuEM. A refurbishment level sets the U-value from TABULA; a value changed here is kept.",
-    "pv": "PV on this surface: switch it on, choose a product and how much of the surface it may use. The modules are laid out on the surface as the 3D model has it.",
-    "building": "What the building is: type, year and country choose its TABULA defaults; floor area per storey and storeys set the area BuEM heats. Edit to change them.",
-    "demand": "The building's annual energy demand by use, from its last BuEM run or the stored result. Cooking gas is a separate fuel and not part of the total.",
-    "insulation": "Sets the insulation of every wall, roof, floor and window at once, from the TABULA typology for this building type and age. Existing: the building as TABULA records it for its age, without later work. Usual: a refurbishment common in practice, such as added roof insulation and new windows. Advanced: an ambitious refurbishment towards new-build standard. A surface changed one by one keeps its own value.",
-    "occupancy": "How the building divides: its storeys, which of them are in the model and, for a terraced house, multi-family house or apartment block, the dwellings on each. With the people per dwelling these set BuEM's internal gains and hot water use.",
-    "comfort": "When the building is heated: the temperature it is heated to, whether that is lowered at night or when people are away (set-back), and whether hot water is included.",
-    "outputs": "Which profiles BuEM returns for each use: a yearly summary, an hourly series, or none.",
-    "equipment": "Which appliances the households own; BuEM's electricity demand follows them. Appliances left unset keep BuEM's own likelihood.",
-    "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits."
+    "envelope": "The size of this surface and how well it keeps heat in. Changing them changes how much heating the building needs.",
+    "pv": "Solar panels on this surface: switch them on, choose a product and set how much of the surface they may cover.",
+    "building": "The basic facts about the building: its type, age, country, size and storeys. Use Edit to correct them.",
+    "demand": "How much energy the building needs in a year, split by use. Gas for cooking is shown on its own and is not in the total.",
+    "insulation": "How well the whole building keeps heat in, and the grade that gives it. Choose a level to see what refurbishment would change. Existing: the building as it is. Usual: a common refurbishment, such as roof insulation and new windows. Advanced: a deep refurbishment, close to a new building. Surfaces you changed one by one keep their own values.",
+    "occupancy": "How many storeys the building has, which of them are included, and how many homes are on each. More people means more hot water and more warmth from inside.",
+    "comfort": "When and how warm the building is kept: the indoor temperature, whether it is turned down at night or when nobody is home, and whether hot water is counted.",
+    "outputs": "Which results you get for each use: a yearly total, an hourly profile, or none.",
+    "equipment": "Which appliances the homes have. They decide the electricity use; appliances left unset use typical values.",
+    "solver": "How the hourly results are worked out: the standard method, which is fast, or a slower one that keeps exactly to the set limits."
   },
   "tour": {
     "button": "Tour",
@@ -805,14 +802,14 @@
     },
     "run": {
       "title": "Save and preview",
-      "body": "Runs BuEM on the building as it is now and shows its hourly demand."
+      "body": "Works out the building's energy demand as it is now and shows it hour by hour."
     }
   },
   "hints": {
     "stepOf": "Step {step} of {total}",
     "hide": "Hide hints",
     "step1": "Click a wall, roof or floor to open it.",
-    "step2": "Change its U-value or refurbishment level in the panel.",
+    "step2": "Change its area or U-value in the panel.",
     "step3": "Save and preview to see the building's new demand."
   },
   "legend": {

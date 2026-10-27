@@ -45,7 +45,8 @@
     "panel": {
       "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
     },
-    "credits": "Zdroje dat"
+    "credits": "Zdroje dat",
+    "measure": "Zobrazit rozměry vybrané plochy"
   },
   "surface": {
     "type": {
@@ -60,22 +61,10 @@
     "areaRejected": "Simulace tuto hodnotu odmítne",
     "useGeometryArea": "Použít {area} m² z modelu",
     "uValue": "Součinitel U",
-    "insulation": {
-      "veryWell": "Velmi dobře izolováno",
-      "well": "Dobře izolováno",
-      "moderate": "Středně izolováno",
-      "poor": "Špatně izolováno",
-      "none": "Bez izolace"
-    },
     "rValue": "Tepelný odpor R (1/U): {value} m²K/W",
     "gValue": "Propustnost slunečního záření (g)",
-    "solar": {
-      "high": "Propouští většinu slunečního tepla",
-      "low": "Blokuje většinu slunečního tepla"
-    },
     "sharedWall": "Společná se sousední budovou",
-    "imported": "Importováno: {area} m² · U {uValue} · {tilt}° / {azimuth}°",
-    "reset": "Obnovit",
+    "reset": "Obnovit importované hodnoty",
     "delete": "Smazat tuto plochu",
     "facing": "Orientace",
     "facingDirection": "orientace {direction}",
@@ -119,15 +108,16 @@
     },
     "hover": {
       "open": "Kliknutím otevřete tuto plochu"
-    }
+    },
+    "uValueTip": "Kolik tepla projde jedním m² této plochy na každý stupeň rozdílu mezi vnitřkem a venkem. Hodnota pochází z TABULA pro typ, stáří a úroveň renovace této budovy; nižší hodnota znamená menší ztráty tepla, takže budova potřebuje méně vytápění."
   },
   "profile": {
     "title": "Hodinový profil zatížení",
-    "stored": "Uložený výsledek BuEM",
+    "stored": "Uložený výsledek",
     "upload": "Nahrát",
     "download": "Stáhnout",
     "source": {
-      "buem": "Výstup modelu BuEM",
+      "buem": "Simulováno",
       "none": "Žádný profil nenačten",
       "file": "{name}",
       "aggregated": "{source} · agregováno z {from}"
@@ -172,7 +162,6 @@
       "panels": "{kwp} kWp na {area} m² panelů",
       "remove": "Odebrat FV",
       "done": "Hotovo",
-      "modules": "Moduly: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tuto plochu se nevejde žádný celý modul.",
       "spaceLimited": "Místo na této ploše omezuje moduly; větší využitelný podíl žádný nepřidá.",
       "noFitShort": "Žádný modul se nevejde"
@@ -203,8 +192,7 @@
     "cost": {
       "investment": "Investice",
       "omPerYear": "Provoz a údržba za rok",
-      "estimateNote": "Odhady z nákladů produktů, před simulací.",
-      "investmentEstimate": "Investice zhruba {amount}, odhad"
+      "estimateNote": "Odhady z nákladů produktů, před simulací."
     },
     "catalogue": {
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
@@ -275,6 +263,12 @@
       "cost": "Nejnižší cena za kWp",
       "capacity": "Nejvyšší výkon modulu",
       "size": "Nejmenší modul"
+    },
+    "result": {
+      "modules": "Moduly",
+      "capacity": "Výkon",
+      "area": "Plocha panelů",
+      "investment": "Investice, odhad"
     }
   },
   "tech": {
@@ -420,14 +414,14 @@
     "capacity": {
       "label": "Kapacita",
       "placeholder": "Odvozeno z podlahové plochy.",
-      "tip": "Počet osob. Pokud zůstane prázdné, BuEM jej odvodí z podlahové plochy a hustoty obsazení pro daný typ budovy."
+      "tip": "Počet osob. Prázdné pole použije typický počet pro velikost a typ budovy."
     },
     "dwellings": {
       "label": "Byty",
-      "requiredTip": "Počet bytů. Předvyplněno z archetypu TABULA. BuEM simuluje jeden reprezentativní byt a vynásobí jej tímto počtem.",
+      "requiredTip": "Počet bytů v budově, předvyplněný podle typických budov tohoto typu.",
       "required": "Povinné pro typ {type}.",
       "placeholder": "Jeden byt.",
-      "tip": "Počet bytů. BuEM simuluje jeden reprezentativní byt a vynásobí jej tímto počtem."
+      "tip": "Počet bytů v budově."
     },
     "persons": {
       "label": "Osob na byt",
@@ -476,7 +470,7 @@
     "averageU": "Průměrný součinitel U",
     "preset": {
       "label": "Nastavit celou budovu na",
-      "tip": "Varianty renovace TABULA pro tento typ a stáří budovy. Volba nastaví všechny typy konstrukcí; jednotlivě nastavené plochy si ponechají své hodnoty.",
+      "tip": "Vyberte úroveň pro celou budovu. Nastaví všechny stěny, střechy, podlahy a okna; plochy změněné jednotlivě si ponechají své hodnoty.",
       "fromVariant": "Z 3D dat: TABULA {code}.",
       "fromType": "Varianty TABULA pro typ a stáří budovy.",
       "typesDiffer": "Typy konstrukcí se liší.",
@@ -533,11 +527,14 @@
       }
     },
     "classes": {
-      "comparing": "BuEM počítá každou úroveň…",
+      "comparing": "Zjišťuje se třída každé úrovně…",
       "perM2": "{value} kWh/m²",
       "note": "Orientační třída: vytápění na m², hodnocené na jedné stupnici pro všechny země (rakouské stupnici HWB, G až A++), aby se budovy daly porovnat mezi zeměmi. Národní štítky, jako nizozemský energetický štítek, hodnotí primární energii, kterou tento model nepočítá. Simulovaná, nejde o certifikát.",
       "failed": "Energetické třídy se nepodařilo určit.",
-      "retry": "Zkusit znovu"
+      "retry": "Zkusit znovu",
+      "about": "O těchto třídách",
+      "source": "Úrovně renovace pocházejí z TABULA, evropské typologie budov.",
+      "sourceLink": "Otevřít TABULA WebTool"
     },
     "default": {
       "buem": "Výchozí v BuEM: {value}",
@@ -791,20 +788,20 @@
     },
     "dwellingsPerStorey": "Bytů na podlaží",
     "mixed": "různé",
-    "dwellingsMissing": "Zadejte byty každého modelovaného podlaží. Chybí: podlaží {storeys}. Vnitřní zisky BuEM se řídí počtem bytů.",
+    "dwellingsMissing": "Uveďte počet bytů na každém zahrnutém podlaží. Chybí: podlaží {storeys}.",
     "inModel": "V modelu"
   },
   "help": {
-    "envelope": "Jak tato plocha drží teplo: její plocha a součinitel U jdou do BuEM. Úroveň renovace nastaví součinitel U z TABULA; hodnota změněná zde zůstane.",
-    "pv": "FV na této ploše: zapněte ji, vyberte produkt a jakou část plochy smí využít. Moduly se rozmístí na ploše tak, jak ji ukazuje 3D model.",
-    "building": "Co je to za budovu: typ, rok a země volí výchozí hodnoty TABULA; plocha podlaží a počet podlaží určují plochu, kterou BuEM vytápí. Upravte je tlačítkem Upravit.",
-    "demand": "Roční potřeba energie budovy podle užití, z posledního výpočtu BuEM nebo uloženého výsledku. Plyn na vaření je samostatné palivo a není v součtu.",
-    "insulation": "Nastaví izolaci všech stěn, střech, podlah a oken najednou, podle typologie TABULA pro tento typ a stáří budovy. Stávající stav: budova, jak ji TABULA uvádí pro její stáří, bez pozdějších úprav. Běžná: renovace obvyklá v praxi, například zateplení střechy a nová okna. Pokročilá: ambiciózní renovace směrem ke standardu novostavby. Plocha změněná samostatně si ponechá svou hodnotu.",
-    "occupancy": "Jak se budova člení: její podlaží, která z nich jsou v modelu, a u řadového, bytového domu či panelového domu byty na každém. S počtem osob na byt určují vnitřní zisky a spotřebu teplé vody v BuEM.",
-    "comfort": "Kdy se budova vytápí: požadovaná teplota, zda se v noci nebo při nepřítomnosti snižuje (útlum) a zda je zahrnuta teplá voda.",
-    "outputs": "Které profily BuEM vrací pro každé užití: roční souhrn, hodinovou řadu, nebo žádný.",
-    "equipment": "Které spotřebiče domácnosti vlastní; spotřeba elektřiny v BuEM se jimi řídí. Nenastavené si ponechají pravděpodobnost BuEM.",
-    "solver": "Jak BuEM řeší hodinový model: výchozím rychlým řídkým řešičem, nebo MILP, pomaleji, ale přesně na mezích."
+    "envelope": "Velikost této plochy a jak dobře drží teplo. Jejich změna mění, kolik vytápění budova potřebuje.",
+    "pv": "Solární panely na této ploše: zapněte je, vyberte produkt a určete, jakou část plochy smějí zakrýt.",
+    "building": "Základní údaje o budově: typ, stáří, země, velikost a podlaží. Upravíte je tlačítkem Upravit.",
+    "demand": "Kolik energie budova za rok potřebuje, podle použití. Plyn na vaření je uveden zvlášť a do součtu se nepočítá.",
+    "insulation": "Jak dobře celá budova drží teplo a jaká třída z toho vychází. Vyberte úroveň a uvidíte, co by renovace změnila. Současný: budova, jak je. Běžná: obvyklá renovace, např. zateplení střechy a nová okna. Pokročilá: hloubková renovace, blízká novostavbě. Plochy změněné jednotlivě si ponechají své hodnoty.",
+    "occupancy": "Kolik podlaží budova má, která z nich jsou zahrnuta a kolik bytů je na každém. Více lidí znamená více teplé vody a více tepla zevnitř.",
+    "comfort": "Kdy a jak teplá se budova udržuje: vnitřní teplota, zda se v noci nebo při nepřítomnosti snižuje a zda se počítá teplá voda.",
+    "outputs": "Jaké výsledky dostanete pro každé použití: roční součet, hodinový profil, nebo žádné.",
+    "equipment": "Jaké spotřebiče domácnosti mají. Určují spotřebu elektřiny; nenastavené spotřebiče mají typické hodnoty.",
+    "solver": "Jak se počítají hodinové výsledky: standardní metodou, která je rychlá, nebo pomalejší, která přesně dodrží limity."
   },
   "tour": {
     "button": "Prohlídka",
@@ -831,14 +828,14 @@
     },
     "run": {
       "title": "Uložit a náhled",
-      "body": "Spustí BuEM pro budovu v aktuálním stavu a ukáže hodinovou potřebu."
+      "body": "Spočítá energetickou potřebu budovy v současném stavu a ukáže ji hodinu po hodině."
     }
   },
   "hints": {
     "stepOf": "Krok {step} z {total}",
     "hide": "Skrýt nápovědu",
     "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
-    "step2": "Změňte hodnotu U nebo úroveň renovace v panelu.",
+    "step2": "Změňte plochu nebo hodnotu U v panelu.",
     "step3": "Uložte a zobrazte náhled nové potřeby budovy."
   },
   "legend": {
