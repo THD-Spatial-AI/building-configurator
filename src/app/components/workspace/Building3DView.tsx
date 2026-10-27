@@ -338,7 +338,7 @@ export function Building3DView({
     </div>
   ) : null;
   const pickable = useMemo(() => [
-    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label, type: t(`surface.type.${element.type}`) })),
+    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label, type: t(`surface.type.${element.type}`), group: element.type })),
     ...Object.entries(pv?.surfaces ?? {})
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),

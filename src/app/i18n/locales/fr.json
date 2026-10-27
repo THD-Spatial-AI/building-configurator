@@ -107,7 +107,15 @@
       }
     },
     "pick": "Choisir une surface",
-    "geometrySource": "Source : modèle 3D du bâtiment"
+    "geometrySource": "Source : modèle 3D du bâtiment",
+    "group": {
+      "roof": "Toits",
+      "wall": "Murs",
+      "floor": "Planchers",
+      "window": "Fenêtres",
+      "door": "Portes",
+      "other": "Autres surfaces"
+    }
   },
   "profile": {
     "title": "Profil de charge horaire",

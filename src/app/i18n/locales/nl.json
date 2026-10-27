@@ -106,7 +106,15 @@
       }
     },
     "pick": "Kies een vlak",
-    "geometrySource": "Bron: 3D-model van het gebouw"
+    "geometrySource": "Bron: 3D-model van het gebouw",
+    "group": {
+      "roof": "Daken",
+      "wall": "Muren",
+      "floor": "Vloeren",
+      "window": "Ramen",
+      "door": "Deuren",
+      "other": "Overige vlakken"
+    }
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",

@@ -106,7 +106,15 @@
       }
     },
     "pick": "Choose a surface",
-    "geometrySource": "Source: the building's 3D model"
+    "geometrySource": "Source: the building's 3D model",
+    "group": {
+      "roof": "Roofs",
+      "wall": "Walls",
+      "floor": "Floors",
+      "window": "Windows",
+      "door": "Doors",
+      "other": "Other surfaces"
+    }
   },
   "profile": {
     "title": "Hourly load profile",

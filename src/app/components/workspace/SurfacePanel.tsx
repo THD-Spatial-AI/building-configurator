@@ -78,11 +78,29 @@ function CloseButton({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** One surface in the picker: its name, and its type beneath. */
+/** One surface in the picker: its name, its type beneath, and the element type it is grouped under. */
 export interface PickerSurface {
   id: string;
   label: string;
   type?: string;
+  /** The envelope element type (roof, wall, floor, window, door); others are grouped as "other". */
+  group?: string;
+}
+
+/** The element types in the order the picker lists them; any other type goes under "other", last. */
+const GROUP_ORDER = ['roof', 'wall', 'floor', 'window', 'door'];
+
+/** The surfaces under their element type, in GROUP_ORDER, each group by name; empty groups are left out. */
+export function groupSurfaces(surfaces: readonly PickerSurface[]): { group: string; surfaces: PickerSurface[] }[] {
+  const groupOf = (surface: PickerSurface) => (surface.group && GROUP_ORDER.includes(surface.group) ? surface.group : 'other');
+  return [...GROUP_ORDER, 'other']
+    .map((group) => ({
+      group,
+      surfaces: surfaces
+        .filter((surface) => groupOf(surface) === group)
+        .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: 'base' })),
+    }))
+    .filter(({ surfaces: members }) => members.length > 0);
 }
 
 /**
@@ -96,6 +114,7 @@ export function SurfacePicker({ surfaces, value, placeholder, onSelect, onPrevie
   onSelect: (id: string) => void;
   onPreview: (id: string | null) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const close = () => { setOpen(false); onPreview(null); };
@@ -127,30 +146,37 @@ export function SurfacePicker({ surfaces, value, placeholder, onSelect, onPrevie
         <ChevronDown className={cn('size-3.5 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
-        <ul
+        <div
           role="listbox"
           aria-label={placeholder}
           onMouseLeave={() => onPreview(null)}
-          className="absolute inset-x-0 top-full z-30 mt-1 max-h-80 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]"
+          className="absolute inset-x-0 top-full z-30 mt-1 max-h-80 overflow-y-auto rounded-md border border-border bg-card pb-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]"
         >
-          {surfaces.map((surface) => (
-            <li key={surface.id} role="option" aria-selected={surface.id === value}>
-              <button
-                type="button"
-                onMouseEnter={() => onPreview(surface.id)}
-                onFocus={() => onPreview(surface.id)}
-                onClick={() => { onSelect(surface.id); close(); }}
-                className={cn(
-                  'flex w-full cursor-pointer flex-col px-2.5 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none',
-                  surface.id === value && 'bg-primary/10',
-                )}
-              >
-                <span className="truncate text-[12px] font-medium text-foreground">{surface.label}</span>
-                {surface.type && <span className="truncate text-[10px] text-muted-foreground">{surface.type}</span>}
-              </button>
-            </li>
+          {groupSurfaces(surfaces).map(({ group, surfaces: members }) => (
+            <div key={group} role="group" aria-label={t(`surface.group.${group}`)}>
+              <div className="sticky top-0 z-10 border-b border-border bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {t(`surface.group.${group}`)} ({members.length})
+              </div>
+              {members.map((surface) => (
+                <button
+                  key={surface.id}
+                  type="button"
+                  role="option"
+                  aria-selected={surface.id === value}
+                  onMouseEnter={() => onPreview(surface.id)}
+                  onFocus={() => onPreview(surface.id)}
+                  onClick={() => { onSelect(surface.id); close(); }}
+                  className={cn(
+                    'flex w-full cursor-pointer px-2.5 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none',
+                    surface.id === value && 'bg-primary/10',
+                  )}
+                >
+                  <span className="truncate text-[12px] font-medium text-foreground">{surface.label}</span>
+                </button>
+              ))}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

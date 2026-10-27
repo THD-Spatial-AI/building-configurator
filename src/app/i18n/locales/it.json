@@ -106,7 +106,15 @@
       }
     },
     "pick": "Scegli una superficie",
-    "geometrySource": "Fonte: modello 3D dell'edificio"
+    "geometrySource": "Fonte: modello 3D dell'edificio",
+    "group": {
+      "roof": "Tetti",
+      "wall": "Pareti",
+      "floor": "Pavimenti",
+      "window": "Finestre",
+      "door": "Porte",
+      "other": "Altre superfici"
+    }
   },
   "profile": {
     "title": "Profilo di carico orario",

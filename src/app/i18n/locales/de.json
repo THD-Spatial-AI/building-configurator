@@ -106,7 +106,15 @@
       }
     },
     "pick": "Fläche wählen",
-    "geometrySource": "Quelle: 3D-Modell des Gebäudes"
+    "geometrySource": "Quelle: 3D-Modell des Gebäudes",
+    "group": {
+      "roof": "Dächer",
+      "wall": "Wände",
+      "floor": "Böden",
+      "window": "Fenster",
+      "door": "Türen",
+      "other": "Weitere Flächen"
+    }
   },
   "profile": {
     "title": "Stündliches Lastprofil",

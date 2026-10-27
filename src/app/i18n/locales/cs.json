@@ -108,7 +108,15 @@
       }
     },
     "pick": "Vyberte plochu",
-    "geometrySource": "Zdroj: 3D model budovy"
+    "geometrySource": "Zdroj: 3D model budovy",
+    "group": {
+      "roof": "Střechy",
+      "wall": "Stěny",
+      "floor": "Podlahy",
+      "window": "Okna",
+      "door": "Dveře",
+      "other": "Další plochy"
+    }
   },
   "profile": {
     "title": "Hodinový profil zatížení",

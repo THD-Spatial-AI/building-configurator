@@ -108,7 +108,15 @@
       }
     },
     "pick": "Wybierz przegrodę",
-    "geometrySource": "Źródło: model 3D budynku"
+    "geometrySource": "Źródło: model 3D budynku",
+    "group": {
+      "roof": "Dachy",
+      "wall": "Ściany",
+      "floor": "Podłogi",
+      "window": "Okna",
+      "door": "Drzwi",
+      "other": "Inne powierzchnie"
+    }
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",
