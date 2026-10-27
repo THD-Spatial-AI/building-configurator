@@ -43,6 +43,18 @@ import { buildingTypeName, hasDwellingsPerStorey, isServiceBuildingType } from '
 
 type SurfaceSelection = { id: string };
 
+/**
+ * A field the user types words into, such as a name or a search, where Ctrl+Z
+ * is the browser's own text undo. Number fields, sliders and switches change
+ * the model, so the model's undo applies there.
+ */
+function isFreeText(target: EventTarget | null): boolean {
+  if (target instanceof HTMLTextAreaElement) return true;
+  if (!(target instanceof HTMLInputElement)) return false;
+  const numeric = target.inputMode === 'decimal' || target.inputMode === 'numeric';
+  return (target.type === 'text' || target.type === 'search') && !numeric;
+}
+
 export interface Building3DViewProps {
   building: BuildingState;
   /** Null while the envelope geometry is still loading. */
@@ -267,11 +279,10 @@ export function Building3DView({
       else requestExit();
       return;
     }
-    // Not while typing into a field, where the browser's own undo applies.
-    const typing = e.target instanceof HTMLElement
-      && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
-    if (!typing && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !isFreeText(e.target)) {
       e.preventDefault();
+      // A focused number field shows its own draft until it lets go of focus.
+      if (e.target instanceof HTMLInputElement) e.target.blur();
       undo();
     }
   };
