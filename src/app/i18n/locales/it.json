@@ -116,7 +116,7 @@
     "download": "Scarica",
     "source": {
       "buem": "Simulato",
-      "none": "Nessun profilo caricato",
+      "none": "Simulato dopo Salva e visualizza fabbisogno energetico",
       "file": "{name}",
       "aggregated": "{source} · aggregato da dati {from}"
     },
@@ -130,7 +130,8 @@
       "parse": "{reason}",
       "unreadable": "Impossibile leggere il file del profilo di carico."
     },
-    "uploadSoon": "Il caricamento di un profilo misurato arriverà presto."
+    "uploadSoon": "Il caricamento di profili di consumo personalizzati sarà presto disponibile.",
+    "downloadTip": "Scarica i profili orari di riscaldamento, raffrescamento, elettricità, acqua calda e gas di cottura in un unico CSV"
   },
   "pv": {
     "state": {

@@ -118,7 +118,7 @@
     "download": "Stáhnout",
     "source": {
       "buem": "Simulováno",
-      "none": "Žádný profil nenačten",
+      "none": "Simulováno po Uložit a zobrazit potřebu energie",
       "file": "{name}",
       "aggregated": "{source} · agregováno z {from}"
     },
@@ -132,7 +132,8 @@
       "parse": "{reason}",
       "unreadable": "Soubor profilu zatížení nelze načíst."
     },
-    "uploadSoon": "Nahrání naměřeného profilu bude brzy k dispozici."
+    "uploadSoon": "Nahrávání vlastních profilů spotřeby bude brzy k dispozici.",
+    "downloadTip": "Stáhnout hodinové profily vytápění, chlazení, elektřiny, teplé vody a plynu na vaření v jednom CSV"
   },
   "pv": {
     "state": {

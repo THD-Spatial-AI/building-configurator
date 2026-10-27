@@ -117,7 +117,7 @@
     "download": "Télécharger",
     "source": {
       "buem": "Simulé",
-      "none": "Aucun profil chargé",
+      "none": "Simulé après Enregistrer et estimer les besoins",
       "file": "{name}",
       "aggregated": "{source} · agrégé au pas {from}"
     },
@@ -131,7 +131,8 @@
       "parse": "{reason}",
       "unreadable": "Impossible de lire le fichier de profil de charge."
     },
-    "uploadSoon": "L'import d'un profil mesuré arrive bientôt."
+    "uploadSoon": "L'import de profils de consommation personnalisés sera bientôt disponible.",
+    "downloadTip": "Télécharger les profils horaires de chauffage, refroidissement, électricité, eau chaude et gaz de cuisson en un seul CSV"
   },
   "pv": {
     "state": {
