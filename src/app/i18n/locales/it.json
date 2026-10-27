@@ -111,11 +111,11 @@
   },
   "profile": {
     "title": "Profilo di carico orario",
-    "stored": "Risultato BuEM salvato",
+    "stored": "Risultato salvato",
     "upload": "Carica",
     "download": "Scarica",
     "source": {
-      "buem": "Output del modello BuEM",
+      "buem": "Simulato",
       "none": "Nessun profilo caricato",
       "file": "{name}",
       "aggregated": "{source} · aggregato da dati {from}"
@@ -396,14 +396,14 @@
     "capacity": {
       "label": "Capienza",
       "placeholder": "Ricavata dalla superficie.",
-      "tip": "Numero di occupanti. Se vuoto, BuEM lo ricava dalla superficie con una densità per il tipo di edificio."
+      "tip": "Numero di persone. Se vuoto, si usa un numero tipico per dimensione e tipo dell'edificio."
     },
     "dwellings": {
       "label": "Alloggi",
-      "requiredTip": "Numero di alloggi. Precompilato dall'archetipo TABULA. BuEM simula un alloggio rappresentativo e lo moltiplica per questo numero.",
+      "requiredTip": "Numero di abitazioni nell'edificio, precompilato da edifici tipici di questo tipo.",
       "required": "Obbligatorio per il tipo {type}.",
       "placeholder": "Un alloggio.",
-      "tip": "Numero di alloggi. BuEM simula un alloggio rappresentativo e lo moltiplica per questo numero."
+      "tip": "Numero di abitazioni nell'edificio."
     },
     "persons": {
       "label": "Occupanti per alloggio",
@@ -452,7 +452,7 @@
     "averageU": "Valore U medio",
     "preset": {
       "label": "Imposta l'intero edificio a",
-      "tip": "Varianti di riqualificazione TABULA per questo tipo ed età di edificio. Una scelta imposta ogni tipo di elemento; le superfici impostate una per una mantengono i loro valori.",
+      "tip": "Scegli un livello per l'intero edificio. Imposta tutte le pareti, i tetti, i pavimenti e le finestre; le superfici cambiate una per una mantengono i loro valori.",
       "fromVariant": "Dai dati 3D: TABULA {code}.",
       "fromType": "Varianti TABULA per tipo ed età dell'edificio.",
       "typesDiffer": "I tipi di elemento differiscono.",
@@ -505,7 +505,7 @@
       }
     },
     "classes": {
-      "comparing": "BuEM calcola ogni livello…",
+      "comparing": "Calcolo della classe di ogni livello…",
       "perM2": "{value} kWh/m²",
       "note": "Classe indicativa: riscaldamento per m², valutato su un'unica scala per tutti i paesi (la scala austriaca HWB, da G a A++), così gli edifici si confrontano tra paesi. Le etichette nazionali, come quella energetica olandese, valutano l'energia primaria, che questo modello non calcola. Simulata, non un attestato.",
       "failed": "Non è stato possibile calcolare le classi energetiche.",
@@ -762,20 +762,20 @@
     },
     "dwellingsPerStorey": "Abitazioni per piano",
     "mixed": "misto",
-    "dwellingsMissing": "Indica le abitazioni di ogni piano modellato. Manca: piano {storeys}. I guadagni interni di BuEM seguono il numero di abitazioni.",
+    "dwellingsMissing": "Indica il numero di abitazioni su ogni piano incluso. Manca: piano {storeys}.",
     "inModel": "Nel modello"
   },
   "help": {
-    "envelope": "Come questa superficie trattiene il calore: superficie e valore U vanno a BuEM. Il livello di riqualificazione dell'edificio, scelto in Livello energetico, imposta il valore U da TABULA; un valore cambiato qui viene mantenuto.",
-    "pv": "FV su questa superficie: attivalo, scegli un prodotto e quanta superficie può usare. I moduli sono disposti sulla superficie come la mostra il modello 3D.",
-    "building": "Che cos'è l'edificio: tipo, anno e paese scelgono i valori predefiniti TABULA; superficie per piano e piani fissano la superficie riscaldata da BuEM. Modifica per cambiarli.",
-    "demand": "La domanda annua di energia dell'edificio per uso, dall'ultimo calcolo BuEM o dal risultato salvato. Il gas di cottura è un altro combustibile e non è nel totale.",
-    "insulation": "Imposta l'isolamento di tutte le pareti, coperture, solai e finestre insieme, dalla tipologia TABULA per questo tipo ed età. Esistente: l'edificio come TABULA lo registra per la sua età, senza interventi successivi. Usuale: una riqualificazione comune, come isolare la copertura e cambiare le finestre. Avanzata: una riqualificazione ambiziosa verso lo standard del nuovo. Una superficie modificata singolarmente mantiene il suo valore.",
-    "occupancy": "Come si divide l'edificio: i suoi piani, quali sono nel modello e, per una casa a schiera, plurifamiliare o un condominio, le abitazioni di ciascuno. Con le persone per abitazione determinano i guadagni interni e l'acqua calda di BuEM.",
-    "comfort": "Quando l'edificio è riscaldato: la temperatura impostata, se si abbassa di notte o in assenza (attenuazione) e se è inclusa l'acqua calda.",
-    "outputs": "Quali profili restituisce BuEM per ogni uso: un riepilogo annuo, una serie oraria o nessuno.",
-    "equipment": "Quali elettrodomestici hanno le famiglie; la domanda elettrica di BuEM li segue. Quelli non impostati mantengono la probabilità di BuEM.",
-    "solver": "Come BuEM risolve il modello orario: con il solutore sparso predefinito, veloce, o con MILP, più lento ma esatto sui limiti."
+    "envelope": "La dimensione di questa superficie e quanto trattiene il calore. Cambiarli cambia il riscaldamento di cui l'edificio ha bisogno.",
+    "pv": "Pannelli solari su questa superficie: attivali, scegli un prodotto e indica quanta superficie possono coprire.",
+    "building": "I dati di base dell'edificio: tipo, età, paese, dimensione e piani. Usa Modifica per correggerli.",
+    "demand": "Quanta energia serve all'edificio in un anno, per uso. Il gas per cucinare è mostrato a parte e non rientra nel totale.",
+    "insulation": "Quanto l'intero edificio trattiene il calore e la classe che ne risulta. Scegli un livello per vedere cosa cambierebbe una riqualificazione. Attuale: l'edificio com'è. Standard: una riqualificazione comune, come isolare il tetto e cambiare le finestre. Avanzata: una riqualificazione profonda, vicina a un edificio nuovo. Le superfici cambiate una per una mantengono i loro valori.",
+    "occupancy": "Quanti piani ha l'edificio, quali sono inclusi e quante abitazioni ci sono su ciascuno. Più persone significano più acqua calda e più calore dall'interno.",
+    "comfort": "Quando e quanto è riscaldato l'edificio: la temperatura interna, se si abbassa di notte o quando non c'è nessuno e se l'acqua calda è inclusa.",
+    "outputs": "Quali risultati ottieni per ogni uso: un totale annuo, un profilo orario o nessuno.",
+    "equipment": "Quali elettrodomestici hanno le abitazioni. Determinano il consumo elettrico; quelli non impostati usano valori tipici.",
+    "solver": "Come si calcolano i risultati orari: con il metodo standard, veloce, o con uno più lento che rispetta esattamente i limiti."
   },
   "tour": {
     "button": "Tour",
@@ -802,7 +802,7 @@
     },
     "run": {
       "title": "Salva e anteprima",
-      "body": "Esegue BuEM sull'edificio così com'è e mostra la domanda oraria."
+      "body": "Calcola la domanda di energia dell'edificio com'è ora e la mostra ora per ora."
     }
   },
   "hints": {

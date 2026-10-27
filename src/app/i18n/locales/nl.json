@@ -111,11 +111,11 @@
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",
-    "stored": "Opgeslagen BuEM-resultaat",
+    "stored": "Opgeslagen resultaat",
     "upload": "Uploaden",
     "download": "Downloaden",
     "source": {
-      "buem": "Uitvoer BuEM-model",
+      "buem": "Gesimuleerd",
       "none": "Geen profiel geladen",
       "file": "{name}",
       "aggregated": "{source} · geaggregeerd uit {from}"
@@ -396,14 +396,14 @@
     "capacity": {
       "label": "Capaciteit",
       "placeholder": "Afgeleid van de vloeroppervlakte.",
-      "tip": "Aantal bewoners. Leeg gelaten leidt BuEM het af van de vloeroppervlakte met een bezettingsdichtheid voor het gebouwtype."
+      "tip": "Aantal personen. Leeg gelaten geldt een gangbaar aantal voor de grootte en het type van het gebouw."
     },
     "dwellings": {
       "label": "Woningen",
-      "requiredTip": "Aantal woningen. Vooraf ingevuld uit het TABULA-archetype. BuEM simuleert één representatieve woning en vermenigvuldigt die met dit aantal.",
+      "requiredTip": "Aantal woningen in het gebouw, vooraf ingevuld op basis van gangbare gebouwen van dit type.",
       "required": "Verplicht voor een {type}.",
       "placeholder": "Eén woning.",
-      "tip": "Aantal woningen. BuEM simuleert één representatieve woning en vermenigvuldigt die met dit aantal."
+      "tip": "Aantal woningen in het gebouw."
     },
     "persons": {
       "label": "Bewoners per woning",
@@ -452,7 +452,7 @@
     "averageU": "Gemiddelde U-waarde",
     "preset": {
       "label": "Heel het gebouw instellen op",
-      "tip": "TABULA-renovatievarianten voor dit gebouwtype en deze bouwperiode. Een keuze stelt elk elementtype in; afzonderlijk ingestelde vlakken behouden hun waarden.",
+      "tip": "Kies een niveau voor het hele gebouw. Het zet alle muren, daken, vloeren en ramen; vlakken die u een voor een wijzigde, houden hun waarden.",
       "fromVariant": "Uit 3D-data: TABULA {code}.",
       "fromType": "TABULA-varianten voor gebouwtype en bouwperiode.",
       "typesDiffer": "Elementtypen verschillen.",
@@ -505,7 +505,7 @@
       }
     },
     "classes": {
-      "comparing": "BuEM rekent elk niveau…",
+      "comparing": "De klasse van elk niveau wordt bepaald…",
       "perM2": "{value} kWh/m²",
       "note": "Indicatieve klasse: ruimteverwarming per m², beoordeeld op één schaal voor alle landen (de Oostenrijkse HWB-schaal, G tot A++), zodat gebouwen over landen heen vergelijkbaar zijn. Nationale labels zoals het Nederlandse energielabel beoordelen primaire energie, die dit model niet berekent. Gesimuleerd, geen certificaat.",
       "failed": "De energieklassen konden niet worden bepaald.",
@@ -762,20 +762,20 @@
     },
     "dwellingsPerStorey": "Woningen per verdieping",
     "mixed": "gemengd",
-    "dwellingsMissing": "Geef de woningen van elke gemodelleerde verdieping op. Ontbreekt: verdieping {storeys}. De interne warmtelast van BuEM volgt het aantal woningen.",
+    "dwellingsMissing": "Geef het aantal woningen op elke meegetelde verdieping. Ontbreekt: verdieping {storeys}.",
     "inModel": "In het model"
   },
   "help": {
-    "envelope": "Hoe dit vlak warmte vasthoudt: oppervlakte en U-waarde gaan naar BuEM. Het renovatieniveau van het gebouw, gekozen bij Energieniveau, zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft behouden.",
-    "pv": "PV op dit vlak: zet het aan, kies een product en hoeveel van het vlak het mag gebruiken. De modules worden gelegd op het vlak zoals het 3D-model het toont.",
-    "building": "Wat het gebouw is: type, bouwjaar en land kiezen de TABULA-standaardwaarden; vloeroppervlak per verdieping en verdiepingen bepalen het oppervlak dat BuEM verwarmt. Bewerk om ze te wijzigen.",
-    "demand": "De jaarlijkse energievraag van het gebouw per gebruik, uit de laatste BuEM-berekening of het opgeslagen resultaat. Kookgas is een aparte brandstof en telt niet mee in het totaal.",
-    "insulation": "Zet de isolatie van alle muren, daken, vloeren en ramen tegelijk, uit de TABULA-typologie voor dit gebouwtype en deze leeftijd. Bestaand: het gebouw zoals TABULA het voor zijn leeftijd vastlegt, zonder latere ingrepen. Gangbaar: een renovatie die in de praktijk veel voorkomt, zoals extra dakisolatie en nieuwe ramen. Vergaand: een ambitieuze renovatie richting nieuwbouwniveau. Een vlak dat afzonderlijk is gewijzigd, houdt zijn eigen waarde.",
-    "occupancy": "Hoe het gebouw is ingedeeld: de verdiepingen, welke in het model zitten en, bij een rijwoning, meergezinswoning of flat, de woningen per verdieping. Met de personen per woning bepalen ze de interne warmtelast en het warmwatergebruik van BuEM.",
-    "comfort": "Wanneer het gebouw wordt verwarmd: de insteltemperatuur, of die 's nachts of bij afwezigheid wordt verlaagd (nachtverlaging) en of warm water is inbegrepen.",
-    "outputs": "Welke profielen BuEM per gebruik teruggeeft: een jaaroverzicht, een uurreeks of geen.",
-    "equipment": "Welke apparaten de huishoudens bezitten; de elektriciteitsvraag in BuEM volgt ze. Niet ingestelde apparaten houden de kans van BuEM zelf.",
-    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen."
+    "envelope": "De grootte van dit vlak en hoe goed het warmte vasthoudt. Wijzigen verandert hoeveel verwarming het gebouw nodig heeft.",
+    "pv": "Zonnepanelen op dit vlak: zet ze aan, kies een product en stel in hoeveel van het vlak ze mogen bedekken.",
+    "building": "De basisgegevens van het gebouw: type, leeftijd, land, grootte en verdiepingen. Met Bewerken past u ze aan.",
+    "demand": "Hoeveel energie het gebouw per jaar nodig heeft, per gebruik. Kookgas staat apart en telt niet mee in het totaal.",
+    "insulation": "Hoe goed het hele gebouw warmte vasthoudt, en de klasse die daaruit volgt. Kies een niveau om te zien wat renovatie zou veranderen. Huidig: het gebouw zoals het is. Standaard: een gebruikelijke renovatie, zoals dakisolatie en nieuwe ramen. Vergaand: een ingrijpende renovatie, dicht bij een nieuw gebouw. Vlakken die u een voor een wijzigde, houden hun eigen waarden.",
+    "occupancy": "Hoeveel verdiepingen het gebouw heeft, welke meetellen en hoeveel woningen er op elke liggen. Meer mensen betekent meer warm water en meer warmte van binnen.",
+    "comfort": "Wanneer en hoe warm het gebouw wordt gehouden: de binnentemperatuur, of die 's nachts of bij afwezigheid lager gaat en of warm water meetelt.",
+    "outputs": "Welke resultaten u per gebruik krijgt: een jaartotaal, een uurprofiel of geen.",
+    "equipment": "Welke apparaten de woningen hebben. Ze bepalen het stroomverbruik; niet ingestelde apparaten krijgen gangbare waarden.",
+    "solver": "Hoe de uurresultaten worden berekend: de standaardmethode, die snel is, of een tragere die de grenzen precies aanhoudt."
   },
   "tour": {
     "button": "Rondleiding",
@@ -802,7 +802,7 @@
     },
     "run": {
       "title": "Opslaan en voorbeeld",
-      "body": "Rekent BuEM door voor het gebouw zoals het nu is en toont de vraag per uur."
+      "body": "Berekent de energievraag van het gebouw zoals het nu is en toont die per uur."
     }
   },
   "hints": {
