@@ -53,7 +53,7 @@ export function SurfacePanel({ docked, open, title, emptyText, picker, onClose, 
               <CloseButton onClose={onClose} />
             </div>
           )}
-          <div className={cn('min-h-0 w-full flex-1 overflow-y-auto', docked && 'mx-auto max-w-[560px]')}>
+          <div className={cn('min-h-0 w-full flex-1 overflow-y-auto [scrollbar-gutter:stable]', docked && 'mx-auto max-w-[560px]')}>
             {children}
           </div>
         </>
