@@ -515,19 +515,21 @@ export function useBuildingModel(
   const setGen = (key: string, value: any) => {
     // A new storey count moves every storey band, so the storeys modelled no longer apply.
     if (key === 'storeys' && value !== general.storeys && general.storeysModelled) {
-      setStoreysModelled(null, {});
+      setStoreysModelled(null, null);
     }
     setGeneralRaw((prev) => ({ ...prev, [key]: value }));
   };
 
   /**
-   * Models only the given storeys (1-based), with each surface's share inside
-   * them from storeyShares; null models them all again.
+   * Models only the given storeys (1-based; null: all), with each surface's
+   * share inside what is modelled from storeyShares; null shares model every
+   * surface whole, as when nothing is left out.
    */
-  const setStoreysModelled = (modelled: number[] | null, shares: Record<string, number>) => {
+  const setStoreysModelled = (modelled: number[] | null, shares: Record<string, number> | null) => {
+    const fallback = modelled ? modelled.length / Math.max(1, general.storeys) : 1;
     setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => {
       const { modelledShare: _, ...whole } = el;
-      return [id, modelled ? { ...whole, modelledShare: shares[id] ?? modelled.length / Math.max(1, general.storeys) } : whole];
+      return [id, shares ? { ...whole, modelledShare: shares[id] ?? fallback } : whole];
     })));
     setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled }));
   };
@@ -798,6 +800,9 @@ export function withEdits(
       residential_units:       general.residential_units,
       storeyDwellings:         general.storeyDwellings,
       storeyHeights:           general.storeyHeights,
+      atticModelled:           general.atticModelled,
+      atticFloorArea:          general.atticFloorArea,
+      atticDwellings:          general.atticDwellings,
       num_persons:             general.num_persons,
       archetype:               general.archetype,
       region_code:             general.region_code,

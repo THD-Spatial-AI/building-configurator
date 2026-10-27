@@ -776,7 +776,16 @@
       "storeys": "Kolejna kondygnacja o wysokości {room} m byłaby wyższa niż model 3D, który ma {height} m do okapu.",
       "height": "Wyższa kondygnacja sprawiłaby, że kondygnacje byłyby wyższe niż model 3D, który ma {height} m do okapu."
     },
-    "heightConflict": "Kondygnacje mają razem {total} m wysokości, więcej niż model 3D, który ma {height} m do okapu. Zmniejsz liczbę kondygnacji lub jedną z wysokości."
+    "heightConflict": "Kondygnacje mają razem {total} m wysokości, więcej niż model 3D, który ma {height} m do okapu. Zmniejsz liczbę kondygnacji lub jedną z wysokości.",
+    "attic": {
+      "label": "Poddasze",
+      "chipIn": "Poddasze, w modelu",
+      "chipOut": "Poddasze, pominięte",
+      "hint": "Przestrzeń pod dachem spadzistym, powyżej okapu. Po pominięciu dach nie należy już do ogrzewanego budynku, a strop pod nim traci ciepło do zimnego poddasza.",
+      "floorArea": "Powierzchnia poddasza",
+      "noArea": "Nie liczona",
+      "dwellings": "Mieszkania na poddaszu"
+    }
   },
   "help": {
     "envelope": "Wielkość tej powierzchni i to, jak dobrze zatrzymuje ciepło. Ich zmiana zmienia zapotrzebowanie budynku na ogrzewanie.",

@@ -167,3 +167,67 @@ describe('a building with storeys of their own height', () => {
     expect(buem.configurator).not.toHaveProperty('storey_list');
   });
 });
+
+describe('a building with an attic', () => {
+  const three = { ...identity, floorArea: 300, storeys: 3 };
+  const whole = {
+    w1: { id: 'w1', label: 'Wall', type: 'wall', area: 30, uValue: 0.3, gValue: null, tilt: 90, azimuth: 180 },
+    r1: { id: 'r1', label: 'Roof', type: 'roof', area: 50, uValue: 0.2, gValue: null, tilt: 60, azimuth: 180 },
+    f1: { id: 'f1', label: 'Floor', type: 'floor', area: 100, uValue: 0.4, gValue: null, tilt: 0, azimuth: 0 },
+  };
+  // The roof is all above the eaves, so leaving the attic out takes all of it.
+  const cold = { w1: { ...whole.w1, modelledShare: 1 }, r1: { ...whole.r1, modelledShare: 0 }, f1: { ...whole.f1, modelledShare: 1 } };
+  const general = { ...DEFAULT_GENERAL, floorArea: 100, storeys: 3, atticModelled: false };
+  const byId = (buem: Record<string, any>) => Object.fromEntries(buem.building.envelope.elements.map((el: { id: string }) => [el.id, el]));
+
+  it('left out, sends a ceiling to the cold attic in place of the roof, keeping the whole envelope beside', () => {
+    const { buem } = serializeToBuemFeature(three, cold, general).properties;
+    const sent = byId(buem);
+    expect(sent.r1).toBeUndefined();
+    expect(sent.internal_ceiling).toBeUndefined();
+    expect(sent.attic_ceiling).toMatchObject({ type: 'roof', tilt: { value: 0 }, U: { value: 0.2 }, b_transmission: { value: 0.8 } });
+    expect(sent.attic_ceiling.area.value).toBeCloseTo(25);
+    expect(buem.building.A_ref.value).toBe(300);
+    expect(buem.configurator.attic).toEqual({ modelled: false });
+    expect(buem.configurator.envelope_full.elements).toHaveLength(3);
+  });
+
+  it('left out, reopens cold with the roof whole', () => {
+    const stored = serializeToBuemFeature(three, cold, general);
+    const reopened = adaptBuemFeature(stored);
+    expect(generalFrom(reopened)).toMatchObject({ atticModelled: false, floorArea: 100 });
+    expect(reopened.envelope.r1).toMatchObject({ area: 50, modelledShare: 0 });
+    expect(parseBuemFeatureForImport(stored).general).toMatchObject({ atticModelled: false, floorArea: 100 });
+  });
+
+  it('with the top storey left out too, stands in the internal ceiling to that storey instead', () => {
+    const top = { ...cold, w1: { ...whole.w1, modelledShare: 2 / 3 } };
+    const sent = byId(serializeToBuemFeature(three, top, { ...general, storeysModelled: [1, 2] }).properties.buem);
+    expect(sent.attic_ceiling).toBeUndefined();
+    expect(sent.internal_ceiling).toMatchObject({ b_transmission: { value: 0 } });
+  });
+
+  it('heated, adds the floor area given to A_ref and reopens it apart from the storeys', () => {
+    const stored = serializeToBuemFeature(three, whole, { ...general, atticModelled: true, atticFloorArea: 60 });
+    const { buem } = stored.properties;
+    expect(buem.building.A_ref.value).toBe(360);
+    expect(buem.configurator.attic).toEqual({ modelled: true, floor_area: 60 });
+    expect(buem.configurator).not.toHaveProperty('envelope_full');
+    expect(generalFrom(adaptBuemFeature(stored))).toMatchObject({ floorArea: 100, atticModelled: true, atticFloorArea: 60 });
+    expect(parseBuemFeatureForImport(stored).general).toMatchObject({ floorArea: 100, atticFloorArea: 60 });
+  });
+
+  it('heated with neither area nor dwellings, stores nothing', () => {
+    const { buem } = serializeToBuemFeature(three, whole, { ...general, atticModelled: true }).properties;
+    expect(buem.configurator).not.toHaveProperty('attic');
+    expect(buem.building.envelope.elements).toHaveLength(3);
+  });
+
+  it('left out, sends the dwellings below it and keeps the whole building\'s beside', () => {
+    const flats = { ...general, buildingType: 'Multi-family House', residential_units: 4, storeyDwellings: { 1: 1, 2: 1, 3: 1 }, atticDwellings: 1 };
+    const { buem } = serializeToBuemFeature({ ...three, buildingType: 'Multi-family House' }, cold, flats).properties;
+    expect(buem.building.residential_units).toBe(3);
+    expect(buem.configurator.residential_units_full).toBe(4);
+    expect(buem.configurator.attic).toEqual({ modelled: false, dwellings: 1 });
+  });
+});

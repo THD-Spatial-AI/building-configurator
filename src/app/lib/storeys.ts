@@ -1,8 +1,9 @@
 // Storeys of the 3D model. The model has no per-storey geometry, so storeys
 // are bands from the ground to the eaves, each its share of that height in
-// proportion to the storey heights given (equal bands without them); the
-// bottom band extends below the ground and the top one above the eaves, so
-// the ground floor belongs to storey 1 and gables and roofs to the top storey.
+// proportion to the storey heights given (equal bands without them). Under a
+// pitched roof the attic is one band more, number storeys + 1, from the eaves
+// up. The bottom band extends below the ground and the top one upwards, so the
+// ground floor belongs to storey 1 and the roof to the attic or top storey.
 
 import { polygonArea, type SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
@@ -13,9 +14,14 @@ type Point = number[];
 export interface StoreyBands {
   ground: number;
   height: number;
-  /** bounds[i] is where storey i + 1 starts; the last entry is the eaves. */
+  /** bounds[i] is where storey i + 1 starts; the last entry is the eaves, where the attic starts. */
   bounds: number[];
+  /** The bands: the storeys, and the attic where there is one. */
+  count: number;
 }
+
+/** How far a roof must rise above the eaves for the space under it to count as an attic. */
+const ATTIC_MIN_RISE = 0.5;
 
 /** City2TABULA geometry names surfaces as CityGML does (WallSurface, RoofSurface); other sources as BuEM (wall, roof). */
 const isKind = (polygon: SurfacePolygon, kind: 'wall' | 'roof') => polygon.type.toLowerCase().startsWith(kind);
@@ -37,7 +43,13 @@ export function storeyBands(polygons: SurfacePolygon[], storeys: number, heights
   const sum = usable.reduce((a, b) => a + b, 0);
   const bounds = [ground];
   for (const h of usable) bounds.push(bounds[bounds.length - 1] + ((eaves - ground) * h) / sum);
-  return { ground, height: (eaves - ground) / count, bounds };
+  const ridge = roofs.length > 0 ? Math.max(...roofs.flatMap(zs)) : eaves;
+  return { ground, height: (eaves - ground) / count, bounds, count: count + (ridge - eaves > ATTIC_MIN_RISE ? 1 : 0) };
+}
+
+/** Whether the model has a pitched roof rising above its eaves, and so an attic. */
+export function hasAttic(polygons: SurfacePolygon[]): boolean {
+  return polygons.length > 0 && storeyBands(polygons, 1).count > 1;
 }
 
 /** Where a ring's edges cross the plane z = level, in order along the ring's horizontal direction. */
@@ -55,14 +67,13 @@ function crossings(ring: Point[], level: number): Point[] {
   return points.sort((p, q) => (p[0] - q[0]) * dx + (p[1] - q[1]) * dy);
 }
 
-/** A line across every wall at each floor level between storeys, as [start, end] in the geometry's coordinates. */
+/** A line across every wall at each floor level between bands, the eaves under an attic too, as [start, end] in the geometry's coordinates. */
 export function storeyLines(polygons: SurfacePolygon[], storeys: number, heights?: readonly number[]): [Point, Point][] {
-  if (storeys < 2) return [];
   const bands = storeyBands(polygons, storeys, heights);
   const lines: [Point, Point][] = [];
   for (const wall of polygons.filter((polygon) => isKind(polygon, 'wall'))) {
     const ring = wall.coordinates[0].slice(0, -1);
-    for (let storey = 1; storey < storeys; storey += 1) {
+    for (let storey = 1; storey < bands.count; storey += 1) {
       const points = crossings(ring, bands.bounds[storey]);
       for (let i = 0; i + 1 < points.length; i += 2) lines.push([points[i], points[i + 1]]);
     }
@@ -88,33 +99,33 @@ function clipZ(ring: Point[], inside: (z: number) => boolean, plane: number): Po
   return out;
 }
 
-/** The part of an open ring inside one storey's band, [lower, upper), the outer bands unbounded. */
-function clipToStorey(ring: Point[], bands: StoreyBands, storeys: number, storey: number): Point[] {
+/** The part of an open ring inside one band, [lower, upper), the outer bands unbounded. */
+function clipToStorey(ring: Point[], bands: StoreyBands, storey: number): Point[] {
   const lower = storey === 1 ? -Infinity : bands.bounds[storey - 1];
-  const upper = storey === storeys ? Infinity : bands.bounds[storey];
+  const upper = storey === bands.count ? Infinity : bands.bounds[storey];
   let part = ring;
   if (lower > -Infinity) part = clipZ(part, (z) => z >= lower, lower);
   if (upper < Infinity) part = clipZ(part, (z) => z < upper, upper);
   return part.length >= 3 ? part : [];
 }
 
-/** Share of a polygon's area inside the given storeys. */
-function polygonShare(polygon: SurfacePolygon, bands: StoreyBands, storeys: number, modelled: readonly number[]): number {
+/** Share of a polygon's area inside the given bands. */
+function polygonShare(polygon: SurfacePolygon, bands: StoreyBands, modelled: readonly number[]): number {
   const ring = polygon.coordinates[0].slice(0, -1);
   const total = ringArea(ring);
   if (total === 0) return 0;
   const inside = modelled.reduce((sum, storey) => {
-    const part = clipToStorey(ring, bands, storeys, storey);
+    const part = clipToStorey(ring, bands, storey);
     return sum + (part.length > 0 ? ringArea(part) : 0);
   }, 0);
   return Math.min(1, inside / total);
 }
 
-/** The storey (1-based) at a height; below the ground is storey 1, above the eaves the top storey. */
-export function storeyAt(z: number, bands: StoreyBands, storeys: number): number {
+/** The band (1-based) at a height; below the ground is storey 1, above the eaves the attic or top storey. */
+export function storeyAt(z: number, bands: StoreyBands): number {
   if (bands.height <= 0) return 1;
   let storey = 1;
-  while (storey < storeys && z >= bands.bounds[storey]) storey += 1;
+  while (storey < bands.count && z >= bands.bounds[storey]) storey += 1;
   return storey;
 }
 
@@ -124,16 +135,16 @@ export function storeyParts(polygons: SurfacePolygon[], storeys: number, chosen:
   return polygons.flatMap((polygon) => {
     const ring = polygon.coordinates[0].slice(0, -1);
     return chosen
-      .map((storey) => clipToStorey(ring, bands, storeys, storey))
+      .map((storey) => clipToStorey(ring, bands, storey))
       .filter((part) => part.length > 0 && ringArea(part) > 0)
       .map((part) => ({ ...polygon, coordinates: [[...part, part[0]]] }));
   });
 }
 
 /**
- * Each element's share of its area inside the modelled storeys (1-based). A
- * window or door takes its parent's share; a surface with no polygon, such as
- * one added by hand, the share of storeys modelled.
+ * Each element's share of its area inside the modelled bands (1-based, the
+ * attic storeys + 1). A window or door takes its parent's share; a surface
+ * with no polygon, such as one added by hand, the share of storeys modelled.
  */
 export function storeyShares(
   polygons: SurfacePolygon[],
@@ -144,10 +155,10 @@ export function storeyShares(
 ): Record<string, number> {
   const bands = storeyBands(polygons, storeys, heights);
   const byId = new Map(polygons.map((polygon) => [polygon.id, polygon]));
-  const fallback = modelled.length / Math.max(1, storeys);
+  const fallback = modelled.filter((storey) => storey <= storeys).length / Math.max(1, storeys);
   const own = (id: string) => {
     const polygon = byId.get(id);
-    return polygon ? polygonShare(polygon, bands, storeys, modelled) : fallback;
+    return polygon ? polygonShare(polygon, bands, modelled) : fallback;
   };
   return Object.fromEntries(Object.values(elements).map((element) => [
     element.id,
@@ -169,6 +180,27 @@ export function modelledDwellings(modelled: readonly number[], dwellings: Storey
     sum += count;
   }
   return modelled.length > 0 ? sum : null;
+}
+
+/**
+ * The dwellings in what is modelled while part of the building is left out:
+ * the modelled storeys' counts with a heated attic's, or with every storey
+ * modelled, the building's less a cold attic's. Null while a count it needs
+ * is missing or nothing is left out.
+ */
+export function modelledUnits(
+  modelled: readonly number[] | undefined,
+  dwellings: StoreyDwellings,
+  attic: { modelled: boolean; dwellings?: number } | undefined,
+  total: number | null | undefined,
+): number | null {
+  const atticUnits = attic?.dwellings ?? 0;
+  const atticOut = attic?.modelled === false;
+  if (modelled) {
+    const storeys = modelledDwellings(modelled, dwellings);
+    return storeys === null ? null : storeys + (atticOut ? 0 : atticUnits);
+  }
+  return atticOut && atticUnits > 0 && Number(total) > atticUnits ? Number(total) - atticUnits : null;
 }
 
 /** The modelled storeys with no dwelling count; none while every storey is modelled. */

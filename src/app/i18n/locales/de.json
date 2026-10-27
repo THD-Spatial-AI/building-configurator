@@ -754,7 +754,16 @@
       "storeys": "Ein weiteres Geschoss mit {room} m wäre höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist.",
       "height": "Ein höheres Geschoss würde die Geschosse höher als das 3D-Modell machen, das bis zur Traufe {height} m hoch ist."
     },
-    "heightConflict": "Die Geschosse sind zusammen {total} m hoch, höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist. Verringern Sie die Geschosszahl oder eine Höhe."
+    "heightConflict": "Die Geschosse sind zusammen {total} m hoch, höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist. Verringern Sie die Geschosszahl oder eine Höhe.",
+    "attic": {
+      "label": "Dachgeschoss",
+      "chipIn": "Dachgeschoss, im Modell",
+      "chipOut": "Dachgeschoss, weggelassen",
+      "hint": "Der Raum unter dem geneigten Dach, oberhalb der Traufe. Weggelassen gehört das Dach nicht mehr zum beheizten Gebäude, und die Decke darunter gibt Wärme an das kalte Dachgeschoss ab.",
+      "floorArea": "Fläche im Dachgeschoss",
+      "noArea": "Nicht gezählt",
+      "dwellings": "Wohnungen im Dachgeschoss"
+    }
   },
   "help": {
     "envelope": "Die Größe dieser Fläche und wie gut sie die Wärme hält. Eine Änderung ändert, wie viel Heizung das Gebäude braucht.",

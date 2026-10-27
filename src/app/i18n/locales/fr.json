@@ -758,7 +758,16 @@
       "storeys": "Un étage de plus à {room} m dépasserait le modèle 3D, qui mesure {height} m jusqu'à l'égout.",
       "height": "Un étage plus haut rendrait les étages plus hauts que le modèle 3D, qui mesure {height} m jusqu'à l'égout."
     },
-    "heightConflict": "Les étages mesurent ensemble {total} m, plus que le modèle 3D, qui mesure {height} m jusqu'à l'égout. Réduisez le nombre d'étages ou une hauteur."
+    "heightConflict": "Les étages mesurent ensemble {total} m, plus que le modèle 3D, qui mesure {height} m jusqu'à l'égout. Réduisez le nombre d'étages ou une hauteur.",
+    "attic": {
+      "label": "Combles",
+      "chipIn": "Combles, dans le modèle",
+      "chipOut": "Combles, retirés",
+      "hint": "L'espace sous le toit en pente, au-dessus de l'égout. Retirés, le toit quitte le bâtiment chauffé et le plafond en dessous perd de la chaleur vers les combles froids.",
+      "floorArea": "Surface des combles",
+      "noArea": "Non comptée",
+      "dwellings": "Logements dans les combles"
+    }
   },
   "help": {
     "envelope": "La taille de cette surface et sa capacité à garder la chaleur. Les modifier change le chauffage dont le bâtiment a besoin.",

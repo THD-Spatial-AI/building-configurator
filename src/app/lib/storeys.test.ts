@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dwellingsTotal, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { dwellingsTotal, hasAttic, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -20,12 +20,19 @@ const element = (id: string, type: BuildingElement['type'], extra: Partial<Build
   id, label: id, type, area: 30, uValue: 1, gValue: null, tilt: 90, azimuth: 180, ...extra,
 });
 
-// Three storeys of 3 m from ground at 0 to eaves at 9, a pitched roof above.
+/** A roof plane 10 m long rising from the eaves at z0 at y = 0 to the ridge at z1 at y = 5. */
+const slope = (id: string, z0: number, z1: number): SurfacePolygon => ({
+  id, type: 'RoofSurface', coordinates: [[[0, 0, z0], [10, 0, z0], [10, 5, z1], [0, 5, z1], [0, 0, z0]]],
+});
+
+// Three storeys of 3 m from ground at 0 to eaves at 9, a flat roof there.
 const polygons = [wall('w1', 0, 9), gable('g1', 9, 12), flat('f1', 'GroundSurface', 0), flat('r1', 'RoofSurface', 9)];
+// The same storeys under a pitched roof rising to a ridge at 12: an attic above the eaves.
+const pitched = [wall('w1', 0, 9), gable('g1', 9, 12), flat('f1', 'GroundSurface', 0), slope('r1', 9, 12)];
 
 describe('storeyBands', () => {
   it('splits the height from ground to eaves evenly by the storey count', () => {
-    expect(storeyBands(polygons, 3)).toEqual({ ground: 0, height: 3, bounds: [0, 3, 6, 9] });
+    expect(storeyBands(polygons, 3)).toEqual({ ground: 0, height: 3, bounds: [0, 3, 6, 9], count: 3 });
   });
 
   it('gives each storey its share of that height in proportion to the storey heights', () => {
@@ -35,7 +42,7 @@ describe('storeyBands', () => {
 
   it('places storey lines and picks storeys at those heights', () => {
     const bands = storeyBands(polygons, 3, [3, 3, 1.5]);
-    expect([3.5, 3.7, 7.1, 7.3].map((z) => storeyAt(z, bands, 3))).toEqual([1, 2, 2, 3]);
+    expect([3.5, 3.7, 7.1, 7.3].map((z) => storeyAt(z, bands))).toEqual([1, 2, 2, 3]);
     expect(storeyLines(polygons, 3, [3, 3, 1.5]).every(([a]) => [3.6, 7.2].some((z) => Math.abs(a[2] - z) < 1e-9))).toBe(true);
   });
 
@@ -69,7 +76,35 @@ describe('storeyParts', () => {
 describe('storeyAt', () => {
   it('finds the storey at a height, the outer storeys extending beyond the ground and eaves', () => {
     const bands = storeyBands(polygons, 3);
-    expect([-1, 0, 2.9, 3, 7, 11].map((z) => storeyAt(z, bands, 3))).toEqual([1, 1, 1, 2, 3, 3]);
+    expect([-1, 0, 2.9, 3, 7, 11].map((z) => storeyAt(z, bands))).toEqual([1, 1, 1, 2, 3, 3]);
+  });
+});
+
+describe('the attic', () => {
+  const elements = { w1: element('w1', 'wall'), g1: element('g1', 'wall'), f1: element('f1', 'floor'), r1: element('r1', 'roof') };
+
+  it('is a band above the eaves under a pitched roof only', () => {
+    expect(hasAttic(pitched)).toBe(true);
+    expect(hasAttic(polygons)).toBe(false);
+    expect(storeyBands(pitched, 3)).toMatchObject({ bounds: [0, 3, 6, 9], count: 4 });
+    expect([8.9, 9, 11].map((z) => storeyAt(z, storeyBands(pitched, 3)))).toEqual([3, 4, 4]);
+  });
+
+  it('holds the roof and gables, so leaving it out takes them from the envelope', () => {
+    const out = storeyShares(pitched, elements, 3, [1, 2, 3]);
+    expect([out.w1, out.g1, out.r1, out.f1]).toEqual([1, 0, 0, 1]);
+    const all = storeyShares(pitched, elements, 3, [1, 2, 3, 4]);
+    expect([all.w1, all.g1, all.r1]).toEqual([1, 1, 1]);
+    expect(storeyShares(pitched, elements, 3, [3]).r1).toBe(0);
+  });
+
+  it('scales a surface without a polygon by the storeys modelled, not the attic', () => {
+    expect(storeyShares(pitched, { extra: element('extra', 'wall') }, 3, [1, 2, 3, 4]).extra).toBe(1);
+  });
+
+  it('draws a line at the eaves, one storey or several', () => {
+    expect(storeyLines(pitched, 1).map(([a]) => a[2])).toEqual([9]);
+    expect(storeyLines(pitched, 3).map(([a]) => a[2])).toEqual([3, 6, 9]);
   });
 });
 

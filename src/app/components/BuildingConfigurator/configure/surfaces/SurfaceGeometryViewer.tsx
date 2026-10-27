@@ -40,7 +40,7 @@ interface SurfaceGeometryViewerProps {
   focusId?: string | null;
   focusToken?: number;
   /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected ones highlighted. */
-  storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[]; heights?: readonly number[] };
+  storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[]; heights?: readonly number[]; atticOut?: boolean };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
   /** Draws the selected surface's side lengths, with a line and end dots per side. */
@@ -181,7 +181,7 @@ export function SurfaceGeometryViewer({
       if (pickStorey) {
         const hit = hitAt(clientX, clientY);
         // Local y is the storage CRS's z less the origin's (see toLocal).
-        pickStorey(hit ? storeyAt(hit.point.y + origin[2], storeyBands(surfaces, count, heights), count) : null);
+        pickStorey(hit ? storeyAt(hit.point.y + origin[2], storeyBands(surfaces, count, heights)) : null);
         return;
       }
       selectRef.current?.(surfaceAt(clientX, clientY), { x: clientX, y: clientY });
@@ -433,15 +433,17 @@ export function SurfaceGeometryViewer({
 
   // Display only: the geometry has no storeys, so these follow storeyBands.
   const storeyCount = storeys?.count ?? 0;
-  const leftOutKey = storeys?.modelled
-    ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)).join(',')
-    : '';
+  // The attic is band storeyCount + 1.
+  const leftOutKey = [
+    ...(storeys?.modelled ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)) : []),
+    ...(storeys?.atticOut ? [storeyCount + 1] : []),
+  ].join(',');
   const selectedKey = (storeys?.selected ?? []).join(',');
   const heightsKey = (storeys?.heights ?? []).join(',');
   useEffect(() => {
     const heights = heightsKey ? heightsKey.split(',').map(Number) : undefined;
     const scene = sceneRef.current;
-    if (!scene || storeyCount < 2 || surfaces.length === 0) return;
+    if (!scene || storeyCount < 1 || surfaces.length === 0) return;
     const overlay = new THREE.Group();
     const lineMaterial = new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.55 });
     const points = storeyLines(surfaces, storeyCount, heights).flat().map((p) => toLocal(p, origin));

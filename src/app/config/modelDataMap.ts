@@ -49,6 +49,7 @@ export const MODEL_DATA_MAP = {
         'properties.buem.building.n_storeys',                             // deprecated in v6-draft; read from older sources, never written
       ],
       storeyList:         'properties.buem.configurator.storey_list',     // [{ storey: 1-based, modelled: boolean, dwellings?: number }], absent when all are modelled
+      attic:              'properties.buem.configurator.attic',           // { modelled, floor_area?, dwellings? }, absent while the attic is modelled with neither
     },
 
     // Building parameters beyond the descriptor, each absent unless set.

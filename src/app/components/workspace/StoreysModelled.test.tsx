@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { StoreysModelled, pickInSelection, toggleSelected, withStoreys } from './StoreysModelled';
+import { StoreysModelled, pickInSelection, pickWithAttic, toggleSelected, withStoreys } from './StoreysModelled';
 
 const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>) => renderToStaticMarkup(
   <StoreysModelled
@@ -88,5 +88,37 @@ describe('a click on a storey', () => {
     expect(pickInSelection([1, 2], 3, false)).toEqual([3]);
     expect(pickInSelection([3], 3, false)).toEqual([]);
     expect(pickInSelection([1], 3, true)).toEqual([1, 3]);
+  });
+});
+
+describe('StoreysModelled with an attic', () => {
+  const attic = { modelled: true, floorArea: null, onModelledChange: () => {}, onFloorAreaChange: () => {} };
+
+  it('shows the attic as its own chip, with one storey too', () => {
+    const html = render({ storeys: 1, modelled: null, attic });
+    expect(html).toContain('aria-label="Attic, in the model"');
+    expect(render({ storeys: 1, modelled: null, attic: { ...attic, modelled: false } })).toContain('aria-label="Attic, left out"');
+    expect(render({ storeys: 1, modelled: null })).not.toContain('Attic');
+  });
+
+  it('gives the selected attic its switch, floor area and dwellings, not a storey height', () => {
+    const html = render({ selected: [4], attic: { ...attic, onDwellingsChange: () => {} } });
+    expect(html).toContain('placeholder="Not counted"');
+    expect(html).toContain('aria-label="Dwellings in the attic"');
+    expect(html).not.toContain('Storey height');
+    expect(render({ selected: [4], attic: { ...attic, modelled: false } })).not.toContain('Attic floor area');
+  });
+
+  it('adds a heated attic\'s floor area to the floor area modelled', () => {
+    expect(render({ attic: { ...attic, floorArea: 40 } })).toContain('2 × 80 m² + 40 m² = 200 m²');
+  });
+});
+
+describe('pickWithAttic', () => {
+  it('selects the attic on its own, never with storeys', () => {
+    expect(pickWithAttic([1, 2], 4, true, 4)).toEqual([4]);
+    expect(pickWithAttic([4], 4, true, 4)).toEqual([]);
+    expect(pickWithAttic([4], 2, true, 4)).toEqual([2]);
+    expect(pickWithAttic([1], 2, true, 4)).toEqual([1, 2]);
   });
 });

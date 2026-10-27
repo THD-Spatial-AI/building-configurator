@@ -41,6 +41,10 @@ export const DEFAULT_GENERAL = {
   storeyDwellings:    {} as Record<number, number>,
   /** A storey's own height, 1-based; storeys without one take roomHeight. */
   storeyHeights:      {} as Record<number, number>,
+  /** Under a pitched roof: whether the attic is heated, its floor area (null: none counted) and its dwellings. */
+  atticModelled:      true,
+  atticFloorArea:     null as number | null,
+  atticDwellings:     null as number | null,
   // The thermal values are the v6-draft request schema's defaults.
   n_air_infiltration: 0.5,
   n_air_use:          0.5,

@@ -754,7 +754,16 @@
       "storeys": "Nog een verdieping van {room} m zou hoger zijn dan het 3D-model, dat tot de dakgoot {height} m is.",
       "height": "Een hogere verdieping zou de verdiepingen hoger maken dan het 3D-model, dat tot de dakgoot {height} m is."
     },
-    "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte."
+    "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte.",
+    "attic": {
+      "label": "Zolder",
+      "chipIn": "Zolder, in het model",
+      "chipOut": "Zolder, weggelaten",
+      "hint": "De ruimte onder het hellende dak, boven de dakgoot. Weggelaten hoort het dak niet meer bij het verwarmde gebouw en verliest het plafond eronder warmte naar de koude zolder.",
+      "floorArea": "Vloeroppervlak zolder",
+      "noArea": "Niet geteld",
+      "dwellings": "Woningen op zolder"
+    }
   },
   "help": {
     "envelope": "De grootte van dit vlak en hoe goed het warmte vasthoudt. Wijzigen verandert hoeveel verwarming het gebouw nodig heeft.",

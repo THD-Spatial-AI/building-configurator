@@ -95,5 +95,6 @@ Schema path changes go in `modelDataMap.ts` only.
 | `room_height` | The room height of the storeys without their own, where any storey has its own; `building.h_room` then holds the mean of the modelled storeys' heights |
 | `envelope_full` | The envelope of the whole building |
 | `residential_units_full` | The dwellings of the whole building, or null |
+| `attic` | Under a pitched roof, while the attic is left out or has a floor area or dwellings: `{ modelled, floor_area?, dwellings? }`. A modelled attic's `floor_area` (m²) is part of `A_ref`; one left out takes the roof from the block, and a ceiling to the cold attic (`attic_ceiling`, `b_transmission` 0.8) is sent in its place while the top storey is modelled |
 
 Buildings stored by 0.14.0 keep `storeys` and `construction_year` beside the block, where they are still read.
