@@ -5,7 +5,7 @@
 import React from 'react';
 import { AlertTriangle, Ruler, RotateCcw, Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
+import { AzimuthDial, PresetSlider, TiltDial, tiltLabel } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT, type Translate } from '../../i18n';
 import { variantName } from '../../lib/refurbishment';
@@ -31,17 +31,33 @@ function insulationLabel(uValue: number, t: Translate): string {
   return t('surface.insulation.none');
 }
 
+/** One labelled figure of the surface's geometry. */
+function GeometryFigure({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="truncate text-[13px] font-semibold text-foreground">{value}</div>
+    </div>
+  );
+}
+
 /** Tilt and facing as the 3D model has them, for Basic, where they are not edited. */
 function ModelOrientation({ element }: { element: BuildingElement }) {
   const t = useT();
   const format = useFormatNumber();
   const { tilt, azimuth } = modelGeometry(element);
+  const flat = isFlat(tilt, azimuth);
   return (
-    <p className="rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
-      {isFlat(tilt, azimuth)
-        ? t('surface.flatFromModel')
-        : t('surface.fromModel', { tilt: format(tilt, 0), azimuth: format(azimuth, 0), compass: t(`surface.compass.${compassPoint(azimuth)}`) })}
-    </p>
+    <div className="flex flex-col gap-1.5 rounded-md bg-muted px-2.5 py-2">
+      <div className="grid grid-cols-2 gap-2">
+        <GeometryFigure label={t('surface.tilt')} value={`${format(tilt, 0)}° · ${tiltLabel(tilt, t)}`} />
+        <GeometryFigure
+          label={t('surface.facing')}
+          value={flat ? '—' : `${format(azimuth, 0)}° ${t(`surface.compass.${compassPoint(azimuth)}`)}`}
+        />
+      </div>
+      <span className="text-[10px] text-muted-foreground">{t('surface.geometrySource')}</span>
+    </div>
   );
 }
 

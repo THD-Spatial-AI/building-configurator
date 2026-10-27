@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Ongedaan maken: {action} (Ctrl+Z)",
-      "none": "Niets om ongedaan te maken",
-      "action": "Ongedaan maken: {action}",
-      "label": "Ongedaan maken"
+      "action": "Ongedaan maken: {action}"
     },
     "loadingGeometry": "Geometrie van vlakken laden…",
     "detached": "De opgeslagen vlakken van dit gebouw komen uit een eerdere City2TABULA-generatie, dus geen ervan past bij de huidige 3D-data. De opgeslagen waarden gelden nog; het model wordt niet getoond.",
@@ -105,8 +103,7 @@
       "pv": "PV"
     },
     "pick": "Kies een vlak",
-    "fromModel": "{tilt}° · oriëntatie {azimuth}° {compass} · uit het 3D-model",
-    "flatFromModel": "Plat · uit het 3D-model"
+    "geometrySource": "Bron: 3D-model van het gebouw"
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",
@@ -151,8 +148,7 @@
     "useSuggested": "Voorgestelde vlakken gebruiken",
     "legend": {
       "installed": "PV geplaatst",
-      "suggested": "Voorgesteld",
-      "available": "Beschikbaar"
+      "suggested": "Voorgesteld"
     },
     "card": {
       "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",
@@ -196,7 +192,7 @@
     "catalogue": {
       "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Catalogus ({count})",
+      "toggle": "Fotovoltaïsche opties ({count})",
       "search": "Catalogus doorzoeken"
     },
     "product": {
@@ -209,8 +205,6 @@
       "use": "Op dit vlak gebruiken"
     },
     "values": {
-      "title": "Technologiewaarden",
-      "product": "Product",
       "buildingOnly": "Wijzigingen aan {name} gelden alleen voor dit gebouw.",
       "question": {
         "cost_energy_cap": "Wat kost het per kWp?",
@@ -221,11 +215,12 @@
       "copyName": "{name} (kopie)",
       "save": "Opslaan",
       "saved": "Opgeslagen als {name}.",
-      "saveFailed": "De technologie kon niet worden opgeslagen. Probeer het opnieuw."
+      "saveFailed": "De technologie kon niet worden opgeslagen. Probeer het opnieuw.",
+      "edit": "Waarden van {name} bewerken"
     },
     "installed": {
       "title": "Geïnstalleerd op dit gebouw",
-      "empty": "Nog geen PV. Open de catalogus en sleep een product op een dak of muur.",
+      "empty": "Nog geen PV. Open de fotovoltaïsche opties en sleep een product op een dak of muur.",
       "surfaces": {
         "one": "op {count} vlak",
         "other": "op {count} vlakken"
@@ -235,7 +230,10 @@
         "other": "{count} modules"
       }
     },
-    "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM."
+    "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM.",
+    "options": {
+      "search": "Fotovoltaïsche opties doorzoeken"
+    }
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",
@@ -785,5 +783,10 @@
       "p50": "Typisch",
       "p90": "Hoog"
     }
+  },
+  "legend": {
+    "roof": "Dak",
+    "wall": "Muur",
+    "ground": "Begane grondvloer"
   }
 }

@@ -28,9 +28,7 @@
     },
     "undo": {
       "title": "Vrátit {action} (Ctrl+Z)",
-      "none": "Není co vrátit",
-      "action": "Vrátit {action}",
-      "label": "Zpět"
+      "action": "Vrátit {action}"
     },
     "loadingGeometry": "Načítání geometrie ploch…",
     "detached": "Uložené plochy této budovy pocházejí ze starší generace City2TABULA, takže žádná neodpovídá aktuálním 3D datům. Uložené hodnoty stále platí; model se nezobrazuje.",
@@ -109,8 +107,7 @@
       "pv": "FV"
     },
     "pick": "Vyberte plochu",
-    "fromModel": "{tilt}° · orientace {azimuth}° {compass} · z 3D modelu",
-    "flatFromModel": "Plochá · z 3D modelu"
+    "geometrySource": "Zdroj: 3D model budovy"
   },
   "profile": {
     "title": "Hodinový profil zatížení",
@@ -155,8 +152,7 @@
     "useSuggested": "Použít navržené plochy",
     "legend": {
       "installed": "FV instalována",
-      "suggested": "Navrženo",
-      "available": "Dostupné"
+      "suggested": "Navrženo"
     },
     "card": {
       "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",
@@ -200,7 +196,7 @@
     "catalogue": {
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Katalog ({count})",
+      "toggle": "Fotovoltaické možnosti ({count})",
       "search": "Hledat v katalogu"
     },
     "product": {
@@ -213,8 +209,6 @@
       "use": "Použít na této ploše"
     },
     "values": {
-      "title": "Hodnoty technologie",
-      "product": "Produkt",
       "buildingOnly": "Změny produktu {name} platí jen pro tuto budovu.",
       "question": {
         "cost_energy_cap": "Kolik stojí za kWp?",
@@ -225,11 +219,12 @@
       "copyName": "{name} (kopie)",
       "save": "Uložit",
       "saved": "Uloženo jako {name}.",
-      "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu."
+      "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu.",
+      "edit": "Upravit hodnoty {name}"
     },
     "installed": {
       "title": "Instalováno na této budově",
-      "empty": "Zatím žádná FV. Otevřete katalog a přetáhněte produkt na střechu nebo stěnu.",
+      "empty": "Zatím žádná FV. Otevřete fotovoltaické možnosti a přetáhněte produkt na střechu nebo stěnu.",
       "surfaces": {
         "one": "na {count} ploše",
         "few": "na {count} plochách",
@@ -243,7 +238,10 @@
         "other": "{count} modulů"
       }
     },
-    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM."
+    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
+    "options": {
+      "search": "Hledat ve fotovoltaických možnostech"
+    }
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",
@@ -805,5 +803,10 @@
       "p50": "Typický",
       "p90": "Silný"
     }
+  },
+  "legend": {
+    "roof": "Střecha",
+    "wall": "Stěna",
+    "ground": "Podlaha na terénu"
   }
 }

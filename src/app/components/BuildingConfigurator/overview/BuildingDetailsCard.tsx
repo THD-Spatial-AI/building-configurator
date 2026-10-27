@@ -172,6 +172,7 @@ function BuildingTable({ rows, occupancy, onEditField }: {
                           min={row.editKey === 'storeys' ? 1 : row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
                           max={row.editKey === 'constructionYear' ? new Date().getFullYear() : undefined}
                           step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
+                        integer={row.editKey === 'storeys' || row.editKey === 'constructionYear'}
                         />
                       )
                     ) : rowValue(row, t)}

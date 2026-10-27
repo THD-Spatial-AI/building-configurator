@@ -23,7 +23,7 @@ import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePanel } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
-import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
+import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
 import { DEFAULT_WEATHER, WeatherSection, weatherChoice, type WeatherSelection } from './WeatherSection';
@@ -454,16 +454,6 @@ export function Building3DView({
           value={mode}
           onChange={(v) => setMode(v as 'basic' | 'expert')}
         />
-        <button
-          type="button"
-          onClick={undo}
-          disabled={!undoLabel}
-          title={undoLabel ? t('view.undo.title', { action: t(undoLabel.key, undoLabel.values) }) : t('view.undo.none')}
-          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Undo2 className="size-3.5" />
-          <span className="hidden sm:inline">{undoLabel ? t('view.undo.action', { action: t(undoLabel.key, undoLabel.values) }) : t('view.undo.label')}</span>
-        </button>
       </div>
 
       {/* ── Wide: load profile + model | parameters. Narrow: model over parameters. ── */}
@@ -532,6 +522,20 @@ export function Building3DView({
             </button>
           )}
 
+          {undoLabel && (
+            // Above the bottom row, which holds the credits and the legends.
+            <button
+              type="button"
+              onClick={undo}
+              title={t('view.undo.title', { action: t(undoLabel.key, undoLabel.values) })}
+              className="absolute bottom-16 left-1/2 z-10 flex max-w-[80%] -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-[13px] font-semibold text-amber-950 shadow-[0_6px_18px_rgba(27,36,48,0.25)] transition-colors hover:bg-amber-300"
+            >
+              <Undo2 className="size-4 shrink-0" />
+              <span className="truncate">{t('view.undo.action', { action: t(undoLabel.key, undoLabel.values) })}</span>
+              <kbd className="shrink-0 rounded border border-amber-950/25 bg-amber-300/60 px-1 font-sans text-[10px] font-medium">Ctrl Z</kbd>
+            </button>
+          )}
+
           <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
             {invalidIds.size > 0 && (
               <div className="flex items-center gap-1.5 rounded-md bg-card/90 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm">
@@ -539,7 +543,7 @@ export function Building3DView({
                 {t('view.invalidSurfaces', { count: invalidIds.size })}
               </div>
             )}
-            {onTech && <PvLegend />}
+            {surfaces.length > 0 && !detached && <ModelLegend pv={onTech} />}
           </div>
 
           {attribution && (

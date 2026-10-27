@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Undo {action} (Ctrl+Z)",
-      "none": "Nothing to undo",
-      "action": "Undo {action}",
-      "label": "Undo"
+      "action": "Undo {action}"
     },
     "loadingGeometry": "Loading surface geometry…",
     "detached": "This building's saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.",
@@ -105,8 +103,7 @@
       "pv": "PV"
     },
     "pick": "Choose a surface",
-    "fromModel": "{tilt}° · facing {azimuth}° {compass} · from the 3D model",
-    "flatFromModel": "Flat · from the 3D model"
+    "geometrySource": "Source: the building's 3D model"
   },
   "profile": {
     "title": "Hourly load profile",
@@ -151,8 +148,7 @@
     "useSuggested": "Use suggested surfaces",
     "legend": {
       "installed": "PV installed",
-      "suggested": "Suggested",
-      "available": "Available"
+      "suggested": "Suggested"
     },
     "card": {
       "fromModel": "Tilt, facing and area come from the building's 3D model.",
@@ -196,7 +192,7 @@
     "catalogue": {
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Catalogue ({count})",
+      "toggle": "Photovoltaic options ({count})",
       "search": "Search the catalogue"
     },
     "product": {
@@ -209,8 +205,6 @@
       "use": "Use on this surface"
     },
     "values": {
-      "title": "Technology values",
-      "product": "Product",
       "buildingOnly": "Changes to {name} apply to this building only.",
       "question": {
         "cost_energy_cap": "What does it cost per kWp?",
@@ -221,11 +215,12 @@
       "copyName": "{name} (copy)",
       "save": "Save",
       "saved": "Saved as {name}.",
-      "saveFailed": "Could not save the technology. Try again."
+      "saveFailed": "Could not save the technology. Try again.",
+      "edit": "Edit the values of {name}"
     },
     "installed": {
       "title": "Installed on this building",
-      "empty": "No PV yet. Open the catalogue and drag a product onto a roof or wall.",
+      "empty": "No PV yet. Open the photovoltaic options and drag a product onto a roof or wall.",
       "surfaces": {
         "one": "on {count} surface",
         "other": "on {count} surfaces"
@@ -235,7 +230,10 @@
         "other": "{count} modules"
       }
     },
-    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only."
+    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
+    "options": {
+      "search": "Search the photovoltaic options"
+    }
   },
   "tech": {
     "none": "No technologies on this building.",
@@ -785,5 +783,10 @@
       "p50": "Typical",
       "p90": "High"
     }
+  },
+  "legend": {
+    "roof": "Roof",
+    "wall": "Wall",
+    "ground": "Ground floor"
   }
 }

@@ -27,9 +27,7 @@
     },
     "undo": {
       "title": "Annuler {action} (Ctrl+Z)",
-      "none": "Rien à annuler",
-      "action": "Annuler {action}",
-      "label": "Annuler"
+      "action": "Annuler {action}"
     },
     "loadingGeometry": "Chargement de la géométrie…",
     "detached": "Les surfaces enregistrées de ce bâtiment proviennent d'une génération City2TABULA antérieure et ne correspondent plus aux données 3D actuelles. Les valeurs enregistrées restent valables ; le modèle n'est pas affiché.",
@@ -107,8 +105,7 @@
       "pv": "PV"
     },
     "pick": "Choisir une surface",
-    "fromModel": "{tilt}° · orientation {azimuth}° {compass} · du modèle 3D",
-    "flatFromModel": "Plat · du modèle 3D"
+    "geometrySource": "Source : modèle 3D du bâtiment"
   },
   "profile": {
     "title": "Profil de charge horaire",
@@ -153,8 +150,7 @@
     "useSuggested": "Utiliser les surfaces suggérées",
     "legend": {
       "installed": "PV installé",
-      "suggested": "Suggérée",
-      "available": "Disponible"
+      "suggested": "Suggérée"
     },
     "card": {
       "fromModel": "L'inclinaison, l'orientation et l'aire viennent du modèle 3D du bâtiment.",
@@ -198,7 +194,7 @@
     "catalogue": {
       "hint": "Faites glisser un produit sur un toit ou un mur, ou choisissez-le dans le panneau d’une surface.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Catalogue ({count})",
+      "toggle": "Options photovoltaïques ({count})",
       "search": "Rechercher dans le catalogue"
     },
     "product": {
@@ -211,8 +207,6 @@
       "use": "Utiliser sur cette surface"
     },
     "values": {
-      "title": "Valeurs de la technologie",
-      "product": "Produit",
       "buildingOnly": "Les modifications de {name} ne concernent que ce bâtiment.",
       "question": {
         "cost_energy_cap": "Combien coûte-t-il par kWp ?",
@@ -223,11 +217,12 @@
       "copyName": "{name} (copie)",
       "save": "Enregistrer",
       "saved": "Enregistré sous {name}.",
-      "saveFailed": "La technologie n’a pas pu être enregistrée. Réessayez."
+      "saveFailed": "La technologie n’a pas pu être enregistrée. Réessayez.",
+      "edit": "Modifier les valeurs de {name}"
     },
     "installed": {
       "title": "Installé sur ce bâtiment",
-      "empty": "Pas encore de PV. Ouvrez le catalogue et faites glisser un produit sur un toit ou un mur.",
+      "empty": "Pas encore de PV. Ouvrez les options photovoltaïques et faites glisser un produit sur un toit ou un mur.",
       "surfaces": {
         "one": "sur {count} surface",
         "other": "sur {count} surfaces"
@@ -237,7 +232,10 @@
         "other": "{count} modules"
       }
     },
-    "followsModel": "Le PV suit les {tilt}° du modèle 3D ; l'inclinaison et l'orientation modifiées ci-dessus ne vont qu'à BuEM."
+    "followsModel": "Le PV suit les {tilt}° du modèle 3D ; l'inclinaison et l'orientation modifiées ci-dessus ne vont qu'à BuEM.",
+    "options": {
+      "search": "Rechercher dans les options photovoltaïques"
+    }
   },
   "tech": {
     "none": "Aucune technologie sur ce bâtiment.",
@@ -791,5 +789,10 @@
       "p50": "Typique",
       "p90": "Fort"
     }
+  },
+  "legend": {
+    "roof": "Toit",
+    "wall": "Mur",
+    "ground": "Plancher bas"
   }
 }

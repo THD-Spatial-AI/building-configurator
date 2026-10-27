@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Annulla {action} (Ctrl+Z)",
-      "none": "Niente da annullare",
-      "action": "Annulla {action}",
-      "label": "Annulla"
+      "action": "Annulla {action}"
     },
     "loadingGeometry": "Caricamento geometria delle superfici…",
     "detached": "Le superfici salvate di questo edificio provengono da una generazione City2TABULA precedente, quindi nessuna corrisponde ai dati 3D attuali. I valori salvati restano validi; il modello non viene mostrato.",
@@ -105,8 +103,7 @@
       "pv": "FV"
     },
     "pick": "Scegli una superficie",
-    "fromModel": "{tilt}° · orientamento {azimuth}° {compass} · dal modello 3D",
-    "flatFromModel": "Piana · dal modello 3D"
+    "geometrySource": "Fonte: modello 3D dell'edificio"
   },
   "profile": {
     "title": "Profilo di carico orario",
@@ -151,8 +148,7 @@
     "useSuggested": "Usa le superfici consigliate",
     "legend": {
       "installed": "FV installato",
-      "suggested": "Consigliata",
-      "available": "Disponibile"
+      "suggested": "Consigliata"
     },
     "card": {
       "fromModel": "Inclinazione, esposizione e area provengono dal modello 3D dell'edificio.",
@@ -196,7 +192,7 @@
     "catalogue": {
       "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Catalogo ({count})",
+      "toggle": "Opzioni fotovoltaiche ({count})",
       "search": "Cerca nel catalogo"
     },
     "product": {
@@ -209,8 +205,6 @@
       "use": "Usa su questa superficie"
     },
     "values": {
-      "title": "Valori della tecnologia",
-      "product": "Prodotto",
       "buildingOnly": "Le modifiche a {name} valgono solo per questo edificio.",
       "question": {
         "cost_energy_cap": "Quanto costa per kWp?",
@@ -221,11 +215,12 @@
       "copyName": "{name} (copia)",
       "save": "Salva",
       "saved": "Salvato come {name}.",
-      "saveFailed": "Impossibile salvare la tecnologia. Riprova."
+      "saveFailed": "Impossibile salvare la tecnologia. Riprova.",
+      "edit": "Modifica i valori di {name}"
     },
     "installed": {
       "title": "Installato su questo edificio",
-      "empty": "Ancora nessun FV. Apri il catalogo e trascina un prodotto su un tetto o una parete.",
+      "empty": "Ancora nessun FV. Apri le opzioni fotovoltaiche e trascina un prodotto su un tetto o una parete.",
       "surfaces": {
         "one": "su {count} superficie",
         "other": "su {count} superfici"
@@ -235,7 +230,10 @@
         "other": "{count} moduli"
       }
     },
-    "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM."
+    "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM.",
+    "options": {
+      "search": "Cerca nelle opzioni fotovoltaiche"
+    }
   },
   "tech": {
     "none": "Nessuna tecnologia su questo edificio.",
@@ -785,5 +783,10 @@
       "p50": "Tipico",
       "p90": "Alto"
     }
+  },
+  "legend": {
+    "roof": "Tetto",
+    "wall": "Parete",
+    "ground": "Pavimento a terra"
   }
 }

@@ -28,9 +28,7 @@
     },
     "undo": {
       "title": "Cofnij {action} (Ctrl+Z)",
-      "none": "Nie ma czego cofnąć",
-      "action": "Cofnij {action}",
-      "label": "Cofnij"
+      "action": "Cofnij {action}"
     },
     "loadingGeometry": "Wczytywanie geometrii przegród…",
     "detached": "Zapisane przegrody tego budynku pochodzą z wcześniejszego przebiegu City2TABULA, więc żadna nie pasuje do aktualnych danych 3D. Zapisane wartości nadal obowiązują; model nie jest wyświetlany.",
@@ -109,8 +107,7 @@
       "pv": "PV"
     },
     "pick": "Wybierz przegrodę",
-    "fromModel": "{tilt}° · orientacja {azimuth}° {compass} · z modelu 3D",
-    "flatFromModel": "Płaska · z modelu 3D"
+    "geometrySource": "Źródło: model 3D budynku"
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",
@@ -155,8 +152,7 @@
     "useSuggested": "Użyj sugerowanych przegród",
     "legend": {
       "installed": "PV zainstalowane",
-      "suggested": "Sugerowana",
-      "available": "Dostępna"
+      "suggested": "Sugerowana"
     },
     "card": {
       "fromModel": "Nachylenie, orientacja i powierzchnia pochodzą z modelu 3D budynku.",
@@ -200,7 +196,7 @@
     "catalogue": {
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Katalog ({count})",
+      "toggle": "Opcje fotowoltaiczne ({count})",
       "search": "Szukaj w katalogu"
     },
     "product": {
@@ -213,8 +209,6 @@
       "use": "Użyj na tej powierzchni"
     },
     "values": {
-      "title": "Wartości technologii",
-      "product": "Produkt",
       "buildingOnly": "Zmiany w {name} dotyczą tylko tego budynku.",
       "question": {
         "cost_energy_cap": "Ile kosztuje za kWp?",
@@ -225,11 +219,12 @@
       "copyName": "{name} (kopia)",
       "save": "Zapisz",
       "saved": "Zapisano jako {name}.",
-      "saveFailed": "Nie udało się zapisać technologii. Spróbuj ponownie."
+      "saveFailed": "Nie udało się zapisać technologii. Spróbuj ponownie.",
+      "edit": "Edytuj wartości {name}"
     },
     "installed": {
       "title": "Zainstalowane na tym budynku",
-      "empty": "Brak PV. Otwórz katalog i przeciągnij produkt na dach lub ścianę.",
+      "empty": "Brak PV. Otwórz opcje fotowoltaiczne i przeciągnij produkt na dach lub ścianę.",
       "surfaces": {
         "one": "na {count} przegrodzie",
         "few": "na {count} przegrodach",
@@ -243,7 +238,10 @@
         "other": "{count} modułu"
       }
     },
-    "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM."
+    "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM.",
+    "options": {
+      "search": "Szukaj w opcjach fotowoltaicznych"
+    }
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",
@@ -805,5 +803,10 @@
       "p50": "Typowy",
       "p90": "Wysoki"
     }
+  },
+  "legend": {
+    "roof": "Dach",
+    "wall": "Ściana",
+    "ground": "Podłoga na gruncie"
   }
 }

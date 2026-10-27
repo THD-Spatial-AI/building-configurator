@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { PvOverview } from './PvOverview';
+import { ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import type { PvLayout } from '../../lib/pvLayout';
@@ -128,12 +128,18 @@ describe('PvOverview with a catalogue', () => {
   });
 
   it('lists the installed products with their modules and capacity, the catalogue closed behind a drop-down', () => {
-    const installed = html.slice(html.indexOf('Installed on this building'), html.indexOf('Surfaces with PV ('));
+    const installed = html.slice(html.indexOf('Installed on this building'), html.indexOf('Photovoltaic options ('));
     expect(installed).toContain('Demo Mono 420 W');
     expect(installed).not.toContain('Demo Compact 300 W');
     expect(installed).toContain('24 modules');
     expect(installed).toContain('on 1 surface');
-    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>Catalogue \(2\)/);
+    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>Photovoltaic options \(2\)/);
+  });
+
+  it('keeps each installed product\'s values behind its edit button', () => {
+    expect(html).toContain('aria-label="Edit the values of Demo Mono 420 W"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain('What does it cost per kWp?');
   });
 
   it('lists the catalogue as draggable products with their module and price', () => {
@@ -142,7 +148,11 @@ describe('PvOverview with a catalogue', () => {
     expect(html).toMatch(/<li draggable="true"/);
   });
 
-  it('asks the basic questions about the building\'s product, and offers to save it as new', () => {
+  const product = mono;
+  const values = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="basic" />);
+
+  it('asks the basic questions about an installed product, and offers to save it as new', () => {
+    const html = values;
     expect(html).toContain('What does it cost per kWp?');
     expect(html).toContain('How many years does it last?');
     expect(html).not.toContain('System losses');
@@ -152,9 +162,7 @@ describe('PvOverview with a catalogue', () => {
   });
 
   it('adds every simulation value the product carries in expert mode, and never an unused one', () => {
-    const expert = renderToStaticMarkup(
-      <PvOverview pv={withCatalogue} elements={elements} layouts={{ r1: flush }} mode="expert" onSelect={() => {}} />,
-    );
+    const expert = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="expert" />);
     expect(expert).toContain('System losses');
     expect(expert).not.toContain('cont_export_cap');
   });
