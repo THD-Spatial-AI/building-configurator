@@ -96,8 +96,14 @@
     },
     "degrees": "{degrees} degrees, {label}",
     "section": {
-      "envelope": "Envelope",
-      "pv": "PV"
+      "pv": "Photovoltaic",
+      "of": {
+        "wall": "Wall surface",
+        "roof": "Roof surface",
+        "floor": "Floor surface",
+        "window": "Window",
+        "door": "Door"
+      }
     },
     "pick": "Choose a surface",
     "geometrySource": "Source: the building's 3D model"
@@ -132,7 +138,7 @@
       "available": "Available"
     },
     "toggle": "PV on {surface}",
-    "thisSurface": "PV on this surface",
+    "thisSurface": "Install",
     "usableShare": "Usable share",
     "usableShareNote": "of this surface, after obstructions",
     "hint": "Click a roof or wall to set up PV, or drop a product on it.",
@@ -153,7 +159,6 @@
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
-      "add": "Add PV to this surface",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "No whole module fits on this surface.",
       "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none.",

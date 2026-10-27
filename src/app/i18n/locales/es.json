@@ -97,8 +97,14 @@
     },
     "degrees": "{degrees} grados, {label}",
     "section": {
-      "envelope": "Envolvente",
-      "pv": "FV"
+      "pv": "Fotovoltaica",
+      "of": {
+        "wall": "Superficie de muro",
+        "roof": "Superficie de cubierta",
+        "floor": "Superficie de suelo",
+        "window": "Ventana",
+        "door": "Puerta"
+      }
     },
     "pick": "Elegir una superficie",
     "geometrySource": "Fuente: modelo 3D del edificio"
@@ -133,7 +139,7 @@
       "available": "Disponible"
     },
     "toggle": "FV en {surface}",
-    "thisSurface": "FV en esta superficie",
+    "thisSurface": "Instalar",
     "usableShare": "Fracción útil",
     "usableShareNote": "de esta superficie, descontando obstáculos",
     "hint": "Haga clic en un tejado o una pared para configurar FV, o suelte un producto sobre él.",
@@ -154,7 +160,6 @@
       "panels": "{kwp} kWp en {area} m² de módulos",
       "remove": "Quitar FV",
       "done": "Listo",
-      "add": "Añadir FV a esta superficie",
       "modules": "Módulos: {count} · {kwp} kWp · {area} m²",
       "noFit": "En esta superficie no cabe ningún módulo entero.",
       "spaceLimited": "El espacio de esta superficie limita los módulos; una fracción utilizable mayor no añade ninguno.",

@@ -98,8 +98,14 @@
     },
     "degrees": "{degrees}°, {label}",
     "section": {
-      "envelope": "Przegrody",
-      "pv": "PV"
+      "pv": "Fotowoltaika",
+      "of": {
+        "wall": "Powierzchnia ściany",
+        "roof": "Powierzchnia dachu",
+        "floor": "Powierzchnia podłogi",
+        "window": "Okno",
+        "door": "Drzwi"
+      }
     },
     "pick": "Wybierz przegrodę",
     "geometrySource": "Źródło: model 3D budynku"
@@ -134,7 +140,7 @@
       "available": "Dostępna"
     },
     "toggle": "PV: {surface}",
-    "thisSurface": "PV na tej przegrodzie",
+    "thisSurface": "Zainstaluj",
     "usableShare": "Udział użyteczny",
     "usableShareNote": "tej przegrody, po odjęciu przeszkód",
     "hint": "Kliknij dach lub ścianę, aby skonfigurować PV, albo upuść na nią produkt.",
@@ -155,7 +161,6 @@
       "panels": "{kwp} kWp na {area} m² modułów",
       "remove": "Usuń PV",
       "done": "Gotowe",
-      "add": "Dodaj PV do tej przegrody",
       "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
       "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego.",

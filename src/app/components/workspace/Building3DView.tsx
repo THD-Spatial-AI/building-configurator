@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
-import { SurfacePanel } from './SurfacePanel';
+import { SurfacePanel, SurfacePicker } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceName, surfaceProduct, type PvMode } from './PvMode';
@@ -149,6 +149,8 @@ export function Building3DView({
   const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : 'building');
   /** On the Technologies tab, surfaces open their PV settings and take dropped products. */
   const onTech = tab === 'technology' && pv !== undefined;
+  /** The surface named under the pointer in the surface picker, outlined on the model. */
+  const [previewSurface, setPreviewSurface] = useState<string | null>(null);
   /** The PV surface under the pointer on the Technologies tab, for its hover card. */
   const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
   /** While on, a click in the model selects a storey instead of a surface. */
@@ -298,7 +300,7 @@ export function Building3DView({
   const panelBody = selected && (selectedElement || selectedPv) ? (
     <div key={selected.id} className="flex flex-col gap-3 p-3">
       {selectedElement && (
-        <SectionCard topic={TOPICS.envelope} title={t('surface.section.envelope')} info={t('help.envelope')}>
+        <SectionCard topic={TOPICS.envelope} title={t(`surface.section.of.${selectedElement.type}`)} info={t('help.envelope')}>
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}
@@ -325,32 +327,26 @@ export function Building3DView({
       )}
     </div>
   ) : null;
-  const panelSubtitle = selectedElement
-    ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`
-    : selectedPv?.label;
   const pickable = useMemo(() => [
-    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label })),
+    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label, type: t(`surface.type.${element.type}`) })),
     ...Object.entries(pv?.surfaces ?? {})
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
-  ], [elements, pv]);
+  ], [elements, pv, t]);
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
       open={!storeyMode && panelBody !== null}
       title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-      subtitle={storeyMode ? undefined : panelSubtitle}
       emptyText={t(storeyMode ? 'storeys.pickHint' : 'view.panel.empty')}
       picker={(
-        <select
-          aria-label={t('surface.pick')}
-          value={selected?.id ?? ''}
-          onChange={(e) => selectFromList(e.target.value)}
-          className="h-8 w-full cursor-pointer rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
-        >
-          <option value="" disabled>{t('surface.pick')}</option>
-          {pickable.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
-        </select>
+        <SurfacePicker
+          surfaces={pickable}
+          value={selected?.id ?? null}
+          placeholder={t('surface.pick')}
+          onSelect={selectFromList}
+          onPreview={setPreviewSurface}
+        />
       )}
       onClose={() => requestSurface(null)}
     >
@@ -466,6 +462,7 @@ export function Building3DView({
               onHoverSurface={onTech ? hoverPv : undefined}
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
+              previewId={previewSurface}
               focusToken={focus?.token}
               storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys }}
               onSelectStorey={storeyMode ? pickStorey : undefined}

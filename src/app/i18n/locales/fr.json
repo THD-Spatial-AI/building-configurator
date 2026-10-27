@@ -97,8 +97,14 @@
     },
     "degrees": "{degrees} degrés, {label}",
     "section": {
-      "envelope": "Enveloppe",
-      "pv": "PV"
+      "pv": "Photovoltaïque",
+      "of": {
+        "wall": "Surface de mur",
+        "roof": "Surface de toit",
+        "floor": "Surface de plancher",
+        "window": "Fenêtre",
+        "door": "Porte"
+      }
     },
     "pick": "Choisir une surface",
     "geometrySource": "Source : modèle 3D du bâtiment"
@@ -133,7 +139,7 @@
       "available": "Disponible"
     },
     "toggle": "PV sur {surface}",
-    "thisSurface": "PV sur cette surface",
+    "thisSurface": "Installer",
     "usableShare": "Part utilisable",
     "usableShareNote": "de cette surface, hors obstacles",
     "hint": "Cliquez sur un toit ou un mur pour configurer le PV, ou déposez-y un produit.",
@@ -154,7 +160,6 @@
       "panels": "{kwp} kWp sur {area} m² de modules",
       "remove": "Retirer le PV",
       "done": "Terminé",
-      "add": "Ajouter du PV sur cette surface",
       "modules": "Modules : {count} · {kwp} kWp · {area} m²",
       "noFit": "Aucun module entier ne tient sur cette surface.",
       "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun.",

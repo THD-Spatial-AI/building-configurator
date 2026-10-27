@@ -3,7 +3,8 @@
 // bottom of the screen on a narrow one. It holds every section of one
 // surface, whichever tab the building panel shows.
 
-import { X } from '@/app/components/icons';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { useT } from '../../i18n';
 
@@ -12,8 +13,8 @@ interface SurfacePanelProps {
   docked: boolean;
   /** Nothing selected: the column shows `emptyText`, the sheet nothing. */
   open: boolean;
+  /** Names the panel for assistive technology, and heads the sheet on a narrow screen. */
   title?: string;
-  subtitle?: string;
   emptyText: string;
   /** Picks a surface without the model; shown above the content in the column. */
   picker?: React.ReactNode;
@@ -21,8 +22,7 @@ interface SurfacePanelProps {
   children?: React.ReactNode;
 }
 
-export function SurfacePanel({ docked, open, title, subtitle, emptyText, picker, onClose, children }: SurfacePanelProps) {
-  const t = useT();
+export function SurfacePanel({ docked, open, title, emptyText, picker, onClose, children }: SurfacePanelProps) {
   if (docked && !open) return null;
   return (
     <aside
@@ -35,28 +35,23 @@ export function SurfacePanel({ docked, open, title, subtitle, emptyText, picker,
           : 'w-[300px] shrink-0 rounded-lg border',
       )}
     >
-      {picker && !docked && <div className="shrink-0 border-b border-border p-2">{picker}</div>}
+      {picker && !docked && (
+        // The picker names the open surface, so the column needs no title of its own.
+        <div className="flex shrink-0 items-center gap-1.5 border-b border-border p-2">
+          <div className="min-w-0 flex-1">{picker}</div>
+          {open && <CloseButton onClose={onClose} />}
+        </div>
+      )}
       {open ? (
         <>
-          <div className={cn(
-            'flex w-full shrink-0 items-start gap-2 border-border px-3',
+          {docked && (
             // A form stretched across a tablet's full width reads worse than a column.
-            docked ? 'mx-auto max-w-[560px] pt-4 pb-2.5' : 'border-b py-2.5',
-          )}>
-            {docked && <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-muted-foreground/40" aria-hidden />}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-semibold text-foreground">{title}</p>
-              {subtitle && <p className="truncate text-[10px] text-muted-foreground">{subtitle}</p>}
+            <div className="mx-auto flex w-full max-w-[560px] shrink-0 items-start gap-2 px-3 pb-2.5 pt-4">
+              <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-muted-foreground/40" aria-hidden />
+              <p className="min-w-0 flex-1 truncate text-[12px] font-semibold text-foreground">{title}</p>
+              <CloseButton onClose={onClose} />
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label={t('surface.close')}
-              className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
-            >
-              <X />
-            </button>
-          </div>
+          )}
           <div className={cn('min-h-0 w-full flex-1 overflow-y-auto', docked && 'mx-auto max-w-[560px]')}>
             {children}
           </div>
@@ -65,5 +60,98 @@ export function SurfacePanel({ docked, open, title, subtitle, emptyText, picker,
         <p className="m-auto max-w-[220px] px-4 text-center text-[12px] leading-snug text-muted-foreground">{emptyText}</p>
       )}
     </aside>
+  );
+}
+
+function CloseButton({ onClose }: { onClose: () => void }) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label={t('surface.close')}
+      title={t('surface.close')}
+      className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted [&_svg]:size-4"
+    >
+      <X />
+    </button>
+  );
+}
+
+/** One surface in the picker: its name, and its type beneath. */
+export interface PickerSurface {
+  id: string;
+  label: string;
+  type?: string;
+}
+
+/**
+ * The surfaces as a list to pick from, in the panel's style. Hovering one
+ * calls onPreview with it, so the model can show where it is.
+ */
+export function SurfacePicker({ surfaces, value, placeholder, onSelect, onPreview }: {
+  surfaces: PickerSurface[];
+  value: string | null;
+  placeholder: string;
+  onSelect: (id: string) => void;
+  onPreview: (id: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const close = () => { setOpen(false); onPreview(null); };
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) close(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+    document.addEventListener('mousedown', onDown);
+    window.addEventListener('keydown', onKey, true);
+    return () => { document.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey, true); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+  const current = surfaces.find((surface) => surface.id === value);
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => (open ? close() : setOpen(true))}
+        className="flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-2.5 text-left hover:bg-muted"
+      >
+        <span className="min-w-0 flex-1">
+          <span className={cn('block truncate text-[12px] font-semibold', current ? 'text-foreground' : 'text-muted-foreground')}>
+            {current?.label ?? placeholder}
+          </span>
+          {current?.type && <span className="block truncate text-[10px] leading-tight text-muted-foreground">{current.type}</span>}
+        </span>
+        <ChevronDown className={cn('size-3.5 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          aria-label={placeholder}
+          onMouseLeave={() => onPreview(null)}
+          className="absolute inset-x-0 top-full z-30 mt-1 max-h-80 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]"
+        >
+          {surfaces.map((surface) => (
+            <li key={surface.id} role="option" aria-selected={surface.id === value}>
+              <button
+                type="button"
+                onMouseEnter={() => onPreview(surface.id)}
+                onFocus={() => onPreview(surface.id)}
+                onClick={() => { onSelect(surface.id); close(); }}
+                className={cn(
+                  'flex w-full cursor-pointer flex-col px-2.5 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none',
+                  surface.id === value && 'bg-primary/10',
+                )}
+              >
+                <span className="truncate text-[12px] font-medium text-foreground">{surface.label}</span>
+                {surface.type && <span className="truncate text-[10px] text-muted-foreground">{surface.type}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

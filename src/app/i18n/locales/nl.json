@@ -96,8 +96,14 @@
     },
     "degrees": "{degrees} graden, {label}",
     "section": {
-      "envelope": "Schil",
-      "pv": "PV"
+      "pv": "Fotovoltaïsch",
+      "of": {
+        "wall": "Muurvlak",
+        "roof": "Dakvlak",
+        "floor": "Vloervlak",
+        "window": "Raam",
+        "door": "Deur"
+      }
     },
     "pick": "Kies een vlak",
     "geometrySource": "Bron: 3D-model van het gebouw"
@@ -132,7 +138,7 @@
       "available": "Beschikbaar"
     },
     "toggle": "PV op {surface}",
-    "thisSurface": "PV op dit vlak",
+    "thisSurface": "Installeren",
     "usableShare": "Bruikbaar aandeel",
     "usableShareNote": "van dit vlak, na obstakels",
     "hint": "Klik op een dak of muur om PV in te stellen, of sleep er een product op.",
@@ -153,7 +159,6 @@
       "panels": "{kwp} kWp op {area} m² panelen",
       "remove": "PV verwijderen",
       "done": "Klaar",
-      "add": "PV op dit vlak plaatsen",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "Er past geen hele module op dit vlak.",
       "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe.",

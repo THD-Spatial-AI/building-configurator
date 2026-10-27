@@ -194,7 +194,6 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
   const installed = surface.state === 'installed';
   const geometry = pvGeometry(surfaceId, elements, surface);
   const area = elements[surfaceId]?.area ?? surface.area;
-  const reach = layout?.kwp ?? surface.maxKwp;
   const element = elements[surfaceId];
   const orientationEdited = element !== undefined && (
     (element.defaultTilt !== undefined && element.defaultTilt !== element.tilt)
@@ -261,18 +260,7 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
             )}
           </div>
         </>
-      ) : (
-        <>
-          <span className="text-[12px] text-muted-foreground">{t('pv.upTo', { kwp: format(reach, 1) })}</span>
-          {surface.state === 'suggested' && (
-            <button
-              type="button"
-              onClick={() => pv.onToggle(surfaceId, true)}
-              className="h-9 cursor-pointer self-start rounded-md bg-primary px-4 text-[12px] font-semibold text-primary-foreground hover:bg-primary/90"
-            >{t('pv.card.add')}</button>
-          )}
-        </>
-      )}
+      ) : null}
     </div>
   );
 }

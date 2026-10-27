@@ -96,8 +96,14 @@
     },
     "degrees": "{degrees} Grad, {label}",
     "section": {
-      "envelope": "Gebäudehülle",
-      "pv": "PV"
+      "pv": "Photovoltaik",
+      "of": {
+        "wall": "Wandfläche",
+        "roof": "Dachfläche",
+        "floor": "Bodenfläche",
+        "window": "Fenster",
+        "door": "Tür"
+      }
     },
     "pick": "Fläche wählen",
     "geometrySource": "Quelle: 3D-Modell des Gebäudes"
@@ -132,7 +138,7 @@
       "available": "Verfügbar"
     },
     "toggle": "PV auf {surface}",
-    "thisSurface": "PV auf dieser Fläche",
+    "thisSurface": "Installieren",
     "usableShare": "Nutzbarer Anteil",
     "usableShareNote": "dieser Fläche, abzüglich Verschattung",
     "hint": "Klicken Sie auf ein Dach oder eine Wand, um PV einzurichten, oder legen Sie ein Produkt darauf ab.",
@@ -153,7 +159,6 @@
       "panels": "{kwp} kWp auf {area} m² Modulfläche",
       "remove": "PV entfernen",
       "done": "Fertig",
-      "add": "PV auf dieser Fläche hinzufügen",
       "modules": "Module: {count} · {kwp} kWp · {area} m²",
       "noFit": "Auf diese Fläche passt kein ganzes Modul.",
       "spaceLimited": "Der Platz auf dieser Fläche begrenzt die Module; ein größerer nutzbarer Anteil fügt keine hinzu.",
