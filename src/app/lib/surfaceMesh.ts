@@ -120,17 +120,17 @@ export function computeOrigin(surfaces: SurfacePolygon[]): [number, number, numb
 const MIN_EDGE_M = 0.1;
 
 /**
- * Each side of a surface's outer ring: its length in metres and its midpoint
- * in the storage CRS. The ring's closing vertex repeats the first, so it is
+ * Each side of a surface's outer ring: its ends, its midpoint and its length
+ * in metres, in the storage CRS. The ring's closing vertex repeats the first, so it is
  * not a side of its own.
  */
-export function surfaceSides(polygon: SurfacePolygon): { mid: number[]; length: number }[] {
+export function surfaceSides(polygon: SurfacePolygon): { from: number[]; to: number[]; mid: number[]; length: number }[] {
   const ring = polygon.coordinates[0] ?? [];
-  const sides: { mid: number[]; length: number }[] = [];
+  const sides: { from: number[]; to: number[]; mid: number[]; length: number }[] = [];
   for (let i = 0; i + 1 < ring.length; i += 1) {
     const [a, b] = [ring[i], ring[i + 1]];
     const length = Math.hypot(b[0] - a[0], b[1] - a[1], (b[2] ?? 0) - (a[2] ?? 0));
-    if (length >= MIN_EDGE_M) sides.push({ mid: a.map((value, axis) => (value + (b[axis] ?? 0)) / 2), length });
+    if (length >= MIN_EDGE_M) sides.push({ from: a, to: b, mid: a.map((value, axis) => (value + (b[axis] ?? 0)) / 2), length });
   }
   return sides;
 }

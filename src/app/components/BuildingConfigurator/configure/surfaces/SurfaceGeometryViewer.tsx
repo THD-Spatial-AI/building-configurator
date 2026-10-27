@@ -50,6 +50,8 @@ interface SurfaceGeometryViewerProps {
 const HIGHLIGHT_COLOR = 0x2563eb;
 const INVALID_COLOR = 0x991b1b;
 /** A surface suggested for PV: a light fill inside a dashed outline. */
+/** The measured sides of the selected surface and their ends. */
+const SIDE_COLOR = 0xf97316;
 const CANDIDATE_FILL = 0xfde047;
 const CANDIDATE_EDGE_COLOR = 0x92400e;
 const EDGE_COLOR = 0x1e293b;
@@ -357,6 +359,31 @@ export function SurfaceGeometryViewer({
       mount.removeChild(renderer.domElement);
     };
   }, [surfaces, origin]);
+
+  // Each measured side as a bright line with a dot at either end, drawn over
+  // the model so the label's start and end can be seen on a cut-up surface.
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || sides.length === 0) return;
+    const ends = sides.flatMap((side) => [toLocal(side.from, origin), toLocal(side.to, origin)]);
+    const lineMaterial = new THREE.LineBasicMaterial({ color: SIDE_COLOR, depthTest: false });
+    const dotMaterial = new THREE.PointsMaterial({ color: SIDE_COLOR, size: 7, sizeAttenuation: false, depthTest: false });
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ends), lineMaterial);
+    const dots = new THREE.Points(new THREE.BufferGeometry().setFromPoints(ends), dotMaterial);
+    for (const object of [lines, dots]) {
+      object.renderOrder = 10;
+      object.raycast = () => {};
+      scene.add(object);
+    }
+    return () => {
+      for (const object of [lines, dots]) {
+        scene.remove(object);
+        object.geometry.dispose();
+      }
+      lineMaterial.dispose();
+      dotMaterial.dispose();
+    };
+  }, [sides, origin]);
 
   // Display only: the geometry has no storeys, so these follow storeyBands.
   const storeyCount = storeys?.count ?? 0;
