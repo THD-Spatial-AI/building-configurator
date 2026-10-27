@@ -3,6 +3,7 @@ import { withEdits } from './useBuildingModel';
 import { DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingElement } from './configure/model/buildingElements';
 import type { BuildingState } from '../../lib/buemAdapter';
+import { toBuem } from '../../lib/buemRun';
 
 const identity = {
   id: 'building-1',
@@ -51,5 +52,12 @@ describe('withEdits', () => {
   it('keeps the original label when the name is blank', () => {
     const result = withEdits(building, elements, { ...DEFAULT_GENERAL, buildingName: '' });
     expect(result.identity.label).toBe('Original');
+  });
+
+  it('keeps the storeys\' own heights, so a run sends their mean', () => {
+    const general = { ...DEFAULT_GENERAL, buildingType: 'Single-family House', storeys: 3, roomHeight: 2.5, storeyHeights: { 3: 4 } };
+    const blocks = toBuem(withEdits(building, elements, general));
+    expect(blocks.building.h_room).toEqual({ value: 3, unit: 'm' });
+    expect(blocks.configurator.storey_list?.[2]).toMatchObject({ storey: 3, height: 4 });
   });
 });

@@ -797,6 +797,7 @@ export function withEdits(
       use_milp:                general.use_milp,
       residential_units:       general.residential_units,
       storeyDwellings:         general.storeyDwellings,
+      storeyHeights:           general.storeyHeights,
       num_persons:             general.num_persons,
       archetype:               general.archetype,
       region_code:             general.region_code,
