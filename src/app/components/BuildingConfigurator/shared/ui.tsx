@@ -349,7 +349,12 @@ export function SelectInput({ label, value, onChange, options, tip }: SelectInpu
 
 // ─── SegmentedControl ─────────────────────────────────────────────────────────
 
-interface SegOpt { value: string; label: string }
+interface SegOpt {
+  value: string;
+  label: string;
+  /** Classes for this option while chosen, such as a topic's tile, in place of the plain card. */
+  activeClassName?: string;
+}
 
 interface SegmentedControlProps {
   options: SegOpt[];
@@ -376,7 +381,7 @@ export function SegmentedControl({ options, value, onChange, fullWidth }: Segmen
               'cursor-pointer select-none whitespace-nowrap rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all duration-150',
               fullWidth && 'flex-1',
               active
-                ? 'border-border bg-card text-foreground shadow-sm'
+                ? cn('border-border shadow-sm', opt.activeClassName ?? 'bg-card text-foreground')
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
