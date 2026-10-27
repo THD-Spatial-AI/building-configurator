@@ -309,26 +309,6 @@
       "equipment": "Apparaten",
       "solver": "Rekenmethode"
     },
-    "summary": {
-      "outputs": "{on} van {total} profielen",
-      "equipmentSet": "{overrides} handmatig ingesteld",
-      "equipmentDefault": "Standaard",
-      "solverMilp": "MILP",
-      "solverSparse": "Sparse",
-      "occupants": "{capacity} bewoners",
-      "capacityFromArea": "Capaciteit uit vloeroppervlakte",
-      "dwellings": {
-        "one": "{count} woning",
-        "other": "{count} woningen"
-      },
-      "dwellingsNotSet": "Woningen niet ingesteld",
-      "perDwelling": "{dwellings} · {persons} per woning",
-      "storeys": {
-        "one": "{count} verdieping",
-        "other": "{count} verdiepingen"
-      },
-      "storeysModelled": "{modelled} van {total} verdiepingen gemodelleerd"
-    },
     "insulationTitle": "Energieniveau",
     "expertMore": {
       "title": "Thermiek en simulatie",
@@ -353,17 +333,6 @@
       "off": "Niet inbegrepen",
       "label": "Warm tapwater",
       "tip": "Uitschakelen als warm tapwater komt uit een systeem dat elders is meegerekend. Ruimteverwarming blijft ongewijzigd."
-    },
-    "summary": {
-      "setback": {
-        "none": "geen nachtverlaging",
-        "nightOnly": "verlaagd 's nachts",
-        "nightAndAway": "verlaagd 's nachts en bij afwezigheid",
-        "deep": "sterk verlaagd",
-        "unknown": "verlaagd: {setback}"
-      },
-      "hotWaterOn": "warm tapwater inbegrepen",
-      "hotWaterOff": "geen warm tapwater"
     },
     "heating": {
       "label": "Setpoint verwarming",
@@ -816,5 +785,15 @@
     "roof": "Dak",
     "wall": "Muur",
     "ground": "Begane grondvloer"
+  },
+  "steps": {
+    "nav": "Onderdelen van het gebouw",
+    "previous": "Terug: {step}",
+    "next": "Volgende: {step}",
+    "status": {
+      "complete": "volledig",
+      "attention": "vraagt aandacht",
+      "error": "bevat een fout"
+    }
   }
 }

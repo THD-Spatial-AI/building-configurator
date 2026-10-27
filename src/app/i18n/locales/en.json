@@ -309,26 +309,6 @@
       "equipment": "Appliances",
       "solver": "Calculation Method"
     },
-    "summary": {
-      "outputs": "{on} of {total} profiles",
-      "equipmentSet": "{overrides} set by hand",
-      "equipmentDefault": "Defaults",
-      "solverMilp": "MILP",
-      "solverSparse": "Sparse",
-      "occupants": "{capacity} occupants",
-      "capacityFromArea": "Capacity from floor area",
-      "dwellings": {
-        "one": "{count} dwelling",
-        "other": "{count} dwellings"
-      },
-      "dwellingsNotSet": "Dwellings not set",
-      "perDwelling": "{dwellings} · {persons} per dwelling",
-      "storeys": {
-        "one": "{count} storey",
-        "other": "{count} storeys"
-      },
-      "storeysModelled": "{modelled} of {total} storeys modelled"
-    },
     "insulationTitle": "Energy grade",
     "expertMore": {
       "title": "Thermal and simulation",
@@ -353,17 +333,6 @@
       "off": "Not included",
       "label": "Hot water",
       "tip": "Turn off when hot water is supplied by a system accounted for elsewhere. Space heating is unaffected."
-    },
-    "summary": {
-      "setback": {
-        "none": "no setback",
-        "nightOnly": "lowered at night",
-        "nightAndAway": "lowered at night and when away",
-        "deep": "lowered deep setback",
-        "unknown": "lowered {setback}"
-      },
-      "hotWaterOn": "hot water included",
-      "hotWaterOff": "no hot water"
     },
     "heating": {
       "label": "Heating setpoint",
@@ -816,5 +785,15 @@
     "roof": "Roof",
     "wall": "Wall",
     "ground": "Ground floor"
+  },
+  "steps": {
+    "nav": "Building sections",
+    "previous": "Back: {step}",
+    "next": "Next: {step}",
+    "status": {
+      "complete": "complete",
+      "attention": "needs attention",
+      "error": "has an error"
+    }
   }
 }

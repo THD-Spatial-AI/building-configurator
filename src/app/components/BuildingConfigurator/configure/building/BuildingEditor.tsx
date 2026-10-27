@@ -1,24 +1,25 @@
-// Building-level parameters panel of the 3D view; Expert shows more groups.
+// The Building tab's sections as steps: energy grade, storeys and occupancy,
+// heating and comfort, and in Expert the thermal and simulation settings.
 
-import { useEffect, useState, type ReactNode } from 'react';
-import { ChevronDown } from '@/app/components/icons';
+import type { ReactNode } from 'react';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import { ToggleSwitch } from '@/app/components/BuildingConfigurator/shared/ui';
 import { SectionCard } from '@/app/components/BuildingConfigurator/shared/SectionCard';
+import type { Step, StepStatus } from '@/app/components/BuildingConfigurator/shared/StepPanel';
 import { TOPICS, type Topic } from '@/app/config/topics';
-import { cn } from '@/lib/utils';
+import { missingDwellings } from '@/app/lib/storeys';
 import {
   BUILDING_TYPE_LABELS,
-  OUTPUT_PROFILES,
   buildingTypeName,
+  hasDwellingsPerStorey,
   isServiceBuildingType,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
-import { ComfortSection, comfortSummary } from './comfortSection';
+import { ComfortSection } from './comfortSection';
 import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
-import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 
-// Insulation and windows is not one of these: it stays open (see BuildingEditor).
+// Energy grade is not one of these: it is built from InsulationProps (see useBuildingSteps).
 type SectionKey = 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
 
 // ─── Section components ───────────────────────────────────────────────────────
@@ -92,7 +93,6 @@ const SECTION_TOPICS: Record<SectionKey, Topic> = {
   solver:      TOPICS.building,
 };
 
-const BASIC_SECTIONS: SectionKey[] = ['occupancy', 'comfort'];
 const EXPERT_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
 
 const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
@@ -102,40 +102,6 @@ const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
   equipment:   (t) => t('editor.section.equipment'),
   solver:      (t) => t('editor.section.solver'),
 };
-
-/** One-line value summary shown on the grid card and chip. */
-function sectionSummary(t: Translate, format: FormatNumber, key: SectionKey, general: Record<string, any>): string {
-  switch (key) {
-    case 'occupancy':   return [storeysSummary(t, general), occupancySummary(t, format, general)].filter(Boolean).join(' · ');
-    case 'comfort':     return comfortSummary(t, format, general);
-    case 'outputs':     return t('editor.summary.outputs', {
-      on: OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length,
-      total: OUTPUT_PROFILES.length,
-    });
-    case 'equipment': {
-      const overrides = Object.keys(general.equipment).length;
-      return overrides > 0 ? t('editor.summary.equipmentSet', { overrides }) : t('editor.summary.equipmentDefault');
-    }
-    case 'solver':      return general.use_milp ? t('editor.summary.solverMilp') : t('editor.summary.solverSparse');
-  }
-}
-
-/** How many storeys the building has and how many are modelled; nothing for a single storey. */
-function storeysSummary(t: Translate, general: Record<string, any>): string {
-  if (general.storeys <= 1) return '';
-  return general.storeysModelled
-    ? t('editor.summary.storeysModelled', { modelled: general.storeysModelled.length, total: general.storeys })
-    : t('editor.summary.storeys', { count: general.storeys });
-}
-
-function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>): string {
-  if (isServiceBuildingType(general.buildingType)) {
-    return general.capacity ? t('editor.summary.occupants', { capacity: format(general.capacity) }) : t('editor.summary.capacityFromArea');
-  }
-  const units = general.residential_units;
-  const dwellings = units ? t('editor.summary.dwellings', { count: units }) : t('editor.summary.dwellingsNotSet');
-  return general.num_persons ? t('editor.summary.perDwelling', { dwellings, persons: format(general.num_persons) }) : dwellings;
-}
 
 /** Renders the content body for a given section key. */
 function SectionBody({
@@ -155,52 +121,69 @@ function SectionBody({
   }
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Steps ────────────────────────────────────────────────────────────────────
 
-interface BuildingEditorProps {
+/** An error once every level's grade failed; attention where TABULA has no levels for the building. */
+export function energyGradeStatus(insulation: InsulationProps): StepStatus {
+  const perM2 = insulation.classes?.perM2;
+  if (perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null)) return 'error';
+  return insulation.levels.length === 0 ? 'attention' : 'complete';
+}
+
+/** Attention while a modelled storey of a building counted per storey has no dwellings. */
+export function storeysStatus(general: Record<string, any>): StepStatus {
+  if (!hasDwellingsPerStorey(general.buildingType)) return 'complete';
+  return missingDwellings(general.storeysModelled, general.storeyDwellings ?? {}).length > 0 ? 'attention' : 'complete';
+}
+
+interface BuildingStepsProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
   mode: 'basic' | 'expert';
-  /** The Insulation and windows group's model; without it the group is not shown. */
+  /** The energy grade's model; without it there is no energy grade step. */
   insulation?: InsulationProps;
-  /** Switches to Expert; in Basic a card then says what Expert adds. */
+  /** Switches to Expert; in Basic the last step then says what Expert adds. */
   onShowExpert?: () => void;
-  /** The storeys modelled, shown at the top of the storeys and occupancy section. */
+  /** The storeys modelled, shown at the top of the storeys and occupancy step. */
   storeys?: ReactNode;
-  /** Opens the storeys and occupancy section, as when storeys are selected in the model. */
-  showStoreys?: boolean;
-  /** Called when the storeys and occupancy section closes, to clear the storey selection. */
+  /** Called when the storeys and occupancy step is left, to clear the storey selection. */
   onStoreysClosed?: () => void;
 }
 
-/**
- * Building-level parameter editor of the Building tab: one card per section
- * in its topic's colour, each showing a summary until it is opened. Expert
- * sections are dashed. Energy grade stays open: the refurbishment state is
- * the first thing most users change. Storeys sit with occupancy, as a building
- * divides into storeys and storeys into dwellings.
- */
-export function BuildingEditor({
-  general, setGen, mode,
-  insulation, onShowExpert, storeys, showStoreys = false, onStoreysClosed,
-}: BuildingEditorProps) {
+/** The building parameters as steps for a StepPanel, each one section card shown open. */
+export function useBuildingSteps({
+  general, setGen, mode, insulation, onShowExpert, storeys, onStoreysClosed,
+}: BuildingStepsProps): Step[] {
   const t = useT();
   const format = useFormatNumber();
-  const [openSection, setOpenSection] = useState<SectionKey | null>(null);
-  useEffect(() => { if (showStoreys) setOpenSection('occupancy'); }, [showStoreys]);
-  /** Opens one section, or none; leaving storeys and occupancy, by closing it or opening another, says so. */
-  const openOnly = (key: SectionKey | null) => {
-    if (openSection === 'occupancy' && key !== 'occupancy') onStoreysClosed?.();
-    setOpenSection(key);
-  };
-
+  const card = (key: SectionKey) => (
+    <SectionCard key={key} topic={SECTION_TOPICS[key]} title={SECTION_LABELS[key](t)} info={t(`help.${key}`)} dashed={EXPERT_SECTIONS.includes(key)}>
+      <div className="flex flex-col gap-3 p-3">
+        {key === 'occupancy' && storeys && <div className="border-b border-border pb-3">{storeys}</div>}
+        <SectionBody id={key} general={general} setGen={setGen} mode={mode} />
+      </div>
+    </SectionCard>
+  );
+  const expertPointer = mode === 'basic' && onShowExpert && (
+    <button
+      type="button"
+      onClick={onShowExpert}
+      className="mt-3 flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-dashed border-muted-foreground/40 px-3 py-2.5 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted"
+    >
+      <span><b className="text-foreground">{t('editor.expertMore.title')}</b> · {t('editor.expertMore.detail')}</span>
+      <span className="shrink-0 font-semibold text-primary">{t('view.mode.expert')}</span>
+    </button>
+  );
   const service = isServiceBuildingType(general.buildingType);
-  const visibleSections = (mode === 'expert' ? [...BASIC_SECTIONS, ...EXPERT_SECTIONS] : BASIC_SECTIONS)
-    .filter((key) => !service || key !== 'equipment');
 
-  return (
-    <div className="flex flex-col gap-3">
-      {insulation && (
+  const steps: Step[] = [];
+  if (insulation) {
+    steps.push({
+      key: 'grade',
+      label: t('editor.insulationTitle'),
+      topic: TOPICS.building,
+      status: energyGradeStatus(insulation),
+      content: (
         <SectionCard
           topic={TOPICS.building}
           title={t('editor.insulationTitle')}
@@ -212,58 +195,36 @@ export function BuildingEditor({
             <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
           </div>
         </SectionCard>
-      )}
-
-      {visibleSections.map((key) => {
-        const open = openSection === key;
-        return (
-          <SectionCard
-            key={key}
-            topic={SECTION_TOPICS[key]}
-            title={SECTION_LABELS[key](t)}
-            info={t(`help.${key}`)}
-            dashed={EXPERT_SECTIONS.includes(key)}
-            onToggle={() => openOnly(open ? null : key)}
-            action={(
-              <button
-                type="button"
-                aria-expanded={open}
-                aria-label={SECTION_LABELS[key](t)}
-                onClick={() => openOnly(open ? null : key)}
-                className="flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-card/60"
-              >
-                <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} />
-              </button>
-            )}
-          >
-            {open ? (
-              <div className="flex flex-col gap-3 p-3">
-                {key === 'occupancy' && storeys && <div className="border-b border-border pb-3">{storeys}</div>}
-                <SectionBody id={key} general={general} setGen={setGen} mode={mode} />
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => openOnly(key)}
-                className="w-full cursor-pointer px-3 py-2 text-left text-[11px] text-muted-foreground hover:bg-muted"
-              >
-                {sectionSummary(t, format, key, general)}
-              </button>
-            )}
-          </SectionCard>
-        );
-      })}
-
-      {mode === 'basic' && onShowExpert && (
-        <button
-          type="button"
-          onClick={onShowExpert}
-          className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-dashed border-muted-foreground/40 px-3 py-2.5 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted"
-        >
-          <span><b className="text-foreground">{t('editor.expertMore.title')}</b> · {t('editor.expertMore.detail')}</span>
-          <span className="shrink-0 font-semibold text-primary">{t('view.mode.expert')}</span>
-        </button>
-      )}
-    </div>
-  );
+      ),
+    });
+  }
+  steps.push({
+    key: 'occupancy',
+    label: SECTION_LABELS.occupancy(t),
+    topic: SECTION_TOPICS.occupancy,
+    status: storeysStatus(general),
+    content: card('occupancy'),
+    onLeave: onStoreysClosed,
+  });
+  steps.push({
+    key: 'comfort',
+    label: SECTION_LABELS.comfort(t),
+    topic: SECTION_TOPICS.comfort,
+    status: 'complete',
+    content: <>{card('comfort')}{expertPointer}</>,
+  });
+  if (mode === 'expert') {
+    steps.push({
+      key: 'expert',
+      label: t('editor.expertMore.title'),
+      topic: TOPICS.building,
+      status: 'complete',
+      content: (
+        <div className="flex flex-col gap-3">
+          {EXPERT_SECTIONS.filter((key) => !service || key !== 'equipment').map(card)}
+        </div>
+      ),
+    });
+  }
+  return steps;
 }

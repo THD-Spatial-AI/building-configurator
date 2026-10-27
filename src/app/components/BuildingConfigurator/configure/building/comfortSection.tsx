@@ -6,7 +6,7 @@ import {
 } from '@/app/components/BuildingConfigurator/shared/ui';
 import { setbackOptions, isServiceBuildingType } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { computeTotalFloorArea } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
-import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 
 interface ComfortProps {
   general: Record<string, any>;
@@ -31,24 +31,6 @@ function hotWaterOptions(t: Translate) {
     { value: 'on',  label: t('comfort.hotWater.on') },
     { value: 'off', label: t('comfort.hotWater.off') },
   ];
-}
-
-const SETBACK_SUMMARIES: Record<string, (t: Translate) => string> = {
-  none:           (t) => t('comfort.summary.setback.none'),
-  night_only:     (t) => t('comfort.summary.setback.nightOnly'),
-  night_and_away: (t) => t('comfort.summary.setback.nightAndAway'),
-  deep:           (t) => t('comfort.summary.setback.deep'),
-};
-
-/** One line for the group's collapsed card. */
-export function comfortSummary(t: Translate, format: FormatNumber, general: Record<string, any>): string {
-  const setback = SETBACK_SUMMARIES[general.setback_profile]?.(t)
-    ?? t('comfort.summary.setback.unknown', { setback: String(general.setback_profile).toLowerCase() });
-  const parts = [`${format(general.comfortT_lb)} °C`, setback];
-  if (!isServiceBuildingType(general.buildingType)) {
-    parts.push(general.include_dhw ? t('comfort.summary.hotWaterOn') : t('comfort.summary.hotWaterOff'));
-  }
-  return parts.join(' · ');
 }
 
 /** Heating setpoint, setback and hot water; Expert adds the cooling setpoint, air changes and thermal mass. */

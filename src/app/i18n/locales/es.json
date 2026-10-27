@@ -310,27 +310,6 @@
       "equipment": "Electrodomésticos",
       "solver": "Método de cálculo"
     },
-    "summary": {
-      "outputs": "{on} de {total} perfiles",
-      "equipmentSet": "{overrides} definidos a mano",
-      "equipmentDefault": "Por defecto",
-      "solverMilp": "MILP",
-      "solverSparse": "Disperso",
-      "occupants": "{capacity} ocupantes",
-      "capacityFromArea": "Capacidad según superficie",
-      "dwellings": {
-        "one": "{count} vivienda",
-        "many": "{count} viviendas",
-        "other": "{count} viviendas"
-      },
-      "dwellingsNotSet": "Viviendas sin definir",
-      "perDwelling": "{dwellings} · {persons} por vivienda",
-      "storeys": {
-        "one": "{count} planta",
-        "other": "{count} plantas"
-      },
-      "storeysModelled": "{modelled} de {total} plantas modeladas"
-    },
     "insulationTitle": "Nivel energético",
     "expertMore": {
       "title": "Térmica y simulación",
@@ -355,17 +334,6 @@
       "off": "No incluida",
       "label": "Agua caliente",
       "tip": "Desactívala si el agua caliente la suministra un sistema contabilizado aparte. La calefacción no se ve afectada."
-    },
-    "summary": {
-      "setback": {
-        "none": "sin reducción",
-        "nightOnly": "reducida de noche",
-        "nightAndAway": "reducida de noche y en ausencia",
-        "deep": "con reducción profunda",
-        "unknown": "reducida: {setback}"
-      },
-      "hotWaterOn": "ACS incluida",
-      "hotWaterOff": "sin ACS"
     },
     "heating": {
       "label": "Consigna de calefacción",
@@ -821,5 +789,15 @@
     "roof": "Cubierta",
     "wall": "Muro",
     "ground": "Solera"
+  },
+  "steps": {
+    "nav": "Secciones del edificio",
+    "previous": "Atrás: {step}",
+    "next": "Siguiente: {step}",
+    "status": {
+      "complete": "completo",
+      "attention": "requiere atención",
+      "error": "tiene un error"
+    }
   }
 }
