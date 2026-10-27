@@ -98,7 +98,7 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatin
   return (
     <section className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="m-0 text-[13px] font-semibold text-foreground">{t('snapshot.annualDemand')}</h3>
+        <h3 className="m-0 flex items-center gap-1 text-[13px] font-semibold text-foreground">{t('snapshot.annualDemand')}<InfoTip tip={t('help.demand')} /></h3>
         <span>
           <span className={cn('text-[22px] font-bold tabular-nums', energyTotals.total === '—' ? 'text-muted-foreground' : 'text-foreground')}>
             {formatTotal(energyTotals.total ?? '—', format)}

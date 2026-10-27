@@ -59,7 +59,7 @@ export function ConfiguratorStyles() {
 // ─── InfoTip ──────────────────────────────────────────────────────────────────
 
 /** Half the tip's maximum width plus a margin, kept between the tip's middle and the window's edges. */
-const TIP_HALF_WIDTH = 108;
+const TIP_HALF_WIDTH = 148;
 
 /**
  * An info icon whose tip shows on hover or keyboard focus. The tip is drawn
@@ -90,7 +90,8 @@ export function InfoTip({ tip }: { tip: string }) {
           id={id}
           role="tooltip"
           className={cn(
-            'pointer-events-none fixed z-[9999] max-w-[200px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
+            // A set width: near the window's edge a fixed element shrinks to the room left of its left edge.
+            'pointer-events-none fixed z-[9999] w-max max-w-[280px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
             below ? 'translate-y-0' : '-translate-y-full',
           )}
           style={{

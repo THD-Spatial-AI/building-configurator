@@ -726,5 +726,17 @@
     "lastOne": "Au moins un étage reste dans le modèle.",
     "dwellings": "Logements dans les étages modélisés",
     "dwellingsHint": "Les apports internes de BuEM dépendent du nombre de logements, pas de la surface."
+  },
+  "help": {
+    "envelope": "Comment cette surface retient la chaleur : sa surface et sa valeur U vont à BuEM. Un niveau de rénovation fixe la valeur U depuis TABULA ; une valeur modifiée ici est conservée.",
+    "pv": "PV sur cette surface : activez-le, choisissez un produit et la part de la surface qu'il peut occuper. Les modules sont posés sur la surface telle que le modèle 3D la montre.",
+    "building": "Ce qu'est le bâtiment : type, année et pays choisissent ses valeurs TABULA par défaut ; la surface par étage et les étages fixent la surface chauffée par BuEM. Modifiez pour les changer.",
+    "demand": "La demande annuelle d'énergie du bâtiment par usage, issue du dernier calcul BuEM ou du résultat enregistré. Le gaz de cuisson est un autre combustible, hors total.",
+    "insulation": "Fixe l'isolation de tous les murs, toits, planchers et fenêtres en une fois, d'après la typologie TABULA pour ce type et cet âge. Existant : le bâtiment tel que TABULA le recense pour son âge, sans travaux ultérieurs. Habituelle : une rénovation courante, comme une isolation de toiture ajoutée et de nouvelles fenêtres. Avancée : une rénovation ambitieuse vers le standard du neuf. Une surface modifiée individuellement garde sa valeur.",
+    "occupancy": "Qui vit ou travaille dans le bâtiment : le nombre de logements et de personnes par logement fixent les apports internes et l'eau chaude dans BuEM.",
+    "comfort": "Quand le bâtiment est chauffé : la température de consigne, si elle baisse la nuit ou en absence (réduit) et si l'eau chaude est incluse.",
+    "outputs": "Les profils que BuEM renvoie pour chaque usage : un résumé annuel, une série horaire ou aucun.",
+    "equipment": "Les appareils que possèdent les ménages ; la demande d'électricité de BuEM en dépend. Les appareils non renseignés gardent la probabilité de BuEM.",
+    "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites."
   }
 }

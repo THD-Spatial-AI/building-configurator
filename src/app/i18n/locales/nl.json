@@ -720,5 +720,17 @@
     "lastOne": "Minstens één verdieping blijft in het model.",
     "dwellings": "Woningen in de gemodelleerde verdiepingen",
     "dwellingsHint": "De interne warmtewinst in BuEM volgt het aantal woningen, niet het vloeroppervlak."
+  },
+  "help": {
+    "envelope": "Hoe dit vlak warmte vasthoudt: oppervlak en U-waarde gaan naar BuEM. Een renovatieniveau zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft staan.",
+    "pv": "PV op dit vlak: zet het aan, kies een product en hoeveel van het vlak het mag gebruiken. De modules worden gelegd op het vlak zoals het 3D-model het toont.",
+    "building": "Wat het gebouw is: type, bouwjaar en land kiezen de TABULA-standaardwaarden; vloeroppervlak per verdieping en verdiepingen bepalen het oppervlak dat BuEM verwarmt. Bewerk om ze te wijzigen.",
+    "demand": "De jaarlijkse energievraag van het gebouw per gebruik, uit de laatste BuEM-berekening of het opgeslagen resultaat. Kookgas is een aparte brandstof en telt niet mee in het totaal.",
+    "insulation": "Zet de isolatie van alle muren, daken, vloeren en ramen tegelijk, uit de TABULA-typologie voor dit gebouwtype en deze leeftijd. Bestaand: het gebouw zoals TABULA het voor zijn leeftijd vastlegt, zonder latere ingrepen. Gangbaar: een renovatie die in de praktijk veel voorkomt, zoals extra dakisolatie en nieuwe ramen. Vergaand: een ambitieuze renovatie richting nieuwbouwniveau. Een vlak dat afzonderlijk is gewijzigd, houdt zijn eigen waarde.",
+    "occupancy": "Wie in het gebouw woont of werkt: het aantal woningen en personen per woning bepalen de interne warmtewinst en het warmwatergebruik in BuEM.",
+    "comfort": "Wanneer het gebouw wordt verwarmd: de insteltemperatuur, of die 's nachts of bij afwezigheid wordt verlaagd (nachtverlaging) en of warm water is inbegrepen.",
+    "outputs": "Welke profielen BuEM per gebruik teruggeeft: een jaaroverzicht, een uurreeks of geen.",
+    "equipment": "Welke apparaten de huishoudens bezitten; de elektriciteitsvraag in BuEM volgt ze. Niet ingestelde apparaten houden de kans van BuEM zelf.",
+    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen."
   }
 }

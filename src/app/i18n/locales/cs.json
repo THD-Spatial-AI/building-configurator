@@ -740,5 +740,17 @@
     "lastOne": "Alespoň jedno podlaží zůstává v modelu.",
     "dwellings": "Byty v modelovaných podlažích",
     "dwellingsHint": "Vnitřní zisky v BuEM se řídí počtem bytů, ne plochou."
+  },
+  "help": {
+    "envelope": "Jak tato plocha drží teplo: její plocha a součinitel U jdou do BuEM. Úroveň renovace nastaví součinitel U z TABULA; hodnota změněná zde zůstane.",
+    "pv": "FV na této ploše: zapněte ji, vyberte produkt a jakou část plochy smí využít. Moduly se rozmístí na ploše tak, jak ji ukazuje 3D model.",
+    "building": "Co je to za budovu: typ, rok a země volí výchozí hodnoty TABULA; plocha podlaží a počet podlaží určují plochu, kterou BuEM vytápí. Upravte je tlačítkem Upravit.",
+    "demand": "Roční potřeba energie budovy podle užití, z posledního výpočtu BuEM nebo uloženého výsledku. Plyn na vaření je samostatné palivo a není v součtu.",
+    "insulation": "Nastaví izolaci všech stěn, střech, podlah a oken najednou, podle typologie TABULA pro tento typ a stáří budovy. Stávající stav: budova, jak ji TABULA uvádí pro její stáří, bez pozdějších úprav. Běžná: renovace obvyklá v praxi, například zateplení střechy a nová okna. Pokročilá: ambiciózní renovace směrem ke standardu novostavby. Plocha změněná samostatně si ponechá svou hodnotu.",
+    "occupancy": "Kdo v budově bydlí nebo pracuje: počet bytů a osob na byt určují vnitřní zisky a spotřebu teplé vody v BuEM.",
+    "comfort": "Kdy se budova vytápí: požadovaná teplota, zda se v noci nebo při nepřítomnosti snižuje (útlum) a zda je zahrnuta teplá voda.",
+    "outputs": "Které profily BuEM vrací pro každé užití: roční souhrn, hodinovou řadu, nebo žádný.",
+    "equipment": "Které spotřebiče domácnosti vlastní; spotřeba elektřiny v BuEM se jimi řídí. Nenastavené si ponechají pravděpodobnost BuEM.",
+    "solver": "Jak BuEM řeší hodinový model: výchozím rychlým řídkým řešičem, nebo MILP, pomaleji, ale přesně na mezích."
   }
 }

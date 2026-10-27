@@ -181,6 +181,7 @@ export function BuildingEditor({
         <SectionCard
           topic={TOPICS.envelope}
           title={t('editor.insulationTitle')}
+          info={t('help.insulation')}
           action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation)}</span>}
         >
           <div className="flex flex-col gap-3 p-3">
@@ -197,6 +198,7 @@ export function BuildingEditor({
             key={key}
             topic={SECTION_TOPICS[key]}
             title={SECTION_LABELS[key](t)}
+            info={t(`help.${key}`)}
             dashed={EXPERT_SECTIONS.includes(key)}
             action={(
               <button

@@ -720,5 +720,17 @@
     "lastOne": "Almeno un piano resta nel modello.",
     "dwellings": "Abitazioni nei piani modellati",
     "dwellingsHint": "Gli apporti interni di BuEM dipendono dal numero di abitazioni, non dalla superficie."
+  },
+  "help": {
+    "envelope": "Come questa superficie trattiene il calore: area e valore U vanno a BuEM. Un livello di riqualificazione imposta il valore U da TABULA; un valore modificato qui resta.",
+    "pv": "FV su questa superficie: attivalo, scegli un prodotto e quanta superficie può usare. I moduli sono disposti sulla superficie come la mostra il modello 3D.",
+    "building": "Che cos'è l'edificio: tipo, anno e paese scelgono i valori predefiniti TABULA; superficie per piano e piani fissano la superficie riscaldata da BuEM. Modifica per cambiarli.",
+    "demand": "La domanda annua di energia dell'edificio per uso, dall'ultimo calcolo BuEM o dal risultato salvato. Il gas di cottura è un altro combustibile e non è nel totale.",
+    "insulation": "Imposta l'isolamento di tutte le pareti, coperture, solai e finestre insieme, dalla tipologia TABULA per questo tipo ed età. Esistente: l'edificio come TABULA lo registra per la sua età, senza interventi successivi. Usuale: una riqualificazione comune, come isolare la copertura e cambiare le finestre. Avanzata: una riqualificazione ambiziosa verso lo standard del nuovo. Una superficie modificata singolarmente mantiene il suo valore.",
+    "occupancy": "Chi vive o lavora nell'edificio: numero di abitazioni e persone per abitazione fissano gli apporti interni e l'acqua calda in BuEM.",
+    "comfort": "Quando l'edificio è riscaldato: la temperatura impostata, se si abbassa di notte o in assenza (attenuazione) e se è inclusa l'acqua calda.",
+    "outputs": "Quali profili restituisce BuEM per ogni uso: un riepilogo annuo, una serie oraria o nessuno.",
+    "equipment": "Quali elettrodomestici hanno le famiglie; la domanda elettrica di BuEM li segue. Quelli non impostati mantengono la probabilità di BuEM.",
+    "solver": "Come BuEM risolve il modello orario: con il solutore sparso predefinito, veloce, o con MILP, più lento ma esatto sui limiti."
   }
 }

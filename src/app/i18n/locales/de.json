@@ -720,5 +720,17 @@
     "lastOne": "Mindestens ein Geschoss bleibt im Modell.",
     "dwellings": "Wohnungen in den modellierten Geschossen",
     "dwellingsHint": "Die inneren Gewinne in BuEM richten sich nach der Zahl der Wohnungen, nicht nach der Fläche."
+  },
+  "help": {
+    "envelope": "Wie diese Fläche Wärme hält: Fläche und U-Wert gehen an BuEM. Eine Sanierungsstufe setzt den U-Wert aus TABULA; ein hier geänderter Wert bleibt erhalten.",
+    "pv": "PV auf dieser Fläche: einschalten, ein Produkt wählen und festlegen, wie viel der Fläche es nutzen darf. Die Module werden auf der Fläche verlegt, wie das 3D-Modell sie zeigt.",
+    "building": "Was das Gebäude ist: Typ, Baujahr und Land bestimmen die TABULA-Vorgaben; Fläche je Geschoss und Geschosse legen die beheizte Fläche für BuEM fest. Zum Ändern bearbeiten.",
+    "demand": "Der jährliche Energiebedarf des Gebäudes nach Nutzung, aus dem letzten BuEM-Lauf oder dem gespeicherten Ergebnis. Kochgas ist ein eigener Brennstoff und nicht in der Summe.",
+    "insulation": "Setzt die Dämmung aller Wände, Dächer, Böden und Fenster auf einmal, aus der TABULA-Typologie für diesen Gebäudetyp und dieses Alter. Bestand: das Gebäude, wie TABULA es für sein Alter verzeichnet, ohne spätere Arbeiten. Übliche Sanierung: eine in der Praxis verbreitete Sanierung, etwa zusätzliche Dachdämmung und neue Fenster. Ambitionierte Sanierung: eine weitgehende Sanierung in Richtung Neubaustandard. Eine einzeln geänderte Fläche behält ihren Wert.",
+    "occupancy": "Wer im Gebäude wohnt oder arbeitet: Zahl der Wohnungen und Personen je Wohnung bestimmen die inneren Gewinne und den Warmwasserbedarf in BuEM.",
+    "comfort": "Wann das Gebäude beheizt wird: die Solltemperatur, ob sie nachts oder bei Abwesenheit abgesenkt wird (Absenkung) und ob Warmwasser enthalten ist.",
+    "outputs": "Welche Profile BuEM je Nutzung liefert: eine Jahresübersicht, eine stündliche Reihe oder keine.",
+    "equipment": "Welche Geräte die Haushalte besitzen; der Strombedarf in BuEM folgt ihnen. Nicht gesetzte Geräte behalten die Wahrscheinlichkeit von BuEM.",
+    "solver": "Wie BuEM das stündliche Modell löst: mit dem schnellen Standard-Sparse-Löser oder mit MILP, langsamer, aber exakt bei Grenzen."
   }
 }

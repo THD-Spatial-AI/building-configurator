@@ -268,7 +268,7 @@ export function Building3DView({
   const panelBody = selected && (selectedElement || selectedPv) ? (
     <div key={selected.id} className="flex flex-col gap-3 p-3">
       {selectedElement && (
-        <SectionCard topic={TOPICS.envelope} title={t('surface.section.envelope')}>
+        <SectionCard topic={TOPICS.envelope} title={t('surface.section.envelope')} info={t('help.envelope')}>
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}
@@ -280,7 +280,7 @@ export function Building3DView({
         </SectionCard>
       )}
       {selectedPv && pv && (
-        <SectionCard topic={TOPICS.pv} title={t('surface.section.pv')}>
+        <SectionCard topic={TOPICS.pv} title={t('surface.section.pv')} info={t('help.pv')}>
           <PvSurfaceSection
             surfaceId={selected.id}
             surface={selectedPv}

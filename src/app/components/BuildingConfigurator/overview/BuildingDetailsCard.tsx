@@ -62,6 +62,7 @@ function BuildingTable({ rows, onEditField }: { rows: SnapshotRow[]; onEditField
     <SectionCard
       topic={TOPICS.building}
       title={t('panel.section.identity')}
+      info={t('help.building')}
       emphasised={isEditing}
       action={onEditField && (
         <button
