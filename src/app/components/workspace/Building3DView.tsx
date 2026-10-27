@@ -33,7 +33,6 @@ import { dwellingsTotal, storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
-import { heatingPerM2 } from '../../lib/energyClass';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
@@ -644,8 +643,6 @@ export function Building3DView({
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
                     pvAnnualKwh={model.pvAnnualKwh}
-                    heatingPerM2={heatingPerM2(model.displayEnergyTotals, model.general, model.resultStoreys)}
-                    heatingClassStale={JSON.stringify(model.resultStoreys) !== JSON.stringify(model.general.storeysModelled)}
                   />
                 </div>
               )}

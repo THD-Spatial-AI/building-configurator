@@ -2,8 +2,6 @@
 // on the OIB-RL 6 HWB scale, for every country. Simulated, not a certificate.
 // The colours are the certificate colours, kept apart from the topic colours.
 
-import type { EnergyTotals } from './loadProfile';
-
 export interface EnergyClass {
   label: string;
   /** Upper limit, inclusive, in kWh/(m²·a); Infinity for the last class. */
@@ -29,20 +27,4 @@ export const HWB_CLASSES: EnergyClass[] = [
 /** The class of a space heating demand in kWh/(m²·a). */
 export function hwbClass(kwhPerM2: number): EnergyClass {
   return HWB_CLASSES.find((c) => kwhPerM2 <= c.maxKwhPerM2) ?? HWB_CLASSES[HWB_CLASSES.length - 1];
-}
-
-/**
- * BuEM's space heating per m² of the storeys the result covers, or null
- * without a BuEM heating figure. A stored whole-building result is not divided
- * by the area of fewer storeys before the next run.
- */
-export function heatingPerM2(
-  totals: Pick<EnergyTotals, 'heating' | 'heatingSource'>,
-  general: { floorArea: number; storeys: number },
-  resultStoreys: readonly number[] | null,
-): number | null {
-  const heating = Number(totals.heating);
-  const aRef = general.floorArea * (resultStoreys?.length ?? general.storeys);
-  const fromBuem = totals.heatingSource === undefined || totals.heatingSource === 'buem';
-  return fromBuem && Number.isFinite(heating) && heating > 0 && aRef > 0 ? heating / aRef : null;
 }

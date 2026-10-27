@@ -659,11 +659,6 @@
     "pvGeneration": "Produkcja PV",
     "storeysModelled": "{modelled} z {total} modelowanych",
     "heatingPerM2": "Ogrzewanie {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Orientacyjna klasa zapotrzebowania na ciepło (symulowana, nie jest świadectwem energetycznym)",
-      "tip": "Roczne ogrzewanie z BuEM na powierzchnię odniesienia, przy pogodzie i użytkowaniu z obliczenia, sklasyfikowane według przedziałów austriackiej skali OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G powyżej 250). Nie obejmuje ciepłej wody, chłodzenia ani energii elektrycznej.",
-      "stale": "Dla kondygnacji z ostatniego obliczenia. Zapisz i podgląd, aby uzyskać klasę obecnie modelowanych kondygnacji."
-    },
     "tile": {
       "statisticalDefault": "Wartość statystyczna"
     },
