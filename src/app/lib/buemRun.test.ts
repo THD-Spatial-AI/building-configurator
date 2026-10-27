@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { previewHeatingPerM2, runBuildingSimulation, runIdentity, toBuem, type RunContext, type WeatherChoice } from './buemRun';
+import { previewHeatingPerM2, runBuildingSimulation, runIdentity, toBuem, type RunContext } from './buemRun';
 import type { BuemBuildingRunRequest } from './services';
 import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
@@ -103,7 +103,7 @@ describe('toBuem', () => {
 
 describe('runBuildingSimulation', () => {
   /** The request a run sends, with the transport failing after capturing it. */
-  async function sentRequest(runContext?: RunContext, weather?: WeatherChoice): Promise<BuemBuildingRunRequest> {
+  async function sentRequest(runContext?: RunContext): Promise<BuemBuildingRunRequest> {
     const requests: BuemBuildingRunRequest[] = [];
     const services = {
       runBuemBuilding: async (request: BuemBuildingRunRequest) => {
@@ -112,7 +112,7 @@ describe('runBuildingSimulation', () => {
       },
     };
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, runContext, weather);
+    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, runContext);
     return requests[0];
   }
 
@@ -149,14 +149,6 @@ describe('runBuildingSimulation', () => {
     const sent = (requests[0].building as { envelope: { elements: { id: string }[] } }).envelope.elements.map((el) => el.id);
     expect(sent).toContain('wall_south');
     expect(sent).not.toContain('wall_sliver');
-  });
-
-  it('sends the weather the user picked, and no weather fields by default', async () => {
-    const picked = await sentRequest(undefined, { weather_provider: 'era5-land', weather_scenario: 'p90' });
-    expect(picked).toMatchObject({ weather_provider: 'era5-land', weather_scenario: 'p90' });
-    const request = await sentRequest();
-    expect(request).not.toHaveProperty('weather_provider');
-    expect(request).not.toHaveProperty('weather_scenario');
   });
 
   it('runs the default year and sends no model id without a run context', async () => {

@@ -762,8 +762,7 @@
     "comfort": "Quand le bâtiment est chauffé : la température de consigne, si elle baisse la nuit ou en absence (réduit) et si l'eau chaude est incluse.",
     "outputs": "Les profils que BuEM renvoie pour chaque usage : un résumé annuel, une série horaire ou aucun.",
     "equipment": "Les appareils que possèdent les ménages ; la demande d'électricité de BuEM en dépend. Les appareils non renseignés gardent la probabilité de BuEM.",
-    "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites.",
-    "weather": "La météo horaire utilisée par BuEM. Une année solaire choisit dans l'archive du fournisseur une année représentative faible, typique ou forte en ensoleillement ; typique est la valeur par défaut."
+    "solver": "Comment BuEM résout le modèle horaire : avec son solveur creux par défaut, rapide, ou avec MILP, plus lent mais exact sur les limites."
   },
   "tour": {
     "button": "Visite",
@@ -799,16 +798,6 @@
     "step1": "Cliquez sur un mur, un toit ou un plancher pour l'ouvrir.",
     "step2": "Modifiez sa valeur U ou son niveau de rénovation dans le panneau.",
     "step3": "Enregistrez et prévisualisez pour voir la nouvelle demande du bâtiment."
-  },
-  "weather": {
-    "title": "Météo",
-    "provider": "Données météo",
-    "year": "Année solaire",
-    "scenario": {
-      "p10": "Faible",
-      "p50": "Typique",
-      "p90": "Fort"
-    }
   },
   "legend": {
     "roof": "Toit",

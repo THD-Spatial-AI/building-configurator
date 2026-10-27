@@ -4,12 +4,12 @@
 // Class names are written out in full so Tailwind finds them.
 
 import {
-  Banknote, Battery, Building2, CloudSun, CookingPot, Droplets, Flame, Heater, Layers, Snowflake, Sun, Zap,
+  Banknote, Battery, Building2, CookingPot, Droplets, Flame, Heater, Layers, Snowflake, Sun, Zap,
 } from '@/app/components/icons';
 
 export type TopicKey =
   | 'electricity' | 'pv' | 'battery' | 'heat' | 'cooling' | 'hotWater' | 'gas' | 'cooking'
-  | 'building' | 'envelope' | 'costs' | 'weather';
+  | 'building' | 'envelope' | 'costs';
 
 export interface Topic {
   Icon: typeof Sun;
@@ -80,7 +80,6 @@ export const TOPICS: Record<TopicKey, Topic> = {
   building: { Icon: Building2, ...SLATE },
   envelope: { Icon: Layers, ...SLATE },
   costs: { Icon: Banknote, ...GREEN },
-  weather: { Icon: CloudSun, ...BLUE },
 };
 
 /** EnerPlanET technology types (the catalogue's `type`), mapped to their topic. */

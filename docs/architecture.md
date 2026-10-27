@@ -72,7 +72,6 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 | `runBuemBuilding` | Save & Preview | Yes |
 | `previewBuemBuilding` | The refurbishment levels are compared by energy class | No |
 | `runPvBuilding` | Save & Preview, when the building has PV surfaces | No |
-| `fetchWeatherOptions` | Once, as the view opens; the Weather section shows only with it | No |
 
 ## Data formats
 

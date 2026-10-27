@@ -44,8 +44,6 @@ export type {
   PvBuildingRunRequest,
   PvBuildingRunResponse,
   VariantLookupServices,
-  WeatherOptions,
-  WeatherScenario,
 } from './app/lib/services';
 
 export type {

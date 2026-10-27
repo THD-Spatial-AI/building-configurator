@@ -762,8 +762,7 @@
     "comfort": "Cuándo se calienta el edificio: la temperatura de consigna, si baja de noche o cuando no hay nadie (reducción) y si incluye agua caliente.",
     "outputs": "Qué perfiles devuelve BuEM para cada uso: un resumen anual, una serie horaria o ninguno.",
     "equipment": "Qué aparatos tienen los hogares; la demanda eléctrica de BuEM los sigue. Los que no se fijan conservan la probabilidad propia de BuEM.",
-    "solver": "Cómo resuelve BuEM el modelo horario: con su solucionador disperso por defecto, rápido, o con MILP, más lento pero exacto en los límites.",
-    "weather": "El clima horario con el que calcula BuEM. Un año solar elige del archivo del proveedor un año representativo bajo, típico o alto en radiación solar; típico es el valor por defecto."
+    "solver": "Cómo resuelve BuEM el modelo horario: con su solucionador disperso por defecto, rápido, o con MILP, más lento pero exacto en los límites."
   },
   "tour": {
     "button": "Recorrido",
@@ -799,16 +798,6 @@
     "step1": "Haga clic en un muro, una cubierta o un suelo para abrirlo.",
     "step2": "Cambie su valor U o su nivel de rehabilitación en el panel.",
     "step3": "Guarde y previsualice para ver la nueva demanda del edificio."
-  },
-  "weather": {
-    "title": "Clima",
-    "provider": "Datos meteorológicos",
-    "year": "Año solar",
-    "scenario": {
-      "p10": "Bajo",
-      "p50": "Típico",
-      "p90": "Alto"
-    }
   },
   "legend": {
     "roof": "Cubierta",

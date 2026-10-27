@@ -756,8 +756,7 @@
     "comfort": "Wanneer het gebouw wordt verwarmd: de insteltemperatuur, of die 's nachts of bij afwezigheid wordt verlaagd (nachtverlaging) en of warm water is inbegrepen.",
     "outputs": "Welke profielen BuEM per gebruik teruggeeft: een jaaroverzicht, een uurreeks of geen.",
     "equipment": "Welke apparaten de huishoudens bezitten; de elektriciteitsvraag in BuEM volgt ze. Niet ingestelde apparaten houden de kans van BuEM zelf.",
-    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen.",
-    "weather": "Het weer per uur waarmee BuEM rekent. Een zonnejaar kiest uit het archief van de leverancier een representatief laag, typisch of hoog jaar voor zonnestraling; typisch is de standaard."
+    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen."
   },
   "tour": {
     "button": "Rondleiding",
@@ -793,16 +792,6 @@
     "step1": "Klik op een muur, dak of vloer om die te openen.",
     "step2": "Wijzig de U-waarde of het renovatieniveau in het paneel.",
     "step3": "Opslaan en voorbeeld toont de nieuwe vraag van het gebouw."
-  },
-  "weather": {
-    "title": "Weer",
-    "provider": "Weergegevens",
-    "year": "Zonnejaar",
-    "scenario": {
-      "p10": "Laag",
-      "p50": "Typisch",
-      "p90": "Hoog"
-    }
   },
   "legend": {
     "roof": "Dak",
