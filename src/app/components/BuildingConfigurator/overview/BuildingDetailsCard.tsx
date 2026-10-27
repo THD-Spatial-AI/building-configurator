@@ -274,7 +274,8 @@ export function BuildingDetailsCard({
 
   return (
     <div className={cn(CARD, 'shrink-0')}>
-      <div className="border-b border-border px-4 py-3">
+      {/* Sticky so the tabs stay in reach while either tab scrolls; its fixed height is where the step bar sticks beneath it. */}
+      <div className="sticky top-0 z-20 flex h-[60px] items-center border-b border-border bg-card px-4">
         <div role="tablist" className="inline-flex h-9 items-center rounded-md bg-muted p-1 text-muted-foreground">
         {tabs.map((tab) => (
           <button
@@ -300,7 +301,7 @@ export function BuildingDetailsCard({
       ) : (
         <div className="flex flex-col gap-3 p-4">
           {overviewSlot}
-          <StepPanel steps={allSteps} active={step} onActive={setStep} />
+          <StepPanel steps={allSteps} active={step} onActive={setStep} stickyTop="top-[60px]" />
         </div>
       )}
     </div>
