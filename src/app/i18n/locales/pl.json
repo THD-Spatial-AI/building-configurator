@@ -50,7 +50,8 @@
     },
     "panel": {
       "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
-    }
+    },
+    "credits": "Źródła danych"
   },
   "surface": {
     "type": {

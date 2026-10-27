@@ -48,7 +48,8 @@
     },
     "panel": {
       "empty": "Cliquez sur une surface du modèle pour la voir ici."
-    }
+    },
+    "credits": "Crédits des données"
   },
   "surface": {
     "type": {

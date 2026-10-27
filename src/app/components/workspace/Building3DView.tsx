@@ -161,6 +161,8 @@ export function Building3DView({
   const pickStorey = (storey: number | null) => {
     if (storey !== null) setSelectedStoreys((prev) => pickInSelection(prev, storey, multiStoreys));
   };
+  /** The data credits, open over the model where it is too narrow to show them in full. */
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [touring, setTouring] = useState(tour?.run ?? false);
   const tourRun = tour?.run ?? false;
   useEffect(() => { if (tourRun) setTouring(true); }, [tourRun]);
@@ -446,7 +448,7 @@ export function Building3DView({
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
         {wide && surfacePanel}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-        <div data-tour="model" className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
+        <div data-tour="model" className="@container relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
@@ -546,9 +548,26 @@ export function Building3DView({
           )}
 
           {attribution && (
-            <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm">
-              {attribution}
-            </div>
+            // In full where the model is wide enough to leave the legend its room,
+            // else behind a © button; the licences ask for the credits to stay reachable.
+            <>
+              <div className="absolute bottom-3 right-3 hidden max-w-[45%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm @4xl:block">
+                {attribution}
+              </div>
+              <button
+                type="button"
+                aria-expanded={creditsOpen}
+                aria-label={t('view.credits')}
+                title={t('view.credits')}
+                onClick={() => setCreditsOpen((open) => !open)}
+                className="absolute bottom-3 right-3 flex size-7 cursor-pointer items-center justify-center rounded-full bg-card/90 text-[13px] font-semibold text-muted-foreground shadow-sm hover:text-foreground @4xl:hidden"
+              >©</button>
+              {creditsOpen && (
+                <div className="absolute bottom-12 right-3 z-20 max-w-[min(320px,80%)] rounded-md border border-border bg-card px-2.5 py-1.5 text-[10px] leading-snug text-muted-foreground shadow-md @4xl:hidden">
+                  {attribution}
+                </div>
+              )}
+            </>
           )}
         </div>
         </div>

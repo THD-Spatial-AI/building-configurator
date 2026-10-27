@@ -46,7 +46,8 @@
     },
     "panel": {
       "empty": "Click a surface in the model to see it here."
-    }
+    },
+    "credits": "Data credits"
   },
   "surface": {
     "type": {

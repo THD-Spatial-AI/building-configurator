@@ -50,7 +50,8 @@
     },
     "panel": {
       "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
-    }
+    },
+    "credits": "Zdroje dat"
   },
   "surface": {
     "type": {

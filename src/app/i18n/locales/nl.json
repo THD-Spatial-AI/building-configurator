@@ -46,7 +46,8 @@
     },
     "panel": {
       "empty": "Klik op een vlak in het model om het hier te zien."
-    }
+    },
+    "credits": "Bronvermelding"
   },
   "surface": {
     "type": {

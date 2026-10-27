@@ -46,7 +46,8 @@
     },
     "panel": {
       "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen."
-    }
+    },
+    "credits": "Datenquellen"
   },
   "surface": {
     "type": {
