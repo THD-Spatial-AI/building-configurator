@@ -47,8 +47,7 @@
       "note": "Discarding puts the surface back as it was when its editor opened."
     },
     "panel": {
-      "empty": "Click a surface in the model to see it here.",
-      "emptyPv": "Click a roof or wall to set up PV on it."
+      "empty": "Click a surface in the model to see it here."
     }
   },
   "surface": {
@@ -100,7 +99,14 @@
       "vertical": "Vertical",
       "pitched": "Pitched"
     },
-    "degrees": "{degrees} degrees, {label}"
+    "degrees": "{degrees} degrees, {label}",
+    "section": {
+      "envelope": "Envelope",
+      "pv": "PV"
+    },
+    "pick": "Choose a surface",
+    "fromModel": "{tilt}° · facing {azimuth}° {compass} · from the 3D model",
+    "flatFromModel": "Flat · from the 3D model"
   },
   "profile": {
     "title": "Hourly load profile",
@@ -188,9 +194,10 @@
       "investmentEstimate": "Investment about {amount}, an estimate"
     },
     "catalogue": {
-      "title": "Catalogue",
       "hint": "Drag a product onto a roof or wall, or choose one in a surface’s panel.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Catalogue ({count})",
+      "search": "Search the catalogue"
     },
     "product": {
       "label": "Product",
@@ -215,45 +222,38 @@
       "save": "Save",
       "saved": "Saved as {name}.",
       "saveFailed": "Could not save the technology. Try again."
-    }
+    },
+    "installed": {
+      "title": "Installed on this building",
+      "empty": "No PV yet. Open the catalogue and drag a product onto a roof or wall.",
+      "surfaces": {
+        "one": "on {count} surface",
+        "other": "on {count} surfaces"
+      },
+      "modules": {
+        "one": "{count} module",
+        "other": "{count} modules"
+      }
+    },
+    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only."
   },
   "tech": {
     "none": "No technologies on this building.",
-    "remove": "Remove {title}"
+    "remove": "Remove {title}",
+    "inFocus": "In focus",
+    "product": "Product",
+    "add": "Add a technology",
+    "totalEstimate": "{amount} so far, estimate",
+    "count": {
+      "one": "{count} technology",
+      "other": "{count} technologies"
+    },
+    "pvSurfaces": {
+      "one": "{count} surface",
+      "other": "{count} surfaces"
+    }
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Building name",
-        "tip": "Human-readable name for this building. Included in exported files.",
-        "placeholder": "e.g. 3434 · Single-family House"
-      },
-      "type": {
-        "label": "Building type",
-        "tip": "TABULA building category. Affects default U-values and reference energy demand patterns."
-      },
-      "country": {
-        "label": "Country",
-        "tip": "Country used to select TABULA reference data and COSMO weather station."
-      },
-      "year": {
-        "label": "Construction year",
-        "tip": "Year the building was built. ignis maps it to a TABULA construction-period band for the default U-value lookup."
-      },
-      "floorArea": {
-        "label": "Floor area (per storey)",
-        "tip": "Footprint area of a single storey. The total conditioned floor area is this × storeys."
-      },
-      "storeys": {
-        "label": "Storeys",
-        "tip": "Number of above-ground storeys."
-      },
-      "roomHeight": {
-        "label": "Room height",
-        "tip": "Clear internal height per storey. Used to compute the heated air volume."
-      },
-      "volume": "Heated volume"
-    },
     "solver": {
       "useMilp": {
         "label": "Use MILP solver",
@@ -271,7 +271,6 @@
       "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached."
     },
     "section": {
-      "identity": "Basic info",
       "occupancy": "Occupancy",
       "comfort": "Heating and comfort",
       "outputs": "Results to compute",
@@ -293,10 +292,11 @@
       "dwellingsNotSet": "Dwellings not set",
       "perDwelling": "{dwellings} · {persons} per dwelling"
     },
-    "header": {
-      "fallbackName": "Building"
-    },
-    "insulationTitle": "Insulation and windows"
+    "insulationTitle": "Insulation and windows",
+    "expertMore": {
+      "title": "Thermal and simulation",
+      "detail": "profiles, equipment and solver keep their defaults"
+    }
   },
   "comfort": {
     "mass": {
@@ -413,7 +413,6 @@
       "averageU": "average U {value} W/m²K"
     },
     "averageU": "Average U-value",
-    "editSurfaces": "Edit surfaces one by one",
     "preset": {
       "label": "Set the whole building to",
       "tip": "TABULA's refurbishment variants for this building type and age. A choice sets every element type; surfaces set one by one keep their values.",
@@ -486,6 +485,13 @@
         "usual": "Usual",
         "advanced": "Advanced"
       }
+    },
+    "classes": {
+      "compare": "Show the energy class of each level",
+      "comparing": "Running BuEM for each level…",
+      "perM2": "{value} kWh/m²",
+      "note": "Indicative class for this building: space heating per m² on the Austrian HWB scale, A++ to G. Simulated, not an energy certificate.",
+      "failed": "The last try failed. Try again."
     }
   },
   "options": {
@@ -586,30 +592,22 @@
   },
   "panel": {
     "title": {
-      "overview": "Energy overview",
-      "envelope": "Building Envelope",
-      "technology": "Technologies",
-      "parameters": "Building Parameters"
+      "technology": "Technologies"
     },
     "tab": {
-      "overview": "Overview",
-      "parameters": "Parameters",
-      "envelope": "Envelope"
+      "building": "Building"
     },
     "doneEditing": "Done editing",
-    "editParameters": "Edit building parameters"
+    "editParameters": "Edit building parameters",
+    "section": {
+      "identity": "Building data"
+    },
+    "edit": "Edit"
   },
   "snapshot": {
     "status": {
       "default": "default",
       "modified": "modified"
-    },
-    "thermalRating": {
-      "excellent": "Excellent",
-      "good": "Good",
-      "fair": "Fair",
-      "poor": "Poor",
-      "veryPoor": "Very Poor"
     },
     "row": {
       "type": "Type",
@@ -632,35 +630,23 @@
       "hotWater": "Hot water",
       "kitchen": "Kitchen (gas)"
     },
-    "estimateNotice": "Building parameters are estimated from public records. Open the configurator to review and adjust them.",
     "annualDemand": "Annual energy demand",
-    "totalDemand": "Total demand",
-    "thermalEfficiency": "Thermal efficiency",
     "unit": {
       "kWhPerYear": "kWh/year",
       "kWhGasPerYear": "kWh gas/year"
     },
-    "pvGeneration": "PV generation"
+    "pvGeneration": "PV generation",
+    "storeysModelled": "{modelled} of {total} modelled",
+    "heatingPerM2": "Heating {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Indicative heating demand class (simulated, not an energy certificate)",
+      "tip": "BuEM's annual space heating per reference floor area, under the run's weather and occupancy, graded on the bands of the Austrian OIB-RL 6 HWB scale (A++ up to 10 kWh/m²·a, G above 250). Hot water, cooling and electricity are not included."
+    },
+    "tile": {
+      "statisticalDefault": "Statistical default"
+    }
   },
   "envelope": {
-    "group": {
-      "walls": "Walls",
-      "windows": "Windows",
-      "doors": "Doors",
-      "roof": "Roof",
-      "floor": "Floor"
-    },
-    "roofShape": {
-      "flat": "low-slope",
-      "monoPitch": "single slope",
-      "gabled": "S + N",
-      "hipped": "S/N/E/W",
-      "vShape": "inward slopes",
-      "sawTooth": "S-facing",
-      "custom": "custom"
-    },
-    "invalidAreaTip": "{count} with no area, fix before running a simulation",
-    "noArea": "no area",
     "compassNorth": "N"
   },
   "common": {
@@ -675,12 +661,12 @@
     "scroll": "scroll",
     "close": "Close",
     "unsaved": {
-      "title": "Unsaved Changes",
+      "title": "Unsaved changes",
       "message": "You have unsaved changes to this building configuration. What would you like to do?",
       "note": "Closing without saving will discard all modifications made since the last save.",
-      "continueEditing": "Continue Editing",
-      "saveAndClose": "Save & Close",
-      "discard": "Discard Changes"
+      "continueEditing": "Continue editing",
+      "saveAndClose": "Save and close",
+      "discard": "Discard changes"
     }
   },
   "model": {
@@ -720,10 +706,84 @@
       "runFailed": "Simulation failed: the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.",
       "exportFailed": "Export failed: {reason}",
       "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json.",
-      "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date."
+      "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date.",
+      "dwellingsModelledRequired": "Some storeys are left out of the model. Give the number of dwellings in the modelled storeys under Storeys modelled before running a simulation."
     },
     "comparison": {
       "lastRun": "the last full simulation"
+    }
+  },
+  "storeys": {
+    "title": "Storeys modelled",
+    "hint": "Storey 1 is the ground floor. Leave out storeys that are not part of this model, such as a shop on the ground floor; floor area and envelope count the modelled storeys only.",
+    "noGeometry": "Storeys can be left out once the 3D model has loaded.",
+    "storey": "Storey {number}",
+    "floorArea": "Floor area modelled",
+    "heightNote": "In the 3D model a storey is {height} m tall; BuEM uses a room height of {room} m.",
+    "pick": "Storeys",
+    "pickHint": "Click a storey in the model to see whether it is in the model.",
+    "inModel": "In the model",
+    "groundFloor": "Ground floor",
+    "lastOne": "At least one storey stays in the model.",
+    "dwellings": "Dwellings in the modelled storeys",
+    "dwellingsHint": "BuEM's internal gains follow the number of dwellings, not the floor area."
+  },
+  "help": {
+    "envelope": "How this surface holds heat: its area and U-value go to BuEM. A refurbishment level sets the U-value from TABULA; a value changed here is kept.",
+    "pv": "PV on this surface: switch it on, choose a product and how much of the surface it may use. The modules are laid out on the surface as the 3D model has it.",
+    "building": "What the building is: type, year and country choose its TABULA defaults; floor area per storey and storeys set the area BuEM heats. Edit to change them.",
+    "demand": "The building's annual energy demand by use, from its last BuEM run or the stored result. Cooking gas is a separate fuel and not part of the total.",
+    "insulation": "Sets the insulation of every wall, roof, floor and window at once, from the TABULA typology for this building type and age. Existing: the building as TABULA records it for its age, without later work. Usual: a refurbishment common in practice, such as added roof insulation and new windows. Advanced: an ambitious refurbishment towards new-build standard. A surface changed one by one keeps its own value.",
+    "occupancy": "Who lives or works in the building: the number of dwellings and people per dwelling set BuEM's internal gains and hot water use.",
+    "comfort": "When the building is heated: the temperature it is heated to, whether that is lowered at night or when people are away (set-back), and whether hot water is included.",
+    "outputs": "Which profiles BuEM returns for each use: a yearly summary, an hourly series, or none.",
+    "equipment": "Which appliances the households own; BuEM's electricity demand follows them. Appliances left unset keep BuEM's own likelihood.",
+    "solver": "How BuEM solves the hourly model: its default sparse solver, fast, or MILP, slower but exact on limits.",
+    "weather": "The hourly weather BuEM runs on. A solar year picks a representative low, typical or high year for sunshine from the provider's archive; typical is the default."
+  },
+  "tour": {
+    "button": "Tour",
+    "stepOf": "Step {step} of {total}",
+    "skip": "Skip the tour",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "model": {
+      "title": "The building in 3D",
+      "body": "Drag to turn the model, scroll to zoom. Click a wall, roof or floor to open it."
+    },
+    "surface": {
+      "title": "One surface at a time",
+      "body": "The surface you click opens here: its area, U-value and windows, and its PV where it takes any."
+    },
+    "building": {
+      "title": "The whole building",
+      "body": "Its annual demand, its data and its parameters. A refurbishment level here changes every surface at once."
+    },
+    "technologies": {
+      "title": "Technologies",
+      "body": "PV, storage and heating on this building. Open the catalogue and drag a product onto a surface to install it."
+    },
+    "run": {
+      "title": "Save and preview",
+      "body": "Runs BuEM on the building as it is now and shows its hourly demand."
+    }
+  },
+  "hints": {
+    "stepOf": "Step {step} of {total}",
+    "hide": "Hide hints",
+    "step1": "Click a wall, roof or floor to open it.",
+    "step2": "Change its U-value or refurbishment level in the panel.",
+    "step3": "Save and preview to see the building's new demand."
+  },
+  "weather": {
+    "title": "Weather",
+    "provider": "Weather data",
+    "year": "Solar year",
+    "scenario": {
+      "p10": "Low",
+      "p50": "Typical",
+      "p90": "High"
     }
   }
 }

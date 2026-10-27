@@ -47,8 +47,7 @@
       "note": "Verwerpen zet het vlak terug zoals het was toen de editor werd geopend."
     },
     "panel": {
-      "empty": "Klik op een vlak in het model om het hier te zien.",
-      "emptyPv": "Klik op een dak of muur om er PV op in te stellen."
+      "empty": "Klik op een vlak in het model om het hier te zien."
     }
   },
   "surface": {
@@ -100,7 +99,14 @@
       "vertical": "Verticaal",
       "pitched": "Hellend"
     },
-    "degrees": "{degrees} graden, {label}"
+    "degrees": "{degrees} graden, {label}",
+    "section": {
+      "envelope": "Schil",
+      "pv": "PV"
+    },
+    "pick": "Kies een vlak",
+    "fromModel": "{tilt}° · oriëntatie {azimuth}° {compass} · uit het 3D-model",
+    "flatFromModel": "Plat · uit het 3D-model"
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",
@@ -188,9 +194,10 @@
       "investmentEstimate": "Investering ongeveer {amount}, geschat"
     },
     "catalogue": {
-      "title": "Catalogus",
       "hint": "Sleep een product op een dak of muur, of kies het in het paneel van een vlak.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Catalogus ({count})",
+      "search": "Catalogus doorzoeken"
     },
     "product": {
       "label": "Product",
@@ -215,45 +222,38 @@
       "save": "Opslaan",
       "saved": "Opgeslagen als {name}.",
       "saveFailed": "De technologie kon niet worden opgeslagen. Probeer het opnieuw."
-    }
+    },
+    "installed": {
+      "title": "Geïnstalleerd op dit gebouw",
+      "empty": "Nog geen PV. Open de catalogus en sleep een product op een dak of muur.",
+      "surfaces": {
+        "one": "op {count} vlak",
+        "other": "op {count} vlakken"
+      },
+      "modules": {
+        "one": "{count} module",
+        "other": "{count} modules"
+      }
+    },
+    "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM."
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",
-    "remove": "{title} verwijderen"
+    "remove": "{title} verwijderen",
+    "inFocus": "Geselecteerd",
+    "product": "Product",
+    "add": "Technologie toevoegen",
+    "totalEstimate": "{amount} tot nu toe, schatting",
+    "count": {
+      "one": "{count} technologie",
+      "other": "{count} technologieën"
+    },
+    "pvSurfaces": {
+      "one": "{count} vlak",
+      "other": "{count} vlakken"
+    }
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Gebouwnaam",
-        "tip": "Leesbare naam voor dit gebouw. Opgenomen in geëxporteerde bestanden.",
-        "placeholder": "bijv. 3434 · Vrijstaand huis"
-      },
-      "type": {
-        "label": "Gebouwtype",
-        "tip": "TABULA-gebouwcategorie. Bepaalt standaard U-waarden en referentiepatronen van de energievraag."
-      },
-      "country": {
-        "label": "Land",
-        "tip": "Land voor de keuze van TABULA-referentiedata en het COSMO-weerstation."
-      },
-      "year": {
-        "label": "Bouwjaar",
-        "tip": "Jaar waarin het gebouw is gebouwd. ignis koppelt het aan een TABULA-bouwperiode voor de standaard U-waarden."
-      },
-      "floorArea": {
-        "label": "Vloeroppervlakte (per verdieping)",
-        "tip": "Oppervlakte van één verdieping; de totale verwarmde vloeroppervlakte is deze × verdiepingen."
-      },
-      "storeys": {
-        "label": "Verdiepingen",
-        "tip": "Aantal bovengrondse verdiepingen."
-      },
-      "roomHeight": {
-        "label": "Verdiepingshoogte",
-        "tip": "Vrije binnenhoogte per verdieping. Gebruikt om het verwarmde luchtvolume te berekenen."
-      },
-      "volume": "Verwarmd volume"
-    },
     "solver": {
       "useMilp": {
         "label": "MILP-solver gebruiken",
@@ -271,7 +271,6 @@
       "noData": "Geen TABULA-data gevonden voor dit gebouw: de TABULA-service heeft er geen variant voor of was niet bereikbaar."
     },
     "section": {
-      "identity": "Basisgegevens",
       "occupancy": "Bewoning",
       "comfort": "Verwarming en comfort",
       "outputs": "Te berekenen resultaten",
@@ -293,10 +292,11 @@
       "dwellingsNotSet": "Woningen niet ingesteld",
       "perDwelling": "{dwellings} · {persons} per woning"
     },
-    "header": {
-      "fallbackName": "Gebouw"
-    },
-    "insulationTitle": "Isolatie en ramen"
+    "insulationTitle": "Isolatie en ramen",
+    "expertMore": {
+      "title": "Thermiek en simulatie",
+      "detail": "profielen, apparatuur en solver houden hun standaardwaarden"
+    }
   },
   "comfort": {
     "mass": {
@@ -413,7 +413,6 @@
       "averageU": "gemiddelde U {value} W/m²K"
     },
     "averageU": "Gemiddelde U-waarde",
-    "editSurfaces": "Vlakken één voor één bewerken",
     "preset": {
       "label": "Heel het gebouw instellen op",
       "tip": "TABULA-renovatievarianten voor dit gebouwtype en deze bouwperiode. Een keuze stelt elk elementtype in; afzonderlijk ingestelde vlakken behouden hun waarden.",
@@ -486,6 +485,13 @@
         "usual": "Standaard",
         "advanced": "Vergaand"
       }
+    },
+    "classes": {
+      "compare": "Energieklasse van elk niveau tonen",
+      "comparing": "BuEM rekent elk niveau…",
+      "perM2": "{value} kWh/m²",
+      "note": "Indicatieve klasse voor dit gebouw: ruimteverwarming per m² op de Oostenrijkse HWB-schaal, A++ tot G. Gesimuleerd, geen energielabel.",
+      "failed": "De laatste poging is mislukt. Probeer opnieuw."
     }
   },
   "options": {
@@ -586,30 +592,22 @@
   },
   "panel": {
     "title": {
-      "overview": "Energieoverzicht",
-      "envelope": "Gebouwschil",
-      "technology": "Technologieën",
-      "parameters": "Gebouwparameters"
+      "technology": "Technologieën"
     },
     "tab": {
-      "overview": "Overzicht",
-      "parameters": "Parameters",
-      "envelope": "Schil"
+      "building": "Gebouw"
     },
     "doneEditing": "Klaar met bewerken",
-    "editParameters": "Gebouwparameters bewerken"
+    "editParameters": "Gebouwparameters bewerken",
+    "section": {
+      "identity": "Gebouwgegevens"
+    },
+    "edit": "Bewerken"
   },
   "snapshot": {
     "status": {
       "default": "standaard",
       "modified": "gewijzigd"
-    },
-    "thermalRating": {
-      "excellent": "Uitstekend",
-      "good": "Goed",
-      "fair": "Redelijk",
-      "poor": "Slecht",
-      "veryPoor": "Zeer slecht"
     },
     "row": {
       "type": "Type",
@@ -632,35 +630,23 @@
       "hotWater": "Warm tapwater",
       "kitchen": "Keuken (gas)"
     },
-    "estimateNotice": "Gebouwparameters zijn geschat uit openbare registers. Open de configurator om ze te controleren en aan te passen.",
     "annualDemand": "Jaarlijkse energievraag",
-    "totalDemand": "Totale vraag",
-    "thermalEfficiency": "Thermische efficiëntie",
     "unit": {
       "kWhPerYear": "kWh/jaar",
       "kWhGasPerYear": "kWh gas/jaar"
     },
-    "pvGeneration": "PV-opwekking"
+    "pvGeneration": "PV-opwekking",
+    "storeysModelled": "{modelled} van {total} gemodelleerd",
+    "heatingPerM2": "Verwarming {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Indicatieve klasse voor de warmtevraag (gesimuleerd, geen energielabel)",
+      "tip": "Jaarlijkse ruimteverwarming van BuEM per referentieoppervlak, met het weer en de bezetting van de berekening, ingedeeld volgens de banden van de Oostenrijkse OIB-RL 6 HWB-schaal (A++ tot 10 kWh/m²·a, G boven 250). Warm water, koeling en elektriciteit zijn niet meegeteld."
+    },
+    "tile": {
+      "statisticalDefault": "Statistische waarde"
+    }
   },
   "envelope": {
-    "group": {
-      "walls": "Wanden",
-      "windows": "Ramen",
-      "doors": "Deuren",
-      "roof": "Dak",
-      "floor": "Vloer"
-    },
-    "roofShape": {
-      "flat": "flauw hellend",
-      "monoPitch": "lessenaarsdak",
-      "gabled": "Z + N",
-      "hipped": "Z/N/O/W",
-      "vShape": "naar binnen hellend",
-      "sawTooth": "op het zuiden",
-      "custom": "aangepast"
-    },
-    "invalidAreaTip": "{count} zonder oppervlakte, herstellen vóór een simulatie",
-    "noArea": "geen oppervlakte",
     "compassNorth": "N"
   },
   "common": {
@@ -720,10 +706,84 @@
       "runFailed": "Simulatie mislukt: de EnerPlanET-backend is onbereikbaar of heeft het verzoek geweigerd. Zie de browserconsole voor details.",
       "exportFailed": "Export mislukt: {reason}",
       "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
-      "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel."
+      "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel.",
+      "dwellingsModelledRequired": "Sommige verdiepingen zijn niet in het model. Geef onder Gemodelleerde verdiepingen het aantal woningen in de gemodelleerde verdiepingen op voordat u een simulatie start."
     },
     "comparison": {
       "lastRun": "de laatste volledige simulatie"
+    }
+  },
+  "storeys": {
+    "title": "Gemodelleerde verdiepingen",
+    "hint": "Verdieping 1 is de begane grond. Laat verdiepingen weg die niet bij dit model horen, zoals een winkel op de begane grond; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
+    "storey": "Verdieping {number}",
+    "floorArea": "Gemodelleerd vloeroppervlak",
+    "heightNote": "In het 3D-model is een verdieping {height} m hoog; BuEM rekent met een kamerhoogte van {room} m.",
+    "pick": "Verdiepingen",
+    "pickHint": "Klik op een verdieping in het model om te zien of die wordt meegenomen.",
+    "inModel": "In het model",
+    "groundFloor": "Begane grond",
+    "lastOne": "Minstens één verdieping blijft in het model.",
+    "dwellings": "Woningen in de gemodelleerde verdiepingen",
+    "dwellingsHint": "De interne warmtewinst in BuEM volgt het aantal woningen, niet het vloeroppervlak."
+  },
+  "help": {
+    "envelope": "Hoe dit vlak warmte vasthoudt: oppervlak en U-waarde gaan naar BuEM. Een renovatieniveau zet de U-waarde uit TABULA; een hier gewijzigde waarde blijft staan.",
+    "pv": "PV op dit vlak: zet het aan, kies een product en hoeveel van het vlak het mag gebruiken. De modules worden gelegd op het vlak zoals het 3D-model het toont.",
+    "building": "Wat het gebouw is: type, bouwjaar en land kiezen de TABULA-standaardwaarden; vloeroppervlak per verdieping en verdiepingen bepalen het oppervlak dat BuEM verwarmt. Bewerk om ze te wijzigen.",
+    "demand": "De jaarlijkse energievraag van het gebouw per gebruik, uit de laatste BuEM-berekening of het opgeslagen resultaat. Kookgas is een aparte brandstof en telt niet mee in het totaal.",
+    "insulation": "Zet de isolatie van alle muren, daken, vloeren en ramen tegelijk, uit de TABULA-typologie voor dit gebouwtype en deze leeftijd. Bestaand: het gebouw zoals TABULA het voor zijn leeftijd vastlegt, zonder latere ingrepen. Gangbaar: een renovatie die in de praktijk veel voorkomt, zoals extra dakisolatie en nieuwe ramen. Vergaand: een ambitieuze renovatie richting nieuwbouwniveau. Een vlak dat afzonderlijk is gewijzigd, houdt zijn eigen waarde.",
+    "occupancy": "Wie in het gebouw woont of werkt: het aantal woningen en personen per woning bepalen de interne warmtewinst en het warmwatergebruik in BuEM.",
+    "comfort": "Wanneer het gebouw wordt verwarmd: de insteltemperatuur, of die 's nachts of bij afwezigheid wordt verlaagd (nachtverlaging) en of warm water is inbegrepen.",
+    "outputs": "Welke profielen BuEM per gebruik teruggeeft: een jaaroverzicht, een uurreeks of geen.",
+    "equipment": "Welke apparaten de huishoudens bezitten; de elektriciteitsvraag in BuEM volgt ze. Niet ingestelde apparaten houden de kans van BuEM zelf.",
+    "solver": "Hoe BuEM het uurmodel oplost: met de snelle standaard sparse-solver of met MILP, trager maar exact bij grenzen.",
+    "weather": "Het weer per uur waarmee BuEM rekent. Een zonnejaar kiest uit het archief van de leverancier een representatief laag, typisch of hoog jaar voor zonnestraling; typisch is de standaard."
+  },
+  "tour": {
+    "button": "Rondleiding",
+    "stepOf": "Stap {step} van {total}",
+    "skip": "Rondleiding overslaan",
+    "back": "Terug",
+    "next": "Volgende",
+    "done": "Klaar",
+    "model": {
+      "title": "Het gebouw in 3D",
+      "body": "Sleep om het model te draaien, scroll om te zoomen. Klik op een muur, dak of vloer om die te openen."
+    },
+    "surface": {
+      "title": "Eén vlak tegelijk",
+      "body": "Het aangeklikte vlak opent hier: oppervlakte, U-waarde en ramen, en de PV waar het die draagt."
+    },
+    "building": {
+      "title": "Het hele gebouw",
+      "body": "De jaarlijkse vraag, de gegevens en de parameters. Een renovatieniveau hier wijzigt alle vlakken tegelijk."
+    },
+    "technologies": {
+      "title": "Technologieën",
+      "body": "PV, opslag en verwarming van dit gebouw. Open de catalogus en sleep een product op een vlak om het te installeren."
+    },
+    "run": {
+      "title": "Opslaan en voorbeeld",
+      "body": "Rekent BuEM door voor het gebouw zoals het nu is en toont de vraag per uur."
+    }
+  },
+  "hints": {
+    "stepOf": "Stap {step} van {total}",
+    "hide": "Tips verbergen",
+    "step1": "Klik op een muur, dak of vloer om die te openen.",
+    "step2": "Wijzig de U-waarde of het renovatieniveau in het paneel.",
+    "step3": "Opslaan en voorbeeld toont de nieuwe vraag van het gebouw."
+  },
+  "weather": {
+    "title": "Weer",
+    "provider": "Weergegevens",
+    "year": "Zonnejaar",
+    "scenario": {
+      "p10": "Laag",
+      "p50": "Typisch",
+      "p90": "Hoog"
     }
   }
 }

@@ -38,6 +38,22 @@ export interface BuemBuildingRunRequest {
   start_date: string;
   end_date: string;
   resolution: number;
+  /** One of WeatherOptions' providers; absent for the host's default provider. */
+  weather_provider?: string;
+  /** One of that provider's scenarios; absent for p50, the typical year. */
+  weather_scenario?: WeatherScenario;
+}
+
+/** The representative low, typical and high solar years of a weather archive. */
+export type WeatherScenario = 'p10' | 'p50' | 'p90';
+
+/** The weather a host can run BuEM on. */
+export interface WeatherOptions {
+  defaultProvider: string;
+  /** Each provider's processed years, by provider name. */
+  providers: Record<string, number[]>;
+  /** Each provider's complete scenarios; empty when not known, which offers no scenario choice. */
+  scenarios: Record<string, WeatherScenario[]>;
 }
 
 /** The building's stored demand after the run, the same body as its demand-profile route. */
@@ -86,11 +102,27 @@ export interface ConfiguratorServices {
   runBuemBuilding(request: BuemBuildingRunRequest): Promise<BuemBuildingRunResponse>;
 
   /**
+   * Optional. One building through BuEM with nothing stored, to compare
+   * refurbishment levels: the same request as runBuemBuilding, with the
+   * heating summary only. Resolves to BuEM's `buem` block unchanged; the
+   * package reads thermal_load_profile.summary.heating.total from it.
+   * Without it no level shows an energy class. Expected budget: 15 s.
+   */
+  previewBuemBuilding?(request: BuemBuildingRunRequest): Promise<{ buem: Record<string, unknown> }>;
+
+  /**
    * Optional. PV generation for the building's PV surfaces, run with Save &
    * Preview when the host passes pvSurfaceIds. Without it there is no PV run
    * and no PV row. Expected budget: 30 s.
    */
   runPvBuilding?(request: PvBuildingRunRequest): Promise<PvBuildingRunResponse>;
+
+  /**
+   * Optional. The weather providers and scenarios BuEM can run on, fetched
+   * once as the view opens. Without it there is no weather choice and runs
+   * use the host's default. Expected budget: 8 s.
+   */
+  fetchWeatherOptions?(): Promise<WeatherOptions>;
 }
 
 /** The host's PV surfaces on the open building, with the geometry as currently edited. */

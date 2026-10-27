@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { DecimalInput } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
-import { pvSummary } from '../../lib/pvSurfaces';
+import { installedByProduct, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
   constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints,
@@ -113,36 +113,82 @@ function SurfaceList({ pv, elements, layouts, onSelect }: {
   );
 }
 
-/** The catalogue's PV products, each draggable onto a surface in the 3D view. */
+/** The products installed on this building, one row each with its surfaces, modules and capacity. */
+function Installed({ pv, layouts }: { pv: PvMode; layouts: Readonly<Record<string, PvLayout>> }) {
+  const t = useT();
+  const format = useFormatNumber();
+  const rows = installedByProduct(pv.surfaces, layouts, (id) => surfaceProduct(pv, id));
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h3 className="m-0 text-[13px] font-semibold text-foreground">{t('pv.installed.title')}</h3>
+      {rows.length === 0 ? (
+        <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.installed.empty')}</p>
+      ) : (
+        <ul className="divide-y divide-border rounded-md border border-border">
+          {rows.map((row) => (
+            <li key={row.product?.id ?? ''} className="flex items-baseline justify-between gap-2 px-3 py-2">
+              <div className="min-w-0">
+                <div className="truncate text-[12px] font-semibold text-foreground">{row.product ? productName(row.product) : t('pv.product.none')}</div>
+                <div className="text-[11px] text-muted-foreground">{t('pv.installed.surfaces', { count: row.surfaces })}</div>
+              </div>
+              <div className="shrink-0 text-right text-[12px] tabular-nums text-foreground">
+                {row.modules !== undefined && <div className="font-semibold">{t('pv.installed.modules', { count: row.modules })}</div>}
+                <div className={row.modules === undefined ? 'font-semibold' : 'text-[11px] text-muted-foreground'}>{format(row.kwp, 1)} kWp</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** The catalogue's PV products behind a drop-down, each draggable onto a surface in the 3D view. */
 function Catalogue({ pv }: { pv: PvMode }) {
   const t = useT();
   const format = useFormatNumber();
+  const [query, setQuery] = useState('');
   if (!pv.catalogue?.length) return null;
+  const needle = query.trim().toLowerCase();
+  const shown = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
   return (
-    <div className="flex flex-col gap-1.5">
-      <h3 className="m-0 text-[13px] font-semibold text-foreground">{t('pv.catalogue.title')}</h3>
-      <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.catalogue.hint')}</p>
-      <ul className="flex flex-col gap-1.5">
-        {pv.catalogue.map((product) => {
-          const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
-          const perKwp = constraintNumber(product, 'cost_energy_cap');
-          return (
-            <li
-              key={product.id}
-              draggable={Boolean(pv.onAssignProduct)}
-              onDragStart={(e) => { e.dataTransfer.setData(PV_PRODUCT_DRAG_TYPE, product.id); e.dataTransfer.effectAllowed = 'copy'; }}
-              className="cursor-grab rounded-md border border-dashed border-border bg-card px-2.5 py-1.5 active:cursor-grabbing"
-            >
-              <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
-              <div className="text-[11px] text-muted-foreground">
-                {t('pv.catalogue.module', { width: format(module.width, 2), height: format(module.height, 2), watts: format(module.kwp * 1000, 0) })}
-                {perKwp !== undefined && ` · ${format(perKwp, 0)} ${productCurrency(product)}/kWp`}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <details className="group rounded-md border border-border">
+      <summary className="flex cursor-pointer items-center justify-between px-3 py-2 text-[12px] font-semibold text-foreground">
+        {t('pv.catalogue.toggle', { count: pv.catalogue.length })}
+        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
+      </summary>
+      <div className="flex flex-col gap-1.5 border-t border-border p-2">
+        <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.catalogue.hint')}</p>
+        <input
+          type="search"
+          aria-label={t('pv.catalogue.search')}
+          placeholder={t('pv.catalogue.search')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="h-8 rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
+        />
+        <ul className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
+          {shown.map((product) => {
+            const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
+            const perKwp = constraintNumber(product, 'cost_energy_cap');
+            return (
+              <li
+                key={product.id}
+                draggable={Boolean(pv.onAssignProduct)}
+                onDragStart={(e) => { e.dataTransfer.setData(PV_PRODUCT_DRAG_TYPE, product.id); e.dataTransfer.effectAllowed = 'copy'; }}
+                className="cursor-grab rounded-md border border-dashed border-border bg-card px-2.5 py-1.5 active:cursor-grabbing"
+              >
+                <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {t('pv.catalogue.module', { width: format(module.width, 2), height: format(module.height, 2), watts: format(module.kwp * 1000, 0) })}
+                  {perKwp !== undefined && ` · ${format(perKwp, 0)} ${productCurrency(product)}/kWp`}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </details>
   );
 }
 
@@ -277,7 +323,7 @@ function ProductValues({ pv, mode }: { pv: PvMode; mode: 'basic' | 'expert' }) {
 }
 
 /** The PV block of the Technologies tab. */
-export function PvOverview({ pv, elements, layouts = {}, mode, onSelect }: {
+export function PvOverview({ pv, elements, layouts = {}, mode, onSelect, framed = false }: {
   pv: PvMode;
   elements: Record<string, BuildingElement>;
   /** Module layouts of the surfaces the view has polygons for. */
@@ -285,17 +331,22 @@ export function PvOverview({ pv, elements, layouts = {}, mode, onSelect }: {
   mode: 'basic' | 'expert';
   /** Shows a surface in the model and opens it in the surface panel. */
   onSelect: (surfaceId: string) => void;
+  /** Inside a technology card, which carries the title: no border or heading of its own. */
+  framed?: boolean;
 }) {
   const t = useT();
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-      <div className="flex flex-col gap-0.5">
-        <h2 className="m-0 text-[15px] font-bold text-foreground">{t('pv.overview.title')}</h2>
-        <p className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-          <Sun className="size-3.5 text-yellow-500" aria-hidden />{pv.typeLabel}
-        </p>
-      </div>
+    <section className={cn('flex flex-col gap-3', framed ? 'px-3 pb-3 pt-1' : 'rounded-lg border border-border bg-card p-4')}>
+      {!framed && (
+        <div className="flex flex-col gap-0.5">
+          <h2 className="m-0 text-[15px] font-bold text-foreground">{t('pv.overview.title')}</h2>
+          <p className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+            <Sun className="size-3.5 text-yellow-500" aria-hidden />{pv.typeLabel}
+          </p>
+        </div>
+      )}
       <Totals pv={pv} elements={elements} layouts={layouts} />
+      <Installed pv={pv} layouts={layouts} />
       <SurfaceList pv={pv} elements={elements} layouts={layouts} onSelect={onSelect} />
       <Catalogue pv={pv} />
       <ProductValues pv={pv} mode={mode} />

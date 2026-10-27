@@ -127,6 +127,15 @@ describe('PvOverview with a catalogue', () => {
     expect(html).toContain('Estimates from the products');
   });
 
+  it('lists the installed products with their modules and capacity, the catalogue closed behind a drop-down', () => {
+    const installed = html.slice(html.indexOf('Installed on this building'), html.indexOf('Surfaces with PV ('));
+    expect(installed).toContain('Demo Mono 420 W');
+    expect(installed).not.toContain('Demo Compact 300 W');
+    expect(installed).toContain('24 modules');
+    expect(installed).toContain('on 1 surface');
+    expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*>Catalogue \(2\)/);
+  });
+
   it('lists the catalogue as draggable products with their module and price', () => {
     expect(html).toContain('Demo Mono 420 W');
     expect(html).toContain('1.13 × 1.76 m · 420 W · 500 EUR/kWp');
@@ -166,6 +175,14 @@ describe('PvSurfaceSection', () => {
     expect(html).toContain('0° N');
     expect(html).toContain('40 m²');
     expect(html).toContain('Add PV to this surface');
+  });
+
+  it('says PV follows the 3D model when the surface\'s tilt was edited for BuEM', () => {
+    const edited = { ...elements, r1: { ...elements.r1, tilt: 10, defaultTilt: 35, defaultAzimuth: 180 } };
+    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={edited} />))
+      .toContain('PV follows the 3D model&#x27;s 35°');
+    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} />))
+      .not.toContain('PV follows the 3D model');
   });
 
   it('calls a flat roof flat and gives it no facing', () => {

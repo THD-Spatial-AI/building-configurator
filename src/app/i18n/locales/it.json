@@ -47,8 +47,7 @@
       "note": "Scartando, la superficie torna com'era all'apertura dell'editor."
     },
     "panel": {
-      "empty": "Fai clic su una superficie del modello per vederla qui.",
-      "emptyPv": "Fai clic su un tetto o una parete per configurarvi il FV."
+      "empty": "Fai clic su una superficie del modello per vederla qui."
     }
   },
   "surface": {
@@ -100,7 +99,14 @@
       "vertical": "Verticale",
       "pitched": "Inclinato"
     },
-    "degrees": "{degrees} gradi, {label}"
+    "degrees": "{degrees} gradi, {label}",
+    "section": {
+      "envelope": "Involucro",
+      "pv": "FV"
+    },
+    "pick": "Scegli una superficie",
+    "fromModel": "{tilt}° · orientamento {azimuth}° {compass} · dal modello 3D",
+    "flatFromModel": "Piana · dal modello 3D"
   },
   "profile": {
     "title": "Profilo di carico orario",
@@ -188,9 +194,10 @@
       "investmentEstimate": "Investimento di circa {amount}, stimato"
     },
     "catalogue": {
-      "title": "Catalogo",
       "hint": "Trascina un prodotto su un tetto o una parete, oppure sceglilo nel pannello di una superficie.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Catalogo ({count})",
+      "search": "Cerca nel catalogo"
     },
     "product": {
       "label": "Prodotto",
@@ -215,45 +222,38 @@
       "save": "Salva",
       "saved": "Salvato come {name}.",
       "saveFailed": "Impossibile salvare la tecnologia. Riprova."
-    }
+    },
+    "installed": {
+      "title": "Installato su questo edificio",
+      "empty": "Ancora nessun FV. Apri il catalogo e trascina un prodotto su un tetto o una parete.",
+      "surfaces": {
+        "one": "su {count} superficie",
+        "other": "su {count} superfici"
+      },
+      "modules": {
+        "one": "{count} modulo",
+        "other": "{count} moduli"
+      }
+    },
+    "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM."
   },
   "tech": {
     "none": "Nessuna tecnologia su questo edificio.",
-    "remove": "Rimuovi {title}"
+    "remove": "Rimuovi {title}",
+    "inFocus": "In primo piano",
+    "product": "Prodotto",
+    "add": "Aggiungi una tecnologia",
+    "totalEstimate": "{amount} finora, stima",
+    "count": {
+      "one": "{count} tecnologia",
+      "other": "{count} tecnologie"
+    },
+    "pvSurfaces": {
+      "one": "{count} superficie",
+      "other": "{count} superfici"
+    }
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Nome edificio",
-        "tip": "Nome leggibile dell'edificio. Incluso nei file esportati.",
-        "placeholder": "es. 3434 · Casa unifamiliare"
-      },
-      "type": {
-        "label": "Tipo di edificio",
-        "tip": "Categoria edilizia TABULA. Influisce sui valori U predefiniti e sui fabbisogni energetici di riferimento."
-      },
-      "country": {
-        "label": "Paese",
-        "tip": "Paese usato per scegliere i dati di riferimento TABULA e la stazione meteo COSMO."
-      },
-      "year": {
-        "label": "Anno di costruzione",
-        "tip": "Anno di costruzione dell'edificio. ignis lo associa a un periodo costruttivo TABULA per i valori U predefiniti."
-      },
-      "floorArea": {
-        "label": "Superficie (per piano)",
-        "tip": "Superficie di un singolo piano: la superficie climatizzata totale è questa × piani."
-      },
-      "storeys": {
-        "label": "Piani",
-        "tip": "Numero di piani fuori terra."
-      },
-      "roomHeight": {
-        "label": "Altezza interna",
-        "tip": "Altezza netta interna per piano. Usata per calcolare il volume d'aria riscaldato."
-      },
-      "volume": "Volume riscaldato"
-    },
     "solver": {
       "useMilp": {
         "label": "Usa il solutore MILP",
@@ -271,7 +271,6 @@
       "noData": "Nessun dato TABULA per questo edificio: il servizio TABULA non ha varianti per esso o non è raggiungibile."
     },
     "section": {
-      "identity": "Dati di base",
       "occupancy": "Occupazione",
       "comfort": "Riscaldamento e comfort",
       "outputs": "Risultati da calcolare",
@@ -293,10 +292,11 @@
       "dwellingsNotSet": "Alloggi non impostati",
       "perDwelling": "{dwellings} · {persons} per alloggio"
     },
-    "header": {
-      "fallbackName": "Edificio"
-    },
-    "insulationTitle": "Isolamento e finestre"
+    "insulationTitle": "Isolamento e finestre",
+    "expertMore": {
+      "title": "Termica e simulazione",
+      "detail": "profili, apparecchi e solutore mantengono i valori predefiniti"
+    }
   },
   "comfort": {
     "mass": {
@@ -413,7 +413,6 @@
       "averageU": "U medio {value} W/m²K"
     },
     "averageU": "Valore U medio",
-    "editSurfaces": "Modifica le superfici una per una",
     "preset": {
       "label": "Imposta l'intero edificio a",
       "tip": "Varianti di riqualificazione TABULA per questo tipo ed età di edificio. Una scelta imposta ogni tipo di elemento; le superfici impostate una per una mantengono i loro valori.",
@@ -486,6 +485,13 @@
         "usual": "Standard",
         "advanced": "Avanzata"
       }
+    },
+    "classes": {
+      "compare": "Mostra la classe energetica di ogni livello",
+      "comparing": "BuEM calcola ogni livello…",
+      "perM2": "{value} kWh/m²",
+      "note": "Classe indicativa per questo edificio: riscaldamento per m² sulla scala austriaca HWB, da A++ a G. Simulata, non un attestato energetico.",
+      "failed": "L'ultimo tentativo non è riuscito. Riprova."
     }
   },
   "options": {
@@ -586,30 +592,22 @@
   },
   "panel": {
     "title": {
-      "overview": "Panoramica energetica",
-      "envelope": "Involucro edilizio",
-      "technology": "Tecnologie",
-      "parameters": "Parametri dell'edificio"
+      "technology": "Tecnologie"
     },
     "tab": {
-      "overview": "Panoramica",
-      "parameters": "Parametri",
-      "envelope": "Involucro"
+      "building": "Edificio"
     },
     "doneEditing": "Fine modifica",
-    "editParameters": "Modifica i parametri dell'edificio"
+    "editParameters": "Modifica i parametri dell'edificio",
+    "section": {
+      "identity": "Dati dell'edificio"
+    },
+    "edit": "Modifica"
   },
   "snapshot": {
     "status": {
       "default": "predefinito",
       "modified": "modificato"
-    },
-    "thermalRating": {
-      "excellent": "Ottima",
-      "good": "Buona",
-      "fair": "Discreta",
-      "poor": "Scarsa",
-      "veryPoor": "Molto scarsa"
     },
     "row": {
       "type": "Tipo",
@@ -632,35 +630,23 @@
       "hotWater": "Acqua calda",
       "kitchen": "Cucina (gas)"
     },
-    "estimateNotice": "I parametri dell'edificio sono stimati da dati pubblici. Apri il configuratore per verificarli e modificarli.",
     "annualDemand": "Fabbisogno energetico annuo",
-    "totalDemand": "Fabbisogno totale",
-    "thermalEfficiency": "Efficienza termica",
     "unit": {
       "kWhPerYear": "kWh/anno",
       "kWhGasPerYear": "kWh gas/anno"
     },
-    "pvGeneration": "Produzione FV"
+    "pvGeneration": "Produzione FV",
+    "storeysModelled": "{modelled} di {total} modellati",
+    "heatingPerM2": "Riscaldamento {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Classe indicativa del fabbisogno di riscaldamento (simulata, non un attestato energetico)",
+      "tip": "Riscaldamento annuo di BuEM per superficie di riferimento, con il meteo e l'occupazione del calcolo, classificato secondo le fasce della scala austriaca OIB-RL 6 HWB (A++ fino a 10 kWh/m²·a, G oltre 250). Acqua calda, raffrescamento ed elettricità non sono inclusi."
+    },
+    "tile": {
+      "statisticalDefault": "Valore statistico"
+    }
   },
   "envelope": {
-    "group": {
-      "walls": "Pareti",
-      "windows": "Finestre",
-      "doors": "Porte",
-      "roof": "Tetto",
-      "floor": "Pavimento"
-    },
-    "roofShape": {
-      "flat": "bassa pendenza",
-      "monoPitch": "una falda",
-      "gabled": "S + N",
-      "hipped": "S/N/E/O",
-      "vShape": "falde verso l'interno",
-      "sawTooth": "esposto a S",
-      "custom": "personalizzato"
-    },
-    "invalidAreaTip": "{count} senza area, da correggere prima di una simulazione",
-    "noArea": "senza area",
     "compassNorth": "N"
   },
   "common": {
@@ -720,10 +706,84 @@
       "runFailed": "Simulazione non riuscita: il backend EnerPlanET non è raggiungibile o ha rifiutato la richiesta. Vedi la console del browser per i dettagli.",
       "exportFailed": "Esportazione non riuscita: {reason}",
       "importFailed": "Impossibile leggere il file: {reason}. Verifica che sia un BuEM GeoJSON valido, un export del configuratore legacy o un config.json di EnerPlanET.",
-      "pvFailed": "Il calcolo FV non è riuscito, quindi la produzione FV non è mostrata. Il fabbisogno energetico sopra è aggiornato."
+      "pvFailed": "Il calcolo FV non è riuscito, quindi la produzione FV non è mostrata. Il fabbisogno energetico sopra è aggiornato.",
+      "dwellingsModelledRequired": "Alcuni piani sono esclusi dal modello. Indica il numero di abitazioni nei piani modellati in Piani modellati prima di avviare una simulazione."
     },
     "comparison": {
       "lastRun": "all'ultima simulazione completa"
+    }
+  },
+  "storeys": {
+    "title": "Piani modellati",
+    "hint": "Il piano 1 è il piano terra. Escludi i piani che non fanno parte di questo modello, come un negozio al piano terra; superficie e involucro contano solo i piani modellati.",
+    "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
+    "storey": "Piano {number}",
+    "floorArea": "Superficie modellata",
+    "heightNote": "Nel modello 3D un piano è alto {height} m; BuEM usa un'altezza dei locali di {room} m.",
+    "pick": "Piani",
+    "pickHint": "Fai clic su un piano del modello per vedere se è incluso.",
+    "inModel": "Nel modello",
+    "groundFloor": "Piano terra",
+    "lastOne": "Almeno un piano resta nel modello.",
+    "dwellings": "Abitazioni nei piani modellati",
+    "dwellingsHint": "Gli apporti interni di BuEM dipendono dal numero di abitazioni, non dalla superficie."
+  },
+  "help": {
+    "envelope": "Come questa superficie trattiene il calore: area e valore U vanno a BuEM. Un livello di riqualificazione imposta il valore U da TABULA; un valore modificato qui resta.",
+    "pv": "FV su questa superficie: attivalo, scegli un prodotto e quanta superficie può usare. I moduli sono disposti sulla superficie come la mostra il modello 3D.",
+    "building": "Che cos'è l'edificio: tipo, anno e paese scelgono i valori predefiniti TABULA; superficie per piano e piani fissano la superficie riscaldata da BuEM. Modifica per cambiarli.",
+    "demand": "La domanda annua di energia dell'edificio per uso, dall'ultimo calcolo BuEM o dal risultato salvato. Il gas di cottura è un altro combustibile e non è nel totale.",
+    "insulation": "Imposta l'isolamento di tutte le pareti, coperture, solai e finestre insieme, dalla tipologia TABULA per questo tipo ed età. Esistente: l'edificio come TABULA lo registra per la sua età, senza interventi successivi. Usuale: una riqualificazione comune, come isolare la copertura e cambiare le finestre. Avanzata: una riqualificazione ambiziosa verso lo standard del nuovo. Una superficie modificata singolarmente mantiene il suo valore.",
+    "occupancy": "Chi vive o lavora nell'edificio: numero di abitazioni e persone per abitazione fissano gli apporti interni e l'acqua calda in BuEM.",
+    "comfort": "Quando l'edificio è riscaldato: la temperatura impostata, se si abbassa di notte o in assenza (attenuazione) e se è inclusa l'acqua calda.",
+    "outputs": "Quali profili restituisce BuEM per ogni uso: un riepilogo annuo, una serie oraria o nessuno.",
+    "equipment": "Quali elettrodomestici hanno le famiglie; la domanda elettrica di BuEM li segue. Quelli non impostati mantengono la probabilità di BuEM.",
+    "solver": "Come BuEM risolve il modello orario: con il solutore sparso predefinito, veloce, o con MILP, più lento ma esatto sui limiti.",
+    "weather": "Il meteo orario su cui calcola BuEM. Un anno solare sceglie dall'archivio del fornitore un anno rappresentativo basso, tipico o alto per l'irraggiamento; tipico è il valore predefinito."
+  },
+  "tour": {
+    "button": "Tour",
+    "stepOf": "Passo {step} di {total}",
+    "skip": "Salta il tour",
+    "back": "Indietro",
+    "next": "Avanti",
+    "done": "Fine",
+    "model": {
+      "title": "L'edificio in 3D",
+      "body": "Trascina per ruotare il modello, scorri per lo zoom. Fai clic su una parete, un tetto o un pavimento per aprirlo."
+    },
+    "surface": {
+      "title": "Una superficie alla volta",
+      "body": "La superficie cliccata si apre qui: area, valore U e finestre, e il suo FV dove ne ospita."
+    },
+    "building": {
+      "title": "L'intero edificio",
+      "body": "La domanda annua, i dati e i parametri. Un livello di riqualificazione qui cambia tutte le superfici insieme."
+    },
+    "technologies": {
+      "title": "Tecnologie",
+      "body": "FV, accumulo e riscaldamento di questo edificio. Apri il catalogo e trascina un prodotto su una superficie per installarlo."
+    },
+    "run": {
+      "title": "Salva e anteprima",
+      "body": "Esegue BuEM sull'edificio così com'è e mostra la domanda oraria."
+    }
+  },
+  "hints": {
+    "stepOf": "Passo {step} di {total}",
+    "hide": "Nascondi suggerimenti",
+    "step1": "Fai clic su una parete, un tetto o un pavimento per aprirlo.",
+    "step2": "Cambia il valore U o il livello di riqualificazione nel pannello.",
+    "step3": "Salva e anteprima per vedere la nuova domanda dell'edificio."
+  },
+  "weather": {
+    "title": "Meteo",
+    "provider": "Dati meteo",
+    "year": "Anno solare",
+    "scenario": {
+      "p10": "Basso",
+      "p50": "Tipico",
+      "p90": "Alto"
     }
   }
 }

@@ -95,10 +95,11 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `demandProfile` | Optional. The building's stored demand, `{ building_ref, series }` (type `BuildingDemandProfile`): `undefined` while it loads, `null` when none is stored. Its totals fill the energy card. Hold it stable: a new object resets the card to it |
 | `attribution` | Optional. Credits for the building's data (React node, for example text with links), shown in a corner of the 3D view. Pass what the data's licences require |
 | `pv` | Optional. The building's PV, placed on the Technologies tab, see [PV](#pv) |
-| `defaultTab` | Optional. `overview`, `parameters`, `envelope` or `technologies`: the tab the view opens on. Absent: `overview` |
+| `defaultTab` | Optional. `building` or `technologies`: the tab the view opens on. Absent: `building` |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
 | `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
+| `tour` | Optional. `{ run, onFinish }`. With `run` true the guided tour starts as the view opens; `onFinish` is called when the user finishes or skips it, so the host can store that the user has seen it. The header's Tour button starts the tour either way |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
 !!! warning "Hold the services stable"
@@ -118,7 +119,9 @@ routes in the example are the EnerPlanET backend's; the package holds none.
 | `fetchVariantData(code)` | One variant's full TABULA record | 8 s |
 | `calculateHeatDemand(code, inputs)` | Annual heat demand for a variant; `inputs` is `undefined` when nothing was overridden | 15 s |
 | `runBuemBuilding(request)` | One building through BuEM. Forward the request unchanged, see [Forward solver and outputs](#storing-an-edited-building). Resolves to the building's stored demand, the same `BuildingDemandProfile` as the `demandProfile` prop | 15 s |
-| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when a surface in `pv` has PV. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as currently edited (m², degrees from horizontal, degrees clockwise from north), plus `modules`, `kwp`, `panel_tilt` and `panel_azimuth` from its [module layout](#module-layout) when the view has its polygon, and `product_id` when it has a product. Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
+| `previewBuemBuilding(request)` | Optional. One building through BuEM with nothing stored, to show each refurbishment level's energy class. Same request as `runBuemBuilding`, with `outputs` asking for the heating summary only. Resolves to `{ buem }`, BuEM's `buem` block unchanged; the package reads `thermal_load_profile.summary.heating.total`. Without it no level shows a class | 15 s |
+| `runPvBuilding(request)` | Optional. The building's PV generation, run with Save & Preview when a surface in `pv` has PV. `request` is `{ osm_id, surfaces }`, each surface `{ id, area, tilt, azimuth }` as the 3D model has it (m², degrees from horizontal, degrees clockwise from north), plus `modules`, `kwp`, `panel_tilt` and `panel_azimuth` from its [module layout](#module-layout) when the view has its polygon, and `product_id` when it has a product. Resolves to `{ annualKwh }`, a full calendar year's generation. Without it there is no PV run and no PV row | 30 s |
+| `fetchWeatherOptions()` | Optional. The weather BuEM can run on, fetched once as the view opens. Resolves to `{ defaultProvider, providers, scenarios }`: `providers` maps each provider (`merra-2`, `era5-land`, `cosmo-rea6`) to its processed years, `scenarios` maps each provider to its built scenarios (`p10`, `p50`, `p90`), empty when not known. The user then picks a provider and, where it has more than one scenario, a low, typical or high solar year. `runBuemBuilding` and `previewBuemBuilding` requests carry `weather_provider` only when it differs from `defaultProvider`, and `weather_scenario` only when it is not `p50`; forward both unchanged. Without it there is no weather choice and the request has neither field | 8 s |
 
 `Building3DView` does not call `calculateHeatDemand` today. It is part of the
 type, so supply it.
@@ -248,20 +251,26 @@ const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientati
 ## Technologies
 
 Pass `technologies` to show the building's technologies other than PV as cards
-in the Technologies tab, under the PV overview. The host owns every value and label; the cards show them and
-report edits, and the view stores nothing.
+in the Technologies tab, after the PV card. The host owns every value and label; the cards show them and
+report edits, and the view stores nothing. One card is in focus at a time and shows its detail; the others
+show their headline figure and cost.
 
 ```tsx
 const technologies = useMemo<Technologies>(() => ({
   items: [
     {
       id: 'heat_pump',
+      type: 'air_source_heat_pump',
       title: t('heatPump'),
+      figures: [{ label: 'COP', value: 3.3 }, { label: t('size'), value: null, unit: 'kW' }],
+      investment: { amount: null, currency: 'EUR', rate: '900 EUR/kW' },
+      catalogue: { products: [{ id: 'ashp', name: 'Air-source heat pump' }], productId: 'ashp', onSelect: assignProduct },
       fields: [{ key: 'size', label: t('maxSize'), value: null, unit: 'kW', editable: true }],
     },
   ],
   onChange: (id, fieldKey, value) => setField(id, fieldKey, value),
   onRemove: (id) => removeTechnology(id),
+  onAdd: () => openTechnologyPicker(),
 }), [/* the values above */]);
 ```
 
@@ -269,6 +278,10 @@ const technologies = useMemo<Technologies>(() => ({
 |---|---|
 | `items[].id` | Passed back to `onChange` and `onRemove` |
 | `items[].title`, `subtitle` | Shown at the top of the card, in the user's language |
+| `items[].type` | Optional. EnerPlanET's technology type (`battery_storage`, `air_source_heat_pump`, `ground_source_heat_pump`, `electric_boilers`, `gas_boiler`, `air_conditioner`): sets the card's icon and colour |
+| `items[].figures` | Optional. Up to three `{ label, value, unit }`; the first is the headline while the card is not in focus. `null` shows as "∞" |
+| `items[].investment` | Optional. `{ amount, currency, rate? }`: the estimate, added to the tab's total; with `amount: null` the card shows `rate` and the total leaves it out |
+| `items[].catalogue` | Optional. `{ products: { id, name, detail? }[], productId?, onSelect(productId) }`, behind a drop-down with a search field |
 | `items[].action` | Optional button, `{ label, onClick }` |
 | `fields[].value` | A number, or `null` for unbounded, shown as "∞" |
 | `fields[].editable` | A number input when true, plain text otherwise |
@@ -276,6 +289,7 @@ const technologies = useMemo<Technologies>(() => ({
 | `fields[].error` | Shown under the field with a red ring until the host clears it |
 | `onChange(id, fieldKey, value)` | Fires with each valid number typed, and with `null` when the input is cleared |
 | `onRemove(id)` | The card's remove button was pressed; the view does not ask first |
+| `onAdd()` | Optional. The "Add a technology" button was pressed; without it there is no button |
 
 ## Geometry
 

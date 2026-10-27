@@ -66,16 +66,6 @@ export function SnapshotStatusBadge({ status }: { status: SnapshotStatus }) {
   );
 }
 
-// Maps area-weighted avg U-value to a human-readable thermal efficiency label.
-// `labelKey` is the translation of `label`, looked up where it is shown.
-export function getThermalRating(u: number): { label: string; labelKey: string; color: string; bg: string } {
-  if (u < 0.20) return { label: 'Excellent', labelKey: 'snapshot.thermalRating.excellent', color: '#059669', bg: '#ecfdf5' };
-  if (u < 0.30) return { label: 'Good',      labelKey: 'snapshot.thermalRating.good',      color: '#16a34a', bg: '#f0fdf4' };
-  if (u < 0.50) return { label: 'Fair',      labelKey: 'snapshot.thermalRating.fair',      color: '#d97706', bg: '#fffbeb' };
-  if (u < 0.80) return { label: 'Poor',      labelKey: 'snapshot.thermalRating.poor',      color: '#dc2626', bg: '#fef2f2' };
-  return             { label: 'Very Poor',   labelKey: 'snapshot.thermalRating.veryPoor',  color: '#9f1239', bg: '#fff1f2' };
-}
-
 export interface SnapshotRow {
   label: string;
   /** Translation key for `label`. */
@@ -122,6 +112,14 @@ export function buildSnapshotRows(
   const baseGeneral      = baseline?.general      ?? DEFAULT_GENERAL;
   const baseTotalArea    = baseline?.totalArea    ?? DEFAULT_TOTAL_AREA;
   const baseElementCount = baseline?.elementCount ?? Object.keys(DEFAULT_ELEMENTS).length;
+  // With storeys left out the table describes what BuEM receives: the modelled
+  // storeys, and each surface for its share inside them.
+  const modelled = general.storeysModelled;
+  const modelledStoreys = modelled?.length ?? general.storeys;
+  const sent = modelled
+    ? Object.values(elements).filter((el) => (el.modelledShare ?? 1) > 0)
+    : Object.values(elements);
+  const envelopeArea = modelled ? sent.reduce((sum, el) => sum + el.area * (el.modelledShare ?? 1), 0) : totalArea;
 
   return [
     {
@@ -166,7 +164,8 @@ export function buildSnapshotRows(
       label: 'Storeys',
       labelKey: 'snapshot.row.storeys',
       value: `${general.storeys}`,
-      status: general.storeys === baseGeneral.storeys ? 'default' : 'modified',
+      ...(modelled ? { valueMessage: { key: 'snapshot.storeysModelled', values: { modelled: modelled.length, total: general.storeys } } } : {}),
+      status: general.storeys === baseGeneral.storeys && !modelled ? 'default' : 'modified',
       editKey: 'storeys',
       editType: 'number',
       rawValue: general.storeys,
@@ -183,9 +182,10 @@ export function buildSnapshotRows(
     {
       label: 'Volume',
       labelKey: 'snapshot.row.volume',
-      value: `${formatNumber(language, computeVolume(general.floorArea, general.storeys, general.roomHeight), 0)} m³`,
+      value: `${formatNumber(language, computeVolume(general.floorArea, modelledStoreys, general.roomHeight), 0)} m³`,
       status: isCloseTo(general.floorArea, baseGeneral.floorArea)
         && general.storeys === baseGeneral.storeys
+        && !modelled
         && isCloseTo(general.roomHeight, baseGeneral.roomHeight)
         ? 'default'
         : 'modified',
@@ -193,13 +193,13 @@ export function buildSnapshotRows(
     {
       label: 'Envelope',
       labelKey: 'snapshot.row.envelope',
-      value: `${formatNumber(language, totalArea, 1)} m²  ·  ${Object.keys(elements).length} surfaces`,
+      value: `${formatNumber(language, envelopeArea, 1)} m²  ·  ${sent.length} surfaces`,
       valueMessage: {
         key: 'snapshot.envelopeValue',
-        values: { area: formatNumber(language, totalArea, 1), count: Object.keys(elements).length },
+        values: { area: formatNumber(language, envelopeArea, 1), count: sent.length },
       },
-      status: isCloseTo(totalArea, baseTotalArea)
-        && Object.keys(elements).length === baseElementCount
+      status: isCloseTo(envelopeArea, baseTotalArea)
+        && sent.length === baseElementCount
         ? 'default'
         : 'modified',
     },

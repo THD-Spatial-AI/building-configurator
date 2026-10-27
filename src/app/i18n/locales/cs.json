@@ -51,8 +51,7 @@
       "note": "Zahozením se plocha vrátí do stavu z okamžiku otevření editoru."
     },
     "panel": {
-      "empty": "Klikněte na plochu v modelu, a uvidíte ji zde.",
-      "emptyPv": "Klikněte na střechu nebo stěnu a nastavte na ní FV."
+      "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
     }
   },
   "surface": {
@@ -104,7 +103,14 @@
       "vertical": "Svislá",
       "pitched": "Šikmá"
     },
-    "degrees": "{degrees} stupňů, {label}"
+    "degrees": "{degrees} stupňů, {label}",
+    "section": {
+      "envelope": "Obálka",
+      "pv": "FV"
+    },
+    "pick": "Vyberte plochu",
+    "fromModel": "{tilt}° · orientace {azimuth}° {compass} · z 3D modelu",
+    "flatFromModel": "Plochá · z 3D modelu"
   },
   "profile": {
     "title": "Hodinový profil zatížení",
@@ -192,9 +198,10 @@
       "investmentEstimate": "Investice zhruba {amount}, odhad"
     },
     "catalogue": {
-      "title": "Katalog",
       "hint": "Přetáhněte produkt na střechu nebo stěnu, nebo ho vyberte v panelu plochy.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Katalog ({count})",
+      "search": "Hledat v katalogu"
     },
     "product": {
       "label": "Produkt",
@@ -219,45 +226,46 @@
       "save": "Uložit",
       "saved": "Uloženo jako {name}.",
       "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu."
-    }
+    },
+    "installed": {
+      "title": "Instalováno na této budově",
+      "empty": "Zatím žádná FV. Otevřete katalog a přetáhněte produkt na střechu nebo stěnu.",
+      "surfaces": {
+        "one": "na {count} ploše",
+        "few": "na {count} plochách",
+        "many": "na {count} plochách",
+        "other": "na {count} plochách"
+      },
+      "modules": {
+        "one": "{count} modul",
+        "few": "{count} moduly",
+        "many": "{count} modulu",
+        "other": "{count} modulů"
+      }
+    },
+    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM."
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",
-    "remove": "Odebrat {title}"
+    "remove": "Odebrat {title}",
+    "inFocus": "Vybraná",
+    "product": "Produkt",
+    "add": "Přidat technologii",
+    "totalEstimate": "{amount} zatím, odhad",
+    "count": {
+      "one": "{count} technologie",
+      "few": "{count} technologie",
+      "many": "{count} technologie",
+      "other": "{count} technologií"
+    },
+    "pvSurfaces": {
+      "one": "{count} plocha",
+      "few": "{count} plochy",
+      "many": "{count} ploch",
+      "other": "{count} plochy"
+    }
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Název budovy",
-        "tip": "Čitelný název této budovy. Je součástí exportovaných souborů.",
-        "placeholder": "např. 3434 · Rodinný dům"
-      },
-      "type": {
-        "label": "Typ budovy",
-        "tip": "Kategorie budovy podle TABULA. Ovlivňuje výchozí součinitele U a referenční průběhy potřeby energie."
-      },
-      "country": {
-        "label": "Země",
-        "tip": "Země pro výběr referenčních dat TABULA a meteorologické stanice COSMO."
-      },
-      "year": {
-        "label": "Rok výstavby",
-        "tip": "Rok, kdy byla budova postavena. ignis jej přiřadí k období výstavby TABULA pro výchozí součinitele U."
-      },
-      "floorArea": {
-        "label": "Podlahová plocha (na podlaží)",
-        "tip": "Půdorysná plocha jednoho podlaží; celková vytápěná podlahová plocha je tato hodnota × počet podlaží."
-      },
-      "storeys": {
-        "label": "Podlaží",
-        "tip": "Počet nadzemních podlaží."
-      },
-      "roomHeight": {
-        "label": "Světlá výška",
-        "tip": "Světlá výška každého podlaží. Slouží k výpočtu vytápěného objemu vzduchu."
-      },
-      "volume": "Vytápěný objem"
-    },
     "solver": {
       "useMilp": {
         "label": "Použít řešič MILP",
@@ -275,7 +283,6 @@
       "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná."
     },
     "section": {
-      "identity": "Základní údaje",
       "occupancy": "Obsazenost",
       "comfort": "Vytápění a komfort",
       "outputs": "Počítané výsledky",
@@ -299,10 +306,11 @@
       "dwellingsNotSet": "Počet bytů nenastaven",
       "perDwelling": "{dwellings} · {persons} na byt"
     },
-    "header": {
-      "fallbackName": "Budova"
-    },
-    "insulationTitle": "Izolace a okna"
+    "insulationTitle": "Izolace a okna",
+    "expertMore": {
+      "title": "Tepelné vlastnosti a simulace",
+      "detail": "profily, spotřebiče a řešič si ponechávají výchozí hodnoty"
+    }
   },
   "comfort": {
     "mass": {
@@ -419,7 +427,6 @@
       "averageU": "průměrné U {value} W/m²K"
     },
     "averageU": "Průměrný součinitel U",
-    "editSurfaces": "Upravit plochy jednotlivě",
     "preset": {
       "label": "Nastavit celou budovu na",
       "tip": "Varianty renovace TABULA pro tento typ a stáří budovy. Volba nastaví všechny typy konstrukcí; jednotlivě nastavené plochy si ponechají své hodnoty.",
@@ -496,6 +503,13 @@
         "usual": "Běžná",
         "advanced": "Pokročilá"
       }
+    },
+    "classes": {
+      "compare": "Zobrazit energetickou třídu každé úrovně",
+      "comparing": "BuEM počítá každou úroveň…",
+      "perM2": "{value} kWh/m²",
+      "note": "Orientační třída této budovy: vytápění na m² na rakouské stupnici HWB, A++ až G. Simulovaná, nejde o energetický štítek.",
+      "failed": "Poslední pokus selhal. Zkuste to znovu."
     }
   },
   "options": {
@@ -596,30 +610,22 @@
   },
   "panel": {
     "title": {
-      "overview": "Energetický přehled",
-      "envelope": "Obálka budovy",
-      "technology": "Technologie",
-      "parameters": "Parametry budovy"
+      "technology": "Technologie"
     },
     "tab": {
-      "overview": "Přehled",
-      "parameters": "Parametry",
-      "envelope": "Obálka"
+      "building": "Budova"
     },
     "doneEditing": "Hotovo",
-    "editParameters": "Upravit parametry budovy"
+    "editParameters": "Upravit parametry budovy",
+    "section": {
+      "identity": "Údaje o budově"
+    },
+    "edit": "Upravit"
   },
   "snapshot": {
     "status": {
       "default": "výchozí",
       "modified": "upraveno"
-    },
-    "thermalRating": {
-      "excellent": "Vynikající",
-      "good": "Dobrá",
-      "fair": "Průměrná",
-      "poor": "Špatná",
-      "veryPoor": "Velmi špatná"
     },
     "row": {
       "type": "Typ",
@@ -644,35 +650,23 @@
       "hotWater": "Teplá voda",
       "kitchen": "Kuchyň (plyn)"
     },
-    "estimateNotice": "Parametry budovy jsou odhadnuty z veřejných záznamů. Otevřete konfigurátor a zkontrolujte je a upravte.",
     "annualDemand": "Roční potřeba energie",
-    "totalDemand": "Celková potřeba",
-    "thermalEfficiency": "Tepelná účinnost",
     "unit": {
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh plynu/rok"
     },
-    "pvGeneration": "Výroba FV"
+    "pvGeneration": "Výroba FV",
+    "storeysModelled": "{modelled} z {total} modelováno",
+    "heatingPerM2": "Vytápění {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Orientační třída potřeby tepla na vytápění (simulovaná, nejde o energetický štítek)",
+      "tip": "Roční potřeba tepla na vytápění z BuEM na referenční plochu, při počasí a užívání výpočtu, zařazená podle pásem rakouské stupnice OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G nad 250). Teplá voda, chlazení a elektřina nejsou zahrnuty."
+    },
+    "tile": {
+      "statisticalDefault": "Statistická hodnota"
+    }
   },
   "envelope": {
-    "group": {
-      "walls": "Stěny",
-      "windows": "Okna",
-      "doors": "Dveře",
-      "roof": "Střecha",
-      "floor": "Podlaha"
-    },
-    "roofShape": {
-      "flat": "plochá",
-      "monoPitch": "pultová",
-      "gabled": "J + S",
-      "hipped": "J/S/V/Z",
-      "vShape": "sklon dovnitř",
-      "sawTooth": "orientace J",
-      "custom": "vlastní"
-    },
-    "invalidAreaTip": "{count} s nulovou výměrou, opravte před spuštěním simulace",
-    "noArea": "nulová výměra",
     "compassNorth": "S"
   },
   "common": {
@@ -732,10 +726,84 @@
       "runFailed": "Simulace selhala: backend EnerPlanET je nedostupný nebo požadavek odmítl. Podrobnosti najdete v konzoli prohlížeče.",
       "exportFailed": "Export selhal: {reason}",
       "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET.",
-      "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální."
+      "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální.",
+      "dwellingsModelledRequired": "Některá podlaží nejsou v modelu. Před spuštěním simulace zadejte v části Modelovaná podlaží počet bytů v modelovaných podlažích."
     },
     "comparison": {
       "lastRun": "poslední úplná simulace"
+    }
+  },
+  "storeys": {
+    "title": "Modelovaná podlaží",
+    "hint": "Podlaží 1 je přízemí. Vynechte podlaží, která do tohoto modelu nepatří, například obchod v přízemí; plocha a obálka počítají jen modelovaná podlaží.",
+    "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
+    "storey": "Podlaží {number}",
+    "floorArea": "Modelovaná plocha",
+    "heightNote": "Ve 3D modelu je podlaží vysoké {height} m; BuEM počítá s výškou místnosti {room} m.",
+    "pick": "Podlaží",
+    "pickHint": "Klikněte na podlaží v modelu a uvidíte, zda je modelováno.",
+    "inModel": "V modelu",
+    "groundFloor": "Přízemí",
+    "lastOne": "Alespoň jedno podlaží zůstává v modelu.",
+    "dwellings": "Byty v modelovaných podlažích",
+    "dwellingsHint": "Vnitřní zisky v BuEM se řídí počtem bytů, ne plochou."
+  },
+  "help": {
+    "envelope": "Jak tato plocha drží teplo: její plocha a součinitel U jdou do BuEM. Úroveň renovace nastaví součinitel U z TABULA; hodnota změněná zde zůstane.",
+    "pv": "FV na této ploše: zapněte ji, vyberte produkt a jakou část plochy smí využít. Moduly se rozmístí na ploše tak, jak ji ukazuje 3D model.",
+    "building": "Co je to za budovu: typ, rok a země volí výchozí hodnoty TABULA; plocha podlaží a počet podlaží určují plochu, kterou BuEM vytápí. Upravte je tlačítkem Upravit.",
+    "demand": "Roční potřeba energie budovy podle užití, z posledního výpočtu BuEM nebo uloženého výsledku. Plyn na vaření je samostatné palivo a není v součtu.",
+    "insulation": "Nastaví izolaci všech stěn, střech, podlah a oken najednou, podle typologie TABULA pro tento typ a stáří budovy. Stávající stav: budova, jak ji TABULA uvádí pro její stáří, bez pozdějších úprav. Běžná: renovace obvyklá v praxi, například zateplení střechy a nová okna. Pokročilá: ambiciózní renovace směrem ke standardu novostavby. Plocha změněná samostatně si ponechá svou hodnotu.",
+    "occupancy": "Kdo v budově bydlí nebo pracuje: počet bytů a osob na byt určují vnitřní zisky a spotřebu teplé vody v BuEM.",
+    "comfort": "Kdy se budova vytápí: požadovaná teplota, zda se v noci nebo při nepřítomnosti snižuje (útlum) a zda je zahrnuta teplá voda.",
+    "outputs": "Které profily BuEM vrací pro každé užití: roční souhrn, hodinovou řadu, nebo žádný.",
+    "equipment": "Které spotřebiče domácnosti vlastní; spotřeba elektřiny v BuEM se jimi řídí. Nenastavené si ponechají pravděpodobnost BuEM.",
+    "solver": "Jak BuEM řeší hodinový model: výchozím rychlým řídkým řešičem, nebo MILP, pomaleji, ale přesně na mezích.",
+    "weather": "Hodinové počasí, se kterým BuEM počítá. Solární rok vybere z archivu poskytovatele reprezentativní rok se slabým, typickým nebo silným slunečním zářením; výchozí je typický."
+  },
+  "tour": {
+    "button": "Prohlídka",
+    "stepOf": "Krok {step} z {total}",
+    "skip": "Přeskočit prohlídku",
+    "back": "Zpět",
+    "next": "Další",
+    "done": "Hotovo",
+    "model": {
+      "title": "Budova ve 3D",
+      "body": "Tažením model otočíte, kolečkem přiblížíte. Kliknutím na stěnu, střechu nebo podlahu ji otevřete."
+    },
+    "surface": {
+      "title": "Jedna plocha po druhé",
+      "body": "Plocha, na kterou kliknete, se otevře zde: její plocha, hodnota U a okna a FV, pokud ji nese."
+    },
+    "building": {
+      "title": "Celá budova",
+      "body": "Roční potřeba, data a parametry budovy. Úroveň renovace zde změní všechny plochy najednou."
+    },
+    "technologies": {
+      "title": "Technologie",
+      "body": "FV, úložiště a vytápění této budovy. Otevřete katalog a přetáhněte produkt na plochu, abyste ho nainstalovali."
+    },
+    "run": {
+      "title": "Uložit a náhled",
+      "body": "Spustí BuEM pro budovu v aktuálním stavu a ukáže hodinovou potřebu."
+    }
+  },
+  "hints": {
+    "stepOf": "Krok {step} z {total}",
+    "hide": "Skrýt nápovědu",
+    "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
+    "step2": "Změňte hodnotu U nebo úroveň renovace v panelu.",
+    "step3": "Uložte a zobrazte náhled nové potřeby budovy."
+  },
+  "weather": {
+    "title": "Počasí",
+    "provider": "Meteorologická data",
+    "year": "Solární rok",
+    "scenario": {
+      "p10": "Slabý",
+      "p50": "Typický",
+      "p90": "Silný"
     }
   }
 }

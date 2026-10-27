@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pvGeometry, pvLayouts, pvSummary } from './pvSurfaces';
+import { installedByProduct, pvGeometry, pvLayouts, pvSummary } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -13,9 +13,14 @@ function surface(state: PvSurface['state'], extra: Partial<PvSurface> = {}): PvS
 }
 
 describe('pvGeometry', () => {
-  it('takes the building\'s own element, as edited, over the host\'s values', () => {
+  it('takes the building\'s own element over the host\'s values', () => {
     expect(pvGeometry('r1', { r1: roof }, surface('installed', { tilt: 10, azimuth: 90, area: 20 })))
       .toEqual({ tilt: 32, azimuth: 205, area: 50, flat: false });
+  });
+
+  it('follows the 3D model, not an expert\'s edits, which go to BuEM only', () => {
+    const edited = { ...roof, tilt: 5, azimuth: 90, area: 30, defaultTilt: 32, defaultAzimuth: 205, defaultArea: 50 };
+    expect(pvGeometry('r1', { r1: edited }, undefined)).toEqual({ tilt: 32, azimuth: 205, area: 50, flat: false });
   });
 
   it('falls back to the host\'s values for a surface that is not an element', () => {
@@ -73,6 +78,28 @@ describe('pvSummary', () => {
 
   it('leaves out the panel area of an installed surface without geometry', () => {
     expect(pvSummary({ x: surface('installed') }, {}).panelArea).toBe(0);
+  });
+});
+
+describe('installedByProduct', () => {
+  const mono = { id: 'mono', key: 'mono', type: 'pv_supply', constraints: [] } as TechnologyProduct;
+  const compact = { id: 'compact', key: 'compact', type: 'pv_supply', constraints: [] } as TechnologyProduct;
+
+  it('groups the installed surfaces by product with their modules and capacity', () => {
+    const products: Record<string, TechnologyProduct> = { r1: mono, r2: mono, r3: compact, r4: mono };
+    const rows = installedByProduct(
+      { r1: surface('installed'), r2: surface('installed'), r3: surface('installed'), r4: surface('suggested') },
+      { r1: { count: 10, kwp: 4.2 } as PvLayout, r2: { count: 5, kwp: 2.1 } as PvLayout, r3: { count: 8, kwp: 2.4 } as PvLayout },
+      (id) => products[id],
+    );
+    expect(rows.map((row) => [row.product?.id, row.surfaces, row.modules])).toEqual([['mono', 2, 15], ['compact', 1, 8]]);
+    expect(rows[0].kwp).toBeCloseTo(6.3);
+  });
+
+  it('gives no module count for a product on a surface without a layout', () => {
+    const [row] = installedByProduct({ r1: surface('installed', { maxKwp: 3 }) }, {}, () => mono);
+    expect(row.modules).toBeUndefined();
+    expect(row.kwp).toBe(3);
   });
 });
 

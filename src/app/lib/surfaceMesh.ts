@@ -52,6 +52,17 @@ export function isEnvelopeDetached(surfaces: SurfacePolygon[], elementIds: Set<s
 }
 
 /**
+ * The surfaces to draw: the envelope's, and those the host left out of the
+ * building it passed in, such as slivers below its area precision. A surface
+ * deleted in the view was in that building, so it stays hidden.
+ */
+export function drawnSurfaceIds(surfaces: SurfacePolygon[], loaded: Record<string, unknown>, envelopeIds: Set<string>): Set<string> {
+  const ids = new Set(envelopeIds);
+  for (const surface of surfaces) if (!(surface.id in loaded)) ids.add(surface.id);
+  return ids;
+}
+
+/**
  * Area of a surface's outer ring in m², from its 3D vertices (Newell's method:
  * half the magnitude of the summed edge cross products, which holds for a
  * planar polygon in any orientation).
@@ -106,7 +117,7 @@ export function computeOrigin(surfaces: SurfacePolygon[]): [number, number, numb
 }
 
 /** Storage CRS (x east, y north, z up) to three.js (x east, y up, z south). */
-function toLocal([x, y, z]: number[], origin: [number, number, number]): THREE.Vector3 {
+export function toLocal([x, y, z]: number[], origin: [number, number, number]): THREE.Vector3 {
   return new THREE.Vector3(x - origin[0], z - origin[2], -(y - origin[1]));
 }
 

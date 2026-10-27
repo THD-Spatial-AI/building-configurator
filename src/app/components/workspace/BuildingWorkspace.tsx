@@ -5,7 +5,7 @@
  * fetched or rendered.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Box, Loader2 } from '@/app/components/icons';
 import { LoenenLiveMap } from '../LoenenLiveMap';
 import { surfaceGeometry, useFixtureBuilding, useLoenenBuildings } from '../../../demo/useLoenen';
@@ -120,6 +120,8 @@ function FixtureView({ osmId, building, geometry, language }: Pick<Parameters<ty
 }
 
 /** One bundled building with the dev shell playing host for its technologies and PV. */
+const TOUR_SEEN_KEY = 'building-configurator-demo.tourSeen';
+
 function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
   osmId: string;
   building: BuildingState;
@@ -129,6 +131,17 @@ function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
 }) {
   const pv = useDemoPvHost(building.envelope);
   const technologies = useDemoTechnologies();
+  // The demo's own first-visit memory; a host keeps it with the user's account.
+  const [tourRun, setTourRun] = useState(() => {
+    try { return window.localStorage.getItem(TOUR_SEEN_KEY) !== '1'; } catch { return false; }
+  });
+  const tour = useMemo(() => ({
+    run: tourRun,
+    onFinish: () => {
+      setTourRun(false);
+      try { window.localStorage.setItem(TOUR_SEEN_KEY, '1'); } catch { /* the tour runs again next visit */ }
+    },
+  }), [tourRun]);
 
   return (
     <Building3DView
@@ -141,6 +154,7 @@ function DemoBuildingView({ osmId, building, geometry, language, onExit }: {
       attribution={FIXTURE_ATTRIBUTION}
       pv={pv}
       technologies={technologies}
+      tour={tour}
       onExit={onExit}
     />
   );

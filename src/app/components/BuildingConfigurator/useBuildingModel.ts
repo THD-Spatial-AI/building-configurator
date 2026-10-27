@@ -17,7 +17,7 @@ import {
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
-import { requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
+import { isServiceBuildingType, requiresResidentialUnits, yearToConstructionPeriod } from './shared/buildingOptions';
 import type { BuildingState, ThermalSummary } from '../../lib/buemAdapter';
 import { exportToBuemGeojson, importBuildingData } from '../../lib/buemAdapter';
 import type { IgnisState } from '../../lib/ignisAdapter';
@@ -28,16 +28,15 @@ import {
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
 import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
-import { applyState, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
-import { runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
+import { applyState, REFURB_TYPES, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
+import { previewHeatingPerM2, runBuildingSimulation, runIdentity, type RunContext, type WeatherChoice } from '../../lib/buemRun';
 import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
 import type { PvLayout } from '../../lib/pvLayout';
 import { toThermalSummary, type BuildingDemandProfile } from '../../lib/demandProfile';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { Language, Message } from '../../i18n';
-import { getThermalRating, buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
+import { buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
-import { getThermalRatingFromDemand } from '@/app/config/thermalRatingStandards';
 
 const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
   wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
@@ -223,9 +222,11 @@ export type BuildingModel = ReturnType<typeof useBuildingModel>;
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
+  { estimateHeatDemand = true, runContext, weather, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
+    /** The weather runs and level previews use. */
+    weather?: WeatherChoice;
     demandProfile?: BuildingDemandProfile | null;
     /** The language the snapshot rows' numbers are written in. */
     language?: Language;
@@ -576,8 +577,25 @@ export function useBuildingModel(
     });
   };
 
-  const setGen = (key: string, value: any) =>
+  const setGen = (key: string, value: any) => {
+    // A new storey count moves every storey band, so the storeys modelled no longer apply.
+    if (key === 'storeys' && value !== general.storeys && general.storeysModelled) {
+      setStoreysModelled(null, {});
+    }
     setGeneralRaw((prev) => ({ ...prev, [key]: value }));
+  };
+
+  /**
+   * Models only the given storeys (1-based), with each surface's share inside
+   * them from storeyShares; null models them all again.
+   */
+  const setStoreysModelled = (modelled: number[] | null, shares: Record<string, number>) => {
+    setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => {
+      const { modelledShare: _, ...whole } = el;
+      return [id, modelled ? { ...whole, modelledShare: shares[id] ?? modelled.length / Math.max(1, general.storeys) } : whole];
+    })));
+    setGeneralRaw((prev) => ({ ...prev, storeysModelled: modelled, ...(modelled ? {} : { dwellingsModelled: null }) }));
+  };
 
   // --- Model-wide actions -----------------------------------------------------
 
@@ -590,6 +608,35 @@ export function useBuildingModel(
 
   const buildIdentity = () => runIdentity(buildingData, general);
 
+  // Each refurbishment level's space heating per m², from BuEM runs the host
+  // does not store. Kept while only the level changes: any other edit makes
+  // them describe a different building.
+  const [levelPreview, setLevelPreview] = useState<{ key: string; perM2: Record<number, number | null> } | null>(null);
+  const [isComparingLevels, setIsComparingLevels] = useState(false);
+  const previewKey = JSON.stringify({
+    weather,
+    general: { ...general, refurbishment: null },
+    shape: Object.values(elements).map((el) => [el.id, el.area, el.tilt, el.azimuth, el.modelledShare]),
+  });
+  const levelHeating = levelPreview?.key === previewKey ? levelPreview.perM2 : null;
+
+  /** Runs every refurbishment level of the building through BuEM's preview. */
+  const compareLevels = async () => {
+    const levels = ignis?.variants ?? [];
+    if (levels.length === 0 || !services.previewBuemBuilding) return;
+    setIsComparingLevels(true);
+    const identity = buildIdentity();
+    const results = await Promise.all(levels.map(async (level) => {
+      const levelElements = REFURB_TYPES.reduce(
+        (acc, type) => applyState(acc, type, refurbStates[type], level.number, refurbInitial, levels),
+        elements,
+      );
+      return [level.number, await previewHeatingPerM2(services, identity, levelElements, general, runContext, weather)] as const;
+    }));
+    setLevelPreview({ key: previewKey, perM2: Object.fromEntries(results) });
+    setIsComparingLevels(false);
+  };
+
   /**
    * Commits the working draft, then runs it through BuEM via the host and
    * shows the stored totals the host returns.
@@ -597,6 +644,10 @@ export function useBuildingModel(
   const runSimulation = async () => {
     if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
       setUploadError({ key: 'model.error.dwellingsRequired' });
+      return;
+    }
+    if (general.storeysModelled && !isServiceBuildingType(general.buildingType) && !general.dwellingsModelled) {
+      setUploadError({ key: 'model.error.dwellingsModelledRequired' });
       return;
     }
 
@@ -610,7 +661,7 @@ export function useBuildingModel(
       // hold back the demand result.
       const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts, pvProductFor) : null;
       const [result, pvKwh] = await Promise.all([
-        runBuildingSimulation(services, identity, elements, general, runContext),
+        runBuildingSimulation(services, identity, elements, general, runContext, weather),
         pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),
       ]);
       if (pvRequest) setPvAnnualKwh(pvKwh);
@@ -702,12 +753,6 @@ export function useBuildingModel(
   const avgUValue = totalArea > 0
     ? Object.values(elements).reduce((sum, e) => sum + e.uValue * e.area, 0) / totalArea
     : 0;
-  // Prefer a demand-based rating (kWh/(m²·a), matching real EPC-style classification —
-  // see thermalRatingStandards.ts for the country-configurable band source) once ignis
-  // has a result; fall back to the simpler U-value-based rating otherwise.
-  const thermalRating = ignis?.result
-    ? getThermalRatingFromDemand(ignis.result.qHnd, general.country as string | undefined)
-    : getThermalRating(avgUValue);
   const snapshotRows = buildSnapshotRows(general, elements, totalArea, language, baselineRef.current);
 
   // BuEM's confirmed result, or a user-uploaded ground-truth profile compared
@@ -738,12 +783,13 @@ export function useBuildingModel(
     undoLabel: history[history.length - 1]?.label ?? null,
     baselineElements: baselineRef.current.elements,
     // derived
-    buildingLabel, buildingType, coordinates, totalArea, avgUValue, thermalRating,
+    buildingLabel, buildingType, coordinates, totalArea, avgUValue,
     snapshotRows, displayEnergyTotals,
     // handlers
     setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
-    setRefurbishment, setTypeUValue, setTypeLossFactor, undo,
+    setRefurbishment, setTypeUValue, setTypeLossFactor, setStoreysModelled, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
+    levelHeating, isComparingLevels, compareLevels, canCompareLevels: Boolean(services.previewBuemBuilding),
     setUploadError, setGroundTruthTimeseries,
   };
 }
@@ -783,7 +829,7 @@ export function withEdits(
   elements: Record<string, BuildingElement>,
   general: typeof DEFAULT_GENERAL,
 ): BuildingState {
-  const base = building.thematic?.identity ?? building.identity;
+  const { storeysModelled: _loaded, ...base } = building.thematic?.identity ?? building.identity;
   const identity = {
     ...base,
     label: general.buildingName || base.label,
@@ -793,6 +839,7 @@ export function withEdits(
     floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
     roomHeight: general.roomHeight,
     storeys: general.storeys,
+    ...(general.storeysModelled ? { storeysModelled: general.storeysModelled } : {}),
   };
   return {
     ...building,
@@ -812,6 +859,7 @@ export function withEdits(
       window_g_gl:             general.window_g_gl,
       use_milp:                general.use_milp,
       residential_units:       general.residential_units,
+      dwellingsModelled:       general.dwellingsModelled,
       num_persons:             general.num_persons,
       archetype:               general.archetype,
       region_code:             general.region_code,

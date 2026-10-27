@@ -59,7 +59,7 @@ export function ConfiguratorStyles() {
 // ─── InfoTip ──────────────────────────────────────────────────────────────────
 
 /** Half the tip's maximum width plus a margin, kept between the tip's middle and the window's edges. */
-const TIP_HALF_WIDTH = 108;
+const TIP_HALF_WIDTH = 148;
 
 /**
  * An info icon whose tip shows on hover or keyboard focus. The tip is drawn
@@ -90,7 +90,8 @@ export function InfoTip({ tip }: { tip: string }) {
           id={id}
           role="tooltip"
           className={cn(
-            'pointer-events-none fixed z-[9999] max-w-[200px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
+            // A set width: near the window's edge a fixed element shrinks to the room left of its left edge.
+            'pointer-events-none fixed z-[9999] w-max max-w-[280px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
             below ? 'translate-y-0' : '-translate-y-full',
           )}
           style={{
@@ -152,7 +153,7 @@ export function EnergyComparisonNote({
   const displayValue = magnitude > DELTA_DISPLAY_CAP ? `>${format(DELTA_DISPLAY_CAP, 0)}` : format(magnitude, 0);
 
   return (
-    <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-400' : 'text-emerald-400')}>
+    <p className={cn('text-[11px] leading-snug', isIncrease ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400')}>
       {t(isIncrease ? 'common.comparison.higher' : 'common.comparison.lower', {
         percent: displayValue, reference: referenceLabel, kwh: formatTotal(referenceKwh, format),
       })}
@@ -681,50 +682,51 @@ export function UnsavedChangesDialog({
       onCancel={(e) => { e.preventDefault(); onCancel(); }}
       // A click on the dialog element itself, not its content, is on the backdrop.
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
-      className="m-auto w-full max-w-sm rounded-md border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="m-auto w-[calc(100%-32px)] max-w-md overflow-hidden rounded-xl border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
     >
-      <div className="p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="size-4 text-amber-500 shrink-0" />
-            <h2 id={titleId} className="text-base font-semibold text-foreground">
-              {t('common.unsaved.title')}
-            </h2>
-          </div>
+      <div className="flex gap-3 px-5 pb-4 pt-5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/20">
+          <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" />
+        </span>
+        <div className="flex min-w-0 flex-col gap-1">
+          <h2 id={titleId} className="m-0 text-base font-semibold text-foreground">
+            {t('common.unsaved.title')}
+          </h2>
+          <p id={messageId} className="m-0 text-sm text-foreground">
+            {message ?? t('common.unsaved.message')}
+          </p>
+          <p className="m-0 text-xs text-muted-foreground">
+            {note ?? t('common.unsaved.note')}
+          </p>
+        </div>
+      </div>
 
-          <div className="mb-4">
-            <p id={messageId} className="text-sm text-foreground mb-2">
-              {message ?? t('common.unsaved.message')}
-            </p>
-            <div className="bg-amber-50 border border-amber-200 rounded-[6px] px-3 py-2">
-              <p className="text-xs text-amber-800">
-                {note ?? t('common.unsaved.note')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-[6px] hover:bg-muted transition-colors cursor-pointer"
-            >
-              {t('common.unsaved.continueEditing')}
-            </button>
-            <button
-              type="button"
-              onClick={onSave}
-              className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-[6px] hover:bg-primary/90 transition-colors cursor-pointer"
-            >
-              {t('common.unsaved.saveAndClose')}
-            </button>
-            <button
-              type="button"
-              onClick={onDiscard}
-              className="px-3 py-1.5 text-sm font-medium rounded-[6px] transition-colors cursor-pointer text-destructive border border-destructive/30 hover:bg-destructive/5"
-            >
-              {t('common.unsaved.discard')}
-            </button>
-          </div>
+      {/* Discard sits apart from the safe pair; a long translation wraps whole buttons, never a label. */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/40 px-5 py-3">
+        <button
+          type="button"
+          onClick={onDiscard}
+          className="cursor-pointer whitespace-nowrap rounded-md px-2 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+        >
+          {t('common.unsaved.discard')}
+        </button>
+        <div className="ml-auto flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            autoFocus
+            onClick={onCancel}
+            className="cursor-pointer whitespace-nowrap rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            {t('common.unsaved.continueEditing')}
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            className="cursor-pointer whitespace-nowrap rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            {t('common.unsaved.saveAndClose')}
+          </button>
+        </div>
       </div>
     </dialog>
   );

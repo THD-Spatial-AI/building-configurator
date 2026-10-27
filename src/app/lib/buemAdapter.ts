@@ -9,6 +9,7 @@ import {
   getMappedArray,
   getMappedNumber,
   getMappedValue,
+  getStoredValue,
   hasMappedValue,
 } from '../config/modelDataResolver';
 import { faceFromAzimuth, type BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
@@ -37,6 +38,8 @@ export interface BuildingIdentity {
   floorArea: number;           // m²
   roomHeight: number;          // m
   storeys: number;
+  /** The storeys in the model, 1-based; absent when all are. */
+  storeysModelled?: number[];
 }
 
 export interface ThermalSummary {
@@ -108,6 +111,8 @@ export interface BuildingParameters {
   /** Whether BuEM solves with MILP rather than its default sparse solver. */
   use_milp?: boolean;
   residential_units?: number | null;
+  /** With storeys left out: the dwellings in the modelled storeys, residential_units being the whole building's. */
+  dwellingsModelled?: number | null;
   num_persons?: number | null;      // per dwelling
   archetype?: string;
   region_code?: string;             // CBS municipality code, e.g. GM0200
@@ -288,6 +293,11 @@ function adaptThematicData(feature: unknown): ThematicData {
 
   const typeCode = String(getMappedValue(feature, descriptor.buildingTypeCode) ?? '');
   const buildingType = BUILDING_TYPE_LABELS[typeCode] ?? typeCode;
+  const storeys = getMappedNumber(feature, descriptor.storeys);
+  const fullElements = getMappedArray(feature, MODEL_DATA_MAP.thematic.envelope.fullElements);
+  const modelled = fullElements.length > 0
+    ? partialStoreys(modelledFromList(getMappedValue(feature, descriptor.storeyList)), storeys)
+    : undefined;
   const identity: BuildingIdentity = {
     id: rawId,
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
@@ -295,12 +305,15 @@ function adaptThematicData(feature: unknown): ThematicData {
     buildingType,
     constructionYear: Number(getMappedValue(feature, descriptor.constructionYear)) || 0,
     country: String(getMappedValue(feature, descriptor.country) ?? ''),
-    floorArea: getMappedNumber(feature, descriptor.floorArea),
+    // A_ref covers the modelled storeys only; the identity holds the whole building's.
+    floorArea: getMappedNumber(feature, descriptor.floorArea) * (modelled ? storeys / modelled.length : 1),
     roomHeight: getMappedNumber(feature, descriptor.roomHeight),
-    storeys: getMappedNumber(feature, descriptor.storeys),
+    storeys,
+    ...(modelled ? { storeysModelled: modelled } : {}),
   };
 
-  const envelope = adaptEnvelope(getMappedArray(feature, MODEL_DATA_MAP.thematic.envelope.elements));
+  const sent = adaptEnvelope(getMappedArray(feature, MODEL_DATA_MAP.thematic.envelope.elements));
+  const envelope = modelled ? withModelledShares(adaptEnvelope(fullElements), sent) : sent;
   const hasSummary = [
     results.heatingTotal,
     results.coolingTotal,
@@ -367,6 +380,13 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   const useMilp = getMappedValue(feature, paths.useMilp);
   if (typeof useMilp === 'boolean') parameters.use_milp = useMilp;
   Object.assign(parameters, householdParameters(feature));
+  // With storeys left out the block holds the modelled storeys' dwellings and
+  // the whole building's travel beside it.
+  const fullUnits = getStoredValue(feature, MODEL_DATA_MAP.thematic.household.residential_units_full);
+  if (typeof fullUnits === 'number' || fullUnits === null) {
+    parameters.dwellingsModelled = parameters.residential_units ?? null;
+    parameters.residential_units = fullUnits;
+  }
   return Object.keys(parameters).length > 0 ? parameters : undefined;
 }
 
@@ -570,6 +590,72 @@ function buildElementsToBuemEnvelope(elements: Record<string, any>): Array<Recor
     });
 }
 
+/**
+ * The storeys modelled when some are left out: 1-based, unique, ascending and
+ * within the storey count. Undefined when none is left out or the value is unusable.
+ */
+export function partialStoreys(modelled: unknown, storeys: number): number[] | undefined {
+  if (!Array.isArray(modelled)) return undefined;
+  const valid = [...new Set(modelled.filter((n): n is number => Number.isInteger(n) && n >= 1 && n <= storeys))]
+    .sort((a, b) => a - b);
+  return valid.length > 0 && valid.length < storeys ? valid : undefined;
+}
+
+/** One storey as stored beside the block, 1-based from the ground. */
+export interface StoreyEntry {
+  storey: number;
+  modelled: boolean;
+}
+
+/** Every storey with whether it is in the model, as stored in properties.buem.storey_list. */
+function storeyList(modelled: readonly number[], storeys: number): StoreyEntry[] {
+  return Array.from({ length: storeys }, (_, i) => ({ storey: i + 1, modelled: modelled.includes(i + 1) }));
+}
+
+/** The modelled storeys of a stored storey_list, or undefined when it is not one. */
+function modelledFromList(list: unknown): number[] | undefined {
+  if (!Array.isArray(list)) return undefined;
+  return list
+    .filter((entry): entry is StoreyEntry => !!entry && typeof entry === 'object' && entry.modelled === true)
+    .map((entry) => entry.storey);
+}
+
+/** The whole envelope with each surface's share of it that was sent; a surface not sent has none. */
+function withModelledShares<T extends { area: number }>(
+  full: Record<string, T>,
+  sent: Record<string, { area: number }>,
+): Record<string, T & { modelledShare: number }> {
+  return Object.fromEntries(Object.entries(full).map(([id, el]) => [
+    id,
+    { ...el, modelledShare: sent[id] && el.area > 0 ? Math.min(1, sent[id].area / el.area) : 0 },
+  ]));
+}
+
+/** Each surface's area cut to its share inside the modelled storeys; `fallback` for a surface with none. */
+function clippedToStoreys(elements: Record<string, any>, fallback: number): Record<string, any> {
+  return Object.fromEntries(Object.entries(elements).map(([id, el]) => [
+    id,
+    { ...el, area: Number(el.area ?? 0) * (typeof el.modelledShare === 'number' ? el.modelledShare : fallback) },
+  ]));
+}
+
+/**
+ * BuEM needs a roof and a floor and fills a missing one with a default that
+ * loses heat. Where clipping removed every roof or floor of `whole`, the
+ * ceiling or floor to the storey left out stands in, the size of one storey,
+ * with b_transmission 0: a neighbour at the same temperature.
+ */
+function withInternalBoundaries(clipped: Record<string, any>, whole: Record<string, any>, storeyArea: number): Record<string, any> {
+  const result = { ...clipped };
+  const has = (elements: Record<string, any>, type: string) => Object.values(elements).some((el) => el.type === type && Number(el.area) > 0);
+  for (const type of ['roof', 'floor'] as const) {
+    if (has(clipped, type) || !has(whole, type)) continue;
+    const id = type === 'roof' ? 'internal_ceiling' : 'internal_floor';
+    result[id] = { id, label: id, type, area: storeyArea, uValue: 1, gValue: null, tilt: 0, azimuth: 0, bTransmission: 0 };
+  }
+  return result;
+}
+
 /** Below this tilt a window is a skylight and sits in a roof. */
 const SKYLIGHT_MAX_TILT = 60;
 
@@ -632,16 +718,20 @@ export function serializeToBuemFeature(
   // BuEM takes no storey count (n_storeys is deprecated and ignored), so the
   // count travels beside the block too, to split A_ref again on reopening.
   const storeys = Number(general.storeys || identity.storeys) || 0;
+  // BuEM has no storey input either: with storeys left out, the block itself
+  // is cut to them and the whole envelope travels beside it for reopening.
+  const modelled = partialStoreys(general.storeysModelled, storeys);
+  const storeyShare = modelled ? modelled.length / storeys : 1;
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
 
   if (typeof identity.floorArea === 'number') {
     // identity.floorArea is already the total conditioned floor area (BuEM A_ref semantics).
-    building.A_ref = { value: identity.floorArea, unit: 'm2' };
+    building.A_ref = { value: identity.floorArea * storeyShare, unit: 'm2' };
   } else if (typeof general.floorArea === 'number') {
     // general.floorArea is per-storey; A_ref needs the whole-building total.
-    building.A_ref = { value: general.floorArea * (Number(general.storeys) || 1), unit: 'm2' };
+    building.A_ref = { value: general.floorArea * (Number(general.storeys) || 1) * storeyShare, unit: 'm2' };
   }
 
   if (typeof identity.roomHeight === 'number') {
@@ -651,6 +741,11 @@ export function serializeToBuemFeature(
   }
 
   Object.assign(building, householdFields(identity.buildingType || general.buildingType, general));
+  // BuEM's internal gains follow residential_units, so with storeys left out it
+  // is the count the user gave for them; the whole building's is kept beside.
+  const keepUnits = Boolean(modelled && general.dwellingsModelled && !isServiceBuildingType(identity.buildingType || general.buildingType));
+  const unitsFull: number | null = keepUnits ? building.residential_units ?? null : null;
+  if (keepUnits) building.residential_units = general.dwellingsModelled;
 
   const outputs = { ...general.outputs };
   if (isServiceBuildingType(identity.buildingType || general.buildingType)) {
@@ -659,8 +754,15 @@ export function serializeToBuemFeature(
   }
   // With neither heating nor cooling selected BuEM skips the thermal solve and
   // the contract drops the envelope requirement.
+  let envelopeFull: Record<string, any> | undefined;
   if (needsEnvelope(outputs)) {
-    building.envelope = { elements: buildElementsToBuemEnvelope(elements) };
+    const storeyArea = Number(building.A_ref?.value ?? 0) / Math.max(1, modelled?.length ?? storeys);
+    building.envelope = {
+      elements: buildElementsToBuemEnvelope(modelled
+        ? withInternalBoundaries(clippedToStoreys(elements, storeyShare), elements, storeyArea)
+        : elements),
+    };
+    if (modelled) envelopeFull = { elements: buildElementsToBuemEnvelope(elements) };
   }
 
   // Thermal parameters
@@ -709,6 +811,9 @@ export function serializeToBuemFeature(
         building,
         ...(constructionYear ? { construction_year: constructionYear } : {}),
         ...(storeys ? { storeys } : {}),
+        ...(modelled ? { storey_list: storeyList(modelled, storeys) } : {}),
+        ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
+        ...(keepUnits ? { residential_units_full: unitsFull } : {}),
         ...(refurbishment ? { refurbishment } : {}),
         outputs,
         solver: {
@@ -800,11 +905,15 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   const buem = (props.buem ?? {}) as Record<string, unknown>;
   const bldg = (buem.building ?? {}) as Record<string, unknown>;
   const envelopeBlk = (bldg.envelope ?? {}) as Record<string, unknown>;
-  const elements: Record<string, any> = {};
+  const fullBlk = (buem.envelope_full ?? {}) as Record<string, unknown>;
+  const importedStoreys = Number(buem.storeys ?? bldg.n_storeys ?? 0);
+  const modelled = Array.isArray(fullBlk.elements) ? partialStoreys(modelledFromList(buem.storey_list), importedStoreys) : undefined;
+  const sourceElements = modelled ? fullBlk.elements : envelopeBlk.elements;
+  let elements: Record<string, any> = {};
 
   // Parse envelope elements
-  if (Array.isArray(envelopeBlk.elements)) {
-    envelopeBlk.elements.forEach((el: any) => {
+  if (Array.isArray(sourceElements)) {
+    sourceElements.forEach((el: any) => {
       if (!el || typeof el !== 'object') return;
       const id = String(el.id ?? '');
       if (!id) return;
@@ -828,18 +937,23 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     });
   }
 
-  // Parse general config. bldg.A_ref is the total conditioned floor area; general.floorArea
-  // is per-storey, so divide by the building's own storey count.
-  const importedStoreys = Number(buem.storeys ?? bldg.n_storeys ?? 0);
+  if (modelled) {
+    const sent = Object.fromEntries((envelopeBlk.elements as any[] ?? []).map((el) => [String(el?.id ?? ''), { area: qty(el?.area) }]));
+    elements = withModelledShares(elements, sent);
+  }
+
+  // Parse general config. bldg.A_ref is the total conditioned floor area of the
+  // modelled storeys; general.floorArea is per storey, so divide by their count.
   const importedYear = Number(buem.construction_year ?? bldg.construction_period) || 0;
   const general: Record<string, any> = {
     // Omitted when unparseable so a { ...DEFAULT_GENERAL, ...general } merge keeps the default.
     ...(importedYear ? { constructionYear: importedYear } : {}),
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
     country: String(bldg.country ?? ''),
-    floorArea: qty(bldg.A_ref) / Math.max(1, importedStoreys),
+    floorArea: qty(bldg.A_ref) / Math.max(1, modelled?.length ?? importedStoreys),
     roomHeight: qty(bldg.h_room),
     storeys: importedStoreys,
+    ...(modelled ? { storeysModelled: modelled } : {}),
     use_milp: ((buem.solver ?? {}) as Record<string, unknown>).use_milp === true,
     compute_cooling: ((buem.solver ?? {}) as Record<string, unknown>).compute_cooling !== false,
     // Only the values the feature sets: the caller merges over DEFAULT_GENERAL.

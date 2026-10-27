@@ -1,6 +1,7 @@
 // The clicked surface's panel: a fixed column left of the model on a wide
 // screen, so it never covers the building while it turns; a sheet over the
-// bottom of the screen on a narrow one.
+// bottom of the screen on a narrow one. It holds every section of one
+// surface, whichever tab the building panel shows.
 
 import { X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
@@ -14,15 +15,18 @@ interface SurfacePanelProps {
   title?: string;
   subtitle?: string;
   emptyText: string;
+  /** Picks a surface without the model; shown above the content in the column. */
+  picker?: React.ReactNode;
   onClose: () => void;
   children?: React.ReactNode;
 }
 
-export function SurfacePanel({ docked, open, title, subtitle, emptyText, onClose, children }: SurfacePanelProps) {
+export function SurfacePanel({ docked, open, title, subtitle, emptyText, picker, onClose, children }: SurfacePanelProps) {
   const t = useT();
   if (docked && !open) return null;
   return (
     <aside
+      data-tour="surface"
       aria-label={title}
       className={cn(
         'flex flex-col border-border bg-card',
@@ -31,6 +35,7 @@ export function SurfacePanel({ docked, open, title, subtitle, emptyText, onClose
           : 'w-[300px] shrink-0 rounded-lg border',
       )}
     >
+      {picker && !docked && <div className="shrink-0 border-b border-border p-2">{picker}</div>}
       {open ? (
         <>
           <div className={cn(

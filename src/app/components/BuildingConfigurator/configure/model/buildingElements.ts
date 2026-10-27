@@ -17,6 +17,8 @@ export interface BuildingElement {
   bTransmission?: number;
   /** For a window or door, the id of the wall or roof it sits in (BuEM parent_id). */
   parentId?: string;
+  /** Share of the area inside the storeys modelled (0 to 1); absent while every storey is modelled. */
+  modelledShare?: number;
   measureType?: string;
   measureTypeOptions?: string[];
   /** Snapshot of the imported/default values — stamped once, never changed. Used to show reset buttons. */

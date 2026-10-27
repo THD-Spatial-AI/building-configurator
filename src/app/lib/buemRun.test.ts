@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { runBuildingSimulation, runIdentity, toBuem, type RunContext } from './buemRun';
+import { previewHeatingPerM2, runBuildingSimulation, runIdentity, toBuem, type RunContext, type WeatherChoice } from './buemRun';
 import type { BuemBuildingRunRequest } from './services';
 import { adaptBuemFeature, serializeToBuemFeature, type BuildingState } from './buemAdapter';
 import { withEdits } from '../components/BuildingConfigurator/useBuildingModel';
@@ -103,7 +103,7 @@ describe('toBuem', () => {
 
 describe('runBuildingSimulation', () => {
   /** The request a run sends, with the transport failing after capturing it. */
-  async function sentRequest(runContext?: RunContext): Promise<BuemBuildingRunRequest> {
+  async function sentRequest(runContext?: RunContext, weather?: WeatherChoice): Promise<BuemBuildingRunRequest> {
     const requests: BuemBuildingRunRequest[] = [];
     const services = {
       runBuemBuilding: async (request: BuemBuildingRunRequest) => {
@@ -112,7 +112,7 @@ describe('runBuildingSimulation', () => {
       },
     };
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, runContext);
+    await runBuildingSimulation(services, runIdentity(opened, general), elements, general, runContext, weather);
     return requests[0];
   }
 
@@ -151,6 +151,14 @@ describe('runBuildingSimulation', () => {
     expect(sent).not.toContain('wall_sliver');
   });
 
+  it('sends the weather the user picked, and no weather fields by default', async () => {
+    const picked = await sentRequest(undefined, { weather_provider: 'era5-land', weather_scenario: 'p90' });
+    expect(picked).toMatchObject({ weather_provider: 'era5-land', weather_scenario: 'p90' });
+    const request = await sentRequest();
+    expect(request).not.toHaveProperty('weather_provider');
+    expect(request).not.toHaveProperty('weather_scenario');
+  });
+
   it('runs the default year and sends no model id without a run context', async () => {
     const request = await sentRequest();
     expect(request).toMatchObject({ start_date: '2018-01-01T00:00:00Z', end_date: '2018-12-31T23:00:00Z' });
@@ -178,16 +186,11 @@ describe('adaptBuemFeature on stored blocks', () => {
   });
 
   it('reopens with the same building parameters and solver choice', () => {
-    const { floorArea, storeys, ...rest } = general;
-    expect(generalFrom(reopened)).toMatchObject(rest);
+    expect(generalFrom(reopened)).toMatchObject(general);
   });
 
-  // v6-draft deprecates n_storeys, so the block keeps the total floor area but
-  // not how it splits across storeys.
-  it('reopens with the same total floor area but the default storey count', () => {
-    const reopenedGeneral = generalFrom(reopened);
-    expect(reopenedGeneral.floorArea * reopenedGeneral.storeys).toBe(general.floorArea * general.storeys);
-    expect(reopenedGeneral.storeys).toBe(DEFAULT_GENERAL.storeys);
+  it('keeps the storey count beside the block, never as the deprecated n_storeys', () => {
+    expect(toBuem(edited).storeys).toBe(general.storeys);
     expect(toBuem(edited).building).not.toHaveProperty('n_storeys');
   });
 
@@ -198,5 +201,28 @@ describe('adaptBuemFeature on stored blocks', () => {
 
   it('serialises to the blocks it was opened from', () => {
     expect(toBuem(reopened)).toEqual(toBuem(edited));
+  });
+});
+
+describe('previewHeatingPerM2', () => {
+  const context: RunContext = { startDate: '2019-01-01T00:00:00Z', endDate: '2019-12-31T23:00:00Z' };
+
+  it('asks for the heating summary only and gives space heating per A_ref', async () => {
+    const previewBuemBuilding = vi.fn(async (_request: BuemBuildingRunRequest) => ({
+      buem: { thermal_load_profile: { summary: { heating: { total: 8000 } } } },
+    }));
+    const perM2 = await previewHeatingPerM2({ previewBuemBuilding }, identity, elements, general, context);
+    const request = previewBuemBuilding.mock.calls[0][0];
+    expect(request.outputs).toEqual({ heating: 'summary', cooling: 'none', electricity: 'none', hot_water: 'none', kitchen: 'none' });
+    expect(request.start_date).toBe(context.startDate);
+    expect(request.building).toHaveProperty('envelope');
+    expect(perM2).toBe(8000 / 100);
+  });
+
+  it('gives null without a preview service, or when the run fails', async () => {
+    expect(await previewHeatingPerM2({}, identity, elements, general)).toBeNull();
+    const failing = async () => { throw new Error('gateway down'); };
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(await previewHeatingPerM2({ previewBuemBuilding: failing }, identity, elements, general)).toBeNull();
   });
 });

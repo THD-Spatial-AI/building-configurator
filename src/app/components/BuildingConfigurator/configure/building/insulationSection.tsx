@@ -9,6 +9,7 @@ import { variantName,
   REFURB_TYPES, customCount, type RefurbElementType, type RefurbStates,
 } from '@/app/lib/refurbishment';
 import type { IgnisVariantLevel } from '@/app/lib/ignisAdapter';
+import { HWB_CLASSES, hwbClass } from '@/app/lib/energyClass';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
@@ -25,10 +26,15 @@ export interface InsulationProps {
   onSetState: (types: RefurbElementType[], number: number) => void;
   onSetTypeUValue: (type: RefurbElementType, uValue: number) => void;
   onSetTypeLossFactor: (type: RefurbElementType, b: number) => void;
-  /** Opens the Envelope tab, where surfaces are edited one by one. */
-  onOpenEnvelope?: () => void;
   /** Adds a surface the 3D data lacks, such as a wall against ground. */
   onAddSurface?: (type: RefurbElementType, values: Partial<BuildingElement>) => void;
+  /** Each level's indicative energy class; absent when the host offers no preview run. */
+  classes?: {
+    /** Space heating per m² by level number, null where a run failed; null until compared. */
+    perM2: Record<number, number | null> | null;
+    comparing: boolean;
+    onCompare: () => void;
+  };
 }
 
 const TYPE_LABELS: Record<RefurbElementType, (t: Translate) => string> = {
@@ -63,23 +69,45 @@ export function insulationSummary(t: Translate, format: FormatNumber, { levels, 
 export function InsulationSection(props: Props) {
   const t = useT();
   const format = useFormatNumber();
-  const { mode, levels, onOpenEnvelope, avgUValue } = props;
+  const { mode, levels, avgUValue } = props;
   return (
     <div className="flex flex-col gap-4">
       {levels.length > 0 && <BuildingPreset {...props} />}
       {mode === 'expert' && <ElementTable {...props} />}
       {mode === 'expert' && props.onAddSurface && <AddSurface onAdd={props.onAddSurface} />}
       {mode === 'expert' && <SynthesisedWindows {...props} />}
-      <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2">
+      <div className="border-t border-border/60 pt-2">
         <span className="text-[11px] text-muted-foreground">
           {t('insulation.averageU')} <span className="font-semibold text-foreground">{format(avgUValue, 2)} W/m²K</span>
         </span>
-        {onOpenEnvelope && (
-          <button type="button" onClick={onOpenEnvelope} className="cursor-pointer text-[11px] font-medium text-primary hover:underline">
-            {t('insulation.editSurfaces')}
-          </button>
-        )}
       </div>
+    </div>
+  );
+}
+
+/** The action that compares the levels, then the class scale and what the classes are. */
+function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['classes']> }) {
+  const t = useT();
+  const failed = classes.perM2 !== null && Object.values(classes.perM2).every((value) => value === null);
+  if (!classes.perM2 || failed) {
+    return (
+      <button
+        type="button"
+        disabled={classes.comparing}
+        onClick={classes.onCompare}
+        className="h-8 cursor-pointer self-start rounded-md border border-border bg-card px-3 text-[11px] font-semibold text-foreground hover:bg-muted disabled:cursor-wait disabled:opacity-60"
+      >
+        {t(classes.comparing ? 'insulation.classes.comparing' : 'insulation.classes.compare')}
+        {failed && !classes.comparing && <span className="ml-2 font-normal text-destructive">{t('insulation.classes.failed')}</span>}
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex h-1.5 overflow-hidden rounded-full" aria-hidden>
+        {HWB_CLASSES.map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
+      </div>
+      <span className="text-[10px] leading-snug text-muted-foreground">{t('insulation.classes.note')}</span>
     </div>
   );
 }
@@ -88,8 +116,9 @@ function presentTypes(elements: Record<string, BuildingElement>): RefurbElementT
   return REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
 }
 
-function BuildingPreset({ levels, states, initial, elements, variantCode, onSetState }: Props) {
+function BuildingPreset({ levels, states, initial, elements, variantCode, onSetState, classes }: Props) {
   const t = useT();
+  const format = useFormatNumber();
   const types = presentTypes(elements);
   const custom = types.reduce((n, type) => n + customCount(elements, type, states[type], initial, levels), 0);
   const uniform = types.every((type) => states[type] === states[types[0]]);
@@ -100,23 +129,38 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
         {t('insulation.preset.label')}
       </FieldLabel>
       <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${levels.length}, minmax(0, 1fr))` }}>
-        {levels.map((level) => (
-          <button
-            key={level.code}
-            type="button"
-            aria-pressed={selected === level.number}
-            onClick={() => onSetState(REFURB_TYPES, level.number)}
-            className={cn(
-              'cursor-pointer rounded-[6px] border px-2 py-1.5 text-[11px] font-medium leading-snug transition-colors',
-              selected === level.number
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border bg-card text-muted-foreground hover:bg-muted',
-            )}
-          >
-            {variantName(t, level.label, level.number)}
-          </button>
-        ))}
+        {levels.map((level) => {
+          const perM2 = classes?.perM2?.[level.number];
+          const energyClass = typeof perM2 === 'number' ? hwbClass(perM2) : null;
+          return (
+            <button
+              key={level.code}
+              type="button"
+              aria-pressed={selected === level.number}
+              onClick={() => onSetState(REFURB_TYPES, level.number)}
+              className={cn(
+                'flex cursor-pointer items-center gap-2 rounded-[6px] border px-2 py-1.5 text-left text-[11px] font-medium leading-snug transition-colors',
+                selected === level.number
+                  ? 'border-2 border-[#475B7A] bg-[#E6EAF2] text-[#33415C] dark:border-[#C3CDDD] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]'
+                  : 'border-border bg-card text-muted-foreground hover:bg-muted',
+              )}
+            >
+              {energyClass && (
+                <span className={cn('flex size-7 shrink-0 items-center justify-center rounded-md text-[12px] font-extrabold', energyClass.badge)}>
+                  {energyClass.label}
+                </span>
+              )}
+              <span className="flex min-w-0 flex-col">
+                <span>{variantName(t, level.label, level.number)}</span>
+                {typeof perM2 === 'number' && (
+                  <span className="text-[10px] font-normal">{t('insulation.classes.perM2', { value: format(perM2, 0) })}</span>
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
+      {classes && <LevelClasses classes={classes} />}
       <p className="text-[10px] leading-snug text-muted-foreground">
         {variantCode ? t('insulation.preset.fromVariant', { code: variantCode }) : t('insulation.preset.fromType')}
         {!uniform && ` ${t('insulation.preset.typesDiffer')}`}

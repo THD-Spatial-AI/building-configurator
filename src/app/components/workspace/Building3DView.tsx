@@ -6,7 +6,7 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, Download, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
+import { AlertTriangle, ArrowLeft, CircleHelp, Download, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
@@ -17,26 +17,45 @@ import { BuildingEditor } from '../BuildingConfigurator/configure/building/Build
 import { useBuildingModel } from '../BuildingConfigurator/useBuildingModel';
 import { hasInvalidArea } from '../BuildingConfigurator/configure/model/buildingElements';
 import { cn } from '@/lib/utils';
-import { isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
+import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePanel } from './SurfacePanel';
+import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
+import { TOPICS } from '@/app/config/topics';
 import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { PvOverview } from './PvOverview';
+import { TechnologiesTab } from './TechnologiesTab';
+import { StepHints, Tour } from './Guidance';
+import { DEFAULT_WEATHER, WeatherSection, weatherChoice, type WeatherSelection } from './WeatherSection';
+import type { WeatherOptions } from '../../lib/services';
 import { PvSurfaceSection } from './PvSurfaceSection';
-import { TechnologyCards, type Technologies } from './TechnologyCards';
+import type { Technologies } from './TechnologyCards';
+import { StoreyPanel, StoreysModelled } from './StoreysModelled';
+import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
+import type { EnergyTotals } from '../../lib/loadProfile';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
 import { pvLayouts } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
-import { buildingTypeName } from '../BuildingConfigurator/shared/buildingOptions';
+import { buildingTypeName, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string };
+
+/** BuEM's space heating per A_ref of the modelled storeys, or null when the figure is not BuEM's (ignis, an upload) or missing. */
+function buemHeatingPerM2(
+  totals: EnergyTotals,
+  general: { floorArea: number; storeys: number; storeysModelled: number[] | null },
+): number | null {
+  const heating = Number(totals.heating);
+  const aRef = general.floorArea * (general.storeysModelled?.length ?? general.storeys);
+  const fromBuem = totals.heatingSource === undefined || totals.heatingSource === 'buem';
+  return fromBuem && Number.isFinite(heating) && heating > 0 && aRef > 0 ? heating / aRef : null;
+}
 
 export interface Building3DViewProps {
   building: BuildingState;
@@ -62,9 +81,9 @@ export interface Building3DViewProps {
   /** Credits for the building's data, as its licences require; shown in a corner of the 3D view. */
   attribution?: ReactNode;
   /**
-   * The building's PV. Its modules are drawn on every tab; on the Technologies
-   * tab suggested surfaces are highlighted, a clicked surface opens its PV
-   * settings, and products can be dropped on surfaces. Controlled; hold it
+   * The building's PV. Its modules are drawn and a clicked surface shows its
+   * PV settings on every tab; on the Technologies tab suggested surfaces are
+   * highlighted and products can be dropped on surfaces. Controlled; hold it
    * stable as for `services`.
    */
   pv?: PvMode;
@@ -72,17 +91,23 @@ export interface Building3DViewProps {
   technologies?: Technologies;
   /** The mode the view opens in. The user can still switch; the next opening starts here again. */
   defaultMode?: 'basic' | 'expert';
-  /** The tab the view opens on. Absent: the energy overview. */
-  defaultTab?: 'overview' | 'parameters' | 'envelope' | 'technologies';
+  /** The tab the view opens on. Absent: Building. */
+  defaultTab?: 'building' | 'technologies';
   /**
    * The language of the view's own text: en, de, es, fr, it, nl, pl or cs. A region tag counts as its
    * language (de-DE), anything else as en. Host-supplied text (PV notice, technology cards) is shown as passed.
    */
   language?: string;
+  /**
+   * The guided tour. With run true it starts as the view opens; onFinish is
+   * called when it is finished or skipped, for the host to remember the visit.
+   * The header's Tour button starts it again either way.
+   */
+  tour?: { run: boolean; onFinish: () => void };
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'basic', defaultTab, language: languageCode,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'basic', defaultTab, language: languageCode, tour,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
@@ -101,8 +126,21 @@ export function Building3DView({
   );
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
   const installedPvIds = useMemo(() => [...(pvSets?.installed ?? [])], [pvSets]);
+  /** Null without the host's weather options, or while they load or after they failed: no weather choice. */
+  const [weatherOptions, setWeatherOptions] = useState<WeatherOptions | null>(null);
+  const [weatherSelection, setWeatherSelection] = useState<WeatherSelection>(DEFAULT_WEATHER);
+  const { fetchWeatherOptions } = services;
+  useEffect(() => {
+    if (!fetchWeatherOptions) return;
+    let cancelled = false;
+    fetchWeatherOptions()
+      .then((options) => { if (!cancelled) setWeatherOptions(options); })
+      .catch((err) => console.error('[weather] options request failed', err));
+    return () => { cancelled = true; };
+  }, [fetchWeatherOptions]);
+  const weather = useMemo(() => weatherChoice(weatherOptions, weatherSelection), [weatherOptions, weatherSelection]);
   const model = useBuildingModel(services, building, {
-    estimateHeatDemand: false, runContext, demandProfile, language,
+    estimateHeatDemand: false, runContext, weather, demandProfile, language,
     pvSurfaceIds: installedPvIds, pvLayouts: layouts,
     pvProductFor: pv ? (id) => surfaceProduct(pv, id)?.id : undefined,
   });
@@ -124,11 +162,21 @@ export function Building3DView({
   /** Bumped to turn the model towards a surface picked from a list. */
   const [focus, setFocus] = useState<{ id: string; token: number } | null>(null);
   /** The open tab of the panel on the right. */
-  const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : defaultTab ?? 'overview');
+  const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : 'building');
   /** On the Technologies tab, surfaces open their PV settings and take dropped products. */
   const onTech = tab === 'technology' && pv !== undefined;
   /** The PV surface under the pointer on the Technologies tab, for its hover card. */
   const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
+  /** While on, a click in the model picks a storey instead of a surface. */
+  const [storeyMode, setStoreyMode] = useState(false);
+  const [pickedStorey, setPickedStorey] = useState<number | null>(null);
+  const leaveStoreyMode = () => { setStoreyMode(false); setPickedStorey(null); };
+  const [touring, setTouring] = useState(tour?.run ?? false);
+  const tourRun = tour?.run ?? false;
+  useEffect(() => { if (tourRun) setTouring(true); }, [tourRun]);
+  const endTour = () => { setTouring(false); tour?.onFinish(); };
+  /** A run was started in this view, so the step hints have done their work. */
+  const [ran, setRan] = useState(false);
 
   const openSurface = (next: SurfaceSelection | null) => {
     setSelected(next);
@@ -149,13 +197,14 @@ export function Building3DView({
 
   /** Picks a surface from a list: shows it in the model and opens it in the panel. */
   const selectFromList = (id: string) => {
+    leaveStoreyMode();
     setFocus((prev) => ({ id, token: (prev?.token ?? 0) + 1 }));
     requestSurface({ id });
   };
 
-  /** A click in the model opens an envelope surface, or on the Technologies tab any surface that takes PV. */
+  /** A click in the model opens an envelope surface or a surface that takes PV. */
   const selectInModel = (id: string | null) => {
-    requestSurface(id && (elements[id] || (onTech && pv?.surfaces[id])) ? { id } : null);
+    requestSurface(id && (elements[id] || pv?.surfaces[id]) ? { id } : null);
   };
 
   /** A product dropped on a surface: it goes on that surface, which gets PV if it had none, and opens. */
@@ -173,6 +222,15 @@ export function Building3DView({
     [elements],
   );
   const surfaces = geometry?.surfaces ?? [];
+  const drawnIds = useMemo(
+    () => drawnSurfaceIds(geometry?.surfaces ?? [], building.envelope, envelopeIds),
+    [geometry, building.envelope, envelopeIds],
+  );
+  /** Models only these storeys (null: all), each surface cut to its share inside them. */
+  const setModelledStoreys = (modelled: number[] | null) => model.setStoreysModelled(
+    modelled,
+    modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
+  );
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
   }, [pv]);
@@ -202,9 +260,10 @@ export function Building3DView({
   const onKeyRef = useRef<(e: KeyboardEvent) => void>(() => {});
   onKeyRef.current = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      // An open prompt's own dialog closes itself on Escape.
-      if (exitPromptOpen || pendingSurface) return;
+      // An open prompt's own dialog, and the tour, close themselves on Escape.
+      if (exitPromptOpen || pendingSurface || touring) return;
       if (exportOpen) setExportOpen(false);
+      else if (storeyMode) leaveStoreyMode();
       else if (selected) requestSurface(null);
       else requestExit();
       return;
@@ -227,7 +286,7 @@ export function Building3DView({
   }, []);
 
   const selectedElement = selected ? elements[selected.id] : undefined;
-  const selectedPv = onTech && selected ? pv?.surfaces[selected.id] : undefined;
+  const selectedPv = selected ? pv?.surfaces[selected.id] : undefined;
   // The measured area of the clicked polygon, offered when the envelope's own
   // figure is missing or disagrees with it.
   const selectedGeometryArea = selected
@@ -237,43 +296,77 @@ export function Building3DView({
       })()
     : null;
 
-  const panelBody = selected && selectedPv && pv ? (
-    <PvSurfaceSection
-      key={selected.id}
-      surfaceId={selected.id}
-      surface={selectedPv}
-      pv={pv}
-      elements={elements}
-      layout={layouts[selected.id]}
-      polygon={surfaces.find((surface) => surface.id === selected.id)}
-      onClose={() => openSurface(null)}
-    />
-  ) : selected && selectedElement ? (
-    <SurfaceQuickEditor
-      key={selected.id}
-      element={selectedElement}
-      geometryArea={selectedGeometryArea}
-      uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
-      mode={mode}
-      onUpdate={(patch) => model.updateElement(selected.id, patch)}
-      onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
-    />
+  // Envelope, then PV where the surface takes it; a roof of another building has only PV.
+  const panelBody = selected && (selectedElement || selectedPv) ? (
+    <div key={selected.id} className="flex flex-col gap-3 p-3">
+      {selectedElement && (
+        <SectionCard topic={TOPICS.envelope} title={t('surface.section.envelope')} info={t('help.envelope')}>
+          <SurfaceQuickEditor
+            element={selectedElement}
+            geometryArea={selectedGeometryArea}
+            uValuePresets={tabulaUValueOptions(model.ignis, selectedElement.type)}
+            mode={mode}
+            onUpdate={(patch) => model.updateElement(selected.id, patch)}
+            onDelete={() => { model.deleteSurface(selected.id); openSurface(null); }}
+          />
+        </SectionCard>
+      )}
+      {selectedPv && pv && (
+        <SectionCard topic={TOPICS.pv} title={t('surface.section.pv')} info={t('help.pv')}>
+          <PvSurfaceSection
+            surfaceId={selected.id}
+            surface={selectedPv}
+            pv={pv}
+            elements={elements}
+            layout={layouts[selected.id]}
+            polygon={surfaces.find((surface) => surface.id === selected.id)}
+            showGeometry={!selectedElement}
+            onClose={() => openSurface(null)}
+          />
+        </SectionCard>
+      )}
+    </div>
   ) : null;
   const panelSubtitle = selectedElement
-    ? (selectedPv
-        ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m²`
-        : `${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`)
+    ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`
     : selectedPv?.label;
+  const pickable = useMemo(() => [
+    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label })),
+    ...Object.entries(pv?.surfaces ?? {})
+      .filter(([id]) => !elements[id])
+      .map(([id, surface]) => ({ id, label: surface.label ?? id })),
+  ], [elements, pv]);
+  const storeyBody = storeyMode && pickedStorey !== null ? (
+    <StoreyPanel
+      storey={pickedStorey}
+      modelled={model.general.storeysModelled}
+      storeys={model.general.storeys}
+      onChange={setModelledStoreys}
+    />
+  ) : null;
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
-      open={panelBody !== null}
-      title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-      subtitle={panelSubtitle}
-      emptyText={t(onTech ? 'view.panel.emptyPv' : 'view.panel.empty')}
-      onClose={() => requestSurface(null)}
+      open={(storeyMode ? storeyBody : panelBody) !== null}
+      title={storeyMode && pickedStorey !== null
+        ? t('storeys.storey', { number: pickedStorey })
+        : selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
+      subtitle={storeyMode ? (pickedStorey === 1 ? t('storeys.groundFloor') : undefined) : panelSubtitle}
+      emptyText={t(storeyMode ? 'storeys.pickHint' : 'view.panel.empty')}
+      picker={(
+        <select
+          aria-label={t('surface.pick')}
+          value={selected?.id ?? ''}
+          onChange={(e) => selectFromList(e.target.value)}
+          className="h-8 w-full cursor-pointer rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
+        >
+          <option value="" disabled>{t('surface.pick')}</option>
+          {pickable.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+        </select>
+      )}
+      onClose={() => (storeyMode ? setPickedStorey(null) : requestSurface(null))}
     >
-      {panelBody}
+      {storeyMode ? storeyBody : panelBody}
     </SurfacePanel>
   );
 
@@ -304,6 +397,14 @@ export function Building3DView({
             <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setTouring(true)}
+          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+        >
+          <CircleHelp className="size-3.5" />
+          <span className="hidden sm:inline">{t('tour.button')}</span>
+        </button>
         <div className="relative shrink-0">
           <button
             type="button"
@@ -369,7 +470,7 @@ export function Building3DView({
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
         {wide && surfacePanel}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-        <div className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
+        <div data-tour="model" className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
@@ -380,7 +481,7 @@ export function Building3DView({
               surfaces={surfaces}
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
-              visibleIds={envelopeIds}
+              visibleIds={drawnIds}
               pvIds={pvSets?.installed}
               pvModules={pvModules}
               candidateIds={onTech ? pvSets?.suggested : undefined}
@@ -388,6 +489,8 @@ export function Building3DView({
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
               focusToken={focus?.token}
+              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: storeyMode ? pickedStorey : null }}
+              onSelectStorey={storeyMode ? setPickedStorey : undefined}
               onSelectSurface={selectInModel}
             />
           ) : (
@@ -405,7 +508,29 @@ export function Building3DView({
             </div>
           )}
 
-          {onTech && geometry && !geometry.note && <PvHintPill />}
+          {onTech && geometry && !geometry.note && !storeyMode && <PvHintPill />}
+          {!onTech && surfaces.length > 0 && !detached && !geometry?.note && !storeyMode && !touring && (
+            <StepHints surfaceOpened={selected !== null} edited={hasUnsavedChanges} ran={ran} />
+          )}
+
+          {model.general.storeys > 1 && surfaces.length > 0 && !detached && (
+            <button
+              type="button"
+              aria-pressed={storeyMode}
+              onClick={() => {
+                if (storeyMode) { leaveStoreyMode(); return; }
+                requestSurface(null);
+                setStoreyMode(true);
+              }}
+              className={cn(
+                'absolute left-3 top-3 flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[11px] font-semibold shadow-sm transition-colors',
+                storeyMode ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card/90 text-foreground hover:bg-muted',
+              )}
+            >
+              <Layers className="size-3.5" />
+              {t('storeys.pick')}
+            </button>
+          )}
 
           <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
             {invalidIds.size > 0 && (
@@ -429,30 +554,53 @@ export function Building3DView({
           'flex shrink-0 flex-col gap-3',
           wide ? 'w-[400px] xl:w-[520px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
+              occupancy={isServiceBuildingType(model.general.buildingType) ? undefined : {
+                dwellings: model.general.residential_units,
+                persons: model.general.num_persons,
+              }}
               onEditField={model.setGen}
-              elements={elements}
-              baselineElements={model.baselineElements}
-              roofConfig={model.roofConfig}
-              onSelectSurface={selectFromList}
               activeTab={tab}
               onTabChange={setTab}
               technologySlot={pv || technologies ? (
-                <div className="flex flex-col gap-3">
-                  {pv && <PvOverview pv={pv} elements={elements} layouts={layouts} mode={mode} onSelect={selectFromList} />}
-                  {technologies && <TechnologyCards technologies={technologies} />}
-                </div>
+                <TechnologiesTab
+                  pv={pv}
+                  technologies={technologies}
+                  elements={elements}
+                  layouts={layouts}
+                  mode={mode}
+                  onSelectSurface={selectFromList}
+                />
               ) : undefined}
-              parametersSlot={(openEnvelope) => (
+              parametersSlot={(
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
-                <div className="border-t border-border">
+                <div className="flex flex-col gap-3">
+                  {model.general.storeys > 1 && (
+                    <StoreysModelled
+                      storeys={model.general.storeys}
+                      modelled={model.general.storeysModelled}
+                      floorAreaPerStorey={model.general.floorArea}
+                      storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
+                      roomHeight={model.general.roomHeight}
+                      dwellings={isServiceBuildingType(model.general.buildingType) ? undefined : {
+                        value: model.general.dwellingsModelled,
+                        onChange: (value) => model.setGen('dwellingsModelled', value),
+                      }}
+                      disabled={surfaces.length === 0}
+                      onChange={setModelledStoreys}
+                    />
+                  )}
+                  {weatherOptions && Object.keys(weatherOptions.providers).length > 0 && (
+                    <WeatherSection options={weatherOptions} selection={weatherSelection} onChange={setWeatherSelection} />
+                  )}
                   <BuildingEditor
                     general={model.general}
                     setGen={model.setGen}
                     mode={mode}
+                    onShowExpert={() => setMode('expert')}
                     insulation={{
                       elements,
                       levels: model.ignis?.variants ?? [],
@@ -463,10 +611,11 @@ export function Building3DView({
                       onSetState: model.setRefurbishment,
                       onSetTypeUValue: model.setTypeUValue,
                       onSetTypeLossFactor: model.setTypeLossFactor,
-                      onOpenEnvelope: openEnvelope,
                       onAddSurface: (type, values) => { model.createSurface(type, values); },
+                      ...(model.canCompareLevels ? {
+                        classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
+                      } : {}),
                     }}
-                    hideIdentity
                   />
                 </div>
               )}
@@ -475,13 +624,8 @@ export function Building3DView({
                   {profileBar}
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
-                    thermalRating={model.thermalRating}
-                    showThermalRating={false}
-                    avgUValue={model.avgUValue}
-                    mode="basic"
-                    embedded
-                    showEstimateNotice={false}
                     pvAnnualKwh={model.pvAnnualKwh}
+                    heatingPerM2={buemHeatingPerM2(model.displayEnergyTotals, model.general)}
                   />
                 </div>
               )}
@@ -501,7 +645,8 @@ export function Building3DView({
 
           <button
             type="button"
-            onClick={model.runSimulation}
+            data-tour="run"
+            onClick={() => { setRan(true); model.runSimulation(); }}
             disabled={model.isRunningSimulation}
             className="flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(47,93,138,0.22)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
@@ -517,6 +662,8 @@ export function Building3DView({
       )}
 
       {!wide && surfacePanel}
+
+      {touring && <Tour onClose={endTour} />}
 
       <UnsavedChangesDialog
         open={pendingSurface !== null}

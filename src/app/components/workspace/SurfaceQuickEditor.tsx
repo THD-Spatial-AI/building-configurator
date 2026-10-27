@@ -9,6 +9,8 @@ import { AzimuthDial, PresetSlider, TiltDial } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT, type Translate } from '../../i18n';
 import { variantName } from '../../lib/refurbishment';
+import { isFlat, modelGeometry } from '../../lib/pvSurfaces';
+import { compassPoint } from './PvMode';
 import { DecimalInput } from '../BuildingConfigurator/shared/ui';
 
 /** Widest U-value the slider covers: a single-glazed window sits near 5. */
@@ -27,6 +29,20 @@ function insulationLabel(uValue: number, t: Translate): string {
   if (uValue <= 1) return t('surface.insulation.moderate');
   if (uValue <= 2) return t('surface.insulation.poor');
   return t('surface.insulation.none');
+}
+
+/** Tilt and facing as the 3D model has them, for Basic, where they are not edited. */
+function ModelOrientation({ element }: { element: BuildingElement }) {
+  const t = useT();
+  const format = useFormatNumber();
+  const { tilt, azimuth } = modelGeometry(element);
+  return (
+    <p className="rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">
+      {isFlat(tilt, azimuth)
+        ? t('surface.flatFromModel')
+        : t('surface.fromModel', { tilt: format(tilt, 0), azimuth: format(azimuth, 0), compass: t(`surface.compass.${compassPoint(azimuth)}`) })}
+    </p>
+  );
 }
 
 interface SurfaceQuickEditorProps {
@@ -147,14 +163,21 @@ export function SurfaceQuickEditor({
       )}
 
       {/* ── Orientation ── */}
+      {/* Tilt and facing change only what BuEM receives, not the geometry or the PV on it: Expert only. */}
+      {mode !== 'expert' ? <ModelOrientation element={element} /> : (
       <div className="flex items-start justify-center gap-4">
-        <AzimuthDial
-          value={element.azimuth}
-          reference={element.defaultAzimuth}
-          onChange={(azimuth) => onUpdate({ azimuth })}
-        />
+        {isFlat(element.tilt, element.azimuth) ? (
+          <span className="self-center rounded-md bg-muted px-2.5 py-1.5 text-[12px] font-semibold text-foreground">{t('surface.tiltShape.flat')}</span>
+        ) : (
+          <AzimuthDial
+            value={element.azimuth}
+            reference={element.defaultAzimuth}
+            onChange={(azimuth) => onUpdate({ azimuth })}
+          />
+        )}
         <TiltDial value={element.tilt} onChange={(tilt) => onUpdate({ tilt })} />
       </div>
+      )}
 
       {edited && (
         <div className="flex items-center justify-between gap-2 border-t border-border pt-2.5">

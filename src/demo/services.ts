@@ -43,12 +43,35 @@ export const fixtureServices: ConfiguratorServices = {
     throw new Error(`Heat demand is not calculated in the dev shell (variant ${variantCode})`);
   },
 
+  // ERA5-Land with no scenarios built shows the choice without a solar year.
+  async fetchWeatherOptions() {
+    return {
+      defaultProvider: 'merra-2',
+      providers: { 'merra-2': [2018, 2019, 2020], 'era5-land': [2018] },
+      scenarios: { 'merra-2': ['p10', 'p50', 'p90'], 'era5-land': [] },
+    };
+  },
+
   // Answers with the stored default run whatever was edited; a real host re-runs BuEM.
   async runBuemBuilding(request) {
     await new Promise((resolve) => setTimeout(resolve, RUN_DELAY_MS));
     const profile = DEMAND[request.osm_id];
     if (!profile) throw new Error(`No bundled BuEM result for building ${request.osm_id}`);
     return profile;
+  },
+
+  // A stand-in for BuEM's heating: transmission only, sum of U x A x b over
+  // 75 kKh a year, so refurbishment levels rank as they would. A real host
+  // runs BuEM and stores nothing.
+  async previewBuemBuilding(request) {
+    await new Promise((resolve) => setTimeout(resolve, RUN_DELAY_MS));
+    const value = (q: unknown) => Number((q as { value?: unknown } | undefined)?.value ?? 0);
+    const elements = ((request.building as { envelope?: { elements?: Record<string, unknown>[] } }).envelope?.elements ?? []);
+    const conductance = elements.reduce((sum, el) => {
+      const b = el.b_transmission === undefined ? 1 : value(el.b_transmission);
+      return sum + value(el.U) * value(el.area) * b;
+    }, 0);
+    return { buem: { thermal_load_profile: { summary: { heating: { total: conductance * 75 } } } } };
   },
 
   // A stand-in for the host's PV model: 0.2 kWp/m², 900 kWh/kWp a year.

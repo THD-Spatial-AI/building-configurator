@@ -51,8 +51,7 @@
       "note": "Odrzucenie przywraca przegrodę do stanu z chwili otwarcia edytora."
     },
     "panel": {
-      "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj.",
-      "emptyPv": "Kliknij dach lub ścianę, aby skonfigurować na niej PV."
+      "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
     }
   },
   "surface": {
@@ -104,7 +103,14 @@
       "vertical": "Pionowa",
       "pitched": "Nachylona"
     },
-    "degrees": "{degrees}°, {label}"
+    "degrees": "{degrees}°, {label}",
+    "section": {
+      "envelope": "Przegrody",
+      "pv": "PV"
+    },
+    "pick": "Wybierz przegrodę",
+    "fromModel": "{tilt}° · orientacja {azimuth}° {compass} · z modelu 3D",
+    "flatFromModel": "Płaska · z modelu 3D"
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",
@@ -192,9 +198,10 @@
       "investmentEstimate": "Inwestycja około {amount}, szacunek"
     },
     "catalogue": {
-      "title": "Katalog",
       "hint": "Przeciągnij produkt na dach lub ścianę albo wybierz go w panelu powierzchni.",
-      "module": "{width} × {height} m · {watts} W"
+      "module": "{width} × {height} m · {watts} W",
+      "toggle": "Katalog ({count})",
+      "search": "Szukaj w katalogu"
     },
     "product": {
       "label": "Produkt",
@@ -219,45 +226,46 @@
       "save": "Zapisz",
       "saved": "Zapisano jako {name}.",
       "saveFailed": "Nie udało się zapisać technologii. Spróbuj ponownie."
-    }
+    },
+    "installed": {
+      "title": "Zainstalowane na tym budynku",
+      "empty": "Brak PV. Otwórz katalog i przeciągnij produkt na dach lub ścianę.",
+      "surfaces": {
+        "one": "na {count} przegrodzie",
+        "few": "na {count} przegrodach",
+        "many": "na {count} przegrodach",
+        "other": "na {count} przegrodach"
+      },
+      "modules": {
+        "one": "{count} moduł",
+        "few": "{count} moduły",
+        "many": "{count} modułów",
+        "other": "{count} modułu"
+      }
+    },
+    "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM."
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",
-    "remove": "Usuń {title}"
+    "remove": "Usuń {title}",
+    "inFocus": "Wybrana",
+    "product": "Produkt",
+    "add": "Dodaj technologię",
+    "totalEstimate": "{amount} do tej pory, szacunek",
+    "count": {
+      "one": "{count} technologia",
+      "few": "{count} technologie",
+      "many": "{count} technologii",
+      "other": "{count} technologii"
+    },
+    "pvSurfaces": {
+      "one": "{count} przegroda",
+      "few": "{count} przegrody",
+      "many": "{count} przegród",
+      "other": "{count} przegrody"
+    }
   },
   "editor": {
-    "identity": {
-      "name": {
-        "label": "Nazwa budynku",
-        "tip": "Czytelna nazwa budynku. Dołączana do eksportowanych plików.",
-        "placeholder": "np. 3434 · Dom jednorodzinny"
-      },
-      "type": {
-        "label": "Typ budynku",
-        "tip": "Kategoria budynku TABULA. Wpływa na domyślne współczynniki U i referencyjne zapotrzebowanie na energię."
-      },
-      "country": {
-        "label": "Kraj",
-        "tip": "Kraj służący do wyboru danych referencyjnych TABULA i stacji pogodowej COSMO."
-      },
-      "year": {
-        "label": "Rok budowy",
-        "tip": "Rok wybudowania budynku. ignis przypisuje go do okresu budowy TABULA, z którego pobiera domyślne współczynniki U."
-      },
-      "floorArea": {
-        "label": "Powierzchnia (na kondygnację)",
-        "tip": "Powierzchnia rzutu jednej kondygnacji; całkowita powierzchnia ogrzewana to ta wartość × liczba kondygnacji."
-      },
-      "storeys": {
-        "label": "Kondygnacje",
-        "tip": "Liczba kondygnacji nadziemnych."
-      },
-      "roomHeight": {
-        "label": "Wysokość pomieszczeń",
-        "tip": "Wysokość wewnętrzna w świetle na kondygnację. Służy do obliczenia kubatury ogrzewanej."
-      },
-      "volume": "Kubatura ogrzewana"
-    },
     "solver": {
       "useMilp": {
         "label": "Użyj solwera MILP",
@@ -275,7 +283,6 @@
       "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna."
     },
     "section": {
-      "identity": "Dane podstawowe",
       "occupancy": "Mieszkańcy",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",
@@ -299,10 +306,11 @@
       "dwellingsNotSet": "Nie podano mieszkań",
       "perDwelling": "{dwellings} · {persons} os. na mieszkanie"
     },
-    "header": {
-      "fallbackName": "Budynek"
-    },
-    "insulationTitle": "Izolacja i okna"
+    "insulationTitle": "Izolacja i okna",
+    "expertMore": {
+      "title": "Cieplne i symulacja",
+      "detail": "profile, urządzenia i solver zachowują wartości domyślne"
+    }
   },
   "comfort": {
     "mass": {
@@ -419,7 +427,6 @@
       "averageU": "średnie U {value} W/m²K"
     },
     "averageU": "Średni współczynnik U",
-    "editSurfaces": "Edytuj przegrody pojedynczo",
     "preset": {
       "label": "Ustaw cały budynek na",
       "tip": "Warianty termomodernizacji TABULA dla tego typu i wieku budynku. Wybór ustawia każdy typ przegrody; przegrody ustawione pojedynczo zachowują swoje wartości.",
@@ -496,6 +503,13 @@
         "usual": "Typowa",
         "advanced": "Zaawansowana"
       }
+    },
+    "classes": {
+      "compare": "Pokaż klasę energetyczną każdego poziomu",
+      "comparing": "BuEM liczy każdy poziom…",
+      "perM2": "{value} kWh/m²",
+      "note": "Klasa orientacyjna dla tego budynku: ogrzewanie na m² w austriackiej skali HWB, od A++ do G. Symulowana, nie jest świadectwem energetycznym.",
+      "failed": "Ostatnia próba nie powiodła się. Spróbuj ponownie."
     }
   },
   "options": {
@@ -596,30 +610,22 @@
   },
   "panel": {
     "title": {
-      "overview": "Przegląd energii",
-      "envelope": "Przegrody budynku",
-      "technology": "Technologie",
-      "parameters": "Parametry budynku"
+      "technology": "Technologie"
     },
     "tab": {
-      "overview": "Przegląd",
-      "parameters": "Parametry",
-      "envelope": "Przegrody"
+      "building": "Budynek"
     },
     "doneEditing": "Zakończ edycję",
-    "editParameters": "Edytuj parametry budynku"
+    "editParameters": "Edytuj parametry budynku",
+    "section": {
+      "identity": "Dane budynku"
+    },
+    "edit": "Edytuj"
   },
   "snapshot": {
     "status": {
       "default": "domyślne",
       "modified": "zmienione"
-    },
-    "thermalRating": {
-      "excellent": "Doskonała",
-      "good": "Dobra",
-      "fair": "Przeciętna",
-      "poor": "Słaba",
-      "veryPoor": "Bardzo słaba"
     },
     "row": {
       "type": "Typ",
@@ -644,35 +650,23 @@
       "hotWater": "Ciepła woda",
       "kitchen": "Kuchnia (gaz)"
     },
-    "estimateNotice": "Parametry budynku są szacowane na podstawie publicznych rejestrów. Otwórz konfigurator, aby je sprawdzić i dostosować.",
     "annualDemand": "Roczne zapotrzebowanie na energię",
-    "totalDemand": "Całkowite zapotrzebowanie",
-    "thermalEfficiency": "Efektywność cieplna",
     "unit": {
       "kWhPerYear": "kWh/rok",
       "kWhGasPerYear": "kWh gazu/rok"
     },
-    "pvGeneration": "Produkcja PV"
+    "pvGeneration": "Produkcja PV",
+    "storeysModelled": "{modelled} z {total} modelowanych",
+    "heatingPerM2": "Ogrzewanie {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Orientacyjna klasa zapotrzebowania na ciepło (symulowana, nie jest świadectwem energetycznym)",
+      "tip": "Roczne ogrzewanie z BuEM na powierzchnię odniesienia, przy pogodzie i użytkowaniu z obliczenia, sklasyfikowane według przedziałów austriackiej skali OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G powyżej 250). Nie obejmuje ciepłej wody, chłodzenia ani energii elektrycznej."
+    },
+    "tile": {
+      "statisticalDefault": "Wartość statystyczna"
+    }
   },
   "envelope": {
-    "group": {
-      "walls": "Ściany",
-      "windows": "Okna",
-      "doors": "Drzwi",
-      "roof": "Dach",
-      "floor": "Podłoga"
-    },
-    "roofShape": {
-      "flat": "niski spadek",
-      "monoPitch": "jednospadowy",
-      "gabled": "S + N",
-      "hipped": "S/N/E/W",
-      "vShape": "spadki do środka",
-      "sawTooth": "na S",
-      "custom": "własny"
-    },
-    "invalidAreaTip": "{count} bez powierzchni, popraw przed uruchomieniem symulacji",
-    "noArea": "brak powierzchni",
     "compassNorth": "N"
   },
   "common": {
@@ -732,10 +726,84 @@
       "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
-      "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne."
+      "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne.",
+      "dwellingsModelledRequired": "Niektóre kondygnacje są pominięte w modelu. Podaj liczbę mieszkań w modelowanych kondygnacjach w sekcji Modelowane kondygnacje przed uruchomieniem symulacji."
     },
     "comparison": {
       "lastRun": "w ostatniej pełnej symulacji"
+    }
+  },
+  "storeys": {
+    "title": "Modelowane kondygnacje",
+    "hint": "Kondygnacja 1 to parter. Pomiń kondygnacje, które nie należą do tego modelu, np. sklep na parterze; powierzchnia i przegrody obejmują tylko modelowane kondygnacje.",
+    "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
+    "storey": "Kondygnacja {number}",
+    "floorArea": "Modelowana powierzchnia",
+    "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m.",
+    "pick": "Kondygnacje",
+    "pickHint": "Kliknij kondygnację w modelu, aby zobaczyć, czy jest modelowana.",
+    "inModel": "W modelu",
+    "groundFloor": "Parter",
+    "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu.",
+    "dwellings": "Mieszkania w modelowanych kondygnacjach",
+    "dwellingsHint": "Zyski wewnętrzne w BuEM zależą od liczby mieszkań, a nie od powierzchni."
+  },
+  "help": {
+    "envelope": "Jak ta przegroda zatrzymuje ciepło: jej powierzchnia i współczynnik U trafiają do BuEM. Poziom modernizacji ustawia współczynnik U z TABULA; wartość zmieniona tutaj zostaje zachowana.",
+    "pv": "PV na tej przegrodzie: włącz je, wybierz produkt i jaką część powierzchni może zająć. Moduły są rozmieszczane na przegrodzie tak, jak pokazuje ją model 3D.",
+    "building": "Czym jest budynek: typ, rok i kraj wybierają wartości domyślne TABULA; powierzchnia kondygnacji i liczba kondygnacji ustalają powierzchnię ogrzewaną przez BuEM. Edytuj, aby je zmienić.",
+    "demand": "Roczne zapotrzebowanie budynku na energię według zastosowań, z ostatniego obliczenia BuEM lub zapisanego wyniku. Gaz do gotowania to osobne paliwo, poza sumą.",
+    "insulation": "Ustawia izolację wszystkich ścian, dachów, podłóg i okien naraz, z typologii TABULA dla tego typu i wieku budynku. Stan istniejący: budynek tak, jak TABULA opisuje go dla jego wieku, bez późniejszych prac. Typowa: modernizacja częsta w praktyce, np. docieplenie dachu i nowe okna. Zaawansowana: ambitna modernizacja w stronę standardu nowego budynku. Przegroda zmieniona osobno zachowuje swoją wartość.",
+    "occupancy": "Kto mieszka lub pracuje w budynku: liczba mieszkań i osób na mieszkanie ustalają zyski wewnętrzne i zużycie ciepłej wody w BuEM.",
+    "comfort": "Kiedy budynek jest ogrzewany: temperatura zadana, czy jest obniżana w nocy lub pod nieobecność (obniżenie) i czy uwzględniono ciepłą wodę.",
+    "outputs": "Jakie profile BuEM zwraca dla każdego zastosowania: podsumowanie roczne, serię godzinową lub żaden.",
+    "equipment": "Jakie urządzenia mają gospodarstwa domowe; zapotrzebowanie na energię elektryczną w BuEM od nich zależy. Nieustawione zachowują prawdopodobieństwo BuEM.",
+    "solver": "Jak BuEM rozwiązuje model godzinowy: domyślnym szybkim solwerem rzadkim albo MILP, wolniej, ale dokładnie na ograniczeniach.",
+    "weather": "Godzinowa pogoda, na której liczy BuEM. Rok słoneczny wybiera z archiwum dostawcy reprezentatywny rok o niskim, typowym lub wysokim nasłonecznieniu; domyślnie typowy."
+  },
+  "tour": {
+    "button": "Przewodnik",
+    "stepOf": "Krok {step} z {total}",
+    "skip": "Pomiń przewodnik",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "done": "Gotowe",
+    "model": {
+      "title": "Budynek w 3D",
+      "body": "Przeciągnij, aby obrócić model, przewiń, aby przybliżyć. Kliknij ścianę, dach lub podłogę, aby ją otworzyć."
+    },
+    "surface": {
+      "title": "Jedna powierzchnia naraz",
+      "body": "Kliknięta powierzchnia otwiera się tutaj: jej pole, współczynnik U i okna oraz PV, jeśli je przyjmuje."
+    },
+    "building": {
+      "title": "Cały budynek",
+      "body": "Roczne zapotrzebowanie, dane i parametry budynku. Poziom termomodernizacji ustawiony tutaj zmienia wszystkie powierzchnie naraz."
+    },
+    "technologies": {
+      "title": "Technologie",
+      "body": "PV, magazyn energii i ogrzewanie tego budynku. Otwórz katalog i przeciągnij produkt na powierzchnię, aby go zainstalować."
+    },
+    "run": {
+      "title": "Zapisz i podgląd",
+      "body": "Uruchamia BuEM dla budynku w obecnym stanie i pokazuje zapotrzebowanie godzinowe."
+    }
+  },
+  "hints": {
+    "stepOf": "Krok {step} z {total}",
+    "hide": "Ukryj wskazówki",
+    "step1": "Kliknij ścianę, dach lub podłogę, aby ją otworzyć.",
+    "step2": "Zmień współczynnik U lub poziom termomodernizacji w panelu.",
+    "step3": "Zapisz i podgląd, aby zobaczyć nowe zapotrzebowanie budynku."
+  },
+  "weather": {
+    "title": "Pogoda",
+    "provider": "Dane pogodowe",
+    "year": "Rok słoneczny",
+    "scenario": {
+      "p10": "Niski",
+      "p50": "Typowy",
+      "p90": "Wysoki"
     }
   }
 }

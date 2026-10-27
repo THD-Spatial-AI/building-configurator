@@ -9,7 +9,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { buildPvModules, buildSurfaceGroup, computeOrigin, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { buildPvModules, buildSurfaceGroup, computeOrigin, toLocal, type SurfacePolygon } from '@/app/lib/surfaceMesh';
+import { storeyAt, storeyBands, storeyLines, storeyParts } from '@/app/lib/storeys';
 import { PV_PRODUCT_DRAG_TYPE } from '@/app/lib/pvProducts';
 import { useT } from '@/app/i18n';
 
@@ -38,6 +39,10 @@ interface SurfaceGeometryViewerProps {
    *  so picking the same surface again re-frames it. */
   focusId?: string | null;
   focusToken?: number;
+  /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected one highlighted. */
+  storeys?: { count: number; modelled: readonly number[] | null; selected?: number | null };
+  /** While set, a click picks the storey at the clicked height instead of a surface. */
+  onSelectStorey?: (storey: number | null) => void;
   /** `at` is the click position in client coordinates. */
   onSelectSurface?: (id: string | null, at?: { x: number; y: number }) => void;
 }
@@ -68,12 +73,15 @@ export function SurfaceGeometryViewer({
   candidateIds,
   focusId,
   focusToken,
+  storeys,
+  onSelectStorey,
   onSelectSurface,
   onHoverSurface,
   onDropProduct,
 }: SurfaceGeometryViewerProps) {
   const t = useT();
   const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
   const compassRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
   const selectRef = useRef(onSelectSurface);
@@ -90,6 +98,8 @@ export function SurfaceGeometryViewer({
   useEffect(() => { hoverRef.current = onHoverSurface; });
   const dropRef = useRef(onDropProduct);
   useEffect(() => { dropRef.current = onDropProduct; });
+  const storeyPickRef = useRef({ onSelectStorey, count: storeys?.count ?? 0 });
+  useEffect(() => { storeyPickRef.current = { onSelectStorey, count: storeys?.count ?? 0 }; });
   const origin = useMemo(() => computeOrigin(surfaces), [surfaces]);
 
   useEffect(() => {
@@ -118,6 +128,7 @@ export function SurfaceGeometryViewer({
     const groups = surfaces.map((surface) => buildSurfaceGroup(surface, origin));
     groups.forEach((group) => scene.add(group));
     groupsRef.current = groups;
+    sceneRef.current = scene;
 
     // Framed from the geometry rather than a fixed distance: a real building is
     // anything from a garage to a terrace block, and the origin is the mean
@@ -133,19 +144,29 @@ export function SurfaceGeometryViewer({
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    /** The id of the surface at a client position, or null. */
-    function surfaceAt(clientX: number, clientY: number): string | null {
+    /** The nearest visible surface hit at a client position, if any. */
+    function hitAt(clientX: number, clientY: number): THREE.Intersection | undefined {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
       // Raycaster ignores Object3D.visible, so a hidden group stays pickable
       // unless its hits are dropped here.
-      const hit = raycaster.intersectObjects(groups, true)
+      return raycaster.intersectObjects(groups, true)
         .find((h) => h.object.name === 'surface-fill' && h.object.parent?.visible !== false);
-      return ((hit?.object.parent as THREE.Group | undefined)?.userData.id as string | undefined) ?? null;
+    }
+    /** The id of the surface at a client position, or null. */
+    function surfaceAt(clientX: number, clientY: number): string | null {
+      return ((hitAt(clientX, clientY)?.object.parent as THREE.Group | undefined)?.userData.id as string | undefined) ?? null;
     }
     function selectAt(clientX: number, clientY: number) {
+      const { onSelectStorey: pickStorey, count } = storeyPickRef.current;
+      if (pickStorey) {
+        const hit = hitAt(clientX, clientY);
+        // Local y is the storage CRS's z less the origin's (see toLocal).
+        pickStorey(hit ? storeyAt(hit.point.y + origin[2], storeyBands(surfaces, count), count) : null);
+        return;
+      }
       selectRef.current?.(surfaceAt(clientX, clientY), { x: clientX, y: clientY });
     }
 
@@ -314,10 +335,57 @@ export function SurfaceGeometryViewer({
         });
       });
       groupsRef.current = [];
+      sceneRef.current = null;
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
   }, [surfaces, origin]);
+
+  // Display only: the geometry has no storeys, so these follow storeyBands.
+  const storeyCount = storeys?.count ?? 0;
+  const leftOutKey = storeys?.modelled
+    ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)).join(',')
+    : '';
+  const selectedStorey = storeys?.selected ?? null;
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || storeyCount < 2 || surfaces.length === 0) return;
+    const overlay = new THREE.Group();
+    const lineMaterial = new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.55 });
+    const points = storeyLines(surfaces, storeyCount).flat().map((p) => toLocal(p, origin));
+    overlay.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(points), lineMaterial));
+    const overMaterial = (color: number, opacity: number) => new THREE.MeshBasicMaterial({
+      color, transparent: true, opacity, depthWrite: false,
+      side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+    });
+    // A left-out storey's part of each surface is drawn again over it, light;
+    // the selected storey's in the selection colour.
+    const veil = overMaterial(0xffffff, 0.6);
+    const picked = overMaterial(HIGHLIGHT_COLOR, 0.35);
+    /** Draws each surface's part inside `chosen` over the model with `material`. */
+    const drawOver = (chosen: number[], material: THREE.Material) => {
+      for (const part of chosen.length > 0 ? storeyParts(surfaces, storeyCount, chosen) : []) {
+        const built = buildSurfaceGroup(part, origin);
+        const fill = built.children.find((c) => c.name === 'surface-fill') as THREE.Mesh | undefined;
+        built.children.forEach((child) => {
+          if (child !== fill) (child as THREE.Mesh).geometry.dispose();
+          ((child as THREE.Mesh).material as THREE.Material).dispose();
+        });
+        if (!fill) continue;
+        fill.material = material;
+        fill.raycast = () => {};
+        overlay.add(fill);
+      }
+    };
+    drawOver(leftOutKey ? leftOutKey.split(',').map(Number) : [], veil);
+    drawOver(selectedStorey ? [selectedStorey] : [], picked);
+    scene.add(overlay);
+    return () => {
+      scene.remove(overlay);
+      overlay.children.forEach((child) => (child as THREE.Mesh).geometry.dispose());
+      [lineMaterial, veil, picked].forEach((material) => material.dispose());
+    };
+  }, [surfaces, origin, storeyCount, leftOutKey, selectedStorey]);
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {
