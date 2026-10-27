@@ -495,11 +495,11 @@
       }
     },
     "classes": {
-      "compare": "Energieklasse jeder Stufe zeigen",
       "comparing": "BuEM rechnet jede Stufe…",
       "perM2": "{value} kWh/m²",
       "note": "Indikative Klasse für dieses Gebäude: Heizwärmebedarf je m² auf der österreichischen HWB-Skala, G bis A++. Simuliert, kein Energieausweis.",
-      "failed": "Der letzte Versuch ist fehlgeschlagen. Erneut versuchen."
+      "failed": "Die Energieklassen ließen sich nicht ermitteln.",
+      "retry": "Erneut versuchen"
     }
   },
   "options": {
