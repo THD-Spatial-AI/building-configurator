@@ -152,8 +152,7 @@
     "useSuggested": "Použít navržené plochy",
     "legend": {
       "installed": "FV instalována",
-      "suggested": "Navrženo",
-      "available": "Dostupné"
+      "suggested": "Navrženo"
     },
     "card": {
       "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",
@@ -804,5 +803,10 @@
       "p50": "Typický",
       "p90": "Silný"
     }
+  },
+  "legend": {
+    "roof": "Střecha",
+    "wall": "Stěna",
+    "ground": "Podlaha na terénu"
   }
 }

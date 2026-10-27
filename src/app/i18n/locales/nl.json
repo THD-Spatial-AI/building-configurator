@@ -148,8 +148,7 @@
     "useSuggested": "Voorgestelde vlakken gebruiken",
     "legend": {
       "installed": "PV geplaatst",
-      "suggested": "Voorgesteld",
-      "available": "Beschikbaar"
+      "suggested": "Voorgesteld"
     },
     "card": {
       "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",
@@ -784,5 +783,10 @@
       "p50": "Typisch",
       "p90": "Hoog"
     }
+  },
+  "legend": {
+    "roof": "Dak",
+    "wall": "Muur",
+    "ground": "Begane grondvloer"
   }
 }

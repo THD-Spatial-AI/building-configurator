@@ -50,8 +50,8 @@ interface SurfaceGeometryViewerProps {
 const HIGHLIGHT_COLOR = 0x2563eb;
 const INVALID_COLOR = 0x991b1b;
 /** A surface suggested for PV: a light fill inside a dashed outline. */
-const CANDIDATE_FILL = 0xf2d9b8;
-const CANDIDATE_EDGE_COLOR = 0xb45309;
+const CANDIDATE_FILL = 0xfde047;
+const CANDIDATE_EDGE_COLOR = 0x92400e;
 const EDGE_COLOR = 0x1e293b;
 const INVALID_EDGE_COLOR = 0xdc2626;
 // A plain DOM 'click' fires on pointerup regardless of drag distance, so an
@@ -425,14 +425,11 @@ export function SurfaceGeometryViewer({
       edgeMaterial?.color.setHex(invalid ? INVALID_EDGE_COLOR : EDGE_COLOR);
       if (edges) edges.visible = !candidate;
 
-      // A dashed copy of the edges, made the first time the surface is suggested.
+      // A solid dark copy of the edges, made the first time the surface is
+      // suggested. WebGL draws every line 1 px wide, so contrast carries it.
       let outline = group.children.find((c) => c.name === 'candidate-outline') as THREE.LineSegments | undefined;
       if (candidate && !outline && edges) {
-        outline = new THREE.LineSegments(
-          edges.geometry,
-          new THREE.LineDashedMaterial({ color: CANDIDATE_EDGE_COLOR, dashSize: 0.6, gapSize: 0.4 }),
-        );
-        outline.computeLineDistances();
+        outline = new THREE.LineSegments(edges.geometry, new THREE.LineBasicMaterial({ color: CANDIDATE_EDGE_COLOR }));
         outline.name = 'candidate-outline';
         group.add(outline);
       }

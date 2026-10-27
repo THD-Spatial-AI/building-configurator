@@ -148,8 +148,7 @@
     "useSuggested": "Use suggested surfaces",
     "legend": {
       "installed": "PV installed",
-      "suggested": "Suggested",
-      "available": "Available"
+      "suggested": "Suggested"
     },
     "card": {
       "fromModel": "Tilt, facing and area come from the building's 3D model.",
@@ -784,5 +783,10 @@
       "p50": "Typical",
       "p90": "High"
     }
+  },
+  "legend": {
+    "roof": "Roof",
+    "wall": "Wall",
+    "ground": "Ground floor"
   }
 }

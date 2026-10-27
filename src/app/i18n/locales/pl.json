@@ -152,8 +152,7 @@
     "useSuggested": "Użyj sugerowanych przegród",
     "legend": {
       "installed": "PV zainstalowane",
-      "suggested": "Sugerowana",
-      "available": "Dostępna"
+      "suggested": "Sugerowana"
     },
     "card": {
       "fromModel": "Nachylenie, orientacja i powierzchnia pochodzą z modelu 3D budynku.",
@@ -804,5 +803,10 @@
       "p50": "Typowy",
       "p90": "Wysoki"
     }
+  },
+  "legend": {
+    "roof": "Dach",
+    "wall": "Ściana",
+    "ground": "Podłoga na gruncie"
   }
 }

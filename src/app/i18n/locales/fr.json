@@ -150,8 +150,7 @@
     "useSuggested": "Utiliser les surfaces suggérées",
     "legend": {
       "installed": "PV installé",
-      "suggested": "Suggérée",
-      "available": "Disponible"
+      "suggested": "Suggérée"
     },
     "card": {
       "fromModel": "L'inclinaison, l'orientation et l'aire viennent du modèle 3D du bâtiment.",
@@ -790,5 +789,10 @@
       "p50": "Typique",
       "p90": "Fort"
     }
+  },
+  "legend": {
+    "roof": "Toit",
+    "wall": "Mur",
+    "ground": "Plancher bas"
   }
 }

@@ -150,8 +150,7 @@
     "useSuggested": "Usar superficies sugeridas",
     "legend": {
       "installed": "FV instalada",
-      "suggested": "Sugerida",
-      "available": "Disponible"
+      "suggested": "Sugerida"
     },
     "card": {
       "fromModel": "La inclinación, la orientación y el área proceden del modelo 3D del edificio.",
@@ -790,5 +789,10 @@
       "p50": "Típico",
       "p90": "Alto"
     }
+  },
+  "legend": {
+    "roof": "Cubierta",
+    "wall": "Muro",
+    "ground": "Solera"
   }
 }

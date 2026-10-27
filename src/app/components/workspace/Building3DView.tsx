@@ -23,7 +23,7 @@ import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePanel } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
-import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
+import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
 import { DEFAULT_WEATHER, WeatherSection, weatherChoice, type WeatherSelection } from './WeatherSection';
@@ -543,7 +543,7 @@ export function Building3DView({
                 {t('view.invalidSurfaces', { count: invalidIds.size })}
               </div>
             )}
-            {onTech && <PvLegend />}
+            {surfaces.length > 0 && !detached && <ModelLegend pv={onTech} />}
           </div>
 
           {attribution && (

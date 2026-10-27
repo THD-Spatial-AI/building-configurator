@@ -156,7 +156,8 @@ function triangulateRing(points: THREE.Vector3[]): { positions: number[]; indice
   return { positions, indices };
 }
 
-const SURFACE_COLOR: Record<string, number> = {
+/** Each CityGML surface type's fill in the model; the legend shows the same colours. */
+export const SURFACE_COLOR: Record<string, number> = {
   RoofSurface: 0xb45309,
   GroundSurface: 0x15803d,
   WallSurface: 0x8ab4d0,

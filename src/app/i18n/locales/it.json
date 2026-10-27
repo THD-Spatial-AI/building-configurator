@@ -148,8 +148,7 @@
     "useSuggested": "Usa le superfici consigliate",
     "legend": {
       "installed": "FV installato",
-      "suggested": "Consigliata",
-      "available": "Disponibile"
+      "suggested": "Consigliata"
     },
     "card": {
       "fromModel": "Inclinazione, esposizione e area provengono dal modello 3D dell'edificio.",
@@ -784,5 +783,10 @@
       "p50": "Tipico",
       "p90": "Alto"
     }
+  },
+  "legend": {
+    "roof": "Tetto",
+    "wall": "Parete",
+    "ground": "Pavimento a terra"
   }
 }

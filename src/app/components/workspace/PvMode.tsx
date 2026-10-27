@@ -4,11 +4,13 @@
 // stored here. Shown on the Technologies tab: the overview on the right
 // (PvOverview), a clicked surface's PV section on the left (PvSurfaceSection).
 
+import type { CSSProperties } from 'react';
 import { MousePointerClick } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry } from '../../lib/pvSurfaces';
+import { SURFACE_COLOR } from '../../lib/surfaceMesh';
 import type { PvModule, PvMounting, PvOrientation } from '../../lib/pvLayout';
 import type { TechnologyProduct } from '../../lib/pvProducts';
 
@@ -133,19 +135,32 @@ export function PvHintPill() {
 }
 
 /** What the three surface drawings in the 3D view mean. Colours match SurfaceGeometryViewer. */
-export function PvLegend() {
+/** A colour of the model as CSS. */
+const css = (hex: number) => `#${hex.toString(16).padStart(6, '0')}`;
+
+/** One swatch and its name in the model's legend. */
+function LegendSwatch({ className, style, label }: { className?: string; style?: CSSProperties; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className={cn('h-2.5 w-3.5 rounded-sm', className)} style={style} />{label}
+    </span>
+  );
+}
+
+/** What the model's colours mean: the surface types, and on the Technologies tab the PV states. */
+export function ModelLegend({ pv }: { pv: boolean }) {
   const t = useT();
   return (
-    <div className="flex gap-3 rounded-md bg-card/90 px-3 py-2 text-[11px] text-foreground shadow-sm">
-      <span className="inline-flex items-center gap-1.5">
-        <span className="h-2.5 w-3.5 rounded-sm bg-[#1F3A5F] outline outline-1 outline-[#9FB3CC]" />{t('pv.legend.installed')}
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <span className="h-2.5 w-3.5 rounded-sm border-2 border-dashed border-[#B45309] bg-[#F2D9B8]" />{t('pv.legend.suggested')}
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <span className="h-2.5 w-3.5 rounded-sm bg-[#B4664A]" />{t('pv.legend.available')}
-      </span>
+    <div className="flex flex-wrap gap-x-3 gap-y-1 rounded-md bg-card/90 px-3 py-2 text-[11px] text-foreground shadow-sm">
+      <LegendSwatch style={{ background: css(SURFACE_COLOR.RoofSurface) }} label={t('legend.roof')} />
+      <LegendSwatch style={{ background: css(SURFACE_COLOR.WallSurface) }} label={t('legend.wall')} />
+      <LegendSwatch style={{ background: css(SURFACE_COLOR.GroundSurface) }} label={t('legend.ground')} />
+      {pv && (
+        <>
+          <LegendSwatch className="bg-[#1F3A5F] outline outline-1 outline-[#9FB3CC]" label={t('pv.legend.installed')} />
+          <LegendSwatch className="border-2 border-[#92400E] bg-[#FDE047]" label={t('pv.legend.suggested')} />
+        </>
+      )}
     </div>
   );
 }

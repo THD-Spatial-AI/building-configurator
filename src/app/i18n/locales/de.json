@@ -148,8 +148,7 @@
     "useSuggested": "Vorgeschlagene Flächen nutzen",
     "legend": {
       "installed": "PV installiert",
-      "suggested": "Vorgeschlagen",
-      "available": "Verfügbar"
+      "suggested": "Vorgeschlagen"
     },
     "card": {
       "fromModel": "Neigung, Ausrichtung und Fläche stammen aus dem 3D-Modell des Gebäudes.",
@@ -784,5 +783,10 @@
       "p50": "Typisch",
       "p90": "Stark"
     }
+  },
+  "legend": {
+    "roof": "Dach",
+    "wall": "Wand",
+    "ground": "Bodenplatte"
   }
 }
