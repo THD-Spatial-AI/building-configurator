@@ -789,7 +789,7 @@ interface DropdownProps {
 export function Dropdown({ title, children }: DropdownProps) {
   return (
     <details className="group rounded-lg border border-border bg-background shadow-xs open:shadow-sm">
-      <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-muted group-open:rounded-b-none [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-10 cursor-pointer select-none list-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-muted group-open:rounded-b-none [&::-webkit-details-marker]:hidden">
         {title}
         <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
       </summary>

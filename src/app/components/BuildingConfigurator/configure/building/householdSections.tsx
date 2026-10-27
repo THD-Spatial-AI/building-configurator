@@ -191,7 +191,7 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
       </p>
       {EQUIPMENT_GROUPS.map((group) => (
         <details key={group.id} className="rounded-md border border-border">
-          <summary className="flex cursor-pointer items-baseline justify-between gap-2 px-2.5 py-2">
+          <summary className="flex cursor-pointer select-none items-baseline justify-between gap-2 px-2.5 py-2">
             <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">{group.label(t)}</span>
             <span className="text-[10px] text-muted-foreground">{groupSummary(t, group, equipment)}</span>
           </summary>
