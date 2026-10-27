@@ -661,12 +661,12 @@
     "scroll": "scroll",
     "close": "Close",
     "unsaved": {
-      "title": "Unsaved Changes",
+      "title": "Unsaved changes",
       "message": "You have unsaved changes to this building configuration. What would you like to do?",
       "note": "Closing without saving will discard all modifications made since the last save.",
-      "continueEditing": "Continue Editing",
-      "saveAndClose": "Save & Close",
-      "discard": "Discard Changes"
+      "continueEditing": "Continue editing",
+      "saveAndClose": "Save and close",
+      "discard": "Discard changes"
     }
   },
   "model": {
