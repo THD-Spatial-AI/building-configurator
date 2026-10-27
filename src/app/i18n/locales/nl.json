@@ -498,7 +498,7 @@
       "compare": "Energieklasse van elk niveau tonen",
       "comparing": "BuEM rekent elk niveau…",
       "perM2": "{value} kWh/m²",
-      "note": "Indicatieve klasse voor dit gebouw: ruimteverwarming per m² op de Oostenrijkse HWB-schaal, A++ tot G. Gesimuleerd, geen energielabel.",
+      "note": "Indicatieve klasse voor dit gebouw: ruimteverwarming per m² op de Oostenrijkse HWB-schaal, G tot A++. Gesimuleerd, geen energielabel.",
       "failed": "De laatste poging is mislukt. Probeer opnieuw."
     }
   },

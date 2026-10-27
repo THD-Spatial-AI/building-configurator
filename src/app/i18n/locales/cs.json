@@ -520,7 +520,7 @@
       "compare": "Zobrazit energetickou třídu každé úrovně",
       "comparing": "BuEM počítá každou úroveň…",
       "perM2": "{value} kWh/m²",
-      "note": "Orientační třída této budovy: vytápění na m² na rakouské stupnici HWB, A++ až G. Simulovaná, nejde o energetický štítek.",
+      "note": "Orientační třída této budovy: vytápění na m² na rakouské stupnici HWB, G až A++. Simulovaná, nejde o energetický štítek.",
       "failed": "Poslední pokus selhal. Zkuste to znovu."
     }
   },

@@ -520,7 +520,7 @@
       "compare": "Pokaż klasę energetyczną każdego poziomu",
       "comparing": "BuEM liczy każdy poziom…",
       "perM2": "{value} kWh/m²",
-      "note": "Klasa orientacyjna dla tego budynku: ogrzewanie na m² w austriackiej skali HWB, od A++ do G. Symulowana, nie jest świadectwem energetycznym.",
+      "note": "Klasa orientacyjna dla tego budynku: ogrzewanie na m² w austriackiej skali HWB, od G do A++. Symulowana, nie jest świadectwem energetycznym.",
       "failed": "Ostatnia próba nie powiodła się. Spróbuj ponownie."
     }
   },

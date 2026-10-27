@@ -105,7 +105,7 @@ function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['class
   return (
     <div className="flex flex-col gap-1">
       <div className="flex h-1.5 overflow-hidden rounded-full" aria-hidden>
-        {HWB_CLASSES.map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
+        {[...HWB_CLASSES].reverse().map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
       </div>
       <span className="text-[10px] leading-snug text-muted-foreground">{t('insulation.classes.note')}</span>
     </div>
