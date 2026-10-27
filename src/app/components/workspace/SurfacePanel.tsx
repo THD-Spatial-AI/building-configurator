@@ -152,7 +152,7 @@ export function SurfacePicker({ surfaces, value, placeholder, onSelect, onPrevie
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => (open ? close() : setOpen(true))}
-        className="flex h-9 w-full cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-2.5 text-left hover:bg-muted"
+        className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-3 py-1 text-left shadow-xs transition-colors hover:bg-muted"
       >
         <span className="min-w-0 flex-1">
           <span className={cn('block truncate text-[12px] font-semibold', current ? 'text-foreground' : 'text-muted-foreground')}>

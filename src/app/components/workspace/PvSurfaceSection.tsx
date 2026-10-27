@@ -2,14 +2,14 @@
 // and with PV its product, usable share, mounting, module format, the
 // resulting modules and cost, and products that fit more.
 
-import { Dropdown, DROPDOWN_LIST, NumberInput, OPTION_ROW, SegmentedControl } from '../BuildingConfigurator/shared/ui';
+import { Dropdown, DROPDOWN_LIST, NumberInput, OPTION_ROW, SegmentedControl, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry } from '../../lib/pvSurfaces';
 import { DEFAULT_PV_MODULE, DEFAULT_RACK, FLAT_MAX_TILT_DEG, type PvLayout, type PvMounting, type PvOrientation } from '../../lib/pvLayout';
 import { fitsMore, productCurrency, productName, pvCosts } from '../../lib/pvProducts';
 import type { SurfacePolygon } from '../../lib/surfaceMesh';
-import { compassPoint, surfaceProduct, Switch, type PvMode, type PvSurface } from './PvMode';
+import { compassPoint, surfaceProduct, type PvMode, type PvSurface } from './PvMode';
 
 /** Tilt, facing and area as tiles; a flat surface shows "Flat" and no facing. */
 function GeometryTiles({ id, elements, surface }: { id: string; elements: Record<string, BuildingElement>; surface: PvSurface }) {
@@ -102,7 +102,7 @@ function ProductPicker({ surfaceId, pv }: { surfaceId: string; pv: PvMode }) {
       <select
         value={current?.id ?? ''}
         onChange={(e) => pv.onAssignProduct?.(surfaceId, e.target.value)}
-        className="h-8 cursor-pointer rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
+        className="cfg-select"
       >
         {!current && <option value="">{t('pv.product.none')}</option>}
         {pv.catalogue.map((product) => <option key={product.id} value={product.id}>{productName(product)}</option>)}

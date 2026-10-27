@@ -361,7 +361,7 @@ interface SegmentedControlProps {
 export function SegmentedControl({ options, value, onChange, fullWidth }: SegmentedControlProps) {
   return (
     <div className={cn(
-      'bg-muted rounded-[6px] p-0.5 gap-0.5',
+      'gap-0.5 rounded-lg border border-border bg-muted/30 p-0.5',
       fullWidth ? 'flex w-full' : 'inline-flex',
     )}>
       {options.map((opt) => {
@@ -370,13 +370,14 @@ export function SegmentedControl({ options, value, onChange, fullWidth }: Segmen
           <button
             key={opt.value}
             type="button"
+            aria-pressed={active}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'px-3 py-[5px] rounded-[5px] text-xs select-none cursor-pointer transition-all duration-150 whitespace-nowrap',
+              'cursor-pointer select-none whitespace-nowrap rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all duration-150',
               fullWidth && 'flex-1',
               active
-                ? 'bg-card text-foreground font-semibold shadow-sm'
-                : 'text-muted-foreground font-normal hover:text-foreground',
+                ? 'border-border bg-card text-foreground shadow-sm'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             {opt.label}
@@ -434,6 +435,26 @@ interface ToggleSwitchProps {
   tip?: string;
 }
 
+/** An on/off switch in EnerPlanET's style (libs/ui switch.tsx). */
+export function Switch({ on, label, onChange, disabled }: { on: boolean; label: string; onChange: (on: boolean) => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!on)}
+      className={cn(
+        'inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+        on ? 'bg-primary' : 'bg-switch-background',
+      )}
+    >
+      <span className={cn('pointer-events-none block size-5 rounded-full bg-background shadow-xs transition-transform', on ? 'translate-x-4' : 'translate-x-0')} />
+    </button>
+  );
+}
+
 export function ToggleSwitch({ checked, onChange, label, tip }: ToggleSwitchProps) {
   return (
     <div className="flex items-center justify-between">
@@ -441,19 +462,7 @@ export function ToggleSwitch({ checked, onChange, label, tip }: ToggleSwitchProp
         <span className="text-xs text-foreground">{label}</span>
         {tip && <InfoTip tip={tip} />}
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
-        onClick={() => onChange(!checked)}
-        className={cn(
-          'inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-transparent transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          checked ? 'bg-primary' : 'bg-switch-background',
-        )}
-      >
-        <span className={cn('bg-background pointer-events-none block size-4 rounded-full shadow-sm transition-transform', checked ? 'translate-x-4' : 'translate-x-0')} />
-      </button>
+      <Switch on={checked} label={label ?? ''} onChange={onChange} />
     </div>
   );
 }
@@ -835,6 +844,9 @@ export function SearchField({ label, value, onChange }: SearchFieldProps) {
 
 /** A Dropdown's list: five rows and the top of a sixth show, the rest scroll. */
 export const DROPDOWN_LIST = 'flex max-h-[19.5rem] flex-col gap-1.5 overflow-y-auto overscroll-contain';
+
+/** A text or number field on its own, as EnerPlanET's Input (libs/ui input.tsx). */
+export const TEXT_INPUT = 'h-9 rounded-md border border-border bg-background px-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50';
 
 /** A choosable row in a Dropdown list, as EnerPlanET's technology rows. */
 export const OPTION_ROW = 'rounded-lg border border-border bg-card px-2.5 py-2 shadow-xs transition-all hover:bg-muted/50 hover:shadow-md';

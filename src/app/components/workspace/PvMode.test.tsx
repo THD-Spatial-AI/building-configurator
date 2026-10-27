@@ -219,7 +219,7 @@ describe('PvSurfaceSection', () => {
     expect(onFlat).toContain('>Racked<');
     expect(onPitched).not.toContain('>Racked<');
     for (const label of ['Best fit', 'Portrait', 'Landscape']) expect(onPitched).toContain(`>${label}<`);
-    expect(onPitched).toMatch(/font-semibold[^"]*"[^>]*>Best fit</);
+    expect(onPitched).toMatch(/aria-pressed="true"[^>]*>Best fit</);
   });
 
   it('offers the panel tilt and facing of a racked surface, and the way back to flush', () => {

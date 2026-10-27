@@ -105,24 +105,6 @@ export function compassPoint(azimuth: number): string {
 }
 
 /** An on/off switch with its state for assistive technology. */
-export function Switch({ on, label, onChange }: { on: boolean; label: string; onChange: (on: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      onClick={() => onChange(!on)}
-      className={cn(
-        'relative h-6 w-10 shrink-0 cursor-pointer rounded-full transition-colors',
-        on ? 'bg-primary' : 'bg-muted-foreground/30',
-      )}
-    >
-      <span className={cn('absolute top-[3px] size-[18px] rounded-full bg-card shadow-sm transition-all', on ? 'right-[3px]' : 'left-[3px]')} />
-    </button>
-  );
-}
-
 /** The click hint, shown over the 3D view on the Technologies tab. */
 export function PvHintPill() {
   const t = useT();
