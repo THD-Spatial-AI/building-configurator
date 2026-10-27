@@ -288,7 +288,7 @@
       "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná."
     },
     "section": {
-      "occupancy": "Obsazenost",
+      "occupancy": "Podlaží a obsazenost",
       "comfort": "Vytápění a komfort",
       "outputs": "Počítané výsledky",
       "equipment": "Spotřebiče",
@@ -309,7 +309,14 @@
         "other": "{count} bytů"
       },
       "dwellingsNotSet": "Počet bytů nenastaven",
-      "perDwelling": "{dwellings} · {persons} na byt"
+      "perDwelling": "{dwellings} · {persons} na byt",
+      "storeys": {
+        "one": "{count} podlaží",
+        "few": "{count} podlaží",
+        "many": "{count} podlaží",
+        "other": "{count} podlaží"
+      },
+      "storeysModelled": "{modelled} z {total} podlaží modelováno"
     },
     "insulationTitle": "Energetická úroveň",
     "expertMore": {
@@ -510,11 +517,11 @@
       }
     },
     "classes": {
-      "compare": "Zobrazit energetickou třídu každé úrovně",
       "comparing": "BuEM počítá každou úroveň…",
       "perM2": "{value} kWh/m²",
-      "note": "Orientační třída této budovy: vytápění na m² na rakouské stupnici HWB, A++ až G. Simulovaná, nejde o energetický štítek.",
-      "failed": "Poslední pokus selhal. Zkuste to znovu."
+      "note": "Orientační třída této budovy: vytápění na m² na rakouské stupnici HWB, G až A++. Simulovaná, nejde o energetický štítek.",
+      "failed": "Energetické třídy se nepodařilo určit.",
+      "retry": "Zkusit znovu"
     }
   },
   "options": {
@@ -665,7 +672,8 @@
     "heatingPerM2": "Vytápění {value} kWh/m²·a",
     "heatingClass": {
       "label": "Orientační třída potřeby tepla na vytápění (simulovaná, nejde o energetický štítek)",
-      "tip": "Roční potřeba tepla na vytápění z BuEM na referenční plochu, při počasí a užívání výpočtu, zařazená podle pásem rakouské stupnice OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G nad 250). Teplá voda, chlazení a elektřina nejsou zahrnuty."
+      "tip": "Roční potřeba tepla na vytápění z BuEM na referenční plochu, při počasí a užívání výpočtu, zařazená podle pásem rakouské stupnice OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G nad 250). Teplá voda, chlazení a elektřina nejsou zahrnuty.",
+      "stale": "Pro podlaží posledního výpočtu. Uložte a zobrazte náhled pro třídu nyní modelovaných podlaží."
     },
     "tile": {
       "statisticalDefault": "Statistická hodnota"
@@ -762,13 +770,10 @@
         "other": "{count} podlaží vybráno"
       }
     },
-    "action": {
-      "leaveOut": "Vynechat z modelu",
-      "include": "Vrátit do modelu"
-    },
     "dwellingsPerStorey": "Bytů na podlaží",
     "mixed": "různé",
-    "dwellingsMissing": "Zadejte byty každého modelovaného podlaží. Chybí: podlaží {storeys}. Vnitřní zisky BuEM se řídí počtem bytů."
+    "dwellingsMissing": "Zadejte byty každého modelovaného podlaží. Chybí: podlaží {storeys}. Vnitřní zisky BuEM se řídí počtem bytů.",
+    "inModel": "V modelu"
   },
   "help": {
     "envelope": "Jak tato plocha drží teplo: její plocha a součinitel U jdou do BuEM. Úroveň renovace nastaví součinitel U z TABULA; hodnota změněná zde zůstane.",
@@ -776,7 +781,7 @@
     "building": "Co je to za budovu: typ, rok a země volí výchozí hodnoty TABULA; plocha podlaží a počet podlaží určují plochu, kterou BuEM vytápí. Upravte je tlačítkem Upravit.",
     "demand": "Roční potřeba energie budovy podle užití, z posledního výpočtu BuEM nebo uloženého výsledku. Plyn na vaření je samostatné palivo a není v součtu.",
     "insulation": "Nastaví izolaci všech stěn, střech, podlah a oken najednou, podle typologie TABULA pro tento typ a stáří budovy. Stávající stav: budova, jak ji TABULA uvádí pro její stáří, bez pozdějších úprav. Běžná: renovace obvyklá v praxi, například zateplení střechy a nová okna. Pokročilá: ambiciózní renovace směrem ke standardu novostavby. Plocha změněná samostatně si ponechá svou hodnotu.",
-    "occupancy": "Kdo v budově bydlí nebo pracuje: počet bytů a osob na byt určují vnitřní zisky a spotřebu teplé vody v BuEM.",
+    "occupancy": "Jak se budova člení: její podlaží, která z nich jsou v modelu, a u řadového, bytového domu či panelového domu byty na každém. S počtem osob na byt určují vnitřní zisky a spotřebu teplé vody v BuEM.",
     "comfort": "Kdy se budova vytápí: požadovaná teplota, zda se v noci nebo při nepřítomnosti snižuje (útlum) a zda je zahrnuta teplá voda.",
     "outputs": "Které profily BuEM vrací pro každé užití: roční souhrn, hodinovou řadu, nebo žádný.",
     "equipment": "Které spotřebiče domácnosti vlastní; spotřeba elektřiny v BuEM se jimi řídí. Nenastavené si ponechají pravděpodobnost BuEM.",

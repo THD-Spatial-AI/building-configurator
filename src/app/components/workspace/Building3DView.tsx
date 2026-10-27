@@ -33,27 +33,16 @@ import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
-import type { EnergyTotals } from '../../lib/loadProfile';
+import { heatingPerM2 } from '../../lib/energyClass';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
 import { fittedPvIds, pvAvailableIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
-import { buildingTypeName, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
+import { buildingTypeName, hasDwellingsPerStorey, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
 type SurfaceSelection = { id: string };
-
-/** BuEM's space heating per A_ref of the modelled storeys, or null when the figure is not BuEM's (ignis, an upload) or missing. */
-function buemHeatingPerM2(
-  totals: EnergyTotals,
-  general: { floorArea: number; storeys: number; storeysModelled: number[] | null },
-): number | null {
-  const heating = Number(totals.heating);
-  const aRef = general.floorArea * (general.storeysModelled?.length ?? general.storeys);
-  const fromBuem = totals.heatingSource === undefined || totals.heatingSource === 'buem';
-  return fromBuem && Number.isFinite(heating) && heating > 0 && aRef > 0 ? heating / aRef : null;
-}
 
 export interface Building3DViewProps {
   building: BuildingState;
@@ -230,6 +219,12 @@ export function Building3DView({
     modelled,
     modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
   );
+  /** Sets the dwellings per storey; once every storey has a count, the building's total is their sum. */
+  const setStoreyDwellings = (values: Record<number, number>) => {
+    model.setGen('storeyDwellings', values);
+    const counts = Array.from({ length: model.general.storeys }, (_, i) => values[i + 1]);
+    if (counts.every((count) => count >= 1)) model.setGen('residential_units', counts.reduce((a, b) => a + b, 0));
+  };
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
   }, [pv]);
@@ -585,28 +580,30 @@ export function Building3DView({
                 // The BuEM building fields the table does not carry; Expert
                 // shows more of them. No fixed height: the panel scrolls once.
                 <div className="flex flex-col gap-3">
-                  {model.general.storeys > 1 && (
-                    <StoreysModelled
-                      storeys={model.general.storeys}
-                      modelled={model.general.storeysModelled}
-                      selected={selectedStoreys}
-                      onSelect={setSelectedStoreys}
-                      floorAreaPerStorey={model.general.floorArea}
-                      storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
-                      roomHeight={model.general.roomHeight}
-                      dwellings={isServiceBuildingType(model.general.buildingType) ? undefined : {
-                        values: model.general.storeyDwellings,
-                        onChange: (values) => model.setGen('storeyDwellings', values),
-                      }}
-                      disabled={surfaces.length === 0}
-                      onChange={setModelledStoreys}
-                    />
-                  )}
                   <BuildingEditor
                     general={model.general}
                     setGen={model.setGen}
                     mode={mode}
                     onShowExpert={() => setMode('expert')}
+                    showStoreys={selectedStoreys.length > 0}
+                    onStoreysClosed={() => setSelectedStoreys([])}
+                    storeys={model.general.storeys > 1 ? (
+                      <StoreysModelled
+                        storeys={model.general.storeys}
+                        modelled={model.general.storeysModelled}
+                        selected={selectedStoreys}
+                        onSelect={setSelectedStoreys}
+                        floorAreaPerStorey={model.general.floorArea}
+                        storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
+                        roomHeight={model.general.roomHeight}
+                        dwellings={hasDwellingsPerStorey(model.general.buildingType) ? {
+                          values: model.general.storeyDwellings,
+                          onChange: setStoreyDwellings,
+                        } : undefined}
+                        disabled={surfaces.length === 0}
+                        onChange={setModelledStoreys}
+                      />
+                    ) : undefined}
                     insulation={{
                       elements,
                       levels: model.ignis?.variants ?? [],
@@ -631,7 +628,8 @@ export function Building3DView({
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
                     pvAnnualKwh={model.pvAnnualKwh}
-                    heatingPerM2={buemHeatingPerM2(model.displayEnergyTotals, model.general)}
+                    heatingPerM2={heatingPerM2(model.displayEnergyTotals, model.general, model.resultStoreys)}
+                    heatingClassStale={JSON.stringify(model.resultStoreys) !== JSON.stringify(model.general.storeysModelled)}
                   />
                 </div>
               )}

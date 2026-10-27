@@ -2,7 +2,7 @@
 // state for the whole building in Basic, and per element type in Expert with
 // its U-value and loss factor, plus the windows BuEM adds when there are none.
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
@@ -85,27 +85,43 @@ export function InsulationSection(props: Props) {
   );
 }
 
-/** The action that compares the levels, then the class scale and what the classes are. */
+/** Edits this long apart start one comparison, so a dragged slider is not three BuEM runs a step. */
+const COMPARE_DELAY_MS = 1500;
+
+/**
+ * The levels' classes, worked out on their own once the building stops
+ * changing, then the class scale and what the classes are. A failed run
+ * offers to try again rather than retrying by itself.
+ */
 function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['classes']> }) {
   const t = useT();
   const failed = classes.perM2 !== null && Object.values(classes.perM2).every((value) => value === null);
+  const compareRef = useRef(classes.onCompare);
+  compareRef.current = classes.onCompare;
+  const pending = classes.perM2 === null && !classes.comparing;
+  useEffect(() => {
+    if (!pending) return;
+    const timer = setTimeout(() => compareRef.current(), COMPARE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [pending]);
   if (!classes.perM2 || failed) {
-    return (
+    return failed && !classes.comparing ? (
       <button
         type="button"
-        disabled={classes.comparing}
         onClick={classes.onCompare}
-        className="h-8 cursor-pointer self-start rounded-md border border-border bg-card px-3 text-[11px] font-semibold text-foreground hover:bg-muted disabled:cursor-wait disabled:opacity-60"
+        className="h-8 cursor-pointer self-start rounded-md border border-border bg-card px-3 text-[11px] font-semibold text-foreground hover:bg-muted"
       >
-        {t(classes.comparing ? 'insulation.classes.comparing' : 'insulation.classes.compare')}
-        {failed && !classes.comparing && <span className="ml-2 font-normal text-destructive">{t('insulation.classes.failed')}</span>}
+        {t('insulation.classes.retry')}
+        <span className="ml-2 font-normal text-destructive">{t('insulation.classes.failed')}</span>
       </button>
+    ) : (
+      <span className="text-[11px] text-muted-foreground">{t('insulation.classes.comparing')}</span>
     );
   }
   return (
     <div className="flex flex-col gap-1">
       <div className="flex h-1.5 overflow-hidden rounded-full" aria-hidden>
-        {HWB_CLASSES.map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
+        {[...HWB_CLASSES].reverse().map((c) => <div key={c.label} className={cn('flex-1', c.badge)} />)}
       </div>
       <span className="text-[10px] leading-snug text-muted-foreground">{t('insulation.classes.note')}</span>
     </div>

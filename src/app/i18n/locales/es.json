@@ -276,7 +276,7 @@
       "noData": "No hay datos TABULA para este edificio: el servicio TABULA no tiene ninguna variante para él o no se pudo contactar."
     },
     "section": {
-      "occupancy": "Ocupación",
+      "occupancy": "Plantas y ocupación",
       "comfort": "Calefacción y confort",
       "outputs": "Resultados a calcular",
       "equipment": "Electrodomésticos",
@@ -296,7 +296,12 @@
         "other": "{count} viviendas"
       },
       "dwellingsNotSet": "Viviendas sin definir",
-      "perDwelling": "{dwellings} · {persons} por vivienda"
+      "perDwelling": "{dwellings} · {persons} por vivienda",
+      "storeys": {
+        "one": "{count} planta",
+        "other": "{count} plantas"
+      },
+      "storeysModelled": "{modelled} de {total} plantas modeladas"
     },
     "insulationTitle": "Nivel energético",
     "expertMore": {
@@ -495,11 +500,11 @@
       }
     },
     "classes": {
-      "compare": "Mostrar la clase energética de cada nivel",
       "comparing": "BuEM calcula cada nivel…",
       "perM2": "{value} kWh/m²",
-      "note": "Clase orientativa para este edificio: calefacción por m² en la escala austriaca HWB, de A++ a G. Simulada, no es un certificado energético.",
-      "failed": "El último intento falló. Inténtelo de nuevo."
+      "note": "Clase orientativa para este edificio: calefacción por m² en la escala austriaca HWB, de G a A++. Simulada, no es un certificado energético.",
+      "failed": "No se pudieron calcular las clases energéticas.",
+      "retry": "Reintentar"
     }
   },
   "options": {
@@ -649,7 +654,8 @@
     "heatingPerM2": "Calefacción {value} kWh/m²·a",
     "heatingClass": {
       "label": "Clase orientativa de demanda de calefacción (simulada, no es un certificado energético)",
-      "tip": "Calefacción anual de BuEM por superficie de referencia, con el clima y la ocupación del cálculo, clasificada según las bandas de la escala austriaca OIB-RL 6 HWB (A++ hasta 10 kWh/m²·a, G por encima de 250). No incluye agua caliente, refrigeración ni electricidad."
+      "tip": "Calefacción anual de BuEM por superficie de referencia, con el clima y la ocupación del cálculo, clasificada según las bandas de la escala austriaca OIB-RL 6 HWB (A++ hasta 10 kWh/m²·a, G por encima de 250). No incluye agua caliente, refrigeración ni electricidad.",
+      "stale": "Para las plantas de la última ejecución. Guarde y previsualice para obtener la clase de las plantas modeladas ahora."
     },
     "tile": {
       "statisticalDefault": "Valor estadístico"
@@ -744,13 +750,10 @@
         "other": "{count} plantas seleccionadas"
       }
     },
-    "action": {
-      "leaveOut": "Dejar fuera del modelo",
-      "include": "Volver a incluir en el modelo"
-    },
     "dwellingsPerStorey": "Viviendas por planta",
     "mixed": "varios",
-    "dwellingsMissing": "Indique las viviendas de cada planta modelada. Falta: planta {storeys}. Las ganancias internas de BuEM siguen el número de viviendas."
+    "dwellingsMissing": "Indique las viviendas de cada planta modelada. Falta: planta {storeys}. Las ganancias internas de BuEM siguen el número de viviendas.",
+    "inModel": "En el modelo"
   },
   "help": {
     "envelope": "Cómo retiene el calor esta superficie: su área y su valor U van a BuEM. Un nivel de rehabilitación fija el valor U desde TABULA; un valor cambiado aquí se conserva.",
@@ -758,7 +761,7 @@
     "building": "Qué es el edificio: tipo, año y país eligen sus valores por defecto de TABULA; la superficie por planta y las plantas fijan la superficie que calienta BuEM. Edite para cambiarlos.",
     "demand": "La demanda anual de energía del edificio por uso, del último cálculo de BuEM o del resultado guardado. El gas de cocina es otro combustible y no entra en el total.",
     "insulation": "Fija el aislamiento de todas las paredes, cubiertas, suelos y ventanas a la vez, desde la tipología TABULA de este tipo y antigüedad. Estado actual: el edificio como lo registra TABULA para su antigüedad, sin obras posteriores. Habitual: una rehabilitación común en la práctica, como aislar la cubierta y cambiar ventanas. Avanzada: una rehabilitación ambiciosa hacia el estándar de obra nueva. Una superficie cambiada una a una conserva su valor.",
-    "occupancy": "Quién vive o trabaja en el edificio: el número de viviendas y de personas por vivienda fijan las ganancias internas y el agua caliente en BuEM.",
+    "occupancy": "Cómo se divide el edificio: sus plantas, cuáles están en el modelo y, en una vivienda adosada, plurifamiliar o un bloque de pisos, las viviendas de cada una. Con las personas por vivienda fijan las ganancias internas y el agua caliente de BuEM.",
     "comfort": "Cuándo se calienta el edificio: la temperatura de consigna, si baja de noche o cuando no hay nadie (reducción) y si incluye agua caliente.",
     "outputs": "Qué perfiles devuelve BuEM para cada uso: un resumen anual, una serie horaria o ninguno.",
     "equipment": "Qué aparatos tienen los hogares; la demanda eléctrica de BuEM los sigue. Los que no se fijan conservan la probabilidad propia de BuEM.",

@@ -1,6 +1,6 @@
 // Building-level parameters panel of the 3D view; Expert shows more groups.
 
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronDown } from '@/app/components/icons';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import { ToggleSwitch } from '@/app/components/BuildingConfigurator/shared/ui';
@@ -106,7 +106,7 @@ const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
 /** One-line value summary shown on the grid card and chip. */
 function sectionSummary(t: Translate, format: FormatNumber, key: SectionKey, general: Record<string, any>): string {
   switch (key) {
-    case 'occupancy':   return occupancySummary(t, format, general);
+    case 'occupancy':   return [storeysSummary(t, general), occupancySummary(t, format, general)].filter(Boolean).join(' · ');
     case 'comfort':     return comfortSummary(t, format, general);
     case 'outputs':     return t('editor.summary.outputs', {
       on: OUTPUT_PROFILES.filter(({ key }) => general.outputs[key] !== 'none').length,
@@ -118,6 +118,14 @@ function sectionSummary(t: Translate, format: FormatNumber, key: SectionKey, gen
     }
     case 'solver':      return general.use_milp ? t('editor.summary.solverMilp') : t('editor.summary.solverSparse');
   }
+}
+
+/** How many storeys the building has and how many are modelled; nothing for a single storey. */
+function storeysSummary(t: Translate, general: Record<string, any>): string {
+  if (general.storeys <= 1) return '';
+  return general.storeysModelled
+    ? t('editor.summary.storeysModelled', { modelled: general.storeysModelled.length, total: general.storeys })
+    : t('editor.summary.storeys', { count: general.storeys });
 }
 
 function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>): string {
@@ -157,21 +165,34 @@ interface BuildingEditorProps {
   insulation?: InsulationProps;
   /** Switches to Expert; in Basic a card then says what Expert adds. */
   onShowExpert?: () => void;
+  /** The storeys modelled, shown at the top of the storeys and occupancy section. */
+  storeys?: ReactNode;
+  /** Opens the storeys and occupancy section, as when storeys are selected in the model. */
+  showStoreys?: boolean;
+  /** Called when the storeys and occupancy section closes, to clear the storey selection. */
+  onStoreysClosed?: () => void;
 }
 
 /**
  * Building-level parameter editor of the Building tab: one card per section
  * in its topic's colour, each showing a summary until it is opened. Expert
- * sections are dashed. Insulation and windows stays open: the refurbishment
- * state is the first thing most users change.
+ * sections are dashed. Energy grade stays open: the refurbishment state is
+ * the first thing most users change. Storeys sit with occupancy, as a building
+ * divides into storeys and storeys into dwellings.
  */
 export function BuildingEditor({
   general, setGen, mode,
-  insulation, onShowExpert,
+  insulation, onShowExpert, storeys, showStoreys = false, onStoreysClosed,
 }: BuildingEditorProps) {
   const t = useT();
   const format = useFormatNumber();
   const [openSection, setOpenSection] = useState<SectionKey | null>(null);
+  useEffect(() => { if (showStoreys) setOpenSection('occupancy'); }, [showStoreys]);
+  /** Opens one section, or none; leaving storeys and occupancy, by closing it or opening another, says so. */
+  const openOnly = (key: SectionKey | null) => {
+    if (openSection === 'occupancy' && key !== 'occupancy') onStoreysClosed?.();
+    setOpenSection(key);
+  };
 
   const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert' ? [...BASIC_SECTIONS, ...EXPERT_SECTIONS] : BASIC_SECTIONS)
@@ -181,7 +202,7 @@ export function BuildingEditor({
     <div className="flex flex-col gap-3">
       {insulation && (
         <SectionCard
-          topic={TOPICS.envelope}
+          topic={TOPICS.building}
           title={t('editor.insulationTitle')}
           info={t('help.insulation')}
           action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation)}</span>}
@@ -202,13 +223,13 @@ export function BuildingEditor({
             title={SECTION_LABELS[key](t)}
             info={t(`help.${key}`)}
             dashed={EXPERT_SECTIONS.includes(key)}
-            onToggle={() => setOpenSection(open ? null : key)}
+            onToggle={() => openOnly(open ? null : key)}
             action={(
               <button
                 type="button"
                 aria-expanded={open}
                 aria-label={SECTION_LABELS[key](t)}
-                onClick={() => setOpenSection(open ? null : key)}
+                onClick={() => openOnly(open ? null : key)}
                 className="flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-card/60"
               >
                 <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} />
@@ -216,13 +237,14 @@ export function BuildingEditor({
             )}
           >
             {open ? (
-              <div className="p-3">
+              <div className="flex flex-col gap-3 p-3">
+                {key === 'occupancy' && storeys && <div className="border-b border-border pb-3">{storeys}</div>}
                 <SectionBody id={key} general={general} setGen={setGen} mode={mode} />
               </div>
             ) : (
               <button
                 type="button"
-                onClick={() => setOpenSection(key)}
+                onClick={() => openOnly(key)}
                 className="w-full cursor-pointer px-3 py-2 text-left text-[11px] text-muted-foreground hover:bg-muted"
               >
                 {sectionSummary(t, format, key, general)}

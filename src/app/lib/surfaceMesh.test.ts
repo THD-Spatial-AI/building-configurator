@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { buildSurfaceGroup, computeOrigin, drawnSurfaceIds, isEnvelopeDetached, polygonArea, pvModulesGeometry, surfacesFromGeometryResponse } from './surfaceMesh';
+import { buildSurfaceGroup, computeOrigin, drawnSurfaceIds, isEnvelopeDetached, surfaceSides, polygonArea, pvModulesGeometry, surfacesFromGeometryResponse, type SurfacePolygon } from './surfaceMesh';
 import type { BuildingGeometry } from './enerplanet';
 import surfaceFixture from '../../assets/data/loenen_surfaces_fixture.json';
 import liveFixture from '../../assets/data/loenen_live_fixture.json';
@@ -171,5 +171,17 @@ describe('drawnSurfaceIds', () => {
   it('draws a surface the host left out of the envelope, not one deleted in the view', () => {
     const ids = drawnSurfaceIds(surfaces.slice(0, 3), loaded, new Set([kept]));
     expect([...ids].sort()).toEqual([kept, sliver].sort());
+  });
+});
+
+describe('surfaceSides', () => {
+  it('measures each side of the ring in metres, without the closing vertex and short seams', () => {
+    const wall: SurfacePolygon = {
+      id: 'w', type: 'WallSurface',
+      coordinates: [[[0, 0, 0], [4, 0, 0], [4, 0, 2.5], [4.05, 0, 2.5], [0, 0, 2.5], [0, 0, 0]]],
+    };
+    const sides = surfaceSides(wall);
+    expect(sides.map((side) => Number(side.length.toFixed(2)))).toEqual([4, 2.5, 4.05, 2.5]);
+    expect(sides[0].mid).toEqual([2, 0, 0]);
   });
 });

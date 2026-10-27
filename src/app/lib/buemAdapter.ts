@@ -16,6 +16,7 @@ import { faceFromAzimuth, type BuildingElement } from '@/app/components/Building
 import {
   BUILDING_TYPE_LABELS,
   OUTPUT_PROFILES,
+  hasDwellingsPerStorey,
   isServiceBuildingType,
   requiresResidentialUnits,
   type OutputLevel,
@@ -756,15 +757,17 @@ export function serializeToBuemFeature(
     building.h_room = { value: general.roomHeight, unit: 'm' };
   }
 
-  Object.assign(building, householdFields(identity.buildingType || general.buildingType, general));
   // BuEM's internal gains follow residential_units, so with storeys left out it
   // is the count the user gave for them; the whole building's is kept beside.
-  const unitsModelled = modelled && !isServiceBuildingType(identity.buildingType || general.buildingType)
+  const unitsModelled = modelled && hasDwellingsPerStorey(identity.buildingType || general.buildingType)
     ? modelledDwellings(modelled, general.storeyDwellings ?? {})
     : null;
   const keepUnits = unitsModelled !== null;
-  const unitsFull: number | null = keepUnits ? building.residential_units ?? null : null;
-  if (keepUnits) building.residential_units = unitsModelled;
+  const unitsFull: number | null = keepUnits ? general.residential_units ?? null : null;
+  Object.assign(building, householdFields(
+    identity.buildingType || general.buildingType,
+    keepUnits ? { ...general, residential_units: unitsModelled } : general,
+  ));
 
   const outputs = { ...general.outputs };
   if (isServiceBuildingType(identity.buildingType || general.buildingType)) {
