@@ -153,9 +153,12 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
               onClick={() => onSetState(REFURB_TYPES, level.number)}
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-[6px] border px-2 py-1.5 text-left text-[11px] font-medium leading-snug transition-colors',
-                selected === level.number
-                  ? 'border-2 border-[#475B7A] bg-[#E6EAF2] text-[#33415C] dark:border-[#C3CDDD] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]'
-                  : 'border-border bg-card text-muted-foreground hover:bg-muted',
+                // In its class colour once the class is known, else the slate of the section.
+                energyClass
+                  ? cn(energyClass.frame, 'text-foreground', selected === level.number ? 'border-[3px]' : 'opacity-80 hover:opacity-100')
+                  : selected === level.number
+                    ? 'border-2 border-[#475B7A] bg-[#E6EAF2] text-[#33415C] dark:border-[#C3CDDD] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]'
+                    : 'border-border bg-card text-muted-foreground hover:bg-muted',
               )}
             >
               {energyClass && (
