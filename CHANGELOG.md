@@ -4,6 +4,40 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.15.0] - 2026-10-27
+
+Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` takes `building` or `technologies`; `overview`, `parameters` and `envelope` are gone. Single surfaces are reached through the model or the surface drop-down.
+
+### Added
+
+- Storeys can be left out of a building's model. A storey is picked in the 3D model (Storeys, top left) or in the Storeys modelled section. The model draws storey lines and lightens storeys left out. Surfaces are cut by height to the modelled storeys, the building data shows the modelled storeys only, and a residential building asks for the dwellings in them. Where cutting removes every roof or floor, an internal ceiling or floor without heat loss is sent in its place.
+- A stored building keeps its full form beside the BuEM block: `storeys` (the total), `storey_list` (one `{ storey, modelled }` per storey), `envelope_full` and `residential_units_full`. The `building` block holds what BuEM is to model.
+- The energy class of each refurbishment level: "Show the energy class of each level" runs every level through BuEM with nothing stored (`ConfiguratorServices.previewBuemBuilding`, optional) and shows its class on the Austrian HWB scale (A++ to G) with its heating per m². Without the service no class is shown.
+- The annual demand card shows the indicative heating class of the BuEM result.
+- A Weather section: the user picks the weather data a run uses and, where the provider has them built, a low, typical or high solar year. The host offers them through `fetchWeatherOptions` (optional); runs and level previews carry `weather_provider` and `weather_scenario` when they differ from the host's default. `WeatherOptions` and `WeatherScenario` are exported.
+- A guided tour of five steps, started from the Tour button in the header or by the host's new `tour` prop (`{ run, onFinish }`), and step hints over the model until a run is started.
+- An info tip on every section saying what it holds and where its figures come from.
+- Technology cards share one shape. `TechCard` gains optional `type`, `figures`, `investment` and `catalogue`; `Technologies` gains optional `onAdd` for an "Add a technology" button. The Technologies tab sums the investment estimates.
+- The PV card lists the installed products with their surfaces and capacity; the catalogue sits behind a drop-down with a search field.
+
+### Changed
+
+- Every section is a card in its topic's colour with the topic's icon; the annual demand is one bar in its carriers' colours.
+- The surface panel shows a surface's envelope and PV together on every tab.
+- Building data shows as tiles (type, country and year, storeys, room height, floor area, dwellings, occupants, volume); Edit switches to the editable table. A dashed card in Basic points to the Expert sections.
+- A section opens from a click anywhere on its header.
+- A surface's tilt and facing are edited in Expert only. PV takes its geometry from the 3D model, not from these edits.
+- The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals and the warning about surfaces a simulation would reject.
+- "Results to compute" moves to Expert.
+
+### Removed
+
+- The Envelope tab and its surface groups list, the building editor's identity section and the unused thermal rating.
+
+### Fixed
+
+- `toBuem` left out the storey count stored since 0.14.0, so a building saved through a host reopened with 4 storeys and its floor area split across them. It now returns `storeys` with the other blocks.
+
 ## [0.14.0] - 2026-10-26
 
 Breaking: there is no PV mode. `pv` now feeds the Technologies tab and draws the building's modules on every tab; open a building there with `defaultTab="technologies"`. `Building3DView`'s `pvSurfaceIds`, `pvSurfaces` and `pvModule` are removed: the installed surfaces, their settings and the module come from `pv`.
