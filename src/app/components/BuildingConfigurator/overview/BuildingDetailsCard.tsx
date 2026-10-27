@@ -16,7 +16,6 @@ import { heightLimits, tallerThanModel } from '@/app/lib/storeys';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
 const ROW_UNITS: Record<string, string> = {
-  floorArea:  'm²',
   storeys:    '',
   roomHeight: 'm',
   constructionYear: '',

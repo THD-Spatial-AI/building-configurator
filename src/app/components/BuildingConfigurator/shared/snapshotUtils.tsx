@@ -155,10 +155,8 @@ export function buildSnapshotRows(
       label: 'Floor area (per storey)',
       labelKey: 'snapshot.row.floorAreaPerStorey',
       value: `${formatNumber(language, general.floorArea, 1)} m²`,
+      // Read only: the footprint comes from the 3D model, whose surfaces cannot be redrawn here.
       status: isCloseTo(general.floorArea, baseGeneral.floorArea) ? 'default' : 'modified',
-      editKey: 'floorArea',
-      editType: 'number',
-      rawValue: general.floorArea,
     },
     {
       label: 'Storeys',
