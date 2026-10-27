@@ -103,8 +103,7 @@
       "pv": "FV"
     },
     "pick": "Scegli una superficie",
-    "fromModel": "{tilt}° · orientamento {azimuth}° {compass} · dal modello 3D",
-    "flatFromModel": "Piana · dal modello 3D"
+    "geometrySource": "Fonte: modello 3D dell'edificio"
   },
   "profile": {
     "title": "Profilo di carico orario",

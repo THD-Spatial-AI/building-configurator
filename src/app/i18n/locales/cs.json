@@ -107,8 +107,7 @@
       "pv": "FV"
     },
     "pick": "Vyberte plochu",
-    "fromModel": "{tilt}° · orientace {azimuth}° {compass} · z 3D modelu",
-    "flatFromModel": "Plochá · z 3D modelu"
+    "geometrySource": "Zdroj: 3D model budovy"
   },
   "profile": {
     "title": "Hodinový profil zatížení",

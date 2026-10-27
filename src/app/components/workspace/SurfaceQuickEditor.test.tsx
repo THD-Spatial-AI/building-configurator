@@ -25,6 +25,10 @@ describe('SurfaceQuickEditor', () => {
   it('shows tilt and facing read-only from the 3D model in Basic', () => {
     const html = render(pitched, 'basic');
     expect(html).not.toContain('S-facing');
-    expect(html).toContain('35° · facing 180° S · from the 3D model');
+    expect(html).toContain('Tilt</div>');
+    expect(html).toContain('35° · Pitched');
+    expect(html).toContain('Facing</div>');
+    expect(html).toContain('180° S');
+    expect(html).toContain('Source: the building&#x27;s 3D model');
   });
 });

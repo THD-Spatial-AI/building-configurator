@@ -103,8 +103,7 @@
       "pv": "PV"
     },
     "pick": "Choose a surface",
-    "fromModel": "{tilt}° · facing {azimuth}° {compass} · from the 3D model",
-    "flatFromModel": "Flat · from the 3D model"
+    "geometrySource": "Source: the building's 3D model"
   },
   "profile": {
     "title": "Hourly load profile",

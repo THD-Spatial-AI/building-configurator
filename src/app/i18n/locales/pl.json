@@ -107,8 +107,7 @@
       "pv": "PV"
     },
     "pick": "Wybierz przegrodę",
-    "fromModel": "{tilt}° · orientacja {azimuth}° {compass} · z modelu 3D",
-    "flatFromModel": "Płaska · z modelu 3D"
+    "geometrySource": "Źródło: model 3D budynku"
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",

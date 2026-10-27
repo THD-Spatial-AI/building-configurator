@@ -103,8 +103,7 @@
       "pv": "PV"
     },
     "pick": "Kies een vlak",
-    "fromModel": "{tilt}° · oriëntatie {azimuth}° {compass} · uit het 3D-model",
-    "flatFromModel": "Plat · uit het 3D-model"
+    "geometrySource": "Bron: 3D-model van het gebouw"
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",

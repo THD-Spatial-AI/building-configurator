@@ -103,8 +103,7 @@
       "pv": "PV"
     },
     "pick": "Fläche wählen",
-    "fromModel": "{tilt}° · Ausrichtung {azimuth}° {compass} · aus dem 3D-Modell",
-    "flatFromModel": "Flach · aus dem 3D-Modell"
+    "geometrySource": "Quelle: 3D-Modell des Gebäudes"
   },
   "profile": {
     "title": "Stündliches Lastprofil",

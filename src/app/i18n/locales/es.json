@@ -105,8 +105,7 @@
       "pv": "FV"
     },
     "pick": "Elegir una superficie",
-    "fromModel": "{tilt}° · orientación {azimuth}° {compass} · del modelo 3D",
-    "flatFromModel": "Plana · del modelo 3D"
+    "geometrySource": "Fuente: modelo 3D del edificio"
   },
   "profile": {
     "title": "Perfil de carga horario",

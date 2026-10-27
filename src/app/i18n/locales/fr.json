@@ -105,8 +105,7 @@
       "pv": "PV"
     },
     "pick": "Choisir une surface",
-    "fromModel": "{tilt}° · orientation {azimuth}° {compass} · du modèle 3D",
-    "flatFromModel": "Plat · du modèle 3D"
+    "geometrySource": "Source : modèle 3D du bâtiment"
   },
   "profile": {
     "title": "Profil de charge horaire",
