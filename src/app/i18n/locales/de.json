@@ -612,7 +612,7 @@
       "type": "Typ",
       "constructionYear": "Baujahr",
       "country": "Land",
-      "floorAreaPerStorey": "Grundfläche (je Geschoss)",
+      "floorAreaPerStorey": "Grundfläche",
       "storeys": "Geschosse",
       "roomHeight": "Raumhöhe",
       "volume": "Volumen",
@@ -640,7 +640,9 @@
     "tile": {
       "statisticalDefault": "Statistischer Wert"
     },
-    "builtIn": "Baujahr {year}"
+    "builtIn": "Baujahr {year}",
+    "eavesHeight": "{value} m bis zur Traufe",
+    "heightConflict": "{storeys} Geschosse zu {room} m sind höher als das 3D-Modell mit {height} m bis zur Traufe. Korrigieren Sie die Geschosszahl oder die Raumhöhe."
   },
   "envelope": {
     "compassNorth": "N"
@@ -707,7 +709,6 @@
     "hint": "Geschoss 1 ist das Erdgeschoss. Wählen Sie Geschosse hier oder im Modell und lassen Sie sie dann aus dem Modell weg oder geben Sie ihre Wohnungen an; Fläche und Hülle zählen nur die modellierten Geschosse.",
     "noGeometry": "Geschosse lassen sich weglassen, sobald das 3D-Modell geladen ist.",
     "floorArea": "Modellierte Fläche",
-    "heightNote": "Im 3D-Modell ist ein Geschoss {height} m hoch; BuEM rechnet mit einer Raumhöhe von {room} m.",
     "pick": "Geschosse",
     "pickHint": "Klicken Sie Geschosse im Modell an, um sie auszuwählen; einstellen lassen sie sich unter Modellierte Geschosse im Reiter Gebäude.",
     "lastOne": "Mindestens ein Geschoss bleibt im Modell.",

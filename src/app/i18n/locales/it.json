@@ -612,7 +612,7 @@
       "type": "Tipo",
       "constructionYear": "Anno di costruzione",
       "country": "Paese",
-      "floorAreaPerStorey": "Superficie (per piano)",
+      "floorAreaPerStorey": "Superficie di ingombro",
       "storeys": "Piani",
       "roomHeight": "Altezza interna",
       "volume": "Volume",
@@ -640,7 +640,9 @@
     "tile": {
       "statisticalDefault": "Valore statistico"
     },
-    "builtIn": "Costruito nel {year}"
+    "builtIn": "Costruito nel {year}",
+    "eavesHeight": "{value} m fino alla gronda",
+    "heightConflict": "{storeys} piani da {room} m sono più alti del modello 3D, alto {height} m fino alla gronda. Correggi il numero di piani o l'altezza dei locali."
   },
   "envelope": {
     "compassNorth": "N"
@@ -707,7 +709,6 @@
     "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni; superficie e involucro contano solo i piani modellati.",
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
     "floorArea": "Superficie modellata",
-    "heightNote": "Nel modello 3D un piano è alto {height} m; BuEM usa un'altezza dei locali di {room} m.",
     "pick": "Piani",
     "pickHint": "Fai clic sui piani nel modello per selezionarli; impostali in Piani modellati, nella scheda Edificio.",
     "lastOne": "Almeno un piano resta nel modello.",

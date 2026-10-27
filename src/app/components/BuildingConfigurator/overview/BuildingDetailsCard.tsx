@@ -10,7 +10,8 @@ import { SectionCard } from '../shared/SectionCard';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
 import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryName, countryOptions } from '../shared/buildingOptions';
-import { useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import { heightLimits, tallerThanModel } from '@/app/lib/storeys';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
 const ROW_UNITS: Record<string, string> = {
@@ -46,6 +47,8 @@ export interface BuildingOccupancy {
 
 export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
+  /** The 3D model's height to the eaves, in metres; it bounds the storeys and room height. */
+  modelHeight?: number;
   /** Shown as tiles beside the building data; absent for a service building. */
   occupancy?: BuildingOccupancy;
   /** Commits a single field's new value (key maps to the `general` state object). */
@@ -76,8 +79,9 @@ function Tile({ label, value, modified }: { label: string; value: string; modifi
 }
 
 /** The building data at a glance: type, country and year, then its main figures as tiles. */
-function BuildingTiles({ rows, occupancy }: { rows: SnapshotRow[]; occupancy?: BuildingOccupancy }) {
+function BuildingTiles({ rows, occupancy, modelHeight }: { rows: SnapshotRow[]; occupancy?: BuildingOccupancy; modelHeight?: number }) {
   const t = useT();
+  const format = useFormatNumber();
   const row = (key: string) => rows.find((r) => r.labelKey === `snapshot.row.${key}`);
   const tile = (key: string) => {
     const r = row(key);
@@ -109,21 +113,48 @@ function BuildingTiles({ rows, occupancy }: { rows: SnapshotRow[]; occupancy?: B
         {tile('volume')}
       </div>
       {envelope && (
-        <span className="text-[11px] text-muted-foreground">{t(envelope.labelKey)}: {rowValue(envelope, t)}</span>
+        <span className="text-[11px] text-muted-foreground">
+          {t(envelope.labelKey)}: {rowValue(envelope, t)}
+          {modelHeight !== undefined && ` · ${t('snapshot.eavesHeight', { value: format(modelHeight, 1) })}`}
+        </span>
       )}
     </div>
   );
 }
 
+/** A storey count and room height taller than the 3D model, as loaded or as edited. */
+function HeightConflict({ rows, modelHeight }: { rows: SnapshotRow[]; modelHeight?: number }) {
+  const t = useT();
+  const format = useFormatNumber();
+  const storeys = Number(rows.find((r) => r.editKey === 'storeys')?.rawValue);
+  const roomHeight = Number(rows.find((r) => r.editKey === 'roomHeight')?.rawValue);
+  if (modelHeight === undefined || !tallerThanModel(modelHeight, storeys, roomHeight)) return null;
+  return (
+    <p className="mx-3 mb-3 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+      {t('snapshot.heightConflict', { storeys, room: format(roomHeight, 1), height: format(modelHeight, 1) })}
+    </p>
+  );
+}
+
 /** The building data: tiles to read, a table to edit while its pencil is on. */
-function BuildingTable({ rows, occupancy, onEditField }: {
+function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
   rows: SnapshotRow[];
   occupancy?: BuildingOccupancy;
+  modelHeight?: number;
   onEditField?: BuildingDetailsCardProps['onEditField'];
 }) {
   const t = useT();
   // Off by default, so a stray click on the table never changes the building's data.
   const [isEditing, setIsEditing] = useState(false);
+  const storeys = Number(rows.find((r) => r.editKey === 'storeys')?.rawValue) || 1;
+  const limits = modelHeight !== undefined ? heightLimits(modelHeight, storeys) : null;
+  /** The most a field takes: the year now, and for storeys and room height what fits the model. */
+  const maxFor = (key: string): number | undefined => {
+    if (key === 'constructionYear') return new Date().getFullYear();
+    if (key === 'storeys') return limits?.maxStoreys;
+    if (key === 'roomHeight') return limits?.maxRoomHeight;
+    return undefined;
+  };
   return (
     <SectionCard
       topic={TOPICS.building}
@@ -145,7 +176,7 @@ function BuildingTable({ rows, occupancy, onEditField }: {
         </button>
       )}
     >
-      {!isEditing ? <BuildingTiles rows={rows} occupancy={occupancy} /> : (
+      {!isEditing ? <BuildingTiles rows={rows} occupancy={occupancy} modelHeight={modelHeight} /> : (
         <table className="w-full text-sm bg-card">
           <colgroup>
             <col className="w-[42%]" />
@@ -169,10 +200,13 @@ function BuildingTable({ rows, occupancy, onEditField }: {
                       ) : (
                         <NumberInput
                           value={row.rawValue ?? 0}
-                          onChange={(v) => onEditField!(row.editKey!, v)}
+                          onChange={(v) => {
+                            const max = maxFor(row.editKey!);
+                            onEditField!(row.editKey!, max === undefined ? v : Math.min(v, max));
+                          }}
                           unit={ROW_UNITS[row.editKey!] ?? ''}
                           min={row.editKey === 'storeys' ? 1 : row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
-                          max={row.editKey === 'constructionYear' ? new Date().getFullYear() : undefined}
+                          max={maxFor(row.editKey!)}
                           step={row.editKey === 'storeys' ? 1 : row.editKey === 'roomHeight' ? 0.1 : 1}
                         integer={row.editKey === 'storeys' || row.editKey === 'constructionYear'}
                         />
@@ -188,6 +222,7 @@ function BuildingTable({ rows, occupancy, onEditField }: {
           </tbody>
         </table>
       )}
+      <HeightConflict rows={rows} modelHeight={modelHeight} />
     </SectionCard>
   );
 }
@@ -195,6 +230,7 @@ function BuildingTable({ rows, occupancy, onEditField }: {
 /** The building in two tabs: Building, and Technologies where the caller has them. */
 export function BuildingDetailsCard({
   snapshotRows,
+  modelHeight,
   occupancy,
   onEditField,
   overviewSlot,
@@ -238,7 +274,7 @@ export function BuildingDetailsCard({
       ) : (
         <div className="flex flex-col gap-3 p-4">
           {overviewSlot}
-          <BuildingTable rows={snapshotRows} occupancy={occupancy} onEditField={onEditField} />
+          <BuildingTable rows={snapshotRows} occupancy={occupancy} modelHeight={modelHeight} onEditField={onEditField} />
           {parametersSlot}
         </div>
       )}

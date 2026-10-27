@@ -29,7 +29,7 @@ import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickInSelection } from './StoreysModelled';
-import { dwellingsTotal, storeyBands, storeyShares } from '../../lib/storeys';
+import { dwellingsTotal, eavesHeight, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -569,6 +569,7 @@ export function Building3DView({
           <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
+              modelHeight={surfaces.length > 0 && !detached ? eavesHeight(surfaces) : undefined}
               occupancy={isServiceBuildingType(model.general.buildingType) ? undefined : {
                 dwellings: model.general.residential_units,
                 persons: model.general.num_persons,
@@ -610,8 +611,6 @@ export function Building3DView({
                           if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
                         }}
                         floorAreaPerStorey={model.general.floorArea}
-                        storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
-                        roomHeight={model.general.roomHeight}
                         dwellings={hasDwellingsPerStorey(model.general.buildingType) ? {
                           values: model.general.storeyDwellings,
                           onChange: setStoreyDwellings,

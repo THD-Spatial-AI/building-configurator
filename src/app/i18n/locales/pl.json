@@ -632,7 +632,7 @@
       "type": "Typ",
       "constructionYear": "Rok budowy",
       "country": "Kraj",
-      "floorAreaPerStorey": "Powierzchnia (na kondygnację)",
+      "floorAreaPerStorey": "Powierzchnia zabudowy",
       "storeys": "Kondygnacje",
       "roomHeight": "Wysokość pomieszczeń",
       "volume": "Kubatura",
@@ -662,7 +662,9 @@
     "tile": {
       "statisticalDefault": "Wartość statystyczna"
     },
-    "builtIn": "Zbudowany w {year}"
+    "builtIn": "Zbudowany w {year}",
+    "eavesHeight": "{value} m do okapu",
+    "heightConflict": "{storeys} kondygnacje po {room} m są wyższe niż model 3D, który ma {height} m do okapu. Popraw liczbę kondygnacji lub wysokość pomieszczeń."
   },
   "envelope": {
     "compassNorth": "N"
@@ -729,7 +731,6 @@
     "hint": "Kondygnacja 1 to parter. Zaznacz kondygnacje tutaj lub w modelu, a następnie pomiń je w modelu lub podaj ich mieszkania; powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
     "floorArea": "Modelowana powierzchnia",
-    "heightNote": "W modelu 3D kondygnacja ma {height} m wysokości; BuEM przyjmuje wysokość pomieszczenia {room} m.",
     "pick": "Kondygnacje",
     "pickHint": "Kliknij kondygnacje w modelu, aby je zaznaczyć; ustaw je w sekcji Modelowane kondygnacje na karcie Budynek.",
     "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu.",
