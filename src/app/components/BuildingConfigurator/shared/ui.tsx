@@ -256,14 +256,19 @@ interface NumberInputProps {
   integer?: boolean;
   /** Shown greyed while the field is empty, such as the value used by default. */
   placeholder?: string;
+  /** Why the value cannot go higher; while a step up would pass `max`, the up arrow is off and shows this. */
+  maxReason?: string;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width, integer, placeholder,
+  tip, readOnly = false, width, integer, placeholder, maxReason,
 }: NumberInputProps) {
+  const [reasonShown, setReasonShown] = useState(false);
+  const current = value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0;
+  const atMax = maxReason !== undefined && max !== undefined && current + step > max + 1e-9;
   return (
-    <div style={width !== undefined ? { width } : undefined}>
+    <div style={width !== undefined ? { width } : undefined} onMouseLeave={() => setReasonShown(false)}>
       {label && (
         <div className="flex items-center gap-1 mb-1">
           <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
@@ -292,22 +297,31 @@ export function NumberInput({
         {!readOnly && onChange && (
           // The field is text so it reads either decimal separator, which drops the browser's own stepper.
           <div className="flex shrink-0 flex-col border-l border-border">
-            {([1, -1] as const).map((direction) => (
-              <button
-                key={direction}
-                type="button"
-                tabIndex={-1}
-                aria-label={label ? `${label} ${direction > 0 ? '+' : '−'}${step}` : `${direction > 0 ? '+' : '−'}${step}`}
-                // An empty field steps from the default it shows.
-                onClick={() => onChange(steppedValue(value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0, step, direction, min, max))}
-                className="flex flex-1 cursor-pointer items-center justify-center px-1 text-muted-foreground hover:bg-muted hover:text-foreground [&+button]:border-t [&+button]:border-border"
-              >
-                <ChevronDown className={cn('size-3', direction > 0 && 'rotate-180')} />
-              </button>
-            ))}
+            {([1, -1] as const).map((direction) => {
+              const blocked = direction > 0 && atMax;
+              return (
+                <button
+                  key={direction}
+                  type="button"
+                  tabIndex={-1}
+                  aria-label={label ? `${label} ${direction > 0 ? '+' : '−'}${step}` : `${direction > 0 ? '+' : '−'}${step}`}
+                  aria-disabled={blocked || undefined}
+                  title={blocked ? maxReason : undefined}
+                  // An empty field steps from the default it shows; at the limit the arrow explains instead.
+                  onClick={() => (blocked ? setReasonShown(true) : onChange(steppedValue(current, step, direction, min, max)))}
+                  className={cn(
+                    'flex flex-1 items-center justify-center px-1 text-muted-foreground [&+button]:border-t [&+button]:border-border',
+                    blocked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-muted hover:text-foreground',
+                  )}
+                >
+                  <ChevronDown className={cn('size-3', direction > 0 && 'rotate-180')} />
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
+      {reasonShown && atMax && <p role="status" className="mt-1 text-[11px] leading-snug text-amber-800 dark:text-amber-200">{maxReason}</p>}
     </div>
   );
 }

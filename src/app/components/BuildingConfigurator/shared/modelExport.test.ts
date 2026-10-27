@@ -50,6 +50,15 @@ describe('buildingCsv', () => {
     expect(csv).toContain('calculation_method,MILP,');
   });
 
+  it('takes the storeys at their own heights for the room height and volume', () => {
+    const csv = buildingCsv(
+      { floorArea: 50, storeys: 3, roomHeight: 2.5, storeyHeights: { 3: 4 } },
+      { totalEnvelopeArea: 320, avgUValue: 0.41 },
+    );
+    expect(csv).toContain('room_height,3.00,m');
+    expect(csv).toContain('volume,450.0,m3');
+  });
+
   it('names the default solver', () => {
     const csv = buildingCsv({ use_milp: false }, { totalEnvelopeArea: 1, avgUValue: 1 });
     expect(csv).toContain('calculation_method,sparse,');

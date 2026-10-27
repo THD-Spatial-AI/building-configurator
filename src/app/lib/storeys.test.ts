@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dwellingsTotal, heightLimits, modelledDwellings, storeyAt, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { dwellingsTotal, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -25,7 +25,18 @@ const polygons = [wall('w1', 0, 9), gable('g1', 9, 12), flat('f1', 'GroundSurfac
 
 describe('storeyBands', () => {
   it('splits the height from ground to eaves evenly by the storey count', () => {
-    expect(storeyBands(polygons, 3)).toEqual({ ground: 0, height: 3 });
+    expect(storeyBands(polygons, 3)).toEqual({ ground: 0, height: 3, bounds: [0, 3, 6, 9] });
+  });
+
+  it('gives each storey its share of that height in proportion to the storey heights', () => {
+    expect(storeyBands(polygons, 3, [3, 3, 1.5]).bounds).toEqual([0, 3.6, 7.2, 9]);
+    expect(storeyBands(polygons, 3, [2, 0, 2]).bounds).toEqual([0, 3, 6, 9]);
+  });
+
+  it('places storey lines and picks storeys at those heights', () => {
+    const bands = storeyBands(polygons, 3, [3, 3, 1.5]);
+    expect([3.5, 3.7, 7.1, 7.3].map((z) => storeyAt(z, bands, 3))).toEqual([1, 2, 2, 3]);
+    expect(storeyLines(polygons, 3, [3, 3, 1.5]).every(([a]) => [3.6, 7.2].some((z) => Math.abs(a[2] - z) < 1e-9))).toBe(true);
   });
 
   it('takes the eaves of the highest roof, not of a lower annex', () => {
@@ -116,14 +127,23 @@ describe('dwellingsTotal', () => {
   });
 });
 
-describe('the model\'s height binds storeys and room height', () => {
-  it('allows as many storeys as fit at the least room height, and a room height that fits the storeys', () => {
-    expect(heightLimits(10, 3)).toEqual({ maxStoreys: 4, maxRoomHeight: 3.36 });
-    expect(heightLimits(1.5, 1).maxStoreys).toBe(1);
+describe('the model\'s height binds storeys and their heights', () => {
+  it('allows another storey only while it fits at the room height, so a lower room height allows more', () => {
+    expect(heightLimits(4, 1, 2.5).maxStoreys).toBe(1);
+    expect(heightLimits(4, 1, 2).maxStoreys).toBe(2);
+    expect(heightLimits(10, 3, 2.5).maxStoreys).toBe(4);
   });
 
-  it('flags storeys and a room height taller than the model', () => {
-    expect(tallerThanModel(2.6, 2, 2.5)).toBe(true);
-    expect(tallerThanModel(6, 2, 2.5)).toBe(false);
+  it('caps the shared room height and a storey\'s own height at what the rest leave', () => {
+    const limits = heightLimits(5, 2, 2.5, { 2: 2 });
+    expect(limits.maxRoomHeight).toBe(3.1);
+    expect(limits.maxStoreyHeight(2)).toBe(2.6);
+  });
+
+  it('flags storeys taller than the model, and averages the included ones for BuEM', () => {
+    expect(tallerThanModel(2.6, storeyHeightList(2, 2.5))).toBe(true);
+    expect(tallerThanModel(6, storeyHeightList(2, 2.5, { 1: 3 }))).toBe(false);
+    expect(meanStoreyHeight(storeyHeightList(3, 2.5, { 1: 3.1 }), [1, 2])).toBeCloseTo(2.8);
+    expect(meanStoreyHeight(storeyHeightList(3, 2.5, { 1: 3.1 }), null)).toBeCloseTo(2.7);
   });
 });

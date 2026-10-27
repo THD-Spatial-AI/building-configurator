@@ -28,7 +28,7 @@ import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickInSelection } from './StoreysModelled';
-import { dwellingsTotal, eavesHeight, storeyShares } from '../../lib/storeys';
+import { dwellingsTotal, eavesHeight, storeyHeightList, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -231,11 +231,26 @@ export function Building3DView({
     () => drawnSurfaceIds(geometry?.surfaces ?? [], building.envelope, envelopeIds),
     [geometry, building.envelope, envelopeIds],
   );
-  /** Models only these storeys (null: all), each surface cut to its share inside them. */
-  const setModelledStoreys = (modelled: number[] | null) => model.setStoreysModelled(
+  const storeyHeights = storeyHeightList(model.general.storeys, model.general.roomHeight, model.general.storeyHeights);
+  const modelHeight = surfaces.length > 0 && !isEnvelopeDetached(surfaces, envelopeIds) ? eavesHeight(surfaces) : undefined;
+  /** Models only these storeys (null: all), each surface cut to its share inside them at these heights. */
+  const setModelledStoreys = (modelled: number[] | null, heights: readonly number[] = storeyHeights) => model.setStoreysModelled(
     modelled,
-    modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
+    modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled, heights) : {},
   );
+  /** Sets the storeys' own heights; they move the storey bands, so the shares of the storeys left out follow. */
+  const setStoreyHeights = (values: Record<number, number>) => {
+    model.setGen('storeyHeights', values);
+    if (model.general.storeysModelled) {
+      setModelledStoreys(model.general.storeysModelled, storeyHeightList(model.general.storeys, model.general.roomHeight, values));
+    }
+  };
+  const setRoomHeight = (roomHeight: number) => {
+    model.setGen('roomHeight', roomHeight);
+    if (model.general.storeysModelled) {
+      setModelledStoreys(model.general.storeysModelled, storeyHeightList(model.general.storeys, roomHeight, model.general.storeyHeights));
+    }
+  };
   /** Sets the dwellings per storey; the building's total is then the sum of the counts given. */
   const setStoreyDwellings = (values: Record<number, number>) => {
     model.setGen('storeyDwellings', values);
@@ -354,9 +369,15 @@ export function Building3DView({
     mode,
     onShowExpert: () => setMode('expert'),
     onStoreysClosed: () => setSelectedStoreys([]),
-    storeys: model.general.storeys > 1 ? (
+    modelHeight,
+    storeys: (
       <StoreysModelled
         storeys={model.general.storeys}
+        roomHeight={model.general.roomHeight}
+        heights={{ values: model.general.storeyHeights ?? {}, onChange: setStoreyHeights }}
+        modelHeight={modelHeight}
+        onStoreysChange={(storeys) => model.setGen('storeys', storeys)}
+        onRoomHeightChange={setRoomHeight}
         modelled={model.general.storeysModelled}
         selected={selectedStoreys}
         onSelect={setSelectedStoreys}
@@ -371,9 +392,9 @@ export function Building3DView({
           onChange: setStoreyDwellings,
         } : undefined}
         disabled={surfaces.length === 0}
-        onChange={setModelledStoreys}
+        onChange={(modelled) => setModelledStoreys(modelled)}
       />
-    ) : undefined,
+    ),
     insulation: {
       elements,
       levels: model.ignis?.variants ?? [],
@@ -522,7 +543,7 @@ export function Building3DView({
               previewId={previewSurface ?? (storeyMode ? null : hover?.id ?? null)}
               showSides={measuring}
               focusToken={focus?.token}
-              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys }}
+              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys, heights: storeyHeights }}
               onSelectStorey={storeyMode ? pickStorey : undefined}
               onSelectSurface={selectInModel}
             />
@@ -643,7 +664,7 @@ export function Building3DView({
           <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
-              modelHeight={surfaces.length > 0 && !detached ? eavesHeight(surfaces) : undefined}
+              modelHeight={modelHeight}
               occupancy={isServiceBuildingType(model.general.buildingType) ? undefined : {
                 dwellings: model.general.residential_units,
                 persons: model.general.num_persons,

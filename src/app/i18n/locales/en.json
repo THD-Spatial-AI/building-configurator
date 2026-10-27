@@ -652,8 +652,7 @@
       "statisticalDefault": "Statistical default"
     },
     "builtIn": "Built in {year}",
-    "eavesHeight": "{value} m to the eaves",
-    "heightConflict": "{storeys} storeys of {room} m are taller than the 3D model, which is {height} m to the eaves. Correct the storeys or the room height."
+    "eavesHeight": "{value} m to the eaves"
   },
   "envelope": {
     "compassNorth": "N"
@@ -717,7 +716,7 @@
   },
   "storeys": {
     "title": "Storeys modelled",
-    "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model or give their dwellings; floor area and envelope count the modelled storeys only.",
+    "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model, give their dwellings or their own height; floor area and envelope count the modelled storeys only.",
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
     "floorArea": "Floor area modelled",
     "pick": "Storeys",
@@ -741,7 +740,15 @@
     "dwellingsPerStorey": "Dwellings per storey",
     "mixed": "mixed",
     "dwellingsMissing": "Give the number of homes on every included storey. Missing: storey {storeys}.",
-    "inModel": "In the model"
+    "inModel": "In the model",
+    "roomHeightTip": "The height of each storey, floor to floor. A storey given its own height keeps it.",
+    "ownHeight": "Storey height",
+    "useRoomHeight": "Use room height",
+    "limit": {
+      "storeys": "Another storey at {room} m would be taller than the 3D model, which is {height} m to the eaves.",
+      "height": "A taller storey would make the storeys taller than the 3D model, which is {height} m to the eaves."
+    },
+    "heightConflict": "The storeys are {total} m tall together, taller than the 3D model, which is {height} m to the eaves. Lower the storey count or a height."
   },
   "help": {
     "envelope": "The size of this surface and how well it keeps heat in. Changing them changes how much heating the building needs.",

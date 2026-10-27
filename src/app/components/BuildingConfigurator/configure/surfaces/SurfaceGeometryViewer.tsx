@@ -40,7 +40,7 @@ interface SurfaceGeometryViewerProps {
   focusId?: string | null;
   focusToken?: number;
   /** Draws a line at each floor level; storeys left out of the model (1-based) are veiled, the selected ones highlighted. */
-  storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[] };
+  storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[]; heights?: readonly number[] };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
   /** Draws the selected surface's side lengths, with a line and end dots per side. */
@@ -106,8 +106,8 @@ export function SurfaceGeometryViewer({
   useEffect(() => { hoverRef.current = onHoverSurface; });
   const dropRef = useRef(onDropProduct);
   useEffect(() => { dropRef.current = onDropProduct; });
-  const storeyPickRef = useRef({ onSelectStorey, count: storeys?.count ?? 0 });
-  useEffect(() => { storeyPickRef.current = { onSelectStorey, count: storeys?.count ?? 0 }; });
+  const storeyPickRef = useRef({ onSelectStorey, count: storeys?.count ?? 0, heights: storeys?.heights });
+  useEffect(() => { storeyPickRef.current = { onSelectStorey, count: storeys?.count ?? 0, heights: storeys?.heights }; });
   const origin = useMemo(() => computeOrigin(surfaces), [surfaces]);
   const format = useFormatNumber();
   // The selected surface's side lengths, placed over the model by the render loop.
@@ -177,11 +177,11 @@ export function SurfaceGeometryViewer({
       return ((hitAt(clientX, clientY)?.object.parent as THREE.Group | undefined)?.userData.id as string | undefined) ?? null;
     }
     function selectAt(clientX: number, clientY: number) {
-      const { onSelectStorey: pickStorey, count } = storeyPickRef.current;
+      const { onSelectStorey: pickStorey, count, heights } = storeyPickRef.current;
       if (pickStorey) {
         const hit = hitAt(clientX, clientY);
         // Local y is the storage CRS's z less the origin's (see toLocal).
-        pickStorey(hit ? storeyAt(hit.point.y + origin[2], storeyBands(surfaces, count), count) : null);
+        pickStorey(hit ? storeyAt(hit.point.y + origin[2], storeyBands(surfaces, count, heights), count) : null);
         return;
       }
       selectRef.current?.(surfaceAt(clientX, clientY), { x: clientX, y: clientY });
@@ -437,12 +437,14 @@ export function SurfaceGeometryViewer({
     ? Array.from({ length: storeyCount }, (_, i) => i + 1).filter((s) => !storeys.modelled?.includes(s)).join(',')
     : '';
   const selectedKey = (storeys?.selected ?? []).join(',');
+  const heightsKey = (storeys?.heights ?? []).join(',');
   useEffect(() => {
+    const heights = heightsKey ? heightsKey.split(',').map(Number) : undefined;
     const scene = sceneRef.current;
     if (!scene || storeyCount < 2 || surfaces.length === 0) return;
     const overlay = new THREE.Group();
     const lineMaterial = new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.55 });
-    const points = storeyLines(surfaces, storeyCount).flat().map((p) => toLocal(p, origin));
+    const points = storeyLines(surfaces, storeyCount, heights).flat().map((p) => toLocal(p, origin));
     overlay.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(points), lineMaterial));
     const overMaterial = (color: number, opacity: number) => new THREE.MeshBasicMaterial({
       color, transparent: true, opacity, depthWrite: false,
@@ -454,7 +456,7 @@ export function SurfaceGeometryViewer({
     const picked = overMaterial(HIGHLIGHT_COLOR, 0.35);
     /** Draws each surface's part inside `chosen` over the model with `material`. */
     const drawOver = (chosen: number[], material: THREE.Material) => {
-      for (const part of chosen.length > 0 ? storeyParts(surfaces, storeyCount, chosen) : []) {
+      for (const part of chosen.length > 0 ? storeyParts(surfaces, storeyCount, chosen, heights) : []) {
         const built = buildSurfaceGroup(part, origin);
         const fill = built.children.find((c) => c.name === 'surface-fill') as THREE.Mesh | undefined;
         built.children.forEach((child) => {
@@ -475,7 +477,7 @@ export function SurfaceGeometryViewer({
       overlay.children.forEach((child) => (child as THREE.Mesh).geometry.dispose());
       [lineMaterial, veil, picked].forEach((material) => material.dispose());
     };
-  }, [surfaces, origin, storeyCount, leftOutKey, selectedKey]);
+  }, [surfaces, origin, storeyCount, leftOutKey, selectedKey, heightsKey]);
 
   // Runs after the scene effect on the same commit, so the groups exist.
   useEffect(() => {

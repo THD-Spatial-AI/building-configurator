@@ -652,8 +652,7 @@
       "statisticalDefault": "Statistischer Wert"
     },
     "builtIn": "Baujahr {year}",
-    "eavesHeight": "{value} m bis zur Traufe",
-    "heightConflict": "{storeys} Geschosse zu {room} m sind höher als das 3D-Modell mit {height} m bis zur Traufe. Korrigieren Sie die Geschosszahl oder die Raumhöhe."
+    "eavesHeight": "{value} m bis zur Traufe"
   },
   "envelope": {
     "compassNorth": "N"
@@ -717,7 +716,7 @@
   },
   "storeys": {
     "title": "Modellierte Geschosse",
-    "hint": "Geschoss 1 ist das Erdgeschoss. Wählen Sie Geschosse hier oder im Modell und lassen Sie sie dann aus dem Modell weg oder geben Sie ihre Wohnungen an; Fläche und Hülle zählen nur die modellierten Geschosse.",
+    "hint": "Geschoss 1 ist das Erdgeschoss. Wählen Sie Geschosse hier oder im Modell und lassen Sie sie dann aus dem Modell weg oder geben Sie ihre Wohnungen oder ihre eigene Höhe an; Fläche und Hülle zählen nur die modellierten Geschosse.",
     "noGeometry": "Geschosse lassen sich weglassen, sobald das 3D-Modell geladen ist.",
     "floorArea": "Modellierte Fläche",
     "pick": "Geschosse",
@@ -741,7 +740,15 @@
     "dwellingsPerStorey": "Wohnungen je Geschoss",
     "mixed": "gemischt",
     "dwellingsMissing": "Geben Sie die Zahl der Wohnungen auf jedem einbezogenen Geschoss an. Es fehlt: Geschoss {storeys}.",
-    "inModel": "Im Modell"
+    "inModel": "Im Modell",
+    "roomHeightTip": "Die Höhe jedes Geschosses, von Boden zu Boden. Ein Geschoss mit eigener Höhe behält diese.",
+    "ownHeight": "Geschosshöhe",
+    "useRoomHeight": "Raumhöhe verwenden",
+    "limit": {
+      "storeys": "Ein weiteres Geschoss mit {room} m wäre höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist.",
+      "height": "Ein höheres Geschoss würde die Geschosse höher als das 3D-Modell machen, das bis zur Traufe {height} m hoch ist."
+    },
+    "heightConflict": "Die Geschosse sind zusammen {total} m hoch, höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist. Verringern Sie die Geschosszahl oder eine Höhe."
   },
   "help": {
     "envelope": "Die Größe dieser Fläche und wie gut sie die Wärme hält. Eine Änderung ändert, wie viel Heizung das Gebäude braucht.",

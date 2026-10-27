@@ -7,6 +7,7 @@
 import { zipStored } from '@/app/lib/zip';
 import type { BuildingElement } from '../configure/model/buildingElements';
 import { computeTotalFloorArea, computeVolume } from './buildingDefaults';
+import { meanStoreyHeight, storeyHeightList } from '@/app/lib/storeys';
 
 /** RFC 4180: a field carrying a comma, quote or newline is quoted, and its own
  *  quotes are doubled. A renamed surface is free text, so this is not optional. */
@@ -53,6 +54,7 @@ export function buildingCsv(
   extras: { totalEnvelopeArea: number; avgUValue: number; heatDemandKwhM2a?: number | null },
 ): string {
   const storeys = general.storeys ?? 1;
+  const roomHeight = meanStoreyHeight(storeyHeightList(storeys, general.roomHeight ?? 0, general.storeyHeights), null);
   const rows: (string | number)[][] = [
     ['parameter', 'value', 'unit'],
     ['building_name', general.buildingName ?? '', ''],
@@ -62,8 +64,8 @@ export function buildingCsv(
     ['floor_area_per_storey', (general.floorArea ?? 0).toFixed(2), 'm2'],
     ['storeys', storeys, ''],
     ['floor_area_total', computeTotalFloorArea(general.floorArea ?? 0, storeys).toFixed(2), 'm2'],
-    ['room_height', (general.roomHeight ?? 0).toFixed(2), 'm'],
-    ['volume', computeVolume(general.floorArea ?? 0, storeys, general.roomHeight ?? 0).toFixed(1), 'm3'],
+    ['room_height', roomHeight.toFixed(2), 'm'],
+    ['volume', computeVolume(general.floorArea ?? 0, storeys, roomHeight).toFixed(1), 'm3'],
     ['infiltration_air_change', (general.n_air_infiltration ?? 0).toFixed(2), '1/h'],
     ['use_air_change', (general.n_air_use ?? 0).toFixed(2), '1/h'],
     ['thermal_mass_class', general.massClass ?? '', ''],

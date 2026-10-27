@@ -32,3 +32,23 @@ describe('buildSnapshotRows with storeys left out', () => {
     expect(row(whole, 'snapshot.row.envelope').valueMessage?.values).toEqual({ area: '90.0', count: 3 });
   });
 });
+
+describe('buildSnapshotRows with storeys of their own height', () => {
+  const tall = { ...general, storeyHeights: { 3: 4 } };
+
+  it('gives the mean room height and the volume of the modelled storeys at their heights', () => {
+    const whole = buildSnapshotRows(tall, {}, 0, 'en');
+    expect(row(whole, 'snapshot.row.roomHeight').value).toBe('3.0 m');
+    expect(row(whole, 'snapshot.row.roomHeight').status).toBe('modified');
+    expect(row(whole, 'snapshot.row.volume').value).toBe('900 m³');
+    const lower = buildSnapshotRows({ ...tall, storeysModelled: [1, 2] }, {}, 0, 'en');
+    expect(row(lower, 'snapshot.row.roomHeight').value).toBe('2.5 m');
+    expect(row(lower, 'snapshot.row.volume').value).toBe('500 m³');
+  });
+
+  it('leaves the storeys and room height to Storeys and occupancy, not the data editor', () => {
+    const rows = buildSnapshotRows(general, {}, 0, 'en');
+    expect(row(rows, 'snapshot.row.storeys').editKey).toBeUndefined();
+    expect(row(rows, 'snapshot.row.roomHeight').editKey).toBeUndefined();
+  });
+});

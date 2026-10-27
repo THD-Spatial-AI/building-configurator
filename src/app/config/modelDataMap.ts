@@ -39,7 +39,10 @@ export const MODEL_DATA_MAP = {
       ],
       country:            'properties.buem.building.country',
       floorArea:          'properties.buem.building.A_ref',               // { value, unit: "m2" }
-      roomHeight:         'properties.buem.building.h_room',              // { value, unit: "m" }
+      roomHeight: [
+        'properties.buem.configurator.room_height',                       // the storeys' shared height, where one has its own
+        'properties.buem.building.h_room',                                // { value, unit: "m" }: the mean BuEM takes
+      ],
       storeys: [
         'properties.buem.configurator.storeys',
         'properties.buem.storeys',                                        // stored by 0.14.0

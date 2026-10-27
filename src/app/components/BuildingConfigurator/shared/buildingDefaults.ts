@@ -39,6 +39,8 @@ export const DEFAULT_GENERAL = {
   storeysModelled:    null as number[] | null,
   /** Dwellings per storey, 1-based; while storeys are left out their sum over the modelled ones is sent as residential_units. */
   storeyDwellings:    {} as Record<number, number>,
+  /** A storey's own height, 1-based; storeys without one take roomHeight. */
+  storeyHeights:      {} as Record<number, number>,
   // The thermal values are the v6-draft request schema's defaults.
   n_air_infiltration: 0.5,
   n_air_use:          0.5,

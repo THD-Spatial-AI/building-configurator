@@ -656,8 +656,7 @@
       "statisticalDefault": "Valeur statistique"
     },
     "builtIn": "Construit en {year}",
-    "eavesHeight": "{value} m jusqu'à l'avant-toit",
-    "heightConflict": "{storeys} étages de {room} m dépassent le modèle 3D, haut de {height} m jusqu'à l'avant-toit. Corrigez le nombre d'étages ou la hauteur sous plafond."
+    "eavesHeight": "{value} m jusqu'à l'avant-toit"
   },
   "envelope": {
     "compassNorth": "N"
@@ -721,7 +720,7 @@
   },
   "storeys": {
     "title": "Étages modélisés",
-    "hint": "L'étage 1 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ; la surface et l'enveloppe ne comptent que les étages modélisés.",
+    "hint": "L'étage 1 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ou leur propre hauteur ; la surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
     "floorArea": "Surface modélisée",
     "pick": "Étages",
@@ -745,7 +744,15 @@
     "dwellingsPerStorey": "Logements par étage",
     "mixed": "variable",
     "dwellingsMissing": "Indiquez le nombre de logements sur chaque étage inclus. Manquant : étage {storeys}.",
-    "inModel": "Dans le modèle"
+    "inModel": "Dans le modèle",
+    "roomHeightTip": "La hauteur de chaque étage, de plancher à plancher. Un étage doté de sa propre hauteur la conserve.",
+    "ownHeight": "Hauteur d'étage",
+    "useRoomHeight": "Utiliser la hauteur sous plafond",
+    "limit": {
+      "storeys": "Un étage de plus à {room} m dépasserait le modèle 3D, qui mesure {height} m jusqu'à l'égout.",
+      "height": "Un étage plus haut rendrait les étages plus hauts que le modèle 3D, qui mesure {height} m jusqu'à l'égout."
+    },
+    "heightConflict": "Les étages mesurent ensemble {total} m, plus que le modèle 3D, qui mesure {height} m jusqu'à l'égout. Réduisez le nombre d'étages ou une hauteur."
   },
   "help": {
     "envelope": "La taille de cette surface et sa capacité à garder la chaleur. Les modifier change le chauffage dont le bâtiment a besoin.",

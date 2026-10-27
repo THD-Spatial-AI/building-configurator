@@ -7,7 +7,7 @@ import { ToggleSwitch } from '@/app/components/BuildingConfigurator/shared/ui';
 import { SectionCard } from '@/app/components/BuildingConfigurator/shared/SectionCard';
 import type { Step, StepStatus } from '@/app/components/BuildingConfigurator/shared/StepPanel';
 import { TOPICS, type Topic } from '@/app/config/topics';
-import { missingDwellings } from '@/app/lib/storeys';
+import { missingDwellings, storeysTooTall } from '@/app/lib/storeys';
 import {
   BUILDING_TYPE_LABELS,
   buildingTypeName,
@@ -130,8 +130,9 @@ export function energyGradeStatus(insulation: InsulationProps): StepStatus {
   return insulation.levels.length === 0 ? 'attention' : 'complete';
 }
 
-/** Incomplete while a modelled storey of a building counted per storey has no dwellings. */
-export function storeysStatus(general: Record<string, any>): StepStatus {
+/** Attention while the storeys are taller than the 3D model; incomplete while a modelled storey of a building counted per storey has no dwellings. */
+export function storeysStatus(general: Record<string, any>, modelHeight?: number): StepStatus {
+  if (storeysTooTall(general.storeys, general.roomHeight, general.storeyHeights ?? {}, modelHeight)) return 'attention';
   if (!hasDwellingsPerStorey(general.buildingType)) return 'complete';
   return missingDwellings(general.storeysModelled, general.storeyDwellings ?? {}).length > 0 ? 'incomplete' : 'complete';
 }
@@ -144,15 +145,17 @@ interface BuildingStepsProps {
   insulation?: InsulationProps;
   /** Switches to Expert; in Basic the last step then says what Expert adds. */
   onShowExpert?: () => void;
-  /** The storeys modelled, shown at the top of the storeys and occupancy step. */
+  /** The storeys, shown at the top of the storeys and occupancy step. */
   storeys?: ReactNode;
+  /** The 3D model's height to the eaves, in metres; storeys taller than it need attention. */
+  modelHeight?: number;
   /** Called when the storeys and occupancy step is left, to clear the storey selection. */
   onStoreysClosed?: () => void;
 }
 
 /** The building parameters as steps for a StepPanel, each one section card shown open. */
 export function useBuildingSteps({
-  general, setGen, mode, insulation, onShowExpert, storeys, onStoreysClosed,
+  general, setGen, mode, insulation, onShowExpert, storeys, onStoreysClosed, modelHeight,
 }: BuildingStepsProps): Step[] {
   const t = useT();
   const format = useFormatNumber();
@@ -204,7 +207,7 @@ export function useBuildingSteps({
     key: 'occupancy',
     label: SECTION_LABELS.occupancy(t),
     topic: SECTION_TOPICS.occupancy,
-    status: storeysStatus(general),
+    status: storeysStatus(general, modelHeight),
     content: card('occupancy'),
     onLeave: onStoreysClosed,
   });

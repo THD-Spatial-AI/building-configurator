@@ -652,8 +652,7 @@
       "statisticalDefault": "Statistische waarde"
     },
     "builtIn": "Bouwjaar {year}",
-    "eavesHeight": "{value} m tot de dakgoot",
-    "heightConflict": "{storeys} verdiepingen van {room} m zijn hoger dan het 3D-model, dat {height} m tot de dakgoot meet. Pas het aantal verdiepingen of de kamerhoogte aan."
+    "eavesHeight": "{value} m tot de dakgoot"
   },
   "envelope": {
     "compassNorth": "N"
@@ -717,7 +716,7 @@
   },
   "storeys": {
     "title": "Gemodelleerde verdiepingen",
-    "hint": "Verdieping 1 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "hint": "Verdieping 1 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen of hun eigen hoogte op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
     "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
     "floorArea": "Gemodelleerd vloeroppervlak",
     "pick": "Verdiepingen",
@@ -741,7 +740,15 @@
     "dwellingsPerStorey": "Woningen per verdieping",
     "mixed": "gemengd",
     "dwellingsMissing": "Geef het aantal woningen op elke meegetelde verdieping. Ontbreekt: verdieping {storeys}.",
-    "inModel": "In het model"
+    "inModel": "In het model",
+    "roomHeightTip": "De hoogte van elke verdieping, van vloer tot vloer. Een verdieping met een eigen hoogte houdt die.",
+    "ownHeight": "Verdiepingshoogte",
+    "useRoomHeight": "Kamerhoogte gebruiken",
+    "limit": {
+      "storeys": "Nog een verdieping van {room} m zou hoger zijn dan het 3D-model, dat tot de dakgoot {height} m is.",
+      "height": "Een hogere verdieping zou de verdiepingen hoger maken dan het 3D-model, dat tot de dakgoot {height} m is."
+    },
+    "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte."
   },
   "help": {
     "envelope": "De grootte van dit vlak en hoe goed het warmte vasthoudt. Wijzigen verandert hoeveel verwarming het gebouw nodig heeft.",

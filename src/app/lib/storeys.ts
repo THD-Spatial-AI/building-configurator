@@ -1,31 +1,43 @@
 // Storeys of the 3D model. The model has no per-storey geometry, so storeys
-// are equal bands from the ground to the eaves; the bottom band extends below
-// the ground and the top one above the eaves, so the ground floor belongs to
-// storey 1 and gables and roofs to the top storey.
+// are bands from the ground to the eaves, each its share of that height in
+// proportion to the storey heights given (equal bands without them); the
+// bottom band extends below the ground and the top one above the eaves, so
+// the ground floor belongs to storey 1 and gables and roofs to the top storey.
 
 import { polygonArea, type SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
 type Point = number[];
 
-/** Where storey 1 starts and how tall each storey is, in the geometry's own units. */
+/** Where storey 1 starts, the mean storey height, and where each storey starts and ends, in the geometry's own units. */
 export interface StoreyBands {
   ground: number;
   height: number;
+  /** bounds[i] is where storey i + 1 starts; the last entry is the eaves. */
+  bounds: number[];
 }
 
 /** City2TABULA geometry names surfaces as CityGML does (WallSurface, RoofSurface); other sources as BuEM (wall, roof). */
 const isKind = (polygon: SurfacePolygon, kind: 'wall' | 'roof') => polygon.type.toLowerCase().startsWith(kind);
 
-/** The ground is the lowest vertex; the eaves the lowest edge of the highest roof. */
-export function storeyBands(polygons: SurfacePolygon[], storeys: number): StoreyBands {
+/**
+ * The ground is the lowest vertex; the eaves the lowest edge of the highest
+ * roof. `heights`, one per storey from the ground, set each band's share of
+ * that height; without them, or with any not positive, the bands are equal.
+ */
+export function storeyBands(polygons: SurfacePolygon[], storeys: number, heights?: readonly number[]): StoreyBands {
   const zs = (polygon: SurfacePolygon) => polygon.coordinates[0].map((p) => p[2]);
   const ground = Math.min(...polygons.flatMap(zs));
   const roofs = polygons.filter((polygon) => isKind(polygon, 'roof'));
   const eaves = roofs.length > 0
     ? Math.max(...roofs.map((roof) => Math.min(...zs(roof))))
     : Math.max(...polygons.flatMap(zs));
-  return { ground, height: (eaves - ground) / Math.max(1, storeys) };
+  const count = Math.max(1, storeys);
+  const usable = heights && heights.length === count && heights.every((h) => h > 0) ? heights : Array(count).fill(1);
+  const sum = usable.reduce((a, b) => a + b, 0);
+  const bounds = [ground];
+  for (const h of usable) bounds.push(bounds[bounds.length - 1] + ((eaves - ground) * h) / sum);
+  return { ground, height: (eaves - ground) / count, bounds };
 }
 
 /** Where a ring's edges cross the plane z = level, in order along the ring's horizontal direction. */
@@ -44,14 +56,14 @@ function crossings(ring: Point[], level: number): Point[] {
 }
 
 /** A line across every wall at each floor level between storeys, as [start, end] in the geometry's coordinates. */
-export function storeyLines(polygons: SurfacePolygon[], storeys: number): [Point, Point][] {
+export function storeyLines(polygons: SurfacePolygon[], storeys: number, heights?: readonly number[]): [Point, Point][] {
   if (storeys < 2) return [];
-  const bands = storeyBands(polygons, storeys);
+  const bands = storeyBands(polygons, storeys, heights);
   const lines: [Point, Point][] = [];
   for (const wall of polygons.filter((polygon) => isKind(polygon, 'wall'))) {
     const ring = wall.coordinates[0].slice(0, -1);
     for (let storey = 1; storey < storeys; storey += 1) {
-      const points = crossings(ring, bands.ground + storey * bands.height);
+      const points = crossings(ring, bands.bounds[storey]);
       for (let i = 0; i + 1 < points.length; i += 2) lines.push([points[i], points[i + 1]]);
     }
   }
@@ -78,8 +90,8 @@ function clipZ(ring: Point[], inside: (z: number) => boolean, plane: number): Po
 
 /** The part of an open ring inside one storey's band, [lower, upper), the outer bands unbounded. */
 function clipToStorey(ring: Point[], bands: StoreyBands, storeys: number, storey: number): Point[] {
-  const lower = storey === 1 ? -Infinity : bands.ground + (storey - 1) * bands.height;
-  const upper = storey === storeys ? Infinity : bands.ground + storey * bands.height;
+  const lower = storey === 1 ? -Infinity : bands.bounds[storey - 1];
+  const upper = storey === storeys ? Infinity : bands.bounds[storey];
   let part = ring;
   if (lower > -Infinity) part = clipZ(part, (z) => z >= lower, lower);
   if (upper < Infinity) part = clipZ(part, (z) => z < upper, upper);
@@ -101,12 +113,14 @@ function polygonShare(polygon: SurfacePolygon, bands: StoreyBands, storeys: numb
 /** The storey (1-based) at a height; below the ground is storey 1, above the eaves the top storey. */
 export function storeyAt(z: number, bands: StoreyBands, storeys: number): number {
   if (bands.height <= 0) return 1;
-  return Math.min(storeys, Math.max(1, Math.floor((z - bands.ground) / bands.height) + 1));
+  let storey = 1;
+  while (storey < storeys && z >= bands.bounds[storey]) storey += 1;
+  return storey;
 }
 
 /** Every surface cut to the given storeys, one closed polygon per surface and storey. */
-export function storeyParts(polygons: SurfacePolygon[], storeys: number, chosen: readonly number[]): SurfacePolygon[] {
-  const bands = storeyBands(polygons, storeys);
+export function storeyParts(polygons: SurfacePolygon[], storeys: number, chosen: readonly number[], heights?: readonly number[]): SurfacePolygon[] {
+  const bands = storeyBands(polygons, storeys, heights);
   return polygons.flatMap((polygon) => {
     const ring = polygon.coordinates[0].slice(0, -1);
     return chosen
@@ -126,8 +140,9 @@ export function storeyShares(
   elements: Record<string, BuildingElement>,
   storeys: number,
   modelled: readonly number[],
+  heights?: readonly number[],
 ): Record<string, number> {
-  const bands = storeyBands(polygons, storeys);
+  const bands = storeyBands(polygons, storeys, heights);
   const byId = new Map(polygons.map((polygon) => [polygon.id, polygon]));
   const fallback = modelled.length / Math.max(1, storeys);
   const own = (id: string) => {
@@ -167,26 +182,62 @@ export function dwellingsTotal(storeys: number, dwellings: StoreyDwellings): num
   return counts.length > 0 ? counts.reduce((a, b) => a + b, 0) : null;
 }
 
-/** The least room height a storey can have, for the storey count the model's height allows. */
-export const MIN_ROOM_HEIGHT_M = 2.2;
+/** A storey's own height where the user gave one, 1-based from the ground; the rest take the room height. */
+export type StoreyHeights = Readonly<Record<number, number>>;
+
+/** The lowest storey height a field accepts: a crawl space or store room can be heated too. */
+export const MIN_STOREY_HEIGHT_M = 0.5;
 /** Slack for rounding in the model's height before storeys and room height count as too tall. */
 const HEIGHT_SLACK_M = 0.1;
+
+/** Each storey's height, from the ground: its own where given, else the room height. */
+export function storeyHeightList(storeys: number, roomHeight: number, own: StoreyHeights = {}): number[] {
+  return Array.from({ length: Math.max(0, storeys) }, (_, i) => (own[i + 1] > 0 ? own[i + 1] : roomHeight));
+}
+
+/** The mean height of the given storeys (all where `modelled` is null): the one room height BuEM takes. */
+export function meanStoreyHeight(heights: readonly number[], modelled: readonly number[] | null): number {
+  const chosen = modelled ? modelled.map((storey) => heights[storey - 1]).filter((h) => h > 0) : heights;
+  return chosen.length > 0 ? chosen.reduce((a, b) => a + b, 0) / chosen.length : 0;
+}
+
+/** Whether these storeys together are taller than the model to its eaves. */
+export function tallerThanModel(modelHeight: number, heights: readonly number[]): boolean {
+  return heights.reduce((a, b) => a + b, 0) > modelHeight + HEIGHT_SLACK_M;
+}
+
+/** Whether these storeys are taller than the 3D model to its eaves; false without a model. */
+export function storeysTooTall(storeys: number, roomHeight: number, own: StoreyHeights, modelHeight?: number): boolean {
+  return modelHeight !== undefined && tallerThanModel(modelHeight, storeyHeightList(storeys, roomHeight, own));
+}
+
+/**
+ * The most each input may reach before the storeys are taller than the model
+ * to its eaves: the storey count at the room height, the room height of the
+ * storeys without their own, and one storey's own height. Down to the
+ * centimetre, so a limit reads as a height.
+ */
+export function heightLimits(modelHeight: number, storeys: number, roomHeight: number, own: StoreyHeights = {}): {
+  maxStoreys: number;
+  maxRoomHeight: number;
+  maxStoreyHeight: (storey: number) => number;
+} {
+  const heights = storeyHeightList(storeys, roomHeight, own);
+  const total = heights.reduce((a, b) => a + b, 0);
+  const room = modelHeight + HEIGHT_SLACK_M;
+  const ownTotal = heights.reduce((sum, h, i) => sum + (own[i + 1] > 0 ? h : 0), 0);
+  const shared = heights.filter((_, i) => !(own[i + 1] > 0)).length;
+  const cm = (value: number) => Math.floor(value * 100 + 1e-6) / 100;
+  return {
+    maxStoreys: storeys + Math.max(0, Math.floor((room - total) / Math.max(roomHeight, MIN_STOREY_HEIGHT_M))),
+    maxRoomHeight: shared > 0 ? cm((room - ownTotal) / shared) : roomHeight,
+    maxStoreyHeight: (storey) => cm(room - (total - (heights[storey - 1] ?? 0))),
+  };
+}
 
 /** The model's height from the ground to the eaves, in metres. */
 export function eavesHeight(polygons: SurfacePolygon[]): number {
   return storeyBands(polygons, 1).height;
 }
 
-/** How many storeys, and how tall a room, fit in the model's height to the eaves. */
-export function heightLimits(modelHeight: number, storeys: number): { maxStoreys: number; maxRoomHeight: number } {
-  return {
-    maxStoreys: Math.max(1, Math.floor((modelHeight + HEIGHT_SLACK_M) / MIN_ROOM_HEIGHT_M)),
-    // Down to the centimetre, so a capped value reads as a room height.
-    maxRoomHeight: Math.floor(((modelHeight + HEIGHT_SLACK_M) / Math.max(1, storeys)) * 100) / 100,
-  };
-}
 
-/** Whether the storeys at the room height are taller than the model to its eaves. */
-export function tallerThanModel(modelHeight: number, storeys: number, roomHeight: number): boolean {
-  return storeys * roomHeight > modelHeight + HEIGHT_SLACK_M;
-}
