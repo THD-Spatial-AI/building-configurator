@@ -135,7 +135,7 @@ export function StepHints({ surfaceOpened, edited, ran }: { surfaceOpened: boole
     try { window.localStorage.setItem(HINTS_HIDDEN_KEY, '1'); } catch { /* a refused write only means the hints return next time */ }
   };
   return (
-    <div className="absolute right-3 top-3 z-10 flex w-[260px] flex-col gap-1.5 rounded-lg border border-border bg-card p-3 shadow-[0_8px_24px_rgba(27,36,48,0.14)]">
+    <div className="absolute right-[68px] top-3 z-10 flex w-[260px] max-w-[calc(100%-80px)] flex-col gap-1.5 rounded-lg border border-border bg-card p-3 shadow-[0_8px_24px_rgba(27,36,48,0.14)]">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-semibold text-muted-foreground">{t('hints.stepOf', { step, total: 3 })}</span>
         <button type="button" onClick={hide} aria-label={t('hints.hide')} title={t('hints.hide')} className="cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-muted [&_svg]:size-3.5">

@@ -45,7 +45,8 @@
     "panel": {
       "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
     },
-    "credits": "Zdroje dat"
+    "credits": "Zdroje dat",
+    "measure": "Zobrazit rozměry vybrané plochy"
   },
   "surface": {
     "type": {

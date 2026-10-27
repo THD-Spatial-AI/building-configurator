@@ -43,6 +43,8 @@ interface SurfaceGeometryViewerProps {
   storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[] };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
+  /** Draws the selected surface's side lengths, with a line and end dots per side. */
+  showSides?: boolean;
   /** A surface to fill and outline, as while it is hovered in the model or a list. */
   previewId?: string | null;
   /** `at` is the click position in client coordinates. */
@@ -80,6 +82,7 @@ export function SurfaceGeometryViewer({
   storeys,
   onSelectStorey,
   previewId = null,
+  showSides = false,
   onSelectSurface,
   onHoverSurface,
   onDropProduct,
@@ -109,9 +112,9 @@ export function SurfaceGeometryViewer({
   const format = useFormatNumber();
   // The selected surface's side lengths, placed over the model by the render loop.
   const sides = useMemo(() => {
-    const polygon = selectedId ? surfaces.find((surface) => surface.id === selectedId) : undefined;
+    const polygon = showSides && selectedId ? surfaces.find((surface) => surface.id === selectedId) : undefined;
     return polygon ? surfaceSides(polygon) : [];
-  }, [surfaces, selectedId]);
+  }, [surfaces, selectedId, showSides]);
   const sidePositionsRef = useRef<THREE.Vector3[]>([]);
   const sideLabelsRef = useRef<(HTMLSpanElement | null)[]>([]);
   useEffect(() => { sidePositionsRef.current = sides.map((side) => toLocal(side.mid, origin)); }, [sides, origin]);

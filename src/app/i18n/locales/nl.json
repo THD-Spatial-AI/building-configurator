@@ -43,7 +43,8 @@
     "panel": {
       "empty": "Klik op een vlak in het model om het hier te zien."
     },
-    "credits": "Bronvermelding"
+    "credits": "Bronvermelding",
+    "measure": "Afmetingen van het gekozen vlak tonen"
   },
   "surface": {
     "type": {

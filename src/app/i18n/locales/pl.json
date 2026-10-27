@@ -45,7 +45,8 @@
     "panel": {
       "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
     },
-    "credits": "Źródła danych"
+    "credits": "Źródła danych",
+    "measure": "Pokaż wymiary wybranej powierzchni"
   },
   "surface": {
     "type": {

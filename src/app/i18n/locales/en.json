@@ -43,7 +43,8 @@
     "panel": {
       "empty": "Click a surface in the model to see it here."
     },
-    "credits": "Data credits"
+    "credits": "Data credits",
+    "measure": "Show the selected surface's measurements"
   },
   "surface": {
     "type": {

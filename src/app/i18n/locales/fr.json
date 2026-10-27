@@ -44,7 +44,8 @@
     "panel": {
       "empty": "Cliquez sur une surface du modèle pour la voir ici."
     },
-    "credits": "Crédits des données"
+    "credits": "Crédits des données",
+    "measure": "Afficher les dimensions de la surface sélectionnée"
   },
   "surface": {
     "type": {

@@ -43,7 +43,8 @@
     "panel": {
       "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen."
     },
-    "credits": "Datenquellen"
+    "credits": "Datenquellen",
+    "measure": "Maße der gewählten Fläche anzeigen"
   },
   "surface": {
     "type": {
