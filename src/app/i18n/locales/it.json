@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Annulla {action} (Ctrl+Z)",
-      "none": "Niente da annullare",
-      "action": "Annulla {action}",
-      "label": "Annulla"
+      "action": "Annulla {action}"
     },
     "loadingGeometry": "Caricamento geometria delle superfici…",
     "detached": "Le superfici salvate di questo edificio provengono da una generazione City2TABULA precedente, quindi nessuna corrisponde ai dati 3D attuali. I valori salvati restano validi; il modello non viene mostrato.",

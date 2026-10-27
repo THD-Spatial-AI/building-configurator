@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Undo {action} (Ctrl+Z)",
-      "none": "Nothing to undo",
-      "action": "Undo {action}",
-      "label": "Undo"
+      "action": "Undo {action}"
     },
     "loadingGeometry": "Loading surface geometry…",
     "detached": "This building's saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.",

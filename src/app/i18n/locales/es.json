@@ -27,9 +27,7 @@
     },
     "undo": {
       "title": "Deshacer {action} (Ctrl+Z)",
-      "none": "Nada que deshacer",
-      "action": "Deshacer {action}",
-      "label": "Deshacer"
+      "action": "Deshacer {action}"
     },
     "loadingGeometry": "Cargando geometría de superficies…",
     "detached": "Las superficies guardadas de este edificio proceden de una generación anterior de City2TABULA, por lo que ninguna coincide con los datos 3D actuales. Los valores guardados siguen vigentes; el modelo no se muestra.",

@@ -28,9 +28,7 @@
     },
     "undo": {
       "title": "Cofnij {action} (Ctrl+Z)",
-      "none": "Nie ma czego cofnąć",
-      "action": "Cofnij {action}",
-      "label": "Cofnij"
+      "action": "Cofnij {action}"
     },
     "loadingGeometry": "Wczytywanie geometrii przegród…",
     "detached": "Zapisane przegrody tego budynku pochodzą z wcześniejszego przebiegu City2TABULA, więc żadna nie pasuje do aktualnych danych 3D. Zapisane wartości nadal obowiązują; model nie jest wyświetlany.",

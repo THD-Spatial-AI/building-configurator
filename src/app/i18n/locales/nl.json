@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Ongedaan maken: {action} (Ctrl+Z)",
-      "none": "Niets om ongedaan te maken",
-      "action": "Ongedaan maken: {action}",
-      "label": "Ongedaan maken"
+      "action": "Ongedaan maken: {action}"
     },
     "loadingGeometry": "Geometrie van vlakken laden…",
     "detached": "De opgeslagen vlakken van dit gebouw komen uit een eerdere City2TABULA-generatie, dus geen ervan past bij de huidige 3D-data. De opgeslagen waarden gelden nog; het model wordt niet getoond.",

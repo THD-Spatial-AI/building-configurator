@@ -28,9 +28,7 @@
     },
     "undo": {
       "title": "Vrátit {action} (Ctrl+Z)",
-      "none": "Není co vrátit",
-      "action": "Vrátit {action}",
-      "label": "Zpět"
+      "action": "Vrátit {action}"
     },
     "loadingGeometry": "Načítání geometrie ploch…",
     "detached": "Uložené plochy této budovy pocházejí ze starší generace City2TABULA, takže žádná neodpovídá aktuálním 3D datům. Uložené hodnoty stále platí; model se nezobrazuje.",

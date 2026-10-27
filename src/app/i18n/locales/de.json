@@ -26,9 +26,7 @@
     },
     "undo": {
       "title": "Rückgängig: {action} (Ctrl+Z)",
-      "none": "Nichts rückgängig zu machen",
-      "action": "Rückgängig: {action}",
-      "label": "Rückgängig"
+      "action": "Rückgängig: {action}"
     },
     "loadingGeometry": "Flächengeometrie wird geladen…",
     "detached": "Die gespeicherten Flächen dieses Gebäudes stammen aus einer früheren City2TABULA-Generierung und passen zu keinen aktuellen 3D-Daten. Die gespeicherten Werte gelten weiterhin; das Modell wird nicht angezeigt.",

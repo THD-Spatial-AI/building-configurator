@@ -27,9 +27,7 @@
     },
     "undo": {
       "title": "Annuler {action} (Ctrl+Z)",
-      "none": "Rien à annuler",
-      "action": "Annuler {action}",
-      "label": "Annuler"
+      "action": "Annuler {action}"
     },
     "loadingGeometry": "Chargement de la géométrie…",
     "detached": "Les surfaces enregistrées de ce bâtiment proviennent d'une génération City2TABULA antérieure et ne correspondent plus aux données 3D actuelles. Les valeurs enregistrées restent valables ; le modèle n'est pas affiché.",
