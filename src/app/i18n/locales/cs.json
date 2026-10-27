@@ -667,7 +667,11 @@
     },
     "pvGeneration": "Výroba FV",
     "storeysModelled": "{modelled} z {total} modelováno",
-    "heatingPerM2": "Vytápění {value} kWh/m²·a"
+    "heatingPerM2": "Vytápění {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Orientační třída potřeby tepla na vytápění (simulovaná, nejde o energetický štítek)",
+      "tip": "Roční potřeba tepla na vytápění z BuEM na referenční plochu, při počasí a užívání výpočtu, zařazená podle pásem rakouské stupnice OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G nad 250). Teplá voda, chlazení a elektřina nejsou zahrnuty."
+    }
   },
   "envelope": {
     "compassNorth": "S"

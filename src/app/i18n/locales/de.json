@@ -651,7 +651,11 @@
     },
     "pvGeneration": "PV-Erzeugung",
     "storeysModelled": "{modelled} von {total} modelliert",
-    "heatingPerM2": "Heizung {value} kWh/m²·a"
+    "heatingPerM2": "Heizung {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Indikative Heizwärmebedarfsklasse (simuliert, kein Energieausweis)",
+      "tip": "Jährlicher Heizwärmebedarf aus BuEM je Bezugsfläche, mit dem Wetter und der Nutzung des Laufs, eingestuft nach den Bändern der österreichischen OIB-RL-6-HWB-Skala (A++ bis 10 kWh/m²·a, G über 250). Warmwasser, Kühlung und Strom sind nicht enthalten."
+    }
   },
   "envelope": {
     "compassNorth": "N"

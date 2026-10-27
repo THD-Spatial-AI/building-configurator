@@ -5,13 +5,16 @@
 import { cn } from '@/lib/utils';
 import { TOPICS, type Topic } from '@/app/config/topics';
 import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
-import { SourceTag, EnergyComparisonNote } from '../shared/ui';
+import { InfoTip, SourceTag, EnergyComparisonNote } from '../shared/ui';
+import { hwbClass } from '../../../lib/energyClass';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
   /** Annual PV generation in kWh; the PV row shows only when it is a number. */
   pvAnnualKwh?: number | null;
+  /** BuEM's space heating per A_ref, kWh/(m²·a); with it the card shows the indicative class. */
+  heatingPerM2?: number | null;
 }
 
 const DEMAND_ITEMS: { key: 'heating' | 'electricity' | 'hotwater' | 'dhw'; labelKey: string; topic: Topic }[] = [
@@ -65,8 +68,29 @@ function LegendItem({ topic, label, value, unit, source, note }: {
   );
 }
 
+/** The indicative class of the building's BuEM heating demand, with what it is and is not. */
+function HeatingClass({ kwhPerM2 }: { kwhPerM2: number }) {
+  const t = useT();
+  const format = useFormatNumber();
+  const energyClass = hwbClass(kwhPerM2);
+  return (
+    <div className="flex items-center gap-2.5 border-t border-border pt-2.5">
+      <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-md text-[13px] font-extrabold', energyClass.badge)}>
+        {energyClass.label}
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="flex items-center gap-1 text-[12px] font-semibold text-foreground">
+          {t('snapshot.heatingClass.label')}
+          <InfoTip tip={t('snapshot.heatingClass.tip')} />
+        </span>
+        <span className="text-[11px] text-muted-foreground">{t('insulation.classes.perM2', { value: format(kwhPerM2, 0) })}</span>
+      </div>
+    </div>
+  );
+}
+
 /** The building's annual demand by carrier, and its PV generation where there is any. */
-export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: BuildingSnapshotAsideProps) {
+export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null, heatingPerM2 = null }: BuildingSnapshotAsideProps) {
   const t = useT();
   const format = useFormatNumber();
   const total = DEMAND_ITEMS.reduce((sum, { key }) => sum + amount(energyTotals[key]), 0);
@@ -128,6 +152,7 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: Buil
           />
         )}
       </div>
+      {typeof heatingPerM2 === 'number' && heatingPerM2 > 0 && <HeatingClass kwhPerM2={heatingPerM2} />}
       {energyTotals.heatingPerM2 && (
         <span className="text-[11px] text-muted-foreground">
           {t('snapshot.heatingPerM2', { value: formatTotal(energyTotals.heatingPerM2, format) })}

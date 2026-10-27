@@ -651,7 +651,11 @@
     },
     "pvGeneration": "PV-opwekking",
     "storeysModelled": "{modelled} van {total} gemodelleerd",
-    "heatingPerM2": "Verwarming {value} kWh/m²·a"
+    "heatingPerM2": "Verwarming {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Indicatieve klasse voor de warmtevraag (gesimuleerd, geen energielabel)",
+      "tip": "Jaarlijkse ruimteverwarming van BuEM per referentieoppervlak, met het weer en de bezetting van de berekening, ingedeeld volgens de banden van de Oostenrijkse OIB-RL 6 HWB-schaal (A++ tot 10 kWh/m²·a, G boven 250). Warm water, koeling en elektriciteit zijn niet meegeteld."
+    }
   },
   "envelope": {
     "compassNorth": "N"

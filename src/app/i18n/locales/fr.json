@@ -657,7 +657,11 @@
     },
     "pvGeneration": "Production PV",
     "storeysModelled": "{modelled} sur {total} modélisés",
-    "heatingPerM2": "Chauffage {value} kWh/m²·a"
+    "heatingPerM2": "Chauffage {value} kWh/m²·a",
+    "heatingClass": {
+      "label": "Classe indicative de besoin de chauffage (simulée, pas un certificat énergétique)",
+      "tip": "Besoin annuel de chauffage de BuEM par surface de référence, avec la météo et l'occupation du calcul, classé selon les bandes de l'échelle autrichienne OIB-RL 6 HWB (A++ jusqu'à 10 kWh/m²·a, G au-delà de 250). Eau chaude, refroidissement et électricité ne sont pas inclus."
+    }
   },
   "envelope": {
     "compassNorth": "N"
