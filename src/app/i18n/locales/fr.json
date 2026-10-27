@@ -160,7 +160,8 @@
       "add": "Ajouter du PV sur cette surface",
       "modules": "Modules : {count} · {kwp} kWp · {area} m²",
       "noFit": "Aucun module entier ne tient sur cette surface.",
-      "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun."
+      "spaceLimited": "La place sur cette surface limite les modules ; une part utilisable plus grande n’en ajoute aucun.",
+      "noFitShort": "Aucun module ne tient"
     },
     "mounting": {
       "label": "Pose",
@@ -235,6 +236,10 @@
     "followsModel": "Le PV suit les {tilt}° du modèle 3D ; l'inclinaison et l'orientation modifiées ci-dessus ne vont qu'à BuEM.",
     "options": {
       "search": "Rechercher dans les options photovoltaïques"
+    },
+    "noFitOn": {
+      "one": "Aucun module PV entier ne tient sur {surfaces} : elle n'a donc pas de PV. Choisissez un produit plus petit ou une autre surface.",
+      "other": "Aucun module PV entier ne tient sur {count} surfaces ({surfaces}) : elles n'ont donc pas de PV. Choisissez un produit plus petit ou d'autres surfaces."
     }
   },
   "tech": {

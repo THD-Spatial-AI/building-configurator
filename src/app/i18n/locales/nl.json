@@ -158,7 +158,8 @@
       "add": "PV op dit vlak plaatsen",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "Er past geen hele module op dit vlak.",
-      "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe."
+      "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe.",
+      "noFitShort": "Geen module past"
     },
     "mounting": {
       "label": "Montage",
@@ -233,6 +234,10 @@
     "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM.",
     "options": {
       "search": "Fotovoltaïsche opties doorzoeken"
+    },
+    "noFitOn": {
+      "one": "Er past geen hele PV-module op {surfaces}, dus het vlak heeft geen PV. Kies een kleiner product of een ander vlak.",
+      "other": "Er past geen hele PV-module op {count} vlakken ({surfaces}), dus ze hebben geen PV. Kies een kleiner product of andere vlakken."
     }
   },
   "tech": {

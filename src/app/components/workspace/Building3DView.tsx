@@ -23,7 +23,7 @@ import { tabulaUValueOptions } from '../../lib/ignisAdapter';
 import { SurfacePanel } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
-import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
+import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceName, surfaceProduct, type PvMode } from './PvMode';
 import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
 import { DEFAULT_WEATHER, WeatherSection, weatherChoice, type WeatherSelection } from './WeatherSection';
@@ -40,7 +40,7 @@ import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
-import { pvLayouts } from '../../lib/pvSurfaces';
+import { fittedPvIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 
@@ -125,7 +125,10 @@ export function Building3DView({
     [layouts],
   );
   const pvSets = useMemo(() => (pv ? pvRenderSets(pv.surfaces) : null), [pv]);
-  const installedPvIds = useMemo(() => [...(pvSets?.installed ?? [])], [pvSets]);
+  // A surface with PV on that fits no whole module is neither drawn as PV nor run.
+  const installedPvIds = useMemo(() => (pv ? fittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
+  const installedPvSet = useMemo(() => new Set(installedPvIds), [installedPvIds]);
+  const unfittedPv = useMemo(() => (pv ? unfittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
   /** Null without the host's weather options, or while they load or after they failed: no weather choice. */
   const [weatherOptions, setWeatherOptions] = useState<WeatherOptions | null>(null);
   const [weatherSelection, setWeatherSelection] = useState<WeatherSelection>(DEFAULT_WEATHER);
@@ -466,7 +469,7 @@ export function Building3DView({
               selectedId={selected?.id ?? null}
               invalidIds={invalidIds}
               visibleIds={drawnIds}
-              pvIds={pvSets?.installed}
+              pvIds={installedPvSet}
               pvModules={pvModules}
               candidateIds={onTech ? pvSets?.suggested : undefined}
               onHoverSurface={onTech ? hoverPv : undefined}
@@ -492,12 +495,11 @@ export function Building3DView({
             </div>
           )}
 
-          {onTech && geometry && !geometry.note && !storeyMode && <PvHintPill />}
           {!onTech && surfaces.length > 0 && !detached && !geometry?.note && !storeyMode && !touring && (
             <StepHints surfaceOpened={selected !== null} edited={hasUnsavedChanges} ran={ran} />
           )}
 
-          {model.general.storeys > 1 && surfaces.length > 0 && !detached && (
+          {!onTech && model.general.storeys > 1 && surfaces.length > 0 && !detached && (
             <button
               type="button"
               aria-pressed={storeyMode}
@@ -537,8 +539,22 @@ export function Building3DView({
                 {t('view.invalidSurfaces', { count: invalidIds.size })}
               </div>
             )}
-            {surfaces.length > 0 && !detached && <ModelLegend pv={onTech} />}
+            {onTech && unfittedPv.length > 0 && (
+              <div role="alert" className="flex max-w-[360px] items-start gap-1.5 rounded-md border border-destructive/30 bg-card/95 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-destructive shadow-sm">
+                <AlertTriangle className="mt-px size-3.5 shrink-0" />
+                {t('pv.noFitOn', { count: unfittedPv.length, surfaces: unfittedPv.map((id) => surfaceName(id, elements, pv?.surfaces ?? {})).join(', ') })}
+              </div>
+            )}
+            {!onTech && surfaces.length > 0 && !detached && <ModelLegend pv={false} />}
           </div>
+
+          {/* On the Technologies tab the storey picker is not needed, so the legend takes its corner. */}
+          {onTech && surfaces.length > 0 && !detached && (
+            <div className="absolute left-3 top-3 flex max-w-[70%] flex-col items-start gap-2">
+              <ModelLegend pv />
+              {!geometry?.note && <PvHintPill />}
+            </div>
+          )}
 
           {attribution && (
             <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm">
@@ -561,7 +577,7 @@ export function Building3DView({
               }}
               onEditField={model.setGen}
               activeTab={tab}
-              onTabChange={setTab}
+              onTabChange={(next) => { setTab(next); leaveStoreyMode(); }}
               technologySlot={pv || technologies ? (
                 <TechnologiesTab
                   pv={pv}

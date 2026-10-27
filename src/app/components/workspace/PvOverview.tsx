@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { DecimalInput } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
-import { installedByProduct, pvSummary } from '../../lib/pvSurfaces';
+import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
   constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints,
@@ -59,7 +59,7 @@ function SurfaceList({ pv, elements, layouts, onSelect }: {
   const t = useT();
   const format = useFormatNumber();
   const entries = Object.entries(pv.surfaces);
-  const installedCount = entries.filter(([, s]) => s.state === 'installed').length;
+  const installedCount = fittedPvIds(pv.surfaces, layouts).length;
   const suggestedIds = entries.filter(([, s]) => s.state === 'suggested').map(([id]) => id);
   const ordered = STATE_ORDER.flatMap((state) => entries
     .filter(([, surface]) => surface.state === state)
@@ -93,9 +93,13 @@ function SurfaceList({ pv, elements, layouts, onSelect }: {
                   <GeometryLine id={id} elements={elements} surface={surface} />
                 </div>
               </div>
-              <span className={cn('shrink-0 text-[12px]', installed ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
-                {installed ? `${format(kwp, 1)} kWp` : t('pv.upTo', { kwp: format(kwp, 1) })}
-              </span>
+              {installed && layouts[id]?.count === 0 ? (
+                <span className="shrink-0 text-[11px] font-medium text-destructive">{t('pv.card.noFitShort')}</span>
+              ) : (
+                <span className={cn('shrink-0 text-[12px]', installed ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
+                  {installed ? `${format(kwp, 1)} kWp` : t('pv.upTo', { kwp: format(kwp, 1) })}
+                </span>
+              )}
               <Switch on={installed} label={t('pv.toggle', { surface: name })} onChange={(on) => pv.onToggle(id, on)} />
             </li>
           );

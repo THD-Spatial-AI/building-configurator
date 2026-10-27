@@ -158,7 +158,8 @@
       "add": "Aggiungi FV a questa superficie",
       "modules": "Moduli: {count} · {kwp} kWp · {area} m²",
       "noFit": "Su questa superficie non entra nessun modulo intero.",
-      "spaceLimited": "Lo spazio su questa superficie limita i moduli; una quota utilizzabile maggiore non ne aggiunge."
+      "spaceLimited": "Lo spazio su questa superficie limita i moduli; una quota utilizzabile maggiore non ne aggiunge.",
+      "noFitShort": "Nessun modulo entra"
     },
     "mounting": {
       "label": "Montaggio",
@@ -233,6 +234,10 @@
     "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM.",
     "options": {
       "search": "Cerca nelle opzioni fotovoltaiche"
+    },
+    "noFitOn": {
+      "one": "Nessun modulo FV intero entra su {surfaces}, quindi non ha FV. Scegli un prodotto più piccolo o un'altra superficie.",
+      "other": "Nessun modulo FV intero entra su {count} superfici ({surfaces}), quindi non hanno FV. Scegli un prodotto più piccolo o altre superfici."
     }
   },
   "tech": {

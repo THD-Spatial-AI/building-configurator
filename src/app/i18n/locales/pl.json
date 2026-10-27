@@ -162,7 +162,8 @@
       "add": "Dodaj PV do tej przegrody",
       "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
-      "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego."
+      "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego.",
+      "noFitShort": "Żaden moduł się nie mieści"
     },
     "mounting": {
       "label": "Montaż",
@@ -241,6 +242,12 @@
     "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM.",
     "options": {
       "search": "Szukaj w opcjach fotowoltaicznych"
+    },
+    "noFitOn": {
+      "one": "Na {surfaces} nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inną powierzchnię.",
+      "few": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
+      "many": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie.",
+      "other": "Na {count} powierzchniach ({surfaces}) nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inne powierzchnie."
     }
   },
   "tech": {

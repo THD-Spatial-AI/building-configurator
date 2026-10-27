@@ -162,7 +162,8 @@
       "add": "Přidat FV na tuto plochu",
       "modules": "Moduly: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tuto plochu se nevejde žádný celý modul.",
-      "spaceLimited": "Místo na této ploše omezuje moduly; větší využitelný podíl žádný nepřidá."
+      "spaceLimited": "Místo na této ploše omezuje moduly; větší využitelný podíl žádný nepřidá.",
+      "noFitShort": "Žádný modul se nevejde"
     },
     "mounting": {
       "label": "Montáž",
@@ -241,6 +242,12 @@
     "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
     "options": {
       "search": "Hledat ve fotovoltaických možnostech"
+    },
+    "noFitOn": {
+      "one": "Na {surfaces} se nevejde žádný celý FV modul, takže na ní FV není. Zvolte menší produkt nebo jinou plochu.",
+      "few": "Na {count} plochy ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy.",
+      "many": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy.",
+      "other": "Na {count} ploch ({surfaces}) se nevejde žádný celý FV modul, takže na nich FV není. Zvolte menší produkt nebo jiné plochy."
     }
   },
   "tech": {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { installedByProduct, pvGeometry, pvLayouts, pvSummary } from './pvSurfaces';
+import { fittedPvIds, installedByProduct, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -100,6 +100,18 @@ describe('installedByProduct', () => {
     const [row] = installedByProduct({ r1: surface('installed', { maxKwp: 3 }) }, {}, () => mono);
     expect(row.modules).toBeUndefined();
     expect(row.kwp).toBe(3);
+  });
+});
+
+describe('a surface with PV that fits no whole module', () => {
+  const surfaces = { r1: surface('installed'), r2: surface('installed', { maxKwp: 3 }) };
+  const layouts = { r1: { count: 6, kwp: 2.4, area: 12 } as PvLayout, r2: { count: 0, kwp: 0, area: 0 } as PvLayout };
+
+  it('is not installed anywhere: not listed, counted or run', () => {
+    expect(fittedPvIds(surfaces, layouts)).toEqual(['r1']);
+    expect(unfittedPvIds(surfaces, layouts)).toEqual(['r2']);
+    expect(installedByProduct(surfaces, layouts, () => undefined)[0].surfaces).toBe(1);
+    expect(pvSummary(surfaces, {}, layouts).installed).toBe(1);
   });
 });
 
