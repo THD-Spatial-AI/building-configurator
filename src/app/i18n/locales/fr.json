@@ -187,7 +187,8 @@
       "title": "PV sur ce bâtiment"
     },
     "surfaces": {
-      "toggle": "Surfaces disponibles pour le PV ({installed} sur {total} avec PV)"
+      "toggle": "{name} ({installed} sur {total} avec PV)",
+      "name": "Surfaces disponibles pour le PV"
     },
     "cost": {
       "investment": "Investissement",
@@ -197,9 +198,10 @@
     "catalogue": {
       "hint": "Faites glisser un produit sur un toit ou un mur, ou choisissez-le dans le panneau d’une surface.",
       "module": "{width} × {height} m · {watts} W",
-      "toggle": "Options photovoltaïques ({count})",
+      "toggle": "{name} ({count})",
       "search": "Rechercher dans le catalogue",
-      "drag": "Faites glisser sur un toit ou un mur du modèle"
+      "drag": "Faites glisser sur un toit ou un mur du modèle",
+      "name": "Options photovoltaïques"
     },
     "product": {
       "label": "Produit",
@@ -226,7 +228,7 @@
     },
     "installed": {
       "title": "Installé sur ce bâtiment",
-      "empty": "Pas encore de PV. Ouvrez les options photovoltaïques et faites glisser un produit sur un toit ou un mur.",
+      "empty": "Aucun PV installé pour l'instant.",
       "surfaces": {
         "one": "sur {count} surface",
         "other": "sur {count} surfaces"
@@ -245,11 +247,17 @@
       "other": "Aucun module PV entier ne tient sur {count} surfaces ({surfaces}) : elles n'ont donc pas de PV. Choisissez un produit plus petit ou d'autres surfaces."
     },
     "help": {
-      "title": "Comment installer du PV sur une surface",
-      "drag": "Ouvrez les options photovoltaïques et faites glisser un produit par sa poignée sur un toit ou un mur du modèle.",
-      "click": "Ou cliquez sur un toit ou un mur du modèle, activez {install} dans son panneau et choisissez-y un produit.",
-      "suggested": "Les surfaces marquées {suggested} conviennent le mieux au PV. Dans la liste des surfaces disponibles, {useSuggested} installe du PV sur toutes.",
-      "remove": "Pour retirer le PV, désactivez {install} dans le panneau de la surface ou dans la liste des surfaces disponibles."
+      "title": "Comment ajouter du PV",
+      "drag": "Ouvrez {options} et faites glisser un produit sur un toit ou un mur.",
+      "click": "Sélectionnez un toit ou un mur, activez {install} et choisissez un produit.",
+      "remove": "Désactivez {install} dans le panneau de la surface ou dans {surfaces}.",
+      "lead": {
+        "drag": "Glisser",
+        "click": "Cliquer",
+        "all": "Tout en une fois",
+        "remove": "Retirer"
+      },
+      "all": "Cliquez sur {useSuggested} pour ajouter du PV à chaque surface marquée {suggested}."
     },
     "sort": {
       "label": "Trier par",
