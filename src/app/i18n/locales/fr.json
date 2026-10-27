@@ -250,6 +250,13 @@
       "click": "Ou cliquez sur un toit ou un mur du modèle, activez {install} dans son panneau et choisissez-y un produit.",
       "suggested": "Les surfaces marquées {suggested} conviennent le mieux au PV. Dans la liste des surfaces disponibles, {useSuggested} installe du PV sur toutes.",
       "remove": "Pour retirer le PV, désactivez {install} dans le panneau de la surface ou dans la liste des surfaces disponibles."
+    },
+    "sort": {
+      "label": "Trier par",
+      "name": "Nom, de A à Z",
+      "cost": "Coût par kWc le plus bas",
+      "capacity": "Puissance de module la plus élevée",
+      "size": "Module le plus petit"
     }
   },
   "tech": {

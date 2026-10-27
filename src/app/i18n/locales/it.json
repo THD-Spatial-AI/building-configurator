@@ -249,6 +249,13 @@
       "click": "Oppure fai clic su un tetto o una parete del modello, attiva {install} nel suo pannello e scegli lì un prodotto.",
       "suggested": "Le superfici contrassegnate {suggested} sono le più adatte al FV. Nell'elenco delle superfici disponibili, {useSuggested} installa il FV su tutte.",
       "remove": "Per rimuovere il FV, disattiva {install} nel pannello della superficie o nell'elenco delle superfici disponibili."
+    },
+    "sort": {
+      "label": "Ordina per",
+      "name": "Nome, dalla A alla Z",
+      "cost": "Costo per kWp più basso",
+      "capacity": "Potenza del modulo più alta",
+      "size": "Modulo più piccolo"
     }
   },
   "tech": {

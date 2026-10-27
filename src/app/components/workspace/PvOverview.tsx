@@ -11,8 +11,8 @@ import { useFormatNumber, useT } from '../../i18n';
 import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
-  constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints,
-  type TechnologyConstraint, type TechnologyProduct,
+  constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints, sortProducts,
+  type ProductOrder, type TechnologyConstraint, type TechnologyProduct,
 } from '../../lib/pvProducts';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { GeometryLine, surfaceName, surfaceProduct, Switch, type PvMode, type PvSurface } from './PvMode';
@@ -208,16 +208,27 @@ function InstallHelp() {
   );
 }
 
+const SORT_ORDERS: readonly ProductOrder[] = ['name', 'cost', 'capacity', 'size'];
+
 function Catalogue({ pv }: { pv: PvMode }) {
   const t = useT();
   const format = useFormatNumber();
   const [query, setQuery] = useState('');
+  const [order, setOrder] = useState<ProductOrder>('name');
   if (!pv.catalogue?.length) return null;
   const needle = query.trim().toLowerCase();
-  const shown = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
+  const found = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
+  const shown = sortProducts(found, order, pv.module ?? DEFAULT_PV_MODULE);
   return (
     <Dropdown title={t('pv.catalogue.toggle', { count: pv.catalogue.length })}>
-        <SearchField label={t('pv.options.search')} value={query} onChange={setQuery} />
+        <div className="flex gap-2">
+          <div className="min-w-0 flex-1"><SearchField label={t('pv.options.search')} value={query} onChange={setQuery} /></div>
+          <div className="w-40 shrink-0">
+            <select className="cfg-select" aria-label={t('pv.sort.label')} value={order} onChange={(e) => setOrder(e.target.value as ProductOrder)}>
+              {SORT_ORDERS.map((option) => <option key={option} value={option}>{t(`pv.sort.${option}`)}</option>)}
+            </select>
+          </div>
+        </div>
         <p className="flex items-center gap-1.5 text-[11px] font-medium leading-snug text-foreground">
           <GripVertical className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{t('pv.catalogue.hint')}
         </p>

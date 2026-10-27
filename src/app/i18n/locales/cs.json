@@ -257,6 +257,13 @@
       "click": "Nebo klikněte na střechu či stěnu v modelu, zapněte v jejím panelu {install} a vyberte tam produkt.",
       "suggested": "Plochy označené {suggested} se pro FV hodí nejlépe. V seznamu dostupných ploch {useSuggested} nainstaluje FV na všechny.",
       "remove": "Chcete-li FV odebrat, vypněte {install} v panelu plochy nebo v seznamu dostupných ploch."
+    },
+    "sort": {
+      "label": "Seřadit podle",
+      "name": "Název, A až Z",
+      "cost": "Nejnižší cena za kWp",
+      "capacity": "Nejvyšší výkon modulu",
+      "size": "Nejmenší modul"
     }
   },
   "tech": {

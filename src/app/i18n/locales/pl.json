@@ -257,6 +257,13 @@
       "click": "Albo kliknij dach lub ścianę w modelu, włącz {install} w jej panelu i wybierz tam produkt.",
       "suggested": "Powierzchnie oznaczone {suggested} najlepiej nadają się do PV. Na liście dostępnych powierzchni {useSuggested} instaluje PV na wszystkich.",
       "remove": "Aby usunąć PV, wyłącz {install} w panelu powierzchni lub na liście dostępnych powierzchni."
+    },
+    "sort": {
+      "label": "Sortuj według",
+      "name": "Nazwa, od A do Z",
+      "cost": "Najniższy koszt za kWp",
+      "capacity": "Najwyższa moc modułu",
+      "size": "Najmniejszy moduł"
     }
   },
   "tech": {

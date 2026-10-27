@@ -250,6 +250,13 @@
       "click": "O haga clic en un tejado o una pared del modelo, active {install} en su panel y elija allí un producto.",
       "suggested": "Las superficies marcadas como {suggested} son las más adecuadas para FV. En la lista de superficies disponibles, {useSuggested} instala FV en todas.",
       "remove": "Para quitar la FV, desactive {install} en el panel de la superficie o en la lista de superficies disponibles."
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "name": "Nombre, A a Z",
+      "cost": "Menor coste por kWp",
+      "capacity": "Mayor potencia del módulo",
+      "size": "Módulo más pequeño"
     }
   },
   "tech": {

@@ -249,6 +249,13 @@
       "click": "Or click a roof or wall in the model, switch {install} on in its panel and choose a product there.",
       "suggested": "Surfaces marked {suggested} suit PV best. In the list of available surfaces, {useSuggested} installs PV on all of them.",
       "remove": "To remove PV, switch {install} off in the surface's panel or in the list of available surfaces."
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Name, A to Z",
+      "cost": "Lowest cost per kWp",
+      "capacity": "Highest module power",
+      "size": "Smallest module"
     }
   },
   "tech": {

@@ -62,6 +62,27 @@ export function productModule(product: TechnologyProduct | undefined, fallback: 
   return width && height && kwp ? { width, height, kwp } : fallback;
 }
 
+/** How a product list is ordered. */
+export type ProductOrder = 'name' | 'cost' | 'capacity' | 'size';
+
+/**
+ * The products by name (A to Z), cost per kWp (cheapest first, those without
+ * one last), module power (highest first) or module area (smallest first);
+ * ties go by name.
+ */
+export function sortProducts(products: readonly TechnologyProduct[], order: ProductOrder, fallback: PvModule): TechnologyProduct[] {
+  const byName = (a: TechnologyProduct, b: TechnologyProduct) =>
+    productName(a).localeCompare(productName(b), undefined, { numeric: true, sensitivity: 'base' });
+  const key = (product: TechnologyProduct): number => {
+    const module = productModule(product, fallback);
+    if (order === 'cost') return constraintNumber(product, 'cost_energy_cap') ?? Infinity;
+    if (order === 'capacity') return -module.kwp;
+    if (order === 'size') return module.width * module.height;
+    return 0;
+  };
+  return [...products].sort((a, b) => key(a) - key(b) || byName(a, b));
+}
+
 /** The currency of the product's costs, from the unit of cost_energy_cap ("EUR/kW" gives "EUR"); empty without one. */
 export function productCurrency(product: TechnologyProduct | undefined): string {
   return product?.constraints.find((c) => c.key === 'cost_energy_cap')?.unit?.split('/')[0].trim() ?? '';

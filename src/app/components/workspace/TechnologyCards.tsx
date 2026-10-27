@@ -173,7 +173,8 @@ function CatalogueSelect({ catalogue }: { catalogue: NonNullable<TechCard['catal
   const [query, setQuery] = useState('');
   const current = catalogue.products.find((product) => product.id === catalogue.productId);
   const needle = query.trim().toLowerCase();
-  const shown = needle ? catalogue.products.filter((product) => product.name.toLowerCase().includes(needle)) : catalogue.products;
+  const shown = (needle ? catalogue.products.filter((product) => product.name.toLowerCase().includes(needle)) : [...catalogue.products])
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
   return (
     <Dropdown title={(
       <span className="min-w-0 truncate">

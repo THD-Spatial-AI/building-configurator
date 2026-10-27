@@ -249,6 +249,13 @@
       "click": "Of klik op een dak of muur in het model, zet {install} aan in het paneel en kies daar een product.",
       "suggested": "Vlakken met {suggested} zijn het meest geschikt voor pv. In de lijst met beschikbare vlakken plaatst {useSuggested} pv op allemaal.",
       "remove": "Zet {install} uit in het paneel van het vlak of in de lijst met beschikbare vlakken om pv te verwijderen."
+    },
+    "sort": {
+      "label": "Sorteren op",
+      "name": "Naam, A tot Z",
+      "cost": "Laagste kosten per kWp",
+      "capacity": "Hoogste modulevermogen",
+      "size": "Kleinste module"
     }
   },
   "tech": {

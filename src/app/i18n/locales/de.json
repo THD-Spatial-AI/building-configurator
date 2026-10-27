@@ -249,6 +249,13 @@
       "click": "Oder klicken Sie im Modell auf ein Dach oder eine Wand, schalten Sie in dessen Bereich {install} ein und wählen Sie dort ein Produkt.",
       "suggested": "Als {suggested} markierte Flächen eignen sich am besten für PV. In der Liste der verfügbaren Flächen installiert {useSuggested} PV auf allen.",
       "remove": "Um PV zu entfernen, schalten Sie {install} im Bereich der Fläche oder in der Liste der verfügbaren Flächen aus."
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "name": "Name, A bis Z",
+      "cost": "Niedrigste Kosten pro kWp",
+      "capacity": "Höchste Modulleistung",
+      "size": "Kleinstes Modul"
     }
   },
   "tech": {
