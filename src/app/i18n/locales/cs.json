@@ -247,7 +247,23 @@
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",
-    "remove": "Odebrat {title}"
+    "remove": "Odebrat {title}",
+    "inFocus": "Vybraná",
+    "product": "Produkt",
+    "add": "Přidat technologii",
+    "totalEstimate": "{amount} zatím, odhad",
+    "count": {
+      "one": "{count} technologie",
+      "few": "{count} technologie",
+      "many": "{count} technologie",
+      "other": "{count} technologií"
+    },
+    "pvSurfaces": {
+      "one": "{count} plocha",
+      "few": "{count} plochy",
+      "many": "{count} ploch",
+      "other": "{count} plochy"
+    }
   },
   "editor": {
     "solver": {

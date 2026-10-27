@@ -249,20 +249,26 @@ const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientati
 ## Technologies
 
 Pass `technologies` to show the building's technologies other than PV as cards
-in the Technologies tab, under the PV overview. The host owns every value and label; the cards show them and
-report edits, and the view stores nothing.
+in the Technologies tab, after the PV card. The host owns every value and label; the cards show them and
+report edits, and the view stores nothing. One card is in focus at a time and shows its detail; the others
+show their headline figure and cost.
 
 ```tsx
 const technologies = useMemo<Technologies>(() => ({
   items: [
     {
       id: 'heat_pump',
+      type: 'air_source_heat_pump',
       title: t('heatPump'),
+      figures: [{ label: 'COP', value: 3.3 }, { label: t('size'), value: null, unit: 'kW' }],
+      investment: { amount: null, currency: 'EUR', rate: '900 EUR/kW' },
+      catalogue: { products: [{ id: 'ashp', name: 'Air-source heat pump' }], productId: 'ashp', onSelect: assignProduct },
       fields: [{ key: 'size', label: t('maxSize'), value: null, unit: 'kW', editable: true }],
     },
   ],
   onChange: (id, fieldKey, value) => setField(id, fieldKey, value),
   onRemove: (id) => removeTechnology(id),
+  onAdd: () => openTechnologyPicker(),
 }), [/* the values above */]);
 ```
 
@@ -270,6 +276,10 @@ const technologies = useMemo<Technologies>(() => ({
 |---|---|
 | `items[].id` | Passed back to `onChange` and `onRemove` |
 | `items[].title`, `subtitle` | Shown at the top of the card, in the user's language |
+| `items[].type` | Optional. EnerPlanET's technology type (`battery_storage`, `air_source_heat_pump`, `ground_source_heat_pump`, `electric_boilers`, `gas_boiler`, `air_conditioner`): sets the card's icon and colour |
+| `items[].figures` | Optional. Up to three `{ label, value, unit }`; the first is the headline while the card is not in focus. `null` shows as "∞" |
+| `items[].investment` | Optional. `{ amount, currency, rate? }`: the estimate, added to the tab's total; with `amount: null` the card shows `rate` and the total leaves it out |
+| `items[].catalogue` | Optional. `{ products: { id, name, detail? }[], productId?, onSelect(productId) }`, behind a drop-down with a search field |
 | `items[].action` | Optional button, `{ label, onClick }` |
 | `fields[].value` | A number, or `null` for unbounded, shown as "∞" |
 | `fields[].editable` | A number input when true, plain text otherwise |
@@ -277,6 +287,7 @@ const technologies = useMemo<Technologies>(() => ({
 | `fields[].error` | Shown under the field with a red ring until the host clears it |
 | `onChange(id, fieldKey, value)` | Fires with each valid number typed, and with `null` when the input is cleared |
 | `onRemove(id)` | The card's remove button was pressed; the view does not ask first |
+| `onAdd()` | Optional. The "Add a technology" button was pressed; without it there is no button |
 
 ## Geometry
 

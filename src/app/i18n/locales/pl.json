@@ -247,7 +247,23 @@
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",
-    "remove": "Usuń {title}"
+    "remove": "Usuń {title}",
+    "inFocus": "Wybrana",
+    "product": "Produkt",
+    "add": "Dodaj technologię",
+    "totalEstimate": "{amount} do tej pory, szacunek",
+    "count": {
+      "one": "{count} technologia",
+      "few": "{count} technologie",
+      "many": "{count} technologii",
+      "other": "{count} technologii"
+    },
+    "pvSurfaces": {
+      "one": "{count} przegroda",
+      "few": "{count} przegrody",
+      "many": "{count} przegród",
+      "other": "{count} przegrody"
+    }
   },
   "editor": {
     "solver": {

@@ -323,7 +323,7 @@ function ProductValues({ pv, mode }: { pv: PvMode; mode: 'basic' | 'expert' }) {
 }
 
 /** The PV block of the Technologies tab. */
-export function PvOverview({ pv, elements, layouts = {}, mode, onSelect }: {
+export function PvOverview({ pv, elements, layouts = {}, mode, onSelect, framed = false }: {
   pv: PvMode;
   elements: Record<string, BuildingElement>;
   /** Module layouts of the surfaces the view has polygons for. */
@@ -331,16 +331,20 @@ export function PvOverview({ pv, elements, layouts = {}, mode, onSelect }: {
   mode: 'basic' | 'expert';
   /** Shows a surface in the model and opens it in the surface panel. */
   onSelect: (surfaceId: string) => void;
+  /** Inside a technology card, which carries the title: no border or heading of its own. */
+  framed?: boolean;
 }) {
   const t = useT();
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-      <div className="flex flex-col gap-0.5">
-        <h2 className="m-0 text-[15px] font-bold text-foreground">{t('pv.overview.title')}</h2>
-        <p className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-          <Sun className="size-3.5 text-yellow-500" aria-hidden />{pv.typeLabel}
-        </p>
-      </div>
+    <section className={cn('flex flex-col gap-3', framed ? 'px-3 pb-3 pt-1' : 'rounded-lg border border-border bg-card p-4')}>
+      {!framed && (
+        <div className="flex flex-col gap-0.5">
+          <h2 className="m-0 text-[15px] font-bold text-foreground">{t('pv.overview.title')}</h2>
+          <p className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+            <Sun className="size-3.5 text-yellow-500" aria-hidden />{pv.typeLabel}
+          </p>
+        </div>
+      )}
       <Totals pv={pv} elements={elements} layouts={layouts} />
       <Installed pv={pv} layouts={layouts} />
       <SurfaceList pv={pv} elements={elements} layouts={layouts} onSelect={onSelect} />

@@ -241,7 +241,19 @@
   },
   "tech": {
     "none": "Ninguna tecnología en este edificio.",
-    "remove": "Quitar {title}"
+    "remove": "Quitar {title}",
+    "inFocus": "En foco",
+    "product": "Producto",
+    "add": "Añadir una tecnología",
+    "totalEstimate": "{amount} hasta ahora, estimación",
+    "count": {
+      "one": "{count} tecnología",
+      "other": "{count} tecnologías"
+    },
+    "pvSurfaces": {
+      "one": "{count} superficie",
+      "other": "{count} superficies"
+    }
   },
   "editor": {
     "solver": {

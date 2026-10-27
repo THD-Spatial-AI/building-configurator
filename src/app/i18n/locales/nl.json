@@ -239,7 +239,19 @@
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",
-    "remove": "{title} verwijderen"
+    "remove": "{title} verwijderen",
+    "inFocus": "Geselecteerd",
+    "product": "Product",
+    "add": "Technologie toevoegen",
+    "totalEstimate": "{amount} tot nu toe, schatting",
+    "count": {
+      "one": "{count} technologie",
+      "other": "{count} technologieën"
+    },
+    "pvSurfaces": {
+      "one": "{count} vlak",
+      "other": "{count} vlakken"
+    }
   },
   "editor": {
     "solver": {

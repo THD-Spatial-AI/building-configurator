@@ -24,9 +24,9 @@ import { SurfacePanel } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import { PvHintPill, PvHoverCard, PvLegend, pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { PvOverview } from './PvOverview';
+import { TechnologiesTab } from './TechnologiesTab';
 import { PvSurfaceSection } from './PvSurfaceSection';
-import { TechnologyCards, type Technologies } from './TechnologyCards';
+import type { Technologies } from './TechnologyCards';
 import { StoreyPanel, StoreysModelled } from './StoreysModelled';
 import { storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
@@ -518,10 +518,14 @@ export function Building3DView({
               activeTab={tab}
               onTabChange={setTab}
               technologySlot={pv || technologies ? (
-                <div className="flex flex-col gap-3">
-                  {pv && <PvOverview pv={pv} elements={elements} layouts={layouts} mode={mode} onSelect={selectFromList} />}
-                  {technologies && <TechnologyCards technologies={technologies} />}
-                </div>
+                <TechnologiesTab
+                  pv={pv}
+                  technologies={technologies}
+                  elements={elements}
+                  layouts={layouts}
+                  mode={mode}
+                  onSelectSurface={selectFromList}
+                />
               ) : undefined}
               parametersSlot={(
                 // The BuEM building fields the table does not carry; Expert
