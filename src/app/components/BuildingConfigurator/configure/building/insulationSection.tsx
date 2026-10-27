@@ -2,7 +2,7 @@
 // state for the whole building in Basic, and per element type in Expert with
 // its U-value and loss factor, plus the windows BuEM adds when there are none.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
@@ -26,8 +26,6 @@ export interface InsulationProps {
   onSetState: (types: RefurbElementType[], number: number) => void;
   onSetTypeUValue: (type: RefurbElementType, uValue: number) => void;
   onSetTypeLossFactor: (type: RefurbElementType, b: number) => void;
-  /** Adds a surface the 3D data lacks, such as a wall against ground. */
-  onAddSurface?: (type: RefurbElementType, values: Partial<BuildingElement>) => void;
   /** Each level's indicative energy class; absent when the host offers no preview run. */
   classes?: {
     /** Space heating per m² by level number, null where a run failed; null until compared. */
@@ -74,7 +72,6 @@ export function InsulationSection(props: Props) {
     <div className="flex flex-col gap-4">
       {levels.length > 0 && <BuildingPreset {...props} />}
       {mode === 'expert' && <ElementTable {...props} />}
-      {mode === 'expert' && props.onAddSurface && <AddSurface onAdd={props.onAddSurface} />}
       {mode === 'expert' && <SynthesisedWindows {...props} />}
       <div className="border-t border-border/60 pt-2">
         <span className="text-[11px] text-muted-foreground">
@@ -154,11 +151,18 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
               type="button"
               aria-pressed={selected === level.number}
               onClick={() => onSetState(REFURB_TYPES, level.number)}
+              style={energyClass ? { '--class': energyClass.color, '--class-tint': `${energyClass.color}26` } as CSSProperties : undefined}
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-[6px] border px-2 py-1.5 text-left text-[11px] font-medium leading-snug transition-colors',
-                selected === level.number
-                  ? 'border-2 border-[#475B7A] bg-[#E6EAF2] text-[#33415C] dark:border-[#C3CDDD] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]'
-                  : 'border-border bg-card text-muted-foreground hover:bg-muted',
+                // Known classes: the box takes the class colour when selected, and
+                // as a preview on hover; unselected only its badge shows it.
+                energyClass
+                  ? selected === level.number
+                    ? 'border-2 border-[var(--class)] bg-[var(--class-tint)] text-foreground'
+                    : 'border-border bg-card text-foreground hover:border-[var(--class)] hover:bg-[var(--class-tint)]'
+                  : selected === level.number
+                    ? 'border-2 border-[#475B7A] bg-[#E6EAF2] text-[#33415C] dark:border-[#C3CDDD] dark:bg-[#475B7A]/35 dark:text-[#C3CDDD]'
+                    : 'border-border bg-card text-muted-foreground hover:bg-muted',
               )}
             >
               {energyClass && (
@@ -310,66 +314,3 @@ function SynthesisedWindows({ elements, general, setGen }: Props) {
   );
 }
 
-function addableTypes(t: Translate) {
-  return [
-    { value: 'wall', label: t('insulation.add.type.wall') },
-    { value: 'floor', label: t('insulation.add.type.floor') },
-    { value: 'roof', label: t('insulation.add.type.roof') },
-  ];
-}
-
-const ADD_BUTTON_LABELS: Record<string, (t: Translate) => string> = {
-  wall: (t) => t('insulation.add.button.wall'),
-  floor: (t) => t('insulation.add.button.floor'),
-  roof: (t) => t('insulation.add.button.roof'),
-};
-
-/** A surface the 3D data lacks, for example a wall against ground or a floor over an open passage. */
-function AddSurface({ onAdd }: { onAdd: NonNullable<InsulationProps['onAddSurface']> }) {
-  const t = useT();
-  const [type, setType] = useState<RefurbElementType>('wall');
-  const [label, setLabel] = useState('');
-  const [area, setArea] = useState(10);
-  const [uValue, setUValue] = useState(0.5);
-  const [loss, setLoss] = useState(1);
-  const add = () => {
-    onAdd(type, { area, uValue, bTransmission: loss, ...(label.trim() ? { label: label.trim() } : {}) });
-    setLabel('');
-  };
-  return (
-    <details className="group rounded-md border border-border">
-      <summary className="cursor-pointer px-2.5 py-2 text-xs font-semibold text-foreground">{t('insulation.add.title')}</summary>
-      <div className="flex flex-col gap-2 border-t border-border p-2.5">
-        <p className="text-[10px] leading-snug text-muted-foreground">
-          {t('insulation.add.note')}
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          <SelectInput label={t('insulation.add.typeLabel')} value={type} onChange={(v) => setType(v as RefurbElementType)} options={addableTypes(t)} />
-          <div>
-            <FieldLabel>{t('insulation.add.name')}</FieldLabel>
-            <div className="cfg-input-wrap">
-              <input
-                type="text"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder={t('insulation.add.namePlaceholder')}
-                className="cfg-number"
-              />
-            </div>
-          </div>
-          <NumberInput label={t('insulation.add.area')} value={area} onChange={(v) => setArea(Math.max(0, v))} unit="m²" min={0} step={1} />
-          <NumberInput label={t('insulation.uValue')} value={uValue} onChange={(v) => setUValue(Math.max(0, v))} unit="W/m²K" min={0} max={6} step={0.01} />
-          <NumberInput label={t('insulation.lossFactor')} value={loss} onChange={(v) => setLoss(Math.min(1, Math.max(0, v)))} unit={t('insulation.unitShare')} min={0} max={1} step={0.05} />
-        </div>
-        <button
-          type="button"
-          onClick={add}
-          disabled={area <= 0}
-          className="cursor-pointer self-start rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {ADD_BUTTON_LABELS[type](t)}
-        </button>
-      </div>
-    </details>
-  );
-}

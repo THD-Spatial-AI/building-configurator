@@ -2,7 +2,7 @@
 // from, an upload that stays in the browser, and a download the host serves.
 // Hourly only, which is the resolution the whole stack runs at.
 
-import { useRef } from 'react';
+import { useId, useRef } from 'react';
 import { Download, Upload } from '@/app/components/icons';
 import { useLoadProfileState } from '../BuildingConfigurator/overview/useLoadProfileState';
 import type { LoadDataPoint } from '../../lib/loadProfile';
@@ -19,6 +19,7 @@ interface LoadProfileBarProps {
 export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }: LoadProfileBarProps) {
   const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadSoonId = useId();
   const {
     handleFileUpload, hasData, sourceCaption, uploadError,
   } = useLoadProfileState({
@@ -39,10 +40,14 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
             })
             : t(sourceCaption.source.key, sourceCaption.source.values)}</p>
         </div>
+        {/* TODO: enable once the host supports uploaded profiles; the file input below is ready for it. */}
         <button
           type="button"
+          disabled
+          title={t('profile.uploadSoon')}
+          aria-describedby={uploadSoonId}
           onClick={() => fileInputRef.current?.click()}
-          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted"
+          className="flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground opacity-60"
         >
           <Upload className="size-3" />
           {t('profile.upload')}
@@ -65,6 +70,8 @@ export function LoadProfileBar({ timeseries, seriesCsvUrl, onGroundTruthChange }
           onChange={handleFileUpload}
         />
       </div>
+
+      <p id={uploadSoonId} className="m-0 text-[10px] leading-snug text-muted-foreground">{t('profile.uploadSoon')}</p>
 
       {uploadError && (
         <p className="text-[10px] leading-snug text-destructive">{t(uploadError.key, uploadError.values)}</p>

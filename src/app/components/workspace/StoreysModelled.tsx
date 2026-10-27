@@ -26,6 +26,12 @@ export function toggleSelected(selected: readonly number[], storey: number): num
   return selected.includes(storey) ? selected.filter((s) => s !== storey) : [...selected, storey].sort((a, b) => a - b);
 }
 
+/** The selection after a click on a storey: several at once while `multi`, else that storey alone, or none if it was. */
+export function pickInSelection(selected: readonly number[], storey: number, multi: boolean): number[] {
+  if (multi) return toggleSelected(selected, storey);
+  return selected.length === 1 && selected[0] === storey ? [] : [storey];
+}
+
 /** The dwelling count every chosen storey shares, or null when they differ or have none. */
 function sharedCount(chosen: readonly number[], dwellings: StoreyDwellings): number | null {
   const counts = new Set(chosen.map((storey) => dwellings[storey] ?? null));
@@ -37,13 +43,16 @@ const HEIGHT_NOTE_GAP_M = 0.5;
 
 /** `modelled` null means every storey; `onChange` gets null back when all are in again. */
 export function StoreysModelled({
-  storeys, modelled, selected, onSelect, floorAreaPerStorey, storeyHeight, roomHeight, dwellings, disabled, onChange,
+  storeys, modelled, selected, onSelect, multi = false, onMultiChange, floorAreaPerStorey, storeyHeight, roomHeight, dwellings, disabled, onChange,
 }: {
   storeys: number;
   modelled: number[] | null;
   /** The storeys selected, here or in the model. */
   selected: readonly number[];
   onSelect: (selected: number[]) => void;
+  /** Clicks add storeys to the selection instead of selecting one, to configure several at once. */
+  multi?: boolean;
+  onMultiChange?: (multi: boolean) => void;
   /** A residential building's dwellings per storey; BuEM's gains follow the count of the storeys modelled. */
   dwellings?: { values: StoreyDwellings; onChange: (values: Record<number, number>) => void };
   floorAreaPerStorey: number;
@@ -89,7 +98,7 @@ export function StoreysModelled({
                 disabled={disabled}
                 aria-pressed={selected.includes(storey)}
                 aria-label={t(on.has(storey) ? 'storeys.chip.in' : 'storeys.chip.out', { number: storey })}
-                onClick={() => onSelect(toggleSelected(selected, storey))}
+                onClick={() => onSelect(pickInSelection(selected, storey, multi))}
                 className={cn(
                   'flex h-9 min-w-9 cursor-pointer flex-col items-center justify-center rounded-md border px-2 text-[12px] font-semibold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
                   on.has(storey)
@@ -104,10 +113,18 @@ export function StoreysModelled({
             );
           })}
         </div>
-        <div className="flex gap-3 text-[11px]">
-          <button type="button" disabled={disabled} onClick={() => onSelect(all)} className="cursor-pointer text-[11px] font-medium text-primary hover:underline disabled:cursor-not-allowed">
-            {t('storeys.select.all')}
-          </button>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px]">
+          {onMultiChange && (
+            <span className="flex items-center gap-1.5 text-foreground">
+              <Switch on={multi} label={t('storeys.select.multi')} onChange={onMultiChange} />
+              {t('storeys.select.multi')}
+            </span>
+          )}
+          {multi && (
+            <button type="button" disabled={disabled} onClick={() => onSelect(all)} className="cursor-pointer text-[11px] font-medium text-primary hover:underline disabled:cursor-not-allowed">
+              {t('storeys.select.all')}
+            </button>
+          )}
           {selected.length > 0 && (
             <button type="button" onClick={() => onSelect([])} className="cursor-pointer text-[11px] font-medium text-primary hover:underline">
               {t('storeys.select.clear')}
@@ -117,7 +134,9 @@ export function StoreysModelled({
 
         {selected.length > 0 && (
           <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50/60 p-2.5 dark:border-amber-500/40 dark:bg-amber-500/10">
-            <span className="text-[12px] font-semibold text-foreground">{t('storeys.select.count', { count: selected.length })}</span>
+            <span className="text-[12px] font-semibold text-foreground">
+              {selected.length === 1 ? t('storeys.select.one', { number: selected[0] }) : t('storeys.select.count', { count: selected.length })}
+            </span>
             <div className="flex items-center justify-between gap-2" title={allIn && leaveOut === undefined ? t('storeys.lastOne') : undefined}>
               <span className="text-[12px] text-foreground">{t('storeys.inModel')}</span>
               <Switch

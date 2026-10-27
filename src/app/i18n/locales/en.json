@@ -31,10 +31,6 @@
     "loadingGeometry": "Loading surface geometry…",
     "detached": "This building's saved surfaces come from an earlier City2TABULA generation, so none matches the current 3D data. The saved values still apply; the model is not shown.",
     "noGeometry": "City2TABULA holds no 3D geometry for this building.",
-    "invalidSurfaces": {
-      "one": "{count} surface with no area, left out of a simulation",
-      "other": "{count} surfaces with no area, left out of a simulation"
-    },
     "run": {
       "working": "Working out the energy…",
       "start": "Save & Preview Energy Demand"
@@ -46,7 +42,8 @@
     },
     "panel": {
       "empty": "Click a surface in the model to see it here."
-    }
+    },
+    "credits": "Data credits"
   },
   "surface": {
     "type": {
@@ -99,8 +96,14 @@
     },
     "degrees": "{degrees} degrees, {label}",
     "section": {
-      "envelope": "Envelope",
-      "pv": "PV"
+      "pv": "Photovoltaic",
+      "of": {
+        "wall": "Wall surface",
+        "roof": "Roof surface",
+        "floor": "Floor surface",
+        "window": "Window",
+        "door": "Door"
+      }
     },
     "pick": "Choose a surface",
     "geometrySource": "Source: the building's 3D model"
@@ -125,7 +128,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Could not parse load profile file."
-    }
+    },
+    "uploadSoon": "Uploading a measured profile is coming soon."
   },
   "pv": {
     "state": {
@@ -134,7 +138,7 @@
       "available": "Available"
     },
     "toggle": "PV on {surface}",
-    "thisSurface": "PV on this surface",
+    "thisSurface": "Install",
     "usableShare": "Usable share",
     "usableShareNote": "of this surface, after obstructions",
     "hint": "Click a roof or wall to set up PV, or drop a product on it.",
@@ -155,7 +159,6 @@
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
-      "add": "Add PV to this surface",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "No whole module fits on this surface.",
       "spaceLimited": "The space on this surface limits the modules; a larger usable share adds none.",
@@ -464,24 +467,6 @@
         "tip": "Share of the sunlight on those windows that enters as heat. Default: the TABULA value for the building type, else 0.5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Wall",
-        "floor": "Floor",
-        "roof": "Roof"
-      },
-      "button": {
-        "wall": "Add wall",
-        "floor": "Add floor",
-        "roof": "Add roof"
-      },
-      "title": "Add a surface",
-      "note": "For a surface the 3D data does not show, such as a wall against ground (loss factor about 0.5) or a floor over an open passage (1). It is listed in the Envelope tab, not drawn in the model.",
-      "typeLabel": "Type",
-      "name": "Name",
-      "namePlaceholder": "e.g. Basement wall",
-      "area": "Area"
-    },
     "variant": {
       "full": {
         "existing": "Existing state",
@@ -497,7 +482,7 @@
     "classes": {
       "comparing": "Running BuEM for each level…",
       "perM2": "{value} kWh/m²",
-      "note": "Indicative class for this building: space heating per m² on the Austrian HWB scale, G to A++. Simulated, not an energy certificate.",
+      "note": "Indicative class: space heating per m², graded on one scale for every country (the Austrian HWB scale, G to A++), so buildings compare across countries. National labels such as the Dutch energy label grade primary energy, which this model does not compute. Simulated, not a certificate.",
       "failed": "The energy classes could not be worked out.",
       "retry": "Try again"
     }
@@ -596,6 +581,12 @@
       "at": "AT - Austria",
       "nl": "NL - Netherlands",
       "cz": "CZ - Czechia"
+    },
+    "countryName": {
+      "de": "Germany",
+      "at": "Austria",
+      "nl": "Netherlands",
+      "cz": "Czechia"
     }
   },
   "panel": {
@@ -646,14 +637,10 @@
     "pvGeneration": "PV generation",
     "storeysModelled": "{modelled} of {total} modelled",
     "heatingPerM2": "Heating {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Indicative heating demand class (simulated, not an energy certificate)",
-      "tip": "BuEM's annual space heating per reference floor area, under the run's weather and occupancy, graded on the bands of the Austrian OIB-RL 6 HWB scale (A++ up to 10 kWh/m²·a, G above 250). Hot water, cooling and electricity are not included.",
-      "stale": "For the storeys as last run. Save & Preview to get the class of the storeys now modelled."
-    },
     "tile": {
       "statisticalDefault": "Statistical default"
-    }
+    },
+    "builtIn": "Built in {year}"
   },
   "envelope": {
     "compassNorth": "N"
@@ -701,13 +688,6 @@
         "floor": "deleted floor",
         "door": "deleted door",
         "surface": "deleted surface"
-      },
-      "added": {
-        "wall": "added wall",
-        "window": "added window",
-        "roof": "added roof",
-        "floor": "added floor",
-        "door": "added door"
       }
     },
     "error": {
@@ -742,7 +722,9 @@
       "count": {
         "one": "{count} storey selected",
         "other": "{count} storeys selected"
-      }
+      },
+      "multi": "Configure several storeys",
+      "one": "Storey {number}"
     },
     "dwellingsPerStorey": "Dwellings per storey",
     "mixed": "mixed",

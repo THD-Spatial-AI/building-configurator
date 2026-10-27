@@ -6,7 +6,7 @@
 // building itself, each asking first when it has unsaved edits.
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, ArrowLeft, CircleHelp, Download, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
+import { AlertTriangle, ArrowLeft, CircleHelp, Download, Info, Layers, Loader2, Play, Table2, Undo2 } from '@/app/components/icons';
 import { SurfaceGeometryViewer } from '../BuildingConfigurator/configure/surfaces/SurfaceGeometryViewer';
 import { SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { BuildingDetailsCard, type DetailsTab } from '../BuildingConfigurator/overview/BuildingDetailsCard';
@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { drawnSurfaceIds, isEnvelopeDetached, polygonArea, type SurfaceGeometry } from '../../lib/surfaceMesh';
 import { useMediaQuery, WIDE_LAYOUT } from '../../lib/useMediaQuery';
 import { tabulaUValueOptions } from '../../lib/ignisAdapter';
-import { SurfacePanel } from './SurfacePanel';
+import { SurfacePanel, SurfacePicker } from './SurfacePanel';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import { ModelLegend, PvHintPill, PvHoverCard, pvRenderSets, surfaceName, surfaceProduct, type PvMode } from './PvMode';
@@ -28,12 +28,11 @@ import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
-import { StoreysModelled, toggleSelected } from './StoreysModelled';
-import { storeyBands, storeyShares } from '../../lib/storeys';
+import { StoreysModelled, pickInSelection } from './StoreysModelled';
+import { dwellingsTotal, storeyBands, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
-import { heatingPerM2 } from '../../lib/energyClass';
 import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
@@ -149,16 +148,22 @@ export function Building3DView({
   const [tab, setTab] = useState<DetailsTab>(defaultTab === 'technologies' ? 'technology' : 'building');
   /** On the Technologies tab, surfaces open their PV settings and take dropped products. */
   const onTech = tab === 'technology' && pv !== undefined;
+  /** The surface named under the pointer in the surface picker, outlined on the model. */
+  const [previewSurface, setPreviewSurface] = useState<string | null>(null);
   /** The PV surface under the pointer on the Technologies tab, for its hover card. */
   const [hover, setHover] = useState<{ id: string; at: { x: number; y: number } } | null>(null);
   /** While on, a click in the model selects a storey instead of a surface. */
   const [storeyMode, setStoreyMode] = useState(false);
   /** The storeys selected in the model or in the storey list, configured together. */
   const [selectedStoreys, setSelectedStoreys] = useState<number[]>([]);
+  /** Off: a click selects one storey. On: clicks add storeys, to configure several at once. */
+  const [multiStoreys, setMultiStoreys] = useState(false);
   const leaveStoreyMode = () => setStoreyMode(false);
   const pickStorey = (storey: number | null) => {
-    if (storey !== null) setSelectedStoreys((prev) => toggleSelected(prev, storey));
+    if (storey !== null) setSelectedStoreys((prev) => pickInSelection(prev, storey, multiStoreys));
   };
+  /** The data credits, open over the model where it is too narrow to show them in full. */
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [touring, setTouring] = useState(tour?.run ?? false);
   const tourRun = tour?.run ?? false;
   useEffect(() => { if (tourRun) setTouring(true); }, [tourRun]);
@@ -219,11 +224,11 @@ export function Building3DView({
     modelled,
     modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled) : {},
   );
-  /** Sets the dwellings per storey; once every storey has a count, the building's total is their sum. */
+  /** Sets the dwellings per storey; the building's total is then the sum of the counts given. */
   const setStoreyDwellings = (values: Record<number, number>) => {
     model.setGen('storeyDwellings', values);
-    const counts = Array.from({ length: model.general.storeys }, (_, i) => values[i + 1]);
-    if (counts.every((count) => count >= 1)) model.setGen('residential_units', counts.reduce((a, b) => a + b, 0));
+    const total = dwellingsTotal(model.general.storeys, values);
+    if (total !== null) model.setGen('residential_units', total);
   };
   const hoverPv = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at && pv?.surfaces[id] ? { id, at } : null);
@@ -294,7 +299,7 @@ export function Building3DView({
   const panelBody = selected && (selectedElement || selectedPv) ? (
     <div key={selected.id} className="flex flex-col gap-3 p-3">
       {selectedElement && (
-        <SectionCard topic={TOPICS.envelope} title={t('surface.section.envelope')} info={t('help.envelope')}>
+        <SectionCard topic={TOPICS.envelope} title={t(`surface.section.of.${selectedElement.type}`)} info={t('help.envelope')}>
           <SurfaceQuickEditor
             element={selectedElement}
             geometryArea={selectedGeometryArea}
@@ -321,32 +326,26 @@ export function Building3DView({
       )}
     </div>
   ) : null;
-  const panelSubtitle = selectedElement
-    ? `${selectedElement.label} · ${formatNumber(language, selectedElement.area, 1)} m² · U ${formatNumber(language, selectedElement.uValue, 2)} W/m²K`
-    : selectedPv?.label;
   const pickable = useMemo(() => [
-    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label })),
+    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label, type: t(`surface.type.${element.type}`) })),
     ...Object.entries(pv?.surfaces ?? {})
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
-  ], [elements, pv]);
+  ], [elements, pv, t]);
   const surfacePanel = (
     <SurfacePanel
       docked={!wide}
       open={!storeyMode && panelBody !== null}
       title={selectedElement ? t(`surface.type.${selectedElement.type}`) : t('view.surface')}
-      subtitle={storeyMode ? undefined : panelSubtitle}
       emptyText={t(storeyMode ? 'storeys.pickHint' : 'view.panel.empty')}
       picker={(
-        <select
-          aria-label={t('surface.pick')}
-          value={selected?.id ?? ''}
-          onChange={(e) => selectFromList(e.target.value)}
-          className="h-8 w-full cursor-pointer rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
-        >
-          <option value="" disabled>{t('surface.pick')}</option>
-          {pickable.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
-        </select>
+        <SurfacePicker
+          surfaces={pickable}
+          value={selected?.id ?? null}
+          placeholder={t('surface.pick')}
+          onSelect={selectFromList}
+          onPreview={setPreviewSurface}
+        />
       )}
       onClose={() => requestSurface(null)}
     >
@@ -444,7 +443,7 @@ export function Building3DView({
       <div className={cn('flex min-h-0 flex-1 gap-3 p-3', wide ? 'flex-row' : 'flex-col')}>
         {wide && surfacePanel}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-        <div data-tour="model" className="relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
+        <div data-tour="model" className="@container relative min-h-[240px] flex-1 overflow-hidden rounded-lg border border-border bg-card">
           {!geometry ? (
             <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
@@ -462,6 +461,7 @@ export function Building3DView({
               onHoverSurface={onTech ? hoverPv : undefined}
               onDropProduct={onTech && pv?.onAssignProduct ? dropProduct : undefined}
               focusId={focus?.id}
+              previewId={previewSurface}
               focusToken={focus?.token}
               storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys }}
               onSelectStorey={storeyMode ? pickStorey : undefined}
@@ -520,12 +520,6 @@ export function Building3DView({
           )}
 
           <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
-            {invalidIds.size > 0 && (
-              <div className="flex items-center gap-1.5 rounded-md bg-card/90 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm">
-                <span className="inline-block size-2.5 rounded-sm bg-destructive" />
-                {t('view.invalidSurfaces', { count: invalidIds.size })}
-              </div>
-            )}
             {onTech && unfittedPv.length > 0 && (
               <div role="alert" className="flex max-w-[360px] items-start gap-1.5 rounded-md border border-destructive/30 bg-card/95 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-destructive shadow-sm">
                 <AlertTriangle className="mt-px size-3.5 shrink-0" />
@@ -544,9 +538,26 @@ export function Building3DView({
           )}
 
           {attribution && (
-            <div className="absolute bottom-3 right-3 max-w-[60%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm">
-              {attribution}
-            </div>
+            // In full where the model is wide enough to leave the legend its room,
+            // else behind an info button; the licences ask for the credits to stay reachable.
+            <>
+              <div className="absolute bottom-3 right-3 hidden max-w-[45%] rounded-md bg-card/90 px-2 py-1 text-right text-[10px] leading-snug text-muted-foreground shadow-sm @4xl:block">
+                {attribution}
+              </div>
+              <button
+                type="button"
+                aria-expanded={creditsOpen}
+                aria-label={t('view.credits')}
+                title={t('view.credits')}
+                onClick={() => setCreditsOpen((open) => !open)}
+                className="absolute bottom-3 right-3 flex size-7 cursor-pointer items-center justify-center rounded-full bg-card/90 text-muted-foreground shadow-sm hover:text-foreground @4xl:hidden"
+              ><Info className="size-4" /></button>
+              {creditsOpen && (
+                <div className="absolute bottom-12 right-3 z-20 max-w-[min(320px,80%)] rounded-md border border-border bg-card px-2.5 py-1.5 text-[10px] leading-snug text-muted-foreground shadow-md @4xl:hidden">
+                  {attribution}
+                </div>
+              )}
+            </>
           )}
         </div>
         </div>
@@ -593,6 +604,11 @@ export function Building3DView({
                         modelled={model.general.storeysModelled}
                         selected={selectedStoreys}
                         onSelect={setSelectedStoreys}
+                        multi={multiStoreys}
+                        onMultiChange={(on) => {
+                          setMultiStoreys(on);
+                          if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
+                        }}
                         floorAreaPerStorey={model.general.floorArea}
                         storeyHeight={surfaces.length > 0 ? storeyBands(surfaces, model.general.storeys).height : undefined}
                         roomHeight={model.general.roomHeight}
@@ -614,7 +630,6 @@ export function Building3DView({
                       onSetState: model.setRefurbishment,
                       onSetTypeUValue: model.setTypeUValue,
                       onSetTypeLossFactor: model.setTypeLossFactor,
-                      onAddSurface: (type, values) => { model.createSurface(type, values); },
                       ...(model.canCompareLevels ? {
                         classes: { perM2: model.levelHeating, comparing: model.isComparingLevels, onCompare: model.compareLevels },
                       } : {}),
@@ -628,8 +643,6 @@ export function Building3DView({
                   <BuildingSnapshotAside
                     energyTotals={model.displayEnergyTotals}
                     pvAnnualKwh={model.pvAnnualKwh}
-                    heatingPerM2={heatingPerM2(model.displayEnergyTotals, model.general, model.resultStoreys)}
-                    heatingClassStale={JSON.stringify(model.resultStoreys) !== JSON.stringify(model.general.storeysModelled)}
                   />
                 </div>
               )}

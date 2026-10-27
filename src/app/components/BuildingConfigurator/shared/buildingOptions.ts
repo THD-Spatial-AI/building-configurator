@@ -181,6 +181,11 @@ export const COUNTRY_OPTIONS = [
   { value: 'CZ', label: 'CZ - Czechia'     },
 ];
 
+/** A country's full name in the view's language; a country outside COUNTRY_OPTIONS shows its code. */
+export function countryName(t: Translate, code: string): string {
+  return COUNTRY_OPTIONS.some((option) => option.value === code) ? t(`options.countryName.${code.toLowerCase()}`) : code;
+}
+
 /** COUNTRY_OPTIONS with translated labels. */
 export function countryOptions(t: Translate) {
   return [

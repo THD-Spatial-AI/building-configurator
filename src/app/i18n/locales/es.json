@@ -32,11 +32,6 @@
     "loadingGeometry": "Cargando geometría de superficies…",
     "detached": "Las superficies guardadas de este edificio proceden de una generación anterior de City2TABULA, por lo que ninguna coincide con los datos 3D actuales. Los valores guardados siguen vigentes; el modelo no se muestra.",
     "noGeometry": "City2TABULA no tiene geometría 3D para este edificio.",
-    "invalidSurfaces": {
-      "one": "{count} superficie sin área, excluida de la simulación",
-      "many": "{count} superficies sin área, excluidas de la simulación",
-      "other": "{count} superficies sin área, excluidas de la simulación"
-    },
     "run": {
       "working": "Calculando la energía…",
       "start": "Guardar y ver demanda energética"
@@ -48,7 +43,8 @@
     },
     "panel": {
       "empty": "Haga clic en una superficie del modelo para verla aquí."
-    }
+    },
+    "credits": "Créditos de los datos"
   },
   "surface": {
     "type": {
@@ -101,8 +97,14 @@
     },
     "degrees": "{degrees} grados, {label}",
     "section": {
-      "envelope": "Envolvente",
-      "pv": "FV"
+      "pv": "Fotovoltaica",
+      "of": {
+        "wall": "Superficie de muro",
+        "roof": "Superficie de cubierta",
+        "floor": "Superficie de suelo",
+        "window": "Ventana",
+        "door": "Puerta"
+      }
     },
     "pick": "Elegir una superficie",
     "geometrySource": "Fuente: modelo 3D del edificio"
@@ -127,7 +129,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "No se pudo leer el archivo del perfil de carga."
-    }
+    },
+    "uploadSoon": "Pronto se podrá subir un perfil medido."
   },
   "pv": {
     "state": {
@@ -136,7 +139,7 @@
       "available": "Disponible"
     },
     "toggle": "FV en {surface}",
-    "thisSurface": "FV en esta superficie",
+    "thisSurface": "Instalar",
     "usableShare": "Fracción útil",
     "usableShareNote": "de esta superficie, descontando obstáculos",
     "hint": "Haga clic en un tejado o una pared para configurar FV, o suelte un producto sobre él.",
@@ -157,7 +160,6 @@
       "panels": "{kwp} kWp en {area} m² de módulos",
       "remove": "Quitar FV",
       "done": "Listo",
-      "add": "Añadir FV a esta superficie",
       "modules": "Módulos: {count} · {kwp} kWp · {area} m²",
       "noFit": "En esta superficie no cabe ningún módulo entero.",
       "spaceLimited": "El espacio de esta superficie limita los módulos; una fracción utilizable mayor no añade ninguno.",
@@ -469,24 +471,6 @@
         "tip": "Fracción de la radiación solar sobre esas ventanas que entra como calor. Por defecto: el valor TABULA del tipo de edificio, o 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Muro",
-        "floor": "Suelo",
-        "roof": "Cubierta"
-      },
-      "button": {
-        "wall": "Añadir muro",
-        "floor": "Añadir suelo",
-        "roof": "Añadir cubierta"
-      },
-      "title": "Añadir una superficie",
-      "note": "Para una superficie que los datos 3D no muestran, como un muro contra el terreno (coeficiente b aprox. 0,5) o un suelo sobre un paso abierto (1). Aparece en la pestaña Envolvente, no se dibuja en el modelo.",
-      "typeLabel": "Tipo",
-      "name": "Nombre",
-      "namePlaceholder": "p. ej. Muro de sótano",
-      "area": "Área"
-    },
     "variant": {
       "full": {
         "existing": "Estado actual",
@@ -502,7 +486,7 @@
     "classes": {
       "comparing": "BuEM calcula cada nivel…",
       "perM2": "{value} kWh/m²",
-      "note": "Clase orientativa para este edificio: calefacción por m² en la escala austriaca HWB, de G a A++. Simulada, no es un certificado energético.",
+      "note": "Clase orientativa: calefacción por m², calificada con una misma escala en todos los países (la escala austriaca HWB, de G a A++), para comparar edificios entre países. Las etiquetas nacionales, como la neerlandesa, califican la energía primaria, que este modelo no calcula. Simulada, no es un certificado.",
       "failed": "No se pudieron calcular las clases energéticas.",
       "retry": "Reintentar"
     }
@@ -601,6 +585,12 @@
       "at": "AT - Austria",
       "nl": "NL - Países Bajos",
       "cz": "CZ - Chequia"
+    },
+    "countryName": {
+      "de": "Alemania",
+      "at": "Austria",
+      "nl": "Países Bajos",
+      "cz": "Chequia"
     }
   },
   "panel": {
@@ -652,14 +642,10 @@
     "pvGeneration": "Generación FV",
     "storeysModelled": "{modelled} de {total} modeladas",
     "heatingPerM2": "Calefacción {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Clase orientativa de demanda de calefacción (simulada, no es un certificado energético)",
-      "tip": "Calefacción anual de BuEM por superficie de referencia, con el clima y la ocupación del cálculo, clasificada según las bandas de la escala austriaca OIB-RL 6 HWB (A++ hasta 10 kWh/m²·a, G por encima de 250). No incluye agua caliente, refrigeración ni electricidad.",
-      "stale": "Para las plantas de la última ejecución. Guarde y previsualice para obtener la clase de las plantas modeladas ahora."
-    },
     "tile": {
       "statisticalDefault": "Valor estadístico"
-    }
+    },
+    "builtIn": "Construido en {year}"
   },
   "envelope": {
     "compassNorth": "N"
@@ -707,13 +693,6 @@
         "floor": "eliminación de suelo",
         "door": "eliminación de puerta",
         "surface": "eliminación de superficie"
-      },
-      "added": {
-        "wall": "adición de muro",
-        "window": "adición de ventana",
-        "roof": "adición de cubierta",
-        "floor": "adición de suelo",
-        "door": "adición de puerta"
       }
     },
     "error": {
@@ -748,7 +727,9 @@
       "count": {
         "one": "{count} planta seleccionada",
         "other": "{count} plantas seleccionadas"
-      }
+      },
+      "multi": "Configurar varias plantas",
+      "one": "Planta {number}"
     },
     "dwellingsPerStorey": "Viviendas por planta",
     "mixed": "varios",

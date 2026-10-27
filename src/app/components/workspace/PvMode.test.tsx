@@ -186,12 +186,14 @@ describe('PvSurfaceSection', () => {
     expect(suggested).not.toContain('Usable share');
   });
 
-  it('shows the surface geometry from the 3D model and offers to add PV to a suggested surface', () => {
+  it('shows the surface geometry from the 3D model and only the Install switch before PV is on', () => {
     const html = renderToStaticMarkup(<PvSurfaceSection surfaceId="r2" surface={pv.surfaces.r2} pv={pv} elements={elements} onClose={() => {}} />);
     expect(html).toContain('35°');
     expect(html).toContain('0° N');
     expect(html).toContain('40 m²');
-    expect(html).toContain('Add PV to this surface');
+    expect(html).toContain('aria-label="Install"');
+    expect(html).not.toContain('up to');
+    expect(html).not.toContain('Usable share');
   });
 
   it('says PV follows the 3D model when the surface\'s tilt was edited for BuEM', () => {

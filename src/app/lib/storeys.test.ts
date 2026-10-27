@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { modelledDwellings, storeyAt, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { dwellingsTotal, modelledDwellings, storeyAt, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -106,5 +106,12 @@ describe('modelledDwellings', () => {
   it('is null while a modelled storey has no count', () => {
     expect(modelledDwellings([2, 3], { 2: 4 })).toBeNull();
     expect(modelledDwellings([], {})).toBeNull();
+  });
+});
+
+describe('dwellingsTotal', () => {
+  it('sums the counts given per storey', () => {
+    expect(dwellingsTotal(3, { 1: 4, 2: 4 })).toBe(8);
+    expect(dwellingsTotal(3, {})).toBeNull();
   });
 });

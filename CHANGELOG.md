@@ -13,7 +13,6 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - Storeys can be left out of a building's model. Storeys are selected, one or many, in the Storeys modelled section or in the 3D model (Storeys, top left), then left out, put back or given a dwelling count each. The model draws storey lines, lightens storeys left out and highlights the selection. Surfaces are cut by height to the modelled storeys, the building data shows the modelled storeys only, and a residential building needs the dwellings of every modelled storey; their sum is sent as `residential_units`. Where cutting removes every roof or floor, an internal ceiling or floor without heat loss is sent in its place.
 - A stored building keeps its full form beside the BuEM block: `storeys` (the total), `storey_list` (one `{ storey, modelled, dwellings? }` per storey), `envelope_full` and `residential_units_full`. The `building` block holds what BuEM is to model.
 - The energy class of each refurbishment level: once the building stops changing, every level is run through BuEM with nothing stored (`ConfiguratorServices.previewBuemBuilding`, optional) and shows its class on the Austrian HWB scale (A++ to G) with its heating per m². Without the service no class is shown.
-- The annual demand card shows the indicative heating class of the BuEM result.
 - A guided tour of five steps, started from the Tour button in the header or by the host's new `tour` prop (`{ run, onFinish }`), and step hints over the model until a run is started.
 - An info tip on every section saying what it holds and where its figures come from.
 - Technology cards share one shape. `TechCard` gains optional `type`, `figures`, `investment` and `catalogue`; `Technologies` gains optional `onAdd` for an "Add a technology" button. The Technologies tab sums the investment estimates.
@@ -26,12 +25,13 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - Building data shows as tiles (type, country and year, storeys, room height, floor area, dwellings, occupants, volume); Edit switches to the editable table. A dashed card in Basic points to the Expert sections.
 - A section opens from a click anywhere on its header.
 - A surface's tilt and facing are edited in Expert only. PV takes its geometry from the 3D model, not from these edits.
-- The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals and the warning about surfaces a simulation would reject.
+- The model draws surfaces that EnerPlanET leaves out of the envelope, such as slivers below City2TABULA's area precision. They stay out of the area totals.
 - "Results to compute" moves to Expert.
 
 ### Removed
 
 - The Envelope tab and its surface groups list, the building editor's identity section and the unused thermal rating.
+- The Expert option to add a surface, which 3D city data has no use for, and the note over the model counting surfaces with no area.
 
 ### Fixed
 

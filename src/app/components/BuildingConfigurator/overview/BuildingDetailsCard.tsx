@@ -9,7 +9,7 @@ import { TOPICS } from '@/app/config/topics';
 import { SectionCard } from '../shared/SectionCard';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
-import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryOptions } from '../shared/buildingOptions';
+import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryName, countryOptions } from '../shared/buildingOptions';
 import { useT, type Translate } from '@/app/i18n';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
@@ -91,8 +91,10 @@ function BuildingTiles({ rows, occupancy }: { rows: SnapshotRow[]; occupancy?: B
   return (
     <div className="flex flex-col gap-2 p-3">
       <div className="flex items-baseline justify-between gap-2 text-[13px]">
-        <span className="truncate text-foreground">{[type, country].filter(Boolean).map((r) => rowValue(r!, t)).join(' · ')}</span>
-        {year && <b className="text-foreground">{rowValue(year, t)}</b>}
+        <span className="truncate text-foreground">
+          {[type && rowValue(type, t), country && countryName(t, country.value)].filter(Boolean).join(' · ')}
+        </span>
+        {year && <b className="shrink-0 text-foreground">{t('snapshot.builtIn', { year: rowValue(year, t) })}</b>}
       </div>
       <div className="grid grid-cols-3 gap-1.5">
         {tile('storeys')}

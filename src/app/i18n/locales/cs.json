@@ -33,12 +33,6 @@
     "loadingGeometry": "Načítání geometrie ploch…",
     "detached": "Uložené plochy této budovy pocházejí ze starší generace City2TABULA, takže žádná neodpovídá aktuálním 3D datům. Uložené hodnoty stále platí; model se nezobrazuje.",
     "noGeometry": "City2TABULA nemá pro tuto budovu žádnou 3D geometrii.",
-    "invalidSurfaces": {
-      "one": "{count} plocha s nulovou výměrou, vynechána ze simulace",
-      "few": "{count} plochy s nulovou výměrou, vynechány ze simulace",
-      "many": "{count} plochy s nulovou výměrou, vynechány ze simulace",
-      "other": "{count} ploch s nulovou výměrou, vynechány ze simulace"
-    },
     "run": {
       "working": "Výpočet energie…",
       "start": "Uložit a zobrazit potřebu energie"
@@ -50,7 +44,8 @@
     },
     "panel": {
       "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
-    }
+    },
+    "credits": "Zdroje dat"
   },
   "surface": {
     "type": {
@@ -103,8 +98,14 @@
     },
     "degrees": "{degrees} stupňů, {label}",
     "section": {
-      "envelope": "Obálka",
-      "pv": "FV"
+      "pv": "Fotovoltaika",
+      "of": {
+        "wall": "Plocha stěny",
+        "roof": "Plocha střechy",
+        "floor": "Plocha podlahy",
+        "window": "Okno",
+        "door": "Dveře"
+      }
     },
     "pick": "Vyberte plochu",
     "geometrySource": "Zdroj: 3D model budovy"
@@ -129,7 +130,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Soubor profilu zatížení nelze načíst."
-    }
+    },
+    "uploadSoon": "Nahrání naměřeného profilu bude brzy k dispozici."
   },
   "pv": {
     "state": {
@@ -138,7 +140,7 @@
       "available": "Dostupné"
     },
     "toggle": "FV: {surface}",
-    "thisSurface": "FV na této ploše",
+    "thisSurface": "Nainstalovat",
     "usableShare": "Využitelný podíl",
     "usableShareNote": "této plochy po odečtení překážek",
     "hint": "Klikněte na střechu nebo stěnu a nastavte FV, nebo na ni přetáhněte produkt.",
@@ -159,7 +161,6 @@
       "panels": "{kwp} kWp na {area} m² panelů",
       "remove": "Odebrat FV",
       "done": "Hotovo",
-      "add": "Přidat FV na tuto plochu",
       "modules": "Moduly: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tuto plochu se nevejde žádný celý modul.",
       "spaceLimited": "Místo na této ploše omezuje moduly; větší využitelný podíl žádný nepřidá.",
@@ -486,24 +487,6 @@
         "tip": "Podíl slunečního záření dopadajícího na tato okna, který vstupuje jako teplo. Výchozí: hodnota TABULA pro typ budovy, jinak 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Stěna",
-        "floor": "Podlaha",
-        "roof": "Střecha"
-      },
-      "button": {
-        "wall": "Přidat stěnu",
-        "floor": "Přidat podlahu",
-        "roof": "Přidat střechu"
-      },
-      "title": "Přidat plochu",
-      "note": "Pro plochu, kterou 3D data nezobrazují, např. stěnu přilehlou k zemině (redukční činitel asi 0,5) nebo podlahu nad otevřeným průjezdem (1). Je uvedena na kartě Obálka, v modelu se nevykresluje.",
-      "typeLabel": "Typ",
-      "name": "Název",
-      "namePlaceholder": "např. Suterénní stěna",
-      "area": "Výměra"
-    },
     "variant": {
       "full": {
         "existing": "Současný stav",
@@ -519,7 +502,7 @@
     "classes": {
       "comparing": "BuEM počítá každou úroveň…",
       "perM2": "{value} kWh/m²",
-      "note": "Orientační třída této budovy: vytápění na m² na rakouské stupnici HWB, G až A++. Simulovaná, nejde o energetický štítek.",
+      "note": "Orientační třída: vytápění na m², hodnocené na jedné stupnici pro všechny země (rakouské stupnici HWB, G až A++), aby se budovy daly porovnat mezi zeměmi. Národní štítky, jako nizozemský energetický štítek, hodnotí primární energii, kterou tento model nepočítá. Simulovaná, nejde o certifikát.",
       "failed": "Energetické třídy se nepodařilo určit.",
       "retry": "Zkusit znovu"
     }
@@ -618,6 +601,12 @@
       "at": "AT - Rakousko",
       "nl": "NL - Nizozemsko",
       "cz": "CZ - Česko"
+    },
+    "countryName": {
+      "de": "Německo",
+      "at": "Rakousko",
+      "nl": "Nizozemsko",
+      "cz": "Česko"
     }
   },
   "panel": {
@@ -670,14 +659,10 @@
     "pvGeneration": "Výroba FV",
     "storeysModelled": "{modelled} z {total} modelováno",
     "heatingPerM2": "Vytápění {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Orientační třída potřeby tepla na vytápění (simulovaná, nejde o energetický štítek)",
-      "tip": "Roční potřeba tepla na vytápění z BuEM na referenční plochu, při počasí a užívání výpočtu, zařazená podle pásem rakouské stupnice OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G nad 250). Teplá voda, chlazení a elektřina nejsou zahrnuty.",
-      "stale": "Pro podlaží posledního výpočtu. Uložte a zobrazte náhled pro třídu nyní modelovaných podlaží."
-    },
     "tile": {
       "statisticalDefault": "Statistická hodnota"
-    }
+    },
+    "builtIn": "Postaveno v roce {year}"
   },
   "envelope": {
     "compassNorth": "S"
@@ -725,13 +710,6 @@
         "floor": "smazání podlahy",
         "door": "smazání dveří",
         "surface": "smazání plochy"
-      },
-      "added": {
-        "wall": "přidání stěny",
-        "window": "přidání okna",
-        "roof": "přidání střechy",
-        "floor": "přidání podlahy",
-        "door": "přidání dveří"
       }
     },
     "error": {
@@ -768,7 +746,9 @@
         "few": "{count} podlaží vybrána",
         "many": "{count} podlaží vybráno",
         "other": "{count} podlaží vybráno"
-      }
+      },
+      "multi": "Nastavit více podlaží",
+      "one": "Podlaží {number}"
     },
     "dwellingsPerStorey": "Bytů na podlaží",
     "mixed": "různé",

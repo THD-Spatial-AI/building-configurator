@@ -33,12 +33,6 @@
     "loadingGeometry": "Wczytywanie geometrii przegród…",
     "detached": "Zapisane przegrody tego budynku pochodzą z wcześniejszego przebiegu City2TABULA, więc żadna nie pasuje do aktualnych danych 3D. Zapisane wartości nadal obowiązują; model nie jest wyświetlany.",
     "noGeometry": "City2TABULA nie zawiera geometrii 3D dla tego budynku.",
-    "invalidSurfaces": {
-      "one": "{count} przegroda bez powierzchni, pominięta w symulacji",
-      "few": "{count} przegrody bez powierzchni, pominięte w symulacji",
-      "many": "{count} przegród bez powierzchni, pominiętych w symulacji",
-      "other": "{count} przegrody bez powierzchni, pominięte w symulacji"
-    },
     "run": {
       "working": "Obliczanie energii…",
       "start": "Zapisz i pokaż zapotrzebowanie"
@@ -50,7 +44,8 @@
     },
     "panel": {
       "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
-    }
+    },
+    "credits": "Źródła danych"
   },
   "surface": {
     "type": {
@@ -103,8 +98,14 @@
     },
     "degrees": "{degrees}°, {label}",
     "section": {
-      "envelope": "Przegrody",
-      "pv": "PV"
+      "pv": "Fotowoltaika",
+      "of": {
+        "wall": "Powierzchnia ściany",
+        "roof": "Powierzchnia dachu",
+        "floor": "Powierzchnia podłogi",
+        "window": "Okno",
+        "door": "Drzwi"
+      }
     },
     "pick": "Wybierz przegrodę",
     "geometrySource": "Źródło: model 3D budynku"
@@ -129,7 +130,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Nie można odczytać pliku profilu obciążenia."
-    }
+    },
+    "uploadSoon": "Przesyłanie zmierzonego profilu będzie dostępne wkrótce."
   },
   "pv": {
     "state": {
@@ -138,7 +140,7 @@
       "available": "Dostępna"
     },
     "toggle": "PV: {surface}",
-    "thisSurface": "PV na tej przegrodzie",
+    "thisSurface": "Zainstaluj",
     "usableShare": "Udział użyteczny",
     "usableShareNote": "tej przegrody, po odjęciu przeszkód",
     "hint": "Kliknij dach lub ścianę, aby skonfigurować PV, albo upuść na nią produkt.",
@@ -159,7 +161,6 @@
       "panels": "{kwp} kWp na {area} m² modułów",
       "remove": "Usuń PV",
       "done": "Gotowe",
-      "add": "Dodaj PV do tej przegrody",
       "modules": "Moduły: {count} · {kwp} kWp · {area} m²",
       "noFit": "Na tej powierzchni nie mieści się żaden cały moduł.",
       "spaceLimited": "Miejsce na tej powierzchni ogranicza moduły; większy udział użytkowy nie doda żadnego.",
@@ -486,24 +487,6 @@
         "tip": "Udział promieniowania słonecznego padającego na te okna, który wnika jako ciepło. Domyślnie wartość TABULA dla typu budynku, w przeciwnym razie 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Ściana",
-        "floor": "Podłoga",
-        "roof": "Dach"
-      },
-      "button": {
-        "wall": "Dodaj ścianę",
-        "floor": "Dodaj podłogę",
-        "roof": "Dodaj dach"
-      },
-      "title": "Dodaj przegrodę",
-      "note": "Dla przegrody, której nie widać w danych 3D, np. ściany przy gruncie (współczynnik b ok. 0,5) lub podłogi nad otwartym przejazdem (1). Pojawia się na karcie Przegrody, ale nie jest rysowana w modelu.",
-      "typeLabel": "Typ",
-      "name": "Nazwa",
-      "namePlaceholder": "np. Ściana piwnicy",
-      "area": "Powierzchnia"
-    },
     "variant": {
       "full": {
         "existing": "Stan obecny",
@@ -519,7 +502,7 @@
     "classes": {
       "comparing": "BuEM liczy każdy poziom…",
       "perM2": "{value} kWh/m²",
-      "note": "Klasa orientacyjna dla tego budynku: ogrzewanie na m² w austriackiej skali HWB, od G do A++. Symulowana, nie jest świadectwem energetycznym.",
+      "note": "Klasa orientacyjna: ogrzewanie na m², oceniane w jednej skali dla wszystkich krajów (austriackiej skali HWB, od G do A++), aby budynki dało się porównać między krajami. Krajowe etykiety, takie jak holenderska etykieta energetyczna, oceniają energię pierwotną, której ten model nie oblicza. Symulowana, nie jest świadectwem.",
       "failed": "Nie udało się wyznaczyć klas energetycznych.",
       "retry": "Spróbuj ponownie"
     }
@@ -618,6 +601,12 @@
       "at": "AT - Austria",
       "nl": "NL - Holandia",
       "cz": "CZ - Czechy"
+    },
+    "countryName": {
+      "de": "Niemcy",
+      "at": "Austria",
+      "nl": "Holandia",
+      "cz": "Czechy"
     }
   },
   "panel": {
@@ -670,14 +659,10 @@
     "pvGeneration": "Produkcja PV",
     "storeysModelled": "{modelled} z {total} modelowanych",
     "heatingPerM2": "Ogrzewanie {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Orientacyjna klasa zapotrzebowania na ciepło (symulowana, nie jest świadectwem energetycznym)",
-      "tip": "Roczne ogrzewanie z BuEM na powierzchnię odniesienia, przy pogodzie i użytkowaniu z obliczenia, sklasyfikowane według przedziałów austriackiej skali OIB-RL 6 HWB (A++ do 10 kWh/m²·a, G powyżej 250). Nie obejmuje ciepłej wody, chłodzenia ani energii elektrycznej.",
-      "stale": "Dla kondygnacji z ostatniego obliczenia. Zapisz i podgląd, aby uzyskać klasę obecnie modelowanych kondygnacji."
-    },
     "tile": {
       "statisticalDefault": "Wartość statystyczna"
-    }
+    },
+    "builtIn": "Zbudowany w {year}"
   },
   "envelope": {
     "compassNorth": "N"
@@ -725,13 +710,6 @@
         "floor": "usunięcie podłogi",
         "door": "usunięcie drzwi",
         "surface": "usunięcie przegrody"
-      },
-      "added": {
-        "wall": "dodanie ściany",
-        "window": "dodanie okna",
-        "roof": "dodanie dachu",
-        "floor": "dodanie podłogi",
-        "door": "dodanie drzwi"
       }
     },
     "error": {
@@ -768,7 +746,9 @@
         "few": "{count} kondygnacje zaznaczone",
         "many": "{count} kondygnacji zaznaczonych",
         "other": "{count} kondygnacji zaznaczonej"
-      }
+      },
+      "multi": "Konfiguruj kilka kondygnacji",
+      "one": "Kondygnacja {number}"
     },
     "dwellingsPerStorey": "Mieszkania na kondygnację",
     "mixed": "różne",

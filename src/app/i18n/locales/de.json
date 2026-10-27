@@ -31,10 +31,6 @@
     "loadingGeometry": "Flächengeometrie wird geladen…",
     "detached": "Die gespeicherten Flächen dieses Gebäudes stammen aus einer früheren City2TABULA-Generierung und passen zu keinen aktuellen 3D-Daten. Die gespeicherten Werte gelten weiterhin; das Modell wird nicht angezeigt.",
     "noGeometry": "City2TABULA enthält keine 3D-Geometrie für dieses Gebäude.",
-    "invalidSurfaces": {
-      "one": "{count} Fläche ohne Flächeninhalt, wird in der Simulation ausgelassen",
-      "other": "{count} Flächen ohne Flächeninhalt, werden in der Simulation ausgelassen"
-    },
     "run": {
       "working": "Energie wird berechnet…",
       "start": "Speichern & Energiebedarf anzeigen"
@@ -46,7 +42,8 @@
     },
     "panel": {
       "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen."
-    }
+    },
+    "credits": "Datenquellen"
   },
   "surface": {
     "type": {
@@ -99,8 +96,14 @@
     },
     "degrees": "{degrees} Grad, {label}",
     "section": {
-      "envelope": "Gebäudehülle",
-      "pv": "PV"
+      "pv": "Photovoltaik",
+      "of": {
+        "wall": "Wandfläche",
+        "roof": "Dachfläche",
+        "floor": "Bodenfläche",
+        "window": "Fenster",
+        "door": "Tür"
+      }
     },
     "pick": "Fläche wählen",
     "geometrySource": "Quelle: 3D-Modell des Gebäudes"
@@ -125,7 +128,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Lastprofil-Datei konnte nicht gelesen werden."
-    }
+    },
+    "uploadSoon": "Das Hochladen eines gemessenen Profils folgt in Kürze."
   },
   "pv": {
     "state": {
@@ -134,7 +138,7 @@
       "available": "Verfügbar"
     },
     "toggle": "PV auf {surface}",
-    "thisSurface": "PV auf dieser Fläche",
+    "thisSurface": "Installieren",
     "usableShare": "Nutzbarer Anteil",
     "usableShareNote": "dieser Fläche, abzüglich Verschattung",
     "hint": "Klicken Sie auf ein Dach oder eine Wand, um PV einzurichten, oder legen Sie ein Produkt darauf ab.",
@@ -155,7 +159,6 @@
       "panels": "{kwp} kWp auf {area} m² Modulfläche",
       "remove": "PV entfernen",
       "done": "Fertig",
-      "add": "PV auf dieser Fläche hinzufügen",
       "modules": "Module: {count} · {kwp} kWp · {area} m²",
       "noFit": "Auf diese Fläche passt kein ganzes Modul.",
       "spaceLimited": "Der Platz auf dieser Fläche begrenzt die Module; ein größerer nutzbarer Anteil fügt keine hinzu.",
@@ -464,24 +467,6 @@
         "tip": "Anteil der Sonneneinstrahlung auf diese Fenster, der als Wärme eintritt. Standard: der TABULA-Wert für den Gebäudetyp, sonst 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Wand",
-        "floor": "Boden",
-        "roof": "Dach"
-      },
-      "button": {
-        "wall": "Wand hinzufügen",
-        "floor": "Boden hinzufügen",
-        "roof": "Dach hinzufügen"
-      },
-      "title": "Fläche hinzufügen",
-      "note": "Für eine Fläche, die die 3D-Daten nicht zeigen, etwa eine erdberührte Wand (Reduktionsfaktor etwa 0,5) oder einen Boden über einer offenen Durchfahrt (1). Sie erscheint im Tab Gebäudehülle, nicht im Modell.",
-      "typeLabel": "Typ",
-      "name": "Name",
-      "namePlaceholder": "z. B. Kellerwand",
-      "area": "Fläche"
-    },
     "variant": {
       "full": {
         "existing": "Ist-Zustand",
@@ -497,7 +482,7 @@
     "classes": {
       "comparing": "BuEM rechnet jede Stufe…",
       "perM2": "{value} kWh/m²",
-      "note": "Indikative Klasse für dieses Gebäude: Heizwärmebedarf je m² auf der österreichischen HWB-Skala, G bis A++. Simuliert, kein Energieausweis.",
+      "note": "Indikative Klasse: Heizwärmebedarf je m², für alle Länder auf einer Skala bewertet (der österreichischen HWB-Skala, G bis A++), damit Gebäude länderübergreifend vergleichbar sind. Nationale Labels wie das niederländische Energielabel bewerten Primärenergie, die dieses Modell nicht berechnet. Simuliert, kein Energieausweis.",
       "failed": "Die Energieklassen ließen sich nicht ermitteln.",
       "retry": "Erneut versuchen"
     }
@@ -596,6 +581,12 @@
       "at": "AT - Österreich",
       "nl": "NL - Niederlande",
       "cz": "CZ - Tschechien"
+    },
+    "countryName": {
+      "de": "Deutschland",
+      "at": "Österreich",
+      "nl": "Niederlande",
+      "cz": "Tschechien"
     }
   },
   "panel": {
@@ -646,14 +637,10 @@
     "pvGeneration": "PV-Erzeugung",
     "storeysModelled": "{modelled} von {total} modelliert",
     "heatingPerM2": "Heizung {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Indikative Heizwärmebedarfsklasse (simuliert, kein Energieausweis)",
-      "tip": "Jährlicher Heizwärmebedarf aus BuEM je Bezugsfläche, mit dem Wetter und der Nutzung des Laufs, eingestuft nach den Bändern der österreichischen OIB-RL-6-HWB-Skala (A++ bis 10 kWh/m²·a, G über 250). Warmwasser, Kühlung und Strom sind nicht enthalten.",
-      "stale": "Für die Geschosse der letzten Berechnung. Speichern und Vorschau ergibt die Klasse der jetzt modellierten Geschosse."
-    },
     "tile": {
       "statisticalDefault": "Statistischer Wert"
-    }
+    },
+    "builtIn": "Baujahr {year}"
   },
   "envelope": {
     "compassNorth": "N"
@@ -701,13 +688,6 @@
         "floor": "Gelöschter Boden",
         "door": "Gelöschte Tür",
         "surface": "Gelöschte Fläche"
-      },
-      "added": {
-        "wall": "Hinzugefügte Wand",
-        "window": "Hinzugefügtes Fenster",
-        "roof": "Hinzugefügtes Dach",
-        "floor": "Hinzugefügter Boden",
-        "door": "Hinzugefügte Tür"
       }
     },
     "error": {
@@ -742,7 +722,9 @@
       "count": {
         "one": "{count} Geschoss ausgewählt",
         "other": "{count} Geschosse ausgewählt"
-      }
+      },
+      "multi": "Mehrere Geschosse bearbeiten",
+      "one": "Geschoss {number}"
     },
     "dwellingsPerStorey": "Wohnungen je Geschoss",
     "mixed": "gemischt",

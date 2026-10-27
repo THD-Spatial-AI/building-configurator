@@ -10,10 +10,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { BuildingElement } from './configure/model/buildingElements';
-import {
-  isElementEditable,
-  normalizeElementRecord,
-} from './configure/model/buildingElements';
+import { normalizeElementRecord } from './configure/model/buildingElements';
 import { type RoofConfig, DEFAULT_ROOF_CONFIG } from './configure/model/roof';
 import { type EnergyTotals, type LoadDataPoint } from '../../lib/loadProfile';
 import { DEFAULT_ELEMENTS, DEFAULT_GENERAL, computeTotalFloorArea, generalFrom } from './shared/buildingDefaults';
@@ -38,57 +35,6 @@ import type { ConfiguratorServices } from '../../lib/services';
 import type { Language, Message } from '../../i18n';
 import { buildSnapshotRows, type SnapshotBaseline } from './shared/snapshotUtils';
 import { modelTablesZip } from './shared/modelExport';
-
-const SURFACE_DEFAULTS: Record<BuildingElement['type'], Omit<BuildingElement, 'id' | 'label'>> = {
-  wall:   { type: 'wall',   area: 12, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
-  window: { type: 'window', area: 2.4, uValue: 1.3,  gValue: 0.6,  tilt: 90, azimuth: 180, source: 'custom', customMode: true },
-  door:   { type: 'door',   area: 2.1, uValue: 1.8,  gValue: null, tilt: 90, azimuth: 180, source: 'custom', customMode: true },
-  roof:   { type: 'roof',   area: 18, uValue: 0.18, gValue: null, tilt: 35, azimuth: 180, source: 'custom', customMode: true },
-  floor:  { type: 'floor',  area: 18, uValue: 0.30, gValue: null, tilt: 0,  azimuth: 0,   source: 'custom', customMode: true },
-};
-
-function surfaceTypeLabel(type: BuildingElement['type']): string {
-  if (type === 'roof') return 'Roof';
-  if (type === 'floor') return 'Floor';
-  if (type === 'door') return 'Door';
-  if (type === 'window') return 'Window';
-  return 'Wall';
-}
-
-function buildSurfaceLabel(type: BuildingElement['type'], elements: Record<string, BuildingElement>): string {
-  const next = Object.values(elements).filter((el) => el.type === type).length + 1;
-  return `Custom ${surfaceTypeLabel(type)} ${next}`;
-}
-
-function buildSurfaceId(type: BuildingElement['type'], elements: Record<string, BuildingElement>): string {
-  const base = `custom_${type}`;
-  let idx = 1;
-  while (elements[`${base}_${idx}`]) idx += 1;
-  return `${base}_${idx}`;
-}
-
-function buildNewSurface(type: BuildingElement['type'], elements: Record<string, BuildingElement>): BuildingElement {
-  const seed = Object.values(elements).find((el) => el.type === type && isElementEditable(el))
-    ?? Object.values(elements).find((el) => el.type === type)
-    ?? null;
-
-  return {
-    id: buildSurfaceId(type, elements),
-    label: buildSurfaceLabel(type, elements),
-    ...(seed
-      ? {
-          type,
-          area: seed.area,
-          uValue: seed.uValue,
-          gValue: seed.gValue,
-          tilt: seed.tilt,
-          azimuth: seed.azimuth,
-          source: 'custom' as const,
-          customMode: true,
-        }
-      : SURFACE_DEFAULTS[type]),
-  };
-}
 
 function isRoofConfig(value: unknown): value is RoofConfig {
   return !!value
@@ -277,8 +223,6 @@ export function useBuildingModel(
   // The building as opened, after the load-time TABULA pass below: what counts
   // as untouched, so opening and leaving hands the host its building back.
   const [loaded, setLoaded] = useState({ elements: initialElements, general: initialGeneral });
-  /** The storeys the shown demand was computed for: the stored building's, then each run's. */
-  const [resultStoreys, setResultStoreys] = useState<number[] | null>(initialGeneral.storeysModelled);
   const [energyTotals,    setEnergyTotals]    = useState<EnergyTotals>(initialEnergyTotals);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
   /** Annual PV generation (kWh) from the last run, or null before one or without PV. */
@@ -320,7 +264,6 @@ export function useBuildingModel(
     );
 
     const nextGeneral = generalFrom(buildingData);
-    setResultStoreys(nextGeneral.storeysModelled);
 
     const nextTotals = computeEnergyTotals(
       buildingData.thematic.timeseries ?? buildingData.timeseries ?? null,
@@ -558,17 +501,6 @@ export function useBuildingModel(
     return deletedType;
   };
 
-  /**
-   * Adds a surface of the given type, with `values` over the defaults, and
-   * returns it so the caller can select it.
-   */
-  const createSurface = (type: BuildingElement['type'], values: Partial<BuildingElement> = {}): BuildingElement => {
-    const next = { ...buildNewSurface(type, elements), ...values };
-    remember(`create:${next.id}`, { key: `model.history.added.${type}` });
-    setElements((prev) => ({ ...prev, [next.id]: next }));
-    return next;
-  };
-
   /** Replaces roof elements from a new type template. */
   const applyRoofType = (newRoofElements: Record<string, BuildingElement>) => {
     remember(`roof-type:${Date.now()}`, { key: 'model.history.roofType' });
@@ -675,7 +607,6 @@ export function useBuildingModel(
         return;
       }
       setEnergyTotals(computeEnergyTotals(null, toThermalSummary(result)));
-      setResultStoreys(general.storeysModelled);
       if (pvRequest && pvKwh === null) setUploadError({ key: 'model.error.pvFailed' });
     } finally {
       setIsRunningSimulation(false);
@@ -790,9 +721,9 @@ export function useBuildingModel(
     baselineElements: baselineRef.current.elements,
     // derived
     buildingLabel, buildingType, coordinates, totalArea, avgUValue,
-    snapshotRows, displayEnergyTotals, resultStoreys,
+    snapshotRows, displayEnergyTotals,
     // handlers
-    setGen, updateElement, restoreElement, renameElement, deleteSurface, createSurface, applyRoofType,
+    setGen, updateElement, restoreElement, renameElement, deleteSurface, applyRoofType,
     setRefurbishment, setTypeUValue, setTypeLossFactor, setStoreysModelled, undo,
     runSimulation, download, downloadTables, upload, reset, toBuildingState,
     levelHeating, isComparingLevels, compareLevels, canCompareLevels: Boolean(services.previewBuemBuilding),

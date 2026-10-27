@@ -43,6 +43,8 @@ interface SurfaceGeometryViewerProps {
   storeys?: { count: number; modelled: readonly number[] | null; selected?: readonly number[] };
   /** While set, a click picks the storey at the clicked height instead of a surface. */
   onSelectStorey?: (storey: number | null) => void;
+  /** A surface to outline, as while its name is hovered in a list. */
+  previewId?: string | null;
   /** `at` is the click position in client coordinates. */
   onSelectSurface?: (id: string | null, at?: { x: number; y: number }) => void;
 }
@@ -77,6 +79,7 @@ export function SurfaceGeometryViewer({
   focusToken,
   storeys,
   onSelectStorey,
+  previewId = null,
   onSelectSurface,
   onHoverSurface,
   onDropProduct,
@@ -384,6 +387,25 @@ export function SurfaceGeometryViewer({
       dotMaterial.dispose();
     };
   }, [sides, origin]);
+
+  // The surface named in a list, outlined in the side colour so its place on
+  // the model shows whichever way the building faces.
+  useEffect(() => {
+    const scene = sceneRef.current;
+    const polygon = previewId ? surfaces.find((surface) => surface.id === previewId) : undefined;
+    if (!scene || !polygon) return;
+    const ends = surfaceSides(polygon).flatMap((side) => [toLocal(side.from, origin), toLocal(side.to, origin)]);
+    const material = new THREE.LineBasicMaterial({ color: SIDE_COLOR, depthTest: false });
+    const outline = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ends), material);
+    outline.renderOrder = 10;
+    outline.raycast = () => {};
+    scene.add(outline);
+    return () => {
+      scene.remove(outline);
+      outline.geometry.dispose();
+      material.dispose();
+    };
+  }, [surfaces, origin, previewId]);
 
   // Display only: the geometry has no storeys, so these follow storeyBands.
   const storeyCount = storeys?.count ?? 0;

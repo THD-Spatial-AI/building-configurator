@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { StoreysModelled, toggleSelected, withStoreys } from './StoreysModelled';
+import { StoreysModelled, pickInSelection, toggleSelected, withStoreys } from './StoreysModelled';
 
 const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>) => renderToStaticMarkup(
   <StoreysModelled storeys={3} modelled={[1, 2]} selected={[]} onSelect={() => {}} floorAreaPerStorey={80} roomHeight={2.5} onChange={() => {}} {...props} />,
@@ -46,5 +46,13 @@ describe('storey selection', () => {
   it('adds a storey to the selection or takes it out, in order', () => {
     expect(toggleSelected([3], 1)).toEqual([1, 3]);
     expect(toggleSelected([1, 3], 3)).toEqual([1]);
+  });
+});
+
+describe('a click on a storey', () => {
+  it('selects that storey alone by default, and adds it while configuring several', () => {
+    expect(pickInSelection([1, 2], 3, false)).toEqual([3]);
+    expect(pickInSelection([3], 3, false)).toEqual([]);
+    expect(pickInSelection([1], 3, true)).toEqual([1, 3]);
   });
 });

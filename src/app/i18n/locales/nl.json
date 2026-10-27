@@ -31,10 +31,6 @@
     "loadingGeometry": "Geometrie van vlakken laden…",
     "detached": "De opgeslagen vlakken van dit gebouw komen uit een eerdere City2TABULA-generatie, dus geen ervan past bij de huidige 3D-data. De opgeslagen waarden gelden nog; het model wordt niet getoond.",
     "noGeometry": "City2TABULA heeft geen 3D-geometrie voor dit gebouw.",
-    "invalidSurfaces": {
-      "one": "{count} vlak zonder oppervlakte, buiten de simulatie gelaten",
-      "other": "{count} vlakken zonder oppervlakte, buiten de simulatie gelaten"
-    },
     "run": {
       "working": "Energie wordt berekend…",
       "start": "Opslaan & energievraag bekijken"
@@ -46,7 +42,8 @@
     },
     "panel": {
       "empty": "Klik op een vlak in het model om het hier te zien."
-    }
+    },
+    "credits": "Bronvermelding"
   },
   "surface": {
     "type": {
@@ -99,8 +96,14 @@
     },
     "degrees": "{degrees} graden, {label}",
     "section": {
-      "envelope": "Schil",
-      "pv": "PV"
+      "pv": "Fotovoltaïsch",
+      "of": {
+        "wall": "Muurvlak",
+        "roof": "Dakvlak",
+        "floor": "Vloervlak",
+        "window": "Raam",
+        "door": "Deur"
+      }
     },
     "pick": "Kies een vlak",
     "geometrySource": "Bron: 3D-model van het gebouw"
@@ -125,7 +128,8 @@
     "error": {
       "parse": "{reason}",
       "unreadable": "Bestand met belastingprofiel kon niet worden gelezen."
-    }
+    },
+    "uploadSoon": "Het uploaden van een gemeten profiel komt binnenkort."
   },
   "pv": {
     "state": {
@@ -134,7 +138,7 @@
       "available": "Beschikbaar"
     },
     "toggle": "PV op {surface}",
-    "thisSurface": "PV op dit vlak",
+    "thisSurface": "Installeren",
     "usableShare": "Bruikbaar aandeel",
     "usableShareNote": "van dit vlak, na obstakels",
     "hint": "Klik op een dak of muur om PV in te stellen, of sleep er een product op.",
@@ -155,7 +159,6 @@
       "panels": "{kwp} kWp op {area} m² panelen",
       "remove": "PV verwijderen",
       "done": "Klaar",
-      "add": "PV op dit vlak plaatsen",
       "modules": "Modules: {count} · {kwp} kWp · {area} m²",
       "noFit": "Er past geen hele module op dit vlak.",
       "spaceLimited": "De ruimte op dit vlak beperkt de modules; een groter bruikbaar aandeel voegt er geen toe.",
@@ -464,24 +467,6 @@
         "tip": "Aandeel van het zonlicht op die ramen dat als warmte binnenkomt. Standaard: de TABULA-waarde voor het gebouwtype, anders 0,5."
       }
     },
-    "add": {
-      "type": {
-        "wall": "Wand",
-        "floor": "Vloer",
-        "roof": "Dak"
-      },
-      "button": {
-        "wall": "Wand toevoegen",
-        "floor": "Vloer toevoegen",
-        "roof": "Dak toevoegen"
-      },
-      "title": "Vlak toevoegen",
-      "note": "Voor een vlak dat de 3D-data niet toont, zoals een wand tegen de grond (reductiefactor ca. 0,5) of een vloer boven een open doorgang (1). Het staat in het tabblad Schil, niet in het model getekend.",
-      "typeLabel": "Type",
-      "name": "Naam",
-      "namePlaceholder": "bijv. Kelderwand",
-      "area": "Oppervlakte"
-    },
     "variant": {
       "full": {
         "existing": "Huidige staat",
@@ -497,7 +482,7 @@
     "classes": {
       "comparing": "BuEM rekent elk niveau…",
       "perM2": "{value} kWh/m²",
-      "note": "Indicatieve klasse voor dit gebouw: ruimteverwarming per m² op de Oostenrijkse HWB-schaal, G tot A++. Gesimuleerd, geen energielabel.",
+      "note": "Indicatieve klasse: ruimteverwarming per m², beoordeeld op één schaal voor alle landen (de Oostenrijkse HWB-schaal, G tot A++), zodat gebouwen over landen heen vergelijkbaar zijn. Nationale labels zoals het Nederlandse energielabel beoordelen primaire energie, die dit model niet berekent. Gesimuleerd, geen certificaat.",
       "failed": "De energieklassen konden niet worden bepaald.",
       "retry": "Opnieuw proberen"
     }
@@ -596,6 +581,12 @@
       "at": "AT - Oostenrijk",
       "nl": "NL - Nederland",
       "cz": "CZ - Tsjechië"
+    },
+    "countryName": {
+      "de": "Duitsland",
+      "at": "Oostenrijk",
+      "nl": "Nederland",
+      "cz": "Tsjechië"
     }
   },
   "panel": {
@@ -646,14 +637,10 @@
     "pvGeneration": "PV-opwekking",
     "storeysModelled": "{modelled} van {total} gemodelleerd",
     "heatingPerM2": "Verwarming {value} kWh/m²·a",
-    "heatingClass": {
-      "label": "Indicatieve klasse voor de warmtevraag (gesimuleerd, geen energielabel)",
-      "tip": "Jaarlijkse ruimteverwarming van BuEM per referentieoppervlak, met het weer en de bezetting van de berekening, ingedeeld volgens de banden van de Oostenrijkse OIB-RL 6 HWB-schaal (A++ tot 10 kWh/m²·a, G boven 250). Warm water, koeling en elektriciteit zijn niet meegeteld.",
-      "stale": "Voor de verdiepingen van de laatste berekening. Opslaan en voorbeeld geeft de klasse van de nu gemodelleerde verdiepingen."
-    },
     "tile": {
       "statisticalDefault": "Statistische waarde"
-    }
+    },
+    "builtIn": "Bouwjaar {year}"
   },
   "envelope": {
     "compassNorth": "N"
@@ -701,13 +688,6 @@
         "floor": "verwijderde vloer",
         "door": "verwijderde deur",
         "surface": "verwijderd vlak"
-      },
-      "added": {
-        "wall": "toegevoegde wand",
-        "window": "toegevoegd raam",
-        "roof": "toegevoegd dak",
-        "floor": "toegevoegde vloer",
-        "door": "toegevoegde deur"
       }
     },
     "error": {
@@ -742,7 +722,9 @@
       "count": {
         "one": "{count} verdieping geselecteerd",
         "other": "{count} verdiepingen geselecteerd"
-      }
+      },
+      "multi": "Meerdere verdiepingen instellen",
+      "one": "Verdieping {number}"
     },
     "dwellingsPerStorey": "Woningen per verdieping",
     "mixed": "gemengd",
