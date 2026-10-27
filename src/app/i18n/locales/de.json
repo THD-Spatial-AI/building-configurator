@@ -802,7 +802,8 @@
     "status": {
       "complete": "vollständig",
       "attention": "bitte prüfen",
-      "error": "fehlerhaft"
+      "error": "fehlerhaft",
+      "incomplete": "unvollständig"
     }
   }
 }

@@ -130,10 +130,10 @@ export function energyGradeStatus(insulation: InsulationProps): StepStatus {
   return insulation.levels.length === 0 ? 'attention' : 'complete';
 }
 
-/** Attention while a modelled storey of a building counted per storey has no dwellings. */
+/** Incomplete while a modelled storey of a building counted per storey has no dwellings. */
 export function storeysStatus(general: Record<string, any>): StepStatus {
   if (!hasDwellingsPerStorey(general.buildingType)) return 'complete';
-  return missingDwellings(general.storeysModelled, general.storeyDwellings ?? {}).length > 0 ? 'attention' : 'complete';
+  return missingDwellings(general.storeysModelled, general.storeyDwellings ?? {}).length > 0 ? 'incomplete' : 'complete';
 }
 
 interface BuildingStepsProps {

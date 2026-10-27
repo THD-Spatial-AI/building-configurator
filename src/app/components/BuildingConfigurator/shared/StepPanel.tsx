@@ -1,5 +1,5 @@
-// A panel's sections as steps: a bar naming each with its status, one section
-// shown at a time, and Previous and Next beneath it.
+// A panel's sections as steps: a path of nodes, each in its status and named
+// beneath, one section shown at a time, and Back and Next beneath it.
 
 import type { ReactNode } from 'react';
 import { AlertTriangle, Check, ChevronDown, X } from '@/app/components/icons';
@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 import type { Topic } from '@/app/config/topics';
 import { useT } from '@/app/i18n';
 
-/** Complete: nothing missing. Attention: a warning to look at. Error: something failed. */
-export type StepStatus = 'complete' | 'attention' | 'error';
+/** Complete: nothing missing. Incomplete: an input still needed. Attention: a warning to look at. Error: something failed. */
+export type StepStatus = 'complete' | 'incomplete' | 'attention' | 'error';
 
 export interface Step {
   key: string;
@@ -20,18 +20,32 @@ export interface Step {
   onLeave?: () => void;
 }
 
-const STATUS_MARK: Record<StepStatus, { Icon: typeof Check; className: string }> = {
-  complete: { Icon: Check, className: 'bg-emerald-600 text-white dark:bg-emerald-500' },
-  attention: { Icon: AlertTriangle, className: 'bg-amber-500 text-white' },
-  error: { Icon: X, className: 'bg-destructive text-white' },
+/**
+ * Each status as a node: filled with its mark, or for the open step outlined
+ * on white with the mark in the status colour. An incomplete step has no mark.
+ */
+const NODE: Record<StepStatus, { Icon?: typeof Check; filled: string; open: string }> = {
+  complete: {
+    Icon: Check,
+    filled: 'border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500',
+    open: 'border-emerald-600 bg-background text-emerald-600 dark:border-emerald-500 dark:text-emerald-400',
+  },
+  incomplete: { filled: 'border-muted-foreground/40 bg-background', open: 'border-primary bg-background' },
+  attention: { Icon: AlertTriangle, filled: 'border-amber-500 bg-amber-500 text-white', open: 'border-amber-500 bg-background text-amber-600' },
+  error: { Icon: X, filled: 'border-destructive bg-destructive text-white', open: 'border-destructive bg-background text-destructive' },
 };
 
-function StatusMark({ status }: { status: StepStatus }) {
-  const { Icon, className } = STATUS_MARK[status];
+/** The link from one node to the next: green once the step it leaves is complete. */
+function Link({ done, side }: { done: boolean; side: 'left' | 'right' }) {
   return (
-    <span className={cn('flex size-4 shrink-0 items-center justify-center rounded-full', className)} aria-hidden>
-      <Icon className="size-2.5" />
-    </span>
+    <span
+      aria-hidden
+      className={cn(
+        'absolute top-4 h-1 -translate-y-1/2',
+        side === 'left' ? 'left-0 right-1/2' : 'left-1/2 right-0',
+        done ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-border',
+      )}
+    />
   );
 }
 
@@ -54,26 +68,38 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
   const next = steps[index + 1];
   return (
     <div className="flex flex-col gap-3">
-      {/* Sticks under the panel's top edge while the section scrolls beneath it. */}
+      {/* Sticks at stickyTop while the section scrolls beneath it. */}
       <nav aria-label={t('steps.nav')} className={cn('sticky z-10 -mx-4 border-b border-border bg-card px-4 py-2', stickyTop)}>
-        <ol className="m-0 flex list-none flex-wrap gap-1.5 p-0">
+        <ol className="m-0 flex list-none items-start p-0">
           {steps.map((step, i) => {
             const on = step.key === current.key;
+            const { Icon, filled, open } = NODE[step.status];
             return (
-              <li key={step.key}>
+              <li key={step.key} className="relative flex min-w-0 flex-1 flex-col items-center">
+                {i > 0 && <Link side="left" done={steps[i - 1].status === 'complete'} />}
+                {i < steps.length - 1 && <Link side="right" done={step.status === 'complete'} />}
                 <button
                   type="button"
                   aria-current={on ? 'step' : undefined}
                   aria-label={`${i + 1}. ${step.label}, ${t(`steps.status.${step.status}`)}`}
                   onClick={() => go(step.key)}
-                  className={cn(
-                    'flex cursor-pointer items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] font-semibold transition-colors',
-                    on ? cn('border-2', step.topic.border, step.topic.tile) : 'border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
-                  )}
+                  className="group relative z-10 flex min-w-0 cursor-pointer flex-col items-center gap-1 px-0.5 outline-none"
                 >
-                  <step.topic.Icon className={cn('size-3.5', on && step.topic.icon)} aria-hidden />
-                  <span>{i + 1}. {step.label}</span>
-                  <StatusMark status={step.status} />
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'flex size-8 items-center justify-center rounded-full transition-shadow group-hover:shadow-md group-focus-visible:ring-[3px] group-focus-visible:ring-ring/50',
+                      on ? cn('border-[3px]', open) : cn('border-2', filled),
+                    )}
+                  >
+                    {Icon && <Icon className="size-4" />}
+                  </span>
+                  <span className={cn(
+                    'text-center text-[11px] leading-tight',
+                    on ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground group-hover:text-foreground',
+                  )}>
+                    {i + 1}. {step.label}
+                  </span>
                 </button>
               </li>
             );

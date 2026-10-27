@@ -24,6 +24,14 @@ describe('StepPanel', () => {
     expect(html).not.toContain('data body');
   });
 
+  it('draws an incomplete step as an open node without a mark, the number in its label', () => {
+    const html = renderToStaticMarkup(
+      <StepPanel steps={[{ ...steps[0], status: 'incomplete' }, steps[2]]} active="data" onActive={() => {}} />,
+    );
+    expect(html).toContain('aria-label="1. Building data, not complete"');
+    expect(html).toMatch(/<span aria-hidden="true" class="[^"]*bg-background[^"]*"><\/span><span[^>]*>1. Building data<\/span>/);
+  });
+
   it('offers the steps either side of the open one', () => {
     expect(render('grade')).toContain('Back: Building data');
     expect(render('grade')).toContain('Next: Heating and comfort');
@@ -41,10 +49,10 @@ describe('step status', () => {
     expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('attention');
   });
 
-  it('marks storeys for attention while an included storey of a multi-family house has no dwellings', () => {
+  it('marks storeys incomplete while an included storey of a multi-family house has no dwellings', () => {
     const general = { buildingType: 'Multi-family House', storeysModelled: [1, 2], storeyDwellings: { 1: 2 } };
     expect(missingDwellings([1, 2], { 1: 2 })).toEqual([2]);
-    expect(storeysStatus(general)).toBe('attention');
+    expect(storeysStatus(general)).toBe('incomplete');
     expect(storeysStatus({ ...general, storeyDwellings: { 1: 2, 2: 1 } })).toBe('complete');
     expect(storeysStatus({ ...general, buildingType: 'Single-family House' })).toBe('complete');
   });

@@ -802,7 +802,8 @@
     "status": {
       "complete": "completo",
       "attention": "da controllare",
-      "error": "contiene un errore"
+      "error": "contiene un errore",
+      "incomplete": "incompleto"
     }
   }
 }
