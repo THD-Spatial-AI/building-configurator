@@ -249,7 +249,6 @@
     "inFocus": "Geselecteerd",
     "product": "Product",
     "add": "Technologie toevoegen",
-    "totalEstimate": "{amount} tot nu toe, schatting",
     "count": {
       "one": "{count} technologie",
       "other": "{count} technologieën"
@@ -257,6 +256,13 @@
     "pvSurfaces": {
       "one": "{count} vlak",
       "other": "{count} vlakken"
+    },
+    "total": {
+      "label": "Geschatte totale kosten van de technologieën",
+      "unsized": {
+        "one": "Zonder {count} technologie die de optimalisatie dimensioneert, waarvan de kosten uit de grootte volgen.",
+        "other": "Zonder {count} technologieën die de optimalisatie dimensioneert, waarvan de kosten uit de grootte volgen."
+      }
     }
   },
   "editor": {

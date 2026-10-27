@@ -35,7 +35,9 @@ function rowValue(row: SnapshotRow, t: Translate): string {
   return row.value;
 }
 
-const CARD = 'overflow-hidden rounded-xl border border-border/60 bg-card shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
+// overflow-clip, not overflow-hidden: it is no scroll container, so the
+// Technologies tab's total can stick to the panel's scroller.
+const CARD = 'overflow-clip rounded-xl border border-border/60 bg-card shadow-[0_1px_3px_rgba(15,23,42,0.07),0_4px_16px_rgba(15,23,42,0.08)]';
 
 export type DetailsTab = 'building' | 'technology';
 

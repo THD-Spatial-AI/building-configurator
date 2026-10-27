@@ -257,7 +257,6 @@
     "inFocus": "Wybrana",
     "product": "Produkt",
     "add": "Dodaj technologię",
-    "totalEstimate": "{amount} do tej pory, szacunek",
     "count": {
       "one": "{count} technologia",
       "few": "{count} technologie",
@@ -269,6 +268,15 @@
       "few": "{count} przegrody",
       "many": "{count} przegród",
       "other": "{count} przegrody"
+    },
+    "total": {
+      "label": "Szacowany łączny koszt technologii",
+      "unsized": {
+        "one": "Bez {count} technologii dobieranej przez optymalizator, której koszt zależy od wielkości.",
+        "few": "Bez {count} technologii dobieranych przez optymalizator, których koszt zależy od wielkości.",
+        "many": "Bez {count} technologii dobieranych przez optymalizator, których koszt zależy od wielkości.",
+        "other": "Bez {count} technologii dobieranych przez optymalizator, których koszt zależy od wielkości."
+      }
     }
   },
   "editor": {

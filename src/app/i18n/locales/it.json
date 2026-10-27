@@ -249,7 +249,6 @@
     "inFocus": "In primo piano",
     "product": "Prodotto",
     "add": "Aggiungi una tecnologia",
-    "totalEstimate": "{amount} finora, stima",
     "count": {
       "one": "{count} tecnologia",
       "other": "{count} tecnologie"
@@ -257,6 +256,13 @@
     "pvSurfaces": {
       "one": "{count} superficie",
       "other": "{count} superfici"
+    },
+    "total": {
+      "label": "Costo totale stimato delle tecnologie",
+      "unsized": {
+        "one": "Esclusa {count} tecnologia dimensionata dall'ottimizzatore, il cui costo dipende dalla taglia.",
+        "other": "Escluse {count} tecnologie dimensionate dall'ottimizzatore, il cui costo dipende dalla taglia."
+      }
     }
   },
   "editor": {

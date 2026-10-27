@@ -3,7 +3,7 @@
 // resulting modules and cost, and products that fit more.
 
 import { PresetSlider } from './surfaceControls';
-import { SegmentedControl } from '../BuildingConfigurator/shared/ui';
+import { Dropdown, OPTION_ROW, SegmentedControl } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { pvGeometry } from '../../lib/pvSurfaces';
@@ -152,16 +152,11 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
   // Closed by default: the list changes as the surface's settings do, and open
   // it would move the rest of the panel each time.
   return (
-    <details className="group rounded-md border border-border">
-      <summary className="flex cursor-pointer items-center justify-between px-2.5 py-2 text-[12px] font-semibold text-foreground">
-        {t('pv.fitsMore.title', { count: better.length })}
-        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <div className="flex flex-col gap-1.5 border-t border-border p-2">
+    <Dropdown title={t('pv.fitsMore.title', { count: better.length })}>
       {better.map(({ product, layout: theirs }) => {
         const perKwp = pvCosts(product, 1).investment;
         return (
-          <div key={product.id} className="flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5">
+          <div key={product.id} className={`${OPTION_ROW} flex items-center gap-2`}>
             <div className="min-w-0 flex-1">
               <div className="truncate text-[12px] font-semibold text-foreground">{productName(product)}</div>
               <div className="text-[11px] text-muted-foreground">
@@ -177,8 +172,7 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
           </div>
         );
       })}
-      </div>
-    </details>
+    </Dropdown>
   );
 }
 

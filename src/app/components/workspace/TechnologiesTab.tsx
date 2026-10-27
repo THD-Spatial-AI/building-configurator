@@ -1,6 +1,6 @@
-// The Technologies tab: how many technologies the building has and what they
-// cost so far, then one card per technology, PV included, at most one open at
-// a time (its header opens and closes it), and the host's way to add another.
+// The Technologies tab: how many technologies the building has, one card per
+// technology, PV included, at most one open at a time (its header opens and
+// closes it), the host's way to add another, and the total cost pinned below.
 
 import { useState } from 'react';
 import { TOPICS } from '@/app/config/topics';
@@ -40,18 +40,12 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
     ...(technologies?.items ?? []).map((card) => card.investment?.amount ?? undefined),
   ].filter((amount): amount is number => typeof amount === 'number');
   const currency = pvCurrency || technologies?.items.find((card) => card.investment)?.investment?.currency || '';
+  const unsized = (technologies?.items ?? []).filter((card) => card.investment && card.investment.amount === null).length;
   const count = (pv ? 1 : 0) + (technologies?.items.length ?? 0);
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex items-baseline justify-between gap-2 text-[12px] text-muted-foreground">
-        <span>{t('tech.count', { count })}</span>
-        {amounts.length > 0 && (
-          <span className="font-semibold text-[#2F7A4F] dark:text-[#8FD1A9]">
-            {t('tech.totalEstimate', { amount: `${format(amounts.reduce((a, b) => a + b, 0), 0)} ${currency}`.trim() })}
-          </span>
-        )}
-      </div>
+      <span className="text-[12px] text-muted-foreground">{t('tech.count', { count })}</span>
 
       {pv && summary && (
         <TechCardFrame
@@ -80,6 +74,19 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
         >
           {t('tech.add')}
         </button>
+      )}
+
+      {amounts.length > 0 && (
+        // Pinned to the bottom of the scrolling panel, so the total stays in view.
+        <div className="sticky bottom-0 -mx-4 -mb-4 mt-1 flex flex-col gap-0.5 border-t border-border bg-card px-4 py-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[13px] font-semibold text-foreground">{t('tech.total.label')}</span>
+            <span className="text-[17px] font-bold tabular-nums text-[#2F7A4F] dark:text-[#8FD1A9]">
+              {`${format(amounts.reduce((a, b) => a + b, 0), 0)} ${currency}`.trim()}
+            </span>
+          </div>
+          {unsized > 0 && <span className="text-[11px] text-muted-foreground">{t('tech.total.unsized', { count: unsized })}</span>}
+        </div>
       )}
     </div>
   );

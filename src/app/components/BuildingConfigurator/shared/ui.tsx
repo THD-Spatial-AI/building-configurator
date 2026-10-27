@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, Info, ChevronDown } from '@/app/components/icons';
+import { AlertTriangle, Info, ChevronDown, Search } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { formatDecimal, parseDecimal, useFormatNumber, useLanguage, useT } from '@/app/i18n';
 import { formatTotal } from '@/app/lib/loadProfile';
@@ -776,3 +776,52 @@ export function UnsavedChangesDialog({
     </dialog>
   );
 }
+
+// ─── Dropdown ────────────────────────────────────────────────────────────────
+// A <details> styled as EnerPlanET's SelectTrigger (libs/ui select.tsx), so a
+// list behind it reads as something to open, not as body text.
+
+interface DropdownProps {
+  title: React.ReactNode;
+  children: React.ReactNode;
+}
+
+export function Dropdown({ title, children }: DropdownProps) {
+  return (
+    <details className="group rounded-lg border border-border bg-background shadow-xs open:shadow-sm">
+      <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-muted group-open:rounded-b-none [&::-webkit-details-marker]:hidden">
+        {title}
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
+      </summary>
+      <div className="flex flex-col gap-2 rounded-b-lg border-t border-border bg-muted/40 p-2">{children}</div>
+    </details>
+  );
+}
+
+// ─── SearchField ─────────────────────────────────────────────────────────────
+// Matches the search in EnerPlanET's TechnologyDrawer.
+
+interface SearchFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function SearchField({ label, value, onChange }: SearchFieldProps) {
+  return (
+    <div className="relative">
+      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+      <input
+        type="search"
+        aria-label={label}
+        placeholder={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-9 w-full rounded-lg border border-border bg-background pl-8 pr-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+      />
+    </div>
+  );
+}
+
+/** A choosable row in a Dropdown list, as EnerPlanET's technology rows. */
+export const OPTION_ROW = 'rounded-lg border border-border bg-card px-2.5 py-2 shadow-xs transition-all hover:bg-muted/50 hover:shadow-md';

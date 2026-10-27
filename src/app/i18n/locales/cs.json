@@ -257,7 +257,6 @@
     "inFocus": "Vybraná",
     "product": "Produkt",
     "add": "Přidat technologii",
-    "totalEstimate": "{amount} zatím, odhad",
     "count": {
       "one": "{count} technologie",
       "few": "{count} technologie",
@@ -269,6 +268,15 @@
       "few": "{count} plochy",
       "many": "{count} ploch",
       "other": "{count} plochy"
+    },
+    "total": {
+      "label": "Odhadované celkové náklady na technologie",
+      "unsized": {
+        "one": "Bez {count} technologie, kterou dimenzuje optimalizátor a jejíž cena plyne z velikosti.",
+        "few": "Bez {count} technologií, které dimenzuje optimalizátor a jejichž cena plyne z velikosti.",
+        "many": "Bez {count} technologie, kterou dimenzuje optimalizátor.",
+        "other": "Bez {count} technologií, které dimenzuje optimalizátor a jejichž cena plyne z velikosti."
+      }
     }
   },
   "editor": {

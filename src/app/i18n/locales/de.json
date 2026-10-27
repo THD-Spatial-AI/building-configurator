@@ -249,7 +249,6 @@
     "inFocus": "Im Fokus",
     "product": "Produkt",
     "add": "Technologie hinzufügen",
-    "totalEstimate": "{amount} bisher, Schätzung",
     "count": {
       "one": "{count} Technologie",
       "other": "{count} Technologien"
@@ -257,6 +256,13 @@
     "pvSurfaces": {
       "one": "{count} Fläche",
       "other": "{count} Flächen"
+    },
+    "total": {
+      "label": "Geschätzte Gesamtkosten der Technologien",
+      "unsized": {
+        "one": "Ohne {count} Technologie, deren Größe der Optimierer bestimmt und deren Kosten daraus folgen.",
+        "other": "Ohne {count} Technologien, deren Größe der Optimierer bestimmt und deren Kosten daraus folgen."
+      }
     }
   },
   "editor": {

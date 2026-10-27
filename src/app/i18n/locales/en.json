@@ -249,7 +249,6 @@
     "inFocus": "In focus",
     "product": "Product",
     "add": "Add a technology",
-    "totalEstimate": "{amount} so far, estimate",
     "count": {
       "one": "{count} technology",
       "other": "{count} technologies"
@@ -257,6 +256,13 @@
     "pvSurfaces": {
       "one": "{count} surface",
       "other": "{count} surfaces"
+    },
+    "total": {
+      "label": "Estimated total cost of technologies",
+      "unsized": {
+        "one": "Without {count} technology the optimiser sizes, whose cost follows from its size.",
+        "other": "Without {count} technologies the optimiser sizes, whose cost follows from their size."
+      }
     }
   },
   "editor": {

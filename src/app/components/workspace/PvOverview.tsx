@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Pencil, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { DecimalInput } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, OPTION_ROW, SearchField } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
@@ -80,18 +80,14 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
     .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
 
   return (
-    <details className="group rounded-md border border-border">
-      <summary className="flex cursor-pointer items-center justify-between px-3 py-2 text-[12px] font-semibold text-foreground">
-        {t('pv.surfaces.toggle', { installed: installedCount, total: entries.length })}
-        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <ul className="divide-y divide-border border-t border-border">
+    <Dropdown title={t('pv.surfaces.toggle', { installed: installedCount, total: entries.length })}>
+      <ul className="flex flex-col gap-1.5">
         {ordered.map(([id, surface]) => {
           const name = surfaceName(id, elements, pv.surfaces);
           const installed = surface.state === 'installed';
           const kwp = layouts[id]?.kwp ?? surface.maxKwp;
           return (
-            <li key={id} className={cn('flex items-center gap-2.5 px-3 py-2', surface.state === 'suggested' && 'bg-amber-500/5')}>
+            <li key={id} className={cn(OPTION_ROW, 'flex items-center gap-2.5', surface.state === 'suggested' && 'border-amber-500/40 bg-amber-500/5')}>
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <button
@@ -119,7 +115,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
           );
         })}
       </ul>
-      <div className="border-t border-border p-2">
+      <div>
         <button
           type="button"
           disabled={suggestedIds.length === 0}
@@ -127,7 +123,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
           className="h-8 cursor-pointer rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
         >{t('pv.useSuggested')}</button>
       </div>
-    </details>
+    </Dropdown>
   );
 }
 
@@ -200,21 +196,9 @@ function Catalogue({ pv }: { pv: PvMode }) {
   const needle = query.trim().toLowerCase();
   const shown = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
   return (
-    <details className="group rounded-md border border-border">
-      <summary className="flex cursor-pointer items-center justify-between px-3 py-2 text-[12px] font-semibold text-foreground">
-        {t('pv.catalogue.toggle', { count: pv.catalogue.length })}
-        <span className="text-muted-foreground transition-transform group-open:rotate-180" aria-hidden>▾</span>
-      </summary>
-      <div className="flex flex-col gap-1.5 border-t border-border p-2">
+    <Dropdown title={t('pv.catalogue.toggle', { count: pv.catalogue.length })}>
+        <SearchField label={t('pv.options.search')} value={query} onChange={setQuery} />
         <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.catalogue.hint')}</p>
-        <input
-          type="search"
-          aria-label={t('pv.options.search')}
-          placeholder={t('pv.options.search')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="h-8 rounded-md border border-border bg-card px-2 text-[12px] text-foreground"
-        />
         <ul className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
           {shown.map((product) => {
             const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
@@ -224,7 +208,7 @@ function Catalogue({ pv }: { pv: PvMode }) {
                 key={product.id}
                 draggable={Boolean(pv.onAssignProduct)}
                 onDragStart={(e) => { e.dataTransfer.setData(PV_PRODUCT_DRAG_TYPE, product.id); e.dataTransfer.effectAllowed = 'copy'; }}
-                className="cursor-grab rounded-md border border-dashed border-border bg-card px-2.5 py-1.5 active:cursor-grabbing"
+                className={cn(OPTION_ROW, 'cursor-grab active:cursor-grabbing')}
               >
                 <div className="text-[12px] font-semibold text-foreground">{productName(product)}</div>
                 <div className="text-[11px] text-muted-foreground">
@@ -235,8 +219,7 @@ function Catalogue({ pv }: { pv: PvMode }) {
             );
           })}
         </ul>
-      </div>
-    </details>
+    </Dropdown>
   );
 }
 
