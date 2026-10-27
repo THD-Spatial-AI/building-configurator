@@ -640,7 +640,7 @@ export function Building3DView({
           'flex shrink-0 flex-col gap-3',
           wide ? 'w-[400px] xl:w-[520px]' : 'h-[46%] min-h-[220px] w-full',
         )}>
-          <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto">
+          <div data-tour="building" className="min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
               modelHeight={surfaces.length > 0 && !detached ? eavesHeight(surfaces) : undefined}
