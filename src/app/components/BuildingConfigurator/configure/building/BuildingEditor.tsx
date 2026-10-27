@@ -169,6 +169,8 @@ interface BuildingEditorProps {
   storeys?: ReactNode;
   /** Opens the storeys and occupancy section, as when storeys are selected in the model. */
   showStoreys?: boolean;
+  /** Called when the storeys and occupancy section closes, to clear the storey selection. */
+  onStoreysClosed?: () => void;
 }
 
 /**
@@ -180,12 +182,17 @@ interface BuildingEditorProps {
  */
 export function BuildingEditor({
   general, setGen, mode,
-  insulation, onShowExpert, storeys, showStoreys = false,
+  insulation, onShowExpert, storeys, showStoreys = false, onStoreysClosed,
 }: BuildingEditorProps) {
   const t = useT();
   const format = useFormatNumber();
   const [openSection, setOpenSection] = useState<SectionKey | null>(null);
   useEffect(() => { if (showStoreys) setOpenSection('occupancy'); }, [showStoreys]);
+  /** Opens one section, or none; leaving storeys and occupancy, by closing it or opening another, says so. */
+  const openOnly = (key: SectionKey | null) => {
+    if (openSection === 'occupancy' && key !== 'occupancy') onStoreysClosed?.();
+    setOpenSection(key);
+  };
 
   const service = isServiceBuildingType(general.buildingType);
   const visibleSections = (mode === 'expert' ? [...BASIC_SECTIONS, ...EXPERT_SECTIONS] : BASIC_SECTIONS)
@@ -216,13 +223,13 @@ export function BuildingEditor({
             title={SECTION_LABELS[key](t)}
             info={t(`help.${key}`)}
             dashed={EXPERT_SECTIONS.includes(key)}
-            onToggle={() => setOpenSection(open ? null : key)}
+            onToggle={() => openOnly(open ? null : key)}
             action={(
               <button
                 type="button"
                 aria-expanded={open}
                 aria-label={SECTION_LABELS[key](t)}
-                onClick={() => setOpenSection(open ? null : key)}
+                onClick={() => openOnly(open ? null : key)}
                 className="flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-card/60"
               >
                 <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} />
@@ -237,7 +244,7 @@ export function BuildingEditor({
             ) : (
               <button
                 type="button"
-                onClick={() => setOpenSection(key)}
+                onClick={() => openOnly(key)}
                 className="w-full cursor-pointer px-3 py-2 text-left text-[11px] text-muted-foreground hover:bg-muted"
               >
                 {sectionSummary(t, format, key, general)}

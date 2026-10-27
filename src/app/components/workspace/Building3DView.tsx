@@ -586,6 +586,7 @@ export function Building3DView({
                     mode={mode}
                     onShowExpert={() => setMode('expert')}
                     showStoreys={selectedStoreys.length > 0}
+                    onStoreysClosed={() => setSelectedStoreys([])}
                     storeys={model.general.storeys > 1 ? (
                       <StoreysModelled
                         storeys={model.general.storeys}
