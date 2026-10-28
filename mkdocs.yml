@@ -115,6 +115,7 @@ nav:
   - Home: index.md
   - Installing: installing.md
   - Architecture: architecture.md
+  - Default values: default-values.md
   - UI Terminology: ui-terminology.md
   - ignis field mapping: ignis-field-mapping.md
 

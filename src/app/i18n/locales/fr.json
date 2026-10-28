@@ -831,5 +831,8 @@
       "gradeFailed": "Non disponible"
     },
     "done": "Terminé"
+  },
+  "tip": {
+    "openDocs": "Cliquez pour les valeurs par défaut dans la documentation."
   }
 }

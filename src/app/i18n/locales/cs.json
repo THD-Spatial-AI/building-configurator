@@ -847,5 +847,8 @@
       "gradeFailed": "Není k dispozici"
     },
     "done": "Hotovo"
+  },
+  "tip": {
+    "openDocs": "Klikněte pro výchozí hodnoty v dokumentaci."
   }
 }

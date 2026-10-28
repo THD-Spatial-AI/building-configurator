@@ -827,5 +827,8 @@
       "gradeFailed": "Niet beschikbaar"
     },
     "done": "Klaar"
+  },
+  "tip": {
+    "openDocs": "Klik voor de standaardwaarden in de documentatie."
   }
 }

@@ -17,6 +17,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - The energy class of each refurbishment level: once the building stops changing, every level is run through BuEM with nothing stored (`ConfiguratorServices.previewBuemBuilding`, optional) and shows its class on the Austrian HWB scale (A++ to G) with its heating per m². Without the service no class is shown.
 - A guided tour of five steps, started from the Tour button in the header or by the host's new `tour` prop (`{ run, onFinish }`), and step hints over the model until a run is started.
 - An info tip on every section saying what it holds and where its figures come from.
+- A Default values page in the documentation lists every default the configurator uses, with its source; the info icon of each field that uses one links to it.
 - Energy grades for a building type TABULA has no type for, such as a school: its levels come from the residential type of the building's own variant code, with a warning that they are a residential building's and need checking.
 - Technology cards share one shape. `TechCard` gains optional `type`, `figures`, `investment` and `catalogue`; `Technologies` gains optional `onAdd` for an "Add a technology" button. The Technologies tab sums the investment estimates.
 - The PV card lists the installed products with their surfaces and capacity; the catalogue sits behind a drop-down with a search field.
