@@ -829,7 +829,8 @@
       "grade": "Clase energética",
       "gradePending": "En cálculo",
       "gradeFailed": "No disponible"
-    }
+    },
+    "done": "Listo"
   },
   "tip": {
     "openDocs": "Haga clic para ver los valores por defecto en la documentación."

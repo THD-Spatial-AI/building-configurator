@@ -107,6 +107,20 @@ describe('a step worked through', () => {
   });
 });
 
+describe('Done beneath a step', () => {
+  const withSummary: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }] }));
+
+  it('shows while the fields of a step with a summary are open', () => {
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />)).toContain('>Done</button>');
+  });
+
+  it('is not offered for a step without a summary, nor while the summary shows', () => {
+    expect(renderToStaticMarkup(<StepPanel steps={steps} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
+    const summarised = withSummary.map((step) => ({ ...step, startSummarised: true }));
+    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
+  });
+});
+
 describe('a step asked for from outside the panel', () => {
   it('opens with its fields, not its summary, even when it starts summarised', () => {
     const summarised: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }], startSummarised: true }));

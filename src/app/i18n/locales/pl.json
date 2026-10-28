@@ -845,7 +845,8 @@
       "grade": "Klasa energetyczna",
       "gradePending": "W trakcie obliczania",
       "gradeFailed": "Niedostępna"
-    }
+    },
+    "done": "Gotowe"
   },
   "tip": {
     "openDocs": "Kliknij, aby zobaczyć wartości domyślne w dokumentacji."

@@ -149,7 +149,16 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
           ? <StepSummary step={current} number={index + 1} onEdit={() => { moved.current = true; setEditing(current.key); }} />
           : current.content}
       </div>
-      <StepNav previous={previous} next={next} go={go} />
+      <StepNav
+        previous={previous}
+        next={next}
+        go={go}
+        // Edits apply as they are made; Done only closes the fields to the step's summary.
+        onDone={!summarised && (current.summary?.length ?? 0) > 0 ? () => {
+          setDone((prev) => new Set(prev).add(current.key));
+          setEditing(null);
+        } : undefined}
+      />
     </div>
   );
 }
@@ -191,8 +200,8 @@ export function StepSummary({ step, number, onEdit }: { step: Step; number: numb
   );
 }
 
-/** Back and Next beneath the open step. */
-function StepNav({ previous, next, go }: { previous?: Step; next?: Step; go: (key: string) => void }) {
+/** Back and Next beneath the open step, and Done while its fields are shown. */
+function StepNav({ previous, next, go, onDone }: { previous?: Step; next?: Step; go: (key: string) => void; onDone?: () => void }) {
   const t = useT();
   return (
     <div className="flex items-center justify-between gap-2">
@@ -206,16 +215,28 @@ function StepNav({ previous, next, go }: { previous?: Step; next?: Step; go: (ke
           {t('steps.previous', { step: previous.label })}
         </button>
       ) : <span />}
-      {next && (
-        <button
-          type="button"
-          onClick={() => go(next.key)}
-          className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-primary bg-background px-3 text-[12px] font-semibold text-primary shadow-xs hover:bg-primary/5"
-        >
-          {t('steps.next', { step: next.label })}
-          <ChevronDown className="size-3.5 -rotate-90" aria-hidden />
-        </button>
-      )}
+      <span className="flex items-center gap-2">
+        {onDone && (
+          <button
+            type="button"
+            onClick={onDone}
+            className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-border bg-background px-3 text-[12px] font-medium text-foreground shadow-xs hover:bg-muted"
+          >
+            <Check className="size-3.5" aria-hidden />
+            {t('steps.done')}
+          </button>
+        )}
+        {next && (
+          <button
+            type="button"
+            onClick={() => go(next.key)}
+            className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-primary bg-background px-3 text-[12px] font-semibold text-primary shadow-xs hover:bg-primary/5"
+          >
+            {t('steps.next', { step: next.label })}
+            <ChevronDown className="size-3.5 -rotate-90" aria-hidden />
+          </button>
+        )}
+      </span>
     </div>
   );
 }

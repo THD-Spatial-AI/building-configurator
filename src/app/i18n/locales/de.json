@@ -825,7 +825,8 @@
       "grade": "Energieklasse",
       "gradePending": "Wird ermittelt",
       "gradeFailed": "Nicht verfügbar"
-    }
+    },
+    "done": "Fertig"
   },
   "tip": {
     "openDocs": "Klicken für die Standardwerte in der Dokumentation."

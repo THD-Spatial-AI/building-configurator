@@ -825,7 +825,8 @@
       "grade": "Energy grade",
       "gradePending": "Being worked out",
       "gradeFailed": "Not available"
-    }
+    },
+    "done": "Done"
   },
   "tip": {
     "openDocs": "Click for the default values in the documentation."

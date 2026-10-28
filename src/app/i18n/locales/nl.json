@@ -825,7 +825,8 @@
       "grade": "Energieklasse",
       "gradePending": "Wordt bepaald",
       "gradeFailed": "Niet beschikbaar"
-    }
+    },
+    "done": "Klaar"
   },
   "tip": {
     "openDocs": "Klik voor de standaardwaarden in de documentatie."
