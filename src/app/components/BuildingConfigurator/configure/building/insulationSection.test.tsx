@@ -19,10 +19,8 @@ describe('the energy grade in Basic and Expert', () => {
     expect(insulationSummary(t, format, insulation, 'expert')).toContain('average U 0.27');
   });
 
-  it('shows the average U-value line in Expert only', () => {
-    const render = (mode: 'basic' | 'expert') =>
-      renderToStaticMarkup(<InsulationSection {...insulation} general={{}} setGen={() => {}} mode={mode} />);
-    expect(render('basic')).not.toContain('Average U-value');
-    expect(render('expert')).toContain('Average U-value');
+  it('shows the average U-value once, in the header, not again beneath the section', () => {
+    const html = renderToStaticMarkup(<InsulationSection {...insulation} general={{}} setGen={() => {}} mode="expert" />);
+    expect(html).not.toContain('0.27');
   });
 });

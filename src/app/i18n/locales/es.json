@@ -438,7 +438,6 @@
       "mixed": "Mixto",
       "averageU": "U medio {value} W/m²K"
     },
-    "averageU": "Valor U medio",
     "preset": {
       "label": "Aplicar a todo el edificio",
       "tip": "Elija un nivel para todo el edificio. Fija todas las paredes, cubiertas, suelos y ventanas; las superficies cambiadas una a una conservan sus valores.",

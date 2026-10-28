@@ -65,23 +65,14 @@ export function insulationSummary(t: Translate, format: FormatNumber, { levels, 
   return [state, averageU].filter(Boolean).join(' · ');
 }
 
-/** Building-wide preset; in Expert also a state, U-value and loss factor per element type. */
+/** Building-wide preset; in Expert also a state, U-value and loss factor per element type. The average U-value is in the header (insulationSummary). */
 export function InsulationSection(props: Props) {
-  const t = useT();
-  const format = useFormatNumber();
-  const { mode, levels, avgUValue } = props;
+  const { mode, levels } = props;
   return (
     <div className="flex flex-col gap-4">
       {levels.length > 0 && <BuildingPreset {...props} />}
       {mode === 'expert' && <ElementTable {...props} />}
       {mode === 'expert' && <SynthesisedWindows {...props} />}
-      {mode === 'expert' && (
-        <div className="border-t border-border/60 pt-2">
-          <span className="text-[11px] text-muted-foreground">
-            {t('insulation.averageU')} <span className="font-semibold text-foreground">{format(avgUValue, 2)} W/m²K</span>
-          </span>
-        </div>
-      )}
     </div>
   );
 }
