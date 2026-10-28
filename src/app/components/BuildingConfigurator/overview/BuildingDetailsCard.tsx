@@ -49,7 +49,7 @@ export interface BuildingDetailsCardProps {
   overviewSlot?: React.ReactNode;
   /** The steps after the building data, e.g. the building parameters from useBuildingSteps. */
   steps?: Step[];
-  /** Opens this step when it changes, as when storeys are picked in the model. */
+  /** Opens this step with its fields shown when it changes, as when storeys are picked in the model. */
   requestStep?: string;
   /** Adds a Technologies tab, e.g. the host's technology cards. */
   technologySlot?: React.ReactNode;
@@ -205,7 +205,7 @@ export function BuildingDetailsCard({
       ) : (
         <div className="flex flex-col gap-3 p-4">
           {overviewSlot}
-          <StepPanel steps={allSteps} active={step} onActive={setStep} stickyTop="top-[60px]" />
+          <StepPanel steps={allSteps} active={step} onActive={setStep} stickyTop="top-[60px]" openFields={requestStep} />
         </div>
       )}
     </div>

@@ -106,3 +106,11 @@ describe('a step worked through', () => {
     ]);
   });
 });
+
+describe('a step asked for from outside the panel', () => {
+  it('opens with its fields, not its summary, even when it starts summarised', () => {
+    const summarised: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }], startSummarised: true }));
+    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="comfort" onActive={() => {}} />)).not.toContain('comfort body');
+    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="comfort" onActive={() => {}} openFields="comfort" />)).toContain('comfort body');
+  });
+});
