@@ -826,5 +826,8 @@
       "gradePending": "Being worked out",
       "gradeFailed": "Not available"
     }
+  },
+  "tip": {
+    "openDocs": "Click for the default values in the documentation."
   }
 }

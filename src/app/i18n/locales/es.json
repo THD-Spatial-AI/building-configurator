@@ -830,5 +830,8 @@
       "gradePending": "En cálculo",
       "gradeFailed": "No disponible"
     }
+  },
+  "tip": {
+    "openDocs": "Haga clic para ver los valores por defecto en la documentación."
   }
 }

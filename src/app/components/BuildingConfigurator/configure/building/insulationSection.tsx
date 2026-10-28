@@ -14,6 +14,7 @@ import { HWB_CLASSES, hwbClass } from '@/app/lib/energyClass';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 import type { StepFact } from '@/app/components/BuildingConfigurator/shared/StepPanel';
+import { DEFAULT_VALUES_URL } from '@/app/config/docs';
 
 /** What the group reads from the building model and calls back into it. */
 export interface InsulationProps {
@@ -351,6 +352,7 @@ function OptionalNumber({ label, value, onChange, unit, min, max, step, tip, def
       <NumberInput
         label={label} value={value ?? ''} placeholder={format(defaultValue, step < 1 ? 2 : 0)}
         onChange={(v) => onChange(Math.min(max, Math.max(min, v)))} unit={unit} min={min} max={max} step={step} tip={tip}
+        tipHref={`${DEFAULT_VALUES_URL}#windows`}
       />
       <p className="mt-1 text-[10px] text-muted-foreground">
         {value === null ? defaultNote : (

@@ -14,12 +14,16 @@ import {
   isServiceBuildingType,
   requiresResidentialUnits,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import { DEFAULT_VALUES_URL } from '@/app/config/docs';
 import { useT, type Translate } from '@/app/i18n';
 
 interface SectionProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
 }
+
+/** The occupancy section of the Default values page, which each default's tip links to. */
+const OCCUPANCY_DEFAULTS = `${DEFAULT_VALUES_URL}#occupancy`;
 
 /** A whole number BuEM defaults when it is left empty. */
 function OptionalCount({ label, value, onChange, tip, placeholder }: {
@@ -32,7 +36,7 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
   const t = useT();
   return (
     <div>
-      <FieldLabel tip={tip}>{label}</FieldLabel>
+      <FieldLabel tip={tip} tipHref={OCCUPANCY_DEFAULTS}>{label}</FieldLabel>
       <NumberInput
         label={label}
         hideLabel
@@ -113,6 +117,7 @@ export function OccupancySection({ general, setGen, mode = 'basic' }: SectionPro
         onChange={(v) => setGen('archetype', v)}
         options={archetypeOptions(t)}
         tip={t('household.archetype.tip')}
+        tipHref={OCCUPANCY_DEFAULTS}
       />
       {mode === 'expert' && <div>
         <FieldLabel tip={t('household.region.tip')}>

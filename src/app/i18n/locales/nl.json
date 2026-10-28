@@ -826,5 +826,8 @@
       "gradePending": "Wordt bepaald",
       "gradeFailed": "Niet beschikbaar"
     }
+  },
+  "tip": {
+    "openDocs": "Klik voor de standaardwaarden in de documentatie."
   }
 }

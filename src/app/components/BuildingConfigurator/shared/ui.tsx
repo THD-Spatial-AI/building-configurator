@@ -64,19 +64,21 @@ const TIP_HALF_WIDTH = 148;
 /**
  * An info icon whose tip shows on hover or keyboard focus. The tip is drawn
  * into document.body so a scrolling panel cannot clip it; it sits above the
- * icon, or below it near the top of the window.
+ * icon, or below it near the top of the window. `href` makes the icon a
+ * link, opened in a new tab, which the tip then names.
  */
-export function InfoTip({ tip }: { tip: string }) {
+export function InfoTip({ tip, href }: { tip: string; href?: string }) {
+  const t = useT();
   const ref = useRef<HTMLSpanElement>(null);
   const id = useId();
   const [rect, setRect] = useState<DOMRect | null>(null);
   const show = () => setRect(ref.current?.getBoundingClientRect() ?? null);
   const hide = () => setRect(null);
   const below = rect !== null && rect.top < 64;
-  return (
+  const icon = (
     <span
       ref={ref}
-      tabIndex={0}
+      tabIndex={href ? -1 : 0}
       aria-describedby={rect ? id : undefined}
       onMouseEnter={show}
       onMouseLeave={hide}
@@ -100,11 +102,18 @@ export function InfoTip({ tip }: { tip: string }) {
           }}
         >
           {tip}
+          {href && <span className="mt-1 block font-semibold">{t('tip.openDocs')}</span>}
         </span>,
         document.body,
       )}
     </span>
   );
+  return href ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${tip} ${t('tip.openDocs')}`} onFocus={show} onBlur={hide}
+      className="inline-flex shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      {icon}
+    </a>
+  ) : icon;
 }
 
 // ─── HeatingDeltaBadge ────────────────────────────────────────────────────────
@@ -260,11 +269,13 @@ interface NumberInputProps {
   maxReason?: string;
   /** Names the field for screen readers only, as in a table whose header shows the label. */
   hideLabel?: boolean;
+  /** Where the tip's icon links to, such as the field's default in the documentation. */
+  tipHref?: string;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false,
+  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false, tipHref,
 }: NumberInputProps) {
   const [reasonShown, setReasonShown] = useState(false);
   const current = value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0;
@@ -274,7 +285,7 @@ export function NumberInput({
       {label && !hideLabel && (
         <div className="flex items-center gap-1 mb-1">
           <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
-          {tip && <InfoTip tip={tip} />}
+          {tip && <InfoTip tip={tip} href={tipHref} />}
         </div>
       )}
       <div className="cfg-input-wrap">
@@ -338,9 +349,11 @@ interface SelectInputProps {
   tip?: string;
   /** Names the field for screen readers only, as in a table whose header shows the label. */
   hideLabel?: boolean;
+  /** Where the tip's icon links to, such as the field's default in the documentation. */
+  tipHref?: string;
 }
 
-export function SelectInput({ label, value, onChange, options, tip, hideLabel = false }: SelectInputProps) {
+export function SelectInput({ label, value, onChange, options, tip, hideLabel = false, tipHref }: SelectInputProps) {
   const normalized = (options as any[]).map((o) =>
     typeof o === 'string' ? { value: o, label: o } : o
   );
@@ -349,7 +362,7 @@ export function SelectInput({ label, value, onChange, options, tip, hideLabel = 
       {label && !hideLabel && (
         <div className="flex items-center gap-1 mb-1">
           <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
-          {tip && <InfoTip tip={tip} />}
+          {tip && <InfoTip tip={tip} href={tipHref} />}
         </div>
       )}
       <select
@@ -553,11 +566,11 @@ export function FieldRow({ children }: { children: React.ReactNode }) {
 
 // ─── FieldLabel ───────────────────────────────────────────────────────────────
 
-export function FieldLabel({ children, tip }: { children: React.ReactNode; tip?: string }) {
+export function FieldLabel({ children, tip, tipHref }: { children: React.ReactNode; tip?: string; tipHref?: string }) {
   return (
     <div className="flex items-center gap-1 mb-1">
       <span className="text-[11px] font-medium text-muted-foreground leading-tight">{children}</span>
-      {tip && <InfoTip tip={tip} />}
+      {tip && <InfoTip tip={tip} href={tipHref} />}
     </div>
   );
 }

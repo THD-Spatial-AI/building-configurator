@@ -35,3 +35,13 @@ describe('occupants per dwelling', () => {
     expect(field(3)).toContain('Use default');
   });
 });
+
+describe('the defaults the occupancy fields use', () => {
+  it('link to the occupancy defaults in the documentation, in a new tab', () => {
+    const html = renderToStaticMarkup(
+      <OccupancySection general={{ ...DEFAULT_GENERAL, buildingType: 'Single-family House', num_persons: null }} setGen={() => {}} />,
+    );
+    const links = html.match(/<a href="https:\/\/THD-Spatial-AI\.github\.io\/building-configurator\/default-values\/#occupancy" target="_blank" rel="noopener noreferrer"/g) ?? [];
+    expect(links.length).toBeGreaterThanOrEqual(3);
+  });
+});

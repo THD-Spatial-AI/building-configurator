@@ -826,5 +826,8 @@
       "gradePending": "Wird ermittelt",
       "gradeFailed": "Nicht verfügbar"
     }
+  },
+  "tip": {
+    "openDocs": "Klicken für die Standardwerte in der Dokumentation."
   }
 }
