@@ -792,7 +792,8 @@
       "dwellings": "Byty v podkroví",
       "floorAreaTip": "Změřeno z 3D modelu: plocha se počítá celá tam, kde je střecha 2 m a výše, poloviční při 1 až 2 m.",
       "useMeasured": "Použít změřenou ({area} m²)"
-    }
+    },
+    "someIn": "Některá jsou v modelu, jiná vynechaná."
   },
   "help": {
     "envelope": "Velikost této plochy a jak dobře drží teplo. Jejich změna mění, kolik vytápění budova potřebuje.",
