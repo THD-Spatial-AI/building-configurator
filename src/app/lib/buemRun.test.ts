@@ -231,3 +231,33 @@ describe('previewHeatingPerM2', () => {
     expect(await previewHeatingPerM2({ previewBuemBuilding: failing }, identity, elements, general)).toBeNull();
   });
 });
+
+describe('a building with no storey count or construction year of its own', () => {
+  const block = {
+    type: 'Feature', id: 'b9', geometry: { type: 'Point', coordinates: [5.9, 52.2] },
+    properties: { buem: { building: {
+      building_type: 'SFH', A_ref: { value: 300, unit: 'm2' },
+      envelope: { elements: [{ id: 'w1', type: 'wall', area: { value: 30, unit: 'm2' }, U: { value: 0.3, unit: 'W/(m2K)' }, tilt: { value: 90, unit: 'deg' }, azimuth: { value: 180, unit: 'deg' } }] },
+    } } },
+  };
+  const opened = adaptBuemFeature(block);
+
+  it('stores neither, so the host\'s own count and year still apply on reopening', () => {
+    expect(opened.identity.storeys).toBe(0);
+    const { configurator } = toBuem(opened);
+    expect(configurator).not.toHaveProperty('storeys');
+    expect(configurator).not.toHaveProperty('construction_year');
+  });
+
+  it('stores neither after an edit that leaves them as shown', () => {
+    const general = { ...generalFrom(opened), comfortT_lb: 19 };
+    const { configurator } = toBuem(withEdits(opened, opened.envelope, general));
+    expect(configurator).not.toHaveProperty('storeys');
+    expect(configurator).not.toHaveProperty('construction_year');
+  });
+
+  it('stores them once the user sets them', () => {
+    const general = { ...generalFrom(opened), storeys: 3, constructionYear: 1975 };
+    expect(toBuem(withEdits(opened, opened.envelope, general)).configurator).toMatchObject({ storeys: 3, construction_year: 1975 });
+  });
+});

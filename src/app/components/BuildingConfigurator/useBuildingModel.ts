@@ -763,6 +763,15 @@ function ignisSeedBuilding(
  * The building with the edited envelope and building parameters written back
  * into it, so reopening it shows the edits. Results are kept as they were.
  */
+/**
+ * A value for the identity: the edited one, unless the building had none and
+ * it is still the default generalFrom filled in, which stays unset (0) so the
+ * host's own value applies on reopening.
+ */
+function ownOrEdited(own: number | undefined, edited: number, fallback: number): number {
+  return own || edited !== fallback ? edited : 0;
+}
+
 export function withEdits(
   building: BuildingState,
   elements: Record<string, BuildingElement>,
@@ -773,11 +782,11 @@ export function withEdits(
     ...base,
     label: general.buildingName || base.label,
     buildingType: general.buildingType,
-    constructionYear: general.constructionYear,
+    constructionYear: ownOrEdited(base.constructionYear, general.constructionYear, DEFAULT_GENERAL.constructionYear),
     country: general.country,
     floorArea: computeTotalFloorArea(general.floorArea, general.storeys),
     roomHeight: general.roomHeight,
-    storeys: general.storeys,
+    storeys: ownOrEdited(base.storeys, general.storeys, DEFAULT_GENERAL.storeys),
     ...(general.storeysModelled ? { storeysModelled: general.storeysModelled } : {}),
   };
   return {

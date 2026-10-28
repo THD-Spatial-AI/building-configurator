@@ -147,9 +147,17 @@ export function toBuem(building: BuildingState): {
   const envelope = building.thematic?.envelope ?? building.envelope;
   const elements = Object.keys(envelope).length > 0 ? envelope : DEFAULT_ELEMENTS;
   const { buem } = serializeToBuemFeature(runIdentity(building, general), elements, general).properties;
+  // generalFrom fills a missing storey count and year with defaults; those
+  // are not the building's, so they are not stored for it.
+  const identity = building.thematic?.identity ?? building.identity;
+  const { storeys, construction_year, ...configurator } = buem.configurator;
   return {
     building: buem.building,
-    configurator: buem.configurator,
+    configurator: {
+      ...(identity?.constructionYear ? { construction_year } : {}),
+      ...(identity?.storeys ? { storeys } : {}),
+      ...configurator,
+    },
     ...(buem.refurbishment ? { refurbishment: buem.refurbishment } : {}),
     outputs: buem.outputs,
     solver: buem.solver,
