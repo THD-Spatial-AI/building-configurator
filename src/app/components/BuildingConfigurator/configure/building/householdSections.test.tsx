@@ -30,6 +30,7 @@ describe('occupants per dwelling', () => {
     const html = field(null);
     expect(html).not.toContain('<option value="8">');
     expect(html).toContain('Statistical household size.');
+    expect(html).toMatch(/placeholder="Default"[^>]*aria-label="Occupants per dwelling"|aria-label="Occupants per dwelling"[^>]*placeholder="Default"/);
     expect(field(3)).toContain('value="3"');
     expect(field(3)).toContain('Use default');
   });

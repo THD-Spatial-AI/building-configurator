@@ -34,7 +34,10 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
     <div>
       <FieldLabel tip={tip}>{label}</FieldLabel>
       <NumberInput
+        label={label}
+        hideLabel
         value={value ?? ''}
+        placeholder={t('household.default')}
         onChange={(v) => onChange(Math.max(1, Math.round(v)))}
         unit="" min={1} step={1} integer
       />
