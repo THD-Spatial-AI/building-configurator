@@ -45,6 +45,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 
 ### Fixed
 
+- A building without a storey count or construction year of its own was stored with the defaults shown, 4 storeys and 2015, so it reopened with those instead of the host's values. `toBuem` now stores only values the building had or the user set.
 - `toBuem` left out the storey count stored since 0.14.0, so a building saved through a host reopened with 4 storeys and its floor area split across them. It now returns `storeys` with the other blocks.
 
 ## [0.14.0] - 2026-10-26
