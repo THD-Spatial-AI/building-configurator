@@ -847,5 +847,8 @@
       "gradeFailed": "Niedostępna"
     },
     "done": "Gotowe"
+  },
+  "tip": {
+    "openDocs": "Kliknij, aby zobaczyć wartości domyślne w dokumentacji."
   }
 }
