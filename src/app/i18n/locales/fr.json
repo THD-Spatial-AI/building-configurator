@@ -766,7 +766,9 @@
       "hint": "L'espace sous le toit en pente, au-dessus de l'égout. Retirés, le toit quitte le bâtiment chauffé et le plafond en dessous perd de la chaleur vers les combles froids.",
       "floorArea": "Surface des combles",
       "noArea": "Non comptée",
-      "dwellings": "Logements dans les combles"
+      "dwellings": "Logements dans les combles",
+      "floorAreaTip": "Mesurée sur le modèle 3D : la surface compte en entier là où le toit est à 2 m ou plus, à moitié là où il est entre 1 et 2 m.",
+      "useMeasured": "Utiliser la mesure ({area} m²)"
     }
   },
   "help": {

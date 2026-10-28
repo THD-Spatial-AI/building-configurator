@@ -762,7 +762,9 @@
       "hint": "Der Raum unter dem geneigten Dach, oberhalb der Traufe. Weggelassen gehört das Dach nicht mehr zum beheizten Gebäude, und die Decke darunter gibt Wärme an das kalte Dachgeschoss ab.",
       "floorArea": "Fläche im Dachgeschoss",
       "noArea": "Nicht gezählt",
-      "dwellings": "Wohnungen im Dachgeschoss"
+      "dwellings": "Wohnungen im Dachgeschoss",
+      "floorAreaTip": "Aus dem 3D-Modell gemessen: Fläche zählt voll, wo das Dach 2 m oder mehr darüber liegt, zur Hälfte bei 1 bis 2 m.",
+      "useMeasured": "Gemessene verwenden ({area} m²)"
     }
   },
   "help": {

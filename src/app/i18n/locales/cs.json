@@ -784,7 +784,9 @@
       "hint": "Prostor pod šikmou střechou, nad okapem. Při vynechání střecha nepatří k vytápěné budově a strop pod ní ztrácí teplo do studeného podkroví.",
       "floorArea": "Plocha podkroví",
       "noArea": "Nezapočteno",
-      "dwellings": "Byty v podkroví"
+      "dwellings": "Byty v podkroví",
+      "floorAreaTip": "Změřeno z 3D modelu: plocha se počítá celá tam, kde je střecha 2 m a výše, poloviční při 1 až 2 m.",
+      "useMeasured": "Použít změřenou ({area} m²)"
     }
   },
   "help": {

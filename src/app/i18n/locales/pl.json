@@ -784,7 +784,9 @@
       "hint": "Przestrzeń pod dachem spadzistym, powyżej okapu. Po pominięciu dach nie należy już do ogrzewanego budynku, a strop pod nim traci ciepło do zimnego poddasza.",
       "floorArea": "Powierzchnia poddasza",
       "noArea": "Nie liczona",
-      "dwellings": "Mieszkania na poddaszu"
+      "dwellings": "Mieszkania na poddaszu",
+      "floorAreaTip": "Zmierzona z modelu 3D: powierzchnia liczy się w całości tam, gdzie dach jest 2 m lub wyżej, w połowie przy 1 do 2 m.",
+      "useMeasured": "Użyj zmierzonej ({area} m²)"
     }
   },
   "help": {

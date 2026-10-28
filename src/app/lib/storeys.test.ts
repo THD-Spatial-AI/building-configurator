@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dwellingsTotal, hasAttic, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { atticFloorArea, dwellingsTotal, hasAttic, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -100,6 +100,12 @@ describe('the attic', () => {
 
   it('scales a surface without a polygon by the storeys modelled, not the attic', () => {
     expect(storeyShares(pitched, { extra: element('extra', 'wall') }, 3, [1, 2, 3, 4]).extra).toBe(1);
+  });
+
+  it('measures its floor in full under 2 m of headroom or more, half from 1 m to 2 m', () => {
+    // The slope rises 3 m over 5 m: 2 m and more over its last 5/3 m, 1 m to 2 m over the 5/3 m before.
+    expect(atticFloorArea(pitched)).toBeCloseTo(10 * 5 / 3 + (10 * 5 / 3) / 2);
+    expect(atticFloorArea(polygons)).toBe(0);
   });
 
   it('draws a line at the eaves, one storey or several', () => {

@@ -28,7 +28,7 @@ import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickWithAttic } from './StoreysModelled';
-import { dwellingsTotal, eavesHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
+import { atticFloorArea, dwellingsTotal, eavesHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -234,6 +234,7 @@ export function Building3DView({
   const storeyHeights = storeyHeightList(model.general.storeys, model.general.roomHeight, model.general.storeyHeights);
   const modelHeight = surfaces.length > 0 && !isEnvelopeDetached(surfaces, envelopeIds) ? eavesHeight(surfaces) : undefined;
   const attic = surfaces.length > 0 && hasAttic(surfaces);
+  const atticMeasured = useMemo(() => Math.round(atticFloorArea(surfaces) * 10) / 10, [surfaces]);
   const atticIn = model.general.atticModelled !== false;
   /** Whether part of the building is left out, so each surface is cut to its share of what is modelled. */
   const isCut = model.general.storeysModelled !== null || (attic && !atticIn);
@@ -426,6 +427,7 @@ export function Building3DView({
         attic={attic ? {
           modelled: atticIn,
           floorArea: model.general.atticFloorArea,
+          measuredArea: atticMeasured,
           onModelledChange: setAtticModelled,
           onFloorAreaChange: (area) => model.setGen('atticFloorArea', area),
           ...(hasDwellingsPerStorey(model.general.buildingType)

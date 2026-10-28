@@ -52,6 +52,41 @@ export function hasAttic(polygons: SurfacePolygon[]): boolean {
   return polygons.length > 0 && storeyBands(polygons, 1).count > 1;
 }
 
+/** Clear heights in m from which attic floor counts in full and by half, as Germany's living-space rule (WoFlV) counts it. */
+const ATTIC_FULL_HEADROOM = 2;
+const ATTIC_HALF_HEADROOM = 1;
+
+/** Area of a ring projected onto the ground, taken from its first point so a projected CRS keeps its precision. */
+function groundArea(ring: Point[]): number {
+  const [ox, oy] = ring[0];
+  let twice = 0;
+  for (let i = 0; i < ring.length; i += 1) {
+    const [ax, ay] = ring[i];
+    const [bx, by] = ring[(i + 1) % ring.length];
+    twice += (ax - ox) * (by - oy) - (bx - ox) * (ay - oy);
+  }
+  return Math.abs(twice) / 2;
+}
+
+/**
+ * The attic's usable floor area, in the geometry's units squared, on a floor
+ * at the eaves: in full under roof 2 m or more above it, half under roof 1 m
+ * to 2 m above it. 0 without an attic.
+ */
+export function atticFloorArea(polygons: SurfacePolygon[]): number {
+  if (!hasAttic(polygons)) return 0;
+  const eaves = storeyBands(polygons, 1).bounds[1];
+  const over = (ring: Point[], headroom: number) => {
+    const part = clipZ(ring, (z) => z >= eaves + headroom, eaves + headroom);
+    return part.length >= 3 ? groundArea(part) : 0;
+  };
+  return polygons.filter((polygon) => isKind(polygon, 'roof')).reduce((sum, roof) => {
+    const ring = roof.coordinates[0].slice(0, -1);
+    const full = over(ring, ATTIC_FULL_HEADROOM);
+    return sum + full + (over(ring, ATTIC_HALF_HEADROOM) - full) / 2;
+  }, 0);
+}
+
 /** Where a ring's edges cross the plane z = level, in order along the ring's horizontal direction. */
 function crossings(ring: Point[], level: number): Point[] {
   const points: Point[] = [];

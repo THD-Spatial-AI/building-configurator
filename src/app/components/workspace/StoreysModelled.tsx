@@ -64,6 +64,8 @@ export function StoreysModelled({
     modelled: boolean;
     /** m2; null counts none. */
     floorArea: number | null;
+    /** The usable floor area measured from the 3D model, in m2; offered, never counted until taken. */
+    measuredArea?: number;
     onModelledChange: (modelled: boolean) => void;
     onFloorAreaChange: (area: number | null) => void;
     /** A residential building's dwellings in the attic, as for a storey. */
@@ -237,7 +239,9 @@ export function StoreysModelled({
             </div>
             {attic.modelled && (
               <label className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-medium text-muted-foreground">{t('storeys.attic.floorArea')}</span>
+                <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                  {t('storeys.attic.floorArea')}<InfoTip tip={t('storeys.attic.floorAreaTip')} />
+                </span>
                 <span className="flex items-center gap-1">
                   <DecimalInput
                     min={0}
@@ -250,6 +254,15 @@ export function StoreysModelled({
                   <span className="text-[11px] text-muted-foreground">m²</span>
                 </span>
               </label>
+            )}
+            {attic.modelled && attic.measuredArea !== undefined && attic.measuredArea > 0 && attic.floorArea !== attic.measuredArea && (
+              <button
+                type="button"
+                onClick={() => attic.onFloorAreaChange(attic.measuredArea ?? null)}
+                className="cursor-pointer self-end text-[11px] font-medium text-primary hover:underline"
+              >
+                {t('storeys.attic.useMeasured', { area: format(attic.measuredArea, 1) })}
+              </button>
             )}
             {attic.onDwellingsChange && (
               <label className="flex items-center justify-between gap-2">

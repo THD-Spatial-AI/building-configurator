@@ -762,7 +762,9 @@
       "hint": "The space under the pitched roof, above the eaves. Left out, the roof leaves the heated building and the ceiling below it loses heat to the cold attic.",
       "floorArea": "Attic floor area",
       "noArea": "Not counted",
-      "dwellings": "Dwellings in the attic"
+      "dwellings": "Dwellings in the attic",
+      "floorAreaTip": "Measured from the 3D model: floor counts in full where the roof is 2 m or more above it, half where it is 1 to 2 m above it.",
+      "useMeasured": "Use measured ({area} m²)"
     }
   },
   "help": {

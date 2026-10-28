@@ -122,3 +122,18 @@ describe('pickWithAttic', () => {
     expect(pickWithAttic([1], 2, true, 4)).toEqual([1, 2]);
   });
 });
+
+describe('StoreysModelled with a measured attic', () => {
+  const attic = { modelled: true, floorArea: null, measuredArea: 25, onModelledChange: () => {}, onFloorAreaChange: () => {} };
+
+  it('offers the measured area without counting it', () => {
+    const html = render({ selected: [4], attic });
+    expect(html).toContain('Use measured (25.0 m²)');
+    expect(html).toContain('placeholder="Not counted"');
+    expect(html).toContain('2 × 80 m² = 160 m²');
+  });
+
+  it('stops offering it once taken', () => {
+    expect(render({ selected: [4], attic: { ...attic, floorArea: 25 } })).not.toContain('Use measured');
+  });
+});

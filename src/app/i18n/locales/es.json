@@ -766,7 +766,9 @@
       "hint": "El espacio bajo la cubierta inclinada, por encima del alero. Si se excluye, la cubierta deja de formar parte del edificio calefactado y el techo de debajo pierde calor hacia el ático frío.",
       "floorArea": "Superficie del ático",
       "noArea": "No contada",
-      "dwellings": "Viviendas en el ático"
+      "dwellings": "Viviendas en el ático",
+      "floorAreaTip": "Medida a partir del modelo 3D: la superficie cuenta entera donde la cubierta está a 2 m o más, y la mitad donde está entre 1 y 2 m.",
+      "useMeasured": "Usar la medida ({area} m²)"
     }
   },
   "help": {

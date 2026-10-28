@@ -762,7 +762,9 @@
       "hint": "Lo spazio sotto il tetto a falde, sopra la gronda. Se escluso, il tetto esce dall'edificio riscaldato e il solaio sottostante disperde calore verso il sottotetto freddo.",
       "floorArea": "Superficie del sottotetto",
       "noArea": "Non contata",
-      "dwellings": "Abitazioni nel sottotetto"
+      "dwellings": "Abitazioni nel sottotetto",
+      "floorAreaTip": "Misurata dal modello 3D: la superficie conta per intero dove il tetto è a 2 m o più, per metà dove è tra 1 e 2 m.",
+      "useMeasured": "Usa la misura ({area} m²)"
     }
   },
   "help": {
