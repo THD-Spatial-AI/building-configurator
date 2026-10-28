@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { formatNumber, translate, type FormatNumber, type Translate } from '@/app/i18n';
-import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
+import { InsulationSection, gradeSummary, insulationSummary, type InsulationProps } from './insulationSection';
 
 const t: Translate = (key, values) => translate('en', key, values);
 const format: FormatNumber = (value, digits) => formatNumber('en', value, digits);
@@ -43,5 +43,24 @@ describe('the element types in Expert', () => {
     expect(html).toContain('aria-label="Walls: Loss factor"');
     expect(html).toContain('aria-label="Windows: U-value"');
     expect(html).not.toContain('aria-label="Windows: Loss factor"');
+  });
+});
+
+describe('the energy grade summary', () => {
+  const elements = { w1: { id: 'w1', label: 'Wall', type: 'wall', area: 30, uValue: 0.3, gValue: null, tilt: 90, azimuth: 180 } } as InsulationProps['elements'];
+  const levels = [{ code: 'NL.N.SFH.05.Gen.ReEx.001.001', number: 1, label: 'Existing state', data: {} }] as InsulationProps['levels'];
+  const summary = (perM2: Record<number, number | null> | null) =>
+    gradeSummary(t, format, { ...insulation, elements, levels, classes: { perM2, comparing: false, onCompare: () => {} } });
+
+  it('leads with the current grade, then the state', () => {
+    expect(summary({ 1: 33 })).toEqual([
+      { label: 'Energy grade', value: 'B · 33 kWh/m²' },
+      { label: 'State', value: 'Existing state' },
+    ]);
+  });
+
+  it('says when the grade is still being worked out or failed', () => {
+    expect(summary(null)[0]).toEqual({ label: 'Energy grade', value: 'Being worked out', muted: true });
+    expect(summary({ 1: null })[0]).toEqual({ label: 'Energy grade', value: 'Not available', muted: true });
   });
 });

@@ -13,6 +13,7 @@ import type { IgnisVariantLevel } from '@/app/lib/ignisAdapter';
 import { HWB_CLASSES, hwbClass } from '@/app/lib/energyClass';
 import type { BuildingElement } from '@/app/components/BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
+import type { StepFact } from '@/app/components/BuildingConfigurator/shared/StepPanel';
 
 /** What the group reads from the building model and calls back into it. */
 export interface InsulationProps {
@@ -53,6 +54,27 @@ interface Props extends InsulationProps {
   mode: 'basic' | 'expert';
 }
 
+/** The facts a closed energy grade step shows: the state of the building, and its class once worked out. */
+export function gradeSummary(t: Translate, format: FormatNumber, insulation: InsulationProps): StepFact[] {
+  const state = insulationSummary(t, format, insulation, 'basic');
+  const present = REFURB_TYPES.find((type) => Object.values(insulation.elements).some((el) => el.type === type));
+  // A grade belongs to one level; a building set element by element has none.
+  const uniform = state !== '' && state !== t('insulation.summary.mixed');
+  const grade = ((): Omit<StepFact, 'label'> | null => {
+    if (!insulation.classes || !uniform || !present) return null;
+    const perM2 = insulation.classes.perM2;
+    if (perM2 === null) return { value: t('steps.summary.gradePending'), muted: true };
+    const value = perM2[insulation.states[present]];
+    return typeof value === 'number'
+      ? { value: `${hwbClass(value).label} · ${format(value, 0)} kWh/m²` }
+      : { value: t('steps.summary.gradeFailed'), muted: true };
+  })();
+  return [
+    ...(grade ? [{ label: t('steps.summary.grade'), ...grade }] : []),
+    ...(state ? [{ label: t('insulation.table.state'), value: state }] : []),
+  ];
+}
+
 /** One line for the group's header; the average U-value in Expert only. */
 export function insulationSummary(t: Translate, format: FormatNumber, { levels, states, elements, initial, avgUValue }: InsulationProps, mode: 'basic' | 'expert'): string {
   const present = REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
@@ -87,17 +109,25 @@ const TABULA_WEBTOOL_URL = 'https://webtool.building-typology.eu/';
  * closed toggle. A failed run
  * offers to try again rather than retrying by itself.
  */
+/**
+ * Works out the levels' classes once the building has stopped changing for
+ * COMPARE_DELAY_MS, wherever the energy grade is shown: in full or as its
+ * step's summary.
+ */
+export function useLevelClasses(classes: InsulationProps['classes']): void {
+  const compareRef = useRef(classes?.onCompare);
+  compareRef.current = classes?.onCompare;
+  const pending = classes !== undefined && classes.perM2 === null && !classes.comparing;
+  useEffect(() => {
+    if (!pending) return;
+    const timer = setTimeout(() => compareRef.current?.(), COMPARE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [pending]);
+}
+
 function LevelClasses({ classes }: { classes: NonNullable<InsulationProps['classes']> }) {
   const t = useT();
   const failed = classes.perM2 !== null && Object.values(classes.perM2).every((value) => value === null);
-  const compareRef = useRef(classes.onCompare);
-  compareRef.current = classes.onCompare;
-  const pending = classes.perM2 === null && !classes.comparing;
-  useEffect(() => {
-    if (!pending) return;
-    const timer = setTimeout(() => compareRef.current(), COMPARE_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [pending]);
   if (!classes.perM2 || failed) {
     return failed && !classes.comparing ? (
       <button

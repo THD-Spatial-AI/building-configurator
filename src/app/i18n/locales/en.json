@@ -619,8 +619,6 @@
     "tab": {
       "building": "Building"
     },
-    "doneEditing": "Done editing",
-    "editParameters": "Edit building parameters",
     "section": {
       "identity": "Building data"
     },
@@ -659,12 +657,7 @@
     },
     "pvGeneration": "PV generation",
     "storeysModelled": "{modelled} of {total} modelled",
-    "heatingPerM2": "Heating {value} kWh/m²·a",
-    "tile": {
-      "statisticalDefault": "Statistical default"
-    },
-    "builtIn": "Built in {year}",
-    "eavesHeight": "{value} m to the eaves"
+    "heatingPerM2": "Heating {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"
@@ -822,6 +815,16 @@
       "attention": "needs attention",
       "error": "has an error",
       "incomplete": "not complete"
+    },
+    "edit": "Edit {step}",
+    "summary": {
+      "solver": "Solver",
+      "milp": "MILP",
+      "sparse": "Sparse",
+      "eaves": "Height to the eaves",
+      "grade": "Energy grade",
+      "gradePending": "Being worked out",
+      "gradeFailed": "Not available"
     }
   }
 }

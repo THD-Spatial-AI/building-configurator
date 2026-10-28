@@ -3,15 +3,14 @@
 // technology cards. Single surfaces live in the surface panel, not here.
 
 import React, { useEffect, useState } from 'react';
-import { Pencil, Check } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { TOPICS } from '@/app/config/topics';
 import { SectionCard } from '../shared/SectionCard';
-import { StepPanel, type Step } from '../shared/StepPanel';
+import { StepPanel, type Step, type StepFact } from '../shared/StepPanel';
 import { SnapshotRow, SnapshotStatusBadge } from '../shared/snapshotUtils';
 import { NumberInput, SelectInput } from '../shared/ui';
 import { MIN_CONSTRUCTION_YEAR, buildingTypeName, buildingTypeOptions, countryName, countryOptions } from '../shared/buildingOptions';
-import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 
 // Unit suffix shown for each 'number' editType row — keyed by editKey.
 const ROW_UNITS: Record<string, string> = {
@@ -40,18 +39,10 @@ const CARD = 'overflow-clip rounded-xl border border-border/60 bg-card shadow-[0
 
 export type DetailsTab = 'building' | 'technology';
 
-/** A residential building's dwellings and occupants per dwelling; null where BuEM's default applies. */
-export interface BuildingOccupancy {
-  dwellings: number | null;
-  persons: number | null;
-}
-
 export interface BuildingDetailsCardProps {
   snapshotRows: SnapshotRow[];
   /** The 3D model's height to the eaves, in metres, shown with the envelope. */
   modelHeight?: number;
-  /** Shown as tiles beside the building data; absent for a service building. */
-  occupancy?: BuildingOccupancy;
   /** Commits a single field's new value (key maps to the `general` state object). */
   onEditField?: (key: string, value: string | number) => void;
   /** Top of the Building tab, e.g. the load profile and annual demand. */
@@ -67,74 +58,12 @@ export interface BuildingDetailsCardProps {
   onTabChange?: (tab: DetailsTab) => void;
 }
 
-/** One figure of the building, marked where it differs from the loaded building. */
-function Tile({ label, value, modified }: { label: string; value: string; modified?: boolean }) {
-  const t = useT();
-  return (
-    <div className="min-w-0 rounded-md bg-muted px-2 py-1.5">
-      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-        <span className="truncate">{label}</span>
-        {modified && <span className="size-1.5 shrink-0 rounded-full bg-primary" title={t('snapshot.status.modified')} />}
-      </div>
-      <b className="block truncate text-[13px] text-foreground">{value}</b>
-    </div>
-  );
-}
-
-/** The building data at a glance: type, country and year, then its main figures as tiles. */
-function BuildingTiles({ rows, occupancy, modelHeight }: { rows: SnapshotRow[]; occupancy?: BuildingOccupancy; modelHeight?: number }) {
-  const t = useT();
-  const format = useFormatNumber();
-  const row = (key: string) => rows.find((r) => r.labelKey === `snapshot.row.${key}`);
-  const tile = (key: string) => {
-    const r = row(key);
-    return r && <Tile key={key} label={t(r.labelKey)} value={rowValue(r, t)} modified={r.status === 'modified'} />;
-  };
-  const type = row('type');
-  const country = row('country');
-  const year = row('constructionYear');
-  const envelope = row('envelope');
-  const byDefault = t('snapshot.tile.statisticalDefault');
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      <div className="flex items-baseline justify-between gap-2 text-[13px]">
-        <span className="truncate text-foreground">
-          {[type && rowValue(type, t), country && countryName(t, country.value)].filter(Boolean).join(' · ')}
-        </span>
-        {year && <b className="shrink-0 text-foreground">{t('snapshot.builtIn', { year: rowValue(year, t) })}</b>}
-      </div>
-      <div className="grid grid-cols-3 gap-1.5">
-        {tile('storeys')}
-        {tile('roomHeight')}
-        {tile('floorAreaPerStorey')}
-        {occupancy && (
-          <>
-            <Tile label={t('household.dwellings.label')} value={String(occupancy.dwellings ?? 1)} />
-            <Tile label={t('household.persons.label')} value={occupancy.persons === null ? byDefault : String(occupancy.persons)} />
-          </>
-        )}
-        {tile('volume')}
-      </div>
-      {envelope && (
-        <span className="text-[11px] text-muted-foreground">
-          {t(envelope.labelKey)}: {rowValue(envelope, t)}
-          {modelHeight !== undefined && ` · ${t('snapshot.eavesHeight', { value: format(modelHeight, 1) })}`}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** The building data: tiles to read, a table to edit while its pencil is on. */
-function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
+/** The building data as a table to edit; the step's summary card is its read-only view. */
+function BuildingTable({ rows, onEditField }: {
   rows: SnapshotRow[];
-  occupancy?: BuildingOccupancy;
-  modelHeight?: number;
   onEditField?: BuildingDetailsCardProps['onEditField'];
 }) {
   const t = useT();
-  // Off by default, so a stray click on the table never changes the building's data.
-  const [isEditing, setIsEditing] = useState(false);
   const maxFor = (key: string): number | undefined => (key === 'constructionYear' ? new Date().getFullYear() : undefined);
   return (
     <SectionCard
@@ -142,77 +71,78 @@ function BuildingTable({ rows, occupancy, modelHeight, onEditField }: {
       title={t('panel.section.identity')}
       info={t('help.building')}
       emphasised
-      action={onEditField && (
-        <button
-          type="button"
-          onClick={() => setIsEditing((v) => !v)}
-          title={isEditing ? t('panel.doneEditing') : t('panel.editParameters')}
-          className={cn(
-            'flex h-6 cursor-pointer items-center gap-1 rounded-md border px-2 text-[11px] font-semibold transition-colors',
-            isEditing ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90' : 'border-current/30 bg-card text-foreground hover:bg-muted',
-          )}
-        >
-          {isEditing ? <Check className="size-3.5" /> : <Pencil className="size-3.5" />}
-          {isEditing ? t('panel.doneEditing') : t('panel.edit')}
-        </button>
-      )}
     >
-      {!isEditing ? <BuildingTiles rows={rows} occupancy={occupancy} modelHeight={modelHeight} /> : (
-        <table className="w-full text-sm bg-card">
-          {/* The value column takes the room the labels and badges leave, so the longest type and country names fit. */}
-          <colgroup>
-            <col className="w-[30%]" />
-            <col />
-            <col className="w-[88px]" />
-          </colgroup>
-          <tbody>
-            {rows.map((row) => {
-              const editable = onEditField && row.editKey && row.editType;
-              return (
-                <tr key={row.label} className="border-t border-border">
-                  <td className="py-2.5 pl-4 pr-2 text-[13px] leading-tight text-muted-foreground">{t(row.labelKey)}</td>
-                  <td className="px-2 py-2 text-right font-medium text-foreground">
-                    {editable ? (
-                      row.editType === 'select' ? (
-                        <SelectInput
-                          value={String(row.rawValue ?? '')}
-                          onChange={(v) => onEditField!(row.editKey!, v)}
-                          options={rowOptions(row, t)}
-                        />
-                      ) : (
-                        <NumberInput
-                          value={row.rawValue ?? 0}
-                          onChange={(v) => {
-                            const max = maxFor(row.editKey!);
-                            onEditField!(row.editKey!, max === undefined ? v : Math.min(v, max));
-                          }}
-                          unit={ROW_UNITS[row.editKey!] ?? ''}
-                          min={row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
-                          max={maxFor(row.editKey!)}
-                          step={1}
-                          integer={row.editKey === 'constructionYear'}
-                        />
-                      )
-                    ) : rowValue(row, t)}
-                  </td>
-                  <td className="py-2 pl-1 pr-3 text-center">
-                    <SnapshotStatusBadge status={row.status} />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+      <table className="w-full text-sm bg-card">
+        {/* The value column takes the room the labels and badges leave, so the longest type and country names fit. */}
+        <colgroup>
+          <col className="w-[30%]" />
+          <col />
+          <col className="w-[88px]" />
+        </colgroup>
+        <tbody>
+          {rows.map((row) => {
+            const editable = onEditField && row.editKey && row.editType;
+            return (
+              <tr key={row.label} className="border-t border-border">
+                <td className="py-2.5 pl-4 pr-2 text-[13px] leading-tight text-muted-foreground">{t(row.labelKey)}</td>
+                <td className="px-2 py-2 text-right font-medium text-foreground">
+                  {editable ? (
+                    row.editType === 'select' ? (
+                      <SelectInput
+                        value={String(row.rawValue ?? '')}
+                        onChange={(v) => onEditField!(row.editKey!, v)}
+                        options={rowOptions(row, t)}
+                      />
+                    ) : (
+                      <NumberInput
+                        value={row.rawValue ?? 0}
+                        onChange={(v) => {
+                          const max = maxFor(row.editKey!);
+                          onEditField!(row.editKey!, max === undefined ? v : Math.min(v, max));
+                        }}
+                        unit={ROW_UNITS[row.editKey!] ?? ''}
+                        min={row.editKey === 'constructionYear' ? MIN_CONSTRUCTION_YEAR : 0}
+                        max={maxFor(row.editKey!)}
+                        step={1}
+                        integer={row.editKey === 'constructionYear'}
+                      />
+                    )
+                  ) : rowValue(row, t)}
+                </td>
+                <td className="py-2 pl-1 pr-3 text-center">
+                  <SnapshotStatusBadge status={row.status} />
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </SectionCard>
   );
+}
+
+/** The facts the building data step shows while it is not being edited. */
+function dataSummary(t: Translate, format: FormatNumber, rows: SnapshotRow[], modelHeight?: number): StepFact[] {
+  const fact = (key: string, value: (row: SnapshotRow) => string) => {
+    const row = rows.find((r) => r.labelKey === `snapshot.row.${key}`);
+    return row ? [{ label: t(row.labelKey), value: value(row) }] : [];
+  };
+  return [
+    ...fact('type', (row) => rowValue(row, t)),
+    ...fact('country', (row) => countryName(t, row.value)),
+    ...fact('constructionYear', (row) => rowValue(row, t)),
+    ...fact('floorAreaPerStorey', (row) => rowValue(row, t)),
+    ...fact('storeys', (row) => rowValue(row, t)),
+    ...fact('roomHeight', (row) => rowValue(row, t)),
+    ...fact('volume', (row) => rowValue(row, t)),
+    ...(modelHeight !== undefined ? [{ label: t('steps.summary.eaves'), value: `${format(modelHeight, 1)} m` }] : []),
+  ];
 }
 
 /** The building in two tabs: Building, and Technologies where the caller has them. */
 export function BuildingDetailsCard({
   snapshotRows,
   modelHeight,
-  occupancy,
   onEditField,
   overviewSlot,
   steps = [],
@@ -222,6 +152,7 @@ export function BuildingDetailsCard({
   onTabChange,
 }: BuildingDetailsCardProps) {
   const t = useT();
+  const format = useFormatNumber();
   const [ownTab, setOwnTab] = useState<DetailsTab>('building');
   const activeTab = technologySlot ? controlledTab ?? ownTab : 'building';
   const setActiveTab = (tab: DetailsTab) => {
@@ -237,7 +168,10 @@ export function BuildingDetailsCard({
       label: t('panel.section.identity'),
       topic: TOPICS.building,
       status: 'complete',
-      content: <BuildingTable rows={snapshotRows} occupancy={occupancy} modelHeight={modelHeight} onEditField={onEditField} />,
+      summary: dataSummary(t, format, snapshotRows, modelHeight),
+      // A loaded building brings its data, so the step opens on its summary.
+      startSummarised: true,
+      content: <BuildingTable rows={snapshotRows} onEditField={onEditField} />,
     },
     ...steps,
   ];

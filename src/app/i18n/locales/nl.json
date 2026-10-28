@@ -619,8 +619,6 @@
     "tab": {
       "building": "Gebouw"
     },
-    "doneEditing": "Klaar met bewerken",
-    "editParameters": "Gebouwparameters bewerken",
     "section": {
       "identity": "Gebouwgegevens"
     },
@@ -659,12 +657,7 @@
     },
     "pvGeneration": "PV-opwekking",
     "storeysModelled": "{modelled} van {total} gemodelleerd",
-    "heatingPerM2": "Verwarming {value} kWh/m²·a",
-    "tile": {
-      "statisticalDefault": "Statistische waarde"
-    },
-    "builtIn": "Bouwjaar {year}",
-    "eavesHeight": "{value} m tot de dakgoot"
+    "heatingPerM2": "Verwarming {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"
@@ -822,6 +815,16 @@
       "attention": "vraagt aandacht",
       "error": "bevat een fout",
       "incomplete": "onvolledig"
+    },
+    "edit": "{step} bewerken",
+    "summary": {
+      "solver": "Oplosser",
+      "milp": "MILP",
+      "sparse": "IJl",
+      "eaves": "Hoogte tot de dakgoot",
+      "grade": "Energieklasse",
+      "gradePending": "Wordt bepaald",
+      "gradeFailed": "Niet beschikbaar"
     }
   }
 }

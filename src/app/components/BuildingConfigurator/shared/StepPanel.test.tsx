@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TOPICS } from '@/app/config/topics';
-import { StepPanel, type Step } from './StepPanel';
-import { energyGradeStatus, storeysStatus } from '../configure/building/BuildingEditor';
+import { StepPanel, StepSummary, type Step } from './StepPanel';
+import { comfortSummary, energyGradeStatus, occupancySummary, storeysStatus } from '../configure/building/BuildingEditor';
+import { translate } from '@/app/i18n';
 import type { InsulationProps } from '../configure/building/insulationSection';
 import { missingDwellings } from '@/app/lib/storeys';
 
@@ -69,5 +70,39 @@ describe('step status', () => {
     expect(storeysStatus(general)).toBe('incomplete');
     expect(storeysStatus({ ...general, storeyDwellings: { 1: 2, 2: 1 } })).toBe('complete');
     expect(storeysStatus({ ...general, buildingType: 'Single-family House' })).toBe('complete');
+  });
+});
+
+describe('a step worked through', () => {
+  const t: Parameters<typeof occupancySummary>[0] = (key, values) => translate('en', key, values);
+
+  it('shows as a card of its values with Edit', () => {
+    const html = renderToStaticMarkup(
+      <StepSummary step={{ ...steps[2], summary: [{ label: 'Heating setpoint', value: '18 °C' }] }} number={3} onEdit={() => {}} />,
+    );
+    expect(html).toContain('3. Heating and comfort');
+    expect(html).toMatch(/<th scope="row"[^>]*>Heating setpoint<\/th><td[^>]*>18 °C<\/td>/);
+    expect(html).toContain('aria-label="Edit Heating and comfort"');
+  });
+
+  it('shows a status in place of a value in grey, a value in bold', () => {
+    const html = renderToStaticMarkup(
+      <StepSummary step={{ ...steps[1], summary: [{ label: 'Energy grade', value: 'Being worked out', muted: true }, { label: 'State', value: 'Existing state' }] }} number={2} onEdit={() => {}} />,
+    );
+    expect(html).toMatch(/<td class="[^"]*text-muted-foreground">Being worked out<\/td>/);
+    expect(html).toMatch(/<td class="[^"]*font-semibold[^"]*">Existing state<\/td>/);
+  });
+
+  it('sums up occupancy and comfort in their own labels, defaults named as such', () => {
+    const general = { buildingType: 'Single-family House', storeys: 3, storeysModelled: [1, 2], residential_units: 1, num_persons: null };
+    expect(occupancySummary(t, general)).toEqual([
+      { label: 'Storeys', value: '2 of 3 modelled' },
+      { label: 'Dwellings', value: '1' },
+      { label: 'Occupants per dwelling', value: 'Default' },
+    ]);
+    expect(comfortSummary(t, { buildingType: 'Single-family House', comfortT_lb: 18, include_dhw: true, setback_profile: 'none' })).toEqual([
+      { label: 'Heating setpoint', value: '18 °C' },
+      { label: 'Hot water', value: 'Included' },
+    ]);
   });
 });
