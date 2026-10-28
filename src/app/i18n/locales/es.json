@@ -731,33 +731,18 @@
   },
   "storeys": {
     "title": "Plantas modeladas",
-    "hint": "La planta 0 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas o su altura propia; la superficie y la envolvente cuentan solo las plantas modeladas.",
+    "hint": "La planta 0 es la planta baja. En su fila, deje una planta fuera del modelo o dele su propia altura y viviendas; una fila elegida aquí o en el modelo se resalta en ambos. La superficie y la envolvente cuentan solo las plantas modeladas.",
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
     "floorArea": "Superficie modelada",
     "pick": "Plantas",
     "pickHint": "Haga clic en plantas del modelo para seleccionarlas; configúrelas en Plantas modeladas, en la pestaña Edificio.",
     "lastOne": "Al menos una planta permanece en el modelo.",
-    "chip": {
-      "in": "Planta {number}, en el modelo",
-      "out": "Planta {number}, excluida",
-      "dwellings": "{count} viv."
-    },
     "select": {
-      "all": "Seleccionar todas",
-      "clear": "Borrar la selección",
-      "count": {
-        "one": "{count} planta seleccionada",
-        "other": "{count} plantas seleccionadas"
-      },
-      "multi": "Configurar varias plantas",
       "one": "Planta {number}"
     },
-    "dwellingsPerStorey": "Viviendas por planta",
-    "mixed": "varios",
     "dwellingsMissing": "Indique el número de viviendas de cada planta incluida. Falta: planta {storeys}.",
     "inModel": "En el modelo",
     "roomHeightTip": "La altura de cada planta, de suelo a suelo. Una planta con altura propia la conserva.",
-    "ownHeight": "Altura de planta",
     "useRoomHeight": "Usar la altura de sala",
     "limit": {
       "storeys": "Otra planta de {room} m superaría el modelo 3D, que mide {height} m hasta el alero.",
@@ -766,8 +751,6 @@
     "heightConflict": "Las plantas suman {total} m de altura, más que el modelo 3D, que mide {height} m hasta el alero. Reduzca el número de plantas o una altura.",
     "attic": {
       "label": "Ático",
-      "chipIn": "Ático, en el modelo",
-      "chipOut": "Ático, excluido",
       "hint": "El espacio bajo la cubierta inclinada, por encima del alero. Si se excluye, la cubierta deja de formar parte del edificio calefactado y el techo de debajo pierde calor hacia el ático frío.",
       "floorArea": "Superficie del ático",
       "noArea": "No contada",
@@ -775,7 +758,11 @@
       "floorAreaTip": "Medida a partir del modelo 3D: la superficie cuenta entera donde la cubierta está a 2 m o más, y la mitad donde está entre 1 y 2 m.",
       "useMeasured": "Usar la medida ({area} m²)"
     },
-    "someIn": "Algunas están en el modelo y otras excluidas."
+    "table": {
+      "storey": "Planta",
+      "height": "Altura",
+      "dwellings": "Viviendas"
+    }
   },
   "help": {
     "envelope": "El tamaño de esta superficie y lo bien que retiene el calor. Cambiarlos cambia la calefacción que necesita el edificio.",
