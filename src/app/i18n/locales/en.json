@@ -438,7 +438,6 @@
       "mixed": "Mixed",
       "averageU": "average U {value} W/m²K"
     },
-    "averageU": "Average U-value",
     "preset": {
       "label": "Set the whole building to",
       "tip": "Choose a level for the whole building. It sets every wall, roof, floor and window; surfaces you changed one by one keep their values.",

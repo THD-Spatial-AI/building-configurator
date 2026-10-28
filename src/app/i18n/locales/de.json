@@ -438,7 +438,6 @@
       "mixed": "Gemischt",
       "averageU": "mittlerer U-Wert {value} W/m²K"
     },
-    "averageU": "Mittlerer U-Wert",
     "preset": {
       "label": "Ganzes Gebäude setzen auf",
       "tip": "Wählen Sie eine Stufe für das ganze Gebäude. Sie setzt alle Wände, Dächer, Böden und Fenster; einzeln geänderte Flächen behalten ihre Werte.",

@@ -438,7 +438,6 @@
       "mixed": "Misto",
       "averageU": "U medio {value} W/m²K"
     },
-    "averageU": "Valore U medio",
     "preset": {
       "label": "Imposta l'intero edificio a",
       "tip": "Scegli un livello per l'intero edificio. Imposta tutte le pareti, i tetti, i pavimenti e le finestre; le superfici cambiate una per una mantengono i loro valori.",

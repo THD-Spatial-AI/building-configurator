@@ -452,7 +452,6 @@
       "mixed": "Smíšené",
       "averageU": "průměrné U {value} W/m²K"
     },
-    "averageU": "Průměrný součinitel U",
     "preset": {
       "label": "Nastavit celou budovu na",
       "tip": "Vyberte úroveň pro celou budovu. Nastaví všechny stěny, střechy, podlahy a okna; plochy změněné jednotlivě si ponechají své hodnoty.",

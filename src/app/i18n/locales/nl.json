@@ -438,7 +438,6 @@
       "mixed": "Gemengd",
       "averageU": "gemiddelde U {value} W/m²K"
     },
-    "averageU": "Gemiddelde U-waarde",
     "preset": {
       "label": "Heel het gebouw instellen op",
       "tip": "Kies een niveau voor het hele gebouw. Het zet alle muren, daken, vloeren en ramen; vlakken die u een voor een wijzigde, houden hun waarden.",

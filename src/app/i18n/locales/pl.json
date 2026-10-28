@@ -452,7 +452,6 @@
       "mixed": "Mieszany",
       "averageU": "średnie U {value} W/m²K"
     },
-    "averageU": "Średni współczynnik U",
     "preset": {
       "label": "Ustaw cały budynek na",
       "tip": "Wybierz poziom dla całego budynku. Ustawia wszystkie ściany, dachy, podłogi i okna; powierzchnie zmienione pojedynczo zachowują swoje wartości.",

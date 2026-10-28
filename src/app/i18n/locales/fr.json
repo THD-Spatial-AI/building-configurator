@@ -439,7 +439,6 @@
       "mixed": "Mixte",
       "averageU": "U moyen {value} W/m²K"
     },
-    "averageU": "Valeur U moyenne",
     "preset": {
       "label": "Appliquer à tout le bâtiment",
       "tip": "Choisissez un niveau pour tout le bâtiment. Il règle tous les murs, toits, planchers et fenêtres ; les surfaces modifiées une à une gardent leurs valeurs.",
