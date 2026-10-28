@@ -846,5 +846,8 @@
       "gradePending": "Počítá se",
       "gradeFailed": "Není k dispozici"
     }
+  },
+  "tip": {
+    "openDocs": "Klikněte pro výchozí hodnoty v dokumentaci."
   }
 }

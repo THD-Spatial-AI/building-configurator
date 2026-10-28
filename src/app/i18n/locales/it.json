@@ -826,5 +826,8 @@
       "gradePending": "In calcolo",
       "gradeFailed": "Non disponibile"
     }
+  },
+  "tip": {
+    "openDocs": "Fai clic per i valori predefiniti nella documentazione."
   }
 }

@@ -846,5 +846,8 @@
       "gradePending": "W trakcie obliczania",
       "gradeFailed": "Niedostępna"
     }
+  },
+  "tip": {
+    "openDocs": "Kliknij, aby zobaczyć wartości domyślne w dokumentacji."
   }
 }
