@@ -770,7 +770,8 @@
       "dwellings": "Dwellings in the attic",
       "floorAreaTip": "Measured from the 3D model: floor counts in full where the roof is 2 m or more above it, half where it is 1 to 2 m above it.",
       "useMeasured": "Use measured ({area} m²)"
-    }
+    },
+    "someIn": "Some are in the model, some are left out."
   },
   "help": {
     "envelope": "The size of this surface and how well it keeps heat in. Changing them changes how much heating the building needs.",

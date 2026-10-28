@@ -770,7 +770,8 @@
       "dwellings": "Wohnungen im Dachgeschoss",
       "floorAreaTip": "Aus dem 3D-Modell gemessen: Fläche zählt voll, wo das Dach 2 m oder mehr darüber liegt, zur Hälfte bei 1 bis 2 m.",
       "useMeasured": "Gemessene verwenden ({area} m²)"
-    }
+    },
+    "someIn": "Einige sind im Modell, einige weggelassen."
   },
   "help": {
     "envelope": "Die Größe dieser Fläche und wie gut sie die Wärme hält. Eine Änderung ändert, wie viel Heizung das Gebäude braucht.",

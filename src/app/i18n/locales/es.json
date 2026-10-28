@@ -774,7 +774,8 @@
       "dwellings": "Viviendas en el ático",
       "floorAreaTip": "Medida a partir del modelo 3D: la superficie cuenta entera donde la cubierta está a 2 m o más, y la mitad donde está entre 1 y 2 m.",
       "useMeasured": "Usar la medida ({area} m²)"
-    }
+    },
+    "someIn": "Algunas están en el modelo y otras excluidas."
   },
   "help": {
     "envelope": "El tamaño de esta superficie y lo bien que retiene el calor. Cambiarlos cambia la calefacción que necesita el edificio.",

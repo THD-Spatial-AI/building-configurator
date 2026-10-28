@@ -770,7 +770,8 @@
       "dwellings": "Woningen op zolder",
       "floorAreaTip": "Gemeten uit het 3D-model: vloer telt volledig waar het dak 2 m of meer erboven ligt, voor de helft bij 1 tot 2 m.",
       "useMeasured": "Gemeten gebruiken ({area} m²)"
-    }
+    },
+    "someIn": "Sommige zijn in het model, andere weggelaten."
   },
   "help": {
     "envelope": "De grootte van dit vlak en hoe goed het warmte vasthoudt. Wijzigen verandert hoeveel verwarming het gebouw nodig heeft.",
