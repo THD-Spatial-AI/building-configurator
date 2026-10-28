@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
 import { ToggleSwitch } from '@/app/components/BuildingConfigurator/shared/ui';
 import { SectionCard } from '@/app/components/BuildingConfigurator/shared/SectionCard';
-import type { Step, StepStatus } from '@/app/components/BuildingConfigurator/shared/StepPanel';
+import type { Step, StepFact, StepStatus } from '@/app/components/BuildingConfigurator/shared/StepPanel';
 import { TOPICS, type Topic } from '@/app/config/topics';
 import { missingDwellings, storeysTooTall } from '@/app/lib/storeys';
 import { variantType } from '@/app/lib/refurbishment';
@@ -14,10 +14,11 @@ import {
   buildingTypeName,
   hasDwellingsPerStorey,
   isServiceBuildingType,
+  setbackOptions,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
 import { ComfortSection } from './comfortSection';
-import { InsulationSection, insulationSummary, type InsulationProps } from './insulationSection';
+import { InsulationSection, gradeSummary, insulationSummary, useLevelClasses, type InsulationProps } from './insulationSection';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 
 // Energy grade is not one of these: it is built from InsulationProps (see useBuildingSteps).
@@ -168,12 +169,41 @@ interface BuildingStepsProps {
   onStoreysClosed?: () => void;
 }
 
+/** The facts a closed storeys and occupancy step shows. */
+export function occupancySummary(t: Translate, general: Record<string, any>): StepFact[] {
+  const modelled = general.storeysModelled as number[] | null;
+  const storeys = modelled
+    ? [{ label: t('snapshot.row.storeys'), value: t('snapshot.storeysModelled', { modelled: modelled.length, total: general.storeys }) }]
+    : [];
+  if (isServiceBuildingType(general.buildingType)) {
+    return [...storeys, { label: t('household.capacity.label'), value: general.capacity ? String(general.capacity) : t('household.default') }];
+  }
+  return [
+    ...storeys,
+    { label: t('household.dwellings.label'), value: String(general.residential_units ?? 1) },
+    { label: t('household.persons.label'), value: general.num_persons ? String(general.num_persons) : t('household.default') },
+  ];
+}
+
+/** The facts a closed heating and comfort step shows. */
+export function comfortSummary(t: Translate, general: Record<string, any>): StepFact[] {
+  const setback = setbackOptions(t).find((option) => option.value === general.setback_profile);
+  return [
+    { label: t('comfort.heating.label'), value: `${general.comfortT_lb} °C` },
+    ...(isServiceBuildingType(general.buildingType) ? [] : [
+      { label: t('comfort.hotWater.label'), value: t(general.include_dhw === false ? 'comfort.hotWater.off' : 'comfort.hotWater.on') },
+    ]),
+    ...(setback && setback.value !== 'none' ? [{ label: t('comfort.setback.label'), value: setback.label }] : []),
+  ];
+}
+
 /** The building parameters as steps for a StepPanel, each one section card shown open. */
 export function useBuildingSteps({
   general, setGen, mode, insulation, onShowExpert, storeys, onStoreysClosed, modelHeight,
 }: BuildingStepsProps): Step[] {
   const t = useT();
   const format = useFormatNumber();
+  useLevelClasses(insulation?.classes);
   // A step's single card is in focus, like the open technology card; the Expert step's three cards are not.
   const card = (key: SectionKey) => (
     <SectionCard key={key} topic={SECTION_TOPICS[key]} title={SECTION_LABELS[key](t)} info={t(`help.${key}`)} dashed={EXPERT_SECTIONS.includes(key)} emphasised={!EXPERT_SECTIONS.includes(key)}>
@@ -202,6 +232,7 @@ export function useBuildingSteps({
       label: t('editor.insulationTitle'),
       topic: TOPICS.building,
       status: energyGradeStatus(insulation, general.buildingType),
+      summary: gradeSummary(t, format, insulation),
       content: (
         <SectionCard
           topic={TOPICS.building}
@@ -224,6 +255,7 @@ export function useBuildingSteps({
     label: SECTION_LABELS.occupancy(t),
     topic: SECTION_TOPICS.occupancy,
     status: storeysStatus(general, modelHeight),
+    summary: occupancySummary(t, general),
     content: card('occupancy'),
     onLeave: onStoreysClosed,
   });
@@ -232,6 +264,7 @@ export function useBuildingSteps({
     label: SECTION_LABELS.comfort(t),
     topic: SECTION_TOPICS.comfort,
     status: 'complete',
+    summary: comfortSummary(t, general),
     content: <>{card('comfort')}{expertPointer}</>,
   });
   if (mode === 'expert') {
@@ -240,6 +273,10 @@ export function useBuildingSteps({
       label: t('editor.expertMore.title'),
       topic: TOPICS.building,
       status: 'complete',
+      summary: [
+        { label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C` },
+        { label: t('steps.summary.solver'), value: t(general.use_milp ? 'steps.summary.milp' : 'steps.summary.sparse') },
+      ],
       content: (
         <div className="flex flex-col gap-3">
           {EXPERT_SECTIONS.filter((key) => !service || key !== 'equipment').map(card)}

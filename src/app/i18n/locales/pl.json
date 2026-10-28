@@ -636,8 +636,6 @@
     "tab": {
       "building": "Budynek"
     },
-    "doneEditing": "Zakończ edycję",
-    "editParameters": "Edytuj parametry budynku",
     "section": {
       "identity": "Dane budynku"
     },
@@ -678,12 +676,7 @@
     },
     "pvGeneration": "Produkcja PV",
     "storeysModelled": "{modelled} z {total} modelowanych",
-    "heatingPerM2": "Ogrzewanie {value} kWh/m²·a",
-    "tile": {
-      "statisticalDefault": "Wartość statystyczna"
-    },
-    "builtIn": "Zbudowany w {year}",
-    "eavesHeight": "{value} m do okapu"
+    "heatingPerM2": "Ogrzewanie {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"
@@ -856,6 +849,16 @@
       "attention": "wymaga uwagi",
       "error": "zawiera błąd",
       "incomplete": "niekompletne"
+    },
+    "edit": "Edytuj {step}",
+    "summary": {
+      "solver": "Solver",
+      "milp": "MILP",
+      "sparse": "Rzadki",
+      "eaves": "Wysokość do okapu",
+      "grade": "Klasa energetyczna",
+      "gradePending": "W trakcie obliczania",
+      "gradeFailed": "Niedostępna"
     }
   }
 }

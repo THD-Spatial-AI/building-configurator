@@ -1,8 +1,9 @@
 // A panel's sections as steps: a path of nodes, each in its status and named
-// beneath, one section shown at a time, and Back and Next beneath it.
+// beneath, one step shown at a time with Back and Next beneath it. A step
+// already worked through shows as a summary card of its values until Edit.
 
-import type { ReactNode } from 'react';
-import { AlertTriangle, Check, ChevronDown, X } from '@/app/components/icons';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { AlertTriangle, Check, ChevronDown, Pencil, X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import type { Topic } from '@/app/config/topics';
 import { useT } from '@/app/i18n';
@@ -16,8 +17,20 @@ export interface Step {
   topic: Topic;
   status: StepStatus;
   content: ReactNode;
+  /** The step's values, shown in place of its content once it has been left, each a field's label and value. */
+  summary?: StepFact[];
+  /** Shows the summary from the start, for a step whose values arrive filled in. */
+  startSummarised?: boolean;
   /** Called when another step is opened while this one is. */
   onLeave?: () => void;
+}
+
+/** One value of a closed step's summary. */
+export interface StepFact {
+  label: string;
+  value: string;
+  /** A status in place of a value, such as one still being worked out: shown in grey. */
+  muted?: boolean;
 }
 
 /**
@@ -60,11 +73,29 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
   const t = useT();
   const index = Math.max(0, steps.findIndex((step) => step.key === active));
   const current = steps[index];
+  /** Steps left after being shown, which return as their summary. */
+  const [done, setDone] = useState<ReadonlySet<string>>(() => new Set(steps.filter((step) => step.startSummarised).map((step) => step.key)));
+  const [editing, setEditing] = useState<string | null>(null);
   const go = (key: string) => {
     if (key === current.key) return;
     current.onLeave?.();
+    moved.current = true;
+    setDone((prev) => new Set(prev).add(current.key));
+    setEditing(null);
     onActive(key);
   };
+  const summarised = done.has(current.key) && editing !== current.key && (current.summary?.length ?? 0) > 0;
+  const sectionRef = useRef<HTMLDivElement>(null);
+  /** Set by the user opening a step or its fields, so opening the panel itself scrolls nothing. */
+  const moved = useRef(false);
+  useEffect(() => {
+    if (!moved.current) return;
+    moved.current = false;
+    const section = sectionRef.current;
+    if (!section) return;
+    section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    section.querySelector<HTMLElement>('input, select, textarea')?.focus({ preventScroll: true });
+  }, [current.key, summarised]);
   const previous = steps[index - 1];
   const next = steps[index + 1];
   return (
@@ -109,30 +140,79 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
         </ol>
       </nav>
 
-      <div>{current.content}</div>
-
-      <div className="flex items-center justify-between gap-2">
-        {previous ? (
-          <button
-            type="button"
-            onClick={() => go(previous.key)}
-            className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-border bg-background px-3 text-[12px] font-medium text-foreground shadow-xs hover:bg-muted"
-          >
-            <ChevronDown className="size-3.5 rotate-90" aria-hidden />
-            {t('steps.previous', { step: previous.label })}
-          </button>
-        ) : <span />}
-        {next && (
-          <button
-            type="button"
-            onClick={() => go(next.key)}
-            className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-primary bg-background px-3 text-[12px] font-semibold text-primary shadow-xs hover:bg-primary/5"
-          >
-            {t('steps.next', { step: next.label })}
-            <ChevronDown className="size-3.5 -rotate-90" aria-hidden />
-          </button>
-        )}
+      {/* scroll-mt keeps the section clear of the sticky tabs and step bar when it is scrolled to. */}
+      <div ref={sectionRef} className="scroll-mt-[150px]">
+        {summarised
+          ? <StepSummary step={current} number={index + 1} onEdit={() => { moved.current = true; setEditing(current.key); }} />
+          : current.content}
       </div>
+      <StepNav previous={previous} next={next} go={go} />
+    </div>
+  );
+}
+
+/** A step worked through: its number, name and status, its values, and Edit to show its fields again. */
+export function StepSummary({ step, number, onEdit }: { step: Step; number: number; onEdit: () => void }) {
+  const t = useT();
+  const { Icon, node } = NODE[step.status];
+  return (
+    <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <header className="flex items-center gap-2 px-3 py-2">
+        <span aria-hidden className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', node)}>
+          {Icon && <Icon className="size-3" />}
+        </span>
+        <h3 className="m-0 min-w-0 flex-1 truncate text-[12px] font-semibold text-foreground">{number}. {step.label}</h3>
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={t('steps.edit', { step: step.label })}
+          className="flex h-7 shrink-0 cursor-pointer items-center gap-1 rounded-md border border-border bg-background px-2 text-[11px] font-medium text-foreground hover:bg-muted"
+        >
+          <Pencil className="size-3" aria-hidden />
+          {t('panel.edit')}
+        </button>
+      </header>
+      {step.summary && step.summary.length > 0 && (
+        <table className="w-full border-collapse text-[12px]">
+          <tbody>
+            {step.summary.map((fact) => (
+              <tr key={fact.label} className="border-t border-border">
+                <th scope="row" className="px-3 py-1.5 text-left font-normal text-muted-foreground">{fact.label}</th>
+                <td className={cn('px-3 py-1.5 text-right tabular-nums', fact.muted ? 'text-muted-foreground' : 'font-semibold text-foreground')}>{fact.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
+/** Back and Next beneath the open step. */
+function StepNav({ previous, next, go }: { previous?: Step; next?: Step; go: (key: string) => void }) {
+  const t = useT();
+  return (
+    <div className="flex items-center justify-between gap-2">
+      {previous ? (
+        <button
+          type="button"
+          onClick={() => go(previous.key)}
+          className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-border bg-background px-3 text-[12px] font-medium text-foreground shadow-xs hover:bg-muted"
+        >
+          <ChevronDown className="size-3.5 rotate-90" aria-hidden />
+          {t('steps.previous', { step: previous.label })}
+        </button>
+      ) : <span />}
+      {next && (
+        <button
+          type="button"
+          onClick={() => go(next.key)}
+          className="flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-primary bg-background px-3 text-[12px] font-semibold text-primary shadow-xs hover:bg-primary/5"
+        >
+          {t('steps.next', { step: next.label })}
+          <ChevronDown className="size-3.5 -rotate-90" aria-hidden />
+        </button>
+      )}
     </div>
   );
 }

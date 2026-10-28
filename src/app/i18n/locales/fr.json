@@ -621,8 +621,6 @@
     "tab": {
       "building": "Bâtiment"
     },
-    "doneEditing": "Terminer",
-    "editParameters": "Modifier les paramètres du bâtiment",
     "section": {
       "identity": "Données du bâtiment"
     },
@@ -662,12 +660,7 @@
     },
     "pvGeneration": "Production PV",
     "storeysModelled": "{modelled} sur {total} modélisés",
-    "heatingPerM2": "Chauffage {value} kWh/m²·a",
-    "tile": {
-      "statisticalDefault": "Valeur statistique"
-    },
-    "builtIn": "Construit en {year}",
-    "eavesHeight": "{value} m jusqu'à l'avant-toit"
+    "heatingPerM2": "Chauffage {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"
@@ -838,6 +831,16 @@
       "attention": "à vérifier",
       "error": "comporte une erreur",
       "incomplete": "incomplet"
+    },
+    "edit": "Modifier {step}",
+    "summary": {
+      "solver": "Solveur",
+      "milp": "MILP",
+      "sparse": "Creux",
+      "eaves": "Hauteur à l'égout",
+      "grade": "Classe énergétique",
+      "gradePending": "En cours de calcul",
+      "gradeFailed": "Non disponible"
     }
   }
 }

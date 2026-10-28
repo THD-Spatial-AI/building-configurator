@@ -708,10 +708,6 @@ export function Building3DView({
             <BuildingDetailsCard
               snapshotRows={model.snapshotRows}
               modelHeight={modelHeight}
-              occupancy={isServiceBuildingType(model.general.buildingType) ? undefined : {
-                dwellings: model.general.residential_units,
-                persons: model.general.num_persons,
-              }}
               onEditField={model.setGen}
               activeTab={tab}
               onTabChange={(next) => { setTab(next); leaveStoreyMode(); }}

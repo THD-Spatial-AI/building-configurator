@@ -621,8 +621,6 @@
     "tab": {
       "building": "Edificio"
     },
-    "doneEditing": "Terminar edición",
-    "editParameters": "Editar parámetros del edificio",
     "section": {
       "identity": "Datos del edificio"
     },
@@ -662,12 +660,7 @@
     },
     "pvGeneration": "Generación FV",
     "storeysModelled": "{modelled} de {total} modeladas",
-    "heatingPerM2": "Calefacción {value} kWh/m²·a",
-    "tile": {
-      "statisticalDefault": "Valor estadístico"
-    },
-    "builtIn": "Construido en {year}",
-    "eavesHeight": "{value} m hasta el alero"
+    "heatingPerM2": "Calefacción {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "N"
@@ -838,6 +831,16 @@
       "attention": "requiere atención",
       "error": "tiene un error",
       "incomplete": "incompleto"
+    },
+    "edit": "Editar {step}",
+    "summary": {
+      "solver": "Solucionador",
+      "milp": "MILP",
+      "sparse": "Disperso",
+      "eaves": "Altura hasta el alero",
+      "grade": "Clase energética",
+      "gradePending": "En cálculo",
+      "gradeFailed": "No disponible"
     }
   }
 }

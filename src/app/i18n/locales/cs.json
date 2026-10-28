@@ -636,8 +636,6 @@
     "tab": {
       "building": "Budova"
     },
-    "doneEditing": "Hotovo",
-    "editParameters": "Upravit parametry budovy",
     "section": {
       "identity": "Údaje o budově"
     },
@@ -678,12 +676,7 @@
     },
     "pvGeneration": "Výroba FV",
     "storeysModelled": "{modelled} z {total} modelováno",
-    "heatingPerM2": "Vytápění {value} kWh/m²·a",
-    "tile": {
-      "statisticalDefault": "Statistická hodnota"
-    },
-    "builtIn": "Postaveno v roce {year}",
-    "eavesHeight": "{value} m k okapu"
+    "heatingPerM2": "Vytápění {value} kWh/m²·a"
   },
   "envelope": {
     "compassNorth": "S"
@@ -856,6 +849,16 @@
       "attention": "vyžaduje pozornost",
       "error": "obsahuje chybu",
       "incomplete": "nedokončeno"
+    },
+    "edit": "Upravit {step}",
+    "summary": {
+      "solver": "Řešič",
+      "milp": "MILP",
+      "sparse": "Řídký",
+      "eaves": "Výška k okapu",
+      "grade": "Energetická třída",
+      "gradePending": "Počítá se",
+      "gradeFailed": "Není k dispozici"
     }
   }
 }
