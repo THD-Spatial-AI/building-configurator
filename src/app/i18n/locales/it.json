@@ -722,7 +722,7 @@
   },
   "storeys": {
     "title": "Piani modellati",
-    "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni o la loro altezza; superficie e involucro contano solo i piani modellati.",
+    "hint": "Il piano 0 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni o la loro altezza; superficie e involucro contano solo i piani modellati.",
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
     "floorArea": "Superficie modellata",
     "pick": "Piani",
@@ -754,7 +754,18 @@
       "storeys": "Un altro piano di {room} m sarebbe più alto del modello 3D, che misura {height} m fino alla gronda.",
       "height": "Un piano più alto renderebbe i piani più alti del modello 3D, che misura {height} m fino alla gronda."
     },
-    "heightConflict": "I piani sono alti {total} m in tutto, più del modello 3D, che misura {height} m fino alla gronda. Riduci il numero di piani o un'altezza."
+    "heightConflict": "I piani sono alti {total} m in tutto, più del modello 3D, che misura {height} m fino alla gronda. Riduci il numero di piani o un'altezza.",
+    "attic": {
+      "label": "Sottotetto",
+      "chipIn": "Sottotetto, nel modello",
+      "chipOut": "Sottotetto, escluso",
+      "hint": "Lo spazio sotto il tetto a falde, sopra la gronda. Se escluso, il tetto esce dall'edificio riscaldato e il solaio sottostante disperde calore verso il sottotetto freddo.",
+      "floorArea": "Superficie del sottotetto",
+      "noArea": "Non contata",
+      "dwellings": "Abitazioni nel sottotetto",
+      "floorAreaTip": "Misurata dal modello 3D: la superficie conta per intero dove il tetto è a 2 m o più, per metà dove è tra 1 e 2 m.",
+      "useMeasured": "Usa la misura ({area} m²)"
+    }
   },
   "help": {
     "envelope": "La dimensione di questa superficie e quanto trattiene il calore. Cambiarli cambia il riscaldamento di cui l'edificio ha bisogno.",

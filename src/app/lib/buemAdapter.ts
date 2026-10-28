@@ -23,7 +23,7 @@ import {
   type OutputProfile,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import type { LoadDataPoint } from './loadProfile';
-import { meanStoreyHeight, modelledDwellings, storeyHeightList, type StoreyDwellings, type StoreyHeights } from './storeys';
+import { meanStoreyHeight, modelledUnits, storeyHeightList, type StoreyDwellings, type StoreyHeights } from './storeys';
 import { REFURB_TYPES, type RefurbElementType, type Refurbishment } from './refurbishment';
 
 // ─── Exported types ───────────────────────────────────────────────────────────
@@ -118,6 +118,10 @@ export interface BuildingParameters {
   storeyDwellings?: StoreyDwellings;
   /** A storey's own height in m, where it differs from roomHeight. */
   storeyHeights?: StoreyHeights;
+  /** Under a pitched roof: whether the attic is heated, its floor area in m2 and its dwellings. */
+  atticModelled?: boolean;
+  atticFloorArea?: number | null;
+  atticDwellings?: number | null;
   num_persons?: number | null;      // per dwelling
   archetype?: string;
   region_code?: string;             // CBS municipality code, e.g. GM0200
@@ -303,6 +307,7 @@ function adaptThematicData(feature: unknown): ThematicData {
   const modelled = fullElements.length > 0
     ? partialStoreys(modelledFromList(getMappedValue(feature, descriptor.storeyList)), storeys)
     : undefined;
+  const atticArea = heatedAtticArea(getMappedValue(feature, descriptor.attic));
   const identity: BuildingIdentity = {
     id: rawId,
     label: String(getMappedValue(feature, MODEL_DATA_MAP.thematic.label) ?? rawId),
@@ -310,15 +315,15 @@ function adaptThematicData(feature: unknown): ThematicData {
     buildingType,
     constructionYear: Number(getMappedValue(feature, descriptor.constructionYear)) || 0,
     country: String(getMappedValue(feature, descriptor.country) ?? ''),
-    // A_ref covers the modelled storeys only; the identity holds the whole building's.
-    floorArea: getMappedNumber(feature, descriptor.floorArea) * (modelled ? storeys / modelled.length : 1),
+    // A_ref covers the modelled storeys and a heated attic's floor; the identity holds the whole building's storeys.
+    floorArea: (getMappedNumber(feature, descriptor.floorArea) - atticArea) * (modelled ? storeys / modelled.length : 1),
     roomHeight: getMappedNumber(feature, descriptor.roomHeight),
     storeys,
     ...(modelled ? { storeysModelled: modelled } : {}),
   };
 
   const sent = adaptEnvelope(getMappedArray(feature, MODEL_DATA_MAP.thematic.envelope.elements));
-  const envelope = modelled ? withModelledShares(adaptEnvelope(fullElements), sent) : sent;
+  const envelope = fullElements.length > 0 ? withModelledShares(adaptEnvelope(fullElements), sent) : sent;
   const hasSummary = [
     results.heatingTotal,
     results.coolingTotal,
@@ -393,6 +398,7 @@ function adaptParameters(feature: unknown): BuildingParameters | undefined {
   if (storeyDwellings) parameters.storeyDwellings = storeyDwellings;
   const storeyHeights = heightsFromList(getMappedValue(feature, MODEL_DATA_MAP.thematic.descriptor.storeyList));
   if (storeyHeights) parameters.storeyHeights = storeyHeights;
+  Object.assign(parameters, atticParameters(getMappedValue(feature, MODEL_DATA_MAP.thematic.descriptor.attic)));
   return Object.keys(parameters).length > 0 ? parameters : undefined;
 }
 
@@ -658,6 +664,65 @@ function modelledFromList(list: unknown): number[] | undefined {
     .map((entry) => entry.storey);
 }
 
+/** The attic as stored in buem.configurator.attic. */
+export interface AtticEntry {
+  modelled: boolean;
+  /** m2; counted in A_ref while the attic is modelled. */
+  floor_area?: number;
+  dwellings?: number;
+}
+
+/** The attic to store, or undefined while it is modelled with neither a floor area nor dwellings. */
+function atticEntry(general: Record<string, any>): AtticEntry | undefined {
+  const out = general.atticModelled === false;
+  const area = Number(general.atticFloorArea) > 0 ? Number(general.atticFloorArea) : 0;
+  const dwellings = Number(general.atticDwellings) >= 1 ? Number(general.atticDwellings) : 0;
+  if (!out && !area && !dwellings) return undefined;
+  return { modelled: !out, ...(area ? { floor_area: area } : {}), ...(dwellings ? { dwellings } : {}) };
+}
+
+/** The attic's fields for the configurator state, from a stored attic entry. */
+function atticParameters(raw: unknown): Pick<BuildingParameters, 'atticModelled' | 'atticFloorArea' | 'atticDwellings'> {
+  if (!raw || typeof raw !== 'object') return {};
+  const entry = raw as Partial<AtticEntry>;
+  return {
+    atticModelled: entry.modelled !== false,
+    atticFloorArea: Number(entry.floor_area) > 0 ? Number(entry.floor_area) : null,
+    atticDwellings: Number(entry.dwellings) >= 1 ? Number(entry.dwellings) : null,
+  };
+}
+
+/** The floor area a stored attic adds to A_ref: its own while modelled, else none. */
+function heatedAtticArea(raw: unknown): number {
+  const { atticModelled, atticFloorArea } = atticParameters(raw);
+  return atticModelled && atticFloorArea ? atticFloorArea : 0;
+}
+
+/** The heat loss factor of a ceiling to an unheated attic, the value TABULA takes for one. */
+const ATTIC_B_TRANSMISSION = 0.8;
+
+/**
+ * With the attic left out, the roof cut away becomes a ceiling to the
+ * unheated attic: its area projected flat and its area-weighted U-value.
+ */
+function withAtticCeiling(clipped: Record<string, any>, whole: Record<string, any>): Record<string, any> {
+  let area = 0;
+  let ua = 0;
+  for (const [id, el] of Object.entries(whole)) {
+    if (el.type !== 'roof') continue;
+    const cut = Number(el.area ?? 0) - Number(clipped[id]?.area ?? 0);
+    if (!(cut > 0)) continue;
+    const projected = cut * Math.cos((Number(el.tilt) || 0) * Math.PI / 180);
+    area += projected;
+    ua += projected * Number(el.uValue ?? 0);
+  }
+  if (!(area > 0)) return clipped;
+  return {
+    ...clipped,
+    attic_ceiling: { id: 'attic_ceiling', label: 'attic_ceiling', type: 'roof', area, uValue: ua / area, gValue: null, tilt: 0, azimuth: 0, bTransmission: ATTIC_B_TRANSMISSION },
+  };
+}
+
 /** The whole envelope with each surface's share of it that was sent; a surface not sent has none. */
 function withModelledShares<T extends { area: number }>(
   full: Record<string, T>,
@@ -760,16 +825,22 @@ export function serializeToBuemFeature(
   // is cut to them and the whole envelope travels in buem.configurator.
   const modelled = partialStoreys(general.storeysModelled, storeys);
   const storeyShare = modelled ? modelled.length / storeys : 1;
+  // A heated attic adds the floor area given for it; one left out takes the
+  // roof from the block, which is then cut as for storeys left out.
+  const attic = atticEntry(general);
+  const atticOut = attic?.modelled === false;
+  const atticArea = attic?.modelled && attic.floor_area ? attic.floor_area : 0;
+  const clipped = modelled !== undefined || atticOut;
 
   if (identity.country) building.country = identity.country;
   else if (general.country) building.country = general.country;
 
   if (typeof identity.floorArea === 'number') {
     // identity.floorArea is already the total conditioned floor area (BuEM A_ref semantics).
-    building.A_ref = { value: identity.floorArea * storeyShare, unit: 'm2' };
+    building.A_ref = { value: identity.floorArea * storeyShare + atticArea, unit: 'm2' };
   } else if (typeof general.floorArea === 'number') {
     // general.floorArea is per-storey; A_ref needs the whole-building total.
-    building.A_ref = { value: general.floorArea * (Number(general.storeys) || 1) * storeyShare, unit: 'm2' };
+    building.A_ref = { value: general.floorArea * (Number(general.storeys) || 1) * storeyShare + atticArea, unit: 'm2' };
   }
 
   // BuEM takes one room height: the mean of the modelled storeys' own heights,
@@ -784,10 +855,11 @@ export function serializeToBuemFeature(
   }
   const hasDwellings = Object.values(general.storeyDwellings ?? {}).some((n) => Number(n) >= 1);
 
-  // BuEM's internal gains follow residential_units, so with storeys left out it
-  // is the count the user gave for them; the whole building's is kept beside.
-  const unitsModelled = modelled && hasDwellingsPerStorey(identity.buildingType || general.buildingType)
-    ? modelledDwellings(modelled, general.storeyDwellings ?? {})
+  // BuEM's internal gains follow residential_units, so with storeys or the
+  // attic left out it is the count the user gave for what is modelled; the
+  // whole building's is kept beside.
+  const unitsModelled = hasDwellingsPerStorey(identity.buildingType || general.buildingType)
+    ? modelledUnits(modelled, general.storeyDwellings ?? {}, attic, general.residential_units)
     : null;
   const keepUnits = unitsModelled !== null;
   const unitsFull: number | null = keepUnits ? general.residential_units ?? null : null;
@@ -805,13 +877,17 @@ export function serializeToBuemFeature(
   // the contract drops the envelope requirement.
   let envelopeFull: Record<string, any> | undefined;
   if (needsEnvelope(outputs)) {
-    const storeyArea = Number(building.A_ref?.value ?? 0) / Math.max(1, modelled?.length ?? storeys);
+    const storeyArea = (Number(building.A_ref?.value ?? 0) - atticArea) / Math.max(1, modelled?.length ?? storeys);
+    // The attic sits on the top storey; with that storey left out too, the
+    // internal ceiling to it stands in instead.
+    const cut = clippedToStoreys(elements, storeyShare);
+    const topModelled = !modelled || modelled.includes(storeys);
     building.envelope = {
-      elements: buildElementsToBuemEnvelope(modelled
-        ? withInternalBoundaries(clippedToStoreys(elements, storeyShare), elements, storeyArea)
+      elements: buildElementsToBuemEnvelope(clipped
+        ? withInternalBoundaries(atticOut && topModelled ? withAtticCeiling(cut, elements) : cut, elements, storeyArea)
         : elements),
     };
-    if (modelled) envelopeFull = { elements: buildElementsToBuemEnvelope(elements) };
+    if (clipped) envelopeFull = { elements: buildElementsToBuemEnvelope(elements) };
   }
 
   // Thermal parameters
@@ -867,6 +943,7 @@ export function serializeToBuemFeature(
           ...(hasOwnHeights && roomHeight !== undefined ? { room_height: roomHeight } : {}),
           ...(envelopeFull ? { envelope_full: envelopeFull } : {}),
           ...(keepUnits ? { residential_units_full: unitsFull } : {}),
+          ...(attic ? { attic } : {}),
         },
         ...(refurbishment ? { refurbishment } : {}),
         outputs,
@@ -962,8 +1039,9 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
   const own = (buem.configurator ?? {}) as Record<string, unknown>;
   const fullBlk = (own.envelope_full ?? {}) as Record<string, unknown>;
   const importedStoreys = Number(own.storeys ?? buem.storeys ?? bldg.n_storeys ?? 0);
-  const modelled = Array.isArray(fullBlk.elements) ? partialStoreys(modelledFromList(own.storey_list), importedStoreys) : undefined;
-  const sourceElements = modelled ? fullBlk.elements : envelopeBlk.elements;
+  const cut = Array.isArray(fullBlk.elements);
+  const modelled = cut ? partialStoreys(modelledFromList(own.storey_list), importedStoreys) : undefined;
+  const sourceElements = cut ? fullBlk.elements : envelopeBlk.elements;
   let elements: Record<string, any> = {};
 
   // Parse envelope elements
@@ -992,7 +1070,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     });
   }
 
-  if (modelled) {
+  if (cut) {
     const sent = Object.fromEntries((envelopeBlk.elements as any[] ?? []).map((el) => [String(el?.id ?? ''), { area: qty(el?.area) }]));
     elements = withModelledShares(elements, sent);
   }
@@ -1005,7 +1083,7 @@ export function parseBuemFeatureForImport(feature: unknown): ImportedBuildingDat
     ...(importedYear ? { constructionYear: importedYear } : {}),
     buildingType: String(bldg.building_type ?? bldg.type ?? ''),
     country: String(bldg.country ?? ''),
-    floorArea: qty(bldg.A_ref) / Math.max(1, modelled?.length ?? importedStoreys),
+    floorArea: (qty(bldg.A_ref) - heatedAtticArea(own.attic)) / Math.max(1, modelled?.length ?? importedStoreys),
     roomHeight: Number(own.room_height) > 0 ? Number(own.room_height) : qty(bldg.h_room),
     storeys: importedStoreys,
     ...(modelled ? { storeysModelled: modelled } : {}),

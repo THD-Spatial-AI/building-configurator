@@ -1,7 +1,7 @@
 // One building through BuEM: build the request from the edited model, hand it
 // to the host's transport, map the answer into the shapes the UI reads.
 
-import { serializeToBuemFeature, type BuildingIdentity, type BuildingState, type StoreyEntry } from './buemAdapter';
+import { serializeToBuemFeature, type AtticEntry, type BuildingIdentity, type BuildingState, type StoreyEntry } from './buemAdapter';
 import {
   DEFAULT_ELEMENTS,
   DEFAULT_GENERAL,
@@ -125,6 +125,8 @@ export interface ConfiguratorKeys {
   envelope_full?: { elements: Record<string, any>[] };
   /** With storeys left out and their dwellings given: the whole building's residential_units (null: BuEM's default). */
   residential_units_full?: number | null;
+  /** Under a pitched roof, while the attic is left out or has a floor area or dwellings. */
+  attic?: AtticEntry;
 }
 
 /**

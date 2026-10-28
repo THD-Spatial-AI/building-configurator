@@ -27,8 +27,8 @@ import { TechnologiesTab } from './TechnologiesTab';
 import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
-import { StoreysModelled, pickInSelection } from './StoreysModelled';
-import { dwellingsTotal, eavesHeight, storeyHeightList, storeyShares } from '../../lib/storeys';
+import { StoreysModelled, pickWithAttic } from './StoreysModelled';
+import { atticFloorArea, dwellingsTotal, eavesHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -172,7 +172,7 @@ export function Building3DView({
   const leaveStoreyMode = () => setStoreyMode(false);
   const [measuring, setMeasuring] = useState(false);
   const pickStorey = (storey: number | null) => {
-    if (storey !== null) setSelectedStoreys((prev) => pickInSelection(prev, storey, multiStoreys));
+    if (storey !== null) setSelectedStoreys((prev) => pickWithAttic(prev, storey, multiStoreys, model.general.storeys + 1));
   };
   /** The data credits, open over the model where it is too narrow to show them in full. */
   const [creditsOpen, setCreditsOpen] = useState(false);
@@ -233,29 +233,62 @@ export function Building3DView({
   );
   const storeyHeights = storeyHeightList(model.general.storeys, model.general.roomHeight, model.general.storeyHeights);
   const modelHeight = surfaces.length > 0 && !isEnvelopeDetached(surfaces, envelopeIds) ? eavesHeight(surfaces) : undefined;
-  /** Models only these storeys (null: all), each surface cut to its share inside them at these heights. */
-  const setModelledStoreys = (modelled: number[] | null, heights: readonly number[] = storeyHeights) => model.setStoreysModelled(
-    modelled,
-    modelled ? storeyShares(surfaces, elements, model.general.storeys, modelled, heights) : {},
-  );
-  /** Sets the storeys' own heights; they move the storey bands, so the shares of the storeys left out follow. */
+  const attic = surfaces.length > 0 && hasAttic(surfaces);
+  const atticMeasured = useMemo(() => Math.round(atticFloorArea(surfaces) * 10) / 10, [surfaces]);
+  const atticIn = model.general.atticModelled !== false;
+  /** Whether part of the building is left out, so each surface is cut to its share of what is modelled. */
+  const isCut = model.general.storeysModelled !== null || (attic && !atticIn);
+  /**
+   * Models these storeys (null: all) and the attic while it is in, each
+   * surface cut to its share inside them at these heights; with nothing left
+   * out, every surface whole.
+   */
+  const cutToBands = ({
+    modelled = model.general.storeysModelled,
+    heights = storeyHeights,
+    storeys = model.general.storeys,
+    atticModelled = atticIn,
+  }: { modelled?: number[] | null; heights?: readonly number[]; storeys?: number; atticModelled?: boolean } = {}) => {
+    const bands = [...(modelled ?? Array.from({ length: storeys }, (_, i) => i + 1)), ...(attic && atticModelled ? [storeys + 1] : [])];
+    const cut = modelled !== null || (attic && !atticModelled);
+    model.setStoreysModelled(modelled, cut ? storeyShares(surfaces, elements, storeys, bands, heights) : null);
+  };
+  /** Sets the storeys' own heights; they move the storey bands, so the shares of what is left out follow. */
   const setStoreyHeights = (values: Record<number, number>) => {
     model.setGen('storeyHeights', values);
-    if (model.general.storeysModelled) {
-      setModelledStoreys(model.general.storeysModelled, storeyHeightList(model.general.storeys, model.general.roomHeight, values));
-    }
+    if (isCut) cutToBands({ heights: storeyHeightList(model.general.storeys, model.general.roomHeight, values) });
   };
   const setRoomHeight = (roomHeight: number) => {
     model.setGen('roomHeight', roomHeight);
-    if (model.general.storeysModelled) {
-      setModelledStoreys(model.general.storeysModelled, storeyHeightList(model.general.storeys, roomHeight, model.general.storeyHeights));
+    if (isCut) cutToBands({ heights: storeyHeightList(model.general.storeys, roomHeight, model.general.storeyHeights) });
+  };
+  /** A new count moves every band, so the storeys modelled reset to all and a cold attic's cut follows. */
+  const setStoreyCount = (storeys: number) => {
+    model.setGen('storeys', storeys);
+    setSelectedStoreys([]);
+    if (attic && !atticIn) {
+      cutToBands({ modelled: null, storeys, heights: storeyHeightList(storeys, model.general.roomHeight, model.general.storeyHeights) });
     }
+  };
+  /** The building's dwellings: the counts given per storey and for the attic, or null while none is. */
+  const dwellingsWith = (perStorey: Record<number, number>, inAttic: number | null) => {
+    const storeys = dwellingsTotal(model.general.storeys, perStorey);
+    return storeys === null && !inAttic ? null : (storeys ?? 0) + (inAttic ?? 0);
   };
   /** Sets the dwellings per storey; the building's total is then the sum of the counts given. */
   const setStoreyDwellings = (values: Record<number, number>) => {
     model.setGen('storeyDwellings', values);
-    const total = dwellingsTotal(model.general.storeys, values);
+    const total = dwellingsWith(values, model.general.atticDwellings);
     if (total !== null) model.setGen('residential_units', total);
+  };
+  const setAtticDwellings = (count: number | null) => {
+    model.setGen('atticDwellings', count);
+    const total = dwellingsWith(model.general.storeyDwellings, count);
+    if (total !== null) model.setGen('residential_units', total);
+  };
+  const setAtticModelled = (on: boolean) => {
+    model.setGen('atticModelled', on);
+    cutToBands({ atticModelled: on });
   };
   const hoverSurface = useCallback((id: string | null, at?: { x: number; y: number }) => {
     setHover(id && at ? { id, at } : null);
@@ -376,7 +409,7 @@ export function Building3DView({
         roomHeight={model.general.roomHeight}
         heights={{ values: model.general.storeyHeights ?? {}, onChange: setStoreyHeights }}
         modelHeight={modelHeight}
-        onStoreysChange={(storeys) => model.setGen('storeys', storeys)}
+        onStoreysChange={setStoreyCount}
         onRoomHeightChange={setRoomHeight}
         modelled={model.general.storeysModelled}
         selected={selectedStoreys}
@@ -391,8 +424,18 @@ export function Building3DView({
           values: model.general.storeyDwellings,
           onChange: setStoreyDwellings,
         } : undefined}
+        attic={attic ? {
+          modelled: atticIn,
+          floorArea: model.general.atticFloorArea,
+          measuredArea: atticMeasured,
+          onModelledChange: setAtticModelled,
+          onFloorAreaChange: (area) => model.setGen('atticFloorArea', area),
+          ...(hasDwellingsPerStorey(model.general.buildingType)
+            ? { dwellings: model.general.atticDwellings, onDwellingsChange: setAtticDwellings }
+            : {}),
+        } : undefined}
         disabled={surfaces.length === 0}
-        onChange={(modelled) => setModelledStoreys(modelled)}
+        onChange={(modelled) => cutToBands({ modelled })}
       />
     ),
     insulation: {
@@ -543,7 +586,7 @@ export function Building3DView({
               previewId={previewSurface ?? (storeyMode ? null : hover?.id ?? null)}
               showSides={measuring}
               focusToken={focus?.token}
-              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys, heights: storeyHeights }}
+              storeys={{ count: model.general.storeys, modelled: model.general.storeysModelled, selected: selectedStoreys, heights: storeyHeights, atticOut: attic && !atticIn }}
               onSelectStorey={storeyMode ? pickStorey : undefined}
               onSelectSurface={selectInModel}
             />

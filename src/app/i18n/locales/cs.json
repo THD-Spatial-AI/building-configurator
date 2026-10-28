@@ -742,7 +742,7 @@
   },
   "storeys": {
     "title": "Modelovaná podlaží",
-    "hint": "Podlaží 1 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty či vlastní výšku; plocha a obálka počítají jen modelovaná podlaží.",
+    "hint": "Podlaží 0 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty či vlastní výšku; plocha a obálka počítají jen modelovaná podlaží.",
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
     "floorArea": "Modelovaná plocha",
     "pick": "Podlaží",
@@ -776,7 +776,18 @@
       "storeys": "Další podlaží o výšce {room} m by bylo vyšší než 3D model, který měří {height} m k okapu.",
       "height": "Vyšší podlaží by udělalo podlaží vyšší než 3D model, který měří {height} m k okapu."
     },
-    "heightConflict": "Podlaží jsou dohromady vysoká {total} m, více než 3D model, který měří {height} m k okapu. Snižte počet podlaží nebo některou výšku."
+    "heightConflict": "Podlaží jsou dohromady vysoká {total} m, více než 3D model, který měří {height} m k okapu. Snižte počet podlaží nebo některou výšku.",
+    "attic": {
+      "label": "Podkroví",
+      "chipIn": "Podkroví, v modelu",
+      "chipOut": "Podkroví, vynechané",
+      "hint": "Prostor pod šikmou střechou, nad okapem. Při vynechání střecha nepatří k vytápěné budově a strop pod ní ztrácí teplo do studeného podkroví.",
+      "floorArea": "Plocha podkroví",
+      "noArea": "Nezapočteno",
+      "dwellings": "Byty v podkroví",
+      "floorAreaTip": "Změřeno z 3D modelu: plocha se počítá celá tam, kde je střecha 2 m a výše, poloviční při 1 až 2 m.",
+      "useMeasured": "Použít změřenou ({area} m²)"
+    }
   },
   "help": {
     "envelope": "Velikost této plochy a jak dobře drží teplo. Jejich změna mění, kolik vytápění budova potřebuje.",

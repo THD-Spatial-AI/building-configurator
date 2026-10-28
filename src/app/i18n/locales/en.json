@@ -722,7 +722,7 @@
   },
   "storeys": {
     "title": "Storeys modelled",
-    "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model, give their dwellings or their own height; floor area and envelope count the modelled storeys only.",
+    "hint": "Storey 0 is the ground floor. Select storeys here or in the model, then leave them out of the model, give their dwellings or their own height; floor area and envelope count the modelled storeys only.",
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
     "floorArea": "Floor area modelled",
     "pick": "Storeys",
@@ -754,7 +754,18 @@
       "storeys": "Another storey at {room} m would be taller than the 3D model, which is {height} m to the eaves.",
       "height": "A taller storey would make the storeys taller than the 3D model, which is {height} m to the eaves."
     },
-    "heightConflict": "The storeys are {total} m tall together, taller than the 3D model, which is {height} m to the eaves. Lower the storey count or a height."
+    "heightConflict": "The storeys are {total} m tall together, taller than the 3D model, which is {height} m to the eaves. Lower the storey count or a height.",
+    "attic": {
+      "label": "Attic",
+      "chipIn": "Attic, in the model",
+      "chipOut": "Attic, left out",
+      "hint": "The space under the pitched roof, above the eaves. Left out, the roof leaves the heated building and the ceiling below it loses heat to the cold attic.",
+      "floorArea": "Attic floor area",
+      "noArea": "Not counted",
+      "dwellings": "Dwellings in the attic",
+      "floorAreaTip": "Measured from the 3D model: floor counts in full where the roof is 2 m or more above it, half where it is 1 to 2 m above it.",
+      "useMeasured": "Use measured ({area} m²)"
+    }
   },
   "help": {
     "envelope": "The size of this surface and how well it keeps heat in. Changing them changes how much heating the building needs.",

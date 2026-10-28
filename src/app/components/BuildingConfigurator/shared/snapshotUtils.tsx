@@ -121,10 +121,12 @@ export function buildSnapshotRows(
   const ownHeights = Object.values(general.storeyHeights ?? {}).some((h) => h > 0);
   const roomHeight = meanStoreyHeight(storeyHeightList(general.storeys, general.roomHeight, general.storeyHeights), modelled ?? null)
     || general.roomHeight;
-  const sent = modelled
+  // An attic left out cuts the envelope as storeys left out do.
+  const cut = modelled || general.atticModelled === false;
+  const sent = cut
     ? Object.values(elements).filter((el) => (el.modelledShare ?? 1) > 0)
     : Object.values(elements);
-  const envelopeArea = modelled ? sent.reduce((sum, el) => sum + el.area * (el.modelledShare ?? 1), 0) : totalArea;
+  const envelopeArea = cut ? sent.reduce((sum, el) => sum + el.area * (el.modelledShare ?? 1), 0) : totalArea;
 
   return [
     {
