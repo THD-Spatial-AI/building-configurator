@@ -396,7 +396,8 @@
     },
     "persons": {
       "label": "Bewoners per woning",
-      "tip": "Personen per woning. De standaard is de statistische huishoudensgrootte voor land, regio en gebouwtype."
+      "tip": "Personen per woning. De standaard is de statistische huishoudensgrootte voor land, regio en gebouwtype.",
+      "placeholder": "Statistische huishoudensgrootte."
     },
     "archetype": {
       "label": "Type huishouden",
