@@ -21,13 +21,6 @@ interface SectionProps {
   setGen: (key: string, value: any) => void;
 }
 
-function personOptions(t: Translate) {
-  return [
-    { value: '', label: t('household.default') },
-    ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ value: String(n), label: String(n) })),
-  ];
-}
-
 /** A whole number BuEM defaults when it is left empty. */
 function OptionalCount({ label, value, onChange, tip, placeholder }: {
   label: string;
@@ -41,7 +34,10 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
     <div>
       <FieldLabel tip={tip}>{label}</FieldLabel>
       <NumberInput
+        label={label}
+        hideLabel
         value={value ?? ''}
+        placeholder={t('household.default')}
         onChange={(v) => onChange(Math.max(1, Math.round(v)))}
         unit="" min={1} step={1} integer
       />
@@ -103,11 +99,11 @@ export function OccupancySection({ general, setGen, mode = 'basic' }: SectionPro
             tip={t('household.dwellings.tip')}
           />
         )}
-        <SelectInput
+        <OptionalCount
           label={t('household.persons.label')}
-          value={general.num_persons === null ? '' : String(general.num_persons)}
-          onChange={(v) => setGen('num_persons', v ? Number(v) : null)}
-          options={personOptions(t)}
+          value={general.num_persons}
+          onChange={(v) => setGen('num_persons', v)}
+          placeholder={t('household.persons.placeholder')}
           tip={t('household.persons.tip')}
         />
       </FieldRow>

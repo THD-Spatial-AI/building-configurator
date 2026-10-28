@@ -396,7 +396,8 @@
     },
     "persons": {
       "label": "Bewoners per woning",
-      "tip": "Personen per woning. De standaard is de statistische huishoudensgrootte voor land, regio en gebouwtype."
+      "tip": "Personen per woning. De standaard is de statistische huishoudensgrootte voor land, regio en gebouwtype.",
+      "placeholder": "Statistische huishoudensgrootte."
     },
     "archetype": {
       "label": "Type huishouden",
@@ -720,33 +721,18 @@
   },
   "storeys": {
     "title": "Gemodelleerde verdiepingen",
-    "hint": "Verdieping 0 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen of hun eigen hoogte op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "hint": "Verdieping 0 is de begane grond. Laat in de rij een verdieping weg uit het model of geef haar een eigen hoogte en woningen; een rij die hier of in het model is gekozen, wordt in beide gemarkeerd. Vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
     "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
     "floorArea": "Gemodelleerd vloeroppervlak",
     "pick": "Verdiepingen",
     "pickHint": "Klik verdiepingen in het model aan om ze te selecteren; stel ze in onder Gemodelleerde verdiepingen op het tabblad Gebouw.",
     "lastOne": "Minstens één verdieping blijft in het model.",
-    "chip": {
-      "in": "Verdieping {number}, in het model",
-      "out": "Verdieping {number}, weggelaten",
-      "dwellings": "{count} won."
-    },
     "select": {
-      "all": "Alles selecteren",
-      "clear": "Selectie wissen",
-      "count": {
-        "one": "{count} verdieping geselecteerd",
-        "other": "{count} verdiepingen geselecteerd"
-      },
-      "multi": "Meerdere verdiepingen instellen",
       "one": "Verdieping {number}"
     },
-    "dwellingsPerStorey": "Woningen per verdieping",
-    "mixed": "gemengd",
     "dwellingsMissing": "Geef het aantal woningen op elke meegetelde verdieping. Ontbreekt: verdieping {storeys}.",
     "inModel": "In het model",
     "roomHeightTip": "De hoogte van elke verdieping, van vloer tot vloer. Een verdieping met een eigen hoogte houdt die.",
-    "ownHeight": "Verdiepingshoogte",
     "useRoomHeight": "Kamerhoogte gebruiken",
     "limit": {
       "storeys": "Nog een verdieping van {room} m zou hoger zijn dan het 3D-model, dat tot de dakgoot {height} m is.",
@@ -755,8 +741,6 @@
     "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte.",
     "attic": {
       "label": "Zolder",
-      "chipIn": "Zolder, in het model",
-      "chipOut": "Zolder, weggelaten",
       "hint": "De ruimte onder het hellende dak, boven de dakgoot. Weggelaten hoort het dak niet meer bij het verwarmde gebouw en verliest het plafond eronder warmte naar de koude zolder.",
       "floorArea": "Vloeroppervlak zolder",
       "noArea": "Niet geteld",
@@ -764,7 +748,11 @@
       "floorAreaTip": "Gemeten uit het 3D-model: vloer telt volledig waar het dak 2 m of meer erboven ligt, voor de helft bij 1 tot 2 m.",
       "useMeasured": "Gemeten gebruiken ({area} m²)"
     },
-    "someIn": "Sommige zijn in het model, andere weggelaten."
+    "table": {
+      "storey": "Verdieping",
+      "height": "Hoogte",
+      "dwellings": "Woningen"
+    }
   },
   "help": {
     "envelope": "De grootte van dit vlak en hoe goed het warmte vasthoudt. Wijzigen verandert hoeveel verwarming het gebouw nodig heeft.",

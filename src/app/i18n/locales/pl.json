@@ -410,7 +410,8 @@
     },
     "persons": {
       "label": "Osoby na mieszkanie",
-      "tip": "Liczba osób w każdym mieszkaniu. Domyślnie statystyczna wielkość gospodarstwa domowego dla kraju, regionu i typu budynku."
+      "tip": "Liczba osób w każdym mieszkaniu. Domyślnie statystyczna wielkość gospodarstwa domowego dla kraju, regionu i typu budynku.",
+      "placeholder": "Statystyczna wielkość gospodarstwa domowego."
     },
     "archetype": {
       "label": "Typ gospodarstwa",
@@ -740,35 +741,18 @@
   },
   "storeys": {
     "title": "Modelowane kondygnacje",
-    "hint": "Kondygnacja 0 to parter. Zaznacz kondygnacje tutaj lub w modelu, a następnie pomiń je w modelu lub podaj ich mieszkania albo własną wysokość; powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
+    "hint": "Kondygnacja 0 to parter. W jej wierszu pomiń kondygnację w modelu lub nadaj jej własną wysokość i mieszkania; wiersz wybrany tutaj lub w modelu jest wyróżniony w obu miejscach. Powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
     "floorArea": "Modelowana powierzchnia",
     "pick": "Kondygnacje",
     "pickHint": "Kliknij kondygnacje w modelu, aby je zaznaczyć; ustaw je w sekcji Modelowane kondygnacje na karcie Budynek.",
     "lastOne": "Co najmniej jedna kondygnacja pozostaje w modelu.",
-    "chip": {
-      "in": "Kondygnacja {number}, w modelu",
-      "out": "Kondygnacja {number}, pominięta",
-      "dwellings": "{count} mieszk."
-    },
     "select": {
-      "all": "Zaznacz wszystkie",
-      "clear": "Wyczyść zaznaczenie",
-      "count": {
-        "one": "{count} kondygnacja zaznaczona",
-        "few": "{count} kondygnacje zaznaczone",
-        "many": "{count} kondygnacji zaznaczonych",
-        "other": "{count} kondygnacji zaznaczonej"
-      },
-      "multi": "Konfiguruj kilka kondygnacji",
       "one": "Kondygnacja {number}"
     },
-    "dwellingsPerStorey": "Mieszkania na kondygnację",
-    "mixed": "różne",
     "dwellingsMissing": "Podaj liczbę mieszkań na każdej uwzględnionej kondygnacji. Brakuje: kondygnacja {storeys}.",
     "inModel": "W modelu",
     "roomHeightTip": "Wysokość każdej kondygnacji, od podłogi do podłogi. Kondygnacja z własną wysokością ją zachowuje.",
-    "ownHeight": "Wysokość kondygnacji",
     "useRoomHeight": "Użyj wysokości pomieszczenia",
     "limit": {
       "storeys": "Kolejna kondygnacja o wysokości {room} m byłaby wyższa niż model 3D, który ma {height} m do okapu.",
@@ -777,8 +761,6 @@
     "heightConflict": "Kondygnacje mają razem {total} m wysokości, więcej niż model 3D, który ma {height} m do okapu. Zmniejsz liczbę kondygnacji lub jedną z wysokości.",
     "attic": {
       "label": "Poddasze",
-      "chipIn": "Poddasze, w modelu",
-      "chipOut": "Poddasze, pominięte",
       "hint": "Przestrzeń pod dachem spadzistym, powyżej okapu. Po pominięciu dach nie należy już do ogrzewanego budynku, a strop pod nim traci ciepło do zimnego poddasza.",
       "floorArea": "Powierzchnia poddasza",
       "noArea": "Nie liczona",
@@ -786,7 +768,11 @@
       "floorAreaTip": "Zmierzona z modelu 3D: powierzchnia liczy się w całości tam, gdzie dach jest 2 m lub wyżej, w połowie przy 1 do 2 m.",
       "useMeasured": "Użyj zmierzonej ({area} m²)"
     },
-    "someIn": "Niektóre są w modelu, inne pominięte."
+    "table": {
+      "storey": "Kondygnacja",
+      "height": "Wysokość",
+      "dwellings": "Mieszkania"
+    }
   },
   "help": {
     "envelope": "Wielkość tej powierzchni i to, jak dobrze zatrzymuje ciepło. Ich zmiana zmienia zapotrzebowanie budynku na ogrzewanie.",

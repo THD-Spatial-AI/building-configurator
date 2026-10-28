@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { StoreysModelled, pickInSelection, pickWithAttic, toggleSelected, withStoreys } from './StoreysModelled';
 
+/** The input named `label`, as rendered, or '' when there is none. */
+const input = (html: string, label: string) => new RegExp(`<input[^>]*aria-label="${label}"[^>]*>`).exec(html)?.[0] ?? '';
+
+/** Whether the switch named `label` is on, off, or absent (null). */
+const switchState = (html: string, label: string) => {
+  const m = new RegExp(`aria-checked="(true|false)" aria-label="${label}"`).exec(html);
+  return m ? m[1] === 'true' : null;
+};
+
 const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>) => renderToStaticMarkup(
   <StoreysModelled
     storeys={3}
@@ -39,30 +48,34 @@ describe('StoreysModelled', () => {
     expect(html).toContain('The storeys are 8.0 m tall together');
   });
 
-  it('gives a selected storey its own height, with the room height as its default', () => {
-    expect(render({ selected: [2] })).toContain('placeholder="2.5"');
-    const own = render({ selected: [2], heights: { values: { 2: 3.2 }, onChange: () => {} } });
-    expect(own).toContain('value="3.2"');
-    expect(own).toContain('Use room height');
+  it('gives every storey its own height, the room height as its default', () => {
+    const html = render({ heights: { values: { 2: 3.2 }, onChange: () => {} } });
+    expect(input(html, 'Storey 0: Height')).toContain('placeholder="2.5"');
+    expect(input(html, 'Storey 1: Height')).toContain('value="3.2"');
+    expect(html).toContain('aria-label="Storey 1: Use room height"');
+    expect(html).not.toContain('aria-label="Storey 0: Use room height"');
   });
 
-  it('names each storey in or out of the model and shows the floor area modelled', () => {
+  it('shows every storey in a row, in or out of the model, with the floor area modelled', () => {
     const html = render({});
-    expect(html).toContain('aria-label="Storey 0, in the model"');
-    expect(html).toContain('aria-label="Storey 2, left out"');
+    expect([0, 1, 2].map((n) => switchState(html, `Storey ${n}: In the model`))).toEqual([true, true, false]);
     expect(html).toContain('2 × 80 m² = 160 m²');
+    expect(html).not.toContain('selected</span>');
   });
 
-  it('offers the in-model switch and the dwellings per storey only while storeys are selected', () => {
-    const dwellings = { values: { 2: 4, 3: 4 }, onChange: () => {} };
-    const none = render({ dwellings });
-    expect(none).not.toContain('Dwellings per storey');
-    const two = render({ dwellings, selected: [2, 3] });
-    expect(two).toContain('2 storeys selected');
-    expect(two).toContain('aria-label="In the model"');
-    expect(two).toContain('aria-checked="false"');
-    expect(two).toContain('Dwellings per storey');
-    expect(two).toContain('value="4"');
+  it('gives every storey its dwellings in its row, for a building counted per storey', () => {
+    const html = render({ dwellings: { values: { 2: 4 }, onChange: () => {} } });
+    expect(input(html, 'Storey 1: Dwellings')).toContain('value="4"');
+    expect(render({})).not.toContain(': Dwellings');
+  });
+
+  it('keeps the last storey in the model: its switch is off limits and says why', () => {
+    const html = render({ modelled: [1] });
+    expect(html).toMatch(/title="At least one storey stays in the model."><button[^>]*disabled=""/);
+  });
+
+  it('highlights a row picked here or in the model', () => {
+    expect(render({ selected: [2] })).toContain('aria-pressed="true" aria-label="Storey 1"');
   });
 
   it('names the modelled storeys that still need a dwelling count', () => {
@@ -96,24 +109,23 @@ describe('StoreysModelled with an attic', () => {
 
   it('names the ground floor 0 and puts the attic after the top storey', () => {
     const html = render({ modelled: null, attic });
-    const order = ['Storey 0, in the model', 'Storey 1, in the model', 'Storey 2, in the model', 'Attic, in the model'].map((label) => html.indexOf(`aria-label="${label}"`));
+    const order = ['Storey 0', 'Storey 1', 'Storey 2', 'Attic'].map((label) => html.indexOf(`aria-label="${label}"`));
     expect(order.every((at, i) => at >= 0 && (i === 0 || at > order[i - 1]))).toBe(true);
-    expect(render({ selected: [1] })).toContain('Storey 0');
   });
 
-  it('shows the attic as its own chip, with one storey too', () => {
-    const html = render({ storeys: 1, modelled: null, attic });
-    expect(html).toContain('aria-label="Attic, in the model"');
-    expect(render({ storeys: 1, modelled: null, attic: { ...attic, modelled: false } })).toContain('aria-label="Attic, left out"');
+  it('shows the attic as its own row, with one storey too', () => {
+    expect(switchState(render({ storeys: 1, modelled: null, attic }), 'Attic: In the model')).toBe(true);
+    expect(switchState(render({ storeys: 1, modelled: null, attic: { ...attic, modelled: false } }), 'Attic: In the model')).toBe(false);
     expect(render({ storeys: 1, modelled: null })).not.toContain('Attic');
   });
 
-  it('gives the selected attic its switch, floor area and dwellings, not a storey height', () => {
-    const html = render({ selected: [4], attic: { ...attic, onDwellingsChange: () => {} } });
+  it('gives the attic dwellings in its row and a floor area beneath while it is in, but no height', () => {
+    const dwellings = { values: {}, onChange: () => {} };
+    const html = render({ dwellings, attic: { ...attic, onDwellingsChange: () => {} } });
+    expect(html).toContain('aria-label="Attic: Dwellings"');
     expect(html).toContain('placeholder="Not counted"');
-    expect(html).toContain('aria-label="Dwellings in the attic"');
-    expect(html).not.toContain('Storey height');
-    expect(render({ selected: [4], attic: { ...attic, modelled: false } })).not.toContain('Attic floor area');
+    expect(html).not.toContain('aria-label="Attic: Height"');
+    expect(render({ attic: { ...attic, modelled: false } })).not.toContain('Attic floor area');
   });
 
   it('adds a heated attic\'s floor area to the floor area modelled', () => {
@@ -142,14 +154,5 @@ describe('StoreysModelled with a measured attic', () => {
 
   it('stops offering it once taken', () => {
     expect(render({ selected: [4], attic: { ...attic, floorArea: 25 } })).not.toContain('Use measured');
-  });
-});
-
-describe('a selection of storeys partly in the model', () => {
-  it('says some are in and some are out, beside the switch that puts them all in', () => {
-    const html = render({ modelled: [1, 2], selected: [2, 3] });
-    expect(html).toContain('Some are in the model, some are left out.');
-    expect(html).toContain('aria-checked="false"');
-    expect(render({ modelled: [1, 2], selected: [1, 2] })).not.toContain('Some are in the model');
   });
 });
