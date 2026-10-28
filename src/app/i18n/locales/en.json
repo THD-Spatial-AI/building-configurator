@@ -396,7 +396,8 @@
     },
     "persons": {
       "label": "Occupants per dwelling",
-      "tip": "People living in each dwelling. The default is the statistical household size for the country, region and building type."
+      "tip": "People living in each dwelling. The default is the statistical household size for the country, region and building type.",
+      "placeholder": "Statistical household size."
     },
     "archetype": {
       "label": "Household type",

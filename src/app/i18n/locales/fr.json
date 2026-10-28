@@ -397,7 +397,8 @@
     },
     "persons": {
       "label": "Occupants par logement",
-      "tip": "Personnes vivant dans chaque logement. Par défaut, la taille statistique des ménages pour le pays, la région et le type de bâtiment."
+      "tip": "Personnes vivant dans chaque logement. Par défaut, la taille statistique des ménages pour le pays, la région et le type de bâtiment.",
+      "placeholder": "Taille statistique des ménages."
     },
     "archetype": {
       "label": "Type de ménage",

@@ -410,7 +410,8 @@
     },
     "persons": {
       "label": "Osoby na mieszkanie",
-      "tip": "Liczba osób w każdym mieszkaniu. Domyślnie statystyczna wielkość gospodarstwa domowego dla kraju, regionu i typu budynku."
+      "tip": "Liczba osób w każdym mieszkaniu. Domyślnie statystyczna wielkość gospodarstwa domowego dla kraju, regionu i typu budynku.",
+      "placeholder": "Statystyczna wielkość gospodarstwa domowego."
     },
     "archetype": {
       "label": "Typ gospodarstwa",

@@ -397,7 +397,8 @@
     },
     "persons": {
       "label": "Ocupantes por vivienda",
-      "tip": "Personas que viven en cada vivienda. Por defecto, el tamaño medio del hogar según país, región y tipo de edificio."
+      "tip": "Personas que viven en cada vivienda. Por defecto, el tamaño medio del hogar según país, región y tipo de edificio.",
+      "placeholder": "Tamaño medio del hogar."
     },
     "archetype": {
       "label": "Tipo de hogar",

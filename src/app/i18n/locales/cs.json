@@ -410,7 +410,8 @@
     },
     "persons": {
       "label": "Osob na byt",
-      "tip": "Počet osob v každém bytě. Výchozí hodnota je statistická velikost domácnosti pro zemi, region a typ budovy."
+      "tip": "Počet osob v každém bytě. Výchozí hodnota je statistická velikost domácnosti pro zemi, region a typ budovy.",
+      "placeholder": "Statistická velikost domácnosti."
     },
     "archetype": {
       "label": "Typ domácnosti",

@@ -30,6 +30,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - Building data shows as tiles (type, country and year, storeys, room height, floor area, dwellings, occupants, volume); Edit switches to the editable table, where storeys and room height are read only. A dashed card in Basic points to the Expert sections.
 - A section opens from a click anywhere on its header.
 - Storeys modelled is a table: each storey and the attic in a row with its in-model switch, own height and dwellings. A row picked there or in the 3D model is highlighted in both.
+- Occupants per dwelling is a number field like Dwellings, empty for the statistical household size, no longer a drop-down capped at 8.
 - The energy grade's element types are one table, a row per type with its state, U-value and loss factor, the units in the header.
 - The region code in Storeys and occupancy shows in Expert only. It stays optional, and a stored `region_code` is sent in either mode.
 - The footprint area is read only in the building data editor: it comes from the 3D model, whose surfaces cannot be redrawn.

@@ -396,7 +396,8 @@
     },
     "persons": {
       "label": "Occupanti per alloggio",
-      "tip": "Persone che vivono in ogni alloggio. Il predefinito è la dimensione statistica del nucleo familiare per paese, regione e tipo di edificio."
+      "tip": "Persone che vivono in ogni alloggio. Il predefinito è la dimensione statistica del nucleo familiare per paese, regione e tipo di edificio.",
+      "placeholder": "Dimensione statistica del nucleo familiare."
     },
     "archetype": {
       "label": "Tipo di nucleo familiare",

@@ -20,3 +20,18 @@ describe('the region code', () => {
     expect(render('expert', 'GM0200')).toContain('value="GM0200"');
   });
 });
+
+describe('occupants per dwelling', () => {
+  const field = (num_persons: number | null) => renderToStaticMarkup(
+    <OccupancySection general={{ ...DEFAULT_GENERAL, buildingType: 'Single-family House', num_persons }} setGen={() => {}} />,
+  );
+
+  it('is a number field, empty for the statistical household size', () => {
+    const html = field(null);
+    expect(html).not.toContain('<option value="8">');
+    expect(html).toContain('Statistical household size.');
+    expect(html).toMatch(/placeholder="Default"[^>]*aria-label="Occupants per dwelling"|aria-label="Occupants per dwelling"[^>]*placeholder="Default"/);
+    expect(field(3)).toContain('value="3"');
+    expect(field(3)).toContain('Use default');
+  });
+});

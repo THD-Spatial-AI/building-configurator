@@ -396,7 +396,8 @@
     },
     "persons": {
       "label": "Bewohner je Wohneinheit",
-      "tip": "Personen pro Wohneinheit. Standard ist die statistische Haushaltsgröße für Land, Region und Gebäudetyp."
+      "tip": "Personen pro Wohneinheit. Standard ist die statistische Haushaltsgröße für Land, Region und Gebäudetyp.",
+      "placeholder": "Statistische Haushaltsgröße."
     },
     "archetype": {
       "label": "Haushaltstyp",
