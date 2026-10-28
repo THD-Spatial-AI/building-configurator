@@ -57,7 +57,8 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
 }
 
 /** Dwellings, occupants and household habits; capacity alone for a service building. */
-export function OccupancySection({ general, setGen }: SectionProps) {
+/** The region code is in Expert only: it is optional, and few users know their municipality's code. */
+export function OccupancySection({ general, setGen, mode = 'basic' }: SectionProps & { mode?: 'basic' | 'expert' }) {
   const t = useT();
   if (isServiceBuildingType(general.buildingType)) {
     return (
@@ -117,7 +118,7 @@ export function OccupancySection({ general, setGen }: SectionProps) {
         options={archetypeOptions(t)}
         tip={t('household.archetype.tip')}
       />
-      <div>
+      {mode === 'expert' && <div>
         <FieldLabel tip={t('household.region.tip')}>
           {t('household.region.label')}
         </FieldLabel>
@@ -130,7 +131,7 @@ export function OccupancySection({ general, setGen }: SectionProps) {
             className="cfg-number"
           />
         </div>
-      </div>
+      </div>}
       <SelectInput
         label={t('household.cooking.label')}
         value={general.cooking_carrier}
