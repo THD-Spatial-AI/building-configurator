@@ -829,6 +829,7 @@
       "grade": "Classe énergétique",
       "gradePending": "En cours de calcul",
       "gradeFailed": "Non disponible"
-    }
+    },
+    "done": "Terminé"
   }
 }

@@ -825,6 +825,7 @@
       "grade": "Energieklasse",
       "gradePending": "Wordt bepaald",
       "gradeFailed": "Niet beschikbaar"
-    }
+    },
+    "done": "Klaar"
   }
 }

@@ -845,6 +845,7 @@
       "grade": "Energetická třída",
       "gradePending": "Počítá se",
       "gradeFailed": "Není k dispozici"
-    }
+    },
+    "done": "Hotovo"
   }
 }

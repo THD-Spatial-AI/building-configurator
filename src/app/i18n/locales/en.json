@@ -825,6 +825,7 @@
       "grade": "Energy grade",
       "gradePending": "Being worked out",
       "gradeFailed": "Not available"
-    }
+    },
+    "done": "Done"
   }
 }
