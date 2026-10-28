@@ -726,7 +726,7 @@
   },
   "storeys": {
     "title": "Étages modélisés",
-    "hint": "L'étage 1 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ou leur propre hauteur ; la surface et l'enveloppe ne comptent que les étages modélisés.",
+    "hint": "L'étage 0 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ou leur propre hauteur ; la surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
     "floorArea": "Surface modélisée",
     "pick": "Étages",

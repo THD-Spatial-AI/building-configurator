@@ -722,7 +722,7 @@
   },
   "storeys": {
     "title": "Piani modellati",
-    "hint": "Il piano 1 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni o la loro altezza; superficie e involucro contano solo i piani modellati.",
+    "hint": "Il piano 0 è il piano terra. Seleziona i piani qui o nel modello, poi escludili dal modello o indica le loro abitazioni o la loro altezza; superficie e involucro contano solo i piani modellati.",
     "noGeometry": "I piani si possono escludere quando il modello 3D è caricato.",
     "floorArea": "Superficie modellata",
     "pick": "Piani",

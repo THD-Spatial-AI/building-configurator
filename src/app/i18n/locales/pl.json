@@ -742,7 +742,7 @@
   },
   "storeys": {
     "title": "Modelowane kondygnacje",
-    "hint": "Kondygnacja 1 to parter. Zaznacz kondygnacje tutaj lub w modelu, a następnie pomiń je w modelu lub podaj ich mieszkania albo własną wysokość; powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
+    "hint": "Kondygnacja 0 to parter. Zaznacz kondygnacje tutaj lub w modelu, a następnie pomiń je w modelu lub podaj ich mieszkania albo własną wysokość; powierzchnia i przegrody liczą tylko kondygnacje modelowane.",
     "noGeometry": "Kondygnacje można pominąć po wczytaniu modelu 3D.",
     "floorArea": "Modelowana powierzchnia",
     "pick": "Kondygnacje",

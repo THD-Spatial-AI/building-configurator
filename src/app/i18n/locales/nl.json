@@ -722,7 +722,7 @@
   },
   "storeys": {
     "title": "Gemodelleerde verdiepingen",
-    "hint": "Verdieping 1 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen of hun eigen hoogte op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
+    "hint": "Verdieping 0 is de begane grond. Selecteer verdiepingen hier of in het model en laat ze daarna weg uit het model of geef hun woningen of hun eigen hoogte op; vloeroppervlak en schil tellen alleen de gemodelleerde verdiepingen.",
     "noGeometry": "Verdiepingen kunnen worden weggelaten zodra het 3D-model is geladen.",
     "floorArea": "Gemodelleerd vloeroppervlak",
     "pick": "Verdiepingen",

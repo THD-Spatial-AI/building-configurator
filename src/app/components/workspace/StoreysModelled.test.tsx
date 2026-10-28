@@ -48,8 +48,8 @@ describe('StoreysModelled', () => {
 
   it('names each storey in or out of the model and shows the floor area modelled', () => {
     const html = render({});
-    expect(html).toContain('aria-label="Storey 1, in the model"');
-    expect(html).toContain('aria-label="Storey 3, left out"');
+    expect(html).toContain('aria-label="Storey 0, in the model"');
+    expect(html).toContain('aria-label="Storey 2, left out"');
     expect(html).toContain('2 × 80 m² = 160 m²');
   });
 
@@ -66,7 +66,7 @@ describe('StoreysModelled', () => {
   });
 
   it('names the modelled storeys that still need a dwelling count', () => {
-    expect(render({ dwellings: { values: { 1: 2 }, onChange: () => {} } })).toContain('Missing: storey 2.');
+    expect(render({ dwellings: { values: { 1: 2 }, onChange: () => {} } })).toContain('Missing: storey 1.');
   });
 });
 
@@ -93,6 +93,13 @@ describe('a click on a storey', () => {
 
 describe('StoreysModelled with an attic', () => {
   const attic = { modelled: true, floorArea: null, onModelledChange: () => {}, onFloorAreaChange: () => {} };
+
+  it('names the ground floor 0 and puts the attic after the top storey', () => {
+    const html = render({ modelled: null, attic });
+    const order = ['Storey 0, in the model', 'Storey 1, in the model', 'Storey 2, in the model', 'Attic, in the model'].map((label) => html.indexOf(`aria-label="${label}"`));
+    expect(order.every((at, i) => at >= 0 && (i === 0 || at > order[i - 1]))).toBe(true);
+    expect(render({ selected: [1] })).toContain('Storey 0');
+  });
 
   it('shows the attic as its own chip, with one storey too', () => {
     const html = render({ storeys: 1, modelled: null, attic });

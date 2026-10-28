@@ -2,6 +2,8 @@
 // dwellings on each. Storeys are selected, one or many, here or in the 3D
 // model; the selection is then left out, put back, given a dwelling count or
 // its own height. At least one stays in.
+// They are numbered from 1 here and in what is stored; the UI names them
+// from 0, the ground floor, as the countries the tool serves count floors.
 
 import { cn } from '@/lib/utils';
 import { useFormatNumber, useT } from '../../i18n';
@@ -163,8 +165,31 @@ export function StoreysModelled({
           {t('storeys.title')}<InfoTip tip={t('storeys.hint')} />
         </span>
         {disabled && <p className="text-[11px] leading-snug text-muted-foreground">{t('storeys.noGeometry')}</p>}
-        {attic && (
-          <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('storeys.title')}>
+          {all.map((storey) => {
+            const count = dwellings?.values[storey];
+            return (
+              <button
+                key={storey}
+                type="button"
+                disabled={disabled}
+                aria-pressed={selected.includes(storey)}
+                aria-label={t(on.has(storey) ? 'storeys.chip.in' : 'storeys.chip.out', { number: storey - 1 })}
+                onClick={() => onSelect(pickWithAttic(selected, storey, multi, atticBand))}
+                className={cn(
+                  'flex h-9 min-w-9 cursor-pointer flex-col items-center justify-center rounded-md border px-2 text-[12px] font-semibold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                  on.has(storey)
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
+                  selected.includes(storey) && 'ring-2 ring-amber-400 ring-offset-1 ring-offset-card',
+                )}
+              >
+                {storey - 1}
+                {count !== undefined && <span className="mt-0.5 text-[9px] font-medium opacity-80">{t('storeys.chip.dwellings', { count })}</span>}
+              </button>
+            );
+          })}
+          {attic && (
             <button
               type="button"
               disabled={disabled}
@@ -182,32 +207,7 @@ export function StoreysModelled({
               {t('storeys.attic.label')}
               {attic.dwellings && <span className="mt-0.5 text-[9px] font-medium opacity-80">{t('storeys.chip.dwellings', { count: attic.dwellings })}</span>}
             </button>
-          </div>
-        )}
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('storeys.title')}>
-          {all.map((storey) => {
-            const count = dwellings?.values[storey];
-            return (
-              <button
-                key={storey}
-                type="button"
-                disabled={disabled}
-                aria-pressed={selected.includes(storey)}
-                aria-label={t(on.has(storey) ? 'storeys.chip.in' : 'storeys.chip.out', { number: storey })}
-                onClick={() => onSelect(pickWithAttic(selected, storey, multi, atticBand))}
-                className={cn(
-                  'flex h-9 min-w-9 cursor-pointer flex-col items-center justify-center rounded-md border px-2 text-[12px] font-semibold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-                  on.has(storey)
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-dashed border-border bg-card text-muted-foreground hover:bg-muted',
-                  selected.includes(storey) && 'ring-2 ring-amber-400 ring-offset-1 ring-offset-card',
-                )}
-              >
-                {storey}
-                {count !== undefined && <span className="mt-0.5 text-[9px] font-medium opacity-80">{t('storeys.chip.dwellings', { count })}</span>}
-              </button>
-            );
-          })}
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px]">
           {onMultiChange && (
@@ -283,7 +283,7 @@ export function StoreysModelled({
         {selected.length > 0 && !atticSelected && (
           <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50/60 p-2.5 dark:border-amber-500/40 dark:bg-amber-500/10">
             <span className="text-[12px] font-semibold text-foreground">
-              {selected.length === 1 ? t('storeys.select.one', { number: selected[0] }) : t('storeys.select.count', { count: selected.length })}
+              {selected.length === 1 ? t('storeys.select.one', { number: selected[0] - 1 }) : t('storeys.select.count', { count: selected.length })}
             </span>
             <div className="flex items-center justify-between gap-2" title={allIn && leaveOut === undefined ? t('storeys.lastOne') : undefined}>
               <span className="text-[12px] text-foreground">{t('storeys.inModel')}</span>
@@ -335,7 +335,7 @@ export function StoreysModelled({
 
         {missing.length > 0 && (
           <p className="text-[11px] leading-snug text-destructive">
-            {t('storeys.dwellingsMissing', { storeys: missing.join(', ') })}
+            {t('storeys.dwellingsMissing', { storeys: missing.map((storey) => storey - 1).join(', ') })}
           </p>
         )}
         <div className="flex justify-between gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[11px] text-muted-foreground">

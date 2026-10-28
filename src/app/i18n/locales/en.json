@@ -722,7 +722,7 @@
   },
   "storeys": {
     "title": "Storeys modelled",
-    "hint": "Storey 1 is the ground floor. Select storeys here or in the model, then leave them out of the model, give their dwellings or their own height; floor area and envelope count the modelled storeys only.",
+    "hint": "Storey 0 is the ground floor. Select storeys here or in the model, then leave them out of the model, give their dwellings or their own height; floor area and envelope count the modelled storeys only.",
     "noGeometry": "Storeys can be left out once the 3D model has loaded.",
     "floorArea": "Floor area modelled",
     "pick": "Storeys",

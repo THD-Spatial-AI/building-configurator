@@ -742,7 +742,7 @@
   },
   "storeys": {
     "title": "Modelovaná podlaží",
-    "hint": "Podlaží 1 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty či vlastní výšku; plocha a obálka počítají jen modelovaná podlaží.",
+    "hint": "Podlaží 0 je přízemí. Vyberte podlaží zde nebo v modelu a pak je vynechte z modelu nebo zadejte jejich byty či vlastní výšku; plocha a obálka počítají jen modelovaná podlaží.",
     "noGeometry": "Podlaží lze vynechat, jakmile se načte 3D model.",
     "floorArea": "Modelovaná plocha",
     "pick": "Podlaží",

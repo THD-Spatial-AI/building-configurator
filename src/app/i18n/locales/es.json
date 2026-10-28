@@ -726,7 +726,7 @@
   },
   "storeys": {
     "title": "Plantas modeladas",
-    "hint": "La planta 1 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas o su altura propia; la superficie y la envolvente cuentan solo las plantas modeladas.",
+    "hint": "La planta 0 es la planta baja. Seleccione plantas aquí o en el modelo y luego déjelas fuera del modelo o indique sus viviendas o su altura propia; la superficie y la envolvente cuentan solo las plantas modeladas.",
     "noGeometry": "Las plantas se pueden excluir cuando el modelo 3D se haya cargado.",
     "floorArea": "Superficie modelada",
     "pick": "Plantas",
