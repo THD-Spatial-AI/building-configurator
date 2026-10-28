@@ -792,7 +792,8 @@
       "dwellings": "Mieszkania na poddaszu",
       "floorAreaTip": "Zmierzona z modelu 3D: powierzchnia liczy się w całości tam, gdzie dach jest 2 m lub wyżej, w połowie przy 1 do 2 m.",
       "useMeasured": "Użyj zmierzonej ({area} m²)"
-    }
+    },
+    "someIn": "Niektóre są w modelu, inne pominięte."
   },
   "help": {
     "envelope": "Wielkość tej powierzchni i to, jak dobrze zatrzymuje ciepło. Ich zmiana zmienia zapotrzebowanie budynku na ogrzewanie.",

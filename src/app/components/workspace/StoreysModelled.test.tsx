@@ -144,3 +144,12 @@ describe('StoreysModelled with a measured attic', () => {
     expect(render({ selected: [4], attic: { ...attic, floorArea: 25 } })).not.toContain('Use measured');
   });
 });
+
+describe('a selection of storeys partly in the model', () => {
+  it('says some are in and some are out, beside the switch that puts them all in', () => {
+    const html = render({ modelled: [1, 2], selected: [2, 3] });
+    expect(html).toContain('Some are in the model, some are left out.');
+    expect(html).toContain('aria-checked="false"');
+    expect(render({ modelled: [1, 2], selected: [1, 2] })).not.toContain('Some are in the model');
+  });
+});

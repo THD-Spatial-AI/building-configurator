@@ -105,6 +105,8 @@ export function StoreysModelled({
   const leaveOut = withStoreys(modelled, storeys, selected, false);
   /** The switch is on while every selected storey is in the model; turning it on puts them all back. */
   const allIn = selected.every((storey) => on.has(storey));
+  /** Some selected storeys are in the model and some are not: the switch is off and says so. */
+  const someIn = !allIn && selected.some((storey) => on.has(storey));
   const missing = dwellings ? missingDwellings(modelled, dwellings.values) : [];
   const limits = modelHeight !== undefined ? heightLimits(modelHeight, storeys, roomHeight, heights.values) : null;
   const eaves = modelHeight !== undefined ? format(modelHeight, 1) : '';
@@ -286,7 +288,10 @@ export function StoreysModelled({
               {selected.length === 1 ? t('storeys.select.one', { number: selected[0] - 1 }) : t('storeys.select.count', { count: selected.length })}
             </span>
             <div className="flex items-center justify-between gap-2" title={allIn && leaveOut === undefined ? t('storeys.lastOne') : undefined}>
-              <span className="text-[12px] text-foreground">{t('storeys.inModel')}</span>
+              <span className="flex flex-col text-[12px] text-foreground">
+                {t('storeys.inModel')}
+                {someIn && <span className="text-[11px] text-muted-foreground">{t('storeys.someIn')}</span>}
+              </span>
               <Switch
                 on={allIn}
                 label={t('storeys.inModel')}

@@ -770,7 +770,8 @@
       "dwellings": "Abitazioni nel sottotetto",
       "floorAreaTip": "Misurata dal modello 3D: la superficie conta per intero dove il tetto è a 2 m o più, per metà dove è tra 1 e 2 m.",
       "useMeasured": "Usa la misura ({area} m²)"
-    }
+    },
+    "someIn": "Alcuni sono nel modello, altri esclusi."
   },
   "help": {
     "envelope": "La dimensione di questa superficie e quanto trattiene il calore. Cambiarli cambia il riscaldamento di cui l'edificio ha bisogno.",
