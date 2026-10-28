@@ -237,7 +237,9 @@
       "modules": {
         "one": "{count} module",
         "other": "{count} modules"
-      }
+      },
+      "remove": "{name} van alle vlakken verwijderen",
+      "removeConfirm": "Van alle vlakken verwijderen"
     },
     "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM.",
     "options": {
@@ -276,7 +278,9 @@
     "moduleCount": {
       "label": "Modules (tot {fits})",
       "tip": "Hoeveel modules op dit vlak komen, tot het aantal dat in het bruikbare deel past. Het vermogen volgt daaruit."
-    }
+    },
+    "removeAll": "Alle pv van dit gebouw verwijderen",
+    "removeAllConfirm": "Alle pv verwijderen"
   },
   "tech": {
     "none": "Geen technologieën op dit gebouw.",

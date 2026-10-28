@@ -238,7 +238,9 @@
       "modules": {
         "one": "{count} módulo",
         "other": "{count} módulos"
-      }
+      },
+      "remove": "Quitar {name} de todas las superficies",
+      "removeConfirm": "Quitar de todas las superficies"
     },
     "followsModel": "La FV sigue los {tilt}° del modelo 3D; la inclinación y la orientación editadas arriba solo van a BuEM.",
     "options": {
@@ -277,7 +279,9 @@
     "moduleCount": {
       "label": "Módulos (hasta {fits})",
       "tip": "Cuántos módulos colocar en esta superficie, hasta los que caben en su parte utilizable. La potencia se deriva de ello."
-    }
+    },
+    "removeAll": "Quitar toda la FV de este edificio",
+    "removeAllConfirm": "Quitar toda la FV"
   },
   "tech": {
     "none": "Ninguna tecnología en este edificio.",

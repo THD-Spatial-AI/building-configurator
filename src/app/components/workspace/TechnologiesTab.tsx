@@ -8,7 +8,7 @@ import type { BuildingElement } from '../BuildingConfigurator/configure/model/bu
 import { useFormatNumber, useT } from '../../i18n';
 import type { PvLayout } from '../../lib/pvLayout';
 import { productCurrency, productName } from '../../lib/pvProducts';
-import { installedByProduct, pvSummary } from '../../lib/pvSurfaces';
+import { installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfaces';
 import { surfaceProduct, type PvMode } from './PvMode';
 import { PvOverview } from './PvOverview';
 import { TechCardFrame, TechnologyCards, type Technologies } from './TechnologyCards';
@@ -56,6 +56,11 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
           cost={summary.investment === undefined ? undefined : `${format(summary.investment, 0)} ${pvCurrency}`.trim()}
           focused={focusId === PV_CARD}
           onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
+          {...(installed.length > 0 ? {
+            onRemove: () => installedPvIds(pv.surfaces, productFor).forEach((id) => pv.onToggle(id, false)),
+            removeLabel: t('pv.removeAll'),
+            confirmLabel: t('pv.removeAllConfirm'),
+          } : {})}
         >
           <PvOverview pv={pv} available={available} elements={elements} layouts={layouts} mode={mode} onSelect={onSelectSurface} framed />
         </TechCardFrame>

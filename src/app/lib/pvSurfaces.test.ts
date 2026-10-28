@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fittedPvIds, installedByProduct, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
+import { fittedPvIds, installedByProduct, installedPvIds, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -140,5 +140,18 @@ describe('pvLayouts', () => {
     const large = { width: 2, height: 3, kwp: 1 };
     expect([...pvAvailableIds([flat, tiny], options, [small, large])].sort()).toEqual(['f', 'unknown']);
     expect([...pvAvailableIds([flat, tiny], options, [])].sort()).toEqual(['unknown']);
+  });
+});
+
+describe('installedPvIds', () => {
+  const mono = { id: 'mono' } as TechnologyProduct;
+  const compact = { id: 'compact' } as TechnologyProduct;
+  const products: Record<string, TechnologyProduct | undefined> = { r1: mono, r2: compact, r3: mono, r4: undefined };
+  const surfaces = { r1: surface('installed'), r2: surface('installed'), r3: surface('suggested'), r4: surface('installed') };
+
+  it('lists the surfaces with PV, of one product or of all', () => {
+    expect(installedPvIds(surfaces, (id) => products[id], 'mono')).toEqual(['r1']);
+    expect(installedPvIds(surfaces, (id) => products[id], '')).toEqual(['r4']);
+    expect(installedPvIds(surfaces, (id) => products[id])).toEqual(['r1', 'r2', 'r4']);
   });
 });

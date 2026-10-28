@@ -19,6 +19,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - An info tip on every section saying what it holds and where its figures come from.
 - Technology cards share one shape. `TechCard` gains optional `type`, `figures`, `investment` and `catalogue`; `Technologies` gains optional `onAdd` for an "Add a technology" button. The Technologies tab sums the investment estimates.
 - The PV card lists the installed products with their surfaces and capacity; the catalogue sits behind a drop-down with a search field.
+- PV can be removed in one step: a bin in the PV card's header removes all PV from the building, and one on each installed product takes it off every surface. Both ask once more and go through the host's `onToggle`.
 
 ### Changed
 

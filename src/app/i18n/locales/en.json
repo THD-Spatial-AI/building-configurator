@@ -237,7 +237,9 @@
       "modules": {
         "one": "{count} module",
         "other": "{count} modules"
-      }
+      },
+      "remove": "Remove {name} from every surface",
+      "removeConfirm": "Remove from all surfaces"
     },
     "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
     "options": {
@@ -276,7 +278,9 @@
     "moduleCount": {
       "label": "Modules (up to {fits})",
       "tip": "How many modules to place on this surface, up to the number that fits in its usable share. The capacity follows from it."
-    }
+    },
+    "removeAll": "Remove all PV from this building",
+    "removeAllConfirm": "Remove all PV"
   },
   "tech": {
     "none": "No technologies on this building.",

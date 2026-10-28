@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
-import { fittedPvIds, installedByProduct, pvSummary } from '../../lib/pvSurfaces';
+import { fittedPvIds, installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
   constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints, sortProducts,
@@ -16,6 +16,7 @@ import {
 } from '../../lib/pvProducts';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { GeometryLine, surfaceName, surfaceProduct, type PvMode, type PvSurface } from './PvMode';
+import { RemoveButton } from './TechnologyCards';
 
 const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'];
 /** Plain-language labels for the constraints basic mode asks; others show the catalogue's own name. */
@@ -129,7 +130,8 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
 
 /**
  * The products installed on this building, one row each with its surfaces,
- * modules and capacity, and an edit button that opens the product's values.
+ * modules and capacity, an edit button that opens the product's values, and a
+ * bin that takes the product off every surface it is on.
  */
 function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record<string, PvLayout>>; mode: 'basic' | 'expert' }) {
   const t = useT();
@@ -172,6 +174,12 @@ function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record
                       <Pencil className="size-3.5" />
                     </button>
                   )}
+                  <RemoveButton
+                    label={t('pv.installed.remove', { name: product ? productName(product) : t('pv.product.none') })}
+                    confirmLabel={t('pv.installed.removeConfirm')}
+                    onRemove={() => installedPvIds(pv.surfaces, (id) => surfaceProduct(pv, id), row.product?.id ?? '').forEach((id) => pv.onToggle(id, false))}
+                    className="size-7 border border-border bg-card text-muted-foreground hover:bg-muted"
+                  />
                 </div>
                 {open && product && (
                   <div className="border-t border-border bg-muted/40 p-3">
