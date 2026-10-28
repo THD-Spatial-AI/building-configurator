@@ -273,11 +273,22 @@ function adaptTimeseries(ts: unknown): LoadDataPoint[] | null {
   }));
 }
 
+/**
+ * The building's location: a Point's coordinates, or for a footprint (Polygon
+ * or MultiPolygon) the first vertex of its outer ring. [0, 0] without a
+ * geometry; any other geometry type throws, naming it.
+ */
 function coordsFromFeature(feature: unknown): [number, number] {
-  const coords = getMappedValue<unknown[]>(feature, MODEL_DATA_MAP.thematic.coordinates) ?? [];
-  const lon = Number(coords[0] ?? 0);
-  const lat = Number(coords[1] ?? 0);
-  return [lon, lat];
+  const type = getMappedValue<unknown>(feature, 'geometry.type');
+  const coords = getMappedValue<unknown>(feature, MODEL_DATA_MAP.thematic.coordinates);
+  const point = (() => {
+    if (type === undefined || type === 'Point') return coords;
+    if (type === 'Polygon') return (coords as unknown[][] | undefined)?.[0]?.[0];
+    if (type === 'MultiPolygon') return (coords as unknown[][][] | undefined)?.[0]?.[0]?.[0];
+    throw new Error(`coordsFromFeature: a building's geometry must be a Point, Polygon or MultiPolygon, got ${String(type)}`);
+  })();
+  const [lon, lat] = Array.isArray(point) ? point : [];
+  return [Number(lon ?? 0), Number(lat ?? 0)];
 }
 
 function adaptGeometryData(feature: unknown): GeometryData {
