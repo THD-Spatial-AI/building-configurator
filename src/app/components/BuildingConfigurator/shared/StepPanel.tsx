@@ -93,7 +93,7 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
     moved.current = false;
     const section = sectionRef.current;
     if (!section) return;
-    section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    scrollPanelTo(section);
     section.querySelector<HTMLElement>('input, select, textarea')?.focus({ preventScroll: true });
   }, [current.key, summarised]);
   const previous = steps[index - 1];
@@ -140,8 +140,7 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
         </ol>
       </nav>
 
-      {/* scroll-mt keeps the section clear of the sticky tabs and step bar when it is scrolled to. */}
-      <div ref={sectionRef} className="scroll-mt-[150px]">
+      <div ref={sectionRef}>
         {summarised
           ? <StepSummary step={current} number={index + 1} onEdit={() => { moved.current = true; setEditing(current.key); }} />
           : current.content}
@@ -197,11 +196,28 @@ export function StepSummary({ step, number, onEdit }: { step: Step; number: numb
   );
 }
 
+/** How far below the scrolling panel's top a section is scrolled to: clear of the sticky tabs and step bar. */
+const STICKY_BARS_PX = 150;
+
+/**
+ * Scrolls the panel holding `section` so its top sits below the sticky bars.
+ * Only that panel scrolls: scrollIntoView would also scroll the host's page,
+ * taking the tabs and step bar out of view.
+ */
+function scrollPanelTo(section: HTMLElement) {
+  let panel = section.parentElement;
+  while (panel && !/(auto|scroll)/.test(getComputedStyle(panel).overflowY)) panel = panel.parentElement;
+  if (!panel) return;
+  const top = section.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - STICKY_BARS_PX;
+  panel.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
+
 /** Back and Next beneath the open step, and Done while its fields are shown. */
 function StepNav({ previous, next, go, onDone }: { previous?: Step; next?: Step; go: (key: string) => void; onDone?: () => void }) {
   const t = useT();
   return (
-    <div className="flex items-center justify-between gap-2">
+    // Sticks to the bottom of the panel, so a long step scrolls between the step bar and it.
+    <div className="sticky bottom-0 z-10 -mx-4 flex items-center justify-between gap-2 border-t border-border bg-card px-4 py-2">
       {previous ? (
         <button
           type="button"
