@@ -29,6 +29,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - The surface panel shows a surface's envelope and PV together on every tab.
 - Building data shows as tiles (type, country and year, storeys, room height, floor area, dwellings, occupants, volume); Edit switches to the editable table, where storeys and room height are read only. A dashed card in Basic points to the Expert sections.
 - A section opens from a click anywhere on its header.
+- The energy grade's element types are one table, a row per type with its state, U-value and loss factor, the units in the header.
 - The region code in Storeys and occupancy shows in Expert only. It stays optional, and a stored `region_code` is sent in either mode.
 - The footprint area is read only in the building data editor: it comes from the 3D model, whose surfaces cannot be redrawn.
 - A surface's tilt and facing are edited in Expert only. PV takes its geometry from the 3D model, not from these edits.

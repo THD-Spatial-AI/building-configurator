@@ -459,7 +459,8 @@
       },
       "setOneByOne": "{custom} einzeln gesetzt",
       "state": "Zustand",
-      "lossFactorTip": "Anteil des Wärmeverlusts über diese Flächen, der zählt: 1 gegen Außenluft, weniger gegen Erdreich oder einen unbeheizten Raum (BuEM b_transmission). Leer, wenn die Flächen sich unterscheiden; Trennwände behalten 0."
+      "lossFactorTip": "Anteil des Wärmeverlusts über diese Flächen, der zählt: 1 gegen Außenluft, weniger gegen Erdreich oder einen unbeheizten Raum (BuEM b_transmission). Leer, wenn die Flächen sich unterscheiden; Trennwände behalten 0.",
+      "element": "Bauteil"
     },
     "uValue": "U-Wert",
     "lossFactor": "Reduktionsfaktor",

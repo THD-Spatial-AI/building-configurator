@@ -462,7 +462,8 @@
       },
       "setOneByOne": "{custom} réglées une à une",
       "state": "État",
-      "lossFactorTip": "Part des déperditions par ces surfaces prise en compte : 1 vers l'air extérieur, moins contre le sol ou un local non chauffé (BuEM b_transmission). Vide si les surfaces diffèrent ; les murs mitoyens gardent 0."
+      "lossFactorTip": "Part des déperditions par ces surfaces prise en compte : 1 vers l'air extérieur, moins contre le sol ou un local non chauffé (BuEM b_transmission). Vide si les surfaces diffèrent ; les murs mitoyens gardent 0.",
+      "element": "Élément"
     },
     "uValue": "Valeur U",
     "lossFactor": "Coefficient b",

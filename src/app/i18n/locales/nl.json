@@ -459,7 +459,8 @@
       },
       "setOneByOne": "{custom} afzonderlijk ingesteld",
       "state": "Staat",
-      "lossFactorTip": "Aandeel van het warmteverlies door deze vlakken dat meetelt: 1 naar buitenlucht, minder tegen grond of een onverwarmde ruimte (BuEM b_transmission). Leeg als de vlakken verschillen; woningscheidende wanden houden 0."
+      "lossFactorTip": "Aandeel van het warmteverlies door deze vlakken dat meetelt: 1 naar buitenlucht, minder tegen grond of een onverwarmde ruimte (BuEM b_transmission). Leeg als de vlakken verschillen; woningscheidende wanden houden 0.",
+      "element": "Bouwdeel"
     },
     "uValue": "U-waarde",
     "lossFactor": "Reductiefactor",

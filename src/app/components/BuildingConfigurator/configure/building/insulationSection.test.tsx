@@ -26,3 +26,24 @@ describe('the energy grade in Basic and Expert', () => {
     expect(render('expert')).toContain('Average U-value');
   });
 });
+
+describe('the element types in Expert', () => {
+  const elements = {
+    w1: { id: 'w1', label: 'Wall', type: 'wall', area: 30, uValue: 0.22, gValue: null, tilt: 90, azimuth: 180 },
+    win: { id: 'win', label: 'Window', type: 'window', area: 4, uValue: 1.1, gValue: 0.5, tilt: 90, azimuth: 180, parentId: 'w1' },
+  } as InsulationProps['elements'];
+  const html = renderToStaticMarkup(<InsulationSection {...insulation} elements={elements} general={{}} setGen={() => {}} mode="expert" />);
+
+  it('lays them out as one table, the units in its header', () => {
+    expect(html.match(/<table/g)).toHaveLength(1);
+    expect(html).toContain('W/m²K</span></th>');
+    expect(html).toContain('0 to 1</span></th>');
+  });
+
+  it('names each field for its type, with a loss factor for opaque surfaces only', () => {
+    expect(html).toContain('aria-label="Walls: U-value"');
+    expect(html).toContain('aria-label="Walls: Loss factor"');
+    expect(html).toContain('aria-label="Windows: U-value"');
+    expect(html).not.toContain('aria-label="Windows: Loss factor"');
+  });
+});

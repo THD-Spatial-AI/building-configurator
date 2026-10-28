@@ -462,7 +462,8 @@
       },
       "setOneByOne": "{custom} definidas una a una",
       "state": "Estado",
-      "lossFactorTip": "Fracción de la pérdida de calor por estas superficies que se contabiliza: 1 hacia el aire exterior, menos contra el terreno o un espacio no calefactado (b_transmission de BuEM). Vacío si las superficies difieren; las medianeras mantienen 0."
+      "lossFactorTip": "Fracción de la pérdida de calor por estas superficies que se contabiliza: 1 hacia el aire exterior, menos contra el terreno o un espacio no calefactado (b_transmission de BuEM). Vacío si las superficies difieren; las medianeras mantienen 0.",
+      "element": "Elemento"
     },
     "uValue": "Valor U",
     "lossFactor": "Coeficiente b",
