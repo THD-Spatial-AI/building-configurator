@@ -63,10 +63,12 @@ function Link({ done, side }: { done: boolean; side: 'left' | 'right' }) {
   );
 }
 
-export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
+export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFields }: {
   steps: Step[];
   active: string;
   onActive: (key: string) => void;
+  /** A step whose fields to show, not its summary, as when storeys are picked in the model to be configured. */
+  openFields?: string;
   /** Where the step bar sticks, as a Tailwind top class: below any bar that sticks above it. */
   stickyTop?: string;
 }) {
@@ -75,7 +77,8 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0' }: {
   const current = steps[index];
   /** Steps left after being shown, which return as their summary. */
   const [done, setDone] = useState<ReadonlySet<string>>(() => new Set(steps.filter((step) => step.startSummarised).map((step) => step.key)));
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(openFields ?? null);
+  useEffect(() => { if (openFields) setEditing(openFields); }, [openFields]);
   const go = (key: string) => {
     if (key === current.key) return;
     current.onLeave?.();
