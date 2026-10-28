@@ -21,4 +21,9 @@ describe("a building's location", () => {
     expect(adaptBuemFeature(feature(undefined)).identity.coordinates).toEqual([0, 0]);
     expect(() => adaptBuemFeature(feature({ type: 'LineString', coordinates: ring }))).toThrow('got LineString');
   });
+
+  it('is refused when its coordinates are not numbers, rather than becoming [null, 0]', () => {
+    expect(() => adaptBuemFeature(feature({ type: 'Point', coordinates: ['x', 52.2] }))).toThrow('no numeric longitude and latitude');
+    expect(() => adaptBuemFeature(feature({ type: 'Polygon', coordinates: [] }))).toThrow('no numeric longitude and latitude');
+  });
 });
