@@ -317,7 +317,7 @@ export function useBuildingModel(
     // classification changed by hand.
     const subtype = isFirstClassificationLoad.current ? variantSubtype(general.refurbishment.variantCode) : undefined;
 
-    (async () => {
+    const cancelLookup = scheduleLookup(async () => {
       const variants = await loadVariantLevels(services, country, type, year, subtype, loadedVariantCode.current);
       // Residential levels stand in for a type TABULA lacks: its floor area and
       // dwellings are a house's, not this building's.
@@ -370,9 +370,9 @@ export function useBuildingModel(
 
       const state = initIgnisState(country, type, period, variants, ignisSeedBuilding(general, nextElements, type, year, country));
       if (!cancelled) setHdcp(state);
-    })();
+    }, isFirstClassificationLoad.current);
 
-    return () => { cancelled = true; };
+    return () => { cancelled = true; cancelLookup(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [general.country, general.buildingType, general.constructionYear]);
 
@@ -764,6 +764,23 @@ function ignisSeedBuilding(
     timeseries: null,
     ignis: null,
   };
+}
+
+/** How long a hand-edited classification must stay unchanged before its TABULA levels are looked up. */
+export const LOOKUP_DELAY_MS = 500;
+
+/**
+ * Starts a TABULA lookup: at once for the building as opened, and for an
+ * edit only once the classification has stayed LOOKUP_DELAY_MS, so typing a
+ * year looks up the year typed, not each digit. Returns its cancel.
+ */
+export function scheduleLookup(run: () => void, immediate: boolean): () => void {
+  if (immediate) {
+    run();
+    return () => {};
+  }
+  const timer = setTimeout(run, LOOKUP_DELAY_MS);
+  return () => clearTimeout(timer);
 }
 
 /**

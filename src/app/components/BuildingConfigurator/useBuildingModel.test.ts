@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { withEdits } from './useBuildingModel';
+import { describe, expect, it, vi } from 'vitest';
+import { LOOKUP_DELAY_MS, scheduleLookup, withEdits } from './useBuildingModel';
 import { DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingElement } from './configure/model/buildingElements';
 import type { BuildingState } from '../../lib/buemAdapter';
@@ -59,5 +59,31 @@ describe('withEdits', () => {
     const blocks = toBuem(withEdits(building, elements, general));
     expect(blocks.building.h_room).toEqual({ value: 3, unit: 'm' });
     expect(blocks.configurator.storey_list?.[2]).toMatchObject({ storey: 3, height: 4 });
+  });
+});
+
+describe('scheduleLookup', () => {
+  it('looks up the building as opened at once', () => {
+    const run = vi.fn();
+    scheduleLookup(run, true);
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
+  it('looks up a typed year once, after it stays unchanged', () => {
+    vi.useFakeTimers();
+    try {
+      const run = vi.fn();
+      let cancel = () => {};
+      for (const _year of [1, 19, 198, 1985]) {
+        cancel();
+        cancel = scheduleLookup(run, false);
+        vi.advanceTimersByTime(LOOKUP_DELAY_MS / 5);
+      }
+      expect(run).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(LOOKUP_DELAY_MS);
+      expect(run).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
