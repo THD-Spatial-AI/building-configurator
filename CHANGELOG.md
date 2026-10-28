@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [0.15.0] - 2026-10-27
+## [0.15.0] - 2026-10-28
 
 Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` takes `building` or `technologies`; `overview`, `parameters` and `envelope` are gone. Single surfaces are reached through the model or the surface drop-down.
 
