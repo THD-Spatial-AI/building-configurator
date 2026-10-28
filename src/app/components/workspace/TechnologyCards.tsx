@@ -111,12 +111,48 @@ function FieldInput({ field, onChange }: { field: TechField; onChange: (value: n
   );
 }
 
+/** A bin that asks once more: the first click shows `confirmLabel`, the second removes, and leaving it cancels. */
+export function RemoveButton({ label, confirmLabel, onRemove, className }: {
+  label: string;
+  confirmLabel: string;
+  onRemove: () => void;
+  className?: string;
+}) {
+  const [asking, setAsking] = useState(false);
+  if (asking) {
+    return (
+      <button
+        type="button"
+        autoFocus
+        onClick={() => { setAsking(false); onRemove(); }}
+        onBlur={() => setAsking(false)}
+        onMouseLeave={() => setAsking(false)}
+        onKeyDown={(e) => { if (e.key === 'Escape') setAsking(false); }}
+        className="h-6 shrink-0 cursor-pointer whitespace-nowrap rounded-md bg-destructive px-2 text-[11px] font-semibold text-white"
+      >
+        {confirmLabel}
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => setAsking(true)}
+      aria-label={label}
+      title={label}
+      className={cn('flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors hover:text-destructive', className)}
+    >
+      <Trash2 className="size-3.5" />
+    </button>
+  );
+}
+
 /**
  * The frame every technology shares: a header band in its topic's colour with
  * a headline figure, a line with its products and cost, and, in focus, its
  * detail. Clicking the header opens or closes it.
  */
-export function TechCardFrame({ topic, title, headline, subtitle, cost, focused, onFocus, onRemove, removeLabel, children }: {
+export function TechCardFrame({ topic, title, headline, subtitle, cost, focused, onFocus, onRemove, removeLabel, confirmLabel, children }: {
   topic: Topic;
   title: string;
   headline?: string;
@@ -126,6 +162,8 @@ export function TechCardFrame({ topic, title, headline, subtitle, cost, focused,
   onFocus: () => void;
   onRemove?: () => void;
   removeLabel?: string;
+  /** Asks once more with this label before removing. */
+  confirmLabel?: string;
   children?: ReactNode;
 }) {
   const t = useT();
@@ -144,7 +182,10 @@ export function TechCardFrame({ topic, title, headline, subtitle, cost, focused,
             ? <span className="shrink-0 text-[11px] font-bold">{t('tech.inFocus')}</span>
             : headline && <span className="shrink-0 text-[12px] font-semibold tabular-nums">{headline}</span>}
         </button>
-        {onRemove && (
+        {onRemove && confirmLabel && (
+          <RemoveButton label={removeLabel ?? confirmLabel} confirmLabel={confirmLabel} onRemove={onRemove} className="hover:bg-card/60" />
+        )}
+        {onRemove && !confirmLabel && (
           <button
             type="button"
             onClick={onRemove}

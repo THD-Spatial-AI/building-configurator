@@ -243,7 +243,9 @@
         "few": "{count} moduły",
         "many": "{count} modułów",
         "other": "{count} modułu"
-      }
+      },
+      "remove": "Usuń {name} ze wszystkich powierzchni",
+      "removeConfirm": "Usuń ze wszystkich powierzchni"
     },
     "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM.",
     "options": {
@@ -284,7 +286,9 @@
     "moduleCount": {
       "label": "Moduły (do {fits})",
       "tip": "Ile modułów umieścić na tej powierzchni, do liczby mieszczącej się w jej użytecznej części. Moc wynika z tej liczby."
-    }
+    },
+    "removeAll": "Usuń całą PV z tego budynku",
+    "removeAllConfirm": "Usuń całą PV"
   },
   "tech": {
     "none": "Brak technologii w tym budynku.",

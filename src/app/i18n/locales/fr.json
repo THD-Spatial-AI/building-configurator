@@ -238,7 +238,9 @@
       "modules": {
         "one": "{count} module",
         "other": "{count} modules"
-      }
+      },
+      "remove": "Retirer {name} de toutes les surfaces",
+      "removeConfirm": "Retirer de toutes les surfaces"
     },
     "followsModel": "Le PV suit les {tilt}° du modèle 3D ; l'inclinaison et l'orientation modifiées ci-dessus ne vont qu'à BuEM.",
     "options": {
@@ -277,7 +279,9 @@
     "moduleCount": {
       "label": "Modules (jusqu'à {fits})",
       "tip": "Le nombre de modules à poser sur cette surface, jusqu'à ceux qui tiennent dans sa part utilisable. La puissance en découle."
-    }
+    },
+    "removeAll": "Retirer tout le PV de ce bâtiment",
+    "removeAllConfirm": "Retirer tout le PV"
   },
   "tech": {
     "none": "Aucune technologie sur ce bâtiment.",

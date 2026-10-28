@@ -78,6 +78,17 @@ export function unfittedPvIds(surfaces: Record<string, PvSurface>, layouts: Read
 }
 
 /** The installed surfaces grouped by product, in the order the products first appear. */
+/** The surfaces with PV installed: of one product (its id, '' for none) or, without one, of every product. */
+export function installedPvIds(
+  surfaces: Record<string, PvSurface>,
+  productFor: (surfaceId: string) => TechnologyProduct | undefined,
+  productId?: string,
+): string[] {
+  return Object.entries(surfaces)
+    .filter(([id, surface]) => surface.state === 'installed' && (productId === undefined || (productFor(id)?.id ?? '') === productId))
+    .map(([id]) => id);
+}
+
 export function installedByProduct(
   surfaces: Record<string, PvSurface>,
   layouts: Readonly<Record<string, PvLayout>>,

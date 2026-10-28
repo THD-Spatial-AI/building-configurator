@@ -237,7 +237,9 @@
       "modules": {
         "one": "{count} Modul",
         "other": "{count} Module"
-      }
+      },
+      "remove": "{name} von allen Flächen entfernen",
+      "removeConfirm": "Von allen Flächen entfernen"
     },
     "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM.",
     "options": {
@@ -276,7 +278,9 @@
     "moduleCount": {
       "label": "Module (bis {fits})",
       "tip": "Wie viele Module auf diese Fläche kommen, bis zur Zahl, die in ihren nutzbaren Anteil passt. Die Leistung ergibt sich daraus."
-    }
+    },
+    "removeAll": "Alle PV von diesem Gebäude entfernen",
+    "removeAllConfirm": "Alle PV entfernen"
   },
   "tech": {
     "none": "Keine Technologien an diesem Gebäude.",

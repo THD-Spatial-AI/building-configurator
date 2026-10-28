@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
+import { TechnologiesTab } from './TechnologiesTab';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import type { PvLayout } from '../../lib/pvLayout';
 import type { TechnologyProduct } from '../../lib/pvProducts';
@@ -282,5 +283,24 @@ describe('PvSurfaceSection', () => {
     expect(html).toContain('Demo Compact 300 W');
     expect(html).toContain('Modules: 2 · 0.6 kWp · 600 EUR/kWp');
     expect(html).toContain('Use on this surface');
+  });
+});
+
+describe('removing PV from the building', () => {
+  const layouts = { r1: flush };
+  const tab = (surfaces: PvMode['surfaces']) => renderToStaticMarkup(
+    <TechnologiesTab pv={{ ...withCatalogue, surfaces }} elements={elements} layouts={layouts} mode="basic" onSelectSurface={() => {}} />,
+  );
+
+  it('offers a bin per installed product and one for all PV', () => {
+    const html = tab(pv.surfaces);
+    expect(html).toContain('aria-label="Remove all PV from this building"');
+    expect(html).toContain('aria-label="Remove Demo Mono 420 W from every surface"');
+  });
+
+  it('shows the building as the host passes it: with no PV installed, nothing to remove', () => {
+    const html = tab({ r1: { state: 'suggested', usableShare: 0.6, maxKwp: 7.2 } });
+    expect(html).not.toContain('Remove all PV');
+    expect(html).toContain('No PV installed yet.');
   });
 });

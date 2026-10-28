@@ -243,7 +243,9 @@
         "few": "{count} moduly",
         "many": "{count} modulu",
         "other": "{count} modulů"
-      }
+      },
+      "remove": "Odebrat {name} ze všech ploch",
+      "removeConfirm": "Odebrat ze všech ploch"
     },
     "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
     "options": {
@@ -284,7 +286,9 @@
     "moduleCount": {
       "label": "Moduly (až {fits})",
       "tip": "Kolik modulů na tuto plochu umístit, až do počtu, který se vejde do její využitelné části. Výkon z toho vyplývá."
-    }
+    },
+    "removeAll": "Odebrat všechny FV z této budovy",
+    "removeAllConfirm": "Odebrat všechny FV"
   },
   "tech": {
     "none": "Tato budova nemá žádné technologie.",
