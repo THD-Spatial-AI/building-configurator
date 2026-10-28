@@ -319,7 +319,8 @@
       "noCountryAfter": "ein Land fest, um den Heizwärmebedarf zu berechnen.",
       "unsupportedBefore": "Gebäudetyp",
       "unsupportedAfter": "ist nicht in der TABULA-Datenbank. Unterstützte Typen: {types}.",
-      "noData": "Keine TABULA-Daten für dieses Gebäude: Der TABULA-Dienst hat keine Variante dafür oder ist nicht erreichbar."
+      "noData": "Keine TABULA-Daten für dieses Gebäude: Der TABULA-Dienst hat keine Variante dafür oder ist nicht erreichbar.",
+      "borrowed": "Für {type} gibt es keine eigenen Energieklassen. Diese stammen von einem {from} gleichen Alters und Landes und bilden kein Nichtwohngebäude ab; die Werte können daher abweichen. Prüfen Sie, ob sie zum Gebäude passen."
     },
     "section": {
       "occupancy": "Geschosse und Belegung",

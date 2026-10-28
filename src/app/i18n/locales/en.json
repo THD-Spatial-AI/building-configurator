@@ -319,7 +319,8 @@
       "noCountryAfter": "to enable heat demand calculation.",
       "unsupportedBefore": "Building type",
       "unsupportedAfter": "is not in the TABULA database. Supported types: {types}.",
-      "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached."
+      "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached.",
+      "borrowed": "{type} has no energy grades of its own. Those shown are a {from}'s of the same age and country and do not reflect a non-residential building, so the values can differ: check that they match the building."
     },
     "section": {
       "occupancy": "Storeys and occupancy",

@@ -14,7 +14,7 @@ import {
   type IgnisVariantLevel,
 } from './ignisAdapter';
 import type { ConfiguratorServices, VariantLookupServices } from './services';
-import { TABULA_VARIANT_NAMES, variantNumber, variantSubtype } from './refurbishment';
+import { TABULA_VARIANT_NAMES, variantNumber, variantSubtype, variantType } from './refurbishment';
 
 /** Maps UI building type labels to TABULA building type codes. */
 const BUILDING_TYPE_TO_TABULA: Record<string, string> = {
@@ -34,6 +34,18 @@ export function isBuildingTypeSupported(label: string): boolean {
   return label in BUILDING_TYPE_TO_TABULA;
 }
 
+/**
+ * The TABULA type the levels are looked up for: the building type's own, else,
+ * for a type TABULA lacks such as a school, the residential type of the
+ * building's own variant code. Null when there is neither.
+ */
+export function lookupTypeCode(label: string, variantCode?: string): string | null {
+  const own = toBuildingTypeCode(label);
+  if (own) return own;
+  const fromCode = variantType(variantCode);
+  return fromCode && Object.values(BUILDING_TYPE_TO_TABULA).includes(fromCode) ? fromCode : null;
+}
+
 /** TABULA's refurbishment variants: existing state, usual and advanced refurbishment. */
 const MAX_VARIANT_NUMBER = 3;
 
@@ -47,7 +59,8 @@ function variantLabel(label: string, number: number): string {
  * The refurbishment variants 1 to 3 of a building classification, ordered by
  * number: one match call for the codes, then one data call per code.
  * `subtype` (e.g. Deta) narrows the match to the building's own subtype;
- * without it ignis matches its default subtype.
+ * without it ignis matches its default subtype. `variantCode`, the building's
+ * own, gives the type for a building type TABULA lacks (see lookupTypeCode).
  */
 export async function loadVariantLevels(
   services: VariantLookupServices,
@@ -55,8 +68,9 @@ export async function loadVariantLevels(
   buildingTypeLabel: string,
   constructionYear: number,
   subtype?: string,
+  variantCode?: string,
 ): Promise<IgnisVariantLevel[]> {
-  const typeCode = toBuildingTypeCode(buildingTypeLabel);
+  const typeCode = lookupTypeCode(buildingTypeLabel, variantCode);
   if (!typeCode) return [];
 
   let entries;

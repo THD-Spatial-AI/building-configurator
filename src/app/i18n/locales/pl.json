@@ -333,7 +333,8 @@
       "noCountryAfter": "w celu obliczenia zapotrzebowania na ciepło.",
       "unsupportedBefore": "Typ budynku",
       "unsupportedAfter": "nie występuje w bazie TABULA. Obsługiwane typy: {types}.",
-      "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna."
+      "noData": "Brak danych TABULA dla tego budynku: usługa TABULA nie ma dla niego wariantu lub jest nieosiągalna.",
+      "borrowed": "{type} nie ma własnych klas energetycznych. Są to klasy budynku typu {from} z tego samego okresu i kraju i nie odzwierciedlają budynku niemieszkalnego, więc wartości mogą się różnić: sprawdź, czy pasują do budynku."
     },
     "section": {
       "occupancy": "Kondygnacje i użytkowanie",

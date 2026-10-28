@@ -319,7 +319,8 @@
       "noCountryAfter": "om de warmtevraagberekening in te schakelen.",
       "unsupportedBefore": "Gebouwtype",
       "unsupportedAfter": "staat niet in de TABULA-database. Ondersteunde typen: {types}.",
-      "noData": "Geen TABULA-data gevonden voor dit gebouw: de TABULA-service heeft er geen variant voor of was niet bereikbaar."
+      "noData": "Geen TABULA-data gevonden voor dit gebouw: de TABULA-service heeft er geen variant voor of was niet bereikbaar.",
+      "borrowed": "{type} heeft geen eigen energieklassen. Deze zijn van een {from} van dezelfde leeftijd en hetzelfde land en geven geen niet-woongebouw weer, dus de waarden kunnen afwijken: controleer of ze bij het gebouw passen."
     },
     "section": {
       "occupancy": "Verdiepingen en bewoning",
