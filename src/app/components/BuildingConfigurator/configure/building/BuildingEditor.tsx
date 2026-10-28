@@ -113,7 +113,7 @@ function SectionBody({
   mode: 'basic' | 'expert';
 }) {
   switch (id) {
-    case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} />;
+    case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} mode={mode} />;
     case 'comfort':     return <ComfortSection     general={general} setGen={setGen} mode={mode} />;
     case 'outputs':     return <OutputsSection     general={general} setGen={setGen} />;
     case 'equipment':   return <EquipmentSection   general={general} setGen={setGen} />;
