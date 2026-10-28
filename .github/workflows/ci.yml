@@ -15,6 +15,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The BuEM schema copy must match buem-gateway at the pinned commit.
+      - run: npm run schema:check
       - run: npm run typecheck
       - run: npm test
       - run: npm run build:lib

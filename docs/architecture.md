@@ -85,6 +85,8 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 
 Schema path changes go in `modelDataMap.ts` only.
 
+The BuEM request schema is buem-gateway's. `schemas/buem/` holds a copy of `schemas/v6-draft/request_schema.json` at the buem-gateway commit pinned in `schemas/buem/source.json`, and `src/app/lib/buemSchema.test.ts` validates every payload the configurator produces against it, with the weather the host adds. `npm run schema:sync` refreshes the copy after the pin changes; `npm run schema:check`, run in CI, fails while the copy differs from the pinned commit.
+
 `toBuem` sends the building as BuEM is to model it. While storeys are left out, the `building` block holds only the modelled storeys, with each surface cut to its share inside them. In `configurator`, an object BuEM ignores and returns unchanged, the configurator keeps its own keys so the building can be restored in full:
 
 | Key | Holds |

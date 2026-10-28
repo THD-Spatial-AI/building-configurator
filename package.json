@@ -34,6 +34,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "capture-fixtures": "node scripts/capture-fixtures.mjs",
+    "schema:sync": "node scripts/buem-schema.mjs",
+    "schema:check": "node scripts/buem-schema.mjs --check",
     "prepare": "npm run build:lib",
     "prepublishOnly": "npm run build:lib"
   },
@@ -49,6 +51,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "4.7.0",
+    "ajv": "8.18.0",
     "ol": "^10.10.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",

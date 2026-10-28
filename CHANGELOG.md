@@ -37,6 +37,7 @@ Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` 
 - The Building tab shows its sections as steps under the annual demand: a step bar names each with a status mark (complete, needs attention, error), one section shows at a time, with Back and Next beneath it.
 - Breaking: `toBuem` returns `storeys` and `construction_year` inside `configurator` (type `ConfiguratorKeys`), no longer beside the `building` block. Buildings stored by 0.14.0 still reopen with both.
 - The build uses Vite 7, which brings esbuild 0.28 in place of the 0.25 release with a known security advisory.
+- Tests validate every BuEM payload the configurator produces against buem-gateway's v6-draft request schema, copied at a pinned commit that CI checks (`npm run schema:check`). `ajv` is a new dev dependency, for the tests only.
 
 ### Removed
 
