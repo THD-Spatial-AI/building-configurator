@@ -167,12 +167,10 @@ export function Building3DView({
   const [storeyMode, setStoreyMode] = useState(false);
   /** The storeys selected in the model or in the storey list, configured together. */
   const [selectedStoreys, setSelectedStoreys] = useState<number[]>([]);
-  /** Off: a click selects one storey. On: clicks add storeys, to configure several at once. */
-  const [multiStoreys, setMultiStoreys] = useState(false);
   const leaveStoreyMode = () => setStoreyMode(false);
   const [measuring, setMeasuring] = useState(false);
   const pickStorey = (storey: number | null) => {
-    if (storey !== null) setSelectedStoreys((prev) => pickWithAttic(prev, storey, multiStoreys, model.general.storeys + 1));
+    if (storey !== null) setSelectedStoreys((prev) => pickWithAttic(prev, storey, false, model.general.storeys + 1));
   };
   /** The data credits, open over the model where it is too narrow to show them in full. */
   const [creditsOpen, setCreditsOpen] = useState(false);
@@ -414,11 +412,6 @@ export function Building3DView({
         modelled={model.general.storeysModelled}
         selected={selectedStoreys}
         onSelect={setSelectedStoreys}
-        multi={multiStoreys}
-        onMultiChange={(on) => {
-          setMultiStoreys(on);
-          if (!on) setSelectedStoreys((prev) => prev.slice(0, 1));
-        }}
         floorAreaPerStorey={model.general.floorArea}
         dwellings={hasDwellingsPerStorey(model.general.buildingType) ? {
           values: model.general.storeyDwellings,

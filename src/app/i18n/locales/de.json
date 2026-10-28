@@ -728,33 +728,18 @@
   },
   "storeys": {
     "title": "Modellierte Geschosse",
-    "hint": "Geschoss 0 ist das Erdgeschoss. Wählen Sie Geschosse hier oder im Modell und lassen Sie sie dann aus dem Modell weg oder geben Sie ihre Wohnungen oder ihre eigene Höhe an; Fläche und Hülle zählen nur die modellierten Geschosse.",
+    "hint": "Geschoss 0 ist das Erdgeschoss. Lassen Sie ein Geschoss in seiner Zeile aus dem Modell weg oder geben Sie ihm eine eigene Höhe und Wohnungen; eine hier oder im Modell gewählte Zeile wird in beiden hervorgehoben. Fläche und Hülle zählen nur die modellierten Geschosse.",
     "noGeometry": "Geschosse lassen sich weglassen, sobald das 3D-Modell geladen ist.",
     "floorArea": "Modellierte Fläche",
     "pick": "Geschosse",
     "pickHint": "Klicken Sie Geschosse im Modell an, um sie auszuwählen; einstellen lassen sie sich unter Modellierte Geschosse im Reiter Gebäude.",
     "lastOne": "Mindestens ein Geschoss bleibt im Modell.",
-    "chip": {
-      "in": "Geschoss {number}, im Modell",
-      "out": "Geschoss {number}, weggelassen",
-      "dwellings": "{count} WE"
-    },
     "select": {
-      "all": "Alle auswählen",
-      "clear": "Auswahl aufheben",
-      "count": {
-        "one": "{count} Geschoss ausgewählt",
-        "other": "{count} Geschosse ausgewählt"
-      },
-      "multi": "Mehrere Geschosse bearbeiten",
       "one": "Geschoss {number}"
     },
-    "dwellingsPerStorey": "Wohnungen je Geschoss",
-    "mixed": "gemischt",
     "dwellingsMissing": "Geben Sie die Zahl der Wohnungen auf jedem einbezogenen Geschoss an. Es fehlt: Geschoss {storeys}.",
     "inModel": "Im Modell",
     "roomHeightTip": "Die Höhe jedes Geschosses, von Boden zu Boden. Ein Geschoss mit eigener Höhe behält diese.",
-    "ownHeight": "Geschosshöhe",
     "useRoomHeight": "Raumhöhe verwenden",
     "limit": {
       "storeys": "Ein weiteres Geschoss mit {room} m wäre höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist.",
@@ -763,8 +748,6 @@
     "heightConflict": "Die Geschosse sind zusammen {total} m hoch, höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist. Verringern Sie die Geschosszahl oder eine Höhe.",
     "attic": {
       "label": "Dachgeschoss",
-      "chipIn": "Dachgeschoss, im Modell",
-      "chipOut": "Dachgeschoss, weggelassen",
       "hint": "Der Raum unter dem geneigten Dach, oberhalb der Traufe. Weggelassen gehört das Dach nicht mehr zum beheizten Gebäude, und die Decke darunter gibt Wärme an das kalte Dachgeschoss ab.",
       "floorArea": "Fläche im Dachgeschoss",
       "noArea": "Nicht gezählt",
@@ -772,7 +755,11 @@
       "floorAreaTip": "Aus dem 3D-Modell gemessen: Fläche zählt voll, wo das Dach 2 m oder mehr darüber liegt, zur Hälfte bei 1 bis 2 m.",
       "useMeasured": "Gemessene verwenden ({area} m²)"
     },
-    "someIn": "Einige sind im Modell, einige weggelassen."
+    "table": {
+      "storey": "Geschoss",
+      "height": "Höhe",
+      "dwellings": "Wohnungen"
+    }
   },
   "help": {
     "envelope": "Die Größe dieser Fläche und wie gut sie die Wärme hält. Eine Änderung ändert, wie viel Heizung das Gebäude braucht.",

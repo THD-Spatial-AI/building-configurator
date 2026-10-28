@@ -732,33 +732,18 @@
   },
   "storeys": {
     "title": "Étages modélisés",
-    "hint": "L'étage 0 est le rez-de-chaussée. Sélectionnez des étages ici ou dans le modèle, puis retirez-les du modèle ou indiquez leurs logements ou leur propre hauteur ; la surface et l'enveloppe ne comptent que les étages modélisés.",
+    "hint": "L'étage 0 est le rez-de-chaussée. Dans sa ligne, retirez un étage du modèle ou donnez-lui sa propre hauteur et ses logements ; une ligne choisie ici ou dans le modèle est mise en évidence dans les deux. La surface et l'enveloppe ne comptent que les étages modélisés.",
     "noGeometry": "Les étages peuvent être exclus une fois le modèle 3D chargé.",
     "floorArea": "Surface modélisée",
     "pick": "Étages",
     "pickHint": "Cliquez sur des étages dans le modèle pour les sélectionner ; réglez-les dans Étages modélisés, dans l'onglet Bâtiment.",
     "lastOne": "Au moins un étage reste dans le modèle.",
-    "chip": {
-      "in": "Étage {number}, dans le modèle",
-      "out": "Étage {number}, retiré",
-      "dwellings": "{count} lgt"
-    },
     "select": {
-      "all": "Tout sélectionner",
-      "clear": "Effacer la sélection",
-      "count": {
-        "one": "{count} étage sélectionné",
-        "other": "{count} étages sélectionnés"
-      },
-      "multi": "Configurer plusieurs étages",
       "one": "Étage {number}"
     },
-    "dwellingsPerStorey": "Logements par étage",
-    "mixed": "variable",
     "dwellingsMissing": "Indiquez le nombre de logements sur chaque étage inclus. Manquant : étage {storeys}.",
     "inModel": "Dans le modèle",
     "roomHeightTip": "La hauteur de chaque étage, de plancher à plancher. Un étage doté de sa propre hauteur la conserve.",
-    "ownHeight": "Hauteur d'étage",
     "useRoomHeight": "Utiliser la hauteur sous plafond",
     "limit": {
       "storeys": "Un étage de plus à {room} m dépasserait le modèle 3D, qui mesure {height} m jusqu'à l'égout.",
@@ -767,8 +752,6 @@
     "heightConflict": "Les étages mesurent ensemble {total} m, plus que le modèle 3D, qui mesure {height} m jusqu'à l'égout. Réduisez le nombre d'étages ou une hauteur.",
     "attic": {
       "label": "Combles",
-      "chipIn": "Combles, dans le modèle",
-      "chipOut": "Combles, retirés",
       "hint": "L'espace sous le toit en pente, au-dessus de l'égout. Retirés, le toit quitte le bâtiment chauffé et le plafond en dessous perd de la chaleur vers les combles froids.",
       "floorArea": "Surface des combles",
       "noArea": "Non comptée",
@@ -776,7 +759,11 @@
       "floorAreaTip": "Mesurée sur le modèle 3D : la surface compte en entier là où le toit est à 2 m ou plus, à moitié là où il est entre 1 et 2 m.",
       "useMeasured": "Utiliser la mesure ({area} m²)"
     },
-    "someIn": "Certains sont dans le modèle, d'autres retirés."
+    "table": {
+      "storey": "Étage",
+      "height": "Hauteur",
+      "dwellings": "Logements"
+    }
   },
   "help": {
     "envelope": "La taille de cette surface et sa capacité à garder la chaleur. Les modifier change le chauffage dont le bâtiment a besoin.",
