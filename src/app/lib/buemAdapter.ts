@@ -273,10 +273,26 @@ function adaptTimeseries(ts: unknown): LoadDataPoint[] | null {
   }));
 }
 
+/**
+ * The building's location: a Point's coordinates, or for a footprint (Polygon
+ * or MultiPolygon) the first vertex of its outer ring. [0, 0] without a
+ * geometry; any other geometry type, or coordinates that are not numbers,
+ * throw rather than become a location.
+ */
 function coordsFromFeature(feature: unknown): [number, number] {
-  const coords = getMappedValue<unknown[]>(feature, MODEL_DATA_MAP.thematic.coordinates) ?? [];
-  const lon = Number(coords[0] ?? 0);
-  const lat = Number(coords[1] ?? 0);
+  const type = getMappedValue<unknown>(feature, 'geometry.type');
+  const coords = getMappedValue<unknown>(feature, MODEL_DATA_MAP.thematic.coordinates);
+  const point = (() => {
+    if (type === undefined || type === 'Point') return coords;
+    if (type === 'Polygon') return (coords as unknown[][] | undefined)?.[0]?.[0];
+    if (type === 'MultiPolygon') return (coords as unknown[][][] | undefined)?.[0]?.[0]?.[0];
+    throw new Error(`coordsFromFeature: a building's geometry must be a Point, Polygon or MultiPolygon, got ${String(type)}`);
+  })();
+  if (type === undefined && coords === undefined) return [0, 0];
+  const [lon, lat] = (Array.isArray(point) ? point : []).map(Number);
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+    throw new Error(`coordsFromFeature: no numeric longitude and latitude in the ${String(type ?? 'Point')} geometry, got ${JSON.stringify(point)}`);
+  }
   return [lon, lat];
 }
 
