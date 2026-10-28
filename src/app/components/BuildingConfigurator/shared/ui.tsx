@@ -258,18 +258,20 @@ interface NumberInputProps {
   placeholder?: string;
   /** Why the value cannot go higher; while a step up would pass `max`, the up arrow is off and shows this. */
   maxReason?: string;
+  /** Names the field for screen readers only, as in a table whose header shows the label. */
+  hideLabel?: boolean;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width, integer, placeholder, maxReason,
+  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false,
 }: NumberInputProps) {
   const [reasonShown, setReasonShown] = useState(false);
   const current = value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0;
   const atMax = maxReason !== undefined && max !== undefined && current + step > max + 1e-9;
   return (
     <div style={width !== undefined ? { width } : undefined} onMouseLeave={() => setReasonShown(false)}>
-      {label && (
+      {label && !hideLabel && (
         <div className="flex items-center gap-1 mb-1">
           <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
           {tip && <InfoTip tip={tip} />}
@@ -334,15 +336,17 @@ interface SelectInputProps {
   onChange: (v: string) => void;
   options: string[] | { value: string; label: string }[];
   tip?: string;
+  /** Names the field for screen readers only, as in a table whose header shows the label. */
+  hideLabel?: boolean;
 }
 
-export function SelectInput({ label, value, onChange, options, tip }: SelectInputProps) {
+export function SelectInput({ label, value, onChange, options, tip, hideLabel = false }: SelectInputProps) {
   const normalized = (options as any[]).map((o) =>
     typeof o === 'string' ? { value: o, label: o } : o
   );
   return (
     <div>
-      {label && (
+      {label && !hideLabel && (
         <div className="flex items-center gap-1 mb-1">
           <span className="text-[11px] font-medium text-muted-foreground leading-tight">{label}</span>
           {tip && <InfoTip tip={tip} />}
@@ -350,6 +354,7 @@ export function SelectInput({ label, value, onChange, options, tip }: SelectInpu
       )}
       <select
         className="cfg-select"
+        aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

@@ -5,7 +5,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Info } from '@/app/components/icons';
-import { FieldLabel, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
+import { FieldLabel, InfoTip, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
   REFURB_TYPES, customCount, type RefurbElementType, type RefurbStates,
 } from '@/app/lib/refurbishment';
@@ -225,57 +225,87 @@ function typeLossFactor(surfaces: BuildingElement[]): number | null {
   return values.size === 1 ? [...values][0] : null;
 }
 
+/** One row per element type: its state, U-value and loss factor, the units in the header. */
 function ElementTable({ elements, levels, states, initial, onSetState, onSetTypeUValue, onSetTypeLossFactor }: Props) {
   const t = useT();
   const types = presentTypes(elements);
+  const head = 'px-1.5 pb-1 text-left text-[10px] font-medium text-muted-foreground';
   return (
-    <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
+    <div className="flex flex-col gap-1.5 border-t border-border/60 pt-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-foreground">{t('insulation.table.title')}</p>
-      {types.map((type) => {
-        const surfaces = Object.values(elements).filter((el) => el.type === type);
-        const custom = customCount(elements, type, states[type], initial, levels);
-        const options = [
-          ...levels.map((level) => ({ value: String(level.number), label: variantName(t, level.label, level.number) })),
-          ...(custom > 0 ? [{ value: 'custom', label: t('insulation.table.custom') }] : []),
-        ];
-        const loss = typeLossFactor(surfaces);
-        return (
-          <div key={type} className="flex flex-col gap-1.5 rounded-md border border-border p-2.5">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-semibold text-foreground">{TYPE_LABELS[type](t)}</span>
-              <span className="text-[10px] text-muted-foreground">
-                {t('insulation.table.surfaces', { count: surfaces.length })}
-                {custom > 0 && ` · ${t('insulation.table.setOneByOne', { custom })}`}
-              </span>
-            </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_9rem] items-end gap-2">
-              {levels.length > 0 ? (
-                <SelectInput
-                  label={t('insulation.table.state')}
-                  value={custom > 0 ? 'custom' : String(states[type])}
-                  onChange={(v) => { if (v !== 'custom') onSetState([type], Number(v)); }}
-                  options={options}
-                />
-              ) : <span />}
-              <NumberInput
-                label={t('insulation.uValue')}
-                value={Number(typeUValue(surfaces).toFixed(3))}
-                onChange={(v) => onSetTypeUValue(type, Math.max(0, v))}
-                unit="W/m²K" min={0} max={6} step={0.01}
-              />
-            </div>
-            {LOSS_FACTOR_TYPES.includes(type) && (
-              <NumberInput
-                label={t('insulation.lossFactor')}
-                value={loss ?? ''}
-                onChange={(v) => onSetTypeLossFactor(type, Math.min(1, Math.max(0, v)))}
-                unit={t('insulation.unitShare')} min={0} max={1} step={0.05}
-                tip={t('insulation.table.lossFactorTip')}
-              />
-            )}
-          </div>
-        );
-      })}
+      <table className="w-full table-fixed border-collapse text-[12px]">
+        <colgroup>
+          <col />
+          {levels.length > 0 && <col className="w-[34%]" />}
+          <col className="w-[25%]" />
+          <col className="w-[22%]" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th className={head}>{t('insulation.table.element')}</th>
+            {levels.length > 0 && <th className={head}>{t('insulation.table.state')}</th>}
+            <th className={head}>{t('insulation.uValue')}<span className="block font-normal">W/m²K</span></th>
+            <th className={head}>
+              <span className="inline-flex items-center gap-1">{t('insulation.lossFactor')}<InfoTip tip={t('insulation.table.lossFactorTip')} /></span>
+              <span className="block font-normal">{t('insulation.unitShare')}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {types.map((type) => {
+            const surfaces = Object.values(elements).filter((el) => el.type === type);
+            const custom = customCount(elements, type, states[type], initial, levels);
+            const options = [
+              ...levels.map((level) => ({ value: String(level.number), label: variantName(t, level.label, level.number) })),
+              ...(custom > 0 ? [{ value: 'custom', label: t('insulation.table.custom') }] : []),
+            ];
+            const loss = typeLossFactor(surfaces);
+            const name = TYPE_LABELS[type](t);
+            return (
+              <tr key={type} className="border-t border-border align-middle">
+                <td className="px-1.5 py-1.5">
+                  <span className="block truncate font-semibold text-foreground">{name}</span>
+                  <span className="block truncate text-[10px] text-muted-foreground">
+                    {t('insulation.table.surfaces', { count: surfaces.length })}
+                    {custom > 0 && ` · ${t('insulation.table.setOneByOne', { custom })}`}
+                  </span>
+                </td>
+                {levels.length > 0 && (
+                  <td className="px-1 py-1.5">
+                    <SelectInput
+                      label={`${name}: ${t('insulation.table.state')}`}
+                      hideLabel
+                      value={custom > 0 ? 'custom' : String(states[type])}
+                      onChange={(v) => { if (v !== 'custom') onSetState([type], Number(v)); }}
+                      options={options}
+                    />
+                  </td>
+                )}
+                <td className="px-1 py-1.5">
+                  <NumberInput
+                    label={`${name}: ${t('insulation.uValue')}`}
+                    hideLabel
+                    value={Number(typeUValue(surfaces).toFixed(3))}
+                    onChange={(v) => onSetTypeUValue(type, Math.max(0, v))}
+                    unit="" min={0} max={6} step={0.01}
+                  />
+                </td>
+                <td className="px-1 py-1.5">
+                  {LOSS_FACTOR_TYPES.includes(type) && (
+                    <NumberInput
+                      label={`${name}: ${t('insulation.lossFactor')}`}
+                      hideLabel
+                      value={loss ?? ''}
+                      onChange={(v) => onSetTypeLossFactor(type, Math.min(1, Math.max(0, v)))}
+                      unit="" min={0} max={1} step={0.05}
+                    />
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

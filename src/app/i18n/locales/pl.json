@@ -476,7 +476,8 @@
       },
       "setOneByOne": "pojedynczo: {custom}",
       "state": "Stan",
-      "lossFactorTip": "Udział strat ciepła przez te przegrody, który jest uwzględniany: 1 do powietrza zewnętrznego, mniej do gruntu lub przestrzeni nieogrzewanej (BuEM b_transmission). Puste, gdy przegrody się różnią; ściany wspólne zachowują 0."
+      "lossFactorTip": "Udział strat ciepła przez te przegrody, który jest uwzględniany: 1 do powietrza zewnętrznego, mniej do gruntu lub przestrzeni nieogrzewanej (BuEM b_transmission). Puste, gdy przegrody się różnią; ściany wspólne zachowują 0.",
+      "element": "Element"
     },
     "uValue": "Współczynnik U",
     "lossFactor": "Współczynnik b",

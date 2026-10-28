@@ -458,7 +458,8 @@
       },
       "setOneByOne": "{custom} set one by one",
       "state": "State",
-      "lossFactorTip": "Share of the heat loss through these surfaces that counts: 1 to outdoor air, less against ground or an unheated space (BuEM b_transmission). Empty when the surfaces differ; party walls keep 0."
+      "lossFactorTip": "Share of the heat loss through these surfaces that counts: 1 to outdoor air, less against ground or an unheated space (BuEM b_transmission). Empty when the surfaces differ; party walls keep 0.",
+      "element": "Element"
     },
     "uValue": "U-value",
     "lossFactor": "Loss factor",

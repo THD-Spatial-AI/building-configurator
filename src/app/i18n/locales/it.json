@@ -458,7 +458,8 @@
       },
       "setOneByOne": "{custom} impostate singolarmente",
       "state": "Stato",
-      "lossFactorTip": "Quota della dispersione termica attraverso queste superfici che viene considerata: 1 verso l'aria esterna, meno verso terreno o ambienti non riscaldati (BuEM b_transmission). Vuoto se le superfici differiscono; le pareti condivise restano a 0."
+      "lossFactorTip": "Quota della dispersione termica attraverso queste superfici che viene considerata: 1 verso l'aria esterna, meno verso terreno o ambienti non riscaldati (BuEM b_transmission). Vuoto se le superfici differiscono; le pareti condivise restano a 0.",
+      "element": "Elemento"
     },
     "uValue": "Valore U",
     "lossFactor": "Fattore di correzione",

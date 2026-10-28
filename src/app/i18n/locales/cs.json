@@ -476,7 +476,8 @@
       },
       "setOneByOne": "{custom} nastaveno jednotlivě",
       "state": "Stav",
-      "lossFactorTip": "Podíl tepelné ztráty těmito plochami, který se započítá: 1 do venkovního vzduchu, méně do zeminy nebo nevytápěného prostoru (BuEM b_transmission). Prázdné, pokud se plochy liší; společné stěny mají 0."
+      "lossFactorTip": "Podíl tepelné ztráty těmito plochami, který se započítá: 1 do venkovního vzduchu, méně do zeminy nebo nevytápěného prostoru (BuEM b_transmission). Prázdné, pokud se plochy liší; společné stěny mají 0.",
+      "element": "Prvek"
     },
     "uValue": "Součinitel U",
     "lossFactor": "Redukční činitel",
