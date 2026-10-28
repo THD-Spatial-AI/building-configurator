@@ -1,0 +1,668 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://buem.energy/schemas/contract/v6-draft/request",
+  "title": "BUEM GeoJSON Request Schema (API contract v6-draft)",
+  "description": "Request schema for the BUEM building energy model. Each feature represents one building. The buem object carries building (complete physical description — classification, geometry, and thermal performance), solver (execution settings), inputs (optional timeseries overrides), and weather (a pre-resolved hourly timeseries — buem-gateway resolves it from no external service). All measurable quantities carry an explicit unit field. SI units are assumed when unit is omitted. Dimensionless ratios use unit: '-'. Draft, not yet promoted.",
+  "type": "object",
+  "required": ["type", "features"],
+  "properties": {
+    "type": {
+      "const": "FeatureCollection",
+      "description": "GeoJSON type identifier"
+    },
+    "timeStamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Request timestamp"
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/feature" },
+      "description": "One entry per building to simulate"
+    }
+  },
+
+  "$defs": {
+
+    "feature": {
+      "type": "object",
+      "required": ["type", "id", "geometry", "properties"],
+      "properties": {
+        "type":       { "const": "Feature" },
+        "id":         { "type": "string", "description": "Unique building identifier" },
+        "geometry":   { "$ref": "#/$defs/geometry" },
+        "properties": { "$ref": "#/$defs/properties" }
+      }
+    },
+
+    "geometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "const": "Point" },
+        "coordinates": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 3,
+          "description": "[longitude, latitude, elevation?] — authoritative building location, used for weather station lookup"
+        }
+      }
+    },
+
+    "properties": {
+      "type": "object",
+      "required": ["start_time", "end_time", "buem"],
+      "properties": {
+        "start_time":      { "type": "string", "format": "date-time", "description": "Simulation start time" },
+        "end_time":        { "type": "string", "format": "date-time", "description": "Simulation end time" },
+        "resolution":      { "type": "string", "default": "60",       "description": "Time resolution value" },
+        "resolution_unit": { "type": "string", "default": "minutes",  "description": "Time resolution unit" },
+        "buem":            { "$ref": "#/$defs/buem" }
+      }
+    },
+
+    "buem": {
+      "type": "object",
+      "required": ["building"],
+      "description": "BUEM model input. building is the description of the building and its occupants. outputs selects the load profiles to compute. solver is execution settings. inputs is optional user-provided timeseries that override model-generated values. weather is the pre-resolved hourly timeseries for the building's location. weather and building.envelope are required whenever heating or cooling is selected (the default); a request selecting neither may omit both, and the year then comes from properties.start_time.",
+      "properties": {
+        "building": { "$ref": "#/$defs/building" },
+        "outputs":  { "$ref": "#/$defs/outputs" },
+        "solver":   { "$ref": "#/$defs/solver" },
+        "inputs":   { "$ref": "#/$defs/inputs" },
+        "weather":  { "$ref": "#/$defs/weather" },
+        "storeys": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Reserved for building-configurator: the building's storey count as the user set it. Ignored by buem-model and echoed back unchanged."
+        },
+        "construction_year": {
+          "type": "integer",
+          "description": "Reserved for building-configurator: the construction year as the user set it, not the TABULA class code in building.construction_period. Ignored by buem-model and echoed back unchanged."
+        }
+      },
+      "if": {
+        "required": ["outputs"],
+        "properties": {
+          "outputs": {
+            "required": ["heating", "cooling"],
+            "properties": {
+              "heating": { "const": "none" },
+              "cooling": { "const": "none" }
+            }
+          }
+        }
+      },
+      "else": {
+        "required": ["weather"],
+        "properties": {
+          "building": { "required": ["envelope"] }
+        }
+      }
+    },
+
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Load profiles to compute and return. Each profile is none (not computed, absent from the response), summary (annual total, peak and statistics) or series (summary plus hourly values). An omitted profile is summary. heating and cooling need building.envelope and weather; electricity, hot_water and kitchen come from the occupancy model alone. When heating and cooling are both none, buem-model skips the thermal solve.",
+      "properties": {
+        "heating":     { "$ref": "#/$defs/output_level" },
+        "cooling":     { "$ref": "#/$defs/output_level" },
+        "electricity": { "$ref": "#/$defs/output_level" },
+        "hot_water": {
+          "allOf": [{ "$ref": "#/$defs/output_level" }],
+          "description": "Residential building_type only; service buildings report all-zero hot water."
+        },
+        "kitchen": {
+          "allOf": [{ "$ref": "#/$defs/output_level" }],
+          "description": "Gas cooking energy, reported only when building.cooking_carrier is gas. With electric cooking it stays inside electricity."
+        }
+      }
+    },
+
+    "output_level": {
+      "type": "string",
+      "enum": ["none", "summary", "series"],
+      "default": "summary"
+    },
+
+    "weather": {
+      "type": "object",
+      "required": ["index", "variables"],
+      "description": "A pre-resolved hourly weather timeseries for the building's location, in the shape weather serve's GET /v1/weather/point?format=json returns. The caller (normally the Orchestrator) resolves it and embeds it here; buem-gateway calls no weather service and does not accept a provider/year selector in place of the data. provider and year are optional metadata recording which archive the timeseries came from.",
+      "properties": {
+        "index": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "format": "date-time" },
+          "description": "Hourly timestamps, ISO 8601. Length must match every array under variables."
+        },
+        "variables": {
+          "type": "object",
+          "description": "Per-variable hourly value arrays, each the same length as index. null marks a gap. BuEM's solver needs all four: T (air temperature, degC) and the solar components GHI, DHI and DNI (W/m2).",
+          "properties": {
+            "T":   { "type": "array", "items": { "type": ["number", "null"] } },
+            "GHI": { "type": "array", "items": { "type": ["number", "null"] } },
+            "DHI": { "type": "array", "items": { "type": ["number", "null"] } },
+            "DNI": { "type": "array", "items": { "type": ["number", "null"] } }
+          },
+          "required": ["T", "GHI", "DHI", "DNI"]
+        },
+        "provider": {
+          "type": "string",
+          "description": "Metadata only: which processed archive the timeseries was resolved from (e.g. era5-land, cosmo-rea6, merra-2)."
+        },
+        "year": {
+          "type": "integer",
+          "description": "Metadata only: the calendar year the archive data covers."
+        }
+      }
+    },
+
+    "building": {
+      "type": "object",
+      "required": ["building_type", "country", "A_ref"],
+      "description": "Description of the building and its occupants. Classification and occupancy fields sit at this level. Geometry and per-element thermal properties are in envelope, required whenever heating or cooling is selected (see buem). Neither BuEM nor buem-gateway derives envelope from classification fields. residential_units is required for MFH and AB.",
+      "allOf": [
+        {
+          "if": {
+            "required": ["building_type"],
+            "properties": { "building_type": { "enum": ["MFH", "AB"] } }
+          },
+          "then": { "required": ["residential_units"] }
+        },
+        {
+          "if": {
+            "required": ["building_type"],
+            "properties": { "building_type": { "enum": ["bakery", "clinic", "hotel", "office", "restaurant", "school", "supermarket", "warehouse"] } }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["equipment"] },
+                { "required": ["num_persons"] },
+                { "required": ["archetype"] },
+                { "required": ["region_code"] }
+              ]
+            },
+            "properties": { "residential_units": { "const": 1 } }
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable building label (e.g. '3434 · Single-family House'). Display only — no effect on simulation."
+        },
+        "A_ref": {
+          "allOf": [{ "$ref": "#/$defs/area_qty" }],
+          "description": "Reference (conditioned) floor area of the whole building, not of one dwelling. Drives the thermal mass and ventilation volume, and for service building_type the default capacity."
+        },
+        "h_room": {
+          "allOf": [{ "$ref": "#/$defs/length_qty" }],
+          "description": "Average room height",
+          "default": { "value": 2.5, "unit": "m" }
+        },
+        "n_storeys": {
+          "type": "integer",
+          "minimum": 1,
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Number of storeys"
+        },
+        "building_type": {
+          "type": "string",
+          "enum": [
+            "SFH", "MFH", "TH", "AB",
+            "bakery", "clinic", "hotel", "office", "restaurant", "school", "supermarket", "warehouse"
+          ],
+          "description": "Building type code. Residential: SFH single-family, MFH multi-family, AB apartment block, TH terraced house — occupancy is driven by num_persons/archetype/equipment. Service: bakery, clinic, hotel, office, restaurant, school, supermarket, warehouse — occupancy is driven by capacity instead, and BuEM has no hot water or cooking model for these, so thermal_load_profile.summary.hot_water/kitchen come back all-zero regardless of cooking_carrier/include_dhw. Re-added as an enum in v6-draft; the v5 migration dropped this check."
+        },
+        "construction_period": {
+          "type": "string",
+          "description": "TABULA construction-year class code for the building's country (e.g. \"01\", \"02\"), not a literal year range. Class boundaries are defined per country by each national TABULA dataset and are not consistent across countries. Classification metadata only — has no effect on the simulation, which reads geometry and U-values from envelope directly."
+        },
+        "country": {
+          "type": "string",
+          "description": "ISO 3166-1 alpha-2 country code (e.g. NL, DE)"
+        },
+        "attic_condition": {
+          "type": "string",
+          "enum": ["-", "N", "P", "C", "NI", "PI"],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Attic conditioning status: - not applicable, N not conditioned, P partially conditioned, C conditioned, NI not insulated, PI partially insulated"
+        },
+        "cellar_condition": {
+          "type": "string",
+          "enum": ["-", "N", "P", "C", "NI", "PI"],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Cellar conditioning status, same codes as attic_condition"
+        },
+        "neighbour_status": {
+          "type": "string",
+          "enum": ["B_Alone", "B_N1", "B_N2"],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Attached neighbours: B_Alone detached, B_N1 one shared wall, B_N2 two shared walls"
+        },
+        "window_to_wall_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1,
+          "description": "Fraction of each exposed wall's area that BuEM glazes when the request has no window elements, applied uniformly to every exposed wall. Ignored when envelope.elements contains a window. Omitted resolves BuEM's default ratio."
+        },
+        "window_U": {
+          "allOf": [{ "$ref": "#/$defs/u_value_qty" }],
+          "description": "U-value of the windows BuEM synthesises when the request has no window elements, replacing the archetype value. Explicit window elements carry their own U. Without it, buem-model uses the TABULA archetype value when one resolves for the building (this needs building_type and the TABULA workbook in the image), and otherwise falls back to 2.8 W/(m2K)."
+        },
+        "window_g_gl": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Solar heat gain coefficient of the windows BuEM synthesises when the request has no window elements, replacing the archetype value. Explicit window elements carry their own g_gl. Without it, buem-model uses the TABULA archetype value when one resolves for the building (this needs building_type and the TABULA workbook in the image), and otherwise falls back to 0.5."
+        },
+        "door_U": {
+          "allOf": [{ "$ref": "#/$defs/u_value_qty" }],
+          "description": "U-value of the doors BuEM synthesises when the request has no door elements, replacing the archetype value. Explicit door elements carry their own U. Without it, buem-model uses the TABULA archetype value when one resolves for the building (this needs building_type and the TABULA workbook in the image), and otherwise falls back to 3.0 W/(m2K)."
+        },
+        "cooking_carrier": {
+          "type": "string",
+          "enum": ["electric", "gas", "none"],
+          "default": "electric",
+          "description": "Energy carrier the household cooks with. 'electric' (default) leaves modelled cooking energy inside electricity — correct for induction/electric hobs and never double-counts. 'gas' reports it separately as thermal_load_profile.summary.kitchen (gas energy, kWh_gas) instead. 'none' reports no separate cooking term and applies no gain correction; the electrically modelled cooking stays inside electricity. Case-insensitive."
+        },
+        "include_dhw": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to report domestic hot water energy alongside space heating, as thermal_load_profile.summary.hot_water. false suppresses it without affecting the space-heating solve — for a caller whose DHW is met by a separate system it accounts for itself."
+        },
+        "residential_units": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Number of dwellings in the building. buem-model generates min(residential_units, 20) distinct households, sums their internal gains, electricity, hot water and cooking, and scales the sum to residential_units, so dwellings peak at different hours. Required for MFH and AB. Must be 1 for service building_type, whose occupancy comes from capacity."
+        },
+        "num_persons": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Occupants per dwelling, not per building. Residential building_type only. Omitted resolves the statistical household size for country, region_code and building_type (CBS figures for NL, generic figures elsewhere)."
+        },
+        "archetype": {
+          "type": "string",
+          "enum": ["generic", "working_couple", "family_with_children", "retired_single", "student_shared"],
+          "description": "Household composition driving the occupancy schedule. Residential building_type only. Omitted resolves a per-type default."
+        },
+        "equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Per-appliance ownership override, keyed by household equipment id. Residential building_type only, ignored for service types. true forces owned, false excludes, an omitted key keeps the appliance's default ownership probability (a seeded draw per household). Each key is one appliance; counts are not expressible, so two or three TVs are tv_1, tv_2 and tv_3.",
+          "properties": {
+            "answer_machine":       { "type": "boolean" },
+            "cassette_cd_player":   { "type": "boolean" },
+            "chest_freezer":        { "type": "boolean" },
+            "clock":                { "type": "boolean" },
+            "cordless_telephone":   { "type": "boolean" },
+            "dish_washer":          { "type": "boolean" },
+            "fax":                  { "type": "boolean" },
+            "fridge_freezer":       { "type": "boolean" },
+            "hi_fi":                { "type": "boolean" },
+            "hob":                  { "type": "boolean" },
+            "iron":                 { "type": "boolean" },
+            "kettle":               { "type": "boolean" },
+            "lighting":             { "type": "boolean" },
+            "microwave":            { "type": "boolean" },
+            "oven":                 { "type": "boolean" },
+            "personal_computer":    { "type": "boolean" },
+            "printer":              { "type": "boolean" },
+            "refrigerator":         { "type": "boolean" },
+            "small_cooking_group":  { "type": "boolean" },
+            "tumble_dryer":         { "type": "boolean" },
+            "tv_1":                 { "type": "boolean" },
+            "tv_2":                 { "type": "boolean" },
+            "tv_3":                 { "type": "boolean" },
+            "tv_receiver_box":      { "type": "boolean" },
+            "upright_freezer":      { "type": "boolean" },
+            "vacuum":               { "type": "boolean" },
+            "vcr_dvd":              { "type": "boolean" },
+            "washer_dryer":         { "type": "boolean" },
+            "washing_machine":      { "type": "boolean" },
+            "laptop":               { "type": "boolean" },
+            "smart_speaker":        { "type": "boolean" },
+            "wifi_router":          { "type": "boolean" },
+            "streaming_stick":      { "type": "boolean" },
+            "robot_vacuum":         { "type": "boolean" },
+            "air_fryer":            { "type": "boolean" },
+            "coffee_machine":       { "type": "boolean" },
+            "ev_charger":           { "type": "boolean" }
+          }
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Occupant count. Service building_type only. Omitted derives it from A_ref using a per-type floor-area density."
+        },
+        "region_code": {
+          "type": "string",
+          "description": "CBS RegioS municipality code (e.g. GM0200). Selects the household-size row by country, region and building_type when num_persons is omitted; without it the country row applies. Residential building_type only."
+        },
+        "setback_profile": {
+          "type": "string",
+          "enum": ["none", "night_only", "night_and_away", "deep"],
+          "default": "none",
+          "description": "Heating setback schedule. Lowers comfortT_lb while occupants are asleep or away, using the occupancy profile. Affects heating only."
+        },
+        "envelope": { "$ref": "#/$defs/envelope" },
+        "thermal":  { "$ref": "#/$defs/thermal" }
+      }
+    },
+
+    "envelope": {
+      "type": "object",
+      "required": ["elements"],
+      "description": "All building surfaces. Each element carries both its geometry (area, orientation, tilt) and its thermal properties (U-value, solar gain coefficient, etc.) in a single entry. No separate thermal properties list is needed.",
+      "properties": {
+        "elements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/envelope_element" },
+          "description": "List of all building surfaces. The id must be unique within the feature. Wall areas are used as sent: BuEM does not subtract explicit window or door elements from their parent wall, so a request listing explicit windows or doors must give net opaque wall areas. Without explicit openings, wall areas are gross and BuEM synthesises openings from them (see building.window_to_wall_ratio)."
+        }
+      }
+    },
+
+    "envelope_element": {
+      "type": "object",
+      "required": ["id", "type"],
+      "description": "A single building surface. Geometry and thermal properties are defined together. For ventilation elements, no surface geometry is needed — only air_changes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "User-defined unique identifier for this surface element"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable label for this surface (e.g. 'South Facade', 'Main Roof'). Display only — no effect on simulation."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["wall", "roof", "floor", "window", "door", "ventilation"],
+          "description": "Surface type"
+        },
+        "area": {
+          "allOf": [{ "$ref": "#/$defs/area_qty" }],
+          "description": "Surface area"
+        },
+        "azimuth": {
+          "allOf": [{ "$ref": "#/$defs/angle_qty" }],
+          "description": "Orientation measured clockwise from North (0=N, 90=E, 180=S, 270=W)"
+        },
+        "tilt": {
+          "allOf": [
+            { "$ref": "#/$defs/angle_qty" },
+            { "properties": { "value": { "minimum": 0, "maximum": 90 } } }
+          ],
+          "description": "Tilt from horizontal (0=horizontal roof, 90=vertical wall)"
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "Id of the envelope element this surface is embedded in. Required for windows and doors. A window is embedded in a wall (or roof for a skylight); a door is embedded in a wall."
+        },
+        "U": {
+          "allOf": [{ "$ref": "#/$defs/u_value_qty" }],
+          "description": "Thermal transmittance (U-value). Applies to wall, roof, floor, window, and door elements."
+        },
+        "b_transmission": {
+          "allOf": [
+            { "$ref": "#/$defs/dimensionless_qty" },
+            { "properties": { "value": { "minimum": 0, "maximum": 1 } } }
+          ],
+          "description": "Transmission correction factor for elements adjacent to unheated spaces (e.g. cellar, attic). 1.0 = fully exposed to outdoor conditions. TABULA: b_Transmission_*",
+          "default": { "value": 1.0, "unit": "-" }
+        },
+        "g_gl": {
+          "allOf": [
+            { "$ref": "#/$defs/dimensionless_qty" },
+            { "properties": { "value": { "minimum": 0, "maximum": 1 } } }
+          ],
+          "description": "Solar heat gain coefficient, window elements only. Fraction of incident solar radiation that enters the building. buem-model uses the first window element's value for every window. TABULA: g_gl_n_Window",
+          "default": { "value": 0.5, "unit": "-" }
+        },
+        "air_changes": {
+          "allOf": [{ "$ref": "#/$defs/air_change_qty" }],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Ventilation comes from thermal.n_air_infiltration, thermal.n_air_use, A_ref and h_room."
+        }
+      },
+      "if": {
+        "properties": { "type": { "not": { "const": "ventilation" } } }
+      },
+      "then": {
+        "required": ["area", "azimuth", "tilt"]
+      }
+    },
+
+    "thermal": {
+      "type": "object",
+      "description": "Building-wide thermal performance parameters aligned with IEE TABULA definitions. All fields are optional — model defaults (SI units) apply when omitted. Per-element thermal properties (U-value, g_gl, etc.) are defined directly on each envelope element.",
+      "properties": {
+        "n_air_infiltration": {
+          "allOf": [{ "$ref": "#/$defs/air_change_qty" }],
+          "description": "Uncontrolled air infiltration rate through gaps and cracks in the building fabric — TABULA: n_air_infiltration",
+          "default": { "value": 0.5, "unit": "1/h" }
+        },
+        "n_air_use": {
+          "allOf": [{ "$ref": "#/$defs/air_change_qty" }],
+          "description": "Ventilation air change rate during building occupancy — TABULA: n_air_use",
+          "default": { "value": 0.5, "unit": "1/h" }
+        },
+        "c_m": {
+          "allOf": [{ "$ref": "#/$defs/heat_capacity_qty" }],
+          "description": "Internal thermal capacity per m² of floor area — how much heat the building structure can store. TABULA: c_m",
+          "default": { "value": 165.0, "unit": "kJ/(m2K)" }
+        },
+        "thermal_class": {
+          "type": "string",
+          "enum": ["light", "medium", "heavy"],
+          "description": "ISO 13790 thermal mass class. Sets the effective mass-area factor (light and medium 2.5, heavy 3.0). c_m is independent and defaults to 165 kJ/(m2K) when omitted.",
+          "default": "medium"
+        },
+        "comfortT_lb": {
+          "allOf": [{ "$ref": "#/$defs/temperature_qty" }],
+          "description": "Heating setpoint — minimum acceptable indoor temperature",
+          "default": { "value": 18.0, "unit": "degC" }
+        },
+        "comfortT_ub": {
+          "allOf": [{ "$ref": "#/$defs/temperature_qty" }],
+          "description": "Cooling setpoint — maximum acceptable indoor temperature",
+          "default": { "value": 21.0, "unit": "degC" }
+        },
+        "design_T_min": {
+          "allOf": [{ "$ref": "#/$defs/temperature_qty" }],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Outdoor design temperature for a peak heating load calculation. TABULA: Theta_e",
+          "default": { "value": -12.0, "unit": "degC" }
+        },
+        "F_sh_hor": {
+          "allOf": [{ "$ref": "#/$defs/dimensionless_qty" }],
+          "description": "Shading reduction factor for horizontal surfaces (e.g. roof) — TABULA: F_sh_hor",
+          "default": { "value": 0.80, "unit": "-" }
+        },
+        "F_sh_vert": {
+          "allOf": [{ "$ref": "#/$defs/dimensionless_qty" }],
+          "description": "Shading reduction factor for vertical surfaces (e.g. walls, windows) — TABULA: F_sh_vert",
+          "default": { "value": 0.75, "unit": "-" }
+        },
+        "F_f": {
+          "allOf": [{ "$ref": "#/$defs/dimensionless_qty" }],
+          "description": "Window frame area fraction — proportion of the window opening that is frame rather than glass. TABULA: F_f",
+          "default": { "value": 0.20, "unit": "-" }
+        },
+        "F_w": {
+          "allOf": [{ "$ref": "#/$defs/dimensionless_qty" }],
+          "description": "Window non-perpendicularity correction factor — TABULA: F_w",
+          "default": { "value": 1.0, "unit": "-" }
+        },
+        "F_red_htr": {
+          "allOf": [
+            { "$ref": "#/$defs/dimensionless_qty" },
+            { "properties": { "value": { "exclusiveMinimum": 0, "maximum": 1 } } }
+          ],
+          "description": "Reduction factor applied to every transmission conductance. 1.0 leaves them unchanged.",
+          "default": { "value": 1.0, "unit": "-" }
+        },
+        "phi_int": {
+          "allOf": [{ "$ref": "#/$defs/measurement" }],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Internal gains come from the occupancy model. Internal heat gains from occupants, appliances, and lighting per unit floor area. Used in the ISO 13790 energy balance as a heat source that reduces heating demand and increases cooling demand. TABULA: phi_int. Typical residential: 3–5 W/m².",
+          "default": { "value": 3.0, "unit": "W/m2" }
+        },
+        "q_w_nd": {
+          "allOf": [{ "$ref": "#/$defs/measurement" }],
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Hot water comes from the occupancy model (see include_dhw). Net energy need for domestic hot water per unit floor area per year. Added to the heating energy need in the final energy balance. TABULA: q_w_nd. Typical residential: ~12.5 kWh/(m²·a).",
+          "default": { "value": 12.5, "unit": "kWh/(m2.a)" }
+        }
+      }
+    },
+
+    "solver": {
+      "type": "object",
+      "description": "Execution settings for the BUEM thermal solver. These control how the model runs and what it simulates.",
+      "properties": {
+        "use_milp": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use Mixed Integer Linear Programming solver (CVXPY + CBC) instead of the default scipy sparse solver. Slower but handles inequality constraints exactly."
+        },
+        "compute_cooling": {
+          "type": "boolean",
+          "const": false,
+          "deprecated": true,
+          "description": "Heating and cooling are always solved together, and cooling is always reported. buem-model rejects true and ignores false."
+        },
+        "parallel_thermal": {
+          "type": "boolean",
+          "default": true,
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Run heating and cooling simulations in parallel within a single building"
+        },
+        "use_chunked_processing": {
+          "type": "boolean",
+          "default": true,
+          "deprecated": true,
+          "description": "Accepted and ignored by buem-model; no effect on the run. Process the 8760-hour timeseries in chunks to limit memory usage"
+        }
+      }
+    },
+
+    "inputs": {
+      "type": "object",
+      "description": "Optional user-provided timeseries inputs. When a field is present, it overrides the model-generated equivalent. When absent, the model generates the value from occupancy simulation.",
+      "properties": {
+        "electricity_load_profile": {
+          "type": "object",
+          "description": "Hourly electricity consumption profile for the building, given inline as values or by file path, exactly one of the two. It replaces the occupancy-generated electricity, and the response's electricity profile returns it in kWh per hour, not scaled by residential_units. For residential building_type it is added to the internal heat gains and so affects heating and cooling demand. For service building_type it is accepted and returned but does not affect heating or cooling, since their internal gains already include equipment and lighting.",
+          "oneOf": [
+            { "required": ["values"], "not": { "required": ["path"] } },
+            { "required": ["path"], "not": { "required": ["values"] } }
+          ],
+          "properties": {
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "number", "minimum": 0 },
+              "description": "One value per hour from 1 January 00:00 UTC of the properties.start_time year, covering that whole year: 8760 values, or 8784 in a leap year."
+            },
+            "path": {
+              "type": "string",
+              "description": "Path to the profile file inside BUEM_DATA_DIR in the model container, either absolute or relative to BUEM_DATA_DIR (e.g. /data/profiles/5.3453464_52.4353446_electricity_2018.csv with BUEM_DATA_DIR=/data). The file must be a regular file inside BUEM_DATA_DIR, at most 32 MiB (decompressed size for .gz); buem-model rejects any other path, including a symlink that resolves outside BUEM_DATA_DIR, and refuses file-based profiles when BUEM_DATA_DIR is not set. Supported formats: CSV (single column of values), JSON array, or gzipped JSON (.gz)."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["kWh", "Wh", "kW"],
+              "default": "kWh",
+              "description": "Unit of the profile values. Defaults to kWh when omitted. Wh is accepted with path only."
+            }
+          },
+          "if": { "required": ["values"] },
+          "then": { "properties": { "unit": { "enum": ["kWh", "kW"] } } }
+        }
+      }
+    },
+
+    "measurement": {
+      "type": "object",
+      "required": ["value"],
+      "description": "Base type for all measurable quantities. buem-model reads value in the SI unit of the quantity and does not convert units, so each unit enum allows only that SI unit. unit defaults to it when omitted.",
+      "properties": {
+        "value": { "type": "number" },
+        "unit":  { "type": "string" }
+      }
+    },
+
+    "area_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "value": { "minimum": 0 },
+        "unit":  { "enum": ["m2"], "default": "m2" }
+      }
+    },
+
+    "length_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "value": { "minimum": 0 },
+        "unit":  { "enum": ["m"], "default": "m" }
+      }
+    },
+
+    "angle_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "value": { "minimum": 0, "maximum": 360 },
+        "unit":  { "enum": ["deg"], "default": "deg" }
+      }
+    },
+
+    "u_value_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "value": { "minimum": 0 },
+        "unit":  { "enum": ["W/(m2K)"], "default": "W/(m2K)" }
+      }
+    },
+
+    "air_change_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "value": { "minimum": 0 },
+        "unit":  { "enum": ["1/h"], "default": "1/h" }
+      }
+    },
+
+    "heat_capacity_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "value": { "minimum": 0 },
+        "unit":  { "enum": ["kJ/(m2K)"], "default": "kJ/(m2K)" }
+      }
+    },
+
+    "temperature_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "unit": { "enum": ["degC"], "default": "degC" }
+      }
+    },
+
+    "dimensionless_qty": {
+      "allOf": [{ "$ref": "#/$defs/measurement" }],
+      "properties": {
+        "unit": { "const": "-" }
+      },
+      "default": { "unit": "-" }
+    }
+
+  }
+}
