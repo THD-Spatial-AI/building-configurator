@@ -24,7 +24,7 @@ import {
   restoreDefaultUValues,
   resetElementsToVariantDefaults,
 } from '../../lib/ignisAdapter';
-import { calculateHeatDemand, loadVariantLevels } from '../../lib/heatDemand';
+import { calculateHeatDemand, isBuildingTypeSupported, loadVariantLevels } from '../../lib/heatDemand';
 import { applyState, REFURB_TYPES, startingStates, variantSubtype, type RefurbElementType } from '../../lib/refurbishment';
 import { previewHeatingPerM2, runBuildingSimulation, runIdentity, type RunContext } from '../../lib/buemRun';
 import { pvRunRequest, runPvBuilding } from '../../lib/pvRun';
@@ -235,6 +235,9 @@ export function useBuildingModel(
   // defaults on the load of a new building (whose own data should win), while still
   // applying that reload when the *same* building's type/period/country is edited by hand.
   const isFirstClassificationLoad = useRef(true);
+  // The building's own TABULA variant code as loaded: a type TABULA lacks takes
+  // its levels from that code's residential type, also after the year changes.
+  const loadedVariantCode = useRef<string | undefined>(initialGeneral.refurbishment.variantCode);
 
   // Baseline for "Modified" comparisons — updated whenever a new building is loaded.
   // This records the state as it was when first loaded so the badges reflect user
@@ -255,6 +258,7 @@ export function useBuildingModel(
     // effect run is that load settling in, not a hand-edit, so it must not reload
     // TABULA defaults on top of what this building just brought with it.
     isFirstClassificationLoad.current = true;
+    loadedVariantCode.current = buildingData.refurbishment?.variantCode;
 
     const nextElements = normalizeElementRecord(
       Object.keys(buildingData.thematic.envelope).length > 0
@@ -314,7 +318,10 @@ export function useBuildingModel(
     const subtype = isFirstClassificationLoad.current ? variantSubtype(general.refurbishment.variantCode) : undefined;
 
     (async () => {
-      const variants = await loadVariantLevels(services, country, type, year, subtype);
+      const variants = await loadVariantLevels(services, country, type, year, subtype, loadedVariantCode.current);
+      // Residential levels stand in for a type TABULA lacks: its floor area and
+      // dwellings are a house's, not this building's.
+      const borrowed = !isBuildingTypeSupported(type);
       if (cancelled || variants.length === 0) {
         if (!cancelled) setHdcp(null);
         return;
@@ -337,7 +344,7 @@ export function useBuildingModel(
         setGeneralRaw((prev) => ({ ...prev, refurbishment: {} }));
       }
 
-      if (isReload && existingStateData.A_C_Ref_Input) {
+      if (isReload && !borrowed && existingStateData.A_C_Ref_Input) {
         const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
         if (!cancelled) setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
       }
@@ -345,7 +352,7 @@ export function useBuildingModel(
       // TABULA's dwelling count prefills BuEM's residential_units: on load only
       // when the building brings none, on a hand-edited classification always.
       // 0 means TABULA gives no count.
-      const dwellings = existingStateData.n_Apartment;
+      const dwellings = borrowed ? 0 : existingStateData.n_Apartment;
       if (!cancelled && dwellings) {
         setGeneralRaw((prev) => (
           prev.residential_units && !isReload ? prev : { ...prev, residential_units: dwellings }

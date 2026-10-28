@@ -16,6 +16,15 @@ function lookup(data: IgnisMatchResponse['data'], calls: unknown[][] = []): Vari
 }
 
 describe('loadVariantLevels', () => {
+  it('looks a school up by the residential type of its own variant code, and nothing without one', async () => {
+    const calls: unknown[][] = [];
+    await loadVariantLevels(lookup([], calls), 'NL', 'School', 1975, 'Deta', 'NL.N.MFH.02.Gen.ReEx.001.001');
+    expect(calls).toEqual([['NL', 'MFH', 1975, 'Deta']]);
+    const none: unknown[][] = [];
+    expect(await loadVariantLevels(lookup([], none), 'NL', 'School', 1975)).toEqual([]);
+    expect(none).toEqual([]);
+  });
+
   it('asks for the subtype it is given', async () => {
     const calls: unknown[][] = [];
     await loadVariantLevels(lookup([], calls), 'NL', 'Single-family House', 1975, 'Deta');

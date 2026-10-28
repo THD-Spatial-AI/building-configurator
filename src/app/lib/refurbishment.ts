@@ -48,6 +48,11 @@ export function variantNumber(code: string | undefined): number | null {
   return Number.isInteger(n) && n > 0 ? n : null;
 }
 
+/** The building type a TABULA code names (NL.N.SFH.02.Deta... is SFH), or undefined. */
+export function variantType(code: string | undefined): string | undefined {
+  return code?.split('.')[2] || undefined;
+}
+
 /** The building subtype a TABULA code names (NL.N.SFH.02.Deta... is Deta), or undefined. */
 export function variantSubtype(code: string | undefined): string | undefined {
   return code?.split('.')[4] || undefined;

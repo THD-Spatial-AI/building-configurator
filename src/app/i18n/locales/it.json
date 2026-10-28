@@ -319,7 +319,8 @@
       "noCountryAfter": "per abilitare il calcolo del fabbisogno termico.",
       "unsupportedBefore": "Il tipo di edificio",
       "unsupportedAfter": "non è presente nel database TABULA. Tipi supportati: {types}.",
-      "noData": "Nessun dato TABULA per questo edificio: il servizio TABULA non ha varianti per esso o non è raggiungibile."
+      "noData": "Nessun dato TABULA per questo edificio: il servizio TABULA non ha varianti per esso o non è raggiungibile.",
+      "borrowed": "{type} non ha classi energetiche proprie. Queste sono di un {from} della stessa epoca e dello stesso paese e non rappresentano un edificio non residenziale, quindi i valori possono differire: verifica che corrispondano all'edificio."
     },
     "section": {
       "occupancy": "Piani e occupazione",

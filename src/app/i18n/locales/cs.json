@@ -333,7 +333,8 @@
       "noCountryAfter": "pro výpočet potřeby tepla.",
       "unsupportedBefore": "Typ budovy",
       "unsupportedAfter": "není v databázi TABULA. Podporované typy: {types}.",
-      "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná."
+      "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná.",
+      "borrowed": "{type} nemá vlastní energetické třídy. Tyto patří budově typu {from} stejného stáří a země a neodrážejí nebytovou budovu, takže se hodnoty mohou lišit: ověřte, že odpovídají budově."
     },
     "section": {
       "occupancy": "Podlaží a obsazenost",

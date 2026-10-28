@@ -8,6 +8,7 @@ import { SectionCard } from '@/app/components/BuildingConfigurator/shared/Sectio
 import type { Step, StepStatus } from '@/app/components/BuildingConfigurator/shared/StepPanel';
 import { TOPICS, type Topic } from '@/app/config/topics';
 import { missingDwellings, storeysTooTall } from '@/app/lib/storeys';
+import { variantType } from '@/app/lib/refurbishment';
 import {
   BUILDING_TYPE_LABELS,
   buildingTypeName,
@@ -123,11 +124,25 @@ function SectionBody({
 
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
-/** An error once every level's grade failed; attention where TABULA has no levels for the building. */
-export function energyGradeStatus(insulation: InsulationProps): StepStatus {
+/** An error once every level's grade failed; attention where TABULA has no levels, or only a residential type's, for the building. */
+export function energyGradeStatus(insulation: InsulationProps, buildingType?: string): StepStatus {
   const perM2 = insulation.classes?.perM2;
   if (perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null)) return 'error';
-  return insulation.levels.length === 0 ? 'attention' : 'complete';
+  if (insulation.levels.length === 0) return 'attention';
+  return buildingType && !isBuildingTypeSupported(buildingType) ? 'attention' : 'complete';
+}
+
+/** For a type TABULA lacks, the levels shown are a residential type's: says so, and which. */
+function BorrowedGradeNote({ general, levels }: { general: Record<string, any>; levels: InsulationProps['levels'] }) {
+  const t = useT();
+  const type = general.buildingType as string | undefined;
+  const from = BUILDING_TYPE_LABELS[variantType(levels[0]?.code) ?? ''];
+  if (!type || isBuildingTypeSupported(type) || !from) return null;
+  return (
+    <p className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+      {t('editor.ignis.borrowed', { type: buildingTypeName(t, type), from: buildingTypeName(t, from) })}
+    </p>
+  );
 }
 
 /** Attention while the storeys are taller than the 3D model; incomplete while a modelled storey of a building counted per storey has no dwellings. */
@@ -186,7 +201,7 @@ export function useBuildingSteps({
       key: 'grade',
       label: t('editor.insulationTitle'),
       topic: TOPICS.building,
-      status: energyGradeStatus(insulation),
+      status: energyGradeStatus(insulation, general.buildingType),
       content: (
         <SectionCard
           topic={TOPICS.building}
@@ -197,6 +212,7 @@ export function useBuildingSteps({
         >
           <div className="flex flex-col gap-3 p-3">
             {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}
+            {insulation.levels.length > 0 && <BorrowedGradeNote general={general} levels={insulation.levels} />}
             <InsulationSection {...insulation} general={general} setGen={setGen} mode={mode} />
           </div>
         </SectionCard>

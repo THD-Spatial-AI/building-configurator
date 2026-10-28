@@ -58,6 +58,11 @@ describe('step status', () => {
     expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('attention');
   });
 
+  it('asks attention for grades a school takes from a residential type', () => {
+    expect(energyGradeStatus(insulation, 'School')).toBe('attention');
+    expect(energyGradeStatus(insulation, 'Single-family House')).toBe('complete');
+  });
+
   it('marks storeys incomplete while an included storey of a multi-family house has no dwellings', () => {
     const general = { buildingType: 'Multi-family House', storeysModelled: [1, 2], storeyDwellings: { 1: 2 } };
     expect(missingDwellings([1, 2], { 1: 2 })).toEqual([2]);
