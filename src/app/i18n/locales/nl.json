@@ -21,8 +21,8 @@
       }
     },
     "mode": {
-      "basic": "Basis",
-      "expert": "Expert"
+      "simple": "Eenvoudig",
+      "advanced": "Geavanceerd"
     },
     "undo": {
       "title": "Ongedaan maken: {action} (Ctrl+Z)",
@@ -330,7 +330,7 @@
       "solver": "Rekenmethode"
     },
     "insulationTitle": "Energieniveau",
-    "expertMore": {
+    "advancedMore": {
       "title": "Thermiek en simulatie",
       "detail": "profielen, apparatuur en solver houden hun standaardwaarden"
     }

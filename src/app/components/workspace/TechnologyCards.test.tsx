@@ -88,7 +88,7 @@ describe('TechnologyCards', () => {
 describe('TechnologiesTab', () => {
   it('counts the technologies, adds up the amounts but not the rates, and offers to add one', () => {
     const html = renderToStaticMarkup(
-      <TechnologiesTab technologies={{ ...technologies, onAdd: () => {} }} elements={{}} layouts={{}} mode="basic" onSelectSurface={() => {}} />,
+      <TechnologiesTab technologies={{ ...technologies, onAdd: () => {} }} elements={{}} layouts={{}} mode="simple" onSelectSurface={() => {}} />,
     );
     expect(html).toContain('3 technologies');
     expect(html).toMatch(/Estimated total cost of technologies<\/span><span[^>]*>12,000 EUR</);

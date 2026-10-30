@@ -38,7 +38,7 @@ At 1024 px and wider (`WIDE_LAYOUT` in `src/app/lib/useMediaQuery.ts`) the view 
 
 | Region | Component | File |
 |---|---|---|
-| Header: back, building name, Tour, Export, Basic/Expert, Undo | `Building3DView` | `workspace/Building3DView.tsx` |
+| Header: back, building name, Tour, Export, Simple/Advanced, Undo | `Building3DView` | `workspace/Building3DView.tsx` |
 | Surface panel (left) | `SurfacePanel`, `SurfaceQuickEditor`, `PvSurfaceSection` | `workspace/` |
 | Storey panel, replaces the surface panel while storeys are picked | `StoreyPanel` | `workspace/StoreysModelled.tsx` |
 | 3D model (centre) | `SurfaceGeometryViewer` | `BuildingConfigurator/configure/surfaces/` |
@@ -57,7 +57,8 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 | Undo history, unsaved-change flag | `useBuildingModel` | Leaving with unsaved changes asks first |
 | TABULA variants and U-values | `useBuildingModel` | Fetched through `fetchMatchingVariants` and `fetchVariantData` |
 | Demand totals and load profile | `useBuildingModel` | From the stored `demandProfile`, replaced by the last run |
-| Open surface, open tab, Basic/Expert, storey picking, tour | `Building3DView` | Not returned to the host |
+| Open surface, open tab, storey picking, tour | `Building3DView` | Not returned to the host |
+| Simple/Advanced | `Building3DView`, or the host | The host can control it with `mode` and `onModeChange`; otherwise the view keeps it, starting at `defaultMode` |
 | PV surfaces and technologies | Host | Controlled props: the view calls the host's handlers and shows what comes back |
 
 ## Service callbacks

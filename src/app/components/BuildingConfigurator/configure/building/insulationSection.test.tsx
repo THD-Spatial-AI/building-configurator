@@ -13,24 +13,24 @@ const insulation: InsulationProps = {
   onSetState: () => {}, onSetTypeUValue: () => {}, onSetTypeLossFactor: () => {},
 };
 
-describe('the energy grade in Basic and Expert', () => {
-  it('names the average U-value in the header in Expert only', () => {
-    expect(insulationSummary(t, format, insulation, 'basic')).not.toContain('average U');
-    expect(insulationSummary(t, format, insulation, 'expert')).toContain('average U 0.27');
+describe('the energy grade in Simple and Advanced', () => {
+  it('names the average U-value in the header in Advanced only', () => {
+    expect(insulationSummary(t, format, insulation, 'simple')).not.toContain('average U');
+    expect(insulationSummary(t, format, insulation, 'advanced')).toContain('average U 0.27');
   });
 
   it('shows the average U-value once, in the header, not again beneath the section', () => {
-    const html = renderToStaticMarkup(<InsulationSection {...insulation} general={{}} setGen={() => {}} mode="expert" />);
+    const html = renderToStaticMarkup(<InsulationSection {...insulation} general={{}} setGen={() => {}} mode="advanced" />);
     expect(html).not.toContain('0.27');
   });
 });
 
-describe('the element types in Expert', () => {
+describe('the element types in Advanced', () => {
   const elements = {
     w1: { id: 'w1', label: 'Wall', type: 'wall', area: 30, uValue: 0.22, gValue: null, tilt: 90, azimuth: 180 },
     win: { id: 'win', label: 'Window', type: 'window', area: 4, uValue: 1.1, gValue: 0.5, tilt: 90, azimuth: 180, parentId: 'w1' },
   } as InsulationProps['elements'];
-  const html = renderToStaticMarkup(<InsulationSection {...insulation} elements={elements} general={{}} setGen={() => {}} mode="expert" />);
+  const html = renderToStaticMarkup(<InsulationSection {...insulation} elements={elements} general={{}} setGen={() => {}} mode="advanced" />);
 
   it('lays them out as one table, the units in its header', () => {
     expect(html.match(/<table/g)).toHaveLength(1);

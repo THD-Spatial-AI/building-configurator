@@ -16,6 +16,7 @@ import {
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
 import { DEFAULT_VALUES_URL } from '@/app/config/docs';
 import { useT, type Translate } from '@/app/i18n';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 interface SectionProps {
   general: Record<string, any>;
@@ -57,8 +58,8 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
 }
 
 /** Dwellings, occupants and household habits; capacity alone for a service building. */
-/** The region code is in Expert only: it is optional, and few users know their municipality's code. */
-export function OccupancySection({ general, setGen, mode = 'basic' }: SectionProps & { mode?: 'basic' | 'expert' }) {
+/** The region code is in Advanced only: it is optional, and few users know their municipality's code. */
+export function OccupancySection({ general, setGen, mode = 'simple' }: SectionProps & { mode?: ConfiguratorMode }) {
   const t = useT();
   if (isServiceBuildingType(general.buildingType)) {
     return (
@@ -119,7 +120,7 @@ export function OccupancySection({ general, setGen, mode = 'basic' }: SectionPro
         tip={t('household.archetype.tip')}
         tipHref={OCCUPANCY_DEFAULTS}
       />
-      {mode === 'expert' && <div>
+      {mode === 'advanced' && <div>
         <FieldLabel tip={t('household.region.tip')}>
           {t('household.region.label')}
         </FieldLabel>

@@ -4,6 +4,7 @@
 
 import { pvLayout, type PvLayout, type PvLayoutOptions, type PvModule } from './pvLayout';
 import type { SurfacePolygon } from './surfaceMesh';
+import type { ConfiguratorMode } from './configuratorMode';
 
 /** One constraint of a product; "INF" stands for an unbounded value. */
 export interface TechnologyConstraint {
@@ -32,11 +33,11 @@ export interface TechnologyProduct {
 /** The drag-and-drop data type that carries a product id from the catalogue to a surface. */
 export const PV_PRODUCT_DRAG_TYPE = 'application/x-pv-product';
 
-/** Asked in basic mode, in this order: cost per kWp, yearly upkeep per kWp, lifetime in years. */
-const BASIC_KEYS = ['cost_energy_cap', 'cost_om_annual', 'cont_lifetime'];
-/** Also shown in expert mode: what else reaches Calliope or the PV yield service. Keys nothing reads are left out. */
-const EXPERT_KEYS = [
-  ...BASIC_KEYS,
+/** Asked in simple mode, in this order: cost per kWp, yearly upkeep per kWp, lifetime in years. */
+const SIMPLE_KEYS = ['cost_energy_cap', 'cost_om_annual', 'cont_lifetime'];
+/** Also shown in advanced mode: what else reaches Calliope or the PV yield service. Keys nothing reads are left out. */
+const ADVANCED_KEYS = [
+  ...SIMPLE_KEYS,
   'cost_interest_rate', 'cost_om_annual_investment_fraction', 'cost_om_prod', 'cont_energy_cap_max_systemwide',
   'losses', 'dc_ac_ratio', 'inv_eff', 'module_type',
 ];
@@ -99,8 +100,8 @@ export function pvCosts(product: TechnologyProduct | undefined, kwp: number): { 
 }
 
 /** The constraints the product carries that this mode shows, in the order above. */
-export function shownConstraints(product: TechnologyProduct, mode: 'basic' | 'expert'): TechnologyConstraint[] {
-  const keys = mode === 'basic' ? BASIC_KEYS : EXPERT_KEYS;
+export function shownConstraints(product: TechnologyProduct, mode: ConfiguratorMode): TechnologyConstraint[] {
+  const keys = mode === 'simple' ? SIMPLE_KEYS : ADVANCED_KEYS;
   return keys.flatMap((key) => product.constraints.filter((c) => c.key === key));
 }
 

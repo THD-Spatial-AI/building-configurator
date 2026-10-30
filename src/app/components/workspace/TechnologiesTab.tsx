@@ -12,6 +12,7 @@ import { installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfa
 import { surfaceProduct, type PvMode } from './PvMode';
 import { PvOverview } from './PvOverview';
 import { TechCardFrame, TechnologyCards, type Technologies } from './TechnologyCards';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 const PV_CARD = 'pv';
 
@@ -22,7 +23,7 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   technologies?: Technologies;
   elements: Record<string, BuildingElement>;
   layouts: Readonly<Record<string, PvLayout>>;
-  mode: 'basic' | 'expert';
+  mode: ConfiguratorMode;
   onSelectSurface: (surfaceId: string) => void;
 }) {
   const t = useT();

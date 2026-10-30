@@ -5,7 +5,7 @@ import { DEFAULT_GENERAL } from '../../shared/buildingDefaults';
 import { TOPICS } from '@/app/config/topics';
 
 const render = (include_dhw: boolean) => renderToStaticMarkup(
-  <ComfortSection general={{ ...DEFAULT_GENERAL, buildingType: 'Single-family House', include_dhw }} setGen={() => {}} mode="basic" />,
+  <ComfortSection general={{ ...DEFAULT_GENERAL, buildingType: 'Single-family House', include_dhw }} setGen={() => {}} mode="simple" />,
 );
 const button = (html: string, label: string) => new RegExp(`<button[^>]*class="([^"]*)"[^>]*>${label}</button>`).exec(html)?.[1] ?? '';
 

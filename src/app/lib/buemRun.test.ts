@@ -33,7 +33,7 @@ const elements: Record<string, BuildingElement> = {
   win_south: { id: 'win_south', label: 'Patio door', type: 'window', area: 6, uValue: 1.1, gValue: 0.5, tilt: 90, azimuth: 180 },
 };
 
-// Every building parameter moved off its default, including the expert-mode ones.
+// Every building parameter moved off its default, including the advanced-mode ones.
 const general = {
   ...DEFAULT_GENERAL,
   buildingName: 'Renamed',
@@ -86,7 +86,7 @@ describe('toBuem', () => {
     expect(stored.configurator.construction_year).toBe(general.constructionYear);
   });
 
-  it('carries the expert-mode parameters and the solver choice', () => {
+  it('carries the advanced-mode parameters and the solver choice', () => {
     const { building, solver } = toBuem(edited);
     expect(building.thermal).toEqual({
       n_air_infiltration: { value: 0.7, unit: '1/h' },

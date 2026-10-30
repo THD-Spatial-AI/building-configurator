@@ -12,6 +12,7 @@
 
 export { Building3DView } from './app/components/workspace/Building3DView';
 export type { Building3DViewProps } from './app/components/workspace/Building3DView';
+export type { ConfiguratorMode } from './app/lib/configuratorMode';
 export type { PvMode, PvSurface } from './app/components/workspace/PvMode';
 export type { TechnologyConstraint, TechnologyProduct } from './app/lib/pvProducts';
 // The same module layout the view draws, for the module count and kWp a host stores and sends to its yield model.
