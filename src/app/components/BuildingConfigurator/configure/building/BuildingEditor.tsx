@@ -1,5 +1,5 @@
 // The Building tab's sections as steps: energy grade, storeys and occupancy,
-// heating and comfort, and in Expert the thermal and simulation settings.
+// heating and comfort, and in Advanced the thermal and simulation settings.
 
 import type { ReactNode } from 'react';
 import { isBuildingTypeSupported } from '@/app/lib/heatDemand';
@@ -20,6 +20,7 @@ import { EquipmentSection, OccupancySection, OutputsSection } from './householdS
 import { ComfortSection } from './comfortSection';
 import { InsulationSection, gradeSummary, insulationSummary, useLevelClasses, type InsulationProps } from './insulationSection';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 // Energy grade is not one of these: it is built from InsulationProps (see useBuildingSteps).
 type SectionKey = 'occupancy' | 'comfort' | 'outputs' | 'equipment' | 'solver';
@@ -95,7 +96,7 @@ const SECTION_TOPICS: Record<SectionKey, Topic> = {
   solver:      TOPICS.building,
 };
 
-const EXPERT_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
+const ADVANCED_SECTIONS: SectionKey[] = ['outputs', 'equipment', 'solver'];
 
 const SECTION_LABELS: Record<SectionKey, (t: Translate) => string> = {
   occupancy:   (t) => t('editor.section.occupancy'),
@@ -112,7 +113,7 @@ function SectionBody({
   id: SectionKey;
   general: Record<string, any>;
   setGen: (k: string, v: any) => void;
-  mode: 'basic' | 'expert';
+  mode: ConfiguratorMode;
 }) {
   switch (id) {
     case 'occupancy':   return <OccupancySection   general={general} setGen={setGen} mode={mode} />;
@@ -156,11 +157,11 @@ export function storeysStatus(general: Record<string, any>, modelHeight?: number
 interface BuildingStepsProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
-  mode: 'basic' | 'expert';
+  mode: ConfiguratorMode;
   /** The energy grade's model; without it there is no energy grade step. */
   insulation?: InsulationProps;
-  /** Switches to Expert; in Basic the last step then says what Expert adds. */
-  onShowExpert?: () => void;
+  /** Switches to Advanced; in Simple the last step then says what Advanced adds. */
+  onShowAdvanced?: () => void;
   /** The storeys, shown at the top of the storeys and occupancy step. */
   storeys?: ReactNode;
   /** The 3D model's height to the eaves, in metres; storeys taller than it need attention. */
@@ -199,28 +200,28 @@ export function comfortSummary(t: Translate, general: Record<string, any>): Step
 
 /** The building parameters as steps for a StepPanel, each one section card shown open. */
 export function useBuildingSteps({
-  general, setGen, mode, insulation, onShowExpert, storeys, onStoreysClosed, modelHeight,
+  general, setGen, mode, insulation, onShowAdvanced, storeys, onStoreysClosed, modelHeight,
 }: BuildingStepsProps): Step[] {
   const t = useT();
   const format = useFormatNumber();
   useLevelClasses(insulation?.classes);
-  // A step's single card is in focus, like the open technology card; the Expert step's three cards are not.
+  // A step's single card is in focus, like the open technology card; the Advanced step's three cards are not.
   const card = (key: SectionKey) => (
-    <SectionCard key={key} topic={SECTION_TOPICS[key]} title={SECTION_LABELS[key](t)} info={t(`help.${key}`)} dashed={EXPERT_SECTIONS.includes(key)} emphasised={!EXPERT_SECTIONS.includes(key)}>
+    <SectionCard key={key} topic={SECTION_TOPICS[key]} title={SECTION_LABELS[key](t)} info={t(`help.${key}`)} dashed={ADVANCED_SECTIONS.includes(key)} emphasised={!ADVANCED_SECTIONS.includes(key)}>
       <div className="flex flex-col gap-3 p-3">
         {key === 'occupancy' && storeys && <div className="border-b border-border pb-3">{storeys}</div>}
         <SectionBody id={key} general={general} setGen={setGen} mode={mode} />
       </div>
     </SectionCard>
   );
-  const expertPointer = mode === 'basic' && onShowExpert && (
+  const advancedPointer = mode === 'simple' && onShowAdvanced && (
     <button
       type="button"
-      onClick={onShowExpert}
+      onClick={onShowAdvanced}
       className="mt-3 flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-dashed border-muted-foreground/40 px-3 py-2.5 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted"
     >
-      <span><b className="text-foreground">{t('editor.expertMore.title')}</b> · {t('editor.expertMore.detail')}</span>
-      <span className="shrink-0 font-semibold text-primary">{t('view.mode.expert')}</span>
+      <span><b className="text-foreground">{t('editor.advancedMore.title')}</b> · {t('editor.advancedMore.detail')}</span>
+      <span className="shrink-0 font-semibold text-primary">{t('view.mode.advanced')}</span>
     </button>
   );
   const service = isServiceBuildingType(general.buildingType);
@@ -265,12 +266,12 @@ export function useBuildingSteps({
     topic: SECTION_TOPICS.comfort,
     status: 'complete',
     summary: comfortSummary(t, general),
-    content: <>{card('comfort')}{expertPointer}</>,
+    content: <>{card('comfort')}{advancedPointer}</>,
   });
-  if (mode === 'expert') {
+  if (mode === 'advanced') {
     steps.push({
-      key: 'expert',
-      label: t('editor.expertMore.title'),
+      key: 'advanced',
+      label: t('editor.advancedMore.title'),
       topic: TOPICS.building,
       status: 'complete',
       summary: [
@@ -279,7 +280,7 @@ export function useBuildingSteps({
       ],
       content: (
         <div className="flex flex-col gap-3">
-          {EXPERT_SECTIONS.filter((key) => !service || key !== 'equipment').map(card)}
+          {ADVANCED_SECTIONS.filter((key) => !service || key !== 'equipment').map(card)}
         </div>
       ),
     });

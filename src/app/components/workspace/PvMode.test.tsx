@@ -79,7 +79,7 @@ describe('surfaceProduct', () => {
 });
 
 describe('PvOverview', () => {
-  const html = renderToStaticMarkup(<PvOverview pv={pv} elements={elements} mode="basic" onSelect={() => {}} />);
+  const html = renderToStaticMarkup(<PvOverview pv={pv} elements={elements} mode="simple" onSelect={() => {}} />);
 
   it("shows the title, the host's notice and PV type", () => {
     expect(html).toContain('PV on this building');
@@ -93,7 +93,7 @@ describe('PvOverview', () => {
     expect(html).toContain('<li><b class="font-semibold">Drag:</b> Open <b class="font-semibold">Photovoltaic options</b> and drag a product onto a roof or wall.</li>');
     expect(html).toContain('to add PV to every surface marked <b class="font-semibold">Suggested for PV</b>.');
     const none = renderToStaticMarkup(
-      <PvOverview pv={{ ...pv, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="basic" onSelect={() => {}} />,
+      <PvOverview pv={{ ...pv, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="simple" onSelect={() => {}} />,
     );
     expect(none).toMatch(/<details open="" class="group[^"]*sky/);
     expect(none).toContain('No PV installed yet.');
@@ -107,7 +107,7 @@ describe('PvOverview', () => {
 
   it('offers only the surfaces some PV option fits on, and any with PV on', () => {
     const offered = renderToStaticMarkup(
-      <PvOverview pv={pv} available={new Set(['r2'])} elements={elements} mode="basic" onSelect={() => {}} />,
+      <PvOverview pv={pv} available={new Set(['r2'])} elements={elements} mode="simple" onSelect={() => {}} />,
     );
     expect(offered).toContain('Available surfaces for PV (1 of 2 with PV)');
     expect(offered).toContain('Roof north');
@@ -125,7 +125,7 @@ describe('PvOverview', () => {
   it('offers to use the suggested surfaces only when there are any', () => {
     expect(html).toContain('Use suggested surfaces');
     const none = renderToStaticMarkup(
-      <PvOverview pv={{ ...pv, surfaces: { r1: pv.surfaces.r1 } }} elements={elements} mode="basic" onSelect={() => {}} />,
+      <PvOverview pv={{ ...pv, surfaces: { r1: pv.surfaces.r1 } }} elements={elements} mode="simple" onSelect={() => {}} />,
     );
     expect(none).toMatch(/<button[^>]*disabled=""[^>]*>Use suggested surfaces/);
   });
@@ -139,7 +139,7 @@ describe('PvOverview', () => {
 
 describe('PvOverview with a catalogue', () => {
   const html = renderToStaticMarkup(
-    <PvOverview pv={withCatalogue} elements={elements} layouts={{ r1: flush }} mode="basic" onSelect={() => {}} />,
+    <PvOverview pv={withCatalogue} elements={elements} layouts={{ r1: flush }} mode="simple" onSelect={() => {}} />,
   );
 
   it('estimates investment and O&M from the products and the layouts', () => {
@@ -171,9 +171,9 @@ describe('PvOverview with a catalogue', () => {
   });
 
   const product = mono;
-  const values = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="basic" />);
+  const values = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="simple" />);
 
-  it('asks the basic questions about an installed product, and offers to save it as new', () => {
+  it('asks the simple-mode questions about an installed product, and offers to save it as new', () => {
     const html = values;
     expect(html).toContain('What does it cost per kWp?');
     expect(html).toContain('How many years does it last?');
@@ -183,10 +183,10 @@ describe('PvOverview with a catalogue', () => {
     expect(html).toContain('value="Demo Mono 420 W (copy)"');
   });
 
-  it('adds every simulation value the product carries in expert mode, and never an unused one', () => {
-    const expert = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="expert" />);
-    expect(expert).toContain('System losses');
-    expect(expert).not.toContain('cont_export_cap');
+  it('adds every simulation value the product carries in advanced mode, and never an unused one', () => {
+    const advanced = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="advanced" />);
+    expect(advanced).toContain('System losses');
+    expect(advanced).not.toContain('cont_export_cap');
   });
 });
 
@@ -289,7 +289,7 @@ describe('PvSurfaceSection', () => {
 describe('removing PV from the building', () => {
   const layouts = { r1: flush };
   const tab = (surfaces: PvMode['surfaces']) => renderToStaticMarkup(
-    <TechnologiesTab pv={{ ...withCatalogue, surfaces }} elements={elements} layouts={layouts} mode="basic" onSelectSurface={() => {}} />,
+    <TechnologiesTab pv={{ ...withCatalogue, surfaces }} elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}} />,
   );
 
   it('offers a bin per installed product and one for all PV', () => {

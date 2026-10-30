@@ -48,12 +48,12 @@ describe('pvCosts', () => {
 });
 
 describe('shownConstraints', () => {
-  it('asks the basic questions in basic mode, in their own order', () => {
-    expect(shownConstraints(mono, 'basic').map((c) => c.key)).toEqual(['cost_energy_cap', 'cost_om_annual', 'cont_lifetime']);
+  it('asks the simple-mode questions in simple mode, in their own order', () => {
+    expect(shownConstraints(mono, 'simple').map((c) => c.key)).toEqual(['cost_energy_cap', 'cost_om_annual', 'cont_lifetime']);
   });
 
-  it('adds the simulation keys the product carries in expert mode, and never the unused ones', () => {
-    const keys = shownConstraints(mono, 'expert').map((c) => c.key);
+  it('adds the simulation keys the product carries in advanced mode, and never the unused ones', () => {
+    const keys = shownConstraints(mono, 'advanced').map((c) => c.key);
     expect(keys).toEqual(['cost_energy_cap', 'cost_om_annual', 'cont_lifetime', 'losses']);
     expect(keys).not.toContain('cont_export_cap');
     expect(keys).not.toContain('module_width_m');

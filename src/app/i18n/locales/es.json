@@ -22,8 +22,8 @@
       }
     },
     "mode": {
-      "basic": "Básico",
-      "expert": "Experto"
+      "simple": "Sencillo",
+      "advanced": "Avanzado"
     },
     "undo": {
       "title": "Deshacer {action} (Ctrl+Z)",
@@ -331,7 +331,7 @@
       "solver": "Método de cálculo"
     },
     "insulationTitle": "Nivel energético",
-    "expertMore": {
+    "advancedMore": {
       "title": "Térmica y simulación",
       "detail": "los perfiles, los equipos y el solver mantienen sus valores por defecto"
     }

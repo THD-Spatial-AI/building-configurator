@@ -424,7 +424,7 @@ export function useBuildingModel(
     }
   };
 
-  /** Gives every surface of the type one U-value, e.g. from a per-type field in Expert. */
+  /** Gives every surface of the type one U-value, e.g. from a per-type field in Advanced. */
   const setTypeUValue = (type: RefurbElementType, uValue: number) => {
     remember(`type-u:${type}`, { key: 'model.history.field.uValue' });
     setElements((prev) => Object.fromEntries(Object.entries(prev).map(([id, el]) => [

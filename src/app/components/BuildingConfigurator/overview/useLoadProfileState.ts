@@ -14,10 +14,11 @@ import {
   type Resolution,
 } from '../../../lib/loadProfile';
 import type { Message } from '../../../i18n';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 interface UseLoadProfileStateArgs {
   initialTimeseries?: LoadDataPoint[];
-  mode?: 'basic' | 'expert';
+  mode?: ConfiguratorMode;
   /** Fixes the resolution, for a caller that offers no resolution choice. */
   initialResolution?: Resolution;
   onTotalsChange?: (totals: EnergyTotals) => void;
@@ -28,14 +29,14 @@ interface UseLoadProfileStateArgs {
 /** Owns viewer-specific state while delegating parsing and aggregation to pure helpers. */
 export function useLoadProfileState({
   initialTimeseries,
-  mode = 'basic',
+  mode = 'simple',
   initialResolution,
   onTotalsChange,
   onGroundTruthChange,
 }: UseLoadProfileStateArgs) {
-  const [energyType, setEnergyType] = useState<EnergyType>(mode === 'basic' ? 'combined' : 'electricity');
+  const [energyType, setEnergyType] = useState<EnergyType>(mode === 'simple' ? 'combined' : 'electricity');
   const [resolution, setResolution] = useState<Resolution>(
-    initialResolution ?? (mode === 'basic' ? 'monthly' : 'daily'),
+    initialResolution ?? (mode === 'simple' ? 'monthly' : 'daily'),
   );
   const [dataset, setDataset] = useState<DatasetByResolution>(() => {
     if (initialTimeseries && initialTimeseries.length > 0) {
@@ -49,7 +50,7 @@ export function useLoadProfileState({
   const [uploadError, setUploadError] = useState<Message | null>(null);
 
   useEffect(() => {
-    if (mode !== 'basic' || initialResolution) return;
+    if (mode !== 'simple' || initialResolution) return;
     setResolution('monthly');
     setEnergyType('combined');
   }, [mode, initialResolution]);

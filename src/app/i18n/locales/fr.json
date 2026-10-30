@@ -22,8 +22,8 @@
       }
     },
     "mode": {
-      "basic": "Simple",
-      "expert": "Expert"
+      "simple": "Simple",
+      "advanced": "Avancé"
     },
     "undo": {
       "title": "Annuler {action} (Ctrl+Z)",
@@ -331,7 +331,7 @@
       "solver": "Méthode de calcul"
     },
     "insulationTitle": "Niveau énergétique",
-    "expertMore": {
+    "advancedMore": {
       "title": "Thermique et simulation",
       "detail": "les profils, les équipements et le solveur gardent leurs valeurs par défaut"
     }

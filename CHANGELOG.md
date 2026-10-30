@@ -4,6 +4,10 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+Breaking: the modes are called Simple and Advanced, as in EnerPlanET. `defaultMode` takes `simple` or `advanced`; `basic` and `expert` are gone.
+
 ## [0.15.0] - 2026-10-28
 
 Breaking: the right panel has two tabs, Building and Technologies. `defaultTab` takes `building` or `technologies`; `overview`, `parameters` and `envelope` are gone. Single surfaces are reached through the model or the surface drop-down.

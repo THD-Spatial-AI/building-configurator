@@ -11,6 +11,7 @@ import { useFormatNumber, useT } from '../../i18n';
 import { isFlat, modelGeometry } from '../../lib/pvSurfaces';
 import { compassPoint } from './PvMode';
 import { DecimalInput, NumberInput, ToggleSwitch } from '../BuildingConfigurator/shared/ui';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 /** Highest U-value accepted: a single-glazed window sits near 5. */
 const U_MAX = 5;
@@ -25,7 +26,7 @@ function GeometryFigure({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Tilt and facing as the 3D model has them, for Basic, where they are not edited. */
+/** Tilt and facing as the 3D model has them, for Simple, where they are not edited. */
 function ModelOrientation({ element }: { element: BuildingElement }) {
   const t = useT();
   const format = useFormatNumber();
@@ -66,13 +67,13 @@ interface SurfaceQuickEditorProps {
   element: BuildingElement;
   /** Area of this surface's 3D polygon, when geometry for it was loaded. */
   geometryArea?: number | null;
-  mode?: 'basic' | 'expert';
+  mode?: ConfiguratorMode;
   onUpdate: (patch: Partial<BuildingElement>) => void;
   onDelete: () => void;
 }
 
 export function SurfaceQuickEditor({
-  element, geometryArea, mode = 'basic', onUpdate, onDelete,
+  element, geometryArea, mode = 'simple', onUpdate, onDelete,
 }: SurfaceQuickEditorProps) {
   const t = useT();
   const format = useFormatNumber();
@@ -139,7 +140,7 @@ export function SurfaceQuickEditor({
             {t('surface.useGeometryArea', { area: format(geometryArea!, 1) })}
           </button>
         )}
-        {mode === 'expert' && (
+        {mode === 'advanced' && (
           <p className="text-[10px] text-muted-foreground">
             {t('surface.rValue', { value: format(1 / Math.max(0.01, element.uValue), 2) })}
           </p>
@@ -155,8 +156,8 @@ export function SurfaceQuickEditor({
       )}
 
       {/* ── Orientation ── */}
-      {/* Tilt and facing change only what BuEM receives, not the geometry or the PV on it: Expert only. */}
-      {mode !== 'expert' ? <ModelOrientation element={element} /> : (
+      {/* Tilt and facing change only what BuEM receives, not the geometry or the PV on it: Advanced only. */}
+      {mode !== 'advanced' ? <ModelOrientation element={element} /> : (
       <div className="flex items-start justify-center gap-4">
         {isFlat(element.tilt, element.azimuth) ? (
           <span className="self-center rounded-md bg-muted px-2.5 py-1.5 text-[12px] font-semibold text-foreground">{t('surface.tiltShape.flat')}</span>

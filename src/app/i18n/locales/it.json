@@ -21,8 +21,8 @@
       }
     },
     "mode": {
-      "basic": "Base",
-      "expert": "Esperto"
+      "simple": "Semplice",
+      "advanced": "Avanzato"
     },
     "undo": {
       "title": "Annulla {action} (Ctrl+Z)",
@@ -330,7 +330,7 @@
       "solver": "Metodo di calcolo"
     },
     "insulationTitle": "Livello energetico",
-    "expertMore": {
+    "advancedMore": {
       "title": "Termica e simulazione",
       "detail": "profili, apparecchi e solutore mantengono i valori predefiniti"
     }

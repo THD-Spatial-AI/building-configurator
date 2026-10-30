@@ -97,7 +97,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `pv` | Optional. The building's PV, placed on the Technologies tab, see [PV](#pv) |
 | `defaultTab` | Optional. `building` or `technologies`: the tab the view opens on. Absent: `building` |
 | `technologies` | Optional. The building's technologies as cards in a Technologies tab, see [Technologies](#technologies) |
-| `defaultMode` | Optional. `basic` (default) or `expert`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
+| `defaultMode` | Optional. `simple` (default) or `advanced`: the mode the view opens in. The user can still switch; the next opening starts in this mode again |
 | `language` | Optional. `en`, `de`, `es`, `fr`, `it`, `nl`, `pl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
 | `tour` | Optional. `{ run, onFinish }`. With `run` true the guided tour starts as the view opens; `onFinish` is called when the user finishes or skips it, so the host can store that the user has seen it. The header's Tour button starts the tour either way |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
@@ -221,8 +221,8 @@ default_value, min?, max?, options? }` with `"INF"` for an unbounded value.
 |---|---|
 | `module_width_m`, `module_height_m`, `module_power_kwp` | The module of the layout. A product without all three uses `module` |
 | `cost_energy_cap`, `cost_om_annual` | Investment and yearly O&M before a run: each times the layout's kWp, shown as estimates. The currency is the part of `cost_energy_cap`'s unit before the slash |
-| `cost_energy_cap`, `cost_om_annual`, `cont_lifetime` | Asked in basic mode as plain questions |
-| `cost_interest_rate`, `cost_om_annual_investment_fraction`, `cost_om_prod`, `cont_energy_cap_max_systemwide`, `losses`, `dc_ac_ratio`, `inv_eff`, `module_type` | Also shown in expert mode, under the constraint's `alias` |
+| `cost_energy_cap`, `cost_om_annual`, `cont_lifetime` | Asked in simple mode as plain questions |
+| `cost_interest_rate`, `cost_om_annual_investment_fraction`, `cost_om_prod`, `cont_energy_cap_max_systemwide`, `losses`, `dc_ac_ratio`, `inv_eff`, `module_type` | Also shown in advanced mode, under the constraint's `alias` |
 
 A key the product does not carry is not shown, and any other key is never shown.
 

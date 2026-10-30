@@ -1,5 +1,5 @@
 // One section of a panel: a header band in its topic's colour with the
-// topic's icon, then the section's content. Expert-only sections are dashed.
+// topic's icon, then the section's content. Advanced-only sections are dashed.
 
 import type { MouseEvent, ReactNode } from 'react';
 import { cn } from '@/lib/utils';

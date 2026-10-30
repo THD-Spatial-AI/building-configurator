@@ -10,7 +10,7 @@ The names used for the regions and controls of the 3D view (`Building3DView`) in
 
 | Term | What it is | Component |
 |---|---|---|
-| Header | The strip at the top: back, building name, Tour, Export, Basic/Expert, Undo | `Building3DView` |
+| Header | The strip at the top: back, building name, Tour, Export, Simple/Advanced, Undo | `Building3DView` |
 | Model | The 3D building in the centre; a click opens a surface | `SurfaceGeometryViewer` |
 | Surface panel | The column left of the model, showing the open surface; on a narrow screen a sheet from the bottom | `SurfacePanel` |
 | Storey panel | Replaces the surface panel while storeys are picked in the model | `StoreyPanel` |
@@ -23,14 +23,14 @@ The names used for the regions and controls of the 3D view (`Building3DView`) in
 
 | Term | What it is | Component |
 |---|---|---|
-| Section | A titled block with a header band in its topic's colour and the topic's icon. A dashed border marks an Expert-only section | `SectionCard` |
+| Section | A titled block with a header band in its topic's colour and the topic's icon. A dashed border marks an Advanced-only section | `SectionCard` |
 | Collapsible section | A section that shows a one-line summary until opened; its header and its arrow both open it | `SectionCard` with `onToggle` |
 | Technology card | One technology on the Technologies tab, with a headline figure, products and cost; its header brings it into focus | `TechCardFrame` |
 | Tile | One figure of the building in the building data section; a dot marks a changed value | `Tile` in `BuildingDetailsCard.tsx` |
 | Info tip | The info icon in a header; hovering or focusing it explains the section | `InfoTip` |
 | Status badge | "default" or "modified" beside a value in the editable building data table | `SnapshotStatusBadge` |
 | Source tag | Marks a demand figure as estimated (ignis) or user-defined; a BuEM figure has none | `SourceTag` |
-| Segmented control | A filled pill of exclusive options that switches a mode, such as Basic/Expert | `SegmentedControl` |
+| Segmented control | A filled pill of exclusive options that switches a mode, such as Simple/Advanced | `SegmentedControl` |
 | Tabs | Underlined labels that swap the whole body of a panel, such as Building and Technologies | `BuildingDetailsCard` |
 | Dialog | Asks before unsaved changes are lost | `UnsavedChangesDialog` |
 

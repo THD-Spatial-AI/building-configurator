@@ -4,11 +4,12 @@ import { importedValues, SurfaceQuickEditor } from './SurfaceQuickEditor';
 import { SectionCard } from '../BuildingConfigurator/shared/SectionCard';
 import { TOPICS } from '@/app/config/topics';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 const flat: BuildingElement = { id: 'f1', label: 'Flat roof', type: 'roof', area: 51, uValue: 0.2, gValue: null, tilt: 0, azimuth: -1 };
 const pitched: BuildingElement = { ...flat, id: 'r1', tilt: 35, azimuth: 180 };
 
-const render = (element: BuildingElement, mode: 'basic' | 'expert' = 'expert') => renderToStaticMarkup(
+const render = (element: BuildingElement, mode: ConfiguratorMode = 'advanced') => renderToStaticMarkup(
   <SurfaceQuickEditor element={element} mode={mode} onUpdate={() => {}} onDelete={() => {}} />,
 );
 
@@ -19,20 +20,20 @@ describe('SurfaceQuickEditor', () => {
     expect(html).not.toContain('° N');
   });
 
-  it('gives a pitched roof its facing dial in Expert', () => {
+  it('gives a pitched roof its facing dial in Advanced', () => {
     expect(render(pitched)).not.toContain('>Flat<');
     expect(render(pitched)).toContain('S-facing');
   });
 
   it('takes the U-value in a number field, without a slider or level buttons', () => {
-    const html = render(pitched, 'basic');
+    const html = render(pitched, 'simple');
     expect(html).toMatch(/<input[^>]*aria-label="U-value \(W\/m²K\)"[^>]*value="0.2"/);
     expect(html).not.toContain('type="range"');
     expect(html).not.toContain('Existing');
   });
 
-  it('shows tilt and facing read-only from the 3D model in Basic', () => {
-    const html = render(pitched, 'basic');
+  it('shows tilt and facing read-only from the 3D model in Simple', () => {
+    const html = render(pitched, 'simple');
     expect(html).not.toContain('S-facing');
     expect(html).toContain('Tilt</div>');
     expect(html).toContain('35° · Pitched');
@@ -54,6 +55,6 @@ describe('resetting a surface from its section header', () => {
     const header = renderToStaticMarkup(<SectionCard topic={TOPICS.envelope} title="Roof surface" onReset={() => {}} resetLabel="Reset" />);
     expect(header).toMatch(/<header[^>]*>.*aria-label="Reset".*<\/header>/);
     expect(renderToStaticMarkup(<SectionCard topic={TOPICS.envelope} title="Roof surface" />)).not.toContain('aria-label="Reset"');
-    expect(render({ ...imported, uValue: 0.5 }, 'basic')).not.toContain('Reset');
+    expect(render({ ...imported, uValue: 0.5 }, 'simple')).not.toContain('Reset');
   });
 });
