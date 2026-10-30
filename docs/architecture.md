@@ -57,7 +57,8 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 | Undo history, unsaved-change flag | `useBuildingModel` | Leaving with unsaved changes asks first |
 | TABULA variants and U-values | `useBuildingModel` | Fetched through `fetchMatchingVariants` and `fetchVariantData` |
 | Demand totals and load profile | `useBuildingModel` | From the stored `demandProfile`, replaced by the last run |
-| Open surface, open tab, Simple/Advanced, storey picking, tour | `Building3DView` | Not returned to the host |
+| Open surface, open tab, storey picking, tour | `Building3DView` | Not returned to the host |
+| Simple/Advanced | `Building3DView`, or the host | The host can control it with `mode` and `onModeChange`; otherwise the view keeps it, starting at `defaultMode` |
 | PV surfaces and technologies | Host | Controlled props: the view calls the host's handlers and shows what comes back |
 
 ## Service callbacks

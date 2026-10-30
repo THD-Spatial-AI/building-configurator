@@ -87,8 +87,12 @@ export interface Building3DViewProps {
   pv?: PvMode;
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
-  /** The mode the view opens in. The user can still switch; the next opening starts here again. */
+  /** The mode the view opens in when `mode` is not given. The user can still switch; the next opening starts here again. */
   defaultMode?: ConfiguratorMode;
+  /** The mode, controlled by the host: given, it wins over `defaultMode` and the user's switch reaches the host through `onModeChange`. */
+  mode?: ConfiguratorMode;
+  /** Called with the mode the user switches to, in either case. */
+  onModeChange?: (mode: ConfiguratorMode) => void;
   /** The tab the view opens on. Absent: Building. */
   defaultTab?: 'building' | 'technologies';
   /**
@@ -105,7 +109,7 @@ export interface Building3DViewProps {
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'simple', defaultTab, language: languageCode, tour,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'simple', mode: hostMode, onModeChange, defaultTab, language: languageCode, tour,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
@@ -149,7 +153,12 @@ export function Building3DView({
   /** Where the editor was about to go when it asked about the open surface's changes. */
   const [pendingSurface, setPendingSurface] = useState<{ next: SurfaceSelection | null } | null>(null);
   /** Advanced shows the full BuEM building parameters. */
-  const [mode, setMode] = useState<ConfiguratorMode>(defaultMode);
+  const [ownMode, setOwnMode] = useState<ConfiguratorMode>(defaultMode);
+  const mode = hostMode ?? ownMode;
+  const setMode = useCallback((next: ConfiguratorMode) => {
+    setOwnMode(next);
+    onModeChange?.(next);
+  }, [onModeChange]);
   /** The export choices, open over the header button. */
   const [exportOpen, setExportOpen] = useState(false);
   /** Leaving was asked for while there are unsaved edits. */
