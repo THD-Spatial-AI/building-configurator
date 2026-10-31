@@ -4,7 +4,7 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
-## [Unreleased]
+## [0.16.0] - 2026-10-31
 
 Breaking: the modes are called Simple and Advanced, as in EnerPlanET. `defaultMode` takes `simple` or `advanced`; `basic` and `expert` are gone.
 
