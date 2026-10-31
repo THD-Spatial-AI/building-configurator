@@ -4,6 +4,12 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.16.1] - 2026-10-31
+
+### Changed
+
+- The 3D view draws only when something changes: the camera moves, a surface is picked, the view is resized or the building changes. An idle view no longer keeps the graphics card or the processor busy. On screens above twice the standard pixel density it draws at twice, with no visible difference.
+
 ## [0.16.0] - 2026-10-31
 
 Breaking: the modes are called Simple and Advanced, as in EnerPlanET. `defaultMode` takes `simple` or `advanced`; `basic` and `expert` are gone.
