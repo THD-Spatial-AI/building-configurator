@@ -39,6 +39,7 @@ import { productModule } from '../../lib/pvProducts';
 import { fittedPvIds, pvAvailableIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName, hasDwellingsPerStorey, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 type SurfaceSelection = { id: string };
 
@@ -86,8 +87,12 @@ export interface Building3DViewProps {
   pv?: PvMode;
   /** The host's technologies on this building, shown as cards in a Technologies tab. Controlled; hold it stable as for `services`. */
   technologies?: Technologies;
-  /** The mode the view opens in. The user can still switch; the next opening starts here again. */
-  defaultMode?: 'basic' | 'expert';
+  /** The mode the view opens in when `mode` is not given. The user can still switch; the next opening starts here again. */
+  defaultMode?: ConfiguratorMode;
+  /** The mode, controlled by the host: given, it wins over `defaultMode` and the user's switch reaches the host through `onModeChange`. */
+  mode?: ConfiguratorMode;
+  /** Called with the mode the user switches to, in either case. */
+  onModeChange?: (mode: ConfiguratorMode) => void;
   /** The tab the view opens on. Absent: Building. */
   defaultTab?: 'building' | 'technologies';
   /**
@@ -104,7 +109,7 @@ export interface Building3DViewProps {
 }
 
 export function Building3DView({
-  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'basic', defaultTab, language: languageCode, tour,
+  building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'simple', mode: hostMode, onModeChange, defaultTab, language: languageCode, tour,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
   // This component sits above its own LanguageProvider, so it translates directly.
@@ -147,8 +152,13 @@ export function Building3DView({
   const [surfaceOriginal, setSurfaceOriginal] = useState<BuildingElement | null>(null);
   /** Where the editor was about to go when it asked about the open surface's changes. */
   const [pendingSurface, setPendingSurface] = useState<{ next: SurfaceSelection | null } | null>(null);
-  /** Expert shows the full BuEM building parameters. */
-  const [mode, setMode] = useState<'basic' | 'expert'>(defaultMode);
+  /** Advanced shows the full BuEM building parameters. */
+  const [ownMode, setOwnMode] = useState<ConfiguratorMode>(defaultMode);
+  const mode = hostMode ?? ownMode;
+  const setMode = useCallback((next: ConfiguratorMode) => {
+    setOwnMode(next);
+    onModeChange?.(next);
+  }, [onModeChange]);
   /** The export choices, open over the header button. */
   const [exportOpen, setExportOpen] = useState(false);
   /** Leaving was asked for while there are unsaved edits. */
@@ -398,7 +408,7 @@ export function Building3DView({
     general: model.general,
     setGen: model.setGen,
     mode,
-    onShowExpert: () => setMode('expert'),
+    onShowAdvanced: () => setMode('advanced'),
     onStoreysClosed: () => setSelectedStoreys([]),
     modelHeight,
     storeys: (
@@ -492,7 +502,7 @@ export function Building3DView({
           </p>
           <p className="truncate text-[11px] leading-tight text-muted-foreground">
             {t('view.surfaceCount', { count: Object.keys(elements).length })}
-            {mode === 'expert' && <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>}
+            {mode === 'advanced' && <span className="hidden sm:inline"> · {t('view.avgU', { value: formatNumber(language, model.avgUValue, 2) })}</span>}
           </p>
         </div>
         <button
@@ -548,9 +558,9 @@ export function Building3DView({
           )}
         </div>
         <SegmentedControl
-          options={[{ value: 'basic', label: t('view.mode.basic') }, { value: 'expert', label: t('view.mode.expert') }]}
+          options={[{ value: 'simple', label: t('view.mode.simple') }, { value: 'advanced', label: t('view.mode.advanced') }]}
           value={mode}
-          onChange={(v) => setMode(v as 'basic' | 'expert')}
+          onChange={(v) => setMode(v as ConfiguratorMode)}
         />
       </div>
 

@@ -21,8 +21,8 @@
       }
     },
     "mode": {
-      "basic": "Basic",
-      "expert": "Expert"
+      "simple": "Simple",
+      "advanced": "Advanced"
     },
     "undo": {
       "title": "Undo {action} (Ctrl+Z)",
@@ -330,7 +330,7 @@
       "solver": "Calculation Method"
     },
     "insulationTitle": "Energy grade",
-    "expertMore": {
+    "advancedMore": {
       "title": "Thermal and simulation",
       "detail": "profiles, equipment and solver keep their defaults"
     }

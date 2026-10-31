@@ -8,11 +8,12 @@ import { setbackOptions, isServiceBuildingType } from '@/app/components/Building
 import { computeTotalFloorArea } from '@/app/components/BuildingConfigurator/shared/buildingDefaults';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
 import { TOPICS } from '@/app/config/topics';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 interface ComfortProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
-  mode: 'basic' | 'expert';
+  mode: ConfiguratorMode;
 }
 
 // BuEM's three thermal_class values, so a saved choice reopens as chosen.
@@ -35,7 +36,7 @@ function hotWaterOptions(t: Translate) {
   ];
 }
 
-/** Heating setpoint, setback and hot water; Expert adds the cooling setpoint, air changes and thermal mass. */
+/** Heating setpoint, setback and hot water; Advanced adds the cooling setpoint, air changes and thermal mass. */
 export function ComfortSection({ general, setGen, mode }: ComfortProps) {
   const t = useT();
   const residential = !isServiceBuildingType(general.buildingType);
@@ -57,7 +58,7 @@ export function ComfortSection({ general, setGen, mode }: ComfortProps) {
           tip={t('comfort.setback.tip')}
         />
       </FieldRow>
-      {mode === 'expert' && <CoolingSetpoint general={general} setGen={setGen} />}
+      {mode === 'advanced' && <CoolingSetpoint general={general} setGen={setGen} />}
       {residential && (
         <div>
           <FieldLabel tip={t('comfort.hotWater.tip')}>
@@ -71,7 +72,7 @@ export function ComfortSection({ general, setGen, mode }: ComfortProps) {
           />
         </div>
       )}
-      {mode === 'expert' && (
+      {mode === 'advanced' && (
         <>
           <AirChanges general={general} setGen={setGen} />
           <ThermalMass general={general} setGen={setGen} />

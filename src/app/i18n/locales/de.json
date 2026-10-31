@@ -21,8 +21,8 @@
       }
     },
     "mode": {
-      "basic": "Einfach",
-      "expert": "Experte"
+      "simple": "Einfach",
+      "advanced": "Erweitert"
     },
     "undo": {
       "title": "Rückgängig: {action} (Ctrl+Z)",
@@ -330,7 +330,7 @@
       "solver": "Berechnungsmethode"
     },
     "insulationTitle": "Energetischer Standard",
-    "expertMore": {
+    "advancedMore": {
       "title": "Thermik und Simulation",
       "detail": "Profile, Geräte und Löser behalten ihre Standardwerte"
     }

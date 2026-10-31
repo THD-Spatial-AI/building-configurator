@@ -23,8 +23,8 @@
       }
     },
     "mode": {
-      "basic": "Základní",
-      "expert": "Expertní"
+      "simple": "Jednoduchý",
+      "advanced": "Pokročilý"
     },
     "undo": {
       "title": "Vrátit {action} (Ctrl+Z)",
@@ -344,7 +344,7 @@
       "solver": "Metoda výpočtu"
     },
     "insulationTitle": "Energetická úroveň",
-    "expertMore": {
+    "advancedMore": {
       "title": "Tepelné vlastnosti a simulace",
       "detail": "profily, spotřebiče a řešič si ponechávají výchozí hodnoty"
     }

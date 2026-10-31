@@ -17,9 +17,10 @@ import {
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { GeometryLine, surfaceName, surfaceProduct, type PvMode, type PvSurface } from './PvMode';
 import { RemoveButton } from './TechnologyCards';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'];
-/** Plain-language labels for the constraints basic mode asks; others show the catalogue's own name. */
+/** Plain-language labels for the constraints simple mode asks; others show the catalogue's own name. */
 const QUESTION_KEYS = new Set(['cost_energy_cap', 'cost_om_annual', 'cont_lifetime']);
 
 /** The surfaces offered for PV: those some option fits on, and any with PV on. */
@@ -133,7 +134,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
  * modules and capacity, an edit button that opens the product's values, and a
  * bin that takes the product off every surface it is on.
  */
-function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record<string, PvLayout>>; mode: 'basic' | 'expert' }) {
+function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record<string, PvLayout>>; mode: ConfiguratorMode }) {
   const t = useT();
   const format = useFormatNumber();
   const [editing, setEditing] = useState<string | null>(null);
@@ -366,8 +367,8 @@ function SaveAsTechnology({ product, onSave }: { product: TechnologyProduct; onS
   );
 }
 
-/** One installed product's values: basic questions, or every simulation value in expert mode. */
-export function ProductValues({ pv, product, mode }: { pv: PvMode; product: TechnologyProduct; mode: 'basic' | 'expert' }) {
+/** One installed product's values: simple-mode questions, or every simulation value in advanced mode. */
+export function ProductValues({ pv, product, mode }: { pv: PvMode; product: TechnologyProduct; mode: ConfiguratorMode }) {
   const t = useT();
   const constraints = shownConstraints(product, mode);
   return (
@@ -396,7 +397,7 @@ export function PvOverview({ pv, available, elements, layouts = {}, mode, onSele
   elements: Record<string, BuildingElement>;
   /** Module layouts of the surfaces the view has polygons for. */
   layouts?: Readonly<Record<string, PvLayout>>;
-  mode: 'basic' | 'expert';
+  mode: ConfiguratorMode;
   /** Shows a surface in the model and opens it in the surface panel. */
   onSelect: (surfaceId: string) => void;
   /** Inside a technology card, which carries the title: no border or heading of its own. */

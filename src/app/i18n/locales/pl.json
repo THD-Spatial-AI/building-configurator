@@ -23,8 +23,8 @@
       }
     },
     "mode": {
-      "basic": "Podstawowy",
-      "expert": "Ekspercki"
+      "simple": "Prosty",
+      "advanced": "Zaawansowany"
     },
     "undo": {
       "title": "Cofnij {action} (Ctrl+Z)",
@@ -344,7 +344,7 @@
       "solver": "Metoda obliczeń"
     },
     "insulationTitle": "Standard energetyczny",
-    "expertMore": {
+    "advancedMore": {
       "title": "Cieplne i symulacja",
       "detail": "profile, urządzenia i solver zachowują wartości domyślne"
     }

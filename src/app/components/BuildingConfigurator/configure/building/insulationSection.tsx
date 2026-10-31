@@ -1,5 +1,5 @@
 // The building editor's Insulation and windows group: TABULA's refurbishment
-// state for the whole building in Basic, and per element type in Expert with
+// state for the whole building in Simple, and per element type in Advanced with
 // its U-value and loss factor, plus the windows BuEM adds when there are none.
 
 import { useEffect, useRef, type CSSProperties } from 'react';
@@ -15,6 +15,7 @@ import type { BuildingElement } from '@/app/components/BuildingConfigurator/conf
 import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 import type { StepFact } from '@/app/components/BuildingConfigurator/shared/StepPanel';
 import { DEFAULT_VALUES_URL } from '@/app/config/docs';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 /** What the group reads from the building model and calls back into it. */
 export interface InsulationProps {
@@ -52,12 +53,12 @@ const LOSS_FACTOR_TYPES: RefurbElementType[] = ['wall', 'roof', 'floor'];
 interface Props extends InsulationProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
-  mode: 'basic' | 'expert';
+  mode: ConfiguratorMode;
 }
 
 /** The facts a closed energy grade step shows: the state of the building, and its class once worked out. */
 export function gradeSummary(t: Translate, format: FormatNumber, insulation: InsulationProps): StepFact[] {
-  const state = insulationSummary(t, format, insulation, 'basic');
+  const state = insulationSummary(t, format, insulation, 'simple');
   const present = REFURB_TYPES.find((type) => Object.values(insulation.elements).some((el) => el.type === type));
   // A grade belongs to one level; a building set element by element has none.
   const uniform = state !== '' && state !== t('insulation.summary.mixed');
@@ -76,26 +77,26 @@ export function gradeSummary(t: Translate, format: FormatNumber, insulation: Ins
   ];
 }
 
-/** One line for the group's header; the average U-value in Expert only. */
-export function insulationSummary(t: Translate, format: FormatNumber, { levels, states, elements, initial, avgUValue }: InsulationProps, mode: 'basic' | 'expert'): string {
+/** One line for the group's header; the average U-value in Advanced only. */
+export function insulationSummary(t: Translate, format: FormatNumber, { levels, states, elements, initial, avgUValue }: InsulationProps, mode: ConfiguratorMode): string {
   const present = REFURB_TYPES.filter((type) => Object.values(elements).some((el) => el.type === type));
   const custom = present.some((type) => customCount(elements, type, states[type], initial, levels) > 0);
   const uniform = present.every((type) => states[type] === states[present[0]]);
   const level = levels.find((l) => l.number === states[present[0]]);
   const label = level && variantName(t, level.label, level.number);
   const state = levels.length === 0 ? null : custom || !uniform || !label ? t('insulation.summary.mixed') : label;
-  const averageU = mode === 'expert' ? t('insulation.summary.averageU', { value: format(avgUValue, 2) }) : null;
+  const averageU = mode === 'advanced' ? t('insulation.summary.averageU', { value: format(avgUValue, 2) }) : null;
   return [state, averageU].filter(Boolean).join(' · ');
 }
 
-/** Building-wide preset; in Expert also a state, U-value and loss factor per element type. The average U-value is in the header (insulationSummary). */
+/** Building-wide preset; in Advanced also a state, U-value and loss factor per element type. The average U-value is in the header (insulationSummary). */
 export function InsulationSection(props: Props) {
   const { mode, levels } = props;
   return (
     <div className="flex flex-col gap-4">
       {levels.length > 0 && <BuildingPreset {...props} />}
-      {mode === 'expert' && <ElementTable {...props} />}
-      {mode === 'expert' && <SynthesisedWindows {...props} />}
+      {mode === 'advanced' && <ElementTable {...props} />}
+      {mode === 'advanced' && <SynthesisedWindows {...props} />}
     </div>
   );
 }
@@ -224,9 +225,9 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
         })}
       </div>
       {classes && <LevelClasses classes={classes} />}
-      {(mode === 'expert' || !uniform || custom > 0) && (
+      {(mode === 'advanced' || !uniform || custom > 0) && (
         <p className="text-[10px] leading-snug text-muted-foreground">
-          {mode === 'expert' && (variantCode ? t('insulation.preset.fromVariant', { code: variantCode }) : t('insulation.preset.fromType'))}
+          {mode === 'advanced' && (variantCode ? t('insulation.preset.fromVariant', { code: variantCode }) : t('insulation.preset.fromType'))}
           {!uniform && ` ${t('insulation.preset.typesDiffer')}`}
           {custom > 0 && ` ${t('insulation.preset.customKept', { count: custom })}`}
         </p>
