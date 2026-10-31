@@ -95,6 +95,8 @@ export function SurfaceGeometryViewer({
   const selectRef = useRef(onSelectSurface);
   /** A surface to turn towards, picked up by the next frame. */
   const focusRequestRef = useRef<string | null>(null);
+  /** Schedules one frame; set by the scene effect. */
+  const renderRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (focusToken === undefined || !focusId) return;
@@ -131,7 +133,8 @@ export function SurfaceGeometryViewer({
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    // Above 2 the extra pixels are not visible on this scene but the fill cost is.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -296,11 +299,22 @@ export function SurfaceGeometryViewer({
       return true;
     }
 
-    let frameId: number;
+    // Drawn on demand, not every frame: an idle model then costs nothing, which
+    // matters on machines where WebGL falls back to the CPU.
+    let frameId = 0;
     let lastFrame = performance.now();
-    function animate() {
-      frameId = requestAnimationFrame(animate);
+    function requestRender() {
+      if (frameId) return;
+      lastFrame = performance.now();
+      frameId = requestAnimationFrame(renderFrame);
+    }
+    // update() fires 'change' while the camera moves, damping included, so
+    // this also keeps the frames coming until the orbit settles.
+    controls.addEventListener('change', requestRender);
+    renderRef.current = requestRender;
 
+    function renderFrame() {
+      frameId = 0;
       const now = performance.now();
       const delta = Math.min(0.1, (now - lastFrame) / 1000);
       lastFrame = now;
@@ -310,7 +324,7 @@ export function SurfaceGeometryViewer({
         focusRequestRef.current = null;
         if (group) startFlyTo(group);
       }
-      advanceFlight(delta);
+      if (advanceFlight(delta)) requestRender();
 
       controls.update();
       renderer.render(scene, camera);
@@ -328,7 +342,7 @@ export function SurfaceGeometryViewer({
         label.style.transform = `translate(-50%, -50%) translate(${((at.x + 1) / 2) * width}px, ${((1 - at.y) / 2) * height}px)`;
       });
     }
-    animate();
+    requestRender();
 
     // An arrow rather than a declaration: a hoisted function could run before
     // the null check above, so TypeScript will not carry it inside one.
@@ -336,12 +350,15 @@ export function SurfaceGeometryViewer({
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
+      requestRender();
     };
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(mount);
 
     return () => {
       cancelAnimationFrame(frameId);
+      renderRef.current = () => {};
+      controls.removeEventListener('change', requestRender);
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener('pointerdown', handlePointerDown);
       renderer.domElement.removeEventListener('pointerup', handlePointerUp);
@@ -530,6 +547,10 @@ export function SurfaceGeometryViewer({
       if (outline) outline.visible = candidate;
     }
   }, [surfaces, origin, selectedId, invalidIds, visibleIds, pvIds, pvModules, candidateIds]);
+
+  // Every scene change happens in an effect above, so one frame after each
+  // commit shows it. Must stay the last effect: effects run in order.
+  useEffect(() => { renderRef.current(); });
 
   return (
     <div className="bg-muted" style={{ width: '100%', height: '100%', position: 'relative' }}>
