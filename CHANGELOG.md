@@ -4,6 +4,12 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [Unreleased]
+
+### Changed
+
+- A building loaded from EnerPlanET's footprints and City2TABULA takes the service type its OSM class maps to, as EnerPlanET does: a hospital or doctors' practice is a clinic, a cafe a restaurant, a kindergarten or university a school, an industrial building or workshop a warehouse, a shop, retail or commercial building a supermarket, and a bakery, hotel, office or school its own type. Any other class keeps City2TABULA's residential type. The residential archetype still supplies the envelope.
+
 ## [0.16.1] - 2026-10-31
 
 ### Changed

@@ -36,6 +36,39 @@ function parseVariantCode(code: string | undefined): { country: string; building
 }
 
 /**
+ * OSM f_class to the BuEM service building_type it is modelled as. Must stay in
+ * step with EnerPlanET's backend/internal/jobs/service_buildings.go; a class not
+ * listed keeps City2TABULA's residential type.
+ */
+const SERVICE_BUILDING_TYPES: Record<string, string> = {
+  bakery: 'bakery',
+  supermarket: 'supermarket',
+  shop: 'supermarket',
+  retail: 'supermarket',
+  commercial: 'supermarket',
+  office: 'office',
+  school: 'school',
+  kindergarten: 'school',
+  university: 'school',
+  hotel: 'hotel',
+  clinic: 'clinic',
+  hospital: 'clinic',
+  doctors: 'clinic',
+  restaurant: 'restaurant',
+  cafe: 'restaurant',
+  warehouse: 'warehouse',
+  industrial: 'warehouse',
+  workshop: 'warehouse',
+};
+
+/** The BuEM service type for an OSM f_class, normalised as EnerPlanET's heatdemand.Normalize does; undefined when none. */
+function serviceBuildingType(fClass: unknown): string | undefined {
+  if (typeof fClass !== 'string') return undefined;
+  const key = fClass.trim().toLowerCase().replace(/[-\s]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  return SERVICE_BUILDING_TYPES[key];
+}
+
+/**
  * First [lon, lat] vertex found in a Polygon/MultiPolygon geometry, recursing
  * through the nested ring arrays. modelDataMap.ts's `thematic.coordinates`
  * path expects geometry.coordinates to already be a bare [lon, lat] pair (a
@@ -68,7 +101,7 @@ export function buildEnrichedFeature(building: PylovoBuildingFeature, entry: Enr
     properties: {
       buem: {
         building: {
-          building_type: buildingTypeCode,
+          building_type: serviceBuildingType(building.properties.f_class) ?? buildingTypeCode,
           construction_period: entry.default_construction_year ?? 0,
           country,
           A_ref: footprintArea
@@ -113,7 +146,8 @@ async function resolveVariantData(
         const inputs = await fetchVariantInputs(services, entry.tabula_variant_code);
         if (inputs) return inputs;
       }
-      const variants = await loadVariantLevels(services, country, buildingType, constructionYear);
+      // The variant code lets a service type, which TABULA lacks, fall back to its residential type.
+      const variants = await loadVariantLevels(services, country, buildingType, constructionYear, undefined, entry.tabula_variant_code);
       return variants[0]?.data;
     })();
     cache.set(cacheKey, pending);
