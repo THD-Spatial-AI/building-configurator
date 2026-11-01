@@ -321,7 +321,7 @@
       "unsupportedBefore": "El tipo de edificio",
       "unsupportedAfter": "no está en la base de datos TABULA. Tipos admitidos: {types}.",
       "noData": "No hay datos TABULA para este edificio: el servicio TABULA no tiene ninguna variante para él o no se pudo contactar.",
-      "borrowed": "{type} no tiene clases energéticas propias. Estas son de un {from} de la misma época y país y no reflejan un edificio no residencial, por lo que los valores pueden diferir: compruebe que se ajustan al edificio."
+      "borrowed": "{type} no tiene clases energéticas propias. Estas son las de un edificio del tipo {from} de la misma época y país y no reflejan un edificio no residencial, por lo que los valores pueden diferir: compruebe que se ajustan al edificio."
     },
     "section": {
       "occupancy": "Plantas y ocupación",

@@ -108,11 +108,19 @@ export interface Building3DViewProps {
   tour?: { run: boolean; onFinish: () => void };
 }
 
-export function Building3DView({
+/** The view inside its LanguageProvider, so every hook it calls, useBuildingSteps among them, reads the chosen language. */
+export function Building3DView(props: Building3DViewProps) {
+  return (
+    <LanguageProvider language={resolveLanguage(props.language)}>
+      <BuildingView {...props} />
+    </LanguageProvider>
+  );
+}
+
+function BuildingView({
   building, geometry, onExit, services, runContext, demandProfile, seriesCsvUrl, attribution, pv, technologies, defaultMode = 'simple', mode: hostMode, onModeChange, defaultTab, language: languageCode, tour,
 }: Building3DViewProps) {
   // No rating is shown here, so the annual demand estimate behind it is not run.
-  // This component sits above its own LanguageProvider, so it translates directly.
   const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
   // Every surface that takes PV is laid out, with its own product's module,
@@ -479,7 +487,6 @@ export function Building3DView({
   );
 
   return (
-    <LanguageProvider language={language}>
     <div lang={language} className="fixed inset-0 z-20 flex flex-col bg-muted">
       <ConfiguratorStyles />
 
@@ -795,6 +802,5 @@ export function Building3DView({
         onDiscard={() => onExit(toBuildingState('saved'))}
       />
     </div>
-    </LanguageProvider>
   );
 }
