@@ -4,6 +4,13 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.16.3] - 2026-11-01
+
+### Fixed
+
+- The Building tab shows its steps in the chosen language: step names, summaries with their number formats, the Next pointer and the Energy grade card title were in English in every other language.
+- The note on a non-residential building's borrowed energy grades names the residential type it borrows from without a wrong article in English, Spanish, French and Italian.
+
 ## [0.16.2] - 2026-11-01
 
 ### Changed
