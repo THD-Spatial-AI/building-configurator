@@ -321,7 +321,7 @@
       "unsupportedBefore": "Le type de bâtiment",
       "unsupportedAfter": "ne figure pas dans la base TABULA. Types pris en charge : {types}.",
       "noData": "Aucune donnée TABULA pour ce bâtiment : le service TABULA n'a aucune variante pour lui ou est injoignable.",
-      "borrowed": "{type} n'a pas de classes énergétiques propres. Celles-ci sont celles d'un {from} de même époque et de même pays, et ne reflètent pas un bâtiment non résidentiel ; les valeurs peuvent donc différer. Vérifiez qu'elles correspondent au bâtiment."
+      "borrowed": "{type} n'a pas de classes énergétiques propres. Celles-ci sont celles d'un bâtiment de type {from} de même époque et de même pays, et ne reflètent pas un bâtiment non résidentiel ; les valeurs peuvent donc différer. Vérifiez qu'elles correspondent au bâtiment."
     },
     "section": {
       "occupancy": "Étages et occupation",
