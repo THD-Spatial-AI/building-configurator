@@ -52,7 +52,7 @@ describe('buildSnapshotRows with storeys of their own height', () => {
     expect(row(lower, 'snapshot.row.volume').value).toBe('500 m³');
   });
 
-  it('leaves the storeys and room height to Storeys and occupancy, not the data editor', () => {
+  it('leaves the storeys and room height to Storeys and household, not the data editor', () => {
     const rows = buildSnapshotRows(general, {}, 0, 'en');
     expect(row(rows, 'snapshot.row.storeys').editKey).toBeUndefined();
     expect(row(rows, 'snapshot.row.roomHeight').editKey).toBeUndefined();

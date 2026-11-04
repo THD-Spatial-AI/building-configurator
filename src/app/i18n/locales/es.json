@@ -324,7 +324,7 @@
       "borrowed": "{type} no tiene clases energéticas propias. Estas son las de un edificio del tipo {from} de la misma época y país y no reflejan un edificio no residencial, por lo que los valores pueden diferir: compruebe que se ajustan al edificio."
     },
     "section": {
-      "occupancy": "Plantas y ocupación",
+      "occupancy": "Plantas y hogar",
       "comfort": "Calefacción y confort",
       "outputs": "Resultados a calcular",
       "equipment": "Electrodomésticos",
@@ -764,7 +764,7 @@
     "building": "Los datos básicos del edificio: tipo, antigüedad, país, tamaño y plantas. Use Editar para corregirlos.",
     "demand": "Cuánta energía necesita el edificio en un año, por uso. El gas para cocinar se muestra aparte y no entra en el total.",
     "insulation": "Lo bien que todo el edificio retiene el calor y la clase que resulta. Elija un nivel para ver qué cambiaría una rehabilitación. Actual: el edificio tal como está. Estándar: una rehabilitación común, como aislar la cubierta y cambiar las ventanas. Avanzada: una rehabilitación profunda, cercana a un edificio nuevo. Las superficies cambiadas una a una conservan sus valores.",
-    "occupancy": "Cuántas plantas tiene el edificio, cuáles se incluyen y cuántas viviendas hay en cada una. Más personas significa más agua caliente y más calor desde dentro.",
+    "occupancy": "Cuántas plantas tiene el edificio, cuáles se incluyen, cuántas viviendas hay en cada una, quién vive allí y cómo se cocina. Más personas significa más agua caliente y más calor desde dentro.",
     "comfort": "Cuándo y a qué temperatura se mantiene el edificio: la temperatura interior, si se baja de noche o cuando no hay nadie y si se cuenta el agua caliente.",
     "outputs": "Qué resultados obtiene para cada uso: un total anual, un perfil horario o ninguno.",
     "equipment": "Qué electrodomésticos tienen las viviendas. Determinan el consumo eléctrico; los no indicados usan valores típicos.",

@@ -324,7 +324,7 @@
       "borrowed": "{type} n'a pas de classes énergétiques propres. Celles-ci sont celles d'un bâtiment de type {from} de même époque et de même pays, et ne reflètent pas un bâtiment non résidentiel ; les valeurs peuvent donc différer. Vérifiez qu'elles correspondent au bâtiment."
     },
     "section": {
-      "occupancy": "Étages et occupation",
+      "occupancy": "Étages et ménage",
       "comfort": "Chauffage et confort",
       "outputs": "Résultats à calculer",
       "equipment": "Appareils",
@@ -764,7 +764,7 @@
     "building": "Les données de base du bâtiment : type, âge, pays, taille et étages. Utilisez Modifier pour les corriger.",
     "demand": "L'énergie dont le bâtiment a besoin en un an, par usage. Le gaz de cuisson est affiché à part et n'entre pas dans le total.",
     "insulation": "La capacité de tout le bâtiment à garder la chaleur, et la classe qui en découle. Choisissez un niveau pour voir ce qu'une rénovation changerait. Existant : le bâtiment tel qu'il est. Standard : une rénovation habituelle, comme isoler la toiture et changer les fenêtres. Avancée : une rénovation profonde, proche d'un bâtiment neuf. Les surfaces modifiées une à une gardent leurs valeurs.",
-    "occupancy": "Le nombre d'étages du bâtiment, ceux qui sont inclus et le nombre de logements sur chacun. Plus de personnes signifie plus d'eau chaude et plus de chaleur intérieure.",
+    "occupancy": "Le nombre d'étages du bâtiment, ceux qui sont inclus, le nombre de logements sur chacun, qui y vit et comment on y cuisine. Plus de personnes signifie plus d'eau chaude et plus de chaleur intérieure.",
     "comfort": "Quand et à quelle température le bâtiment est chauffé : la température intérieure, si elle baisse la nuit ou en absence, et si l'eau chaude est comptée.",
     "outputs": "Les résultats obtenus pour chaque usage : un total annuel, un profil horaire ou aucun.",
     "equipment": "Les appareils dont disposent les logements. Ils déterminent la consommation d'électricité ; ceux non renseignés prennent des valeurs typiques.",

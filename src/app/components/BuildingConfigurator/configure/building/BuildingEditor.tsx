@@ -1,4 +1,4 @@
-// The Building tab's sections as steps: energy grade, storeys and occupancy,
+// The Building tab's sections as steps: energy grade, storeys and household,
 // heating and comfort, and in Advanced the thermal and simulation settings.
 
 import type { ReactNode } from 'react';
@@ -162,15 +162,15 @@ interface BuildingStepsProps {
   insulation?: InsulationProps;
   /** Switches to Advanced; in Simple the last step then says what Advanced adds. */
   onShowAdvanced?: () => void;
-  /** The storeys, shown at the top of the storeys and occupancy step. */
+  /** The storeys, shown at the top of the storeys and household step. */
   storeys?: ReactNode;
   /** The 3D model's height to the eaves, in metres; storeys taller than it need attention. */
   modelHeight?: number;
-  /** Called when the storeys and occupancy step is left, to clear the storey selection. */
+  /** Called when the storeys and household step is left, to clear the storey selection. */
   onStoreysClosed?: () => void;
 }
 
-/** The facts a closed storeys and occupancy step shows. */
+/** The facts a closed storeys and household step shows. */
 export function occupancySummary(t: Translate, general: Record<string, any>): StepFact[] {
   const modelled = general.storeysModelled as number[] | null;
   const storeys = modelled

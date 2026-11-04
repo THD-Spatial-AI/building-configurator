@@ -323,7 +323,7 @@
       "borrowed": "{type} non ha classi energetiche proprie. Queste sono di un edificio di tipo {from} della stessa epoca e dello stesso paese e non rappresentano un edificio non residenziale, quindi i valori possono differire: verifica che corrispondano all'edificio."
     },
     "section": {
-      "occupancy": "Piani e occupazione",
+      "occupancy": "Piani e nucleo familiare",
       "comfort": "Riscaldamento e comfort",
       "outputs": "Risultati da calcolare",
       "equipment": "Elettrodomestici",
@@ -760,7 +760,7 @@
     "building": "I dati di base dell'edificio: tipo, età, paese, dimensione e piani. Usa Modifica per correggerli.",
     "demand": "Quanta energia serve all'edificio in un anno, per uso. Il gas per cucinare è mostrato a parte e non rientra nel totale.",
     "insulation": "Quanto l'intero edificio trattiene il calore e la classe che ne risulta. Scegli un livello per vedere cosa cambierebbe una riqualificazione. Attuale: l'edificio com'è. Standard: una riqualificazione comune, come isolare il tetto e cambiare le finestre. Avanzata: una riqualificazione profonda, vicina a un edificio nuovo. Le superfici cambiate una per una mantengono i loro valori.",
-    "occupancy": "Quanti piani ha l'edificio, quali sono inclusi e quante abitazioni ci sono su ciascuno. Più persone significano più acqua calda e più calore dall'interno.",
+    "occupancy": "Quanti piani ha l'edificio, quali sono inclusi, quante abitazioni ci sono su ciascuno, chi ci vive e come si cucina. Più persone significano più acqua calda e più calore dall'interno.",
     "comfort": "Quando e quanto è riscaldato l'edificio: la temperatura interna, se si abbassa di notte o quando non c'è nessuno e se l'acqua calda è inclusa.",
     "outputs": "Quali risultati ottieni per ogni uso: un totale annuo, un profilo orario o nessuno.",
     "equipment": "Quali elettrodomestici hanno le abitazioni. Determinano il consumo elettrico; quelli non impostati usano valori tipici.",

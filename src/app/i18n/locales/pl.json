@@ -337,7 +337,7 @@
       "borrowed": "{type} nie ma własnych klas energetycznych. Są to klasy budynku typu {from} z tego samego okresu i kraju i nie odzwierciedlają budynku niemieszkalnego, więc wartości mogą się różnić: sprawdź, czy pasują do budynku."
     },
     "section": {
-      "occupancy": "Kondygnacje i użytkowanie",
+      "occupancy": "Kondygnacje i gospodarstwo domowe",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",
       "equipment": "Urządzenia",
@@ -780,7 +780,7 @@
     "building": "Podstawowe dane budynku: typ, wiek, kraj, wielkość i kondygnacje. Użyj Edytuj, aby je poprawić.",
     "demand": "Ile energii budynek potrzebuje w ciągu roku, według zastosowania. Gaz do gotowania jest pokazany osobno i nie wchodzi do sumy.",
     "insulation": "Jak dobrze cały budynek zatrzymuje ciepło i jaka klasa z tego wynika. Wybierz poziom, aby zobaczyć, co zmieniłaby modernizacja. Obecny: budynek taki, jaki jest. Typowa: zwykła modernizacja, np. ocieplenie dachu i nowe okna. Zaawansowana: głęboka modernizacja, bliska nowemu budynkowi. Powierzchnie zmienione pojedynczo zachowują swoje wartości.",
-    "occupancy": "Ile kondygnacji ma budynek, które z nich są uwzględnione i ile mieszkań jest na każdej. Więcej osób to więcej ciepłej wody i więcej ciepła od wewnątrz.",
+    "occupancy": "Ile kondygnacji ma budynek, które z nich są uwzględnione, ile mieszkań jest na każdej, kto w nich mieszka i na czym się gotuje. Więcej osób to więcej ciepłej wody i więcej ciepła od wewnątrz.",
     "comfort": "Kiedy i jak ciepło utrzymuje się budynek: temperatura wewnątrz, czy jest obniżana w nocy lub pod nieobecność i czy liczy się ciepła woda.",
     "outputs": "Jakie wyniki otrzymujesz dla każdego zastosowania: sumę roczną, profil godzinowy albo żadne.",
     "equipment": "Jakie urządzenia mają mieszkania. Decydują o zużyciu prądu; nieustawione urządzenia przyjmują typowe wartości.",
