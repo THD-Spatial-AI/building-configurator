@@ -337,7 +337,7 @@
       "borrowed": "{type} nemá vlastní energetické třídy. Tyto patří budově typu {from} stejného stáří a země a neodrážejí nebytovou budovu, takže se hodnoty mohou lišit: ověřte, že odpovídají budově."
     },
     "section": {
-      "occupancy": "Podlaží a obsazenost",
+      "occupancy": "Podlaží a domácnost",
       "comfort": "Vytápění a komfort",
       "outputs": "Počítané výsledky",
       "equipment": "Spotřebiče",
@@ -781,7 +781,7 @@
     "building": "Základní údaje o budově: typ, stáří, země, velikost a podlaží. Upravíte je tlačítkem Upravit.",
     "demand": "Kolik energie budova za rok potřebuje, podle použití. Plyn na vaření je uveden zvlášť a do součtu se nepočítá.",
     "insulation": "Jak dobře celá budova drží teplo a jaká třída z toho vychází. Vyberte úroveň a uvidíte, co by renovace změnila. Současný: budova, jak je. Běžná: obvyklá renovace, např. zateplení střechy a nová okna. Pokročilá: hloubková renovace, blízká novostavbě. Plochy změněné jednotlivě si ponechají své hodnoty.",
-    "occupancy": "Kolik podlaží budova má, která z nich jsou zahrnuta a kolik bytů je na každém. Více lidí znamená více teplé vody a více tepla zevnitř.",
+    "occupancy": "Kolik podlaží budova má, která z nich jsou zahrnuta, kolik bytů je na každém, kdo v nich bydlí a na čem se vaří. Více lidí znamená více teplé vody a více tepla zevnitř.",
     "comfort": "Kdy a jak teplá se budova udržuje: vnitřní teplota, zda se v noci nebo při nepřítomnosti snižuje a zda se počítá teplá voda.",
     "outputs": "Jaké výsledky dostanete pro každé použití: roční součet, hodinový profil, nebo žádné.",
     "equipment": "Jaké spotřebiče domácnosti mají. Určují spotřebu elektřiny; nenastavené spotřebiče mají typické hodnoty.",

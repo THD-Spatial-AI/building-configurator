@@ -21,7 +21,7 @@ describe('Building3DView', () => {
 
   it('shows the Building tab steps in the chosen language', () => {
     const html = renderToStaticMarkup(<Building3DView building={building} geometry={null} services={services} onExit={() => {}} language="de" />);
-    expect(html).toContain('Geschosse und Belegung');
-    expect(html).not.toContain('Storeys and occupancy');
+    expect(html).toContain('Geschosse und Haushalt');
+    expect(html).not.toContain('Storeys and household');
   });
 });

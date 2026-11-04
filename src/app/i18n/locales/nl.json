@@ -323,7 +323,7 @@
       "borrowed": "{type} heeft geen eigen energieklassen. Deze zijn van een {from} van dezelfde leeftijd en hetzelfde land en geven geen niet-woongebouw weer, dus de waarden kunnen afwijken: controleer of ze bij het gebouw passen."
     },
     "section": {
-      "occupancy": "Verdiepingen en bewoning",
+      "occupancy": "Verdiepingen en huishouden",
       "comfort": "Verwarming en comfort",
       "outputs": "Te berekenen resultaten",
       "equipment": "Apparaten",
@@ -761,7 +761,7 @@
     "building": "De basisgegevens van het gebouw: type, leeftijd, land, grootte en verdiepingen. Met Bewerken past u ze aan.",
     "demand": "Hoeveel energie het gebouw per jaar nodig heeft, per gebruik. Kookgas staat apart en telt niet mee in het totaal.",
     "insulation": "Hoe goed het hele gebouw warmte vasthoudt, en de klasse die daaruit volgt. Kies een niveau om te zien wat renovatie zou veranderen. Huidig: het gebouw zoals het is. Standaard: een gebruikelijke renovatie, zoals dakisolatie en nieuwe ramen. Vergaand: een ingrijpende renovatie, dicht bij een nieuw gebouw. Vlakken die u een voor een wijzigde, houden hun eigen waarden.",
-    "occupancy": "Hoeveel verdiepingen het gebouw heeft, welke meetellen en hoeveel woningen er op elke liggen. Meer mensen betekent meer warm water en meer warmte van binnen.",
+    "occupancy": "Hoeveel verdiepingen het gebouw heeft, welke meetellen, hoeveel woningen er op elke liggen, wie er woont en waarop gekookt wordt. Meer mensen betekent meer warm water en meer warmte van binnen.",
     "comfort": "Wanneer en hoe warm het gebouw wordt gehouden: de binnentemperatuur, of die 's nachts of bij afwezigheid lager gaat en of warm water meetelt.",
     "outputs": "Welke resultaten u per gebruik krijgt: een jaartotaal, een uurprofiel of geen.",
     "equipment": "Welke apparaten de woningen hebben. Ze bepalen het stroomverbruik; niet ingestelde apparaten krijgen gangbare waarden.",

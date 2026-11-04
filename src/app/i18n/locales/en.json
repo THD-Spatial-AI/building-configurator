@@ -323,7 +323,7 @@
       "borrowed": "{type} has no energy grades of its own. Those shown belong to the {from} type of the same age and country and do not reflect a non-residential building, so the values can differ: check that they match the building."
     },
     "section": {
-      "occupancy": "Storeys and occupancy",
+      "occupancy": "Storeys and household",
       "comfort": "Heating and comfort",
       "outputs": "Results to compute",
       "equipment": "Appliances",
@@ -761,7 +761,7 @@
     "building": "The basic facts about the building: its type, age, country, size and storeys. Use Edit to correct them.",
     "demand": "How much energy the building needs in a year, split by use. Gas for cooking is shown on its own and is not in the total.",
     "insulation": "How well the whole building keeps heat in, and the grade that gives it. Choose a level to see what refurbishment would change. Existing: the building as it is. Usual: a common refurbishment, such as roof insulation and new windows. Advanced: a deep refurbishment, close to a new building. Surfaces you changed one by one keep their own values.",
-    "occupancy": "How many storeys the building has, which of them are included, and how many homes are on each. More people means more hot water and more warmth from inside.",
+    "occupancy": "How many storeys the building has, which of them are included, how many homes are on each, who lives there and how they cook. More people means more hot water and more warmth from inside.",
     "comfort": "When and how warm the building is kept: the indoor temperature, whether it is turned down at night or when nobody is home, and whether hot water is counted.",
     "outputs": "Which results you get for each use: a yearly total, an hourly profile, or none.",
     "equipment": "Which appliances the homes have. They decide the electricity use; appliances left unset use typical values.",
