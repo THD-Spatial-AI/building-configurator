@@ -8,7 +8,7 @@
 import { cn } from '@/lib/utils';
 import { RotateCcw } from '@/app/components/icons';
 import { useFormatNumber, useT } from '../../i18n';
-import { DecimalInput, InfoTip, NumberInput, Switch, TEXT_INPUT } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, FIELD_ACTION, InfoTip, NumberInput, Switch, TEXT_INPUT } from '../BuildingConfigurator/shared/ui';
 import {
   MIN_STOREY_HEIGHT_M, heightLimits, missingDwellings, storeyHeightList, storeysTooTall,
   type StoreyDwellings, type StoreyHeights,
@@ -296,7 +296,7 @@ export function StoreysModelled({
               <button
                 type="button"
                 onClick={() => attic.onFloorAreaChange(attic.measuredArea ?? null)}
-                className="cursor-pointer self-end text-[11px] font-medium text-primary hover:underline"
+                className={cn(FIELD_ACTION, 'self-end')}
               >
                 {t('storeys.attic.useMeasured', { area: format(attic.measuredArea, 1) })}
               </button>
