@@ -214,7 +214,7 @@ export function StoreysModelled({
                         label={`${name}: ${t('storeys.table.height')}`}
                         hideLabel
                         value={own ?? ''}
-                        placeholder={String(roomHeight)}
+                        placeholder={format(roomHeight)}
                         onChange={(next) => setHeight(storey, Math.max(MIN_STOREY_HEIGHT_M, next))}
                         unit=""
                         min={MIN_STOREY_HEIGHT_M}

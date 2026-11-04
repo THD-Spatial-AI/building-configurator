@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { LanguageProvider, type Language } from '../../i18n';
 import { StoreysModelled, pickInSelection, pickWithAttic, toggleSelected, withStoreys } from './StoreysModelled';
 
 /** The input named `label`, as rendered, or '' when there is none. */
@@ -11,20 +12,22 @@ const switchState = (html: string, label: string) => {
   return m ? m[1] === 'true' : null;
 };
 
-const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>) => renderToStaticMarkup(
-  <StoreysModelled
-    storeys={3}
-    roomHeight={2.5}
-    heights={{ values: {}, onChange: () => {} }}
-    onStoreysChange={() => {}}
-    onRoomHeightChange={() => {}}
-    modelled={[1, 2]}
-    selected={[]}
-    onSelect={() => {}}
-    floorAreaPerStorey={80}
-    onChange={() => {}}
-    {...props}
-  />,
+const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>, language: Language = 'en') => renderToStaticMarkup(
+  <LanguageProvider language={language}>
+    <StoreysModelled
+      storeys={3}
+      roomHeight={2.5}
+      heights={{ values: {}, onChange: () => {} }}
+      onStoreysChange={() => {}}
+      onRoomHeightChange={() => {}}
+      modelled={[1, 2]}
+      selected={[]}
+      onSelect={() => {}}
+      floorAreaPerStorey={80}
+      onChange={() => {}}
+      {...props}
+    />
+  </LanguageProvider>,
 );
 
 describe('StoreysModelled', () => {
@@ -54,6 +57,10 @@ describe('StoreysModelled', () => {
     expect(input(html, 'Storey 1: Height')).toContain('value="3.2"');
     expect(html).toContain('aria-label="Storey 1: Use room height"');
     expect(html).not.toContain('aria-label="Storey 0: Use room height"');
+  });
+
+  it('writes the room height default with the language\'s decimal separator', () => {
+    expect(render({}, 'es')).toContain('placeholder="2,5"');
   });
 
   it('shows every storey in a row, in or out of the model, with the floor area modelled', () => {
