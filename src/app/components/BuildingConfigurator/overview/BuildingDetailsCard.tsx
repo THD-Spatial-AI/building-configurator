@@ -177,7 +177,8 @@ export function BuildingDetailsCard({
   ];
 
   return (
-    <div className={cn(CARD, 'shrink-0')}>
+    // Grows to fill the scrolling panel, so Back and Next rest at its bottom however short the step.
+    <div className={cn(CARD, 'flex shrink-0 grow flex-col')}>
       {/* Sticky so the tabs stay in reach while either tab scrolls; its fixed height is where the step bar sticks beneath it. */}
       <div className="sticky top-0 z-20 flex h-[60px] items-center border-b border-border bg-card px-4">
         <div role="tablist" className="inline-flex h-9 items-center rounded-md bg-muted p-1 text-muted-foreground">
@@ -203,7 +204,7 @@ export function BuildingDetailsCard({
       {activeTab === 'technology' ? (
         <div className="p-4">{technologySlot}</div>
       ) : (
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-1 flex-col gap-3 px-4 pt-4">
           {overviewSlot}
           <StepPanel steps={allSteps} active={step} onActive={setStep} stickyTop="top-[60px]" openFields={requestStep} />
         </div>
