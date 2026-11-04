@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TOPICS } from '@/app/config/topics';
 import { StepPanel, StepSummary, type Step } from './StepPanel';
-import { comfortSummary, energyGradeStatus, occupancySummary, storeysStatus } from '../configure/building/BuildingEditor';
+import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, storeysStatus } from '../configure/building/BuildingEditor';
 import { translate } from '@/app/i18n';
 import type { InsulationProps } from '../configure/building/insulationSection';
 import { missingDwellings } from '@/app/lib/storeys';
@@ -52,6 +52,12 @@ describe('StepPanel', () => {
 
 describe('step status', () => {
   const insulation = { levels: [{ number: 1 }], classes: { perM2: { 1: 33 }, comparing: false, onCompare: () => {} } } as unknown as InsulationProps;
+
+  it('marks heating and comfort for attention while the cooling setpoint is not above the heating one', () => {
+    expect(comfortStatus({ comfortT_lb: 20, comfortT_ub: 26 })).toBe('complete');
+    expect(comfortStatus({ comfortT_lb: 18, comfortT_ub: 16.5 })).toBe('attention');
+    expect(comfortStatus({ comfortT_lb: 18, comfortT_ub: 18 })).toBe('attention');
+  });
 
   it('marks the energy grade an error once every grade failed, and for attention without levels', () => {
     expect(energyGradeStatus(insulation)).toBe('complete');

@@ -154,6 +154,11 @@ export function storeysStatus(general: Record<string, any>, modelHeight?: number
   return missingDwellings(general.storeysModelled, general.storeyDwellings ?? {}).length > 0 ? 'incomplete' : 'complete';
 }
 
+/** Attention while the cooling setpoint is not above the heating setpoint, which stops a run. */
+export function comfortStatus(general: Record<string, any>): StepStatus {
+  return general.comfortT_ub <= general.comfortT_lb ? 'attention' : 'complete';
+}
+
 interface BuildingStepsProps {
   general: Record<string, any>;
   setGen: (key: string, value: any) => void;
@@ -264,7 +269,7 @@ export function useBuildingSteps({
     key: 'comfort',
     label: SECTION_LABELS.comfort(t),
     topic: SECTION_TOPICS.comfort,
-    status: 'complete',
+    status: comfortStatus(general),
     summary: comfortSummary(t, general),
     content: <>{card('comfort')}{advancedPointer}</>,
   });
