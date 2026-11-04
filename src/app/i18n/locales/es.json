@@ -357,7 +357,7 @@
     },
     "heating": {
       "label": "Consigna de calefacción",
-      "tip": "Temperatura interior mínima que mantiene la calefacción."
+      "tip": "Temperatura interior mínima que mantiene la calefacción. Por ejemplo, con 20 °C la calefacción se enciende cuando las estancias bajarían de 20 °C. Cada grado menos ahorra energía de calefacción."
     },
     "setback": {
       "label": "Reducirla cuando",
@@ -365,7 +365,7 @@
     },
     "cooling": {
       "label": "Consigna de refrigeración",
-      "tip": "Temperatura interior máxima que mantiene la refrigeración.",
+      "tip": "Temperatura interior máxima que mantiene la refrigeración. Por ejemplo, con 26 °C la refrigeración se enciende cuando las estancias superarían los 26 °C. Entre las dos consignas no funciona ninguna, así que esta debe ser más alta.",
       "inverted": "Debe ser mayor que la consigna de calefacción."
     },
     "air": {

@@ -370,7 +370,7 @@
     },
     "heating": {
       "label": "Temperatura zadana ogrzewania",
-      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie."
+      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie. Na przykład przy 20 °C ogrzewanie włącza się, gdy temperatura w pomieszczeniach spadłaby poniżej 20 °C. Każdy stopień mniej oszczędza energię na ogrzewanie."
     },
     "setback": {
       "label": "Obniżaj, gdy",
@@ -378,7 +378,7 @@
     },
     "cooling": {
       "label": "Temperatura zadana chłodzenia",
-      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie.",
+      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie. Na przykład przy 26 °C chłodzenie włącza się, gdy temperatura w pomieszczeniach przekroczyłaby 26 °C. Między dwiema nastawami nie działa żadne z nich, więc ta musi być wyższa.",
       "inverted": "Ustaw ją powyżej temperatury zadanej ogrzewania."
     },
     "air": {
