@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "Dieser Gebäudetyp benötigt die Anzahl der Wohneinheiten. Legen Sie sie unter Belegung fest, bevor Sie eine Simulation starten.",
-      "runFailed": "Simulation fehlgeschlagen: Das EnerPlanET-Backend ist nicht erreichbar oder hat die Anfrage abgelehnt. Details in der Browserkonsole.",
+      "runFailed": "Die Simulation konnte nicht ausgeführt werden. Versuchen Sie es gleich noch einmal. Schlägt sie erneut fehl, prüfen Sie die Werte des Gebäudes.",
+      "coolingInverted": "Der Kühlsollwert muss über dem Heizsollwert liegen. Senken Sie unter Heizung und Komfort den Heizsollwert oder erhöhen Sie den Kühlsollwert (Erweitert) und starten Sie dann erneut.",
       "exportFailed": "Export fehlgeschlagen: {reason}",
       "importFailed": "Datei konnte nicht gelesen werden: {reason}. Es muss ein gültiges BuEM GeoJSON, ein Export des alten Konfigurators oder eine EnerPlanET config.json sein.",
       "pvFailed": "Die PV-Berechnung ist fehlgeschlagen, daher wird keine PV-Erzeugung angezeigt. Der Energiebedarf oben ist aktuell.",

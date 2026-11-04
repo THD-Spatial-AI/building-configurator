@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LOOKUP_DELAY_MS, scheduleLookup, withEdits } from './useBuildingModel';
+import { LOOKUP_DELAY_MS, runBlocker, scheduleLookup, withEdits } from './useBuildingModel';
 import { DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingElement } from './configure/model/buildingElements';
 import type { BuildingState } from '../../lib/buemAdapter';
@@ -85,5 +85,28 @@ describe('scheduleLookup', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe('runBlocker', () => {
+  const general = (over: Record<string, unknown>) => ({ ...DEFAULT_GENERAL, buildingType: 'Single-family House', ...over });
+
+  it('lets a building with valid values run', () => {
+    expect(runBlocker(general({ comfortT_lb: 20, comfortT_ub: 26 }))).toBeNull();
+  });
+
+  it('stops a run while the cooling setpoint is not above the heating setpoint', () => {
+    expect(runBlocker(general({ comfortT_lb: 18, comfortT_ub: 16.5 }))).toBe('model.error.coolingInverted');
+    expect(runBlocker(general({ comfortT_lb: 18, comfortT_ub: 18 }))).toBe('model.error.coolingInverted');
+  });
+
+  it('stops a run while a multi-family house has no dwellings', () => {
+    expect(runBlocker(general({ buildingType: 'Multi-family House', residential_units: null }))).toBe('model.error.dwellingsRequired');
+  });
+
+  it('stops a run while a modelled storey has no dwellings', () => {
+    expect(runBlocker(general({
+      buildingType: 'Multi-family House', residential_units: 6, storeysModelled: [1, 2], storeyDwellings: { 1: 3 },
+    }))).toBe('model.error.dwellingsModelledRequired');
   });
 });
