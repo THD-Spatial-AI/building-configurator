@@ -210,6 +210,13 @@ export function StoreysModelled({
                   </td>
                   <td className="px-1 py-1">
                     <span className="flex items-center gap-1">
+                      {/* Always in the row, hidden until needed, so the input's arrows stay under the pointer. */}
+                      <button type="button" onClick={() => setHeight(storey, null)} aria-label={`${name}: ${t('storeys.useRoomHeight')}`}
+                        disabled={own === undefined}
+                        title={t('storeys.useRoomHeight')}
+                        className={cn('shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground', own === undefined && 'invisible')}>
+                        <RotateCcw className="size-3" />
+                      </button>
                       <NumberInput
                         label={`${name}: ${t('storeys.table.height')}`}
                         hideLabel
@@ -222,12 +229,6 @@ export function StoreysModelled({
                         maxReason={limits ? t('storeys.limit.height', { height: eaves }) : undefined}
                         step={0.1}
                       />
-                      {own !== undefined && (
-                        <button type="button" onClick={() => setHeight(storey, null)} aria-label={`${name}: ${t('storeys.useRoomHeight')}`}
-                          title={t('storeys.useRoomHeight')} className="shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground">
-                          <RotateCcw className="size-3" />
-                        </button>
-                      )}
                     </span>
                   </td>
                   {dwellings && (
