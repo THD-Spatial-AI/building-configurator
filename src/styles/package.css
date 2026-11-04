@@ -145,6 +145,11 @@
     border-color: var(--ring);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
   }
+  /* The field a message asks the user to fix; aria-invalid is set on the input inside. */
+  .cfg-input-wrap:has([aria-invalid="true"]) {
+    border-color: var(--destructive);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--destructive) 40%, transparent);
+  }
 
   input.cfg-number {
     flex: 1;

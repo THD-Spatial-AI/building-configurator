@@ -20,6 +20,12 @@ describe('SurfaceQuickEditor', () => {
     expect(html).not.toContain('° N');
   });
 
+  it('marks the area while it has none', () => {
+    const area = (html: string) => /<input[^>]*aria-label="Area[^"]*"[^>]*>/.exec(html)?.[0] ?? '';
+    expect(area(render({ ...flat, area: 0 }))).toContain('aria-invalid="true"');
+    expect(area(render(flat))).not.toContain('aria-invalid');
+  });
+
   it('gives a pitched roof its facing dial in Advanced', () => {
     expect(render(pitched)).not.toContain('>Flat<');
     expect(render(pitched)).toContain('S-facing');

@@ -750,7 +750,7 @@
     "select": {
       "one": "Podlaží {number}"
     },
-    "dwellingsMissing": "Uveďte počet bytů na každém zahrnutém podlaží. Chybí: podlaží {storeys}.",
+    "dwellingsMissing": "Když je podlaží vynecháno, uveďte byty na každém podlaží, které v modelu zůstává, aby se počítali jen lidé v této části. Chybí: podlaží {storeys}.",
     "inModel": "V modelu",
     "roomHeightTip": "Výška každého podlaží, od podlahy k podlaze. Podlaží s vlastní výškou si ji ponechá.",
     "useRoomHeight": "Použít výšku místnosti",
@@ -771,7 +771,8 @@
     "table": {
       "storey": "Podlaží",
       "height": "Výška",
-      "dwellings": "Byty"
+      "dwellings": "Byty",
+      "optional": "Nepovinné"
     }
   },
   "help": {

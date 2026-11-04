@@ -85,9 +85,12 @@ export function OccupancySection({ general, setGen, mode = 'simple' }: SectionPr
               {t('household.dwellings.label')}
             </FieldLabel>
             <NumberInput
+              label={t('household.dwellings.label')}
+              hideLabel
               value={general.residential_units ?? ''}
               onChange={(v) => setGen('residential_units', Math.max(1, Math.round(v)))}
               unit="" min={1} step={1} integer
+              invalid={!general.residential_units}
             />
             {!general.residential_units && (
               <p className="mt-1 text-[10px] text-amber-700">

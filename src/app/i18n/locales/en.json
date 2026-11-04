@@ -730,7 +730,7 @@
     "select": {
       "one": "Storey {number}"
     },
-    "dwellingsMissing": "Give the number of homes on every included storey. Missing: storey {storeys}.",
+    "dwellingsMissing": "With a storey left out, give the homes on each storey still in the model, so only the people in that part are counted. Missing: storey {storeys}.",
     "inModel": "In the model",
     "roomHeightTip": "The height of each storey, floor to floor. A storey given its own height keeps it.",
     "useRoomHeight": "Use room height",
@@ -751,7 +751,8 @@
     "table": {
       "storey": "Storey",
       "height": "Height",
-      "dwellings": "Dwellings"
+      "dwellings": "Dwellings",
+      "optional": "Optional"
     }
   },
   "help": {

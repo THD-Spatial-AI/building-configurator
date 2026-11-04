@@ -95,6 +95,7 @@ function CoolingSetpoint({ general, setGen }: FieldProps) {
         onChange={(v) => setGen('comfortT_ub', v)}
         unit="°C" min={15} max={35} step={0.5}
         tip={t('comfort.cooling.tip')}
+        invalid={inverted}
       />
       {inverted && (
         <p className="mt-1 text-[10px] text-amber-700">{t('comfort.cooling.inverted')}</p>

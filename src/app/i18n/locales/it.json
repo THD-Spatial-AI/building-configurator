@@ -730,7 +730,7 @@
     "select": {
       "one": "Piano {number}"
     },
-    "dwellingsMissing": "Indica il numero di abitazioni su ogni piano incluso. Manca: piano {storeys}.",
+    "dwellingsMissing": "Con un piano escluso, indica le abitazioni di ogni piano rimasto nel modello, così si contano solo le persone di quella parte. Manca: piano {storeys}.",
     "inModel": "Nel modello",
     "roomHeightTip": "L'altezza di ogni piano, da pavimento a pavimento. Un piano con un'altezza propria la mantiene.",
     "useRoomHeight": "Usa l'altezza dei locali",
@@ -751,7 +751,8 @@
     "table": {
       "storey": "Piano",
       "height": "Altezza",
-      "dwellings": "Abitazioni"
+      "dwellings": "Abitazioni",
+      "optional": "Facoltativo"
     }
   },
   "help": {
