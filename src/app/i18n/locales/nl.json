@@ -730,7 +730,7 @@
     "select": {
       "one": "Verdieping {number}"
     },
-    "dwellingsMissing": "Geef het aantal woningen op elke meegetelde verdieping. Ontbreekt: verdieping {storeys}.",
+    "dwellingsMissing": "Met een verdieping weggelaten: geef de woningen op elke verdieping die in het model blijft, zodat alleen de mensen in dat deel meetellen. Ontbreekt: verdieping {storeys}.",
     "inModel": "In het model",
     "roomHeightTip": "De hoogte van elke verdieping, van vloer tot vloer. Een verdieping met een eigen hoogte houdt die.",
     "useRoomHeight": "Kamerhoogte gebruiken",
@@ -751,7 +751,8 @@
     "table": {
       "storey": "Verdieping",
       "height": "Hoogte",
-      "dwellings": "Woningen"
+      "dwellings": "Woningen",
+      "optional": "Optioneel"
     }
   },
   "help": {

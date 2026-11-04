@@ -750,7 +750,7 @@
     "select": {
       "one": "Kondygnacja {number}"
     },
-    "dwellingsMissing": "Podaj liczbę mieszkań na każdej uwzględnionej kondygnacji. Brakuje: kondygnacja {storeys}.",
+    "dwellingsMissing": "Gdy kondygnacja jest pominięta, podaj liczbę mieszkań na każdej kondygnacji pozostałej w modelu, aby liczyć tylko osoby w tej części. Brakuje: kondygnacja {storeys}.",
     "inModel": "W modelu",
     "roomHeightTip": "Wysokość każdej kondygnacji, od podłogi do podłogi. Kondygnacja z własną wysokością ją zachowuje.",
     "useRoomHeight": "Użyj wysokości pomieszczenia",
@@ -771,7 +771,8 @@
     "table": {
       "storey": "Kondygnacja",
       "height": "Wysokość",
-      "dwellings": "Mieszkania"
+      "dwellings": "Mieszkania",
+      "optional": "Opcjonalnie"
     }
   },
   "help": {

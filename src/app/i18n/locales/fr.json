@@ -734,7 +734,7 @@
     "select": {
       "one": "Étage {number}"
     },
-    "dwellingsMissing": "Indiquez le nombre de logements sur chaque étage inclus. Manquant : étage {storeys}.",
+    "dwellingsMissing": "Avec un étage exclu, indiquez les logements de chaque étage resté dans le modèle, afin de ne compter que les personnes de cette partie. Manquant : étage {storeys}.",
     "inModel": "Dans le modèle",
     "roomHeightTip": "La hauteur de chaque étage, de plancher à plancher. Un étage doté de sa propre hauteur la conserve.",
     "useRoomHeight": "Utiliser la hauteur sous plafond",
@@ -755,7 +755,8 @@
     "table": {
       "storey": "Étage",
       "height": "Hauteur",
-      "dwellings": "Logements"
+      "dwellings": "Logements",
+      "optional": "Facultatif"
     }
   },
   "help": {

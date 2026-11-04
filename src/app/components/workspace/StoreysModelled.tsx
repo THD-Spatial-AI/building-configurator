@@ -145,6 +145,7 @@ export function StoreysModelled({
             unit=""
             step={1}
             integer
+            invalid={tooTall}
           />
           <NumberInput
             label={t('snapshot.row.roomHeight')}
@@ -156,6 +157,7 @@ export function StoreysModelled({
             max={limits?.maxRoomHeight}
             maxReason={limits ? t('storeys.limit.height', { height: eaves }) : undefined}
             step={0.1}
+            invalid={tooTall}
           />
         </div>
         {tooTall && (
@@ -233,7 +235,9 @@ export function StoreysModelled({
                       <DecimalInput
                         integer min={1}
                         value={dwellings.values[storey] ?? null}
+                        placeholder={modelled ? undefined : t('storeys.table.optional')}
                         aria-label={`${name}: ${t('storeys.table.dwellings')}`}
+                        aria-invalid={missing.includes(storey) || undefined}
                         onChange={(count) => setDwellings(storey, count)}
                         className={`${TEXT_INPUT} w-full text-right`}
                       />

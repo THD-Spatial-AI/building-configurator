@@ -22,6 +22,20 @@ describe('the region code', () => {
   });
 });
 
+describe('the dwellings of a multi-family house', () => {
+  const field = (residential_units: number | null) => {
+    const html = renderToStaticMarkup(
+      <OccupancySection general={{ ...DEFAULT_GENERAL, buildingType: 'Multi-family House', residential_units }} setGen={() => {}} />,
+    );
+    return /<input[^>]*aria-label="Dwellings"[^>]*>/.exec(html)?.[0] ?? '';
+  };
+
+  it('is marked while it is empty, as it is required', () => {
+    expect(field(null)).toContain('aria-invalid="true"');
+    expect(field(6)).not.toContain('aria-invalid');
+  });
+});
+
 describe('occupants per dwelling', () => {
   const field = (num_persons: number | null) => renderToStaticMarkup(
     <OccupancySection general={{ ...DEFAULT_GENERAL, buildingType: 'Single-family House', num_persons }} setGen={() => {}} />,

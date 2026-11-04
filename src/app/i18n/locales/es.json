@@ -734,7 +734,7 @@
     "select": {
       "one": "Planta {number}"
     },
-    "dwellingsMissing": "Indique el número de viviendas de cada planta incluida. Falta: planta {storeys}.",
+    "dwellingsMissing": "Con una planta excluida, indique las viviendas de cada planta que sigue en el modelo, para contar solo a las personas de esa parte. Falta: planta {storeys}.",
     "inModel": "En el modelo",
     "roomHeightTip": "La altura de cada planta, de suelo a suelo. Una planta con altura propia la conserva.",
     "useRoomHeight": "Usar la altura de sala",
@@ -755,7 +755,8 @@
     "table": {
       "storey": "Planta",
       "height": "Altura",
-      "dwellings": "Viviendas"
+      "dwellings": "Viviendas",
+      "optional": "Opcional"
     }
   },
   "help": {

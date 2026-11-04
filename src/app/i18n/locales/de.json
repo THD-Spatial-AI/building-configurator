@@ -730,7 +730,7 @@
     "select": {
       "one": "Geschoss {number}"
     },
-    "dwellingsMissing": "Geben Sie die Zahl der Wohnungen auf jedem einbezogenen Geschoss an. Es fehlt: Geschoss {storeys}.",
+    "dwellingsMissing": "Ist ein Geschoss ausgelassen, geben Sie die Wohnungen auf jedem Geschoss im Modell an, damit nur die Menschen in diesem Teil zählen. Es fehlt: Geschoss {storeys}.",
     "inModel": "Im Modell",
     "roomHeightTip": "Die Höhe jedes Geschosses, von Boden zu Boden. Ein Geschoss mit eigener Höhe behält diese.",
     "useRoomHeight": "Raumhöhe verwenden",
@@ -751,7 +751,8 @@
     "table": {
       "storey": "Geschoss",
       "height": "Höhe",
-      "dwellings": "Wohnungen"
+      "dwellings": "Wohnungen",
+      "optional": "Optional"
     }
   },
   "help": {

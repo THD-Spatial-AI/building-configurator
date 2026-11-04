@@ -271,11 +271,13 @@ interface NumberInputProps {
   hideLabel?: boolean;
   /** Where the tip's icon links to, such as the field's default in the documentation. */
   tipHref?: string;
+  /** Marks the field as the one to fix, while a message beside it says what is missing or wrong. */
+  invalid?: boolean;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false, tipHref,
+  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false, tipHref, invalid = false,
 }: NumberInputProps) {
   const [reasonShown, setReasonShown] = useState(false);
   const current = value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0;
@@ -299,6 +301,7 @@ export function NumberInput({
           readOnly={readOnly}
           placeholder={placeholder}
           aria-label={label}
+          aria-invalid={invalid || undefined}
           onChange={(v) => { if (v !== null) onChange?.(v); }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
         />
@@ -883,7 +886,7 @@ export function SearchField({ label, value, onChange }: SearchFieldProps) {
 export const DROPDOWN_LIST = 'flex max-h-[19.5rem] flex-col gap-1.5 overflow-y-auto overscroll-contain';
 
 /** A text or number field on its own, as EnerPlanET's Input (libs/ui input.tsx). */
-export const TEXT_INPUT = 'h-9 rounded-md border border-border bg-background px-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50';
+export const TEXT_INPUT = 'h-9 rounded-md border border-border bg-background px-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-destructive/40';
 
 /** A choosable row in a Dropdown list, as EnerPlanET's technology rows. */
 export const OPTION_ROW = 'rounded-lg border border-border bg-card px-2.5 py-2 shadow-xs transition-all hover:bg-muted/50 hover:shadow-md';

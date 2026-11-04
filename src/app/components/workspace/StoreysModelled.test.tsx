@@ -79,7 +79,26 @@ describe('StoreysModelled', () => {
   });
 
   it('names the modelled storeys that still need a dwelling count', () => {
-    expect(render({ dwellings: { values: { 1: 2 }, onChange: () => {} } })).toContain('Missing: storey 1.');
+    expect(render({ dwellings: { values: { 1: 2 }, onChange: () => {} } })).toContain('so only the people in that part are counted. Missing: storey 1.');
+  });
+
+  it('marks the dwelling cells still missing a count, and only those', () => {
+    const html = render({ dwellings: { values: { 1: 2 }, onChange: () => {} } });
+    expect(input(html, 'Storey 1: Dwellings')).toContain('aria-invalid="true"');
+    expect(input(html, 'Storey 0: Dwellings')).not.toContain('aria-invalid');
+  });
+
+  it('shows the dwellings as optional while every storey is in the model', () => {
+    const html = render({ modelled: null, dwellings: { values: {}, onChange: () => {} } });
+    expect(input(html, 'Storey 0: Dwellings')).toContain('placeholder="Optional"');
+    expect(input(html, 'Storey 0: Dwellings')).not.toContain('aria-invalid');
+  });
+
+  it('marks the storey count and room height while the storeys are taller than the model', () => {
+    const html = render({ modelHeight: 6, heights: { values: { 3: 3 }, onChange: () => {} } });
+    expect(input(html, 'Storeys')).toContain('aria-invalid="true"');
+    expect(input(html, 'Room height')).toContain('aria-invalid="true"');
+    expect(input(render({ modelHeight: 12 }), 'Storeys')).not.toContain('aria-invalid');
   });
 });
 
