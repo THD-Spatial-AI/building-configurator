@@ -181,7 +181,8 @@ export function StoreysModelled({
             <tr>
               <th className={HEAD}>{t('storeys.table.storey')}</th>
               <th className={HEAD}>{t('storeys.inModel')}</th>
-              <th className={HEAD}>{t('storeys.table.height')}<span className="block font-normal">m</span></th>
+              {/* pl-6 lines the title up with the inputs, which sit after the reset's slot. */}
+              <th className={cn(HEAD, 'pl-6 whitespace-nowrap')}>{t('storeys.table.height')} <span className="font-normal">(m)</span></th>
               {dwellings && <th className={HEAD}>{t('storeys.table.dwellings')}</th>}
             </tr>
           </thead>
