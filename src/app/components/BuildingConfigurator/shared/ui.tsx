@@ -243,8 +243,9 @@ export function steppedValue(current: number, step: number, direction: 1 | -1, m
   if (direction < 0 && min !== undefined && current <= min) return current;
   const precision = (String(step).split('.')[1] ?? '').length;
   let next = Number((current + direction * step).toFixed(precision));
-  if (min !== undefined) next = Math.max(min, next);
-  if (max !== undefined) next = Math.min(max, next);
+  // Only the limit stepped towards applies: past the other one, as when the storeys outgrow the model, a step moves towards it.
+  if (direction < 0 && min !== undefined) next = Math.max(min, next);
+  if (direction > 0 && max !== undefined) next = Math.min(max, next);
   return next;
 }
 
