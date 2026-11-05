@@ -189,6 +189,7 @@ describe('StoreysModelled with a measured attic', () => {
   it('offers the measured area without counting it', () => {
     const html = render({ selected: [4], attic });
     expect(html).toContain('Use measured (25.0 m²)');
+    expect(html).toMatch(/<button[^>]*class="[^"]*\bborder border-border\b[^"]*"[^>]*>Use measured/);
     expect(html).toContain('placeholder="Not counted"');
     expect(html).toContain('2 × 80 m² = 160 m²');
   });
