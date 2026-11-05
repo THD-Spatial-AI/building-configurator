@@ -36,4 +36,9 @@ describe('steppedValue', () => {
     expect(steppedValue(2, 1, 1, 1, 1)).toBe(2);
     expect(steppedValue(2, 1, -1, 1, 1)).toBe(1);
   });
+
+  it('steps away from a limit the value is already past, rather than jumping to it', () => {
+    expect(steppedValue(2.5, 0.1, -1, 0.5, 0)).toBe(2.4);
+    expect(steppedValue(1, 1, 1, 3, 10)).toBe(2);
+  });
 });
