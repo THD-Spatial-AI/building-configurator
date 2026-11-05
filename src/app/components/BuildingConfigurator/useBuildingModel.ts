@@ -171,6 +171,16 @@ export function runBlocker(general: Record<string, any>): string | null {
 }
 
 /**
+ * The floor area per storey after the type, year or country changes: the
+ * building's own, since a new classification does not resize it, or TABULA's
+ * reference area per storey when the building has none.
+ */
+export function reclassifiedFloorArea(current: number, referenceArea: number | undefined, storeys: number): number {
+  if (current || !referenceArea) return current;
+  return referenceArea / Math.max(1, storeys);
+}
+
+/**
  * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
  * caller that shows no such figure: the heat demand service then only serves
  * TABULA variants and their U-values, and no request is made per envelope
@@ -353,9 +363,8 @@ export function useBuildingModel(
         setGeneralRaw((prev) => ({ ...prev, refurbishment: {} }));
       }
 
-      if (isReload && !borrowed && existingStateData.A_C_Ref_Input) {
-        const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
-        if (!cancelled) setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
+      if (isReload && !borrowed && !cancelled) {
+        setGeneralRaw((prev) => ({ ...prev, floorArea: reclassifiedFloorArea(prev.floorArea, existingStateData.A_C_Ref_Input, prev.storeys) }));
       }
 
       // TABULA's dwelling count prefills BuEM's residential_units: on load only

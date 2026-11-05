@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LOOKUP_DELAY_MS, runBlocker, scheduleLookup, withEdits } from './useBuildingModel';
+import { LOOKUP_DELAY_MS, reclassifiedFloorArea, runBlocker, scheduleLookup, withEdits } from './useBuildingModel';
 import { DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingElement } from './configure/model/buildingElements';
 import type { BuildingState } from '../../lib/buemAdapter';
@@ -85,6 +85,17 @@ describe('scheduleLookup', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe('reclassifiedFloorArea', () => {
+  it('keeps the building\'s own floor area when its type changes', () => {
+    expect(reclassifiedFloorArea(85, 300, 2)).toBe(85);
+  });
+
+  it('takes TABULA\'s reference area per storey only when the building has none', () => {
+    expect(reclassifiedFloorArea(0, 300, 2)).toBe(150);
+    expect(reclassifiedFloorArea(0, undefined, 2)).toBe(0);
   });
 });
 
