@@ -63,4 +63,11 @@ describe('loadVariantLevels', () => {
     ]), 'NL', 'Terraced House', 1998, 'Gen');
     expect(levels.map((level) => level.label)).toEqual(['Existing state', 'Usual refurbishment', 'KfW Effizienzhaus 70']);
   });
+
+  it('names TABULA\'s "Existing condition" description as the existing state, so it is translated', async () => {
+    const levels = await loadVariantLevels(lookup([
+      { code: 'DE.N.SFH.05.Gen.ReEx.001.001', label: 'Existing condition' },
+    ]), 'DE', 'Single-family House', 1975);
+    expect(levels.map((level) => level.label)).toEqual(['Existing state']);
+  });
 });

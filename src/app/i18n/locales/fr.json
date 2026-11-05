@@ -324,7 +324,7 @@
       "borrowed": "{type} n'a pas de classes énergétiques propres. Celles-ci sont celles d'un bâtiment de type {from} de même époque et de même pays, et ne reflètent pas un bâtiment non résidentiel ; les valeurs peuvent donc différer. Vérifiez qu'elles correspondent au bâtiment."
     },
     "section": {
-      "occupancy": "Étages et occupation",
+      "occupancy": "Étages et ménage",
       "comfort": "Chauffage et confort",
       "outputs": "Résultats à calculer",
       "equipment": "Appareils",
@@ -357,7 +357,7 @@
     },
     "heating": {
       "label": "Consigne de chauffage",
-      "tip": "Température intérieure minimale maintenue par le chauffage."
+      "tip": "Température intérieure minimale maintenue par le chauffage. Par exemple, à 20 °C le chauffage se met en marche dès que les pièces descendraient sous 20 °C. Chaque degré en moins économise de l'énergie de chauffage."
     },
     "setback": {
       "label": "Réduit",
@@ -365,7 +365,7 @@
     },
     "cooling": {
       "label": "Consigne de refroidissement",
-      "tip": "Température intérieure maximale maintenue par le refroidissement.",
+      "tip": "Température intérieure maximale maintenue par le refroidissement. Par exemple, à 26 °C le refroidissement se met en marche dès que les pièces dépasseraient 26 °C. Entre les deux consignes, aucun ne fonctionne, donc celle-ci doit être plus haute.",
       "inverted": "Réglez-la au-dessus de la consigne de chauffage."
     },
     "air": {
@@ -713,7 +713,8 @@
     },
     "error": {
       "dwellingsRequired": "Ce type de bâtiment requiert son nombre de logements. Renseignez-le sous Occupation avant de lancer une simulation.",
-      "runFailed": "Échec de la simulation : le backend EnerPlanET est injoignable ou a rejeté la requête. Voir la console du navigateur pour plus de détails.",
+      "runFailed": "La simulation n'a pas pu être lancée. Réessayez dans un instant. Si elle échoue encore, vérifiez les valeurs du bâtiment.",
+      "coolingInverted": "La consigne de refroidissement doit être supérieure à celle de chauffage. Dans Chauffage et confort, baissez la consigne de chauffage ou montez celle de refroidissement (Avancé), puis relancez.",
       "exportFailed": "Échec de l'export : {reason}",
       "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET.",
       "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour.",
@@ -734,7 +735,7 @@
     "select": {
       "one": "Étage {number}"
     },
-    "dwellingsMissing": "Indiquez le nombre de logements sur chaque étage inclus. Manquant : étage {storeys}.",
+    "dwellingsMissing": "Avec un étage exclu, indiquez les logements de chaque étage resté dans le modèle, afin de ne compter que les personnes de cette partie. Manquant : étage {storeys}.",
     "inModel": "Dans le modèle",
     "roomHeightTip": "La hauteur de chaque étage, de plancher à plancher. Un étage doté de sa propre hauteur la conserve.",
     "useRoomHeight": "Utiliser la hauteur sous plafond",
@@ -755,7 +756,8 @@
     "table": {
       "storey": "Étage",
       "height": "Hauteur",
-      "dwellings": "Logements"
+      "dwellings": "Logements",
+      "optional": "Facultatif"
     }
   },
   "help": {
@@ -764,7 +766,7 @@
     "building": "Les données de base du bâtiment : type, âge, pays, taille et étages. Utilisez Modifier pour les corriger.",
     "demand": "L'énergie dont le bâtiment a besoin en un an, par usage. Le gaz de cuisson est affiché à part et n'entre pas dans le total.",
     "insulation": "La capacité de tout le bâtiment à garder la chaleur, et la classe qui en découle. Choisissez un niveau pour voir ce qu'une rénovation changerait. Existant : le bâtiment tel qu'il est. Standard : une rénovation habituelle, comme isoler la toiture et changer les fenêtres. Avancée : une rénovation profonde, proche d'un bâtiment neuf. Les surfaces modifiées une à une gardent leurs valeurs.",
-    "occupancy": "Le nombre d'étages du bâtiment, ceux qui sont inclus et le nombre de logements sur chacun. Plus de personnes signifie plus d'eau chaude et plus de chaleur intérieure.",
+    "occupancy": "Le nombre d'étages du bâtiment, ceux qui sont inclus, le nombre de logements sur chacun, qui y vit et comment on y cuisine. Plus de personnes signifie plus d'eau chaude et plus de chaleur intérieure.",
     "comfort": "Quand et à quelle température le bâtiment est chauffé : la température intérieure, si elle baisse la nuit ou en absence, et si l'eau chaude est comptée.",
     "outputs": "Les résultats obtenus pour chaque usage : un total annuel, un profil horaire ou aucun.",
     "equipment": "Les appareils dont disposent les logements. Ils déterminent la consommation d'électricité ; ceux non renseignés prennent des valeurs typiques.",

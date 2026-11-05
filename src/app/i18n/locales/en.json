@@ -323,7 +323,7 @@
       "borrowed": "{type} has no energy grades of its own. Those shown belong to the {from} type of the same age and country and do not reflect a non-residential building, so the values can differ: check that they match the building."
     },
     "section": {
-      "occupancy": "Storeys and occupancy",
+      "occupancy": "Storeys and household",
       "comfort": "Heating and comfort",
       "outputs": "Results to compute",
       "equipment": "Appliances",
@@ -356,7 +356,7 @@
     },
     "heating": {
       "label": "Heating setpoint",
-      "tip": "Lowest indoor temperature the heating keeps."
+      "tip": "Lowest indoor temperature the heating keeps. For example, at 20 °C the heating comes on whenever the rooms would drop below 20 °C. Each degree lower saves heating energy."
     },
     "setback": {
       "label": "Lower it when",
@@ -364,7 +364,7 @@
     },
     "cooling": {
       "label": "Cooling setpoint",
-      "tip": "Highest indoor temperature the cooling keeps.",
+      "tip": "Highest indoor temperature the cooling keeps. For example, at 26 °C the cooling comes on whenever the rooms would rise above 26 °C. Between the two setpoints neither runs, so keep this one higher.",
       "inverted": "Set it above the heating setpoint."
     },
     "air": {
@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "This building type needs its number of dwellings. Set it under Occupancy before running a simulation.",
-      "runFailed": "Simulation failed: the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.",
+      "runFailed": "The simulation could not be run. Try again in a moment. If it fails again, check the building's values.",
+      "coolingInverted": "The cooling setpoint must be above the heating setpoint. Under Heating and comfort, lower the heating setpoint or raise the cooling setpoint (Advanced), then run again.",
       "exportFailed": "Export failed: {reason}",
       "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json.",
       "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date.",
@@ -730,7 +731,7 @@
     "select": {
       "one": "Storey {number}"
     },
-    "dwellingsMissing": "Give the number of homes on every included storey. Missing: storey {storeys}.",
+    "dwellingsMissing": "With a storey left out, give the homes on each storey still in the model, so only the people in that part are counted. Missing: storey {storeys}.",
     "inModel": "In the model",
     "roomHeightTip": "The height of each storey, floor to floor. A storey given its own height keeps it.",
     "useRoomHeight": "Use room height",
@@ -751,7 +752,8 @@
     "table": {
       "storey": "Storey",
       "height": "Height",
-      "dwellings": "Dwellings"
+      "dwellings": "Dwellings",
+      "optional": "Optional"
     }
   },
   "help": {
@@ -760,7 +762,7 @@
     "building": "The basic facts about the building: its type, age, country, size and storeys. Use Edit to correct them.",
     "demand": "How much energy the building needs in a year, split by use. Gas for cooking is shown on its own and is not in the total.",
     "insulation": "How well the whole building keeps heat in, and the grade that gives it. Choose a level to see what refurbishment would change. Existing: the building as it is. Usual: a common refurbishment, such as roof insulation and new windows. Advanced: a deep refurbishment, close to a new building. Surfaces you changed one by one keep their own values.",
-    "occupancy": "How many storeys the building has, which of them are included, and how many homes are on each. More people means more hot water and more warmth from inside.",
+    "occupancy": "How many storeys the building has, which of them are included, how many homes are on each, who lives there and how they cook. More people means more hot water and more warmth from inside.",
     "comfort": "When and how warm the building is kept: the indoor temperature, whether it is turned down at night or when nobody is home, and whether hot water is counted.",
     "outputs": "Which results you get for each use: a yearly total, an hourly profile, or none.",
     "equipment": "Which appliances the homes have. They decide the electricity use; appliances left unset use typical values.",

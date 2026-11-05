@@ -323,7 +323,7 @@
       "borrowed": "{type} heeft geen eigen energieklassen. Deze zijn van een {from} van dezelfde leeftijd en hetzelfde land en geven geen niet-woongebouw weer, dus de waarden kunnen afwijken: controleer of ze bij het gebouw passen."
     },
     "section": {
-      "occupancy": "Verdiepingen en bewoning",
+      "occupancy": "Verdiepingen en huishouden",
       "comfort": "Verwarming en comfort",
       "outputs": "Te berekenen resultaten",
       "equipment": "Apparaten",
@@ -356,7 +356,7 @@
     },
     "heating": {
       "label": "Setpoint verwarming",
-      "tip": "Laagste binnentemperatuur die de verwarming aanhoudt."
+      "tip": "Laagste binnentemperatuur die de verwarming aanhoudt. Bij 20 °C bijvoorbeeld gaat de verwarming aan zodra de ruimtes onder 20 °C zouden zakken. Elke graad lager bespaart verwarmingsenergie."
     },
     "setback": {
       "label": "Verlagen wanneer",
@@ -364,7 +364,7 @@
     },
     "cooling": {
       "label": "Setpoint koeling",
-      "tip": "Hoogste binnentemperatuur die de koeling aanhoudt.",
+      "tip": "Hoogste binnentemperatuur die de koeling aanhoudt. Bij 26 °C bijvoorbeeld gaat de koeling aan zodra de ruimtes boven 26 °C zouden stijgen. Tussen de twee setpoints draait geen van beide, dus deze moet hoger zijn.",
       "inverted": "Stel het hoger in dan het setpoint verwarming."
     },
     "air": {
@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "Dit gebouwtype vereist het aantal woningen. Stel het in onder Bewoning voordat u een simulatie start.",
-      "runFailed": "Simulatie mislukt: de EnerPlanET-backend is onbereikbaar of heeft het verzoek geweigerd. Zie de browserconsole voor details.",
+      "runFailed": "De simulatie kon niet worden uitgevoerd. Probeer het zo opnieuw. Mislukt het weer, controleer dan de waarden van het gebouw.",
+      "coolingInverted": "Het koelsetpoint moet boven het verwarmingssetpoint liggen. Verlaag onder Verwarming en comfort het verwarmingssetpoint of verhoog het koelsetpoint (Geavanceerd) en voer daarna opnieuw uit.",
       "exportFailed": "Export mislukt: {reason}",
       "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
       "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel.",
@@ -730,7 +731,7 @@
     "select": {
       "one": "Verdieping {number}"
     },
-    "dwellingsMissing": "Geef het aantal woningen op elke meegetelde verdieping. Ontbreekt: verdieping {storeys}.",
+    "dwellingsMissing": "Met een verdieping weggelaten: geef de woningen op elke verdieping die in het model blijft, zodat alleen de mensen in dat deel meetellen. Ontbreekt: verdieping {storeys}.",
     "inModel": "In het model",
     "roomHeightTip": "De hoogte van elke verdieping, van vloer tot vloer. Een verdieping met een eigen hoogte houdt die.",
     "useRoomHeight": "Kamerhoogte gebruiken",
@@ -751,7 +752,8 @@
     "table": {
       "storey": "Verdieping",
       "height": "Hoogte",
-      "dwellings": "Woningen"
+      "dwellings": "Woningen",
+      "optional": "Optioneel"
     }
   },
   "help": {
@@ -760,7 +762,7 @@
     "building": "De basisgegevens van het gebouw: type, leeftijd, land, grootte en verdiepingen. Met Bewerken past u ze aan.",
     "demand": "Hoeveel energie het gebouw per jaar nodig heeft, per gebruik. Kookgas staat apart en telt niet mee in het totaal.",
     "insulation": "Hoe goed het hele gebouw warmte vasthoudt, en de klasse die daaruit volgt. Kies een niveau om te zien wat renovatie zou veranderen. Huidig: het gebouw zoals het is. Standaard: een gebruikelijke renovatie, zoals dakisolatie en nieuwe ramen. Vergaand: een ingrijpende renovatie, dicht bij een nieuw gebouw. Vlakken die u een voor een wijzigde, houden hun eigen waarden.",
-    "occupancy": "Hoeveel verdiepingen het gebouw heeft, welke meetellen en hoeveel woningen er op elke liggen. Meer mensen betekent meer warm water en meer warmte van binnen.",
+    "occupancy": "Hoeveel verdiepingen het gebouw heeft, welke meetellen, hoeveel woningen er op elke liggen, wie er woont en waarop gekookt wordt. Meer mensen betekent meer warm water en meer warmte van binnen.",
     "comfort": "Wanneer en hoe warm het gebouw wordt gehouden: de binnentemperatuur, of die 's nachts of bij afwezigheid lager gaat en of warm water meetelt.",
     "outputs": "Welke resultaten u per gebruik krijgt: een jaartotaal, een uurprofiel of geen.",
     "equipment": "Welke apparaten de woningen hebben. Ze bepalen het stroomverbruik; niet ingestelde apparaten krijgen gangbare waarden.",

@@ -4,6 +4,28 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.16.4] - 2026-11-05
+
+### Changed
+
+- A field that a message asks the user to fix takes a red border: the dwellings of a multi-family house or apartment block, the dwellings of each modelled storey while one is left out, the storey count and room height while the storeys are taller than the 3D model, and the cooling setpoint while it is not above the heating setpoint. The rule is in `styles.css`.
+- Step 3 is called Storeys and household, since it also holds who lives there and how they cook.
+- The Back and Next buttons stay at the bottom of the panel, centred, while the step above them grows or shrinks.
+- The heating and cooling setpoint tips give a worked example, and the cooling tip says why it must sit above the heating setpoint.
+- The actions under a field (Use measured, Use default) are small outlined buttons.
+- A storey's room-height reset sits in front of its height field and keeps its place, so the arrows stay under the pointer. The column title reads "Height (m)".
+- The dwelling cells of the storeys, the attic's included, read "Optional" while every storey is in the model.
+- The BuEM request schema used in the payload check is pinned to buem-gateway v7.5.1.
+
+### Fixed
+
+- A run with the cooling setpoint at or below the heating setpoint stops before it is sent and says which fields to change. A failed run no longer points the user to the browser console.
+- Heating and comfort shows the attention mark while the cooling setpoint is not above the heating setpoint.
+- Changing a loaded building's type, construction year or country keeps its floor area; TABULA's reference area fills it only when it is empty.
+- TABULA's "Existing condition" variant is translated as the existing state in every language.
+- An arrow step on a number field already past its other limit moves by one step, so a storey's height steps from 2.5 m to 2.4 m while the storeys are taller than the 3D model, instead of jumping to 0.5 m.
+- The storey height placeholder uses the language's decimal separator.
+
 ## [0.16.3] - 2026-11-01
 
 ### Fixed

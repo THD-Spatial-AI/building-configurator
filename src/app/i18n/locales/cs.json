@@ -337,7 +337,7 @@
       "borrowed": "{type} nemá vlastní energetické třídy. Tyto patří budově typu {from} stejného stáří a země a neodrážejí nebytovou budovu, takže se hodnoty mohou lišit: ověřte, že odpovídají budově."
     },
     "section": {
-      "occupancy": "Podlaží a obsazenost",
+      "occupancy": "Podlaží a domácnost",
       "comfort": "Vytápění a komfort",
       "outputs": "Počítané výsledky",
       "equipment": "Spotřebiče",
@@ -370,7 +370,7 @@
     },
     "heating": {
       "label": "Žádaná teplota vytápění",
-      "tip": "Nejnižší vnitřní teplota, kterou vytápění udržuje."
+      "tip": "Nejnižší vnitřní teplota, kterou vytápění udržuje. Například při 20 °C se vytápění zapne, jakmile by teplota v místnostech klesla pod 20 °C. Každý stupeň méně šetří energii na vytápění."
     },
     "setback": {
       "label": "Útlum, když",
@@ -378,7 +378,7 @@
     },
     "cooling": {
       "label": "Žádaná teplota chlazení",
-      "tip": "Nejvyšší vnitřní teplota, kterou chlazení udržuje.",
+      "tip": "Nejvyšší vnitřní teplota, kterou chlazení udržuje. Například při 26 °C se chlazení zapne, jakmile by teplota v místnostech přesáhla 26 °C. Mezi oběma žádanými teplotami neběží ani jedno, proto musí být tato vyšší.",
       "inverted": "Nastavte ji nad žádanou teplotu vytápění."
     },
     "air": {
@@ -729,7 +729,8 @@
     },
     "error": {
       "dwellingsRequired": "Tento typ budovy vyžaduje počet bytů. Před spuštěním simulace jej nastavte v sekci Obsazenost.",
-      "runFailed": "Simulace selhala: backend EnerPlanET je nedostupný nebo požadavek odmítl. Podrobnosti najdete v konzoli prohlížeče.",
+      "runFailed": "Simulaci se nepodařilo spustit. Zkuste to za chvíli znovu. Pokud se to znovu nepodaří, zkontrolujte hodnoty budovy.",
+      "coolingInverted": "Žádaná teplota chlazení musí být vyšší než žádaná teplota vytápění. V části Vytápění a komfort snižte žádanou teplotu vytápění nebo zvyšte žádanou teplotu chlazení (Pokročilý) a spusťte znovu.",
       "exportFailed": "Export selhal: {reason}",
       "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET.",
       "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální.",
@@ -750,7 +751,7 @@
     "select": {
       "one": "Podlaží {number}"
     },
-    "dwellingsMissing": "Uveďte počet bytů na každém zahrnutém podlaží. Chybí: podlaží {storeys}.",
+    "dwellingsMissing": "Když je podlaží vynecháno, uveďte byty na každém podlaží, které v modelu zůstává, aby se počítali jen lidé v této části. Chybí: podlaží {storeys}.",
     "inModel": "V modelu",
     "roomHeightTip": "Výška každého podlaží, od podlahy k podlaze. Podlaží s vlastní výškou si ji ponechá.",
     "useRoomHeight": "Použít výšku místnosti",
@@ -771,7 +772,8 @@
     "table": {
       "storey": "Podlaží",
       "height": "Výška",
-      "dwellings": "Byty"
+      "dwellings": "Byty",
+      "optional": "Nepovinné"
     }
   },
   "help": {
@@ -780,7 +782,7 @@
     "building": "Základní údaje o budově: typ, stáří, země, velikost a podlaží. Upravíte je tlačítkem Upravit.",
     "demand": "Kolik energie budova za rok potřebuje, podle použití. Plyn na vaření je uveden zvlášť a do součtu se nepočítá.",
     "insulation": "Jak dobře celá budova drží teplo a jaká třída z toho vychází. Vyberte úroveň a uvidíte, co by renovace změnila. Současný: budova, jak je. Běžná: obvyklá renovace, např. zateplení střechy a nová okna. Pokročilá: hloubková renovace, blízká novostavbě. Plochy změněné jednotlivě si ponechají své hodnoty.",
-    "occupancy": "Kolik podlaží budova má, která z nich jsou zahrnuta a kolik bytů je na každém. Více lidí znamená více teplé vody a více tepla zevnitř.",
+    "occupancy": "Kolik podlaží budova má, která z nich jsou zahrnuta, kolik bytů je na každém, kdo v nich bydlí a na čem se vaří. Více lidí znamená více teplé vody a více tepla zevnitř.",
     "comfort": "Kdy a jak teplá se budova udržuje: vnitřní teplota, zda se v noci nebo při nepřítomnosti snižuje a zda se počítá teplá voda.",
     "outputs": "Jaké výsledky dostanete pro každé použití: roční součet, hodinový profil, nebo žádné.",
     "equipment": "Jaké spotřebiče domácnosti mají. Určují spotřebu elektřiny; nenastavené spotřebiče mají typické hodnoty.",

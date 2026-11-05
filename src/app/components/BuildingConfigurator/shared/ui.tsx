@@ -243,8 +243,9 @@ export function steppedValue(current: number, step: number, direction: 1 | -1, m
   if (direction < 0 && min !== undefined && current <= min) return current;
   const precision = (String(step).split('.')[1] ?? '').length;
   let next = Number((current + direction * step).toFixed(precision));
-  if (min !== undefined) next = Math.max(min, next);
-  if (max !== undefined) next = Math.min(max, next);
+  // Only the limit stepped towards applies: past the other one, as when the storeys outgrow the model, a step moves towards it.
+  if (direction < 0 && min !== undefined) next = Math.max(min, next);
+  if (direction > 0 && max !== undefined) next = Math.min(max, next);
   return next;
 }
 
@@ -271,11 +272,13 @@ interface NumberInputProps {
   hideLabel?: boolean;
   /** Where the tip's icon links to, such as the field's default in the documentation. */
   tipHref?: string;
+  /** Marks the field as the one to fix, while a message beside it says what is missing or wrong. */
+  invalid?: boolean;
 }
 
 export function NumberInput({
   label, value, onChange, unit, min, max, step = 0.01,
-  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false, tipHref,
+  tip, readOnly = false, width, integer, placeholder, maxReason, hideLabel = false, tipHref, invalid = false,
 }: NumberInputProps) {
   const [reasonShown, setReasonShown] = useState(false);
   const current = value === '' ? parseDecimal(placeholder ?? '') ?? 0 : Number(value) || 0;
@@ -299,6 +302,7 @@ export function NumberInput({
           readOnly={readOnly}
           placeholder={placeholder}
           aria-label={label}
+          aria-invalid={invalid || undefined}
           onChange={(v) => { if (v !== null) onChange?.(v); }}
           style={{ cursor: readOnly ? 'default' : 'text' }}
         />
@@ -883,7 +887,10 @@ export function SearchField({ label, value, onChange }: SearchFieldProps) {
 export const DROPDOWN_LIST = 'flex max-h-[19.5rem] flex-col gap-1.5 overflow-y-auto overscroll-contain';
 
 /** A text or number field on its own, as EnerPlanET's Input (libs/ui input.tsx). */
-export const TEXT_INPUT = 'h-9 rounded-md border border-border bg-background px-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50';
+export const TEXT_INPUT = 'h-9 rounded-md border border-border bg-background px-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-destructive/40';
+
+/** A small action under a field, such as resetting it to its default: outlined so it reads as a button. */
+export const FIELD_ACTION = 'inline-flex h-6 cursor-pointer items-center rounded-md border border-border bg-background px-2 text-[11px] font-medium text-foreground shadow-xs transition-colors hover:bg-muted';
 
 /** A choosable row in a Dropdown list, as EnerPlanET's technology rows. */
 export const OPTION_ROW = 'rounded-lg border border-border bg-card px-2.5 py-2 shadow-xs transition-all hover:bg-muted/50 hover:shadow-md';

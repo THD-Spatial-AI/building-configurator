@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { LanguageProvider, type Language } from '../../i18n';
 import { StoreysModelled, pickInSelection, pickWithAttic, toggleSelected, withStoreys } from './StoreysModelled';
 
 /** The input named `label`, as rendered, or '' when there is none. */
@@ -11,20 +12,22 @@ const switchState = (html: string, label: string) => {
   return m ? m[1] === 'true' : null;
 };
 
-const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>) => renderToStaticMarkup(
-  <StoreysModelled
-    storeys={3}
-    roomHeight={2.5}
-    heights={{ values: {}, onChange: () => {} }}
-    onStoreysChange={() => {}}
-    onRoomHeightChange={() => {}}
-    modelled={[1, 2]}
-    selected={[]}
-    onSelect={() => {}}
-    floorAreaPerStorey={80}
-    onChange={() => {}}
-    {...props}
-  />,
+const render = (props: Partial<Parameters<typeof StoreysModelled>[0]>, language: Language = 'en') => renderToStaticMarkup(
+  <LanguageProvider language={language}>
+    <StoreysModelled
+      storeys={3}
+      roomHeight={2.5}
+      heights={{ values: {}, onChange: () => {} }}
+      onStoreysChange={() => {}}
+      onRoomHeightChange={() => {}}
+      modelled={[1, 2]}
+      selected={[]}
+      onSelect={() => {}}
+      floorAreaPerStorey={80}
+      onChange={() => {}}
+      {...props}
+    />
+  </LanguageProvider>,
 );
 
 describe('StoreysModelled', () => {
@@ -53,7 +56,17 @@ describe('StoreysModelled', () => {
     expect(input(html, 'Storey 0: Height')).toContain('placeholder="2.5"');
     expect(input(html, 'Storey 1: Height')).toContain('value="3.2"');
     expect(html).toContain('aria-label="Storey 1: Use room height"');
-    expect(html).not.toContain('aria-label="Storey 0: Use room height"');
+    expect(html).not.toMatch(/<button[^>]*aria-label="Storey 1: Use room height"[^>]*disabled/);
+  });
+
+  it('keeps the reset\'s place before the height, hidden until the storey has its own, so the arrows never move', () => {
+    const html = render({ heights: { values: { 2: 3.2 }, onChange: () => {} } });
+    expect(html).toMatch(/<button[^>]*aria-label="Storey 0: Use room height"[^>]*disabled=""[^>]*class="[^"]*\binvisible\b/);
+    expect(html.indexOf('aria-label="Storey 1: Use room height"')).toBeLessThan(html.indexOf('aria-label="Storey 1: Height"'));
+  });
+
+  it('writes the room height default with the language\'s decimal separator', () => {
+    expect(render({}, 'es')).toContain('placeholder="2,5"');
   });
 
   it('shows every storey in a row, in or out of the model, with the floor area modelled', () => {
@@ -79,7 +92,26 @@ describe('StoreysModelled', () => {
   });
 
   it('names the modelled storeys that still need a dwelling count', () => {
-    expect(render({ dwellings: { values: { 1: 2 }, onChange: () => {} } })).toContain('Missing: storey 1.');
+    expect(render({ dwellings: { values: { 1: 2 }, onChange: () => {} } })).toContain('so only the people in that part are counted. Missing: storey 1.');
+  });
+
+  it('marks the dwelling cells still missing a count, and only those', () => {
+    const html = render({ dwellings: { values: { 1: 2 }, onChange: () => {} } });
+    expect(input(html, 'Storey 1: Dwellings')).toContain('aria-invalid="true"');
+    expect(input(html, 'Storey 0: Dwellings')).not.toContain('aria-invalid');
+  });
+
+  it('shows the dwellings as optional while every storey is in the model', () => {
+    const html = render({ modelled: null, dwellings: { values: {}, onChange: () => {} } });
+    expect(input(html, 'Storey 0: Dwellings')).toContain('placeholder="Optional"');
+    expect(input(html, 'Storey 0: Dwellings')).not.toContain('aria-invalid');
+  });
+
+  it('marks the storey count and room height while the storeys are taller than the model', () => {
+    const html = render({ modelHeight: 6, heights: { values: { 3: 3 }, onChange: () => {} } });
+    expect(input(html, 'Storeys')).toContain('aria-invalid="true"');
+    expect(input(html, 'Room height')).toContain('aria-invalid="true"');
+    expect(input(render({ modelHeight: 12 }), 'Storeys')).not.toContain('aria-invalid');
   });
 });
 
@@ -119,6 +151,15 @@ describe('StoreysModelled with an attic', () => {
     expect(render({ storeys: 1, modelled: null })).not.toContain('Attic');
   });
 
+  it('shows the attic dwellings as optional, with storeys left out or not', () => {
+    const dwellings = { values: {}, onChange: () => {} };
+    for (const modelled of [null, [1, 2]]) {
+      const html = render({ modelled, dwellings, attic: { ...attic, onDwellingsChange: () => {} } });
+      expect(input(html, 'Attic: Dwellings')).toContain('placeholder="Optional"');
+      expect(input(html, 'Attic: Dwellings')).not.toContain('aria-invalid');
+    }
+  });
+
   it('gives the attic dwellings in its row and a floor area beneath while it is in, but no height', () => {
     const dwellings = { values: {}, onChange: () => {} };
     const html = render({ dwellings, attic: { ...attic, onDwellingsChange: () => {} } });
@@ -148,6 +189,7 @@ describe('StoreysModelled with a measured attic', () => {
   it('offers the measured area without counting it', () => {
     const html = render({ selected: [4], attic });
     expect(html).toContain('Use measured (25.0 m²)');
+    expect(html).toMatch(/<button[^>]*class="[^"]*\bborder border-border\b[^"]*"[^>]*>Use measured/);
     expect(html).toContain('placeholder="Not counted"');
     expect(html).toContain('2 × 80 m² = 160 m²');
   });

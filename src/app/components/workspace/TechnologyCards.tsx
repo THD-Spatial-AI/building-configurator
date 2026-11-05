@@ -88,7 +88,7 @@ function FieldInput({ field, onChange }: { field: TechField; onChange: (value: n
   return (
     <div>
       <span className="mb-1 block text-[11px] font-medium leading-tight text-muted-foreground">{field.label}</span>
-      <div className={cn('cfg-input-wrap', field.error && 'ring-2 ring-destructive/60')}>
+      <div className="cfg-input-wrap">
         <DecimalInput
           className="cfg-number"
           aria-label={field.label}

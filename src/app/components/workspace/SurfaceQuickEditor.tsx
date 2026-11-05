@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { AlertTriangle, Ruler, Trash2 } from '@/app/components/icons';
-import { cn } from '@/lib/utils';
 import { AzimuthDial, TiltDial, tiltLabel } from './surfaceControls';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
@@ -90,10 +89,11 @@ export function SurfaceQuickEditor({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <span className="mb-1 block text-[11px] font-medium leading-tight text-muted-foreground">{t('surface.area')}</span>
-            <div className={cn('cfg-input-wrap', areaMissing && 'border-destructive ring-1 ring-destructive/30')}>
+            <div className="cfg-input-wrap">
               <DecimalInput
                 className="cfg-number"
                 aria-label={t('surface.area')}
+                aria-invalid={areaMissing || undefined}
                 min={0}
                 step={0.1}
                 value={element.area}

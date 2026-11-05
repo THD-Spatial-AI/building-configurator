@@ -2,7 +2,7 @@
 // the envelope. Field keys are BuEM's own names, see DEFAULT_GENERAL.
 
 import type { ReactNode } from 'react';
-import { Dropdown, FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
+import { Dropdown, FIELD_ACTION, FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
   archetypeOptions,
   buildingTypeName,
@@ -48,7 +48,7 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
       />
       <p className="mt-1 text-[10px] text-muted-foreground">
         {value === null ? placeholder : (
-          <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>
+          <button type="button" className={FIELD_ACTION} onClick={() => onChange(null)}>
             {t('household.useDefault')}
           </button>
         )}
@@ -85,9 +85,12 @@ export function OccupancySection({ general, setGen, mode = 'simple' }: SectionPr
               {t('household.dwellings.label')}
             </FieldLabel>
             <NumberInput
+              label={t('household.dwellings.label')}
+              hideLabel
               value={general.residential_units ?? ''}
               onChange={(v) => setGen('residential_units', Math.max(1, Math.round(v)))}
               unit="" min={1} step={1} integer
+              invalid={!general.residential_units}
             />
             {!general.residential_units && (
               <p className="mt-1 text-[10px] text-amber-700">

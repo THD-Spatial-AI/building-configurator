@@ -161,6 +161,25 @@ const HISTORY_FIELDS = new Set(['area', 'uValue', 'tilt', 'azimuth', 'gValue', '
 
 export type BuildingModel = ReturnType<typeof useBuildingModel>;
 
+/** The message key of a value that stops a BuEM run before it is sent, or null when the building can run. */
+export function runBlocker(general: Record<string, any>): string | null {
+  if (requiresResidentialUnits(general.buildingType) && !general.residential_units) return 'model.error.dwellingsRequired';
+  if (general.storeysModelled && hasDwellingsPerStorey(general.buildingType)
+    && modelledDwellings(general.storeysModelled, general.storeyDwellings) === null) return 'model.error.dwellingsModelledRequired';
+  if (general.comfortT_ub <= general.comfortT_lb) return 'model.error.coolingInverted';
+  return null;
+}
+
+/**
+ * The floor area per storey after the type, year or country changes: the
+ * building's own, since a new classification does not resize it, or TABULA's
+ * reference area per storey when the building has none.
+ */
+export function reclassifiedFloorArea(current: number, referenceArea: number | undefined, storeys: number): number {
+  if (current || !referenceArea) return current;
+  return referenceArea / Math.max(1, storeys);
+}
+
 /**
  * `estimateHeatDemand` runs the annual demand alongside the model. Off for a
  * caller that shows no such figure: the heat demand service then only serves
@@ -344,9 +363,8 @@ export function useBuildingModel(
         setGeneralRaw((prev) => ({ ...prev, refurbishment: {} }));
       }
 
-      if (isReload && !borrowed && existingStateData.A_C_Ref_Input) {
-        const nextFloorArea = existingStateData.A_C_Ref_Input / Math.max(1, general.storeys ?? 1);
-        if (!cancelled) setGeneralRaw((prev) => ({ ...prev, floorArea: nextFloorArea }));
+      if (isReload && !borrowed && !cancelled) {
+        setGeneralRaw((prev) => ({ ...prev, floorArea: reclassifiedFloorArea(prev.floorArea, existingStateData.A_C_Ref_Input, prev.storeys) }));
       }
 
       // TABULA's dwelling count prefills BuEM's residential_units: on load only
@@ -587,13 +605,9 @@ export function useBuildingModel(
    * shows the stored totals the host returns.
    */
   const runSimulation = async () => {
-    if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
-      setUploadError({ key: 'model.error.dwellingsRequired' });
-      return;
-    }
-    if (general.storeysModelled && hasDwellingsPerStorey(general.buildingType)
-      && modelledDwellings(general.storeysModelled, general.storeyDwellings) === null) {
-      setUploadError({ key: 'model.error.dwellingsModelledRequired' });
+    const blocker = runBlocker(general);
+    if (blocker) {
+      setUploadError({ key: blocker });
       return;
     }
 

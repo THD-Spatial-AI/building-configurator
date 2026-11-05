@@ -323,7 +323,7 @@
       "borrowed": "Für {type} gibt es keine eigenen Energieklassen. Diese stammen von einem {from} gleichen Alters und Landes und bilden kein Nichtwohngebäude ab; die Werte können daher abweichen. Prüfen Sie, ob sie zum Gebäude passen."
     },
     "section": {
-      "occupancy": "Geschosse und Belegung",
+      "occupancy": "Geschosse und Haushalt",
       "comfort": "Heizung und Komfort",
       "outputs": "Zu berechnende Ergebnisse",
       "equipment": "Geräte",
@@ -356,7 +356,7 @@
     },
     "heating": {
       "label": "Solltemperatur Heizen",
-      "tip": "Niedrigste Innentemperatur, die die Heizung hält."
+      "tip": "Niedrigste Innentemperatur, die die Heizung hält. Bei 20 °C zum Beispiel heizt sie, sobald die Räume unter 20 °C fallen würden. Jedes Grad weniger spart Heizenergie."
     },
     "setback": {
       "label": "Absenken, wenn",
@@ -364,7 +364,7 @@
     },
     "cooling": {
       "label": "Solltemperatur Kühlen",
-      "tip": "Höchste Innentemperatur, die die Kühlung hält.",
+      "tip": "Höchste Innentemperatur, die die Kühlung hält. Bei 26 °C zum Beispiel kühlt sie, sobald die Räume über 26 °C steigen würden. Zwischen den beiden Sollwerten läuft keines von beiden, daher muss dieser Wert höher sein.",
       "inverted": "Über die Heiz-Solltemperatur setzen."
     },
     "air": {
@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "Dieser Gebäudetyp benötigt die Anzahl der Wohneinheiten. Legen Sie sie unter Belegung fest, bevor Sie eine Simulation starten.",
-      "runFailed": "Simulation fehlgeschlagen: Das EnerPlanET-Backend ist nicht erreichbar oder hat die Anfrage abgelehnt. Details in der Browserkonsole.",
+      "runFailed": "Die Simulation konnte nicht ausgeführt werden. Versuchen Sie es gleich noch einmal. Schlägt sie erneut fehl, prüfen Sie die Werte des Gebäudes.",
+      "coolingInverted": "Der Kühlsollwert muss über dem Heizsollwert liegen. Senken Sie unter Heizung und Komfort den Heizsollwert oder erhöhen Sie den Kühlsollwert (Erweitert) und starten Sie dann erneut.",
       "exportFailed": "Export fehlgeschlagen: {reason}",
       "importFailed": "Datei konnte nicht gelesen werden: {reason}. Es muss ein gültiges BuEM GeoJSON, ein Export des alten Konfigurators oder eine EnerPlanET config.json sein.",
       "pvFailed": "Die PV-Berechnung ist fehlgeschlagen, daher wird keine PV-Erzeugung angezeigt. Der Energiebedarf oben ist aktuell.",
@@ -730,7 +731,7 @@
     "select": {
       "one": "Geschoss {number}"
     },
-    "dwellingsMissing": "Geben Sie die Zahl der Wohnungen auf jedem einbezogenen Geschoss an. Es fehlt: Geschoss {storeys}.",
+    "dwellingsMissing": "Ist ein Geschoss ausgelassen, geben Sie die Wohnungen auf jedem Geschoss im Modell an, damit nur die Menschen in diesem Teil zählen. Es fehlt: Geschoss {storeys}.",
     "inModel": "Im Modell",
     "roomHeightTip": "Die Höhe jedes Geschosses, von Boden zu Boden. Ein Geschoss mit eigener Höhe behält diese.",
     "useRoomHeight": "Raumhöhe verwenden",
@@ -751,7 +752,8 @@
     "table": {
       "storey": "Geschoss",
       "height": "Höhe",
-      "dwellings": "Wohnungen"
+      "dwellings": "Wohnungen",
+      "optional": "Optional"
     }
   },
   "help": {
@@ -760,7 +762,7 @@
     "building": "Die Grunddaten des Gebäudes: Typ, Alter, Land, Größe und Geschosse. Mit Bearbeiten lassen sie sich korrigieren.",
     "demand": "Wie viel Energie das Gebäude im Jahr braucht, aufgeteilt nach Nutzung. Kochgas steht für sich und zählt nicht zur Summe.",
     "insulation": "Wie gut das ganze Gebäude die Wärme hält, und die Klasse, die sich daraus ergibt. Wählen Sie eine Stufe, um zu sehen, was eine Sanierung ändern würde. Ist-Zustand: das Gebäude, wie es ist. Üblich: eine verbreitete Sanierung, etwa Dachdämmung und neue Fenster. Zukunftsweisend: eine umfassende Sanierung, nahe an einem Neubau. Einzeln geänderte Flächen behalten ihre Werte.",
-    "occupancy": "Wie viele Geschosse das Gebäude hat, welche davon einbezogen sind und wie viele Wohnungen auf jedem liegen. Mehr Menschen heißt mehr Warmwasser und mehr Wärme von innen.",
+    "occupancy": "Wie viele Geschosse das Gebäude hat, welche davon einbezogen sind, wie viele Wohnungen auf jedem liegen, wer dort wohnt und womit gekocht wird. Mehr Menschen heißt mehr Warmwasser und mehr Wärme von innen.",
     "comfort": "Wann und wie warm das Gebäude gehalten wird: die Raumtemperatur, ob sie nachts oder bei Abwesenheit abgesenkt wird und ob Warmwasser mitzählt.",
     "outputs": "Welche Ergebnisse Sie je Nutzung erhalten: eine Jahressumme, ein Stundenprofil oder keine.",
     "equipment": "Welche Geräte die Haushalte haben. Sie bestimmen den Stromverbrauch; nicht gesetzte Geräte nutzen typische Werte.",

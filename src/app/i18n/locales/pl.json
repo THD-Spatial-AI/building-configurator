@@ -337,7 +337,7 @@
       "borrowed": "{type} nie ma własnych klas energetycznych. Są to klasy budynku typu {from} z tego samego okresu i kraju i nie odzwierciedlają budynku niemieszkalnego, więc wartości mogą się różnić: sprawdź, czy pasują do budynku."
     },
     "section": {
-      "occupancy": "Kondygnacje i użytkowanie",
+      "occupancy": "Kondygnacje i gospodarstwo domowe",
       "comfort": "Ogrzewanie i komfort",
       "outputs": "Wyniki do obliczenia",
       "equipment": "Urządzenia",
@@ -370,7 +370,7 @@
     },
     "heating": {
       "label": "Temperatura zadana ogrzewania",
-      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie."
+      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie. Na przykład przy 20 °C ogrzewanie włącza się, gdy temperatura w pomieszczeniach spadłaby poniżej 20 °C. Każdy stopień mniej oszczędza energię na ogrzewanie."
     },
     "setback": {
       "label": "Obniżaj, gdy",
@@ -378,7 +378,7 @@
     },
     "cooling": {
       "label": "Temperatura zadana chłodzenia",
-      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie.",
+      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie. Na przykład przy 26 °C chłodzenie włącza się, gdy temperatura w pomieszczeniach przekroczyłaby 26 °C. Między dwiema nastawami nie działa żadne z nich, więc ta musi być wyższa.",
       "inverted": "Ustaw ją powyżej temperatury zadanej ogrzewania."
     },
     "air": {
@@ -729,7 +729,8 @@
     },
     "error": {
       "dwellingsRequired": "Ten typ budynku wymaga podania liczby mieszkań. Ustaw ją w sekcji Mieszkańcy przed uruchomieniem symulacji.",
-      "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
+      "runFailed": "Nie udało się uruchomić symulacji. Spróbuj ponownie za chwilę. Jeśli znów się nie uda, sprawdź wartości budynku.",
+      "coolingInverted": "Nastawa chłodzenia musi być wyższa od nastawy ogrzewania. W sekcji Ogrzewanie i komfort obniż nastawę ogrzewania lub podnieś nastawę chłodzenia (Zaawansowany), a następnie uruchom ponownie.",
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
       "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne.",
@@ -750,7 +751,7 @@
     "select": {
       "one": "Kondygnacja {number}"
     },
-    "dwellingsMissing": "Podaj liczbę mieszkań na każdej uwzględnionej kondygnacji. Brakuje: kondygnacja {storeys}.",
+    "dwellingsMissing": "Gdy kondygnacja jest pominięta, podaj liczbę mieszkań na każdej kondygnacji pozostałej w modelu, aby liczyć tylko osoby w tej części. Brakuje: kondygnacja {storeys}.",
     "inModel": "W modelu",
     "roomHeightTip": "Wysokość każdej kondygnacji, od podłogi do podłogi. Kondygnacja z własną wysokością ją zachowuje.",
     "useRoomHeight": "Użyj wysokości pomieszczenia",
@@ -771,7 +772,8 @@
     "table": {
       "storey": "Kondygnacja",
       "height": "Wysokość",
-      "dwellings": "Mieszkania"
+      "dwellings": "Mieszkania",
+      "optional": "Opcjonalnie"
     }
   },
   "help": {
@@ -780,7 +782,7 @@
     "building": "Podstawowe dane budynku: typ, wiek, kraj, wielkość i kondygnacje. Użyj Edytuj, aby je poprawić.",
     "demand": "Ile energii budynek potrzebuje w ciągu roku, według zastosowania. Gaz do gotowania jest pokazany osobno i nie wchodzi do sumy.",
     "insulation": "Jak dobrze cały budynek zatrzymuje ciepło i jaka klasa z tego wynika. Wybierz poziom, aby zobaczyć, co zmieniłaby modernizacja. Obecny: budynek taki, jaki jest. Typowa: zwykła modernizacja, np. ocieplenie dachu i nowe okna. Zaawansowana: głęboka modernizacja, bliska nowemu budynkowi. Powierzchnie zmienione pojedynczo zachowują swoje wartości.",
-    "occupancy": "Ile kondygnacji ma budynek, które z nich są uwzględnione i ile mieszkań jest na każdej. Więcej osób to więcej ciepłej wody i więcej ciepła od wewnątrz.",
+    "occupancy": "Ile kondygnacji ma budynek, które z nich są uwzględnione, ile mieszkań jest na każdej, kto w nich mieszka i na czym się gotuje. Więcej osób to więcej ciepłej wody i więcej ciepła od wewnątrz.",
     "comfort": "Kiedy i jak ciepło utrzymuje się budynek: temperatura wewnątrz, czy jest obniżana w nocy lub pod nieobecność i czy liczy się ciepła woda.",
     "outputs": "Jakie wyniki otrzymujesz dla każdego zastosowania: sumę roczną, profil godzinowy albo żadne.",
     "equipment": "Jakie urządzenia mają mieszkania. Decydują o zużyciu prądu; nieustawione urządzenia przyjmują typowe wartości.",

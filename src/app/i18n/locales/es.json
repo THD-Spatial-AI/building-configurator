@@ -324,7 +324,7 @@
       "borrowed": "{type} no tiene clases energéticas propias. Estas son las de un edificio del tipo {from} de la misma época y país y no reflejan un edificio no residencial, por lo que los valores pueden diferir: compruebe que se ajustan al edificio."
     },
     "section": {
-      "occupancy": "Plantas y ocupación",
+      "occupancy": "Plantas y hogar",
       "comfort": "Calefacción y confort",
       "outputs": "Resultados a calcular",
       "equipment": "Electrodomésticos",
@@ -357,7 +357,7 @@
     },
     "heating": {
       "label": "Consigna de calefacción",
-      "tip": "Temperatura interior mínima que mantiene la calefacción."
+      "tip": "Temperatura interior mínima que mantiene la calefacción. Por ejemplo, con 20 °C la calefacción se enciende cuando las estancias bajarían de 20 °C. Cada grado menos ahorra energía de calefacción."
     },
     "setback": {
       "label": "Reducirla cuando",
@@ -365,7 +365,7 @@
     },
     "cooling": {
       "label": "Consigna de refrigeración",
-      "tip": "Temperatura interior máxima que mantiene la refrigeración.",
+      "tip": "Temperatura interior máxima que mantiene la refrigeración. Por ejemplo, con 26 °C la refrigeración se enciende cuando las estancias superarían los 26 °C. Entre las dos consignas no funciona ninguna, así que esta debe ser más alta.",
       "inverted": "Debe ser mayor que la consigna de calefacción."
     },
     "air": {
@@ -713,7 +713,8 @@
     },
     "error": {
       "dwellingsRequired": "Este tipo de edificio necesita su número de viviendas. Indícalo en Ocupación antes de simular.",
-      "runFailed": "La simulación falló: el backend de EnerPlanET no responde o rechazó la solicitud. Revisa la consola del navegador para más detalles.",
+      "runFailed": "No se pudo ejecutar la simulación. Inténtelo de nuevo en un momento. Si vuelve a fallar, revise los valores del edificio.",
+      "coolingInverted": "La consigna de refrigeración debe estar por encima de la de calefacción. En Calefacción y confort, baje la consigna de calefacción o suba la de refrigeración (Avanzado) y vuelva a ejecutar.",
       "exportFailed": "Error al exportar: {reason}",
       "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET.",
       "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada.",
@@ -734,7 +735,7 @@
     "select": {
       "one": "Planta {number}"
     },
-    "dwellingsMissing": "Indique el número de viviendas de cada planta incluida. Falta: planta {storeys}.",
+    "dwellingsMissing": "Con una planta excluida, indique las viviendas de cada planta que sigue en el modelo, para contar solo a las personas de esa parte. Falta: planta {storeys}.",
     "inModel": "En el modelo",
     "roomHeightTip": "La altura de cada planta, de suelo a suelo. Una planta con altura propia la conserva.",
     "useRoomHeight": "Usar la altura de sala",
@@ -755,7 +756,8 @@
     "table": {
       "storey": "Planta",
       "height": "Altura",
-      "dwellings": "Viviendas"
+      "dwellings": "Viviendas",
+      "optional": "Opcional"
     }
   },
   "help": {
@@ -764,7 +766,7 @@
     "building": "Los datos básicos del edificio: tipo, antigüedad, país, tamaño y plantas. Use Editar para corregirlos.",
     "demand": "Cuánta energía necesita el edificio en un año, por uso. El gas para cocinar se muestra aparte y no entra en el total.",
     "insulation": "Lo bien que todo el edificio retiene el calor y la clase que resulta. Elija un nivel para ver qué cambiaría una rehabilitación. Actual: el edificio tal como está. Estándar: una rehabilitación común, como aislar la cubierta y cambiar las ventanas. Avanzada: una rehabilitación profunda, cercana a un edificio nuevo. Las superficies cambiadas una a una conservan sus valores.",
-    "occupancy": "Cuántas plantas tiene el edificio, cuáles se incluyen y cuántas viviendas hay en cada una. Más personas significa más agua caliente y más calor desde dentro.",
+    "occupancy": "Cuántas plantas tiene el edificio, cuáles se incluyen, cuántas viviendas hay en cada una, quién vive allí y cómo se cocina. Más personas significa más agua caliente y más calor desde dentro.",
     "comfort": "Cuándo y a qué temperatura se mantiene el edificio: la temperatura interior, si se baja de noche o cuando no hay nadie y si se cuenta el agua caliente.",
     "outputs": "Qué resultados obtiene para cada uso: un total anual, un perfil horario o ninguno.",
     "equipment": "Qué electrodomésticos tienen las viviendas. Determinan el consumo eléctrico; los no indicados usan valores típicos.",
