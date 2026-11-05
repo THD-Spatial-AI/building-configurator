@@ -357,7 +357,7 @@
     },
     "heating": {
       "label": "Consigne de chauffage",
-      "tip": "Température intérieure minimale maintenue par le chauffage."
+      "tip": "Température intérieure minimale maintenue par le chauffage. Par exemple, à 20 °C le chauffage se met en marche dès que les pièces descendraient sous 20 °C. Chaque degré en moins économise de l'énergie de chauffage."
     },
     "setback": {
       "label": "Réduit",
@@ -365,7 +365,7 @@
     },
     "cooling": {
       "label": "Consigne de refroidissement",
-      "tip": "Température intérieure maximale maintenue par le refroidissement.",
+      "tip": "Température intérieure maximale maintenue par le refroidissement. Par exemple, à 26 °C le refroidissement se met en marche dès que les pièces dépasseraient 26 °C. Entre les deux consignes, aucun ne fonctionne, donc celle-ci doit être plus haute.",
       "inverted": "Réglez-la au-dessus de la consigne de chauffage."
     },
     "air": {
@@ -713,7 +713,8 @@
     },
     "error": {
       "dwellingsRequired": "Ce type de bâtiment requiert son nombre de logements. Renseignez-le sous Occupation avant de lancer une simulation.",
-      "runFailed": "Échec de la simulation : le backend EnerPlanET est injoignable ou a rejeté la requête. Voir la console du navigateur pour plus de détails.",
+      "runFailed": "La simulation n'a pas pu être lancée. Réessayez dans un instant. Si elle échoue encore, vérifiez les valeurs du bâtiment.",
+      "coolingInverted": "La consigne de refroidissement doit être supérieure à celle de chauffage. Dans Chauffage et confort, baissez la consigne de chauffage ou montez celle de refroidissement (Avancé), puis relancez.",
       "exportFailed": "Échec de l'export : {reason}",
       "importFailed": "Impossible de lire le fichier : {reason}. Vérifiez qu'il s'agit d'un BuEM GeoJSON valide, d'un export de l'ancien configurateur ou d'un config.json EnerPlanET.",
       "pvFailed": "Le calcul PV a échoué ; la production PV n’est donc pas affichée. La demande d’énergie ci-dessus est à jour.",

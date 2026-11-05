@@ -370,7 +370,7 @@
     },
     "heating": {
       "label": "Temperatura zadana ogrzewania",
-      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie."
+      "tip": "Najniższa temperatura wewnętrzna utrzymywana przez ogrzewanie. Na przykład przy 20 °C ogrzewanie włącza się, gdy temperatura w pomieszczeniach spadłaby poniżej 20 °C. Każdy stopień mniej oszczędza energię na ogrzewanie."
     },
     "setback": {
       "label": "Obniżaj, gdy",
@@ -378,7 +378,7 @@
     },
     "cooling": {
       "label": "Temperatura zadana chłodzenia",
-      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie.",
+      "tip": "Najwyższa temperatura wewnętrzna utrzymywana przez chłodzenie. Na przykład przy 26 °C chłodzenie włącza się, gdy temperatura w pomieszczeniach przekroczyłaby 26 °C. Między dwiema nastawami nie działa żadne z nich, więc ta musi być wyższa.",
       "inverted": "Ustaw ją powyżej temperatury zadanej ogrzewania."
     },
     "air": {
@@ -729,7 +729,8 @@
     },
     "error": {
       "dwellingsRequired": "Ten typ budynku wymaga podania liczby mieszkań. Ustaw ją w sekcji Mieszkańcy przed uruchomieniem symulacji.",
-      "runFailed": "Symulacja nie powiodła się: backend EnerPlanET jest nieosiągalny lub odrzucił żądanie. Szczegóły w konsoli przeglądarki.",
+      "runFailed": "Nie udało się uruchomić symulacji. Spróbuj ponownie za chwilę. Jeśli znów się nie uda, sprawdź wartości budynku.",
+      "coolingInverted": "Nastawa chłodzenia musi być wyższa od nastawy ogrzewania. W sekcji Ogrzewanie i komfort obniż nastawę ogrzewania lub podnieś nastawę chłodzenia (Zaawansowany), a następnie uruchom ponownie.",
       "exportFailed": "Eksport nie powiódł się: {reason}",
       "importFailed": "Nie można odczytać pliku: {reason}. Upewnij się, że to poprawny BuEM GeoJSON, eksport starszego konfiguratora lub config.json EnerPlanET.",
       "pvFailed": "Obliczenie PV nie powiodło się, więc produkcja PV nie jest wyświetlana. Zapotrzebowanie na energię powyżej jest aktualne.",

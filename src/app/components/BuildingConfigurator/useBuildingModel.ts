@@ -161,6 +161,15 @@ const HISTORY_FIELDS = new Set(['area', 'uValue', 'tilt', 'azimuth', 'gValue', '
 
 export type BuildingModel = ReturnType<typeof useBuildingModel>;
 
+/** The message key of a value that stops a BuEM run before it is sent, or null when the building can run. */
+export function runBlocker(general: Record<string, any>): string | null {
+  if (requiresResidentialUnits(general.buildingType) && !general.residential_units) return 'model.error.dwellingsRequired';
+  if (general.storeysModelled && hasDwellingsPerStorey(general.buildingType)
+    && modelledDwellings(general.storeysModelled, general.storeyDwellings) === null) return 'model.error.dwellingsModelledRequired';
+  if (general.comfortT_ub <= general.comfortT_lb) return 'model.error.coolingInverted';
+  return null;
+}
+
 /**
  * The floor area per storey after the type, year or country changes: the
  * building's own, since a new classification does not resize it, or TABULA's
@@ -596,13 +605,9 @@ export function useBuildingModel(
    * shows the stored totals the host returns.
    */
   const runSimulation = async () => {
-    if (requiresResidentialUnits(general.buildingType) && !general.residential_units) {
-      setUploadError({ key: 'model.error.dwellingsRequired' });
-      return;
-    }
-    if (general.storeysModelled && hasDwellingsPerStorey(general.buildingType)
-      && modelledDwellings(general.storeysModelled, general.storeyDwellings) === null) {
-      setUploadError({ key: 'model.error.dwellingsModelledRequired' });
+    const blocker = runBlocker(general);
+    if (blocker) {
+      setUploadError({ key: blocker });
       return;
     }
 

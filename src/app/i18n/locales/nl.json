@@ -356,7 +356,7 @@
     },
     "heating": {
       "label": "Setpoint verwarming",
-      "tip": "Laagste binnentemperatuur die de verwarming aanhoudt."
+      "tip": "Laagste binnentemperatuur die de verwarming aanhoudt. Bij 20 °C bijvoorbeeld gaat de verwarming aan zodra de ruimtes onder 20 °C zouden zakken. Elke graad lager bespaart verwarmingsenergie."
     },
     "setback": {
       "label": "Verlagen wanneer",
@@ -364,7 +364,7 @@
     },
     "cooling": {
       "label": "Setpoint koeling",
-      "tip": "Hoogste binnentemperatuur die de koeling aanhoudt.",
+      "tip": "Hoogste binnentemperatuur die de koeling aanhoudt. Bij 26 °C bijvoorbeeld gaat de koeling aan zodra de ruimtes boven 26 °C zouden stijgen. Tussen de twee setpoints draait geen van beide, dus deze moet hoger zijn.",
       "inverted": "Stel het hoger in dan het setpoint verwarming."
     },
     "air": {
@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "Dit gebouwtype vereist het aantal woningen. Stel het in onder Bewoning voordat u een simulatie start.",
-      "runFailed": "Simulatie mislukt: de EnerPlanET-backend is onbereikbaar of heeft het verzoek geweigerd. Zie de browserconsole voor details.",
+      "runFailed": "De simulatie kon niet worden uitgevoerd. Probeer het zo opnieuw. Mislukt het weer, controleer dan de waarden van het gebouw.",
+      "coolingInverted": "Het koelsetpoint moet boven het verwarmingssetpoint liggen. Verlaag onder Verwarming en comfort het verwarmingssetpoint of verhoog het koelsetpoint (Geavanceerd) en voer daarna opnieuw uit.",
       "exportFailed": "Export mislukt: {reason}",
       "importFailed": "Bestand kon niet worden gelezen: {reason}. Controleer of het een geldig BuEM GeoJSON, een oude configurator-export of een EnerPlanET config.json is.",
       "pvFailed": "De PV-berekening is mislukt, dus de PV-opwekking wordt niet getoond. De energievraag hierboven is actueel.",

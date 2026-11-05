@@ -2,7 +2,7 @@
 // the envelope. Field keys are BuEM's own names, see DEFAULT_GENERAL.
 
 import type { ReactNode } from 'react';
-import { Dropdown, FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
+import { Dropdown, FIELD_ACTION, FieldLabel, FieldRow, NumberInput, SegmentedControl, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import {
   archetypeOptions,
   buildingTypeName,
@@ -48,7 +48,7 @@ function OptionalCount({ label, value, onChange, tip, placeholder }: {
       />
       <p className="mt-1 text-[10px] text-muted-foreground">
         {value === null ? placeholder : (
-          <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>
+          <button type="button" className={FIELD_ACTION} onClick={() => onChange(null)}>
             {t('household.useDefault')}
           </button>
         )}

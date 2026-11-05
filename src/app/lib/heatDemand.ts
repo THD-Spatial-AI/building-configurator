@@ -51,7 +51,7 @@ const MAX_VARIANT_NUMBER = 3;
 
 /** ignis's label, or TABULA's name for the number where ignis gives a generic one. */
 function variantLabel(label: string, number: number): string {
-  const generic = /^(Existing state|Medium refurbishment|Advanced refurbishment|Refurbishment level \d+)$/;
+  const generic = /^(Existing state|Existing condition|Medium refurbishment|Advanced refurbishment|Refurbishment level \d+)$/;
   return generic.test(label) ? TABULA_VARIANT_NAMES[number - 1] : label;
 }
 

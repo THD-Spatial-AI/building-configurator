@@ -5,7 +5,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Info } from '@/app/components/icons';
-import { FieldLabel, InfoTip, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
+import { FIELD_ACTION, FieldLabel, InfoTip, NumberInput, SelectInput } from '@/app/components/BuildingConfigurator/shared/ui';
 import { variantName,
   REFURB_TYPES, customCount, type RefurbElementType, type RefurbStates,
 } from '@/app/lib/refurbishment';
@@ -357,7 +357,7 @@ function OptionalNumber({ label, value, onChange, unit, min, max, step, tip, def
       />
       <p className="mt-1 text-[10px] text-muted-foreground">
         {value === null ? defaultNote : (
-          <button type="button" className="cursor-pointer text-[10px] underline" onClick={() => onChange(null)}>{t('insulation.useDefault')}</button>
+          <button type="button" className={FIELD_ACTION} onClick={() => onChange(null)}>{t('insulation.useDefault')}</button>
         )}
       </p>
     </div>

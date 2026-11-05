@@ -356,7 +356,7 @@
     },
     "heating": {
       "label": "Setpoint riscaldamento",
-      "tip": "Temperatura interna minima mantenuta dal riscaldamento."
+      "tip": "Temperatura interna minima mantenuta dal riscaldamento. Ad esempio, a 20 °C il riscaldamento si accende quando gli ambienti scenderebbero sotto i 20 °C. Ogni grado in meno fa risparmiare energia per il riscaldamento."
     },
     "setback": {
       "label": "Ridurla quando",
@@ -364,7 +364,7 @@
     },
     "cooling": {
       "label": "Setpoint raffrescamento",
-      "tip": "Temperatura interna massima mantenuta dal raffrescamento.",
+      "tip": "Temperatura interna massima mantenuta dal raffrescamento. Ad esempio, a 26 °C il raffrescamento si accende quando gli ambienti supererebbero i 26 °C. Tra i due setpoint nessuno dei due è attivo, quindi questo deve essere più alto.",
       "inverted": "Impostalo sopra il setpoint di riscaldamento."
     },
     "air": {
@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "Questo tipo di edificio richiede il numero di alloggi. Impostalo in Occupazione prima di avviare una simulazione.",
-      "runFailed": "Simulazione non riuscita: il backend EnerPlanET non è raggiungibile o ha rifiutato la richiesta. Vedi la console del browser per i dettagli.",
+      "runFailed": "Non è stato possibile eseguire la simulazione. Riprova tra poco. Se non riesce di nuovo, controlla i valori dell'edificio.",
+      "coolingInverted": "Il setpoint di raffrescamento deve essere superiore a quello di riscaldamento. In Riscaldamento e comfort, abbassa il setpoint di riscaldamento o alza quello di raffrescamento (Avanzato), poi esegui di nuovo.",
       "exportFailed": "Esportazione non riuscita: {reason}",
       "importFailed": "Impossibile leggere il file: {reason}. Verifica che sia un BuEM GeoJSON valido, un export del configuratore legacy o un config.json di EnerPlanET.",
       "pvFailed": "Il calcolo FV non è riuscito, quindi la produzione FV non è mostrata. Il fabbisogno energetico sopra è aggiornato.",

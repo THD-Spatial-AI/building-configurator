@@ -56,7 +56,13 @@ describe('StoreysModelled', () => {
     expect(input(html, 'Storey 0: Height')).toContain('placeholder="2.5"');
     expect(input(html, 'Storey 1: Height')).toContain('value="3.2"');
     expect(html).toContain('aria-label="Storey 1: Use room height"');
-    expect(html).not.toContain('aria-label="Storey 0: Use room height"');
+    expect(html).not.toMatch(/<button[^>]*aria-label="Storey 1: Use room height"[^>]*disabled/);
+  });
+
+  it('keeps the reset\'s place before the height, hidden until the storey has its own, so the arrows never move', () => {
+    const html = render({ heights: { values: { 2: 3.2 }, onChange: () => {} } });
+    expect(html).toMatch(/<button[^>]*aria-label="Storey 0: Use room height"[^>]*disabled=""[^>]*class="[^"]*\binvisible\b/);
+    expect(html.indexOf('aria-label="Storey 1: Use room height"')).toBeLessThan(html.indexOf('aria-label="Storey 1: Height"'));
   });
 
   it('writes the room height default with the language\'s decimal separator', () => {
@@ -145,6 +151,15 @@ describe('StoreysModelled with an attic', () => {
     expect(render({ storeys: 1, modelled: null })).not.toContain('Attic');
   });
 
+  it('shows the attic dwellings as optional, with storeys left out or not', () => {
+    const dwellings = { values: {}, onChange: () => {} };
+    for (const modelled of [null, [1, 2]]) {
+      const html = render({ modelled, dwellings, attic: { ...attic, onDwellingsChange: () => {} } });
+      expect(input(html, 'Attic: Dwellings')).toContain('placeholder="Optional"');
+      expect(input(html, 'Attic: Dwellings')).not.toContain('aria-invalid');
+    }
+  });
+
   it('gives the attic dwellings in its row and a floor area beneath while it is in, but no height', () => {
     const dwellings = { values: {}, onChange: () => {} };
     const html = render({ dwellings, attic: { ...attic, onDwellingsChange: () => {} } });
@@ -174,6 +189,7 @@ describe('StoreysModelled with a measured attic', () => {
   it('offers the measured area without counting it', () => {
     const html = render({ selected: [4], attic });
     expect(html).toContain('Use measured (25.0 m²)');
+    expect(html).toMatch(/<button[^>]*class="[^"]*\bborder border-border\b[^"]*"[^>]*>Use measured/);
     expect(html).toContain('placeholder="Not counted"');
     expect(html).toContain('2 × 80 m² = 160 m²');
   });
