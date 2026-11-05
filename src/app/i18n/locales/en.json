@@ -709,7 +709,8 @@
     },
     "error": {
       "dwellingsRequired": "This building type needs its number of dwellings. Set it under Occupancy before running a simulation.",
-      "runFailed": "Simulation failed: the EnerPlanET backend is unreachable or rejected the request. See the browser console for details.",
+      "runFailed": "The simulation could not be run. Try again in a moment. If it fails again, check the building's values.",
+      "coolingInverted": "The cooling setpoint must be above the heating setpoint. Under Heating and comfort, lower the heating setpoint or raise the cooling setpoint (Advanced), then run again.",
       "exportFailed": "Export failed: {reason}",
       "importFailed": "Could not parse file: {reason}. Ensure it is a valid BuEM GeoJSON, legacy configurator export, or EnerPlanET config.json.",
       "pvFailed": "The PV run failed, so PV generation is not shown. The energy demand above is up to date.",

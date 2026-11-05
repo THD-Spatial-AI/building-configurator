@@ -713,7 +713,8 @@
     },
     "error": {
       "dwellingsRequired": "Este tipo de edificio necesita su número de viviendas. Indícalo en Ocupación antes de simular.",
-      "runFailed": "La simulación falló: el backend de EnerPlanET no responde o rechazó la solicitud. Revisa la consola del navegador para más detalles.",
+      "runFailed": "No se pudo ejecutar la simulación. Inténtelo de nuevo en un momento. Si vuelve a fallar, revise los valores del edificio.",
+      "coolingInverted": "La consigna de refrigeración debe estar por encima de la de calefacción. En Calefacción y confort, baje la consigna de calefacción o suba la de refrigeración (Avanzado) y vuelva a ejecutar.",
       "exportFailed": "Error al exportar: {reason}",
       "importFailed": "No se pudo leer el archivo: {reason}. Comprueba que sea un BuEM GeoJSON válido, una exportación del configurador antiguo o un config.json de EnerPlanET.",
       "pvFailed": "El cálculo FV ha fallado, así que no se muestra la generación FV. La demanda de energía de arriba está actualizada.",

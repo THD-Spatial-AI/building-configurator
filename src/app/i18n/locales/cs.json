@@ -729,7 +729,8 @@
     },
     "error": {
       "dwellingsRequired": "Tento typ budovy vyžaduje počet bytů. Před spuštěním simulace jej nastavte v sekci Obsazenost.",
-      "runFailed": "Simulace selhala: backend EnerPlanET je nedostupný nebo požadavek odmítl. Podrobnosti najdete v konzoli prohlížeče.",
+      "runFailed": "Simulaci se nepodařilo spustit. Zkuste to za chvíli znovu. Pokud se to znovu nepodaří, zkontrolujte hodnoty budovy.",
+      "coolingInverted": "Žádaná teplota chlazení musí být vyšší než žádaná teplota vytápění. V části Vytápění a komfort snižte žádanou teplotu vytápění nebo zvyšte žádanou teplotu chlazení (Pokročilý) a spusťte znovu.",
       "exportFailed": "Export selhal: {reason}",
       "importFailed": "Soubor nelze načíst: {reason}. Ověřte, že jde o platný BuEM GeoJSON, starší export konfigurátoru nebo config.json z EnerPlanET.",
       "pvFailed": "Výpočet FV se nezdařil, výroba FV se proto nezobrazuje. Energetická potřeba výše je aktuální.",
