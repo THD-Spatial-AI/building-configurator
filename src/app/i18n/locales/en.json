@@ -356,7 +356,7 @@
     },
     "heating": {
       "label": "Heating setpoint",
-      "tip": "Lowest indoor temperature the heating keeps."
+      "tip": "Lowest indoor temperature the heating keeps. For example, at 20 °C the heating comes on whenever the rooms would drop below 20 °C. Each degree lower saves heating energy."
     },
     "setback": {
       "label": "Lower it when",
@@ -364,7 +364,7 @@
     },
     "cooling": {
       "label": "Cooling setpoint",
-      "tip": "Highest indoor temperature the cooling keeps.",
+      "tip": "Highest indoor temperature the cooling keeps. For example, at 26 °C the cooling comes on whenever the rooms would rise above 26 °C. Between the two setpoints neither runs, so keep this one higher.",
       "inverted": "Set it above the heating setpoint."
     },
     "air": {

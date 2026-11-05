@@ -357,7 +357,7 @@
     },
     "heating": {
       "label": "Consigne de chauffage",
-      "tip": "Température intérieure minimale maintenue par le chauffage."
+      "tip": "Température intérieure minimale maintenue par le chauffage. Par exemple, à 20 °C le chauffage se met en marche dès que les pièces descendraient sous 20 °C. Chaque degré en moins économise de l'énergie de chauffage."
     },
     "setback": {
       "label": "Réduit",
@@ -365,7 +365,7 @@
     },
     "cooling": {
       "label": "Consigne de refroidissement",
-      "tip": "Température intérieure maximale maintenue par le refroidissement.",
+      "tip": "Température intérieure maximale maintenue par le refroidissement. Par exemple, à 26 °C le refroidissement se met en marche dès que les pièces dépasseraient 26 °C. Entre les deux consignes, aucun ne fonctionne, donc celle-ci doit être plus haute.",
       "inverted": "Réglez-la au-dessus de la consigne de chauffage."
     },
     "air": {

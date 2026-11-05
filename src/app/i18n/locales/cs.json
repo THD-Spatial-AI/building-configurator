@@ -370,7 +370,7 @@
     },
     "heating": {
       "label": "Žádaná teplota vytápění",
-      "tip": "Nejnižší vnitřní teplota, kterou vytápění udržuje."
+      "tip": "Nejnižší vnitřní teplota, kterou vytápění udržuje. Například při 20 °C se vytápění zapne, jakmile by teplota v místnostech klesla pod 20 °C. Každý stupeň méně šetří energii na vytápění."
     },
     "setback": {
       "label": "Útlum, když",
@@ -378,7 +378,7 @@
     },
     "cooling": {
       "label": "Žádaná teplota chlazení",
-      "tip": "Nejvyšší vnitřní teplota, kterou chlazení udržuje.",
+      "tip": "Nejvyšší vnitřní teplota, kterou chlazení udržuje. Například při 26 °C se chlazení zapne, jakmile by teplota v místnostech přesáhla 26 °C. Mezi oběma žádanými teplotami neběží ani jedno, proto musí být tato vyšší.",
       "inverted": "Nastavte ji nad žádanou teplotu vytápění."
     },
     "air": {
