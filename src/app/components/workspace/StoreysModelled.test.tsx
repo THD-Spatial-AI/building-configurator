@@ -56,7 +56,13 @@ describe('StoreysModelled', () => {
     expect(input(html, 'Storey 0: Height')).toContain('placeholder="2.5"');
     expect(input(html, 'Storey 1: Height')).toContain('value="3.2"');
     expect(html).toContain('aria-label="Storey 1: Use room height"');
-    expect(html).not.toContain('aria-label="Storey 0: Use room height"');
+    expect(html).not.toMatch(/<button[^>]*aria-label="Storey 1: Use room height"[^>]*disabled/);
+  });
+
+  it('keeps the reset\'s place before the height, hidden until the storey has its own, so the arrows never move', () => {
+    const html = render({ heights: { values: { 2: 3.2 }, onChange: () => {} } });
+    expect(html).toMatch(/<button[^>]*aria-label="Storey 0: Use room height"[^>]*disabled=""[^>]*class="[^"]*\binvisible\b/);
+    expect(html.indexOf('aria-label="Storey 1: Use room height"')).toBeLessThan(html.indexOf('aria-label="Storey 1: Height"'));
   });
 
   it('writes the room height default with the language\'s decimal separator', () => {
