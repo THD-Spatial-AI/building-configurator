@@ -145,6 +145,15 @@ describe('StoreysModelled with an attic', () => {
     expect(render({ storeys: 1, modelled: null })).not.toContain('Attic');
   });
 
+  it('shows the attic dwellings as optional, with storeys left out or not', () => {
+    const dwellings = { values: {}, onChange: () => {} };
+    for (const modelled of [null, [1, 2]]) {
+      const html = render({ modelled, dwellings, attic: { ...attic, onDwellingsChange: () => {} } });
+      expect(input(html, 'Attic: Dwellings')).toContain('placeholder="Optional"');
+      expect(input(html, 'Attic: Dwellings')).not.toContain('aria-invalid');
+    }
+  });
+
   it('gives the attic dwellings in its row and a floor area beneath while it is in, but no height', () => {
     const dwellings = { values: {}, onChange: () => {} };
     const html = render({ dwellings, attic: { ...attic, onDwellingsChange: () => {} } });

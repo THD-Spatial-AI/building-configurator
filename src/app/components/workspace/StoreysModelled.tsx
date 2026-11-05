@@ -262,6 +262,7 @@ export function StoreysModelled({
                       <DecimalInput
                         integer min={1}
                         value={attic.dwellings ?? null}
+                        placeholder={t('storeys.table.optional')}
                         aria-label={`${t('storeys.attic.label')}: ${t('storeys.table.dwellings')}`}
                         onChange={(count) => attic.onDwellingsChange?.(count && count >= 1 ? count : null)}
                         className={`${TEXT_INPUT} w-full text-right`}
