@@ -111,6 +111,15 @@ describe('a step worked through', () => {
       { label: 'Hot water', value: 'Included' },
     ]);
   });
+
+  it('lists the cooling setpoint with heating and comfort in Advanced, where its field is', () => {
+    const general = { buildingType: 'Single-family House', comfortT_lb: 18, comfortT_ub: 26, include_dhw: true, setback_profile: 'none' };
+    expect(comfortSummary(t, general, true).slice(0, 2)).toEqual([
+      { label: 'Heating setpoint', value: '18 °C' },
+      { label: 'Cooling setpoint', value: '26 °C' },
+    ]);
+    expect(comfortSummary(t, general).map((fact) => fact.label)).not.toContain('Cooling setpoint');
+  });
 });
 
 describe('Done beneath a step', () => {

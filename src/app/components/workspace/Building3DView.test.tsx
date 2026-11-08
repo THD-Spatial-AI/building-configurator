@@ -24,4 +24,15 @@ describe('Building3DView', () => {
     expect(html).toContain('Geschosse und Haushalt');
     expect(html).not.toContain('Storeys and household');
   });
+
+  it('names the last step after its results and appliances, and after its results alone for a service building', () => {
+    const render = (buildingType: string) => {
+      const typed = adaptBuemFeature(serializeToBuemFeature({ ...identity, buildingType }, DEFAULT_ELEMENTS, { ...general, buildingType }));
+      return renderToStaticMarkup(<Building3DView building={typed} geometry={null} services={services} onExit={() => {}} defaultMode="advanced" />);
+    };
+    expect(render('Single-family House')).toContain('Results and appliances');
+    const school = render('School');
+    expect(school).toContain('5. Results');
+    expect(school).not.toContain('appliances');
+  });
 });

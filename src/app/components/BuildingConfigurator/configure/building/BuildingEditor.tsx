@@ -192,10 +192,11 @@ export function occupancySummary(t: Translate, general: Record<string, any>): St
 }
 
 /** The facts a closed heating and comfort step shows. */
-export function comfortSummary(t: Translate, general: Record<string, any>): StepFact[] {
+export function comfortSummary(t: Translate, general: Record<string, any>, advanced = false): StepFact[] {
   const setback = setbackOptions(t).find((option) => option.value === general.setback_profile);
   return [
     { label: t('comfort.heating.label'), value: `${general.comfortT_lb} °C` },
+    ...(advanced ? [{ label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C` }] : []),
     ...(isServiceBuildingType(general.buildingType) ? [] : [
       { label: t('comfort.hotWater.label'), value: t(general.include_dhw === false ? 'comfort.hotWater.off' : 'comfort.hotWater.on') },
     ]),
@@ -219,17 +220,19 @@ export function useBuildingSteps({
       </div>
     </SectionCard>
   );
+  const service = isServiceBuildingType(general.buildingType);
+  // A service building has no appliances card, so its last step holds only the results.
+  const lastTitle = t(service ? 'editor.advancedMore.titleService' : 'editor.advancedMore.title');
   const advancedPointer = mode === 'simple' && onShowAdvanced && (
     <button
       type="button"
       onClick={onShowAdvanced}
       className="mt-3 flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-dashed border-muted-foreground/40 px-3 py-2.5 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted"
     >
-      <span><b className="text-foreground">{t('editor.advancedMore.title')}</b> · {t('editor.advancedMore.detail')}</span>
+      <span><b className="text-foreground">{lastTitle}</b> · {t('editor.advancedMore.detail')}</span>
       <span className="shrink-0 font-semibold text-primary">{t('view.mode.advanced')}</span>
     </button>
   );
-  const service = isServiceBuildingType(general.buildingType);
 
   const steps: Step[] = [];
   if (insulation) {
@@ -270,17 +273,16 @@ export function useBuildingSteps({
     label: SECTION_LABELS.comfort(t),
     topic: SECTION_TOPICS.comfort,
     status: comfortStatus(general),
-    summary: comfortSummary(t, general),
+    summary: comfortSummary(t, general, mode === 'advanced'),
     content: <>{card('comfort')}{advancedPointer}</>,
   });
   if (mode === 'advanced') {
     steps.push({
       key: 'advanced',
-      label: t('editor.advancedMore.title'),
+      label: lastTitle,
       topic: TOPICS.building,
       status: 'complete',
       summary: [
-        { label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C` },
         { label: t('steps.summary.solver'), value: t(general.use_milp ? 'steps.summary.milp' : 'steps.summary.sparse') },
       ],
       content: (

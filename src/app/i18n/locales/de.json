@@ -331,7 +331,8 @@
     },
     "insulationTitle": "Energetischer Standard",
     "advancedMore": {
-      "title": "Thermik und Simulation",
+      "title": "Ergebnisse und Geräte",
+      "titleService": "Ergebnisse",
       "detail": "Profile, Geräte und Löser behalten ihre Standardwerte"
     }
   },
@@ -415,7 +416,7 @@
     "equipment": {
       "yes": "Ja",
       "no": "Nein",
-      "intro": "Standard überlässt jedes Gerät der BuEM-Ausstattungsstatistik.",
+      "intro": "Standard zählt jedes Gerät so oft, wie ähnliche Haushalte es besitzen.",
       "sameInEveryDwelling": "Jede Wohneinheit im Gebäude erhält dieselben Geräte.",
       "televisions": "Fernseher",
       "resetAll": "Alle auf Standard zurücksetzen",
@@ -424,7 +425,7 @@
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Kochgas wird nur beim Kochen mit Gas ausgewiesen.",
-      "thermalOff": "Ohne Heizen oder Kühlen überspringt BuEM das thermische Modell: Flächen und Wetter werden nicht verwendet."
+      "thermalOff": "Sind Heizen und Kühlen beide aus, werden die Flächen des Gebäudes und das Wetter nicht verwendet."
     }
   },
   "insulation": {

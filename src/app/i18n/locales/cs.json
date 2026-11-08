@@ -345,7 +345,8 @@
     },
     "insulationTitle": "Energetická úroveň",
     "advancedMore": {
-      "title": "Tepelné vlastnosti a simulace",
+      "title": "Výsledky a spotřebiče",
+      "titleService": "Výsledky",
       "detail": "profily, spotřebiče a řešič si ponechávají výchozí hodnoty"
     }
   },
@@ -429,7 +430,7 @@
     "equipment": {
       "yes": "Ano",
       "no": "Ne",
-      "intro": "Výchozí nastavení ponechá každý spotřebič na statistice vybavenosti BuEM.",
+      "intro": "Výchozí nastavení počítá každý spotřebič tak často, jak ho vlastní podobné domácnosti.",
       "sameInEveryDwelling": "Všechny byty v budově mají stejné spotřebiče.",
       "televisions": "Televizory",
       "resetAll": "Obnovit vše na výchozí",
@@ -438,7 +439,7 @@
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Plyn na vaření se vykazuje jen při vaření na plynu.",
-      "thermalOff": "Bez vytápění a chlazení BuEM vynechá tepelný model: plochy a počasí se nepoužijí."
+      "thermalOff": "Při vypnutém vytápění i chlazení se plochy budovy ani počasí nepoužijí."
     }
   },
   "insulation": {
