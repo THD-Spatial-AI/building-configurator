@@ -256,7 +256,9 @@
     },
     "followsModel": "PV podąża za {tilt}° modelu 3D; nachylenie i orientacja zmienione powyżej trafiają tylko do BuEM.",
     "options": {
-      "search": "Szukaj w opcjach fotowoltaicznych"
+      "search": "Szukaj w opcjach fotowoltaicznych",
+      "noMatch": "Żadna opcja fotowoltaiczna nie pasuje do „{query}”.",
+      "clear": "Wyczyść wyszukiwanie"
     },
     "noFitOn": {
       "one": "Na {surfaces} nie mieści się żaden cały moduł PV, więc nie ma tam PV. Wybierz mniejszy produkt lub inną powierzchnię.",

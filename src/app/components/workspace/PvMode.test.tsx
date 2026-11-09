@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { ProductValues, PvOverview } from './PvOverview';
+import { NoMatch, ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologiesTab } from './TechnologiesTab';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -192,6 +192,11 @@ describe('PvOverview with a catalogue', () => {
     expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
 
+  it('keeps the roof choices clear of the total pinned below them when they scroll into view', () => {
+    const menu = html.match(/<span class="([^"]*)"><button[^>]*>All roof surfaces/);
+    expect(menu?.[1]).toContain('scroll-mb-20');
+  });
+
   it('opens the catalogue while no surface has PV, so its products can be dragged straight away', () => {
     const empty = renderToStaticMarkup(
       <PvOverview pv={{ ...withCatalogue, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="simple" onSelect={() => {}} />,
@@ -207,6 +212,12 @@ describe('PvOverview with a catalogue', () => {
     expect(empty).toMatch(/<button[^>]*aria-label="Sort by"[^>]*aria-expanded="false"/);
     expect(empty).not.toContain('type="search"');
     expect(empty).not.toContain('<select');
+  });
+
+  it('says when no option matches the search, and offers to clear it', () => {
+    const html = renderToStaticMarkup(<NoMatch query="mono" onClear={() => {}} />);
+    expect(html).toContain('No photovoltaic option matches “mono”.');
+    expect(html).toMatch(/<button[^>]*>Clear the search<\/button>/);
   });
 
   it('keeps each installed product\'s values behind its edit button', () => {

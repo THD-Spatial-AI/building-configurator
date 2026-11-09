@@ -4,6 +4,13 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.17.1] - 2026-11-09
+
+### Fixed
+
+- A PV options search that matches nothing says so and offers "Clear the search", also while the search field is hidden behind its icon. It used to leave an empty list.
+- Opening "Add PV to roofs" low in a short panel scrolls its choices into view, above the technologies total pinned to the panel bottom.
+
 ## [0.17.0] - 2026-11-09
 
 ### Added

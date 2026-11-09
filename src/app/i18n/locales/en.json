@@ -250,7 +250,9 @@
     },
     "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
     "options": {
-      "search": "Search the photovoltaic options"
+      "search": "Search the photovoltaic options",
+      "noMatch": "No photovoltaic option matches “{query}”.",
+      "clear": "Clear the search"
     },
     "noFitOn": {
       "one": "No whole PV module fits on {surfaces}, so it has no PV. Choose a smaller product or another surface.",
