@@ -836,12 +836,16 @@ interface DropdownProps {
   children: React.ReactNode;
   /** "recommend" draws it in amber with a lightbulb, the colour of what is suggested for PV. */
   tone?: 'recommend';
+  /** Open when first shown; the user opens and closes it from there. */
+  defaultOpen?: boolean;
+  /** A control in the header, usable while closed; its clicks do not open or close the list. */
+  action?: React.ReactNode;
 }
 
-export function Dropdown({ title, children, tone }: DropdownProps) {
+export function Dropdown({ title, children, tone, defaultOpen, action }: DropdownProps) {
   const recommend = tone === 'recommend';
   return (
-    <details className={cn(
+    <details open={defaultOpen} className={cn(
       'group rounded-lg border shadow-xs open:shadow-sm',
       recommend ? 'border-amber-400 bg-amber-50 dark:border-amber-500/60 dark:bg-amber-500/10' : 'border-border bg-background',
     )}>
@@ -851,6 +855,7 @@ export function Dropdown({ title, children, tone }: DropdownProps) {
       )}>
         {recommend && <Lightbulb className="size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />}
         <span className="min-w-0 flex-1">{title}</span>
+        {action}
         <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
       </summary>
       <div className="flex flex-col gap-2 rounded-b-lg border-t border-border bg-muted/40 p-2">{children}</div>
@@ -865,9 +870,11 @@ interface SearchFieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  /** Takes focus when shown, as when opened from its icon. */
+  autoFocus?: boolean;
 }
 
-export function SearchField({ label, value, onChange }: SearchFieldProps) {
+export function SearchField({ label, value, onChange, autoFocus }: SearchFieldProps) {
   return (
     <div className="relative">
       <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
@@ -876,6 +883,7 @@ export function SearchField({ label, value, onChange }: SearchFieldProps) {
         aria-label={label}
         placeholder={label}
         value={value}
+        autoFocus={autoFocus}
         onChange={(e) => onChange(e.target.value)}
         className="h-9 w-full rounded-lg border border-border bg-background pl-8 pr-3 text-[12px] text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50"
       />

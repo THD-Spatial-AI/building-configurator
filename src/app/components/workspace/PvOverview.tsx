@@ -2,8 +2,8 @@
 // installed (each with its values behind an edit button), the products to drag
 // onto a surface, and the surfaces that take PV.
 
-import { useState, type ReactNode } from 'react';
-import { ChevronDown, CircleHelp, GripVertical, Pencil, Sun } from '@/app/components/icons';
+import { useState, type MouseEvent, type ReactNode } from 'react';
+import { ArrowUpDown, ChevronDown, CircleHelp, GripVertical, Pencil, Plus, Search, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -76,56 +76,123 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
   const offered = new Set(offeredIds(pv, available));
   const entries = Object.entries(pv.surfaces).filter(([id]) => offered.has(id));
   const installedCount = fittedPvIds(pv.surfaces, layouts).length;
-  const suggestedIds = entries.filter(([, s]) => s.state === 'suggested').map(([id]) => id);
-  const ordered = STATE_ORDER.flatMap((state) => entries
+  const ordered = (group: [string, PvSurface][]) => STATE_ORDER.flatMap((state) => group
     .filter(([, surface]) => surface.state === state)
     .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
+  const groups = [
+    { key: 'roof', entries: ordered(entries.filter(([id, surface]) => isRoof(id, elements, surface))) },
+    { key: 'wall', entries: ordered(entries.filter(([id, surface]) => !isRoof(id, elements, surface))) },
+  ].filter((group) => group.entries.length > 0);
 
   return (
-    <Dropdown title={t('pv.surfaces.toggle', { name: t('pv.surfaces.name'), installed: installedCount, total: entries.length })}>
-      <ul className={DROPDOWN_LIST}>
-        {ordered.map(([id, surface]) => {
-          const name = surfaceName(id, elements, pv.surfaces);
-          const installed = surface.state === 'installed';
-          const kwp = layouts[id]?.kwp ?? surface.maxKwp;
-          return (
-            <li key={id} className={cn(OPTION_ROW, 'flex items-center gap-2.5', surface.state === 'suggested' && 'border-amber-500/40 bg-amber-500/5')}>
-              <div className="min-w-0 flex-1">
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => onSelect(id)}
-                    className="min-w-0 cursor-pointer truncate text-left text-[13px] font-semibold text-foreground hover:underline"
-                  >{name}</button>
-                  {surface.state === 'suggested' && (
-                    <span className="shrink-0 rounded-full bg-amber-500/15 px-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">{t('pv.state.suggested')}</span>
-                  )}
-                </div>
-                <div className="truncate text-[11px] text-muted-foreground">
-                  <GeometryLine id={id} elements={elements} surface={surface} />
-                </div>
-              </div>
-              {installed && layouts[id]?.count === 0 ? (
-                <span className="shrink-0 text-[11px] font-medium text-destructive">{t('pv.card.noFitShort')}</span>
-              ) : (
-                <span className={cn('shrink-0 text-[12px]', installed ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
-                  {installed ? `${format(kwp, 1)} kWp` : t('pv.upTo', { kwp: format(kwp, 1) })}
-                </span>
-              )}
-              <Switch on={installed} label={t('pv.toggle', { surface: name })} onChange={(on) => pv.onToggle(id, on)} />
-            </li>
-          );
-        })}
-      </ul>
-      <div>
-        <button
-          type="button"
-          disabled={suggestedIds.length === 0}
-          onClick={() => suggestedIds.forEach((id) => pv.onToggle(id, true))}
-          className="h-8 cursor-pointer rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-        >{t('pv.useSuggested')}</button>
+    <Dropdown
+      title={t('pv.surfaces.toggle', { name: t('pv.surfaces.name'), installed: installedCount, total: entries.length })}
+      action={<AddToRoofs pv={pv} available={available} elements={elements} />}
+    >
+      <div className={DROPDOWN_LIST}>
+        {groups.map((group) => (
+          <div key={group.key} className="flex flex-col gap-1">
+            <h4 className="m-0 px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t(`surface.group.${group.key}`)}</h4>
+            <SurfaceRows entries={group.entries} pv={pv} elements={elements} layouts={layouts} onSelect={onSelect} />
+          </div>
+        ))}
       </div>
     </Dropdown>
+  );
+}
+
+/** The rows of one group of surfaces, each with its geometry, capacity and switch. */
+function SurfaceRows({ entries, pv, elements, layouts, onSelect }: {
+  entries: [string, PvSurface][];
+  pv: PvMode;
+  elements: Record<string, BuildingElement>;
+  layouts: Readonly<Record<string, PvLayout>>;
+  onSelect: (surfaceId: string) => void;
+}) {
+  const t = useT();
+  const format = useFormatNumber();
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {entries.map(([id, surface]) => {
+        const name = surfaceName(id, elements, pv.surfaces);
+        const installed = surface.state === 'installed';
+        const kwp = layouts[id]?.kwp ?? surface.maxKwp;
+        return (
+          <li key={id} className={cn(OPTION_ROW, 'flex items-center gap-2.5', surface.state === 'suggested' && 'border-amber-500/40 bg-amber-500/5')}>
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => onSelect(id)}
+                  className="min-w-0 cursor-pointer truncate text-left text-[13px] font-semibold text-foreground hover:underline"
+                >{name}</button>
+                {surface.state === 'suggested' && (
+                  <span className="shrink-0 rounded-full bg-amber-500/15 px-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">{t('pv.state.suggested')}</span>
+                )}
+              </div>
+              <div className="truncate text-[11px] text-muted-foreground">
+                <GeometryLine id={id} elements={elements} surface={surface} />
+              </div>
+            </div>
+            {installed && layouts[id]?.count === 0 ? (
+              <span className="shrink-0 text-[11px] font-medium text-destructive">{t('pv.card.noFitShort')}</span>
+            ) : (
+              <span className={cn('shrink-0 text-[12px]', installed ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
+                {installed ? `${format(kwp, 1)} kWp` : t('pv.upTo', { kwp: format(kwp, 1) })}
+              </span>
+            )}
+            <Switch on={installed} label={t('pv.toggle', { surface: name })} onChange={(on) => pv.onToggle(id, on)} />
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+const CHOICE = 'h-8 cursor-pointer rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50';
+
+/**
+ * A roof by the building's own element type; a surface of the building's other
+ * 3D parts has no element, so its tilt decides, walls being vertical.
+ */
+function isRoof(id: string, elements: Record<string, BuildingElement>, surface: PvSurface): boolean {
+  const element = elements[id];
+  if (element) return element.type === 'roof';
+  return surface.tilt !== undefined && surface.tilt < 90;
+}
+
+/** Adds PV to the offered roof surfaces without it: all of them, or only the suggested ones. Walls are never included. */
+function AddToRoofs({ pv, available, elements }: {
+  pv: PvMode;
+  available?: ReadonlySet<string>;
+  elements: Record<string, BuildingElement>;
+}) {
+  const t = useT();
+  const roofs = offeredIds(pv, available).filter((id) => pv.surfaces[id].state !== 'installed' && isRoof(id, elements, pv.surfaces[id]));
+  const best = roofs.filter((id) => pv.surfaces[id].state === 'suggested');
+  const [open, setOpen] = useState(false);
+  // Inside the list's header: a click here must not open or close the list.
+  const inHeader = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); };
+  const add = (ids: string[]) => (event: MouseEvent) => {
+    inHeader(event);
+    ids.forEach((id) => pv.onToggle(id, true));
+    setOpen(false);
+  };
+  return (
+    <span className="relative shrink-0" onClick={inHeader}>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={(event) => { inHeader(event); setOpen(!open); }}
+        className="flex h-7 cursor-pointer items-center gap-1 rounded-md bg-primary px-2.5 text-[11px] font-semibold text-primary-foreground hover:opacity-90"
+      >
+        <Plus className="size-3.5" aria-hidden />{t('pv.addRoofs.button')}
+      </button>
+      <span className={cn(open ? 'flex' : 'hidden', 'absolute right-0 top-full z-20 mt-1 w-max flex-col gap-1.5 rounded-md border border-border bg-card p-2 shadow-lg')}>
+        <button type="button" disabled={roofs.length === 0} onClick={add(roofs)} className={CHOICE}>{t('pv.addRoofs.all', { count: roofs.length })}</button>
+        <button type="button" disabled={best.length === 0} onClick={add(best)} className={CHOICE}>{t('pv.addRoofs.best', { count: best.length })}</button>
+      </span>
+    </span>
   );
 }
 
@@ -216,7 +283,7 @@ function InstallHelp({ hasPv }: { hasPv: boolean }) {
     surfaces: t('pv.surfaces.name'),
     install: t('pv.thisSurface'),
     suggested: t('pv.state.suggested'),
-    useSuggested: t('pv.useSuggested'),
+    addRoofs: t('pv.addRoofs.button'),
   };
   return (
     <details open={!hasPv} className="group rounded-lg border border-sky-500/30 bg-sky-500/5">
@@ -243,23 +310,32 @@ function Catalogue({ pv }: { pv: PvMode }) {
   const format = useFormatNumber();
   const [query, setQuery] = useState('');
   const [order, setOrder] = useState<ProductOrder>('name');
+  const [tool, setTool] = useState<'search' | 'sort' | null>(null);
+  // Read once, so placing the first product does not close the list the user drags from.
+  const [openAtStart] = useState(() => Object.values(pv.surfaces).every((surface) => surface.state !== 'installed'));
   if (!pv.catalogue?.length) return null;
   const needle = query.trim().toLowerCase();
   const found = needle ? pv.catalogue.filter((product) => productName(product).toLowerCase().includes(needle)) : pv.catalogue;
   const shown = sortProducts(found, order, pv.module ?? DEFAULT_PV_MODULE);
   return (
-    <Dropdown title={t('pv.catalogue.toggle', { name: t('pv.catalogue.name'), count: pv.catalogue.length })}>
-        <div className="flex gap-2">
-          <div className="min-w-0 flex-1"><SearchField label={t('pv.options.search')} value={query} onChange={setQuery} /></div>
-          <div className="w-40 shrink-0">
-            <select className="cfg-select" aria-label={t('pv.sort.label')} value={order} onChange={(e) => setOrder(e.target.value as ProductOrder)}>
-              {SORT_ORDERS.map((option) => <option key={option} value={option}>{t(`pv.sort.${option}`)}</option>)}
-            </select>
-          </div>
+    <Dropdown defaultOpen={openAtStart} title={t('pv.catalogue.toggle', { name: t('pv.catalogue.name'), count: pv.catalogue.length })}>
+        <div className="flex items-center gap-1.5">
+          <p className="flex min-w-0 flex-1 items-center gap-1.5 text-[11px] font-medium leading-snug text-foreground">
+            <GripVertical className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{t('pv.catalogue.hint')}
+          </p>
+          <ToolButton label={t('pv.options.search')} active={tool === 'search' || needle !== ''} open={tool === 'search'} onClick={() => setTool(tool === 'search' ? null : 'search')}>
+            <Search className="size-3.5" aria-hidden />
+          </ToolButton>
+          <ToolButton label={t('pv.sort.label')} active={tool === 'sort' || order !== 'name'} open={tool === 'sort'} onClick={() => setTool(tool === 'sort' ? null : 'sort')}>
+            <ArrowUpDown className="size-3.5" aria-hidden />
+          </ToolButton>
         </div>
-        <p className="flex items-center gap-1.5 text-[11px] font-medium leading-snug text-foreground">
-          <GripVertical className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{t('pv.catalogue.hint')}
-        </p>
+        {tool === 'search' && <SearchField label={t('pv.options.search')} value={query} onChange={setQuery} autoFocus />}
+        {tool === 'sort' && (
+          <select className="cfg-select" aria-label={t('pv.sort.label')} value={order} onChange={(e) => setOrder(e.target.value as ProductOrder)}>
+            {SORT_ORDERS.map((option) => <option key={option} value={option}>{t(`pv.sort.${option}`)}</option>)}
+          </select>
+        )}
         <ul className={DROPDOWN_LIST}>
           {shown.map((product) => {
             const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
@@ -285,6 +361,29 @@ function Catalogue({ pv }: { pv: PvMode }) {
           })}
         </ul>
     </Dropdown>
+  );
+}
+
+/** An icon that shows or hides one of the catalogue's tools; `active` while open or while its setting is in use. */
+function ToolButton({ label, active, open, onClick, children }: {
+  label: string;
+  active: boolean;
+  open: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-expanded={open}
+      title={label}
+      onClick={onClick}
+      className={cn(
+        'flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border transition-colors',
+        active ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-background text-muted-foreground hover:text-foreground',
+      )}
+    >{children}</button>
   );
 }
 
@@ -416,9 +515,9 @@ export function PvOverview({ pv, available, elements, layouts = {}, mode, onSele
       )}
       <Totals pv={pv} available={available} elements={elements} layouts={layouts} />
       <InstallHelp hasPv={fittedPvIds(pv.surfaces, layouts).length > 0} />
-      <Installed pv={pv} layouts={layouts} mode={mode} />
       <Catalogue pv={pv} />
       <SurfaceList pv={pv} available={available} elements={elements} layouts={layouts} onSelect={onSelect} />
+      <Installed pv={pv} layouts={layouts} mode={mode} />
       <p className="text-[11px] leading-snug text-muted-foreground">{pv.notice}</p>
     </section>
   );

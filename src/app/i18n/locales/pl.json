@@ -156,7 +156,11 @@
     },
     "geometry": "{tilt}° · kierunek {azimuth}° · {area} m²",
     "upTo": "do {kwp} kWp",
-    "useSuggested": "Użyj sugerowanych przegród",
+    "addRoofs": {
+      "button": "Dodaj PV na dachach",
+      "all": "Wszystkie powierzchnie dachu ({count})",
+      "best": "Tylko najlepsze powierzchnie dachu ({count})"
+    },
     "legend": {
       "installed": "PV zainstalowane",
       "suggested": "Sugerowana dla PV"
@@ -271,7 +275,7 @@
         "all": "Wszystkie naraz",
         "remove": "Usuń"
       },
-      "all": "Kliknij {useSuggested}, aby dodać PV na każdej powierzchni oznaczonej {suggested}."
+      "all": "W sekcji {surfaces} kliknij {addRoofs} i wybierz wszystkie powierzchnie dachu lub tylko oznaczone {suggested}."
     },
     "sort": {
       "label": "Sortuj według",

@@ -155,7 +155,11 @@
     },
     "geometry": "{tilt}° · orienté {azimuth}° · {area} m²",
     "upTo": "jusqu'à {kwp} kWp",
-    "useSuggested": "Utiliser les surfaces suggérées",
+    "addRoofs": {
+      "button": "Ajouter du PV aux toitures",
+      "all": "Toutes les surfaces de toiture ({count})",
+      "best": "Seulement les meilleures surfaces de toiture ({count})"
+    },
     "legend": {
       "installed": "PV installé",
       "suggested": "Suggérée pour le PV"
@@ -264,7 +268,7 @@
         "all": "Tout en une fois",
         "remove": "Retirer"
       },
-      "all": "Cliquez sur {useSuggested} pour ajouter du PV à chaque surface marquée {suggested}."
+      "all": "Dans {surfaces}, cliquez sur {addRoofs} et choisissez toutes les surfaces de toiture ou seulement celles marquées {suggested}."
     },
     "sort": {
       "label": "Trier par",

@@ -154,7 +154,11 @@
     },
     "geometry": "{tilt}° · esposta a {azimuth}° · {area} m²",
     "upTo": "fino a {kwp} kWp",
-    "useSuggested": "Usa le superfici consigliate",
+    "addRoofs": {
+      "button": "Aggiungi FV ai tetti",
+      "all": "Tutte le superfici del tetto ({count})",
+      "best": "Solo le migliori superfici del tetto ({count})"
+    },
     "legend": {
       "installed": "FV installato",
       "suggested": "Consigliata per il FV"
@@ -263,7 +267,7 @@
         "all": "Tutte insieme",
         "remove": "Rimuovi"
       },
-      "all": "Fai clic su {useSuggested} per aggiungere il FV a ogni superficie contrassegnata {suggested}."
+      "all": "In {surfaces}, fai clic su {addRoofs} e scegli tutte le superfici del tetto o solo quelle contrassegnate {suggested}."
     },
     "sort": {
       "label": "Ordina per",
