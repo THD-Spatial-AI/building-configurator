@@ -154,7 +154,11 @@
     },
     "geometry": "{tilt}° · facing {azimuth}° · {area} m²",
     "upTo": "up to {kwp} kWp",
-    "useSuggested": "Use suggested surfaces",
+    "addRoofs": {
+      "button": "Add PV to roofs",
+      "all": "All roof surfaces ({count})",
+      "best": "Best roof surfaces only ({count})"
+    },
     "legend": {
       "installed": "PV installed",
       "suggested": "Suggested for PV"
@@ -263,7 +267,7 @@
         "all": "All at once",
         "remove": "Remove"
       },
-      "all": "Click {useSuggested} to add PV to every surface marked {suggested}."
+      "all": "In {surfaces}, click {addRoofs} and choose every roof surface or only those marked {suggested}."
     },
     "sort": {
       "label": "Sort by",

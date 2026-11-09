@@ -155,7 +155,11 @@
     },
     "geometry": "{tilt}° · orientación {azimuth}° · {area} m²",
     "upTo": "hasta {kwp} kWp",
-    "useSuggested": "Usar superficies sugeridas",
+    "addRoofs": {
+      "button": "Añadir FV a los tejados",
+      "all": "Todas las superficies de tejado ({count})",
+      "best": "Solo las mejores superficies de tejado ({count})"
+    },
     "legend": {
       "installed": "FV instalada",
       "suggested": "Sugerida para FV"
@@ -264,7 +268,7 @@
         "all": "Todas a la vez",
         "remove": "Quitar"
       },
-      "all": "Haga clic en {useSuggested} para añadir FV a cada superficie marcada como {suggested}."
+      "all": "En {surfaces}, haga clic en {addRoofs} y elija todas las superficies de tejado o solo las marcadas como {suggested}."
     },
     "sort": {
       "label": "Ordenar por",

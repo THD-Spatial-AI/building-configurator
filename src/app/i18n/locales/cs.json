@@ -156,7 +156,11 @@
     },
     "geometry": "{tilt}° · orientace {azimuth}° · {area} m²",
     "upTo": "až {kwp} kWp",
-    "useSuggested": "Použít navržené plochy",
+    "addRoofs": {
+      "button": "Přidat FV na střechy",
+      "all": "Všechny střešní plochy ({count})",
+      "best": "Jen nejlepší střešní plochy ({count})"
+    },
     "legend": {
       "installed": "FV instalována",
       "suggested": "Navrženo pro FV"
@@ -271,7 +275,7 @@
         "all": "Vše najednou",
         "remove": "Odebrat"
       },
-      "all": "Klikněte na {useSuggested} a přidejte FV na každou plochu označenou {suggested}."
+      "all": "V části {surfaces} klikněte na {addRoofs} a zvolte všechny střešní plochy, nebo jen ty označené {suggested}."
     },
     "sort": {
       "label": "Seřadit podle",

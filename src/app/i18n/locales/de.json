@@ -154,7 +154,11 @@
     },
     "geometry": "{tilt}° · nach {azimuth}° · {area} m²",
     "upTo": "bis {kwp} kWp",
-    "useSuggested": "Vorgeschlagene Flächen nutzen",
+    "addRoofs": {
+      "button": "PV auf Dächer setzen",
+      "all": "Alle Dachflächen ({count})",
+      "best": "Nur die besten Dachflächen ({count})"
+    },
     "legend": {
       "installed": "PV installiert",
       "suggested": "Für PV vorgeschlagen"
@@ -263,7 +267,7 @@
         "all": "Alle auf einmal",
         "remove": "Entfernen"
       },
-      "all": "Klicken Sie auf {useSuggested}, um PV auf jeder als {suggested} markierten Fläche hinzuzufügen."
+      "all": "Klicken Sie in {surfaces} auf {addRoofs} und wählen Sie alle Dachflächen oder nur die als {suggested} markierten."
     },
     "sort": {
       "label": "Sortieren nach",

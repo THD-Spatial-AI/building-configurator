@@ -154,7 +154,11 @@
     },
     "geometry": "{tilt}° · gericht op {azimuth}° · {area} m²",
     "upTo": "tot {kwp} kWp",
-    "useSuggested": "Voorgestelde vlakken gebruiken",
+    "addRoofs": {
+      "button": "Pv op daken plaatsen",
+      "all": "Alle dakvlakken ({count})",
+      "best": "Alleen de beste dakvlakken ({count})"
+    },
     "legend": {
       "installed": "PV geplaatst",
       "suggested": "Voorgesteld voor pv"
@@ -263,7 +267,7 @@
         "all": "Alles tegelijk",
         "remove": "Verwijderen"
       },
-      "all": "Klik op {useSuggested} om pv toe te voegen aan elk vlak met {suggested}."
+      "all": "Klik in {surfaces} op {addRoofs} en kies alle dakvlakken of alleen die met {suggested}."
     },
     "sort": {
       "label": "Sorteren op",

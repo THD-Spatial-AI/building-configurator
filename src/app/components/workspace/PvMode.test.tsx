@@ -91,7 +91,7 @@ describe('PvOverview', () => {
     expect(html).toMatch(/<details class="group[^"]*sky[^"]*"><summary/);
     expect(html).toContain('How to add PV');
     expect(html).toContain('<li><b class="font-semibold">Drag:</b> Open <b class="font-semibold">Photovoltaic options</b> and drag a product onto a roof or wall.</li>');
-    expect(html).toContain('to add PV to every surface marked <b class="font-semibold">Suggested for PV</b>.');
+    expect(html).toContain('In <b class="font-semibold">Available surfaces for PV</b>, click <b class="font-semibold">Add PV to roofs</b> and choose every roof surface or only those marked <b class="font-semibold">Suggested for PV</b>.');
     const none = renderToStaticMarkup(
       <PvOverview pv={{ ...pv, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="simple" onSelect={() => {}} />,
     );
@@ -114,6 +114,16 @@ describe('PvOverview', () => {
     expect(offered).not.toContain('Wall west');
   });
 
+  it('groups the surfaces into roofs, then walls, each in its own order', () => {
+    const surfaces = { w1: { ...pv.surfaces.w1, state: 'installed' as const }, r2: pv.surfaces.r2, f1: { state: 'available' as const, usableShare: 0.6, maxKwp: 8 } };
+    const grouped = renderToStaticMarkup(<PvOverview pv={{ ...pv, surfaces }} elements={elements} mode="simple" onSelect={() => {}} />);
+    const at = (text: string) => grouped.indexOf(text);
+    expect(at('>Roofs<')).toBeGreaterThan(-1);
+    expect([at('>Roofs<'), at('Roof north'), at('Flat roof'), at('>Walls<'), at('Wall west')]).toEqual(
+      [at('>Roofs<'), at('Roof north'), at('Flat roof'), at('>Walls<'), at('Wall west')].sort((a, b) => a - b),
+    );
+  });
+
   it('lists installed, then suggested, then available surfaces, with their geometry', () => {
     const order = ['Roof south', 'Roof north', 'Wall west'].map((name) => html.indexOf(name));
     expect(order.every((at) => at >= 0)).toBe(true);
@@ -122,12 +132,30 @@ describe('PvOverview', () => {
     expect(html).toContain('up to 4.1 kWp');
   });
 
-  it('offers to use the suggested surfaces only when there are any', () => {
-    expect(html).toContain('Use suggested surfaces');
+  it('adds PV to every roof surface or only the suggested ones, never to a wall', () => {
+    const surfaces = { ...pv.surfaces, f1: { state: 'available' as const, usableShare: 0.6, maxKwp: 8 } };
+    const roofs = renderToStaticMarkup(<PvOverview pv={{ ...pv, surfaces }} elements={elements} mode="simple" onSelect={() => {}} />);
+    expect(roofs).toMatch(/<summary[^>]*>(?:(?!<\/summary>).)*Available surfaces for PV(?:(?!<\/summary>).)*Add PV to roofs(?:(?!<\/summary>).)*All roof surfaces \(2\)(?:(?!<\/summary>).)*<\/summary>/);
+    expect(roofs).toContain('>All roof surfaces (2)</button>');
+    expect(roofs).toContain('>Best roof surfaces only (1)</button>');
+    expect(roofs).not.toContain('Use suggested surfaces');
+  });
+
+  it("counts a surface of the building's other 3D parts as a roof by its tilt, and a vertical one as a wall", () => {
+    const surfaces = {
+      n1: { state: 'available' as const, usableShare: 0.6, maxKwp: 5, label: 'Annex roof', tilt: 30, azimuth: 180, area: 30 },
+      n2: { state: 'available' as const, usableShare: 0.6, maxKwp: 3, label: 'Annex wall', tilt: 90, azimuth: 180, area: 20 },
+    };
+    const html = renderToStaticMarkup(<PvOverview pv={{ ...pv, surfaces }} elements={elements} mode="simple" onSelect={() => {}} />);
+    expect(html).toContain('>All roof surfaces (1)</button>');
+  });
+
+  it('offers neither roof choice once every roof surface has PV', () => {
     const none = renderToStaticMarkup(
-      <PvOverview pv={{ ...pv, surfaces: { r1: pv.surfaces.r1 } }} elements={elements} mode="simple" onSelect={() => {}} />,
+      <PvOverview pv={{ ...pv, surfaces: { r1: pv.surfaces.r1, w1: pv.surfaces.w1 } }} elements={elements} mode="simple" onSelect={() => {}} />,
     );
-    expect(none).toMatch(/<button[^>]*disabled=""[^>]*>Use suggested surfaces/);
+    expect(none).toMatch(/<button[^>]*disabled=""[^>]*>All roof surfaces \(0\)/);
+    expect(none).toMatch(/<button[^>]*disabled=""[^>]*>Best roof surfaces only \(0\)/);
   });
 
   it('shows no costs, catalogue or values without products', () => {
@@ -149,13 +177,36 @@ describe('PvOverview with a catalogue', () => {
     expect(html).toContain('Estimates from the products');
   });
 
-  it('lists the installed products with their modules and capacity, the catalogue closed behind a drop-down', () => {
-    const installed = html.slice(html.indexOf('Installed on this building'), html.indexOf('Photovoltaic options ('));
+  it('lists the installed products with their modules and capacity, the catalogue closed behind a drop-down once there is PV', () => {
+    const installed = html.slice(html.indexOf('Installed on this building'));
     expect(installed).toContain('Demo Mono 420 W');
     expect(installed).not.toContain('Demo Compact 300 W');
     expect(installed).toContain('24 modules');
     expect(installed).toContain('on 1 surface');
     expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*><span[^>]*>Photovoltaic options \(2\)/);
+  });
+
+  it('orders the card: totals, how to add PV, the options, the surfaces, then what is installed', () => {
+    const order = ['Investment', 'How to add PV', 'Photovoltaic options (', 'Available surfaces for PV (', 'Installed on this building'].map((text) => html.indexOf(text));
+    expect(order.every((at) => at >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+
+  it('opens the catalogue while no surface has PV, so its products can be dragged straight away', () => {
+    const empty = renderToStaticMarkup(
+      <PvOverview pv={{ ...withCatalogue, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="simple" onSelect={() => {}} />,
+    );
+    expect(empty).toMatch(/<details open="" class="group[^"]*"><summary[^>]*><span[^>]*>Photovoltaic options \(2\)/);
+  });
+
+  it('keeps the search and sort behind their icons until asked for', () => {
+    const empty = renderToStaticMarkup(
+      <PvOverview pv={{ ...withCatalogue, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="simple" onSelect={() => {}} />,
+    );
+    expect(empty).toMatch(/<button[^>]*aria-label="Search the photovoltaic options"[^>]*aria-expanded="false"/);
+    expect(empty).toMatch(/<button[^>]*aria-label="Sort by"[^>]*aria-expanded="false"/);
+    expect(empty).not.toContain('type="search"');
+    expect(empty).not.toContain('<select');
   });
 
   it('keeps each installed product\'s values behind its edit button', () => {
@@ -191,6 +242,18 @@ describe('PvOverview with a catalogue', () => {
 });
 
 describe('PvSurfaceSection', () => {
+  it("shows the values of an installed surface's product where the host takes changes, and none before PV is on", () => {
+    const installed = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={withCatalogue} mode="simple" />);
+    expect(installed).toContain('What does it cost per kWp?');
+    expect(installed).toContain('Changes to Demo Mono 420 W apply to this building only.');
+    const off = renderToStaticMarkup(<PvSurfaceSection surfaceId="r2" surface={pv.surfaces.r2} pv={withCatalogue} mode="simple" />);
+    expect(off).not.toContain('What does it cost per kWp?');
+    const readOnly = renderToStaticMarkup(
+      <PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={{ ...withCatalogue, onConstraintChange: undefined }} mode="simple" />,
+    );
+    expect(readOnly).not.toContain('What does it cost per kWp?');
+  });
+
   it('offers the usable share as a percentage only on an installed surface', () => {
     const installed = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} />);
     const suggested = renderToStaticMarkup(<PvSurfaceSection surfaceId="r2" surface={pv.surfaces.r2} pv={pv} />);
@@ -314,14 +377,6 @@ describe('removing PV from the building', () => {
     expect(html).toContain('aria-label="Remove all PV from this building"');
   });
 
-  it("names PV without a product after the building's PV type, not as a product to choose", () => {
-    const html = renderToStaticMarkup(
-      <TechnologiesTab pv={pv} elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}} />,
-    );
-    expect(html).toContain('aria-label="Remove Monocrystalline 400 W from every surface"');
-    expect(html).not.toContain('Choose a product');
-  });
-
   it('shows the PV investment once in its tile and in the total, not again in the card header', () => {
     const html = tab(pv.surfaces);
     expect(html.match(/4,800 EUR/g)).toHaveLength(2);
@@ -332,5 +387,13 @@ describe('removing PV from the building', () => {
     const html = tab(pv.surfaces);
     expect(html).toMatch(/^<div class="flex flex-1 flex-col gap-2.5">/);
     expect(html).toMatch(/<div class="sticky bottom-0 [^"]*mt-auto[^"]*"><div[^>]*><span[^>]*>Estimated total cost of technologies/);
+  });
+
+  it("names PV without a product after the building's PV type, not as a product to choose", () => {
+    const html = renderToStaticMarkup(
+      <TechnologiesTab pv={pv} elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}} />,
+    );
+    expect(html).toContain('aria-label="Remove Monocrystalline 400 W from every surface"');
+    expect(html).not.toContain('Choose a product');
   });
 });
