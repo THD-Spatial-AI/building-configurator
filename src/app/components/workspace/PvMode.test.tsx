@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { heldOrder, NoMatch, ProductValues, PvOverview } from './PvOverview';
+import { NoMatch, ProductValues, PvOverview } from './PvOverview';
+import { heldOrder } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologiesTab } from './TechnologiesTab';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
