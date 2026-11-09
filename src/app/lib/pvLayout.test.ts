@@ -146,3 +146,18 @@ describe('pvLayout default mounting', () => {
     expect(pvLayout(southRoof(30), module, { usableShare: 1 }).tilt).toBeCloseTo(30);
   });
 });
+
+describe('pvLayout on a large roof', () => {
+  it('lays out a 60 by 30 m flat roof in under 3 s, where checking every candidate against every module took about 15 s', () => {
+    const rad = (5 * Math.PI) / 180;
+    const top = [30 * Math.cos(rad), 5 + 30 * Math.sin(rad)];
+    const roof: SurfacePolygon = {
+      id: 'big', type: 'roof',
+      coordinates: [[[0, 0, 5], [60, 0, 5], [60, top[0], top[1]], [0, top[0], top[1]], [0, 0, 5]]],
+    };
+    const start = performance.now();
+    const layout = pvLayout(roof, module, { usableShare: 0.8, mounting: { kind: 'flush' } });
+    expect(layout.count).toBeGreaterThan(600);
+    expect(performance.now() - start).toBeLessThan(3000);
+  });
+});
