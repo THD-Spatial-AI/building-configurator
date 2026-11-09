@@ -200,7 +200,7 @@ export function BuildingDetailsCard({
       </div>
 
       {activeTab === 'technology' ? (
-        <div className="p-4">{technologySlot}</div>
+        <div className="flex flex-1 flex-col p-4">{technologySlot}</div>
       ) : (
         <div className="flex flex-1 flex-col gap-3 px-4 pt-4">
           {overviewSlot}
