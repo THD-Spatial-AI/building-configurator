@@ -4,6 +4,37 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.17.0] - 2026-11-09
+
+### Added
+
+- `PvMode.onRemove`, optional. It fires once, with no `onToggle`, when the user confirms the bin on the PV card; the host drops its PV technology and stops passing `pv`. While it is passed, the bin shows even with no PV installed. Without it the bin switches off each installed surface as before. See the PV section of the install guide.
+- Zoom in, zoom out and "Show the whole building" buttons in the 3D view. Fitting keeps the viewing angle, undoes any pan and frames the whole building.
+- The PV card's "Add PV to roofs" button, in the Available surfaces header: adds PV to every roof surface or only the suggested ones, never to a wall. It replaces "Use suggested surfaces".
+- An installed surface's panel shows its product's values where the host passes `onConstraintChange`.
+
+### Changed
+
+- The last step of Advanced mode is called Results and appliances, and Results for a service building, which has no appliances.
+- The last step's overview card lists each result with its level (Hourly, Annual or Off), each appliance category with how many appliances are installed and how many are left at default, and the solver, each under a heading.
+- An appliance category reads as "2 installed, 5 at default" on the Appliances card too, and counts the televisions as one row.
+- In Advanced mode the cooling setpoint shows in the Heating and comfort overview card, where its field is, and no longer in the last step's.
+- The Appliances intro and the note shown with heating and cooling both off describe what the user sees, without naming the simulation model.
+- Installed PV with no product is named after the building's PV type (`typeLabel`) instead of "Choose a product".
+- The PV card reads top to bottom: totals, How to add PV, Photovoltaic options, Available surfaces for PV, Installed on this building. Available surfaces are grouped into roofs and walls; a surface of the building's other 3D parts counts as a roof when tilted under 90 degrees.
+- Photovoltaic options opens on its own while no surface has PV. Its search and sort sit behind two icons.
+- The PV card header shows capacity and surfaces only; the investment shows in its tile and in the technologies total.
+- The technologies total sits at the bottom of the panel however few cards are open.
+- The surface panel is 380 px wide instead of 300 px.
+- The 3D view zooms out no further than three times the distance that fits the building, and frames a narrow view by its width.
+
+### Fixed
+
+- Every step with an overview card opens on it, whether or not it was visited before; its fields show only after Edit, and leaving the step closes them.
+- Filling a large roof with PV no longer freezes the page: a 60 x 30 m roof took 17.5 s and now takes 0.4 s, with the same layout.
+- The PV format choice (Best fit, Portrait, Landscape) no longer runs past the surface panel's edge.
+- A building whose PV was removed through the PV card's bin no longer keeps an empty PV technology that cannot be removed, when the host passes `onRemove`.
+
 ## [0.16.4] - 2026-11-05
 
 ### Changed
