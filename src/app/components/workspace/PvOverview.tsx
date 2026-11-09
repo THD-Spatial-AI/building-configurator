@@ -2,7 +2,7 @@
 // installed (each with its values behind an edit button), the products to drag
 // onto a surface, and the surfaces that take PV.
 
-import { useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { ArrowUpDown, ChevronDown, CircleHelp, GripVertical, Pencil, Plus, Search, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
@@ -171,6 +171,9 @@ function AddToRoofs({ pv, available, elements }: {
   const roofs = offeredIds(pv, available).filter((id) => pv.surfaces[id].state !== 'installed' && isRoof(id, elements, pv.surfaces[id]));
   const best = roofs.filter((id) => pv.surfaces[id].state === 'suggested');
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLSpanElement>(null);
+  // Low in a short panel the menu would open below its visible part.
+  useEffect(() => { if (open) menuRef.current?.scrollIntoView({ block: 'nearest' }); }, [open]);
   // Inside the list's header: a click here must not open or close the list.
   const inHeader = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); };
   const add = (ids: string[]) => (event: MouseEvent) => {
@@ -188,7 +191,8 @@ function AddToRoofs({ pv, available, elements }: {
       >
         <Plus className="size-3.5" aria-hidden />{t('pv.addRoofs.button')}
       </button>
-      <span className={cn(open ? 'flex' : 'hidden', 'absolute right-0 top-full z-20 mt-1 w-max flex-col gap-1.5 rounded-md border border-border bg-card p-2 shadow-lg')}>
+      {/* The bottom scroll margin keeps the menu above the technologies total pinned to the panel bottom. */}
+      <span ref={menuRef} className={cn(open ? 'flex' : 'hidden', 'absolute right-0 top-full z-20 mt-1 w-max scroll-mb-20 flex-col gap-1.5 rounded-md border border-border bg-card p-2 shadow-lg')}>
         <button type="button" disabled={roofs.length === 0} onClick={add(roofs)} className={CHOICE}>{t('pv.addRoofs.all', { count: roofs.length })}</button>
         <button type="button" disabled={best.length === 0} onClick={add(best)} className={CHOICE}>{t('pv.addRoofs.best', { count: best.length })}</button>
       </span>

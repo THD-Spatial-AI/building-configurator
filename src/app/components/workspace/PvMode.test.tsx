@@ -209,6 +209,11 @@ describe('PvOverview with a catalogue', () => {
     expect(empty).not.toContain('<select');
   });
 
+  it('keeps the roof choices clear of the total pinned below them when they scroll into view', () => {
+    const menu = html.match(/<span class="([^"]*)"><button[^>]*>All roof surfaces/);
+    expect(menu?.[1]).toContain('scroll-mb-20');
+  });
+
   it('keeps each installed product\'s values behind its edit button', () => {
     expect(html).toContain('aria-label="Edit the values of Demo Mono 420 W"');
     expect(html).toContain('aria-expanded="false"');
