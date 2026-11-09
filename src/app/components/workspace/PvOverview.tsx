@@ -5,7 +5,7 @@
 import { useState, type MouseEvent, type ReactNode } from 'react';
 import { ArrowUpDown, ChevronDown, CircleHelp, GripVertical, Pencil, Plus, Search, Sun } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
-import { DecimalInput, Dropdown, DROPDOWN_LIST, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
+import { DecimalInput, Dropdown, DROPDOWN_LIST, FIELD_ACTION, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import { fittedPvIds, installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfaces';
@@ -336,6 +336,7 @@ function Catalogue({ pv }: { pv: PvMode }) {
             {SORT_ORDERS.map((option) => <option key={option} value={option}>{t(`pv.sort.${option}`)}</option>)}
           </select>
         )}
+        {shown.length === 0 && <NoMatch query={query.trim()} onClear={() => setQuery('')} />}
         <ul className={DROPDOWN_LIST}>
           {shown.map((product) => {
             const module = productModule(product, pv.module ?? DEFAULT_PV_MODULE);
@@ -361,6 +362,17 @@ function Catalogue({ pv }: { pv: PvMode }) {
           })}
         </ul>
     </Dropdown>
+  );
+}
+
+/** Shown in place of the options when the search matches none, whether or not its field is open. */
+export function NoMatch({ query, onClear }: { query: string; onClear: () => void }) {
+  const t = useT();
+  return (
+    <div className="flex flex-col items-start gap-1.5 px-1 py-2">
+      <p className="m-0 text-[12px] text-muted-foreground">{t('pv.options.noMatch', { query })}</p>
+      <button type="button" onClick={onClear} className={FIELD_ACTION}>{t('pv.options.clear')}</button>
+    </div>
   );
 }
 

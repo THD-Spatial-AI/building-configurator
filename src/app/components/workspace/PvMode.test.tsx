@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { ProductValues, PvOverview } from './PvOverview';
+import { NoMatch, ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologiesTab } from './TechnologiesTab';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -207,6 +207,12 @@ describe('PvOverview with a catalogue', () => {
     expect(empty).toMatch(/<button[^>]*aria-label="Sort by"[^>]*aria-expanded="false"/);
     expect(empty).not.toContain('type="search"');
     expect(empty).not.toContain('<select');
+  });
+
+  it('says when no option matches the search, and offers to clear it', () => {
+    const html = renderToStaticMarkup(<NoMatch query="mono" onClear={() => {}} />);
+    expect(html).toContain('No photovoltaic option matches “mono”.');
+    expect(html).toMatch(/<button[^>]*>Clear the search<\/button>/);
   });
 
   it('keeps each installed product\'s values behind its edit button', () => {

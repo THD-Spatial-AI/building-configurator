@@ -251,7 +251,9 @@
     },
     "followsModel": "La FV sigue los {tilt}° del modelo 3D; la inclinación y la orientación editadas arriba solo van a BuEM.",
     "options": {
-      "search": "Buscar en las opciones fotovoltaicas"
+      "search": "Buscar en las opciones fotovoltaicas",
+      "noMatch": "Ninguna opción fotovoltaica coincide con «{query}».",
+      "clear": "Borrar la búsqueda"
     },
     "noFitOn": {
       "one": "Ningún módulo FV completo cabe en {surfaces}, así que no tiene FV. Elija un producto más pequeño u otra superficie.",

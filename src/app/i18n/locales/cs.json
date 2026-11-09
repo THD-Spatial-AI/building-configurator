@@ -256,7 +256,9 @@
     },
     "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
     "options": {
-      "search": "Hledat ve fotovoltaických možnostech"
+      "search": "Hledat ve fotovoltaických možnostech",
+      "noMatch": "Hledání „{query}“ neodpovídá žádná fotovoltaická možnost.",
+      "clear": "Vymazat hledání"
     },
     "noFitOn": {
       "one": "Na {surfaces} se nevejde žádný celý FV modul, takže na ní FV není. Zvolte menší produkt nebo jinou plochu.",
