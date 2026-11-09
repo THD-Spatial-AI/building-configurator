@@ -840,12 +840,14 @@ interface DropdownProps {
   defaultOpen?: boolean;
   /** A control in the header, usable while closed; its clicks do not open or close the list. */
   action?: React.ReactNode;
+  /** Called with the new state each time the user opens or closes it. */
+  onToggle?: (open: boolean) => void;
 }
 
-export function Dropdown({ title, children, tone, defaultOpen, action }: DropdownProps) {
+export function Dropdown({ title, children, tone, defaultOpen, action, onToggle }: DropdownProps) {
   const recommend = tone === 'recommend';
   return (
-    <details open={defaultOpen} className={cn(
+    <details open={defaultOpen} onToggle={onToggle && ((event) => onToggle(event.currentTarget.open))} className={cn(
       'group rounded-lg border shadow-xs open:shadow-sm',
       recommend ? 'border-amber-400 bg-amber-50 dark:border-amber-500/60 dark:bg-amber-500/10' : 'border-border bg-background',
     )}>
