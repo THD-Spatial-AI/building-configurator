@@ -165,24 +165,29 @@ describe('a step worked through', () => {
   });
 });
 
-describe('Done beneath a step', () => {
+describe('a step with a summary', () => {
   const withSummary: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }] }));
 
-  it('shows while the fields of a step with a summary are open', () => {
-    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />)).toContain('>Done</button>');
+  it('opens on its overview card, whether or not it was visited before', () => {
+    const html = renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />);
+    expect(html).toContain('aria-label="Edit Energy grade"');
+    expect(html).not.toContain('grade body');
   });
 
-  it('is not offered for a step without a summary, nor while the summary shows', () => {
-    expect(renderToStaticMarkup(<StepPanel steps={steps} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
-    const summarised = withSummary.map((step) => ({ ...step, startSummarised: true }));
-    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
+  it('offers Done while its fields are open, not while its overview card shows', () => {
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} openFields="grade" />)).toContain('>Done</button>');
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
+  });
+
+  it('opens with its fields when asked for from outside the panel', () => {
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="comfort" onActive={() => {}} openFields="comfort" />)).toContain('comfort body');
   });
 });
 
-describe('a step asked for from outside the panel', () => {
-  it('opens with its fields, not its summary, even when it starts summarised', () => {
-    const summarised: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }], startSummarised: true }));
-    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="comfort" onActive={() => {}} />)).not.toContain('comfort body');
-    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="comfort" onActive={() => {}} openFields="comfort" />)).toContain('comfort body');
+describe('a step without a summary', () => {
+  it('shows its fields and no Done', () => {
+    const html = renderToStaticMarkup(<StepPanel steps={steps} active="grade" onActive={() => {}} />);
+    expect(html).toContain('grade body');
+    expect(html).not.toContain('>Done</button>');
   });
 });

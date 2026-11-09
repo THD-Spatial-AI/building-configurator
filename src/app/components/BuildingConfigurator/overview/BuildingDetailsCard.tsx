@@ -169,8 +169,6 @@ export function BuildingDetailsCard({
       topic: TOPICS.building,
       status: 'complete',
       summary: dataSummary(t, format, snapshotRows, modelHeight),
-      // A loaded building brings its data, so the step opens on its summary.
-      startSummarised: true,
       content: <BuildingTable rows={snapshotRows} onEditField={onEditField} />,
     },
     ...steps,

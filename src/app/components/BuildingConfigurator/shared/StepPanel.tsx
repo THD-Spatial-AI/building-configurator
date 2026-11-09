@@ -1,6 +1,6 @@
 // A panel's sections as steps: a path of nodes, each in its status and named
 // beneath, one step shown at a time with Back and Next beneath it. A step
-// already worked through shows as a summary card of its values until Edit.
+// with a summary shows as a card of its values until Edit.
 
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle, Check, ChevronDown, Pencil, X } from '@/app/components/icons';
@@ -17,10 +17,8 @@ export interface Step {
   topic: Topic;
   status: StepStatus;
   content: ReactNode;
-  /** The step's values, shown in place of its content once it has been left, each a field's label and value. */
+  /** The step's values, shown in place of its content until Edit, each a field's label and value. */
   summary?: StepFact[];
-  /** Shows the summary from the start, for a step whose values arrive filled in. */
-  startSummarised?: boolean;
   /** Called when another step is opened while this one is. */
   onLeave?: () => void;
 }
@@ -77,19 +75,16 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
   const t = useT();
   const index = Math.max(0, steps.findIndex((step) => step.key === active));
   const current = steps[index];
-  /** Steps left after being shown, which return as their summary. */
-  const [done, setDone] = useState<ReadonlySet<string>>(() => new Set(steps.filter((step) => step.startSummarised).map((step) => step.key)));
   const [editing, setEditing] = useState<string | null>(openFields ?? null);
   useEffect(() => { if (openFields) setEditing(openFields); }, [openFields]);
   const go = (key: string) => {
     if (key === current.key) return;
     current.onLeave?.();
     moved.current = true;
-    setDone((prev) => new Set(prev).add(current.key));
     setEditing(null);
     onActive(key);
   };
-  const summarised = done.has(current.key) && editing !== current.key && (current.summary?.length ?? 0) > 0;
+  const summarised = editing !== current.key && (current.summary?.length ?? 0) > 0;
   const sectionRef = useRef<HTMLDivElement>(null);
   /** Set by the user opening a step or its fields, so opening the panel itself scrolls nothing. */
   const moved = useRef(false);
@@ -155,10 +150,7 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
         next={next}
         go={go}
         // Edits apply as they are made; Done only closes the fields to the step's summary.
-        onDone={!summarised && (current.summary?.length ?? 0) > 0 ? () => {
-          setDone((prev) => new Set(prev).add(current.key));
-          setEditing(null);
-        } : undefined}
+        onDone={!summarised && (current.summary?.length ?? 0) > 0 ? () => setEditing(null) : undefined}
       />
     </div>
   );
