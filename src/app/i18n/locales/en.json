@@ -44,7 +44,10 @@
       "empty": "Click a surface in the model to see it here."
     },
     "credits": "Data credits",
-    "measure": "Show the selected surface's measurements"
+    "measure": "Show the selected surface's measurements",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Show the whole building"
   },
   "surface": {
     "type": {

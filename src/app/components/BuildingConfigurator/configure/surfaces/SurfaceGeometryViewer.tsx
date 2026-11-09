@@ -13,6 +13,7 @@ import { buildPvModules, buildSurfaceGroup, computeOrigin, surfaceSides, toLocal
 import { storeyAt, storeyBands, storeyLines, storeyParts } from '@/app/lib/storeys';
 import { PV_PRODUCT_DRAG_TYPE } from '@/app/lib/pvProducts';
 import { useFormatNumber, useT } from '@/app/i18n';
+import { Minus, Plus, Scan } from '@/app/components/icons';
 
 interface SurfaceGeometryViewerProps {
   surfaces: SurfacePolygon[];
@@ -68,6 +69,15 @@ const CLICK_DRAG_THRESHOLD_PX = 5;
 const TOUCH_DRAG_THRESHOLD_PX = 12;
 /** How long the model takes to turn towards a surface picked from a list. */
 const FLY_TO_SECONDS = 0.7;
+/** Distance factor per press of a zoom button. */
+const ZOOM_STEP = 1.4;
+
+/** How far back the camera stands for a sphere to fill the narrower of the view's two angles. */
+function fitDistance(camera: THREE.PerspectiveCamera, radius: number): number {
+  const halfHeight = (camera.fov * Math.PI) / 360;
+  const halfWidth = Math.atan(Math.tan(halfHeight) * camera.aspect);
+  return radius / Math.sin(Math.min(halfHeight, halfWidth));
+}
 
 export function SurfaceGeometryViewer({
   surfaces,
@@ -97,6 +107,8 @@ export function SurfaceGeometryViewer({
   const focusRequestRef = useRef<string | null>(null);
   /** Schedules one frame; set by the scene effect. */
   const renderRef = useRef<() => void>(() => {});
+  /** The view buttons' camera moves; set by the scene effect. */
+  const viewRef = useRef({ zoom: (_factor: number) => {}, fit: () => {} });
 
   useEffect(() => {
     if (focusToken === undefined || !focusId) return;
@@ -156,9 +168,11 @@ export function SurfaceGeometryViewer({
     const bounds = new THREE.Box3();
     groups.forEach((group) => bounds.expandByObject(group));
     const view = bounds.getBoundingSphere(new THREE.Sphere());
-    const distance = view.radius / Math.sin((camera.fov * Math.PI) / 360);
+    const distance = fitDistance(camera, view.radius);
     camera.position.copy(view.center).add(new THREE.Vector3(1, 0.7, 1).normalize().multiplyScalar(distance));
     camera.far = distance * 4;
+    // Further out, the far plane starts cutting the model.
+    controls.maxDistance = distance * 3;
     camera.updateProjectionMatrix();
     controls.target.copy(view.center);
 
@@ -246,7 +260,20 @@ export function SurfaceGeometryViewer({
     renderer.domElement.addEventListener('drop', handleDrop);
 
     /** Eases a turn around the target rather than sliding the camera through it. */
-    let flight: { from: THREE.Spherical; to: THREE.Spherical; progress: number } | null = null;
+    let flight: { from: THREE.Spherical; to: THREE.Spherical; progress: number; target?: { from: THREE.Vector3; to: THREE.Vector3 } } | null = null;
+
+    /** Eases to `radius` from the target, keeping the angle; with `target`, also moves the target there. */
+    function startFlyBack(radius: number, target?: THREE.Vector3) {
+      const from = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+      const to = from.clone();
+      to.radius = THREE.MathUtils.clamp(radius, controls.minDistance, controls.maxDistance);
+      flight = { from, to, progress: 0, target: target && { from: controls.target.clone(), to: target.clone() } };
+      requestRender();
+    }
+    viewRef.current = {
+      zoom: (factor) => startFlyBack((flight?.to.radius ?? camera.position.distanceTo(controls.target)) * factor),
+      fit: () => startFlyBack(fitDistance(camera, view.radius), view.center),
+    };
 
     /** Where to stand to look a surface in the face: outward along its normal,
      *  at the distance the camera is already at. */
@@ -294,6 +321,7 @@ export function SurfaceGeometryViewer({
         THREE.MathUtils.lerp(flight.from.phi, flight.to.phi, t),
         THREE.MathUtils.lerp(flight.from.theta, flight.to.theta, t),
       );
+      if (flight.target) controls.target.lerpVectors(flight.target.from, flight.target.to, t);
       camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(step));
       if (flight.progress >= 1) flight = null;
       return true;
@@ -358,6 +386,7 @@ export function SurfaceGeometryViewer({
     return () => {
       cancelAnimationFrame(frameId);
       renderRef.current = () => {};
+      viewRef.current = { zoom: () => {}, fit: () => {} };
       controls.removeEventListener('change', requestRender);
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener('pointerdown', handlePointerDown);
@@ -576,6 +605,23 @@ export function SurfaceGeometryViewer({
             transform: 'translateX(-50%)',
           }} />
         </div>
+      </div>
+      {/* Below the measure button that Building3DView places 64 to 96 px from the top. */}
+      <div className="absolute right-[18px] top-[104px] flex flex-col overflow-hidden rounded-md border border-border bg-card/90 shadow-sm">
+        {[
+          { label: t('view.zoomIn'), Icon: Plus, onClick: () => viewRef.current.zoom(1 / ZOOM_STEP) },
+          { label: t('view.zoomOut'), Icon: Minus, onClick: () => viewRef.current.zoom(ZOOM_STEP) },
+          { label: t('view.fit'), Icon: Scan, onClick: () => viewRef.current.fit() },
+        ].map(({ label, Icon, onClick }) => (
+          <button
+            key={label}
+            type="button"
+            aria-label={label}
+            title={label}
+            onClick={onClick}
+            className="flex size-8 cursor-pointer items-center justify-center border-b border-border text-foreground transition-colors last:border-b-0 hover:bg-muted"
+          ><Icon className="size-4" /></button>
+        ))}
       </div>
     </div>
   );

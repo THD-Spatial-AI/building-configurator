@@ -46,7 +46,10 @@
       "empty": "Kliknij powierzchnię w modelu, aby zobaczyć ją tutaj."
     },
     "credits": "Źródła danych",
-    "measure": "Pokaż wymiary wybranej powierzchni"
+    "measure": "Pokaż wymiary wybranej powierzchni",
+    "zoomIn": "Powiększ",
+    "zoomOut": "Pomniejsz",
+    "fit": "Pokaż cały budynek"
   },
   "surface": {
     "type": {
