@@ -164,11 +164,19 @@ function fill(poly: number[][], placed: Rect[], du: number, dv: number, portrait
   const all = [...placed];
   const added: Rect[] = [];
   for (const v of rowsAt) {
+    // Only rectangles reaching into this row's band can overlap one placed in it.
+    const band = all.filter((o) => o.v < v + dv + MODULE_GAP_M && v < o.v + o.dv + MODULE_GAP_M);
     let next = -Infinity;
+    // Once clamped to `next`, later columns repeat the same u; nothing was placed since, so the answer is the same.
+    let tried = -Infinity;
     for (const at of columnsAt) {
-      const r = { u: Math.max(at, next), v, du, dv, portrait };
-      if (all.some((o) => overlaps(r, o)) || !fits(r, poly)) continue;
+      const u = Math.max(at, next);
+      if (u === tried) continue;
+      tried = u;
+      const r = { u, v, du, dv, portrait };
+      if (band.some((o) => overlaps(r, o)) || !fits(r, poly)) continue;
       all.push(r);
+      band.push(r);
       added.push(r);
       next = r.u + du + MODULE_GAP_M;
     }
