@@ -4,6 +4,7 @@ import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
 import { escapeClosesOnly, NoMatch, ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologiesTab } from './TechnologiesTab';
+import { heldOrder } from './PvOverview';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import type { PvLayout } from '../../lib/pvLayout';
 import type { TechnologyProduct } from '../../lib/pvProducts';
@@ -122,6 +123,11 @@ describe('PvOverview', () => {
     expect([at('>Roofs<'), at('Roof north'), at('Flat roof'), at('>Walls<'), at('Wall west')]).toEqual(
       [at('>Roofs<'), at('Roof north'), at('Flat roof'), at('>Walls<'), at('Wall west')].sort((a, b) => a - b),
     );
+  });
+
+  it('keeps each surface where it was when the list opened, and puts surfaces new since then at the end', () => {
+    expect(heldOrder(['r2', 'r1', 'w1'], null)).toEqual(['r2', 'r1', 'w1']);
+    expect(heldOrder(['r2', 'r1', 'w1'], ['r1', 'w1'])).toEqual(['r1', 'w1', 'r2']);
   });
 
   it('lists installed, then suggested, then available surfaces, with their geometry', () => {
