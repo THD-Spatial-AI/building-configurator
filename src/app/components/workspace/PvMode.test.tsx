@@ -321,4 +321,16 @@ describe('removing PV from the building', () => {
     expect(html).toContain('aria-label="Remove Monocrystalline 400 W from every surface"');
     expect(html).not.toContain('Choose a product');
   });
+
+  it('shows the PV investment once in its tile and in the total, not again in the card header', () => {
+    const html = tab(pv.surfaces);
+    expect(html.match(/4,800 EUR/g)).toHaveLength(2);
+    expect(html).toMatch(/>4,800 EUR<\/div><div[^>]*>Investment</);
+  });
+
+  it('pins the total to the bottom of the panel, below the cards however few there are', () => {
+    const html = tab(pv.surfaces);
+    expect(html).toMatch(/^<div class="flex flex-1 flex-col gap-2.5">/);
+    expect(html).toMatch(/<div class="sticky bottom-0 [^"]*mt-auto[^"]*"><div[^>]*><span[^>]*>Estimated total cost of technologies/);
+  });
 });
