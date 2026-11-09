@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { NoMatch, ProductValues, PvOverview } from './PvOverview';
+import { escapeClosesOnly, NoMatch, ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologiesTab } from './TechnologiesTab';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
@@ -184,6 +184,15 @@ describe('PvOverview with a catalogue', () => {
     expect(installed).toContain('24 modules');
     expect(installed).toContain('on 1 surface');
     expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*><span[^>]*>Photovoltaic options \(2\)/);
+  });
+
+  it('closes the roof choices on Escape without letting the key reach the view behind them', () => {
+    let closed = 0;
+    let stopped = 0;
+    const onKey = escapeClosesOnly(() => { closed += 1; });
+    onKey({ key: 'Escape', stopPropagation: () => { stopped += 1; } } as unknown as KeyboardEvent);
+    onKey({ key: 'Enter', stopPropagation: () => { stopped += 1; } } as unknown as KeyboardEvent);
+    expect([closed, stopped]).toEqual([1, 1]);
   });
 
   it('orders the card: totals, how to add PV, the options, the surfaces, then what is installed', () => {

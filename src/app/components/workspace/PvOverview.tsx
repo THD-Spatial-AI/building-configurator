@@ -161,6 +161,15 @@ function isRoof(id: string, elements: Record<string, BuildingElement>, surface: 
   return surface.tilt !== undefined && surface.tilt < 90;
 }
 
+/** A keydown listener that takes Escape for `close` alone, so nothing behind it also closes. */
+export function escapeClosesOnly(close: () => void): (event: KeyboardEvent) => void {
+  return (event) => {
+    if (event.key !== 'Escape') return;
+    event.stopPropagation();
+    close();
+  };
+}
+
 /** Adds PV to the offered roof surfaces without it: all of them, or only the suggested ones. Walls are never included. */
 function AddToRoofs({ pv, available, elements }: {
   pv: PvMode;
@@ -174,6 +183,13 @@ function AddToRoofs({ pv, available, elements }: {
   const menuRef = useRef<HTMLSpanElement>(null);
   // Low in a short panel the menu would open below its visible part.
   useEffect(() => { if (open) menuRef.current?.scrollIntoView({ block: 'nearest' }); }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    // Capture phase on window, ahead of the view's and the host's own Escape handling.
+    const onKey = escapeClosesOnly(() => setOpen(false));
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [open]);
   // Inside the list's header: a click here must not open or close the list.
   const inHeader = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); };
   const add = (ids: string[]) => (event: MouseEvent) => {
