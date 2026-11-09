@@ -44,7 +44,10 @@
       "empty": "Klik op een vlak in het model om het hier te zien."
     },
     "credits": "Bronvermelding",
-    "measure": "Afmetingen van het gekozen vlak tonen"
+    "measure": "Afmetingen van het gekozen vlak tonen",
+    "zoomIn": "Inzoomen",
+    "zoomOut": "Uitzoomen",
+    "fit": "Hele gebouw tonen"
   },
   "surface": {
     "type": {

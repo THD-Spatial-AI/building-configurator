@@ -44,7 +44,10 @@
       "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen."
     },
     "credits": "Datenquellen",
-    "measure": "Maße der gewählten Fläche anzeigen"
+    "measure": "Maße der gewählten Fläche anzeigen",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "fit": "Ganzes Gebäude zeigen"
   },
   "surface": {
     "type": {

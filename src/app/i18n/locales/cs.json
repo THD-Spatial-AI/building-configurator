@@ -46,7 +46,10 @@
       "empty": "Klikněte na plochu v modelu, a uvidíte ji zde."
     },
     "credits": "Zdroje dat",
-    "measure": "Zobrazit rozměry vybrané plochy"
+    "measure": "Zobrazit rozměry vybrané plochy",
+    "zoomIn": "Přiblížit",
+    "zoomOut": "Oddálit",
+    "fit": "Zobrazit celou budovu"
   },
   "surface": {
     "type": {
