@@ -170,6 +170,7 @@ const pv = useMemo<PvMode>(() => ({
   products,          // this building's copies of the products it uses, by id
   productId,         // the building's product
   onToggle: (surfaceId, installed) => setInstalled(surfaceId, installed),
+  onRemove: () => removePvTechnology(),
   onShareChange: (surfaceId, usableShare) => setShare(surfaceId, usableShare),
   onMountingChange: (surfaceId, mounting, orientation) => setMounting(surfaceId, mounting, orientation),
   onModuleCountChange: (surfaceId, moduleCount) => setModuleCount(surfaceId, moduleCount),
@@ -200,6 +201,7 @@ const pv = useMemo<PvMode>(() => ({
 | `productId` | Optional. The building's product, for surfaces without their own |
 | `module` | Optional. `{ width, height, kwp }`, portrait width and height in m: the module of a product without module dimensions. Absent: `DEFAULT_PV_MODULE`, 1.134 by 1.762 m and 0.4 kWp |
 | `onToggle(surfaceId, installed)` | A surface's PV was switched on or off. Dropping a product on a surface without PV also calls it with `true` |
+| `onRemove()` | Optional. The user confirmed the bin on the PV card. Drop the building's PV technology and stop passing `pv`; no `onToggle` comes with it. While it is passed, the bin shows even with no PV installed. Without it the bin switches off every installed surface through `onToggle` |
 | `onShareChange(surfaceId, usableShare)` | The usable share of a surface with PV was changed, 0 to 1 |
 | `onMountingChange(surfaceId, mounting, orientation)` | The mounting or module orientation of a surface was changed. Store both and pass them back on the surface; `orientation` is `undefined` while the best fit applies |
 | `onModuleCountChange(surfaceId, moduleCount)` | Optional. The module count of a surface with PV was changed. Store it as `surfaces[id].moduleCount`; `null` means as many as fit. Without it the count is not editable |

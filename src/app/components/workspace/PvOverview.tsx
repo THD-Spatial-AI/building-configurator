@@ -153,7 +153,7 @@ function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record
               <li key={row.product?.id ?? ''} className="flex flex-col">
                 <div className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
-                    <div className="truncate text-[12px] font-semibold text-foreground">{product ? productName(product) : t('pv.product.none')}</div>
+                    <div className="truncate text-[12px] font-semibold text-foreground">{product ? productName(product) : pv.typeLabel}</div>
                     <div className="text-[11px] text-muted-foreground">{t('pv.installed.surfaces', { count: row.surfaces })}</div>
                   </div>
                   <div className="ml-auto shrink-0 text-right text-[12px] tabular-nums text-foreground">
@@ -176,7 +176,7 @@ function Installed({ pv, layouts, mode }: { pv: PvMode; layouts: Readonly<Record
                     </button>
                   )}
                   <RemoveButton
-                    label={t('pv.installed.remove', { name: product ? productName(product) : t('pv.product.none') })}
+                    label={t('pv.installed.remove', { name: product ? productName(product) : pv.typeLabel })}
                     confirmLabel={t('pv.installed.removeConfirm')}
                     onRemove={() => installedPvIds(pv.surfaces, (id) => surfaceProduct(pv, id), row.product?.id ?? '').forEach((id) => pv.onToggle(id, false))}
                     className="size-7 border border-border bg-card text-muted-foreground hover:bg-muted"

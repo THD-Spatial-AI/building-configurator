@@ -58,6 +58,11 @@ export interface PvMode {
   /** Name of the building's PV type. */
   typeLabel: string;
   onToggle: (surfaceId: string, installed: boolean) => void;
+  /**
+   * The user confirmed removing PV from the building: drop the technology and stop passing `pv`.
+   * Fires alone, with no onToggle. Absent: the card's bin switches off each installed surface instead.
+   */
+  onRemove?: () => void;
   onShareChange: (surfaceId: string, usableShare: number) => void;
   /** Store both and pass them back on the surface; orientation undefined means best fit. */
   onMountingChange: (surfaceId: string, mounting: PvMounting, orientation: PvOrientation | undefined) => void;
