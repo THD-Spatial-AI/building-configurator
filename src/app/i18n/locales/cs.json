@@ -435,7 +435,9 @@
       "televisions": "Televizory",
       "resetAll": "Obnovit vše na výchozí",
       "groupDefault": "{items} ve výchozím stavu",
-      "groupSet": "{set} nastaveno: {owned} ano, {notOwned} ne"
+      "groupInstalled": "{installed} instalováno",
+      "groupMixed": "{installed} instalováno, {items} ve výchozím stavu",
+      "groupNone": "Nic nainstalováno"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Plyn na vaření se vykazuje jen při vaření na plynu.",

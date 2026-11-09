@@ -421,7 +421,9 @@
       "televisions": "Televisori",
       "resetAll": "Ripristina tutti i predefiniti",
       "groupDefault": "{items} predefiniti",
-      "groupSet": "{set} impostati: {owned} sì, {notOwned} no"
+      "groupInstalled": "{installed} installati",
+      "groupMixed": "{installed} installati, {items} predefiniti",
+      "groupNone": "Nessuno installato"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Il gas di cottura è riportato solo con la cottura a gas.",

@@ -422,7 +422,9 @@
       "televisions": "Televisores",
       "resetAll": "Restablecer todo",
       "groupDefault": "{items} por defecto",
-      "groupSet": "{set} definidos: {owned} sí, {notOwned} no"
+      "groupInstalled": "{installed} instalados",
+      "groupMixed": "{installed} instalados, {items} por defecto",
+      "groupNone": "Ninguno instalado"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "El gas de cocina solo se informa al cocinar con gas.",

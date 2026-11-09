@@ -435,7 +435,9 @@
       "televisions": "Telewizory",
       "resetAll": "Przywróć wszystkie domyślne",
       "groupDefault": "{items} domyślnie",
-      "groupSet": "ustawione: {set} ({owned} tak, {notOwned} nie)"
+      "groupInstalled": "zainstalowane: {installed}",
+      "groupMixed": "zainstalowane: {installed}, domyślnie: {items}",
+      "groupNone": "Brak zainstalowanych"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Gaz do gotowania jest raportowany tylko przy gotowaniu na gazie.",

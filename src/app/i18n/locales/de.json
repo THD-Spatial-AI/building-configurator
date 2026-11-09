@@ -421,7 +421,9 @@
       "televisions": "Fernseher",
       "resetAll": "Alle auf Standard zurücksetzen",
       "groupDefault": "{items} auf Standard",
-      "groupSet": "{set} gesetzt: {owned} ja, {notOwned} nein"
+      "groupInstalled": "{installed} vorhanden",
+      "groupMixed": "{installed} vorhanden, {items} auf Standard",
+      "groupNone": "Keines vorhanden"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Kochgas wird nur beim Kochen mit Gas ausgewiesen.",

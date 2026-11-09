@@ -14,9 +14,12 @@ import {
   buildingTypeName,
   hasDwellingsPerStorey,
   isServiceBuildingType,
+  EQUIPMENT_GROUPS,
+  OUTPUT_PROFILES,
+  outputLevelOptions,
   setbackOptions,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
-import { EquipmentSection, OccupancySection, OutputsSection } from './householdSections';
+import { EquipmentSection, OccupancySection, OutputsSection, groupSummary } from './householdSections';
 import { ComfortSection } from './comfortSection';
 import { InsulationSection, gradeSummary, insulationSummary, useLevelClasses, type InsulationProps } from './insulationSection';
 import { useFormatNumber, useT, type Translate } from '@/app/i18n';
@@ -191,6 +194,23 @@ export function occupancySummary(t: Translate, general: Record<string, any>): St
   ];
 }
 
+/** The facts a closed results and appliances step shows: each result's level, each appliance category's settings, and the solver. */
+export function resultsSummary(t: Translate, general: Record<string, any>): StepFact[] {
+  const service = isServiceBuildingType(general.buildingType);
+  const levels = new Map(outputLevelOptions(t).map(({ value, label }) => [value, label]));
+  const results = OUTPUT_PROFILES
+    .filter(({ key }) => !service || (key !== 'hot_water' && key !== 'kitchen'))
+    .map(({ key, label }) => ({ section: t('editor.section.outputs'), label: label(t), value: levels.get(general.outputs[key]) ?? '' }));
+  const appliances = service ? [] : EQUIPMENT_GROUPS.map((group) => (
+    { section: t('editor.section.equipment'), label: group.label(t), value: groupSummary(t, group, general.equipment ?? {}) }
+  ));
+  return [
+    ...results,
+    ...appliances,
+    { section: t('editor.section.solver'), label: t('steps.summary.solver'), value: t(general.use_milp ? 'steps.summary.milp' : 'steps.summary.sparse') },
+  ];
+}
+
 /** The facts a closed heating and comfort step shows. */
 export function comfortSummary(t: Translate, general: Record<string, any>, advanced = false): StepFact[] {
   const setback = setbackOptions(t).find((option) => option.value === general.setback_profile);
@@ -282,9 +302,7 @@ export function useBuildingSteps({
       label: lastTitle,
       topic: TOPICS.building,
       status: 'complete',
-      summary: [
-        { label: t('steps.summary.solver'), value: t(general.use_milp ? 'steps.summary.milp' : 'steps.summary.sparse') },
-      ],
+      summary: resultsSummary(t, general),
       content: (
         <div className="flex flex-col gap-3">
           {ADVANCED_SECTIONS.filter((key) => !service || key !== 'equipment').map(card)}

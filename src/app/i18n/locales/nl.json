@@ -421,7 +421,9 @@
       "televisions": "Televisies",
       "resetAll": "Alles naar standaard",
       "groupDefault": "{items} op standaard",
-      "groupSet": "{set} ingesteld: {owned} ja, {notOwned} nee"
+      "groupInstalled": "{installed} aanwezig",
+      "groupMixed": "{installed} aanwezig, {items} op standaard",
+      "groupNone": "Geen aanwezig"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Kookgas wordt alleen gerapporteerd bij koken op gas.",

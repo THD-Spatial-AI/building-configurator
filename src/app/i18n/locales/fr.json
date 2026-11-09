@@ -422,7 +422,9 @@
       "televisions": "Téléviseurs",
       "resetAll": "Tout remettre par défaut",
       "groupDefault": "{items} par défaut",
-      "groupSet": "{set} définis : {owned} oui, {notOwned} non"
+      "groupInstalled": "{installed} installés",
+      "groupMixed": "{installed} installés, {items} par défaut",
+      "groupNone": "Aucun installé"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Le gaz de cuisson n'est indiqué qu'en cas de cuisson au gaz.",

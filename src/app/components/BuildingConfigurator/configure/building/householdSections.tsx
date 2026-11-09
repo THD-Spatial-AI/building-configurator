@@ -231,13 +231,18 @@ export function EquipmentSection({ general, setGen }: SectionProps) {
   );
 }
 
-/** One line for a collapsed appliance group: how many are set by hand, and how. */
-function groupSummary(t: Translate, group: (typeof EQUIPMENT_GROUPS)[number], equipment: Record<string, boolean>): string {
-  const ids = [...group.items.map((item) => item.id), ...(group.id === 'electronics' ? TV_IDS : [])];
-  const set = ids.filter((id) => equipment[id] !== undefined);
-  if (set.length === 0) return t('household.equipment.groupDefault', { items: group.items.length });
-  const owned = set.filter((id) => equipment[id]).length;
-  return t('household.equipment.groupSet', { set: set.length, owned, notOwned: set.length - owned });
+/**
+ * One line for an appliance group: how many are installed and how many left
+ * at default. The televisions count as one row, at default until their count is set.
+ */
+export function groupSummary(t: Translate, group: (typeof EQUIPMENT_GROUPS)[number], equipment: Record<string, boolean>): string {
+  const tvs = group.id === 'electronics' ? TV_IDS : [];
+  const installed = [...group.items.map((item) => item.id), ...tvs].filter((id) => equipment[id]).length;
+  const atDefault = group.items.filter((item) => equipment[item.id] === undefined).length
+    + (tvs.length > 0 && tvs.every((id) => equipment[id] === undefined) ? 1 : 0);
+  if (installed === 0) return atDefault === 0 ? t('household.equipment.groupNone') : t('household.equipment.groupDefault', { items: atDefault });
+  if (atDefault === 0) return t('household.equipment.groupInstalled', { installed });
+  return t('household.equipment.groupMixed', { installed, items: atDefault });
 }
 
 function ApplianceRow({ label, children }: { label: string; children: ReactNode }) {

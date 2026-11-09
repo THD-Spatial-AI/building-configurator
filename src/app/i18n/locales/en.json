@@ -421,7 +421,9 @@
       "televisions": "Televisions",
       "resetAll": "Reset all to default",
       "groupDefault": "{items} at default",
-      "groupSet": "{set} set: {owned} yes, {notOwned} no"
+      "groupInstalled": "{installed} installed",
+      "groupMixed": "{installed} installed, {items} at default",
+      "groupNone": "None installed"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Cooking gas is reported only when cooking with gas.",
