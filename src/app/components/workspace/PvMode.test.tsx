@@ -303,4 +303,22 @@ describe('removing PV from the building', () => {
     expect(html).not.toContain('Remove all PV');
     expect(html).toContain('No PV installed yet.');
   });
+
+  it('offers to remove the PV technology itself while the host takes it, even with no PV installed', () => {
+    const html = renderToStaticMarkup(
+      <TechnologiesTab
+        pv={{ ...withCatalogue, surfaces: { r1: { state: 'suggested', usableShare: 0.6, maxKwp: 7.2 } }, onRemove: () => {} }}
+        elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}}
+      />,
+    );
+    expect(html).toContain('aria-label="Remove all PV from this building"');
+  });
+
+  it("names PV without a product after the building's PV type, not as a product to choose", () => {
+    const html = renderToStaticMarkup(
+      <TechnologiesTab pv={pv} elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}} />,
+    );
+    expect(html).toContain('aria-label="Remove Monocrystalline 400 W from every surface"');
+    expect(html).not.toContain('Choose a product');
+  });
 });

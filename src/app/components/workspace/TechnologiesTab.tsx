@@ -43,6 +43,8 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   const currency = pvCurrency || technologies?.items.find((card) => card.investment)?.investment?.currency || '';
   const unsized = (technologies?.items ?? []).filter((card) => card.investment && card.investment.amount === null).length;
   const count = (pv ? 1 : 0) + (technologies?.items.length ?? 0);
+  const removePv = pv?.onRemove
+    ?? (pv && installed.length > 0 ? () => installedPvIds(pv.surfaces, productFor).forEach((id) => pv.onToggle(id, false)) : undefined);
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -57,8 +59,8 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
           cost={summary.investment === undefined ? undefined : `${format(summary.investment, 0)} ${pvCurrency}`.trim()}
           focused={focusId === PV_CARD}
           onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
-          {...(installed.length > 0 ? {
-            onRemove: () => installedPvIds(pv.surfaces, productFor).forEach((id) => pv.onToggle(id, false)),
+          {...(removePv ? {
+            onRemove: removePv,
             removeLabel: t('pv.removeAll'),
             confirmLabel: t('pv.removeAllConfirm'),
           } : {})}
