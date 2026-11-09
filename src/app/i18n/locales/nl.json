@@ -250,7 +250,9 @@
     },
     "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM.",
     "options": {
-      "search": "Fotovoltaïsche opties doorzoeken"
+      "search": "Fotovoltaïsche opties doorzoeken",
+      "noMatch": "Geen pv-optie komt overeen met ‘{query}’.",
+      "clear": "Zoekopdracht wissen"
     },
     "noFitOn": {
       "one": "Er past geen hele PV-module op {surfaces}, dus het vlak heeft geen PV. Kies een kleiner product of een ander vlak.",

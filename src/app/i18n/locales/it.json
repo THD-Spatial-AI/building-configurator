@@ -250,7 +250,9 @@
     },
     "followsModel": "Il FV segue i {tilt}° del modello 3D; inclinazione e orientamento modificati sopra vanno solo a BuEM.",
     "options": {
-      "search": "Cerca nelle opzioni fotovoltaiche"
+      "search": "Cerca nelle opzioni fotovoltaiche",
+      "noMatch": "Nessuna opzione fotovoltaica corrisponde a «{query}».",
+      "clear": "Cancella la ricerca"
     },
     "noFitOn": {
       "one": "Nessun modulo FV intero entra su {surfaces}, quindi non ha FV. Scegli un prodotto più piccolo o un'altra superficie.",
