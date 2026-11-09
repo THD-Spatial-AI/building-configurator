@@ -332,7 +332,8 @@
     },
     "insulationTitle": "Niveau énergétique",
     "advancedMore": {
-      "title": "Thermique et simulation",
+      "title": "Résultats et appareils",
+      "titleService": "Résultats",
       "detail": "les profils, les équipements et le solveur gardent leurs valeurs par défaut"
     }
   },
@@ -416,16 +417,18 @@
     "equipment": {
       "yes": "Oui",
       "no": "Non",
-      "intro": "Par défaut, chaque appareil suit les statistiques d'équipement de BuEM.",
+      "intro": "Par défaut, chaque appareil compte autant que les ménages semblables en possèdent.",
       "sameInEveryDwelling": "Tous les logements du bâtiment ont les mêmes appareils.",
       "televisions": "Téléviseurs",
       "resetAll": "Tout remettre par défaut",
       "groupDefault": "{items} par défaut",
-      "groupSet": "{set} définis : {owned} oui, {notOwned} non"
+      "groupInstalled": "{installed} installés",
+      "groupMixed": "{installed} installés, {items} par défaut",
+      "groupNone": "Aucun installé"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Le gaz de cuisson n'est indiqué qu'en cas de cuisson au gaz.",
-      "thermalOff": "Sans chauffage ni refroidissement, BuEM ignore le modèle thermique : surfaces et météo ne sont pas utilisées."
+      "thermalOff": "Chauffage et refroidissement désactivés, les surfaces du bâtiment et la météo ne sont pas utilisées."
     }
   },
   "insulation": {

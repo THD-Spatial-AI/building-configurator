@@ -331,7 +331,8 @@
     },
     "insulationTitle": "Livello energetico",
     "advancedMore": {
-      "title": "Termica e simulazione",
+      "title": "Risultati ed elettrodomestici",
+      "titleService": "Risultati",
       "detail": "profili, apparecchi e solutore mantengono i valori predefiniti"
     }
   },
@@ -415,16 +416,18 @@
     "equipment": {
       "yes": "Sì",
       "no": "No",
-      "intro": "Predefinito lascia ogni elettrodomestico alle statistiche di possesso di BuEM.",
+      "intro": "Predefinito conta ogni elettrodomestico quanto lo possiedono famiglie simili.",
       "sameInEveryDwelling": "Ogni alloggio dell'edificio riceve gli stessi elettrodomestici.",
       "televisions": "Televisori",
       "resetAll": "Ripristina tutti i predefiniti",
       "groupDefault": "{items} predefiniti",
-      "groupSet": "{set} impostati: {owned} sì, {notOwned} no"
+      "groupInstalled": "{installed} installati",
+      "groupMixed": "{installed} installati, {items} predefiniti",
+      "groupNone": "Nessuno installato"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Il gas di cottura è riportato solo con la cottura a gas.",
-      "thermalOff": "Senza riscaldamento né raffrescamento BuEM salta il modello termico: superfici e meteo non vengono usati."
+      "thermalOff": "Con riscaldamento e raffrescamento spenti, le superfici dell'edificio e il meteo non vengono usati."
     }
   },
   "insulation": {

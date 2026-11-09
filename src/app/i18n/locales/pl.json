@@ -345,7 +345,8 @@
     },
     "insulationTitle": "Standard energetyczny",
     "advancedMore": {
-      "title": "Cieplne i symulacja",
+      "title": "Wyniki i urządzenia",
+      "titleService": "Wyniki",
       "detail": "profile, urządzenia i solver zachowują wartości domyślne"
     }
   },
@@ -429,16 +430,18 @@
     "equipment": {
       "yes": "Tak",
       "no": "Nie",
-      "intro": "Domyślnie posiadanie każdego urządzenia wynika ze statystyk BuEM.",
+      "intro": "Domyślnie każde urządzenie liczy się tak często, jak posiadają je podobne gospodarstwa.",
       "sameInEveryDwelling": "Każde mieszkanie w budynku ma te same urządzenia.",
       "televisions": "Telewizory",
       "resetAll": "Przywróć wszystkie domyślne",
       "groupDefault": "{items} domyślnie",
-      "groupSet": "ustawione: {set} ({owned} tak, {notOwned} nie)"
+      "groupInstalled": "zainstalowane: {installed}",
+      "groupMixed": "zainstalowane: {installed}, domyślnie: {items}",
+      "groupNone": "Brak zainstalowanych"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Gaz do gotowania jest raportowany tylko przy gotowaniu na gazie.",
-      "thermalOff": "Bez ogrzewania i chłodzenia BuEM pomija model cieplny: przegrody i dane pogodowe nie są używane."
+      "thermalOff": "Gdy ogrzewanie i chłodzenie są wyłączone, przegrody budynku i dane pogodowe nie są używane."
     }
   },
   "insulation": {

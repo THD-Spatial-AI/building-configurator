@@ -331,7 +331,8 @@
     },
     "insulationTitle": "Energy grade",
     "advancedMore": {
-      "title": "Thermal and simulation",
+      "title": "Results and appliances",
+      "titleService": "Results",
       "detail": "profiles, equipment and solver keep their defaults"
     }
   },
@@ -415,16 +416,18 @@
     "equipment": {
       "yes": "Yes",
       "no": "No",
-      "intro": "Default leaves each appliance to BuEM's ownership statistics.",
+      "intro": "Default counts each appliance as often as households like this one own it.",
       "sameInEveryDwelling": "Every dwelling in the building gets the same appliances.",
       "televisions": "Televisions",
       "resetAll": "Reset all to default",
       "groupDefault": "{items} at default",
-      "groupSet": "{set} set: {owned} yes, {notOwned} no"
+      "groupInstalled": "{installed} installed",
+      "groupMixed": "{installed} installed, {items} at default",
+      "groupNone": "None installed"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Cooking gas is reported only when cooking with gas.",
-      "thermalOff": "Without heating or cooling BuEM skips the thermal model: surfaces and weather are not used."
+      "thermalOff": "With heating and cooling both off, the building's surfaces and the weather are not used."
     }
   },
   "insulation": {

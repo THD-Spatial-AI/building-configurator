@@ -2,7 +2,7 @@
 // beneath, one step shown at a time with Back and Next beneath it. A step
 // already worked through shows as a summary card of its values until Edit.
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle, Check, ChevronDown, Pencil, X } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import type { Topic } from '@/app/config/topics';
@@ -31,6 +31,8 @@ export interface StepFact {
   value: string;
   /** A status in place of a value, such as one still being worked out: shown in grey. */
   muted?: boolean;
+  /** A heading the fact sits under, drawn once above the first fact of each section. */
+  section?: string;
 }
 
 /**
@@ -186,11 +188,18 @@ export function StepSummary({ step, number, onEdit }: { step: Step; number: numb
       {step.summary && step.summary.length > 0 && (
         <table className="w-full border-collapse text-[12px]">
           <tbody>
-            {step.summary.map((fact) => (
-              <tr key={fact.label} className="border-t border-border">
-                <th scope="row" className="px-3 py-1.5 text-left font-normal text-muted-foreground">{fact.label}</th>
-                <td className={cn('px-3 py-1.5 text-right tabular-nums', fact.muted ? 'text-muted-foreground' : 'font-semibold text-foreground')}>{fact.value}</td>
-              </tr>
+            {step.summary.map((fact, i) => (
+              <Fragment key={fact.label}>
+                {fact.section && fact.section !== step.summary![i - 1]?.section && (
+                  <tr className="border-t border-border bg-muted/50">
+                    <th colSpan={2} scope="colgroup" className="px-3 py-1 text-left text-[11px] font-semibold text-foreground">{fact.section}</th>
+                  </tr>
+                )}
+                <tr className="border-t border-border">
+                  <th scope="row" className="px-3 py-1.5 text-left font-normal text-muted-foreground">{fact.label}</th>
+                  <td className={cn('px-3 py-1.5 text-right tabular-nums', fact.muted ? 'text-muted-foreground' : 'font-semibold text-foreground')}>{fact.value}</td>
+                </tr>
+              </Fragment>
             ))}
           </tbody>
         </table>
