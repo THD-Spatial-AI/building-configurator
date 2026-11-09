@@ -192,6 +192,11 @@ describe('PvOverview with a catalogue', () => {
     expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
 
+  it('keeps the roof choices clear of the total pinned below them when they scroll into view', () => {
+    const menu = html.match(/<span class="([^"]*)"><button[^>]*>All roof surfaces/);
+    expect(menu?.[1]).toContain('scroll-mb-20');
+  });
+
   it('opens the catalogue while no surface has PV, so its products can be dragged straight away', () => {
     const empty = renderToStaticMarkup(
       <PvOverview pv={{ ...withCatalogue, surfaces: { r2: pv.surfaces.r2 } }} elements={elements} mode="simple" onSelect={() => {}} />,
@@ -207,11 +212,6 @@ describe('PvOverview with a catalogue', () => {
     expect(empty).toMatch(/<button[^>]*aria-label="Sort by"[^>]*aria-expanded="false"/);
     expect(empty).not.toContain('type="search"');
     expect(empty).not.toContain('<select');
-  });
-
-  it('keeps the roof choices clear of the total pinned below them when they scroll into view', () => {
-    const menu = html.match(/<span class="([^"]*)"><button[^>]*>All roof surfaces/);
-    expect(menu?.[1]).toContain('scroll-mb-20');
   });
 
   it('keeps each installed product\'s values behind its edit button', () => {
