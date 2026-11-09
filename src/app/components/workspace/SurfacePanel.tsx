@@ -33,7 +33,7 @@ export function SurfacePanel({ docked, open, title, emptyText, picker, onClose, 
         'flex flex-col border-border bg-card',
         docked
           ? 'fixed inset-x-0 bottom-0 z-30 max-h-[58vh] overflow-hidden rounded-t-2xl border-t shadow-[0_18px_50px_rgba(15,23,42,0.28)]'
-          : 'w-[300px] shrink-0 rounded-lg border',
+          : 'w-[380px] shrink-0 rounded-lg border',
       )}
     >
       {picker && !docked && (

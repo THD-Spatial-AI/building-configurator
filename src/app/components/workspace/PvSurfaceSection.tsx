@@ -10,6 +10,8 @@ import { DEFAULT_PV_MODULE, DEFAULT_RACK, FLAT_MAX_TILT_DEG, type PvLayout, type
 import { fitsMore, productCurrency, productName, pvCosts } from '../../lib/pvProducts';
 import type { SurfacePolygon } from '../../lib/surfaceMesh';
 import { compassPoint, surfaceProduct, type PvMode, type PvSurface } from './PvMode';
+import { ProductValues } from './PvOverview';
+import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 /** Tilt, facing and area as tiles; a flat surface shows "Flat" and no facing. */
 function GeometryTiles({ id, elements, surface }: { id: string; elements: Record<string, BuildingElement>; surface: PvSurface }) {
@@ -191,7 +193,7 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
 }
 
 /** The PV section of a clicked surface. */
-export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout, polygon, showGeometry = true, onClose }: {
+export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout, polygon, showGeometry = true, mode = 'simple', onClose }: {
   surfaceId: string;
   surface: PvSurface;
   pv: PvMode;
@@ -201,6 +203,8 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
   polygon?: SurfacePolygon;
   /** Off where the envelope section above already shows the geometry. */
   showGeometry?: boolean;
+  /** Which of the product's values to show: simple mode asks only about cost and lifetime. */
+  mode?: ConfiguratorMode;
   /** Closes the panel, from its Done button. */
   onClose?: () => void;
 }) {
@@ -208,6 +212,9 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
   const format = useFormatNumber();
   const installed = surface.state === 'installed';
   const geometry = pvGeometry(surfaceId, elements, surface);
+  const chosen = surfaceProduct(pv, surfaceId);
+  // The building's copy, which carries the values edited for it.
+  const product = chosen && (pv.products?.[chosen.id] ?? chosen);
   const area = elements[surfaceId]?.area ?? surface.area;
   const element = elements[surfaceId];
   const orientationEdited = element !== undefined && (
@@ -276,6 +283,9 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
             </div>
           )}
           {layout && polygon && <FitsMore surfaceId={surfaceId} surface={surface} pv={pv} polygon={polygon} layout={layout} />}
+          {product && pv.onConstraintChange && (
+            <div className="rounded-md border border-border bg-muted/40 p-3"><ProductValues pv={pv} product={product} mode={mode} /></div>
+          )}
           <div className="flex justify-between gap-2">
             <button
               type="button"

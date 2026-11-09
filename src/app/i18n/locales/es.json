@@ -45,7 +45,10 @@
       "empty": "Haga clic en una superficie del modelo para verla aquí."
     },
     "credits": "Créditos de los datos",
-    "measure": "Mostrar las medidas de la superficie seleccionada"
+    "measure": "Mostrar las medidas de la superficie seleccionada",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "fit": "Mostrar todo el edificio"
   },
   "surface": {
     "type": {
@@ -152,7 +155,11 @@
     },
     "geometry": "{tilt}° · orientación {azimuth}° · {area} m²",
     "upTo": "hasta {kwp} kWp",
-    "useSuggested": "Usar superficies sugeridas",
+    "addRoofs": {
+      "button": "Añadir FV a los tejados",
+      "all": "Todas las superficies de tejado ({count})",
+      "best": "Solo las mejores superficies de tejado ({count})"
+    },
     "legend": {
       "installed": "FV instalada",
       "suggested": "Sugerida para FV"
@@ -261,7 +268,7 @@
         "all": "Todas a la vez",
         "remove": "Quitar"
       },
-      "all": "Haga clic en {useSuggested} para añadir FV a cada superficie marcada como {suggested}."
+      "all": "En {surfaces}, haga clic en {addRoofs} y elija todas las superficies de tejado o solo las marcadas como {suggested}."
     },
     "sort": {
       "label": "Ordenar por",
@@ -332,7 +339,8 @@
     },
     "insulationTitle": "Nivel energético",
     "advancedMore": {
-      "title": "Térmica y simulación",
+      "title": "Resultados y electrodomésticos",
+      "titleService": "Resultados",
       "detail": "los perfiles, los equipos y el solver mantienen sus valores por defecto"
     }
   },
@@ -416,16 +424,18 @@
     "equipment": {
       "yes": "Sí",
       "no": "No",
-      "intro": "Por defecto, cada electrodoméstico sigue las estadísticas de equipamiento de BuEM.",
+      "intro": "Por defecto, cada electrodoméstico cuenta tanto como lo poseen hogares similares.",
       "sameInEveryDwelling": "Todas las viviendas del edificio tienen los mismos electrodomésticos.",
       "televisions": "Televisores",
       "resetAll": "Restablecer todo",
       "groupDefault": "{items} por defecto",
-      "groupSet": "{set} definidos: {owned} sí, {notOwned} no"
+      "groupInstalled": "{installed} instalados",
+      "groupMixed": "{installed} instalados, {items} por defecto",
+      "groupNone": "Ninguno instalado"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "El gas de cocina solo se informa al cocinar con gas.",
-      "thermalOff": "Sin calefacción ni refrigeración, BuEM omite el modelo térmico: no se usan superficies ni datos meteorológicos."
+      "thermalOff": "Con la calefacción y la refrigeración desactivadas, no se usan las superficies del edificio ni el tiempo."
     }
   },
   "insulation": {

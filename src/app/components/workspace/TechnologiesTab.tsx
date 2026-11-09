@@ -43,9 +43,11 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   const currency = pvCurrency || technologies?.items.find((card) => card.investment)?.investment?.currency || '';
   const unsized = (technologies?.items ?? []).filter((card) => card.investment && card.investment.amount === null).length;
   const count = (pv ? 1 : 0) + (technologies?.items.length ?? 0);
+  const removePv = pv?.onRemove
+    ?? (pv && installed.length > 0 ? () => installedPvIds(pv.surfaces, productFor).forEach((id) => pv.onToggle(id, false)) : undefined);
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-1 flex-col gap-2.5">
       <span className="text-[12px] text-muted-foreground">{t('tech.count', { count })}</span>
 
       {pv && summary && (
@@ -54,11 +56,10 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
           title={t('pv.overview.title')}
           headline={`${format(summary.kwp, 1)} kWp · ${t('tech.pvSurfaces', { count: summary.installed })}`}
           subtitle={installed.map((row) => (row.product ? productName(row.product) : pv.typeLabel)).join(' · ') || pv.typeLabel}
-          cost={summary.investment === undefined ? undefined : `${format(summary.investment, 0)} ${pvCurrency}`.trim()}
           focused={focusId === PV_CARD}
           onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
-          {...(installed.length > 0 ? {
-            onRemove: () => installedPvIds(pv.surfaces, productFor).forEach((id) => pv.onToggle(id, false)),
+          {...(removePv ? {
+            onRemove: removePv,
             removeLabel: t('pv.removeAll'),
             confirmLabel: t('pv.removeAllConfirm'),
           } : {})}
@@ -83,8 +84,8 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
       )}
 
       {amounts.length > 0 && (
-        // Pinned to the bottom of the scrolling panel, so the total stays in view.
-        <div className="sticky bottom-0 -mx-4 -mb-4 mt-1 flex flex-col gap-0.5 border-t border-border bg-card px-4 py-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
+        // At the bottom of the panel however short the cards, and pinned there while they scroll.
+        <div className="sticky bottom-0 -mx-4 -mb-4 mt-auto flex flex-col gap-0.5 border-t border-border bg-card px-4 py-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-[13px] font-semibold text-foreground">{t('tech.total.label')}</span>
             <span className="text-[17px] font-bold tabular-nums text-[#2F7A4F] dark:text-[#8FD1A9]">

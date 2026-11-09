@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TOPICS } from '@/app/config/topics';
 import { StepPanel, StepSummary, type Step } from './StepPanel';
-import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, storeysStatus } from '../configure/building/BuildingEditor';
+import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, resultsSummary, storeysStatus } from '../configure/building/BuildingEditor';
 import { translate } from '@/app/i18n';
 import type { InsulationProps } from '../configure/building/insulationSection';
 import { missingDwellings } from '@/app/lib/storeys';
@@ -111,26 +111,83 @@ describe('a step worked through', () => {
       { label: 'Hot water', value: 'Included' },
     ]);
   });
+
+  it('lists the cooling setpoint with heating and comfort in Advanced, where its field is', () => {
+    const general = { buildingType: 'Single-family House', comfortT_lb: 18, comfortT_ub: 26, include_dhw: true, setback_profile: 'none' };
+    expect(comfortSummary(t, general, true).slice(0, 2)).toEqual([
+      { label: 'Heating setpoint', value: '18 °C' },
+      { label: 'Cooling setpoint', value: '26 °C' },
+    ]);
+    expect(comfortSummary(t, general).map((fact) => fact.label)).not.toContain('Cooling setpoint');
+  });
+
+  it('sums up the last step as one row per result and per appliance category, under headings', () => {
+    const outputs = { heating: 'series', cooling: 'none', electricity: 'series', hot_water: 'summary', kitchen: 'none' };
+    const equipment = {
+      hob: true, oven: false,
+      fridge_freezer: false, refrigerator: false, chest_freezer: false, upright_freezer: false,
+      tv_1: true, tv_2: true, tv_3: false, printer: true,
+    };
+    const general = { buildingType: 'Single-family House', outputs, equipment, use_milp: false };
+    const results = 'Results to compute';
+    const appliances = 'Appliances';
+    expect(resultsSummary(t, general)).toEqual([
+      { section: results, label: 'Space heating', value: 'Hourly' },
+      { section: results, label: 'Space cooling', value: 'Off' },
+      { section: results, label: 'Electricity', value: 'Hourly' },
+      { section: results, label: 'Hot water', value: 'Annual' },
+      { section: results, label: 'Cooking gas', value: 'Off' },
+      { section: appliances, label: 'Cooking', value: '1 installed, 5 at default' },
+      { section: appliances, label: 'Cold', value: 'None installed' },
+      { section: appliances, label: 'Laundry and cleaning', value: '7 at default' },
+      { section: appliances, label: 'Electronics', value: '3 installed, 9 at default' },
+      { section: appliances, label: 'Other', value: '6 at default' },
+      { section: 'Calculation Method', label: 'Solver', value: 'Sparse' },
+    ]);
+  });
+
+  it('leaves hot water, cooking gas and appliances out of a service building\'s last step', () => {
+    const outputs = { heating: 'series', cooling: 'series', electricity: 'summary', hot_water: 'none', kitchen: 'none' };
+    expect(resultsSummary(t, { buildingType: 'School', outputs, equipment: {}, use_milp: true }).map((fact) => fact.label))
+      .toEqual(['Space heating', 'Space cooling', 'Electricity', 'Solver']);
+  });
+
+  it('draws a heading row above each new section of a summary', () => {
+    const html = renderToStaticMarkup(
+      <StepSummary step={{ ...steps[2], summary: [
+        { section: 'Results', label: 'Space heating', value: 'Hourly' },
+        { section: 'Results', label: 'Electricity', value: 'Annual' },
+        { section: 'Appliances', label: 'Cooking', value: '7 at default' },
+      ] }} number={5} onEdit={() => {}} />,
+    );
+    expect(html.match(/<th colspan="2"[^>]*>Results<\/th>/gi)).toHaveLength(1);
+    expect(html.match(/<th colspan="2"[^>]*>Appliances<\/th>/gi)).toHaveLength(1);
+  });
 });
 
-describe('Done beneath a step', () => {
+describe('a step with a summary', () => {
   const withSummary: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }] }));
 
-  it('shows while the fields of a step with a summary are open', () => {
-    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />)).toContain('>Done</button>');
+  it('opens on its overview card, whether or not it was visited before', () => {
+    const html = renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />);
+    expect(html).toContain('aria-label="Edit Energy grade"');
+    expect(html).not.toContain('grade body');
   });
 
-  it('is not offered for a step without a summary, nor while the summary shows', () => {
-    expect(renderToStaticMarkup(<StepPanel steps={steps} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
-    const summarised = withSummary.map((step) => ({ ...step, startSummarised: true }));
-    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
+  it('offers Done while its fields are open, not while its overview card shows', () => {
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} openFields="grade" />)).toContain('>Done</button>');
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="grade" onActive={() => {}} />)).not.toContain('>Done</button>');
+  });
+
+  it('opens with its fields when asked for from outside the panel', () => {
+    expect(renderToStaticMarkup(<StepPanel steps={withSummary} active="comfort" onActive={() => {}} openFields="comfort" />)).toContain('comfort body');
   });
 });
 
-describe('a step asked for from outside the panel', () => {
-  it('opens with its fields, not its summary, even when it starts summarised', () => {
-    const summarised: Step[] = steps.map((step) => ({ ...step, summary: [{ label: 'x', value: 'y' }], startSummarised: true }));
-    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="comfort" onActive={() => {}} />)).not.toContain('comfort body');
-    expect(renderToStaticMarkup(<StepPanel steps={summarised} active="comfort" onActive={() => {}} openFields="comfort" />)).toContain('comfort body');
+describe('a step without a summary', () => {
+  it('shows its fields and no Done', () => {
+    const html = renderToStaticMarkup(<StepPanel steps={steps} active="grade" onActive={() => {}} />);
+    expect(html).toContain('grade body');
+    expect(html).not.toContain('>Done</button>');
   });
 });

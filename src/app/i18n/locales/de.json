@@ -44,7 +44,10 @@
       "empty": "Klicken Sie auf eine Fläche im Modell, um sie hier zu sehen."
     },
     "credits": "Datenquellen",
-    "measure": "Maße der gewählten Fläche anzeigen"
+    "measure": "Maße der gewählten Fläche anzeigen",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "fit": "Ganzes Gebäude zeigen"
   },
   "surface": {
     "type": {
@@ -151,7 +154,11 @@
     },
     "geometry": "{tilt}° · nach {azimuth}° · {area} m²",
     "upTo": "bis {kwp} kWp",
-    "useSuggested": "Vorgeschlagene Flächen nutzen",
+    "addRoofs": {
+      "button": "PV auf Dächer setzen",
+      "all": "Alle Dachflächen ({count})",
+      "best": "Nur die besten Dachflächen ({count})"
+    },
     "legend": {
       "installed": "PV installiert",
       "suggested": "Für PV vorgeschlagen"
@@ -260,7 +267,7 @@
         "all": "Alle auf einmal",
         "remove": "Entfernen"
       },
-      "all": "Klicken Sie auf {useSuggested}, um PV auf jeder als {suggested} markierten Fläche hinzuzufügen."
+      "all": "Klicken Sie in {surfaces} auf {addRoofs} und wählen Sie alle Dachflächen oder nur die als {suggested} markierten."
     },
     "sort": {
       "label": "Sortieren nach",
@@ -331,7 +338,8 @@
     },
     "insulationTitle": "Energetischer Standard",
     "advancedMore": {
-      "title": "Thermik und Simulation",
+      "title": "Ergebnisse und Geräte",
+      "titleService": "Ergebnisse",
       "detail": "Profile, Geräte und Löser behalten ihre Standardwerte"
     }
   },
@@ -415,16 +423,18 @@
     "equipment": {
       "yes": "Ja",
       "no": "Nein",
-      "intro": "Standard überlässt jedes Gerät der BuEM-Ausstattungsstatistik.",
+      "intro": "Standard zählt jedes Gerät so oft, wie ähnliche Haushalte es besitzen.",
       "sameInEveryDwelling": "Jede Wohneinheit im Gebäude erhält dieselben Geräte.",
       "televisions": "Fernseher",
       "resetAll": "Alle auf Standard zurücksetzen",
       "groupDefault": "{items} auf Standard",
-      "groupSet": "{set} gesetzt: {owned} ja, {notOwned} nein"
+      "groupInstalled": "{installed} vorhanden",
+      "groupMixed": "{installed} vorhanden, {items} auf Standard",
+      "groupNone": "Keines vorhanden"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Kochgas wird nur beim Kochen mit Gas ausgewiesen.",
-      "thermalOff": "Ohne Heizen oder Kühlen überspringt BuEM das thermische Modell: Flächen und Wetter werden nicht verwendet."
+      "thermalOff": "Sind Heizen und Kühlen beide aus, werden die Flächen des Gebäudes und das Wetter nicht verwendet."
     }
   },
   "insulation": {

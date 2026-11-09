@@ -44,7 +44,10 @@
       "empty": "Klik op een vlak in het model om het hier te zien."
     },
     "credits": "Bronvermelding",
-    "measure": "Afmetingen van het gekozen vlak tonen"
+    "measure": "Afmetingen van het gekozen vlak tonen",
+    "zoomIn": "Inzoomen",
+    "zoomOut": "Uitzoomen",
+    "fit": "Hele gebouw tonen"
   },
   "surface": {
     "type": {
@@ -151,7 +154,11 @@
     },
     "geometry": "{tilt}° · gericht op {azimuth}° · {area} m²",
     "upTo": "tot {kwp} kWp",
-    "useSuggested": "Voorgestelde vlakken gebruiken",
+    "addRoofs": {
+      "button": "Pv op daken plaatsen",
+      "all": "Alle dakvlakken ({count})",
+      "best": "Alleen de beste dakvlakken ({count})"
+    },
     "legend": {
       "installed": "PV geplaatst",
       "suggested": "Voorgesteld voor pv"
@@ -260,7 +267,7 @@
         "all": "Alles tegelijk",
         "remove": "Verwijderen"
       },
-      "all": "Klik op {useSuggested} om pv toe te voegen aan elk vlak met {suggested}."
+      "all": "Klik in {surfaces} op {addRoofs} en kies alle dakvlakken of alleen die met {suggested}."
     },
     "sort": {
       "label": "Sorteren op",
@@ -331,7 +338,8 @@
     },
     "insulationTitle": "Energieniveau",
     "advancedMore": {
-      "title": "Thermiek en simulatie",
+      "title": "Resultaten en apparaten",
+      "titleService": "Resultaten",
       "detail": "profielen, apparatuur en solver houden hun standaardwaarden"
     }
   },
@@ -415,16 +423,18 @@
     "equipment": {
       "yes": "Ja",
       "no": "Nee",
-      "intro": "Standaard laat elk apparaat over aan de bezitsstatistieken van BuEM.",
+      "intro": "Standaard telt elk apparaat zo vaak als vergelijkbare huishoudens het bezitten.",
       "sameInEveryDwelling": "Elke woning in het gebouw krijgt dezelfde apparaten.",
       "televisions": "Televisies",
       "resetAll": "Alles naar standaard",
       "groupDefault": "{items} op standaard",
-      "groupSet": "{set} ingesteld: {owned} ja, {notOwned} nee"
+      "groupInstalled": "{installed} aanwezig",
+      "groupMixed": "{installed} aanwezig, {items} op standaard",
+      "groupNone": "Geen aanwezig"
     },
     "outputs": {
       "cookingGasOnlyWithGas": "Kookgas wordt alleen gerapporteerd bij koken op gas.",
-      "thermalOff": "Zonder verwarming of koeling slaat BuEM het thermische model over: vlakken en weer worden niet gebruikt."
+      "thermalOff": "Met verwarming en koeling beide uit worden de vlakken van het gebouw en het weer niet gebruikt."
     }
   },
   "insulation": {

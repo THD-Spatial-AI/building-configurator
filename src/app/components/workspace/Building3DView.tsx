@@ -400,6 +400,7 @@ function BuildingView({
             layout={layouts[selected.id]}
             polygon={surfaces.find((surface) => surface.id === selected.id)}
             showGeometry={!selectedElement}
+            mode={mode}
             onClose={() => openSurface(null)}
           />
         </SectionCard>
