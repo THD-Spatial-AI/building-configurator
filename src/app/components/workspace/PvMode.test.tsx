@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pvRenderSets, surfaceProduct, type PvMode } from './PvMode';
-import { NoMatch, ProductValues, PvOverview } from './PvOverview';
+import { escapeClosesOnly, NoMatch, ProductValues, PvOverview } from './PvOverview';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import { TechnologiesTab } from './TechnologiesTab';
+import { heldOrder } from './PvOverview';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import type { PvLayout } from '../../lib/pvLayout';
 import type { TechnologyProduct } from '../../lib/pvProducts';
@@ -124,6 +125,11 @@ describe('PvOverview', () => {
     );
   });
 
+  it('keeps each surface where it was when the list opened, and puts surfaces new since then at the end', () => {
+    expect(heldOrder(['r2', 'r1', 'w1'], null)).toEqual(['r2', 'r1', 'w1']);
+    expect(heldOrder(['r2', 'r1', 'w1'], ['r1', 'w1'])).toEqual(['r1', 'w1', 'r2']);
+  });
+
   it('lists installed, then suggested, then available surfaces, with their geometry', () => {
     const order = ['Roof south', 'Roof north', 'Wall west'].map((name) => html.indexOf(name));
     expect(order.every((at) => at >= 0)).toBe(true);
@@ -184,6 +190,15 @@ describe('PvOverview with a catalogue', () => {
     expect(installed).toContain('24 modules');
     expect(installed).toContain('on 1 surface');
     expect(html).toMatch(/<details class="group[^"]*"><summary[^>]*><span[^>]*>Photovoltaic options \(2\)/);
+  });
+
+  it('closes the roof choices on Escape without letting the key reach the view behind them', () => {
+    let closed = 0;
+    let stopped = 0;
+    const onKey = escapeClosesOnly(() => { closed += 1; });
+    onKey({ key: 'Escape', stopPropagation: () => { stopped += 1; } } as unknown as KeyboardEvent);
+    onKey({ key: 'Enter', stopPropagation: () => { stopped += 1; } } as unknown as KeyboardEvent);
+    expect([closed, stopped]).toEqual([1, 1]);
   });
 
   it('orders the card: totals, how to add PV, the options, the surfaces, then what is installed', () => {
