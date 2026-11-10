@@ -293,8 +293,24 @@ function layoutFor(
   };
 }
 
-/** Whole modules on a surface: as many as fit inside its edge clearance, up to its usable share of the area. */
+// Hosts pass a new pv object on every change, and a large roof takes up to about 100 ms to lay out.
+const layouts = new WeakMap<SurfacePolygon, Map<string, PvLayout>>();
+
+/**
+ * Whole modules on a surface: as many as fit inside its edge clearance, up to its usable share of the area.
+ * Remembered per polygon object and settings: change neither the polygon's coordinates nor the returned layout in place.
+ */
 export function pvLayout(surface: SurfacePolygon, module: PvModule, options: PvLayoutOptions): PvLayout {
+  const { usableShare, mounting, orientation, moduleCount } = options;
+  const key = JSON.stringify([module.width, module.height, module.kwp, usableShare, mounting, orientation, moduleCount]);
+  let known = layouts.get(surface);
+  if (!known) layouts.set(surface, known = new Map());
+  let layout = known.get(key);
+  if (!layout) known.set(key, layout = layoutOn(surface, module, options));
+  return layout;
+}
+
+function layoutOn(surface: SurfacePolygon, module: PvModule, options: PvLayoutOptions): PvLayout {
   const ring = surface.coordinates[0].slice(0, -1) as Vec[];
   const sum = newell(ring);
   const area = Math.hypot(...sum) / 2;
