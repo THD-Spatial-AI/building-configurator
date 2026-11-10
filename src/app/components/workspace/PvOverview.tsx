@@ -76,15 +76,9 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
   const offered = new Set(offeredIds(pv, available));
   const entries = Object.entries(pv.surfaces).filter(([id]) => offered.has(id));
   const installedCount = fittedPvIds(pv.surfaces, layouts).length;
-  // Re-sorted on each opening only: a row moving as it is switched would put another under the pointer.
-  const [held, setHeld] = useState<string[] | null>(null);
-  const sorted = (group: [string, PvSurface][]) => STATE_ORDER.flatMap((state) => group
+  const ordered = (group: [string, PvSurface][]) => STATE_ORDER.flatMap((state) => group
     .filter(([, surface]) => surface.state === state)
     .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
-  const ordered = (group: [string, PvSurface][]) => {
-    const byId = new Map(group);
-    return heldOrder(sorted(group).map(([id]) => id), held).map((id) => [id, byId.get(id)!] as [string, PvSurface]);
-  };
   const groups = [
     { key: 'roof', entries: ordered(entries.filter(([id, surface]) => isRoof(id, elements, surface))) },
     { key: 'wall', entries: ordered(entries.filter(([id, surface]) => !isRoof(id, elements, surface))) },
@@ -94,7 +88,6 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
     <Dropdown
       title={t('pv.surfaces.toggle', { name: t('pv.surfaces.name'), installed: installedCount, total: entries.length })}
       action={<AddToRoofs pv={pv} available={available} elements={elements} />}
-      onToggle={(open) => setHeld(open ? sorted(entries).map(([id]) => id) : null)}
     >
       <div className={DROPDOWN_LIST}>
         {groups.map((group) => (
@@ -106,14 +99,6 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
       </div>
     </Dropdown>
   );
-}
-
-/** `ids` in their order in `held`, any not in it after them in their own order; `ids` unchanged without `held`. */
-export function heldOrder(ids: string[], held: string[] | null): string[] {
-  if (!held) return ids;
-  const at = new Map(held.map((id, i) => [id, i]));
-  const rank = (id: string) => at.get(id) ?? held.length + ids.indexOf(id);
-  return [...ids].sort((a, b) => rank(a) - rank(b));
 }
 
 /** The rows of one group of surfaces, each with its geometry, capacity and switch. */
@@ -176,15 +161,6 @@ function isRoof(id: string, elements: Record<string, BuildingElement>, surface: 
   return surface.tilt !== undefined && surface.tilt < 90;
 }
 
-/** A keydown listener that takes Escape for `close` alone, so nothing behind it also closes. */
-export function escapeClosesOnly(close: () => void): (event: KeyboardEvent) => void {
-  return (event) => {
-    if (event.key !== 'Escape') return;
-    event.stopPropagation();
-    close();
-  };
-}
-
 /** Adds PV to the offered roof surfaces without it: all of them, or only the suggested ones. Walls are never included. */
 function AddToRoofs({ pv, available, elements }: {
   pv: PvMode;
@@ -198,13 +174,6 @@ function AddToRoofs({ pv, available, elements }: {
   const menuRef = useRef<HTMLSpanElement>(null);
   // Low in a short panel the menu would open below its visible part.
   useEffect(() => { if (open) menuRef.current?.scrollIntoView({ block: 'nearest' }); }, [open]);
-  useEffect(() => {
-    if (!open) return;
-    // Capture phase on window, ahead of the view's and the host's own Escape handling.
-    const onKey = escapeClosesOnly(() => setOpen(false));
-    window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
-  }, [open]);
   // Inside the list's header: a click here must not open or close the list.
   const inHeader = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); };
   const add = (ids: string[]) => (event: MouseEvent) => {
