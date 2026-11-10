@@ -4,6 +4,13 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.17.2] - 2026-11-09
+
+### Fixed
+
+- Escape with the "Add PV to roofs" choices open closes only the choices. It used to close the whole building view.
+- Available surfaces for PV keeps every row in place while the list is open, so switching a surface no longer moves another one under the pointer. Reopening the list sorts it again.
+
 ## [0.17.1] - 2026-11-09
 
 ### Fixed
