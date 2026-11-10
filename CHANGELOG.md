@@ -4,6 +4,16 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.17.3] - 2026-11-10
+
+### Fixed
+
+- Switching PV on or off no longer freezes the view on large buildings. Each switch, and "Add PV to roofs", laid out every surface again, which took about 2 s on a building with about 100 surfaces.
+
+### Changed
+
+- `pvLayout` returns the same layout object for the same polygon object and layout settings. Change neither the polygon's coordinates nor the returned layout in place.
+
 ## [0.17.2] - 2026-11-09
 
 ### Fixed

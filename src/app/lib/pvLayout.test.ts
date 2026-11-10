@@ -147,6 +147,18 @@ describe('pvLayout default mounting', () => {
   });
 });
 
+describe('pvLayout reuse', () => {
+  it('returns the earlier layout for the same polygon and settings, whatever else the surface carries', () => {
+    const roof = southRoof(30);
+    const first = pvLayout(roof, module, { usableShare: 0.6 });
+    const surface = { usableShare: 0.6, state: 'installed', maxKwp: 5 };
+    expect(pvLayout(roof, { ...module }, surface)).toBe(first);
+    expect(pvLayout(roof, module, { usableShare: 0.5 })).not.toBe(first);
+    expect(pvLayout(roof, { ...module, kwp: 0.45 }, { usableShare: 0.6 })).not.toBe(first);
+    expect(pvLayout(southRoof(30), module, { usableShare: 0.6 })).not.toBe(first);
+  });
+});
+
 describe('pvLayout on a large roof', () => {
   it('lays out a 60 by 30 m flat roof in under 3 s, where checking every candidate against every module took about 15 s', () => {
     const rad = (5 * Math.PI) / 180;
