@@ -774,6 +774,7 @@
     "heightConflict": "Podlaží jsou dohromady vysoká {total} m, více než 3D model, který měří {height} m k okapu. Snižte počet podlaží nebo některou výšku.",
     "attic": {
       "label": "Podkroví",
+      "notInModel": "Mimo model",
       "hint": "Prostor pod šikmou střechou, nad okapem. Při vynechání střecha nepatří k vytápěné budově a strop pod ní ztrácí teplo do studeného podkroví.",
       "floorArea": "Plocha podkroví",
       "noArea": "Nezapočteno",

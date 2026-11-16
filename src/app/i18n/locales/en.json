@@ -754,6 +754,7 @@
     "heightConflict": "The storeys are {total} m tall together, taller than the 3D model, which is {height} m to the eaves. Lower the storey count or a height.",
     "attic": {
       "label": "Attic",
+      "notInModel": "Not in the model",
       "hint": "The space under the pitched roof, above the eaves. Left out, the roof leaves the heated building and the ceiling below it loses heat to the cold attic.",
       "floorArea": "Attic floor area",
       "noArea": "Not counted",

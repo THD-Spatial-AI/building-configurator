@@ -774,6 +774,7 @@
     "heightConflict": "Kondygnacje mają razem {total} m wysokości, więcej niż model 3D, który ma {height} m do okapu. Zmniejsz liczbę kondygnacji lub jedną z wysokości.",
     "attic": {
       "label": "Poddasze",
+      "notInModel": "Poza modelem",
       "hint": "Przestrzeń pod dachem spadzistym, powyżej okapu. Po pominięciu dach nie należy już do ogrzewanego budynku, a strop pod nim traci ciepło do zimnego poddasza.",
       "floorArea": "Powierzchnia poddasza",
       "noArea": "Nie liczona",
