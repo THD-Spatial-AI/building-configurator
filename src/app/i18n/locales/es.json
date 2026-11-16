@@ -193,7 +193,7 @@
     },
     "geometryFlat": "plano · {area} m²",
     "overview": {
-      "title": "FV en este edificio"
+      "title": "Suministro fotovoltaico"
     },
     "surfaces": {
       "toggle": "{name} ({installed} de {total} con FV)",
@@ -297,14 +297,11 @@
     "remove": "Quitar {title}",
     "inFocus": "En foco",
     "product": "Producto",
+    "investment": "Inversión",
     "add": "Añadir una tecnología",
     "count": {
       "one": "{count} tecnología",
       "other": "{count} tecnologías"
-    },
-    "pvSurfaces": {
-      "one": "{count} superficie",
-      "other": "{count} superficies"
     },
     "total": {
       "label": "Coste total estimado de las tecnologías",

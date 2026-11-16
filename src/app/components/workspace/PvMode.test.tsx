@@ -83,7 +83,7 @@ describe('PvOverview', () => {
   const html = renderToStaticMarkup(<PvOverview pv={pv} elements={elements} mode="simple" onSelect={() => {}} />);
 
   it("shows the title, the host's notice and PV type", () => {
-    expect(html).toContain('PV on this building');
+    expect(html).toContain('Photovoltaic supply');
     expect(html).toContain(pv.notice);
     expect(html).toContain(pv.typeLabel);
   });

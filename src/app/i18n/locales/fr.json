@@ -193,7 +193,7 @@
     },
     "geometryFlat": "plat · {area} m²",
     "overview": {
-      "title": "PV sur ce bâtiment"
+      "title": "Production photovoltaïque"
     },
     "surfaces": {
       "toggle": "{name} ({installed} sur {total} avec PV)",
@@ -297,14 +297,11 @@
     "remove": "Supprimer {title}",
     "inFocus": "Sélectionné",
     "product": "Produit",
+    "investment": "Investissement",
     "add": "Ajouter une technologie",
     "count": {
       "one": "{count} technologie",
       "other": "{count} technologies"
-    },
-    "pvSurfaces": {
-      "one": "{count} surface",
-      "other": "{count} surfaces"
     },
     "total": {
       "label": "Coût total estimé des technologies",

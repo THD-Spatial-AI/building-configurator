@@ -192,7 +192,7 @@
     },
     "geometryFlat": "flach · {area} m²",
     "overview": {
-      "title": "PV auf diesem Gebäude"
+      "title": "PV-Versorgung"
     },
     "surfaces": {
       "toggle": "{name} ({installed} von {total} mit PV)",
@@ -296,14 +296,11 @@
     "remove": "{title} entfernen",
     "inFocus": "Im Fokus",
     "product": "Produkt",
+    "investment": "Investition",
     "add": "Technologie hinzufügen",
     "count": {
       "one": "{count} Technologie",
       "other": "{count} Technologien"
-    },
-    "pvSurfaces": {
-      "one": "{count} Fläche",
-      "other": "{count} Flächen"
     },
     "total": {
       "label": "Geschätzte Gesamtkosten der Technologien",
