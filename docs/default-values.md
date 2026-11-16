@@ -15,7 +15,7 @@ The Source column names where a value comes from. BuEM is the building energy mo
 | Dwellings | 1 dwelling. Required for a multi-family house and an apartment block. | BuEM |
 | Occupants per dwelling | The household size for the building's country and type, in the table below | CBS for the Netherlands, typical figures elsewhere |
 | Household type | Set by the building type, in the table below | The occupancy model in BuEM |
-| Capacity, for a non-residential building | Floor area divided by the floor area per occupant for the type, in the table below | European and US standards for how many people occupy a space (EN 16798-1, ASHRAE 62.1) |
+| Occupants, for a non-residential building | Floor area divided by the floor area per occupant for the type, in the table below | European and US standards for how many people occupy a space (EN 16798-1, ASHRAE 62.1) |
 
 ### Household size
 
