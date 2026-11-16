@@ -40,8 +40,9 @@ describe('StoreysModelled', () => {
 
   it('turns the up arrows off with the reason once another step would pass the eaves', () => {
     const html = render({ modelHeight: 7.5 });
-    expect(html).toContain('aria-disabled="true" title="Another storey at 2.5 m would be taller than the 3D model, which is 7.5 m to the eaves."');
+    expect(html).not.toContain('aria-label="Storeys +1" aria-disabled="true"');
     expect(html).toContain('title="A taller storey would make the storeys taller than the 3D model, which is 7.5 m to the eaves."');
+    expect(render({ modelHeight: 1.5 })).toContain('aria-disabled="true" title="More storeys would leave each less than 0.5 m of the 1.5 m to the eaves."');
     expect(render({ modelHeight: 12 })).not.toContain('aria-disabled="true"');
   });
 

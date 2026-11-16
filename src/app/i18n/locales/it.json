@@ -748,7 +748,7 @@
     "roomHeightTip": "L'altezza di ogni piano, da pavimento a pavimento. Un piano con un'altezza propria la mantiene.",
     "useRoomHeight": "Usa l'altezza dei locali",
     "limit": {
-      "storeys": "Un altro piano di {room} m sarebbe più alto del modello 3D, che misura {height} m fino alla gronda.",
+      "storeys": "Con più piani, ognuno avrebbe meno di {min} m dei {height} m fino alla gronda.",
       "height": "Un piano più alto renderebbe i piani più alti del modello 3D, che misura {height} m fino alla gronda."
     },
     "heightConflict": "I piani sono alti {total} m in tutto, più del modello 3D, che misura {height} m fino alla gronda. Riduci il numero di piani o un'altezza.",

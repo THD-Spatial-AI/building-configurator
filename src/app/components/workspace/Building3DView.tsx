@@ -28,7 +28,7 @@ import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickWithAttic } from './StoreysModelled';
-import { atticFloorArea, dwellingsTotal, eavesHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
+import { atticFloorArea, dwellingsTotal, eavesHeight, eavesRoomHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
 import type { BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
@@ -278,12 +278,19 @@ function BuildingView({
     model.setGen('roomHeight', roomHeight);
     if (isCut) cutToBands({ heights: storeyHeightList(model.general.storeys, roomHeight, model.general.storeyHeights) });
   };
-  /** A new count moves every band, so the storeys modelled reset to all and a cold attic's cut follows. */
+  /**
+   * A new count moves every band, so the storeys modelled reset to all and a
+   * cold attic's cut follows. With a 3D model the room height changes so the
+   * storeys fill it to the eaves.
+   */
   const setStoreyCount = (storeys: number) => {
+    const own = model.general.storeyHeights ?? {};
+    const roomHeight = (modelHeight !== undefined ? eavesRoomHeight(modelHeight, storeys, own) : null) ?? model.general.roomHeight;
     model.setGen('storeys', storeys);
+    if (roomHeight !== model.general.roomHeight) model.setGen('roomHeight', roomHeight);
     setSelectedStoreys([]);
     if (attic && !atticIn) {
-      cutToBands({ modelled: null, storeys, heights: storeyHeightList(storeys, model.general.roomHeight, model.general.storeyHeights) });
+      cutToBands({ modelled: null, storeys, heights: storeyHeightList(storeys, roomHeight, own) });
     }
   };
   /** The building's dwellings: the counts given per storey and for the attic, or null while none is. */
