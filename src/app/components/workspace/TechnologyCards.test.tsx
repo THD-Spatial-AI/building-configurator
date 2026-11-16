@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TechnologyCards, type Technologies } from './TechnologyCards';
-import { TechnologiesTab } from './TechnologiesTab';
+import { pvProductLine, TechnologiesTab } from './TechnologiesTab';
 
 const technologies: Technologies = {
   items: [
@@ -95,5 +95,15 @@ describe('TechnologiesTab', () => {
     expect(html).toMatch(/Estimated total cost of technologies<\/span><span[^>]*>12,000 EUR</);
     expect(html).toContain('Without 1 technology the optimiser sizes');
     expect(html).toContain('Add a technology');
+  });
+});
+
+describe('pvProductLine', () => {
+  const product = (id: string, alias: string, model = '') => ({ id, key: id, type: 'pv_supply', alias, model, constraints: [] });
+
+  it('leaves out a product name that repeats the title or the PV type, whatever its case, and names each product once', () => {
+    const rows = [{ product: product('pv', 'Photovoltaic Supply') }, { product: product('mono', '', 'Mono 420 W') }, { product: product('mono', '', 'Mono 420 W') }, {}];
+    expect(pvProductLine(rows, ['Photovoltaic supply', 'PV'])).toBe('Mono 420 W');
+    expect(pvProductLine(rows.slice(0, 1), ['Photovoltaic supply'])).toBe('');
   });
 });

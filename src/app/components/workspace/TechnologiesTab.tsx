@@ -7,7 +7,7 @@ import { TOPICS } from '@/app/config/topics';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import type { PvLayout } from '../../lib/pvLayout';
-import { productCurrency, productName } from '../../lib/pvProducts';
+import { productCurrency, productName, type TechnologyProduct } from '../../lib/pvProducts';
 import { installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfaces';
 import { surfaceProduct, type PvMode } from './PvMode';
 import { PvOverview } from './PvOverview';
@@ -15,6 +15,13 @@ import { TechCardFrame, TechnologyCards, type Technologies } from './TechnologyC
 import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 const PV_CARD = 'pv';
+
+/** The PV products in use, leaving out a name that only repeats the card's title or the PV type, whatever its case. */
+export function pvProductLine(installed: { product?: TechnologyProduct }[], repeats: string[]): string {
+  const known = new Set(repeats.map((text) => text.trim().toLowerCase()));
+  const names = installed.flatMap((row) => (row.product ? [productName(row.product)] : []));
+  return [...new Set(names)].filter((name) => !known.has(name.trim().toLowerCase())).join(' · ');
+}
 
 export function TechnologiesTab({ pv, available, technologies, elements, layouts, mode, onSelectSurface }: {
   pv?: PvMode;
@@ -56,7 +63,7 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
         <TechCardFrame
           topic={TOPICS.pv}
           title={t('pv.overview.title')}
-          subtitle={installed.filter((row) => row.product).map((row) => productName(row.product!)).join(' · ')}
+          subtitle={pvProductLine(installed, [t('pv.overview.title'), pv.typeLabel])}
           facts={installed.length === 0 ? [] : [
             { label: t('pv.result.capacity'), value: `${format(summary.kwp, 1)} kWp` },
             ...(modules === undefined ? [] : [{ label: t('pv.result.modules'), value: format(modules, 0) }]),
