@@ -380,17 +380,33 @@ describe('removing PV from the building', () => {
   const tab = (surfaces: PvMode['surfaces']) => renderToStaticMarkup(
     <TechnologiesTab pv={{ ...withCatalogue, surfaces }} elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}} />,
   );
+  const opened = (card: PvMode) => renderToStaticMarkup(
+    <PvOverview pv={card} elements={elements} layouts={layouts} mode="simple" onSelect={() => {}} />,
+  );
+
+  it('opens with every card closed, showing its summary rows', () => {
+    const html = tab(pv.surfaces);
+    expect(html).toMatch(/<dt[^>]*>Investment<\/dt><dd[^>]*>4,800 EUR<\/dd>/);
+    expect(html).not.toContain('Available surfaces for PV');
+  });
+
+  it('sums up a building without PV installed as zero', () => {
+    const html = tab({ r1: { state: 'suggested', usableShare: 0.6, maxKwp: 7.2 } });
+    expect(html).toMatch(/<dt[^>]*>Capacity<\/dt><dd[^>]*>0.0 kWp<\/dd>/);
+    expect(html).toMatch(/<dt[^>]*>Modules<\/dt><dd[^>]*>0<\/dd>/);
+    expect(html).toMatch(/<dt[^>]*>Surfaces with PV<\/dt><dd[^>]*>0 of 1<\/dd>/);
+    expect(html).toMatch(/<dt[^>]*>Investment<\/dt><dd[^>]*>0 EUR<\/dd>/);
+  });
 
   it('offers a bin per installed product and one for all PV', () => {
-    const html = tab(pv.surfaces);
-    expect(html).toContain('aria-label="Remove all PV from this building"');
-    expect(html).toContain('aria-label="Remove Demo Mono 420 W from every surface"');
+    expect(tab(pv.surfaces)).toContain('aria-label="Remove all PV from this building"');
+    expect(opened({ ...withCatalogue, surfaces: pv.surfaces })).toContain('aria-label="Remove Demo Mono 420 W from every surface"');
   });
 
   it('shows the building as the host passes it: with no PV installed, nothing to remove', () => {
-    const html = tab({ r1: { state: 'suggested', usableShare: 0.6, maxKwp: 7.2 } });
-    expect(html).not.toContain('Remove all PV');
-    expect(html).toContain('No PV installed yet.');
+    const surfaces: PvMode['surfaces'] = { r1: { state: 'suggested', usableShare: 0.6, maxKwp: 7.2 } };
+    expect(tab(surfaces)).not.toContain('Remove all PV');
+    expect(opened({ ...withCatalogue, surfaces })).toContain('No PV installed yet.');
   });
 
   it('offers to remove the PV technology itself while the host takes it, even with no PV installed', () => {
@@ -403,10 +419,9 @@ describe('removing PV from the building', () => {
     expect(html).toContain('aria-label="Remove all PV from this building"');
   });
 
-  it('shows the PV investment once in its tile and in the total, not again in the card header', () => {
-    const html = tab(pv.surfaces);
-    expect(html.match(/4,800 EUR/g)).toHaveLength(2);
-    expect(html).toMatch(/>4,800 EUR<\/div><div[^>]*>Investment</);
+  it('shows the PV investment once on the card and in the total, not again in the card header', () => {
+    expect(tab(pv.surfaces).match(/4,800 EUR/g)).toHaveLength(2);
+    expect(opened({ ...withCatalogue, surfaces: pv.surfaces })).toMatch(/>4,800 EUR<\/div><div[^>]*>Investment</);
   });
 
   it('pins the total to the bottom of the panel, below the cards however few there are', () => {
@@ -416,9 +431,7 @@ describe('removing PV from the building', () => {
   });
 
   it("names PV without a product after the building's PV type, not as a product to choose", () => {
-    const html = renderToStaticMarkup(
-      <TechnologiesTab pv={pv} elements={elements} layouts={layouts} mode="simple" onSelectSurface={() => {}} />,
-    );
+    const html = opened(pv);
     expect(html).toContain('aria-label="Remove Monocrystalline 400 W from every surface"');
     expect(html).not.toContain('Choose a product');
   });

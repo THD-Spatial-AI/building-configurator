@@ -36,7 +36,7 @@ import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
-import { fittedPvIds, pvAvailableIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
+import { fittedPvIds, lastPvSwitchedOff, pvAvailableIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName, hasDwellingsPerStorey, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
@@ -146,6 +146,12 @@ function BuildingView({
   const installedPvIds = useMemo(() => (pv ? fittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
   const installedPvSet = useMemo(() => new Set(installedPvIds), [installedPvIds]);
   const unfittedPv = useMemo(() => (pv ? unfittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
+  // Switching off the last PV removes the PV technology, as the PV card's bin does.
+  const lastPvSurfaces = useRef(pv?.surfaces);
+  useEffect(() => {
+    if (pv?.onRemove && lastPvSurfaces.current && lastPvSwitchedOff(lastPvSurfaces.current, pv.surfaces)) pv.onRemove();
+    lastPvSurfaces.current = pv?.surfaces;
+  }, [pv]);
   const model = useBuildingModel(services, building, {
     estimateHeatDemand: false, runContext, demandProfile, language,
     pvSurfaceIds: installedPvIds, pvLayouts: layouts,

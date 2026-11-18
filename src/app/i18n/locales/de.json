@@ -540,11 +540,6 @@
         "existing": "Ist-Zustand",
         "usual": "Übliche Modernisierung",
         "advanced": "Zukunftsweisende Modernisierung"
-      },
-      "short": {
-        "existing": "Ist-Zustand",
-        "usual": "Üblich",
-        "advanced": "Zukunftsweisend"
       }
     },
     "classes": {

@@ -89,6 +89,12 @@ export function installedPvIds(
     .map(([id]) => id);
 }
 
+/** Whether the change from `before` to `after` switched off the last surface with PV. */
+export function lastPvSwitchedOff(before: Record<string, PvSurface>, after: Record<string, PvSurface>): boolean {
+  const any = (surfaces: Record<string, PvSurface>) => Object.values(surfaces).some((surface) => surface.state === 'installed');
+  return any(before) && !any(after);
+}
+
 export function installedByProduct(
   surfaces: Record<string, PvSurface>,
   layouts: Readonly<Record<string, PvLayout>>,

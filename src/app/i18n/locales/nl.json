@@ -540,11 +540,6 @@
         "existing": "Huidige staat",
         "usual": "Standaard renovatie",
         "advanced": "Vergaande renovatie"
-      },
-      "short": {
-        "existing": "Huidig",
-        "usual": "Standaard",
-        "advanced": "Vergaand"
       }
     },
     "classes": {
