@@ -320,7 +320,7 @@ export function TechnologyCards({ technologies, focusId, onFocus }: {
 }) {
   const t = useT();
   const format = useFormatNumber();
-  const [ownFocus, setOwnFocus] = useState<string | null>(technologies.items[0]?.id ?? null);
+  const [ownFocus, setOwnFocus] = useState<string | null>(null);
   const focused = focusId === undefined ? ownFocus : focusId;
   if (technologies.items.length === 0) {
     return <p className="text-[12px] text-muted-foreground">{t('tech.none')}</p>;
