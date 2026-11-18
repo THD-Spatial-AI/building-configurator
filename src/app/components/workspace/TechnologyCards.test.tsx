@@ -62,6 +62,17 @@ describe('TechnologyCards', () => {
     expect(html).not.toMatch(/<dt[^>]*>Power<\/dt>/);
   });
 
+  it('marks a closed card\'s body as clickable with a hint to click it, not an open one\'s', () => {
+    const count = (focusId: string | null, pattern: RegExp) =>
+      renderToStaticMarkup(<TechnologyCards technologies={technologies} focusId={focusId} />).match(pattern)?.length ?? 0;
+    const clickable = /class="cursor-pointer transition-colors duration-200/g;
+    const hint = /group-hover:opacity-100"><svg[^]*?<\/svg>Click to edit<\/span>/g;
+    expect(count(null, clickable)).toBe(technologies.items.length);
+    expect(count(null, hint)).toBe(technologies.items.length);
+    expect(count('heat_pump', clickable)).toBe(technologies.items.length - 1);
+    expect(count('heat_pump', hint)).toBe(technologies.items.length - 1);
+  });
+
   it('puts the products behind a drop-down with a search field', () => {
     expect(html).toMatch(/<details[^>]*><summary[^>]*><span[^>]*><span[^>]*><span[^>]*>Product: <\/span>Lithium-ion home storage/);
     expect(html).toContain('placeholder="Search the catalogue"');

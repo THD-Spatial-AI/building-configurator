@@ -339,6 +339,7 @@
     "none": "No technologies on this building.",
     "remove": "Remove {title}",
     "inFocus": "In focus",
+    "clickToEdit": "Click to edit",
     "product": "Product",
     "investment": "Investment",
     "add": "Add a technology",
