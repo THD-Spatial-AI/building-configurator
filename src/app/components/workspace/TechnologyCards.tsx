@@ -3,7 +3,7 @@
 // label; the cards show them and report edits. Nothing is stored here.
 
 import { useState, type ReactNode } from 'react';
-import { Trash2 } from '@/app/components/icons';
+import { Pencil, Trash2 } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import { technologyTopic, type Topic } from '@/app/config/topics';
 import { useFormatNumber, useT, type FormatNumber } from '../../i18n';
@@ -158,7 +158,7 @@ export interface TechFact {
 /**
  * The frame every technology shares: a header band in its topic's colour, a
  * line with its products, its key figures while closed and its detail in
- * focus. Clicking the header opens or closes it.
+ * focus. Clicking the header opens or closes it; clicking a closed card anywhere opens it.
  */
 export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onFocus, onRemove, removeLabel, confirmLabel, children }: {
   topic: Topic;
@@ -175,7 +175,10 @@ export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onF
 }) {
   const t = useT();
   return (
-    <section className={cn('overflow-hidden rounded-lg bg-card shadow-sm', focused ? cn('border-2', topic.border) : 'border border-border')}>
+    <section className={cn(
+      'group overflow-hidden rounded-lg bg-card shadow-sm',
+      focused ? cn('border-2', topic.border) : 'border border-border transition-[border-color,box-shadow] duration-200 hover:border-primary/40 hover:shadow-md dark:hover:border-primary/60',
+    )}>
       <div className={cn('flex items-center gap-2 px-3 py-2', topic.tile)}>
         <button
           type="button"
@@ -186,6 +189,12 @@ export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onF
           <topic.Icon className={cn('size-4 shrink-0', topic.icon)} aria-hidden />
           <span className="min-w-0 flex-1 truncate text-[13px] font-bold">{title}</span>
           {focused && <span className="shrink-0 text-[11px] font-bold">{t('tech.inFocus')}</span>}
+          {!focused && (
+            <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <Pencil className="size-3" aria-hidden />
+              {t('tech.clickToEdit')}
+            </span>
+          )}
         </button>
         {onRemove && confirmLabel && (
           <RemoveButton label={removeLabel ?? confirmLabel} confirmLabel={confirmLabel} onRemove={onRemove} className="hover:bg-card/60" />
@@ -202,18 +211,24 @@ export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onF
           </button>
         )}
       </div>
-      {subtitle && <p className="m-0 truncate px-3 pt-1.5 text-[12px] text-muted-foreground">{subtitle}</p>}
-      {!focused && facts.length > 0 && (
-        <dl className="m-0 grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 px-3 py-1.5 text-[12px]">
-          {facts.map((fact) => (
-            <div key={fact.label} className="contents">
-              <dt className="text-muted-foreground">{fact.label}</dt>
-              <dd className={cn('m-0 text-right font-semibold tabular-nums', fact.cost ? 'text-[#2F7A4F] dark:text-[#8FD1A9]' : 'text-foreground')}>{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      {subtitle && (focused || facts.length === 0) && <div className="pb-1.5" />}
+      {/* Closed, the whole body opens the card too; keyboard users open it by the header button. */}
+      <div
+        onClick={focused ? undefined : onFocus}
+        className={cn(!focused && 'cursor-pointer transition-colors duration-200 group-hover:bg-primary/[0.04] dark:group-hover:bg-primary/[0.09]')}
+      >
+        {subtitle && <p className="m-0 truncate px-3 pt-1.5 text-[12px] text-muted-foreground">{subtitle}</p>}
+        {!focused && facts.length > 0 && (
+          <dl className="m-0 grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 px-3 py-1.5 text-[12px]">
+            {facts.map((fact) => (
+              <div key={fact.label} className="contents">
+                <dt className="text-muted-foreground">{fact.label}</dt>
+                <dd className={cn('m-0 text-right font-semibold tabular-nums', fact.cost ? 'text-[#2F7A4F] dark:text-[#8FD1A9]' : 'text-foreground')}>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        {subtitle && (focused || facts.length === 0) && <div className="pb-1.5" />}
+      </div>
       {focused && children}
     </section>
   );
