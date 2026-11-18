@@ -394,7 +394,7 @@
     "default": "Por defecto",
     "useDefault": "Usar valor por defecto",
     "capacity": {
-      "label": "Capacidad",
+      "label": "Número de ocupantes",
       "placeholder": "Derivada de la superficie.",
       "tip": "Número de personas. Si se deja vacío, se usa un número típico para el tamaño y el tipo del edificio."
     },

@@ -407,7 +407,7 @@
     "default": "Výchozí",
     "useDefault": "Použít výchozí",
     "capacity": {
-      "label": "Kapacita",
+      "label": "Počet osob",
       "placeholder": "Odvozeno z podlahové plochy.",
       "tip": "Počet osob. Prázdné pole použije typický počet pro velikost a typ budovy."
     },

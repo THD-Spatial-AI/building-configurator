@@ -393,7 +393,7 @@
     "default": "Predefinito",
     "useDefault": "Usa predefinito",
     "capacity": {
-      "label": "Capienza",
+      "label": "Numero di occupanti",
       "placeholder": "Ricavata dalla superficie.",
       "tip": "Numero di persone. Se vuoto, si usa un numero tipico per dimensione e tipo dell'edificio."
     },

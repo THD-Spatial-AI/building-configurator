@@ -393,7 +393,7 @@
     "default": "Standaard",
     "useDefault": "Standaard gebruiken",
     "capacity": {
-      "label": "Capaciteit",
+      "label": "Aantal personen",
       "placeholder": "Afgeleid van de vloeroppervlakte.",
       "tip": "Aantal personen. Leeg gelaten geldt een gangbaar aantal voor de grootte en het type van het gebouw."
     },
