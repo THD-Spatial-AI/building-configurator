@@ -6,18 +6,15 @@ import { createContext, useCallback, useContext, type ReactNode } from 'react';
 import en from './locales/en.json';
 import de from './locales/de.json';
 import es from './locales/es.json';
-import fr from './locales/fr.json';
-import it from './locales/it.json';
 import nl from './locales/nl.json';
-import pl from './locales/pl.json';
 import cs from './locales/cs.json';
 
-/** The languages EnerPlanET offers. */
-export type Language = 'en' | 'de' | 'es' | 'fr' | 'it' | 'nl' | 'pl' | 'cs';
+/** EnerPlanET's languages, plus Czech for the Czech demo site. */
+export type Language = 'en' | 'de' | 'es' | 'nl' | 'cs';
 
 type Messages = { [key: string]: string | Messages };
 
-export const MESSAGES: Record<Language, Messages> = { en, de, es, fr, it, nl, pl, cs };
+export const MESSAGES: Record<Language, Messages> = { en, de, es, nl, cs };
 
 /**
  * The language for a host's code: a region tag counts as its language
