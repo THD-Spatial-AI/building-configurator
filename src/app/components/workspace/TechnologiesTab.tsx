@@ -35,7 +35,7 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
 }) {
   const t = useT();
   const format = useFormatNumber();
-  const [focusId, setFocusId] = useState<string | null>(pv ? PV_CARD : technologies?.items[0]?.id ?? null);
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   const productFor = (id: string) => (pv ? surfaceProduct(pv, id) : undefined);
   const summary = pv ? pvSummary(pv.surfaces, elements, layouts, productFor, available) : null;
