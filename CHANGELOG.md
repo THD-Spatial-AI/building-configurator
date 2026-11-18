@@ -4,6 +4,12 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.18.2] - 2026-11-18
+
+### Changed
+
+- Clicking anywhere on a closed technology card opens it, not only its header. On hover a closed card takes a soft border, a faint tint and a little more shadow, and its title bar shows "Click to edit" with a pencil.
+
 ## [0.18.1] - 2026-11-18
 
 ### Changed
