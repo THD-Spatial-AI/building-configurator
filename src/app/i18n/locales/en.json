@@ -540,11 +540,6 @@
         "existing": "Existing state",
         "usual": "Usual refurbishment",
         "advanced": "Advanced refurbishment"
-      },
-      "short": {
-        "existing": "Existing",
-        "usual": "Usual",
-        "advanced": "Advanced"
       }
     },
     "classes": {

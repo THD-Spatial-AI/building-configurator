@@ -556,11 +556,6 @@
         "existing": "Současný stav",
         "usual": "Běžná renovace",
         "advanced": "Pokročilá renovace"
-      },
-      "short": {
-        "existing": "Současný",
-        "usual": "Běžná",
-        "advanced": "Pokročilá"
       }
     },
     "classes": {
