@@ -754,6 +754,7 @@
     "heightConflict": "I piani sono alti {total} m in tutto, più del modello 3D, che misura {height} m fino alla gronda. Riduci il numero di piani o un'altezza.",
     "attic": {
       "label": "Sottotetto",
+      "notInModel": "Fuori dal modello",
       "hint": "Lo spazio sotto il tetto a falde, sopra la gronda. Se escluso, il tetto esce dall'edificio riscaldato e il solaio sottostante disperde calore verso il sottotetto freddo.",
       "floorArea": "Superficie del sottotetto",
       "noArea": "Non contata",

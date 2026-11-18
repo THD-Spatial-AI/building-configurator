@@ -754,6 +754,7 @@
     "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte.",
     "attic": {
       "label": "Zolder",
+      "notInModel": "Niet in het model",
       "hint": "De ruimte onder het hellende dak, boven de dakgoot. Weggelaten hoort het dak niet meer bij het verwarmde gebouw en verliest het plafond eronder warmte naar de koude zolder.",
       "floorArea": "Vloeroppervlak zolder",
       "noArea": "Niet geteld",

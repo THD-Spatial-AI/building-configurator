@@ -758,6 +758,7 @@
     "heightConflict": "Les étages mesurent ensemble {total} m, plus que le modèle 3D, qui mesure {height} m jusqu'à l'égout. Réduisez le nombre d'étages ou une hauteur.",
     "attic": {
       "label": "Combles",
+      "notInModel": "Hors du modèle",
       "hint": "L'espace sous le toit en pente, au-dessus de l'égout. Retirés, le toit quitte le bâtiment chauffé et le plafond en dessous perd de la chaleur vers les combles froids.",
       "floorArea": "Surface des combles",
       "noArea": "Non comptée",

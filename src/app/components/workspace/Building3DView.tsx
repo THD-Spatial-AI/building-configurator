@@ -419,6 +419,7 @@ function BuildingView({
     mode,
     onShowAdvanced: () => setMode('advanced'),
     onStoreysClosed: () => setSelectedStoreys([]),
+    atticIn: attic ? atticIn : undefined,
     modelHeight,
     storeys: (
       <StoreysModelled
