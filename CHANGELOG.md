@@ -4,6 +4,28 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.18.0] - 2026-11-18
+
+Breaking: the view's own text is in English, German, Spanish, Dutch and Czech. French, Italian and Polish are gone, and `Language` is `'en' | 'de' | 'es' | 'nl' | 'cs'`. The `language` prop still takes any string; a removed code shows English.
+
+### Added
+
+- `TechFigure`, the type of a technology card's figure, is exported.
+
+### Changed
+
+- A closed technology card lists every figure the host sends, then the investment, as rows. The card header carries the title only.
+- The PV card is called "Photovoltaic supply". Closed, it lists capacity (kWp), modules, surfaces with PV and investment. Its product line leaves out a name that repeats the title or the PV type.
+- The closed "Storeys and household" card lists the storey count, the room height and, where the building has an attic, whether it is in the model.
+- With a 3D model, changing the storey count sets the room height to fill the height to the eaves, shared among the storeys without their own height and rounded down to the centimetre. The storey limit message names the minimum height and the eaves height.
+- A non-residential building's head count is called Occupants instead of Capacity.
+- Surfaces named by type and facing ("Northwest wall 3", "Flat roof") show in the user's language. The payload keeps the English name.
+
+### Fixed
+
+- The unsaved-changes buttons stay right-aligned when a long translation wraps them.
+- The open and closed PV cards count surfaces with PV against the same total: the surfaces offered for PV.
+
 ## [0.17.3] - 2026-11-10
 
 ### Fixed
