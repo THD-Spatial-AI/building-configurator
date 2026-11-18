@@ -340,6 +340,7 @@
     "none": "Ninguna tecnología en este edificio.",
     "remove": "Quitar {title}",
     "inFocus": "En foco",
+    "clickToEdit": "Haz clic para editar",
     "product": "Producto",
     "investment": "Inversión",
     "add": "Añadir una tecnología",
