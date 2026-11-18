@@ -194,7 +194,7 @@
     },
     "geometryFlat": "rovná · {area} m²",
     "overview": {
-      "title": "FV na této budově"
+      "title": "Fotovoltaická výroba"
     },
     "surfaces": {
       "toggle": "{name} ({installed} z {total} s FV)",
@@ -304,18 +304,13 @@
     "remove": "Odebrat {title}",
     "inFocus": "Vybraná",
     "product": "Produkt",
+    "investment": "Investice",
     "add": "Přidat technologii",
     "count": {
       "one": "{count} technologie",
       "few": "{count} technologie",
       "many": "{count} technologie",
       "other": "{count} technologií"
-    },
-    "pvSurfaces": {
-      "one": "{count} plocha",
-      "few": "{count} plochy",
-      "many": "{count} ploch",
-      "other": "{count} plochy"
     },
     "total": {
       "label": "Odhadované celkové náklady na technologie",

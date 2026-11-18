@@ -192,7 +192,7 @@
     },
     "geometryFlat": "piano · {area} m²",
     "overview": {
-      "title": "FV su questo edificio"
+      "title": "Produzione fotovoltaica"
     },
     "surfaces": {
       "toggle": "{name} ({installed} di {total} con FV)",
@@ -296,14 +296,11 @@
     "remove": "Rimuovi {title}",
     "inFocus": "In primo piano",
     "product": "Prodotto",
+    "investment": "Investimento",
     "add": "Aggiungi una tecnologia",
     "count": {
       "one": "{count} tecnologia",
       "other": "{count} tecnologie"
-    },
-    "pvSurfaces": {
-      "one": "{count} superficie",
-      "other": "{count} superfici"
     },
     "total": {
       "label": "Costo totale stimato delle tecnologie",

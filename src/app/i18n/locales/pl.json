@@ -194,7 +194,7 @@
     },
     "geometryFlat": "płaski · {area} m²",
     "overview": {
-      "title": "PV na tym budynku"
+      "title": "Instalacja fotowoltaiczna"
     },
     "surfaces": {
       "toggle": "{name} ({installed} z {total} z PV)",
@@ -304,18 +304,13 @@
     "remove": "Usuń {title}",
     "inFocus": "Wybrana",
     "product": "Produkt",
+    "investment": "Inwestycja",
     "add": "Dodaj technologię",
     "count": {
       "one": "{count} technologia",
       "few": "{count} technologie",
       "many": "{count} technologii",
       "other": "{count} technologii"
-    },
-    "pvSurfaces": {
-      "one": "{count} przegroda",
-      "few": "{count} przegrody",
-      "many": "{count} przegród",
-      "other": "{count} przegrody"
     },
     "total": {
       "label": "Szacowany łączny koszt technologii",

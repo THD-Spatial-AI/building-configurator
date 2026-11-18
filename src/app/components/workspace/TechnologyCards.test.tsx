@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TechnologyCards, type Technologies } from './TechnologyCards';
-import { TechnologiesTab } from './TechnologiesTab';
+import { pvProductLine, TechnologiesTab } from './TechnologiesTab';
 
 const technologies: Technologies = {
   items: [
@@ -55,10 +55,11 @@ describe('TechnologyCards', () => {
     expect(html).not.toContain('PV surfaces');
   });
 
-  it('shows a card out of focus with its headline figure and cost, a rate while its size is open', () => {
-    expect(html).toContain('COP 3.3');
-    expect(html).toContain('1,400 EUR/kW');
-    expect(html).toContain('12,000 EUR');
+  it('lists a closed card\'s figures and investment, a rate while its size is open', () => {
+    expect(html).toMatch(/<dt[^>]*>COP<\/dt><dd[^>]*>3.3<\/dd><\/div><div[^>]*><dt[^>]*>Investment<\/dt><dd[^>]*>1,400 EUR\/kW<\/dd>/);
+    const closed = renderToStaticMarkup(<TechnologyCards technologies={technologies} focusId={null} />);
+    expect(closed).toMatch(/<dt[^>]*>Power<\/dt><dd[^>]*>10 kW<\/dd><\/div><div[^>]*><dt[^>]*>Energy<\/dt><dd[^>]*>20 kWh<\/dd><\/div><div[^>]*><dt[^>]*>Investment<\/dt><dd[^>]*>12,000 EUR<\/dd>/);
+    expect(html).not.toMatch(/<dt[^>]*>Power<\/dt>/);
   });
 
   it('puts the products behind a drop-down with a search field', () => {
@@ -94,5 +95,15 @@ describe('TechnologiesTab', () => {
     expect(html).toMatch(/Estimated total cost of technologies<\/span><span[^>]*>12,000 EUR</);
     expect(html).toContain('Without 1 technology the optimiser sizes');
     expect(html).toContain('Add a technology');
+  });
+});
+
+describe('pvProductLine', () => {
+  const product = (id: string, alias: string, model = '') => ({ id, key: id, type: 'pv_supply', alias, model, constraints: [] });
+
+  it('leaves out a product name that repeats the title or the PV type, whatever its case, and names each product once', () => {
+    const rows = [{ product: product('pv', 'Photovoltaic Supply') }, { product: product('mono', '', 'Mono 420 W') }, { product: product('mono', '', 'Mono 420 W') }, {}];
+    expect(pvProductLine(rows, ['Photovoltaic supply', 'PV'])).toBe('Mono 420 W');
+    expect(pvProductLine(rows.slice(0, 1), ['Photovoltaic supply'])).toBe('');
   });
 });

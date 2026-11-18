@@ -33,10 +33,10 @@ export interface TechFigure {
   unit?: string;
 }
 
-/** A figure as a card's headline: with its unit, or with its label where it has none (COP 3.3). */
-function headlineText(figure: TechFigure, format: FormatNumber): string {
+/** A figure's value with its unit. */
+function figureText(figure: TechFigure, format: FormatNumber): string {
   const value = formatValue(figure.value, format);
-  return figure.unit ? `${value} ${figure.unit}` : `${figure.label} ${value}`;
+  return figure.unit ? `${value} ${figure.unit}` : value;
 }
 
 /** A product the host offers for a technology. */
@@ -55,7 +55,7 @@ export interface TechCard {
   fields: TechField[];
   /** EnerPlanET's technology type (battery_storage, air_source_heat_pump, ...): sets the card's icon and colour. */
   type?: string;
-  /** Up to three headline numbers; the first is shown while the card is not in focus. */
+  /** Headline numbers: every one is listed while the card is closed, the first three in focus. */
   figures?: TechFigure[];
   /** The investment estimate; with `amount` null, `rate` (such as "1,400 EUR/kW") is shown instead. */
   investment?: { amount: number | null; currency: string; rate?: string };
@@ -147,17 +147,24 @@ export function RemoveButton({ label, confirmLabel, onRemove, className }: {
   );
 }
 
+/** One row of a closed card's summary, such as its capacity or investment. */
+export interface TechFact {
+  label: string;
+  value: string;
+  /** Shown in the cost colour. */
+  cost?: boolean;
+}
+
 /**
- * The frame every technology shares: a header band in its topic's colour with
- * a headline figure, a line with its products and cost, and, in focus, its
- * detail. Clicking the header opens or closes it.
+ * The frame every technology shares: a header band in its topic's colour, a
+ * line with its products, its key figures while closed and its detail in
+ * focus. Clicking the header opens or closes it.
  */
-export function TechCardFrame({ topic, title, headline, subtitle, cost, focused, onFocus, onRemove, removeLabel, confirmLabel, children }: {
+export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onFocus, onRemove, removeLabel, confirmLabel, children }: {
   topic: Topic;
   title: string;
-  headline?: string;
   subtitle?: string;
-  cost?: string;
+  facts?: TechFact[];
   focused: boolean;
   onFocus: () => void;
   onRemove?: () => void;
@@ -178,9 +185,7 @@ export function TechCardFrame({ topic, title, headline, subtitle, cost, focused,
         >
           <topic.Icon className={cn('size-4 shrink-0', topic.icon)} aria-hidden />
           <span className="min-w-0 flex-1 truncate text-[13px] font-bold">{title}</span>
-          {focused
-            ? <span className="shrink-0 text-[11px] font-bold">{t('tech.inFocus')}</span>
-            : headline && <span className="shrink-0 text-[12px] font-semibold tabular-nums">{headline}</span>}
+          {focused && <span className="shrink-0 text-[11px] font-bold">{t('tech.inFocus')}</span>}
         </button>
         {onRemove && confirmLabel && (
           <RemoveButton label={removeLabel ?? confirmLabel} confirmLabel={confirmLabel} onRemove={onRemove} className="hover:bg-card/60" />
@@ -197,12 +202,18 @@ export function TechCardFrame({ topic, title, headline, subtitle, cost, focused,
           </button>
         )}
       </div>
-      {(subtitle || cost) && (
-        <div className="flex items-baseline justify-between gap-2 px-3 py-1.5 text-[12px]">
-          <span className="min-w-0 truncate text-muted-foreground">{subtitle}</span>
-          {cost && <span className="shrink-0 font-semibold tabular-nums text-[#2F7A4F] dark:text-[#8FD1A9]">{cost}</span>}
-        </div>
+      {subtitle && <p className="m-0 truncate px-3 pt-1.5 text-[12px] text-muted-foreground">{subtitle}</p>}
+      {!focused && facts.length > 0 && (
+        <dl className="m-0 grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 px-3 py-1.5 text-[12px]">
+          {facts.map((fact) => (
+            <div key={fact.label} className="contents">
+              <dt className="text-muted-foreground">{fact.label}</dt>
+              <dd className={cn('m-0 text-right font-semibold tabular-nums', fact.cost ? 'text-[#2F7A4F] dark:text-[#8FD1A9]' : 'text-foreground')}>{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
       )}
+      {subtitle && (focused || facts.length === 0) && <div className="pb-1.5" />}
       {focused && children}
     </section>
   );
@@ -317,15 +328,17 @@ export function TechnologyCards({ technologies, focusId, onFocus }: {
   return (
     <div className="flex flex-col gap-2.5">
       {technologies.items.map((card) => {
-        const first = card.figures?.[0];
+        const cost = investmentText(card.investment, format);
         return (
           <TechCardFrame
             key={card.id}
             topic={technologyTopic(card.type ?? '')}
             title={card.title}
-            headline={first && headlineText(first, format)}
             subtitle={card.subtitle}
-            cost={investmentText(card.investment, format)}
+            facts={[
+              ...(card.figures ?? []).map((figure) => ({ label: figure.label, value: figureText(figure, format) })),
+              ...(cost ? [{ label: t('tech.investment'), value: cost, cost: true }] : []),
+            ]}
             focused={focused === card.id}
             onFocus={() => (onFocus ?? setOwnFocus)(focused === card.id ? null : card.id)}
             onRemove={() => technologies.onRemove(card.id)}
