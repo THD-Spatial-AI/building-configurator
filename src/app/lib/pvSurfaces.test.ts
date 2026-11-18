@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fittedPvIds, installedByProduct, installedPvIds, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
+import { fittedPvIds, installedByProduct, installedPvIds, lastPvSwitchedOff, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -159,5 +159,16 @@ describe('installedPvIds', () => {
     expect(installedPvIds(surfaces, (id) => products[id], 'mono')).toEqual(['r1']);
     expect(installedPvIds(surfaces, (id) => products[id], '')).toEqual(['r4']);
     expect(installedPvIds(surfaces, (id) => products[id])).toEqual(['r1', 'r2', 'r4']);
+  });
+});
+
+describe('lastPvSwitchedOff', () => {
+  it('is true only when the last surface with PV goes, not for a building that never had PV', () => {
+    const on = { r1: surface('installed'), r2: surface('suggested') };
+    const off = { r1: surface('available'), r2: surface('suggested') };
+    expect(lastPvSwitchedOff(on, off)).toBe(true);
+    expect(lastPvSwitchedOff(off, off)).toBe(false);
+    expect(lastPvSwitchedOff(on, { ...on, r2: surface('installed') })).toBe(false);
+    expect(lastPvSwitchedOff({ ...on, r2: surface('installed') }, on)).toBe(false);
   });
 });

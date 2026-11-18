@@ -390,6 +390,14 @@ describe('removing PV from the building', () => {
     expect(html).not.toContain('Available surfaces for PV');
   });
 
+  it('sums up a building without PV installed as zero', () => {
+    const html = tab({ r1: { state: 'suggested', usableShare: 0.6, maxKwp: 7.2 } });
+    expect(html).toMatch(/<dt[^>]*>Capacity<\/dt><dd[^>]*>0.0 kWp<\/dd>/);
+    expect(html).toMatch(/<dt[^>]*>Modules<\/dt><dd[^>]*>0<\/dd>/);
+    expect(html).toMatch(/<dt[^>]*>Surfaces with PV<\/dt><dd[^>]*>0 of 1<\/dd>/);
+    expect(html).toMatch(/<dt[^>]*>Investment<\/dt><dd[^>]*>0 EUR<\/dd>/);
+  });
+
   it('offers a bin per installed product and one for all PV', () => {
     expect(tab(pv.surfaces)).toContain('aria-label="Remove all PV from this building"');
     expect(opened({ ...withCatalogue, surfaces: pv.surfaces })).toContain('aria-label="Remove Demo Mono 420 W from every surface"');

@@ -60,8 +60,9 @@ export interface PvMode {
   typeLabel: string;
   onToggle: (surfaceId: string, installed: boolean) => void;
   /**
-   * The user confirmed removing PV from the building: drop the technology and stop passing `pv`.
-   * Fires alone, with no onToggle. Absent: the card's bin switches off each installed surface instead.
+   * Drop the building's PV technology and stop passing `pv`. Fires alone when the user confirms the
+   * card's bin, and after the onToggle that switches off the last surface with PV.
+   * Absent: the card's bin switches off each installed surface instead.
    */
   onRemove?: () => void;
   onShareChange: (surfaceId: string, usableShare: number) => void;
