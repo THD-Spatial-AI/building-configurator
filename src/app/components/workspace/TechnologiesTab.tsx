@@ -44,6 +44,9 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   // Known only while every surface with PV has its layout.
   const modules = installed.every((row) => row.modules !== undefined) ? installed.reduce((sum, row) => sum + (row.modules ?? 0), 0) : undefined;
 
+  // With no PV installed the card reads zero; with PV but no product costs, the investment is unknown.
+  const pvInvestment = installed.length === 0 ? 0 : summary?.investment;
+
   // Only amounts add up; a rate (size still open) has no total yet.
   const amounts = [
     summary?.investment,
@@ -64,11 +67,11 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
           topic={TOPICS.pv}
           title={t('pv.overview.title')}
           subtitle={pvProductLine(installed, [t('pv.overview.title'), pv.typeLabel])}
-          facts={installed.length === 0 ? [] : [
+          facts={[
             { label: t('pv.result.capacity'), value: `${format(summary.kwp, 1)} kWp` },
             ...(modules === undefined ? [] : [{ label: t('pv.result.modules'), value: format(modules, 0) }]),
             { label: t('pv.summary.surfaces'), value: t('pv.summary.count', { installed: summary.installed, total: summary.total }) },
-            ...(summary.investment === undefined ? [] : [{ label: t('tech.investment'), value: `${format(summary.investment, 0)} ${pvCurrency}`.trim(), cost: true }]),
+            ...(pvInvestment === undefined ? [] : [{ label: t('tech.investment'), value: `${format(pvInvestment, 0)} ${pvCurrency || productCurrency(pv.catalogue?.[0])}`.trim(), cost: true }]),
           ]}
           focused={focusId === PV_CARD}
           onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
