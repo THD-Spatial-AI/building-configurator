@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { TOPICS } from '@/app/config/topics';
 import { StepPanel, StepSummary, type Step } from './StepPanel';
 import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, resultsSummary, storeysStatus } from '../configure/building/BuildingEditor';
-import { translate } from '@/app/i18n';
+import { formatNumber, translate } from '@/app/i18n';
 import type { InsulationProps } from '../configure/building/insulationSection';
 import { missingDwellings } from '@/app/lib/storeys';
 
@@ -81,6 +81,7 @@ describe('step status', () => {
 
 describe('a step worked through', () => {
   const t: Parameters<typeof occupancySummary>[0] = (key, values) => translate('en', key, values);
+  const format: Parameters<typeof occupancySummary>[1] = (value, digits) => formatNumber('en', value, digits);
 
   it('shows as a card of its values with Edit', () => {
     const html = renderToStaticMarkup(
@@ -100,9 +101,10 @@ describe('a step worked through', () => {
   });
 
   it('sums up occupancy and comfort in their own labels, defaults named as such', () => {
-    const general = { buildingType: 'Single-family House', storeys: 3, storeysModelled: [1, 2], residential_units: 1, num_persons: null };
-    expect(occupancySummary(t, general)).toEqual([
+    const general = { buildingType: 'Single-family House', storeys: 3, storeysModelled: [1, 2], roomHeight: 2.75, residential_units: 1, num_persons: null };
+    expect(occupancySummary(t, format, general)).toEqual([
       { label: 'Storeys', value: '2 of 3 modelled' },
+      { label: 'Room height', value: '2.8 m' },
       { label: 'Dwellings', value: '1' },
       { label: 'Occupants per dwelling', value: 'Default' },
     ]);
@@ -110,6 +112,17 @@ describe('a step worked through', () => {
       { label: 'Heating setpoint', value: '18 °C' },
       { label: 'Hot water', value: 'Included' },
     ]);
+  });
+
+  it('sums up the storeys with every storey modelled, and the attic where there is one', () => {
+    const general = { buildingType: 'Office', storeys: 4, storeysModelled: null, roomHeight: 3, capacity: null };
+    expect(occupancySummary(t, format, general, false)).toEqual([
+      { label: 'Storeys', value: '4' },
+      { label: 'Room height', value: '3.0 m' },
+      { label: 'Attic', value: 'Not in the model' },
+      { label: 'Occupants', value: 'Default' },
+    ]);
+    expect(occupancySummary(t, format, general).map((fact) => fact.label)).not.toContain('Attic');
   });
 
   it('lists the cooling setpoint with heating and comfort in Advanced, where its field is', () => {

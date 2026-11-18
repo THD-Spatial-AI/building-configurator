@@ -28,8 +28,8 @@ import { StepHints, Tour } from './Guidance';
 import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickWithAttic } from './StoreysModelled';
-import { atticFloorArea, dwellingsTotal, eavesHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
-import type { BuildingState } from '../../lib/buemAdapter';
+import { atticFloorArea, dwellingsTotal, eavesHeight, eavesRoomHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
+import { localSurfaceLabel, type BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
@@ -278,12 +278,19 @@ function BuildingView({
     model.setGen('roomHeight', roomHeight);
     if (isCut) cutToBands({ heights: storeyHeightList(model.general.storeys, roomHeight, model.general.storeyHeights) });
   };
-  /** A new count moves every band, so the storeys modelled reset to all and a cold attic's cut follows. */
+  /**
+   * A new count moves every band, so the storeys modelled reset to all and a
+   * cold attic's cut follows. With a 3D model the room height changes so the
+   * storeys fill it to the eaves.
+   */
   const setStoreyCount = (storeys: number) => {
+    const own = model.general.storeyHeights ?? {};
+    const roomHeight = (modelHeight !== undefined ? eavesRoomHeight(modelHeight, storeys, own) : null) ?? model.general.roomHeight;
     model.setGen('storeys', storeys);
+    if (roomHeight !== model.general.roomHeight) model.setGen('roomHeight', roomHeight);
     setSelectedStoreys([]);
     if (attic && !atticIn) {
-      cutToBands({ modelled: null, storeys, heights: storeyHeightList(storeys, model.general.roomHeight, model.general.storeyHeights) });
+      cutToBands({ modelled: null, storeys, heights: storeyHeightList(storeys, roomHeight, own) });
     }
   };
   /** The building's dwellings: the counts given per storey and for the attic, or null while none is. */
@@ -408,7 +415,7 @@ function BuildingView({
     </div>
   ) : null;
   const pickable = useMemo(() => [
-    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label, type: t(`surface.type.${element.type}`), group: element.type })),
+    ...Object.values(elements).map((element) => ({ id: element.id, label: localSurfaceLabel(t, element.label), type: t(`surface.type.${element.type}`), group: element.type })),
     ...Object.entries(pv?.surfaces ?? {})
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
@@ -419,6 +426,7 @@ function BuildingView({
     mode,
     onShowAdvanced: () => setMode('advanced'),
     onStoreysClosed: () => setSelectedStoreys([]),
+    atticIn: attic ? atticIn : undefined,
     modelHeight,
     storeys: (
       <StoreysModelled
@@ -672,7 +680,7 @@ function BuildingView({
             {onTech && unfittedPv.length > 0 && (
               <div role="alert" className="flex max-w-[360px] items-start gap-1.5 rounded-md border border-destructive/30 bg-card/95 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-destructive shadow-sm">
                 <AlertTriangle className="mt-px size-3.5 shrink-0" />
-                {t('pv.noFitOn', { count: unfittedPv.length, surfaces: unfittedPv.map((id) => surfaceName(id, elements, pv?.surfaces ?? {})).join(', ') })}
+                {t('pv.noFitOn', { count: unfittedPv.length, surfaces: unfittedPv.map((id) => surfaceName(t, id, elements, pv?.surfaces ?? {})).join(', ') })}
               </div>
             )}
             {!onTech && surfaces.length > 0 && !detached && <ModelLegend pv={false} />}

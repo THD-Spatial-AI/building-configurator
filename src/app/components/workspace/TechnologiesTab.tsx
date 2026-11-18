@@ -7,7 +7,7 @@ import { TOPICS } from '@/app/config/topics';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
 import type { PvLayout } from '../../lib/pvLayout';
-import { productCurrency, productName } from '../../lib/pvProducts';
+import { productCurrency, productName, type TechnologyProduct } from '../../lib/pvProducts';
 import { installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfaces';
 import { surfaceProduct, type PvMode } from './PvMode';
 import { PvOverview } from './PvOverview';
@@ -15,6 +15,13 @@ import { TechCardFrame, TechnologyCards, type Technologies } from './TechnologyC
 import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 const PV_CARD = 'pv';
+
+/** The PV products in use, leaving out a name that only repeats the card's title or the PV type, whatever its case. */
+export function pvProductLine(installed: { product?: TechnologyProduct }[], repeats: string[]): string {
+  const known = new Set(repeats.map((text) => text.trim().toLowerCase()));
+  const names = installed.flatMap((row) => (row.product ? [productName(row.product)] : []));
+  return [...new Set(names)].filter((name) => !known.has(name.trim().toLowerCase())).join(' · ');
+}
 
 export function TechnologiesTab({ pv, available, technologies, elements, layouts, mode, onSelectSurface }: {
   pv?: PvMode;
@@ -31,9 +38,11 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   const [focusId, setFocusId] = useState<string | null>(pv ? PV_CARD : technologies?.items[0]?.id ?? null);
 
   const productFor = (id: string) => (pv ? surfaceProduct(pv, id) : undefined);
-  const summary = pv ? pvSummary(pv.surfaces, elements, layouts, productFor) : null;
+  const summary = pv ? pvSummary(pv.surfaces, elements, layouts, productFor, available) : null;
   const installed = pv ? installedByProduct(pv.surfaces, layouts, productFor) : [];
   const pvCurrency = pv ? productCurrency(installed.find((row) => row.product)?.product) : '';
+  // Known only while every surface with PV has its layout.
+  const modules = installed.every((row) => row.modules !== undefined) ? installed.reduce((sum, row) => sum + (row.modules ?? 0), 0) : undefined;
 
   // Only amounts add up; a rate (size still open) has no total yet.
   const amounts = [
@@ -54,8 +63,13 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
         <TechCardFrame
           topic={TOPICS.pv}
           title={t('pv.overview.title')}
-          headline={`${format(summary.kwp, 1)} kWp · ${t('tech.pvSurfaces', { count: summary.installed })}`}
-          subtitle={installed.map((row) => (row.product ? productName(row.product) : pv.typeLabel)).join(' · ') || pv.typeLabel}
+          subtitle={pvProductLine(installed, [t('pv.overview.title'), pv.typeLabel])}
+          facts={installed.length === 0 ? [] : [
+            { label: t('pv.result.capacity'), value: `${format(summary.kwp, 1)} kWp` },
+            ...(modules === undefined ? [] : [{ label: t('pv.result.modules'), value: format(modules, 0) }]),
+            { label: t('pv.summary.surfaces'), value: t('pv.summary.count', { installed: summary.installed, total: summary.total }) },
+            ...(summary.investment === undefined ? [] : [{ label: t('tech.investment'), value: `${format(summary.investment, 0)} ${pvCurrency}`.trim(), cost: true }]),
+          ]}
           focused={focusId === PV_CARD}
           onFocus={() => setFocusId(focusId === PV_CARD ? null : PV_CARD)}
           {...(removePv ? {

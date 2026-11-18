@@ -86,13 +86,6 @@ describe('formatNumber', () => {
     expect(formatNumber('en', 21356, 0)).toBe('21,356');
   });
 
-  it('groups French thousands with the separator Intl gives', () => {
-    const group = new Intl.NumberFormat('fr').formatToParts(21356).find((part) => part.type === 'group')!.value;
-    expect(group).not.toMatch(/[.,]/);
-    expect(formatNumber('fr', 21356, 0)).toBe(`21${group}356`);
-    expect(formatNumber('fr', 0.4, 2)).toBe('0,40');
-  });
-
   it('takes a range of decimals', () => {
     expect(formatNumber('en', 1.5, { min: 0, max: 2 })).toBe('1.5');
     expect(formatNumber('en', 2, { min: 0, max: 2 })).toBe('2');

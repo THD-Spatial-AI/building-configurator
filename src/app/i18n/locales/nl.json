@@ -110,7 +110,51 @@
     "hover": {
       "open": "Klik om dit vlak te openen"
     },
-    "uValueTip": "Hoeveel warmte per graad verschil tussen binnen en buiten door één m² van dit vlak gaat. De waarde komt uit TABULA voor het type, de bouwperiode en het renovatieniveau van dit gebouw; een lagere waarde verliest minder warmte, dus het gebouw heeft minder verwarming nodig."
+    "uValueTip": "Hoeveel warmte per graad verschil tussen binnen en buiten door één m² van dit vlak gaat. De waarde komt uit TABULA voor het type, de bouwperiode en het renovatieniveau van dit gebouw; een lagere waarde verliest minder warmte, dus het gebouw heeft minder verwarming nodig.",
+    "named": {
+      "wall": {
+        "north": "Noordwand",
+        "northeast": "Noordoostwand",
+        "east": "Oostwand",
+        "southeast": "Zuidoostwand",
+        "south": "Zuidwand",
+        "southwest": "Zuidwestwand",
+        "west": "Westwand",
+        "northwest": "Noordwestwand"
+      },
+      "roof": {
+        "north": "Noorddak",
+        "northeast": "Noordoostdak",
+        "east": "Oostdak",
+        "southeast": "Zuidoostdak",
+        "south": "Zuiddak",
+        "southwest": "Zuidwestdak",
+        "west": "Westdak",
+        "northwest": "Noordwestdak"
+      },
+      "window": {
+        "north": "Noordraam",
+        "northeast": "Noordoostraam",
+        "east": "Oostraam",
+        "southeast": "Zuidoostraam",
+        "south": "Zuidraam",
+        "southwest": "Zuidwestraam",
+        "west": "Westraam",
+        "northwest": "Noordwestraam"
+      },
+      "door": {
+        "north": "Noorddeur",
+        "northeast": "Noordoostdeur",
+        "east": "Oostdeur",
+        "southeast": "Zuidoostdeur",
+        "south": "Zuiddeur",
+        "southwest": "Zuidwestdeur",
+        "west": "Westdeur",
+        "northwest": "Noordwestdeur"
+      },
+      "flatRoof": "Plat dak",
+      "floor": "Vloer"
+    }
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",
@@ -192,7 +236,7 @@
     },
     "geometryFlat": "plat · {area} m²",
     "overview": {
-      "title": "PV op dit gebouw"
+      "title": "PV-opwekking"
     },
     "surfaces": {
       "toggle": "{name} ({installed} van {total} met PV)",
@@ -296,14 +340,11 @@
     "remove": "{title} verwijderen",
     "inFocus": "Geselecteerd",
     "product": "Product",
+    "investment": "Investering",
     "add": "Technologie toevoegen",
     "count": {
       "one": "{count} technologie",
       "other": "{count} technologieën"
-    },
-    "pvSurfaces": {
-      "one": "{count} vlak",
-      "other": "{count} vlakken"
     },
     "total": {
       "label": "Geschatte totale kosten van de technologieën",
@@ -393,7 +434,7 @@
     "default": "Standaard",
     "useDefault": "Standaard gebruiken",
     "capacity": {
-      "label": "Capaciteit",
+      "label": "Aantal personen",
       "placeholder": "Afgeleid van de vloeroppervlakte.",
       "tip": "Aantal personen. Leeg gelaten geldt een gangbaar aantal voor de grootte en het type van het gebouw."
     },
@@ -748,12 +789,13 @@
     "roomHeightTip": "De hoogte van elke verdieping, van vloer tot vloer. Een verdieping met een eigen hoogte houdt die.",
     "useRoomHeight": "Kamerhoogte gebruiken",
     "limit": {
-      "storeys": "Nog een verdieping van {room} m zou hoger zijn dan het 3D-model, dat tot de dakgoot {height} m is.",
+      "storeys": "Met meer verdiepingen bleef er per verdieping minder dan {min} m over van de {height} m tot de dakgoot.",
       "height": "Een hogere verdieping zou de verdiepingen hoger maken dan het 3D-model, dat tot de dakgoot {height} m is."
     },
     "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte.",
     "attic": {
       "label": "Zolder",
+      "notInModel": "Niet in het model",
       "hint": "De ruimte onder het hellende dak, boven de dakgoot. Weggelaten hoort het dak niet meer bij het verwarmde gebouw en verliest het plafond eronder warmte naar de koude zolder.",
       "floorArea": "Vloeroppervlak zolder",
       "noArea": "Niet geteld",

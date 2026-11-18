@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, DROPDOWN_LIST, FIELD_ACTION, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { useFormatNumber, useT } from '../../i18n';
-import { fittedPvIds, installedByProduct, installedPvIds, pvSummary } from '../../lib/pvSurfaces';
+import { fittedPvIds, installedByProduct, installedPvIds, offeredPvIds, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
   constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints, sortProducts,
@@ -23,13 +23,6 @@ const STATE_ORDER: PvSurface['state'][] = ['installed', 'suggested', 'available'
 /** Plain-language labels for the constraints simple mode asks; others show the catalogue's own name. */
 const QUESTION_KEYS = new Set(['cost_energy_cap', 'cost_om_annual', 'cont_lifetime']);
 
-/** The surfaces offered for PV: those some option fits on, and any with PV on. */
-function offeredIds(pv: PvMode, available: ReadonlySet<string> | undefined): string[] {
-  return Object.entries(pv.surfaces)
-    .filter(([id, surface]) => !available || available.has(id) || surface.state === 'installed')
-    .map(([id]) => id);
-}
-
 /** Capacity, surfaces with PV, investment and yearly O&M, as tiles. */
 function Totals({ pv, available, elements, layouts }: {
   pv: PvMode;
@@ -39,12 +32,12 @@ function Totals({ pv, available, elements, layouts }: {
 }) {
   const t = useT();
   const format = useFormatNumber();
-  const summary = pvSummary(pv.surfaces, elements, layouts, (id) => surfaceProduct(pv, id));
+  const summary = pvSummary(pv.surfaces, elements, layouts, (id) => surfaceProduct(pv, id), available);
   const currency = productCurrency(Object.keys(pv.surfaces).map((id) => surfaceProduct(pv, id)).find(Boolean));
   const money = (value: number) => `${format(value, 0)} ${currency}`.trim();
   const tiles = [
     [`${format(summary.kwp, 1)} kWp`, t('pv.summary.capacity')],
-    [t('pv.summary.count', { installed: summary.installed, total: offeredIds(pv, available).length }), t('pv.summary.surfaces')],
+    [t('pv.summary.count', { installed: summary.installed, total: summary.total }), t('pv.summary.surfaces')],
     ...(summary.investment === undefined ? [] : [[money(summary.investment), t('pv.cost.investment')]]),
     ...(summary.omPerYear === undefined ? [] : [[money(summary.omPerYear), t('pv.cost.omPerYear')]]),
   ];
@@ -73,14 +66,14 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
 }) {
   const t = useT();
   const format = useFormatNumber();
-  const offered = new Set(offeredIds(pv, available));
+  const offered = new Set(offeredPvIds(pv.surfaces, available));
   const entries = Object.entries(pv.surfaces).filter(([id]) => offered.has(id));
   const installedCount = fittedPvIds(pv.surfaces, layouts).length;
   // Re-sorted on each opening only: a row moving as it is switched would put another under the pointer.
   const [held, setHeld] = useState<string[] | null>(null);
   const sorted = (group: [string, PvSurface][]) => STATE_ORDER.flatMap((state) => group
     .filter(([, surface]) => surface.state === state)
-    .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
+    .sort(([a], [b]) => surfaceName(t, a, elements, pv.surfaces).localeCompare(surfaceName(t, b, elements, pv.surfaces), undefined, { numeric: true })));
   const ordered = (group: [string, PvSurface][]) => {
     const byId = new Map(group);
     return heldOrder(sorted(group).map(([id]) => id), held).map((id) => [id, byId.get(id)!] as [string, PvSurface]);
@@ -129,7 +122,7 @@ function SurfaceRows({ entries, pv, elements, layouts, onSelect }: {
   return (
     <ul className="flex flex-col gap-1.5">
       {entries.map(([id, surface]) => {
-        const name = surfaceName(id, elements, pv.surfaces);
+        const name = surfaceName(t, id, elements, pv.surfaces);
         const installed = surface.state === 'installed';
         const kwp = layouts[id]?.kwp ?? surface.maxKwp;
         return (
@@ -192,7 +185,7 @@ function AddToRoofs({ pv, available, elements }: {
   elements: Record<string, BuildingElement>;
 }) {
   const t = useT();
-  const roofs = offeredIds(pv, available).filter((id) => pv.surfaces[id].state !== 'installed' && isRoof(id, elements, pv.surfaces[id]));
+  const roofs = offeredPvIds(pv.surfaces, available).filter((id) => pv.surfaces[id].state !== 'installed' && isRoof(id, elements, pv.surfaces[id]));
   const best = roofs.filter((id) => pv.surfaces[id].state === 'suggested');
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLSpanElement>(null);

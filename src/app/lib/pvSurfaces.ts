@@ -143,6 +143,13 @@ export function pvAvailableIds(
 /** Adds b to a, where a stays undefined until some value is added. */
 const add = (a: number | undefined, b: number | undefined) => (b === undefined ? a : (a ?? 0) + b);
 
+/** The surfaces offered for PV: those some option fits on, and any with PV on. Without `available`, all of them. */
+export function offeredPvIds(surfaces: Record<string, PvSurface>, available?: ReadonlySet<string>): string[] {
+  return Object.entries(surfaces)
+    .filter(([id, surface]) => !available || available.has(id) || surface.state === 'installed')
+    .map(([id]) => id);
+}
+
 /**
  * Installed capacity (kWp), panel area (m²), investment and yearly O&M, and
  * how many of the offered surfaces carry PV. A surface's module layout counts
@@ -154,6 +161,7 @@ export function pvSummary(
   elements: Record<string, BuildingElement>,
   layouts: Readonly<Record<string, PvLayout>> = {},
   productFor: (surfaceId: string) => TechnologyProduct | undefined = () => undefined,
+  available?: ReadonlySet<string>,
 ): { kwp: number; panelArea: number; installed: number; total: number; investment?: number; omPerYear?: number } {
   let kwp = 0;
   let panelArea = 0;
@@ -171,5 +179,5 @@ export function pvSummary(
     investment = add(investment, costs.investment);
     omPerYear = add(omPerYear, costs.omPerYear);
   }
-  return { kwp, panelArea, installed, total: Object.keys(surfaces).length, investment, omPerYear };
+  return { kwp, panelArea, installed, total: offeredPvIds(surfaces, available).length, investment, omPerYear };
 }

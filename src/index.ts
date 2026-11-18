@@ -25,7 +25,7 @@ export {
   type PvMounting,
   type PvOrientation,
 } from './app/lib/pvLayout';
-export type { TechCard, TechField, Technologies } from './app/components/workspace/TechnologyCards';
+export type { TechCard, TechField, TechFigure, Technologies } from './app/components/workspace/TechnologyCards';
 export type { Language } from './app/i18n';
 
 export {

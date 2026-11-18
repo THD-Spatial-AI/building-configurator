@@ -22,7 +22,7 @@ import {
 import { EquipmentSection, OccupancySection, OutputsSection, groupSummary } from './householdSections';
 import { ComfortSection } from './comfortSection';
 import { InsulationSection, gradeSummary, insulationSummary, useLevelClasses, type InsulationProps } from './insulationSection';
-import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useT, type FormatNumber, type Translate } from '@/app/i18n';
 import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
 
 // Energy grade is not one of these: it is built from InsulationProps (see useBuildingSteps).
@@ -174,16 +174,26 @@ interface BuildingStepsProps {
   storeys?: ReactNode;
   /** The 3D model's height to the eaves, in metres; storeys taller than it need attention. */
   modelHeight?: number;
+  /** Whether the attic is modelled; undefined for a building without one. */
+  atticIn?: boolean;
   /** Called when the storeys and household step is left, to clear the storey selection. */
   onStoreysClosed?: () => void;
 }
 
-/** The facts a closed storeys and household step shows. */
-export function occupancySummary(t: Translate, general: Record<string, any>): StepFact[] {
+/**
+ * The facts a closed storeys and household step shows. `atticIn` is whether
+ * the attic is modelled; undefined for a building without one.
+ */
+export function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>, atticIn?: boolean): StepFact[] {
   const modelled = general.storeysModelled as number[] | null;
-  const storeys = modelled
-    ? [{ label: t('snapshot.row.storeys'), value: t('snapshot.storeysModelled', { modelled: modelled.length, total: general.storeys }) }]
-    : [];
+  const storeys = [
+    {
+      label: t('snapshot.row.storeys'),
+      value: modelled ? t('snapshot.storeysModelled', { modelled: modelled.length, total: general.storeys }) : String(general.storeys),
+    },
+    { label: t('snapshot.row.roomHeight'), value: `${format(general.roomHeight, 1)} m` },
+    ...(atticIn === undefined ? [] : [{ label: t('storeys.attic.label'), value: t(atticIn ? 'storeys.inModel' : 'storeys.attic.notInModel') }]),
+  ];
   if (isServiceBuildingType(general.buildingType)) {
     return [...storeys, { label: t('household.capacity.label'), value: general.capacity ? String(general.capacity) : t('household.default') }];
   }
@@ -226,7 +236,7 @@ export function comfortSummary(t: Translate, general: Record<string, any>, advan
 
 /** The building parameters as steps for a StepPanel, each one section card shown open. */
 export function useBuildingSteps({
-  general, setGen, mode, insulation, onShowAdvanced, storeys, onStoreysClosed, modelHeight,
+  general, setGen, mode, insulation, onShowAdvanced, storeys, onStoreysClosed, modelHeight, atticIn,
 }: BuildingStepsProps): Step[] {
   const t = useT();
   const format = useFormatNumber();
@@ -284,7 +294,7 @@ export function useBuildingSteps({
     label: SECTION_LABELS.occupancy(t),
     topic: SECTION_TOPICS.occupancy,
     status: storeysStatus(general, modelHeight),
-    summary: occupancySummary(t, general),
+    summary: occupancySummary(t, format, general, atticIn),
     content: card('occupancy'),
     onLeave: onStoreysClosed,
   });

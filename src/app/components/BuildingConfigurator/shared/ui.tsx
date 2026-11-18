@@ -777,7 +777,7 @@ export function UnsavedChangesDialog({
       onCancel={(e) => { e.preventDefault(); onCancel(); }}
       // A click on the dialog element itself, not its content, is on the backdrop.
       onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
-      className="m-auto w-[calc(100%-32px)] max-w-md overflow-hidden rounded-xl border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="m-auto w-[calc(100%-32px)] max-w-lg overflow-hidden rounded-xl border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
     >
       <div className="flex gap-3 px-5 pb-4 pt-5">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/20">
@@ -796,8 +796,8 @@ export function UnsavedChangesDialog({
         </div>
       </div>
 
-      {/* Discard sits apart from the safe pair; a long translation wraps whole buttons, never a label. */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/40 px-5 py-3">
+      {/* One right-aligned group, so a long translation wraps whole buttons onto right-aligned rows, never a label. */}
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-muted/40 px-5 py-3">
         <button
           type="button"
           onClick={onDiscard}
@@ -805,23 +805,21 @@ export function UnsavedChangesDialog({
         >
           {t('common.unsaved.discard')}
         </button>
-        <div className="ml-auto flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            autoFocus
-            onClick={onCancel}
-            className="cursor-pointer whitespace-nowrap rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-          >
-            {t('common.unsaved.continueEditing')}
-          </button>
-          <button
-            type="button"
-            onClick={onSave}
-            className="cursor-pointer whitespace-nowrap rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            {t('common.unsaved.saveAndClose')}
-          </button>
-        </div>
+        <button
+          type="button"
+          autoFocus
+          onClick={onCancel}
+          className="cursor-pointer whitespace-nowrap rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          {t('common.unsaved.continueEditing')}
+        </button>
+        <button
+          type="button"
+          onClick={onSave}
+          className="cursor-pointer whitespace-nowrap rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          {t('common.unsaved.saveAndClose')}
+        </button>
       </div>
     </dialog>
   );

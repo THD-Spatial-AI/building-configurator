@@ -112,7 +112,51 @@
     "hover": {
       "open": "Kliknutím otevřete tuto plochu"
     },
-    "uValueTip": "Kolik tepla projde jedním m² této plochy na každý stupeň rozdílu mezi vnitřkem a venkem. Hodnota pochází z TABULA pro typ, stáří a úroveň renovace této budovy; nižší hodnota znamená menší ztráty tepla, takže budova potřebuje méně vytápění."
+    "uValueTip": "Kolik tepla projde jedním m² této plochy na každý stupeň rozdílu mezi vnitřkem a venkem. Hodnota pochází z TABULA pro typ, stáří a úroveň renovace této budovy; nižší hodnota znamená menší ztráty tepla, takže budova potřebuje méně vytápění.",
+    "named": {
+      "wall": {
+        "north": "Severní stěna",
+        "northeast": "Severovýchodní stěna",
+        "east": "Východní stěna",
+        "southeast": "Jihovýchodní stěna",
+        "south": "Jižní stěna",
+        "southwest": "Jihozápadní stěna",
+        "west": "Západní stěna",
+        "northwest": "Severozápadní stěna"
+      },
+      "roof": {
+        "north": "Severní střecha",
+        "northeast": "Severovýchodní střecha",
+        "east": "Východní střecha",
+        "southeast": "Jihovýchodní střecha",
+        "south": "Jižní střecha",
+        "southwest": "Jihozápadní střecha",
+        "west": "Západní střecha",
+        "northwest": "Severozápadní střecha"
+      },
+      "window": {
+        "north": "Severní okno",
+        "northeast": "Severovýchodní okno",
+        "east": "Východní okno",
+        "southeast": "Jihovýchodní okno",
+        "south": "Jižní okno",
+        "southwest": "Jihozápadní okno",
+        "west": "Západní okno",
+        "northwest": "Severozápadní okno"
+      },
+      "door": {
+        "north": "Severní dveře",
+        "northeast": "Severovýchodní dveře",
+        "east": "Východní dveře",
+        "southeast": "Jihovýchodní dveře",
+        "south": "Jižní dveře",
+        "southwest": "Jihozápadní dveře",
+        "west": "Západní dveře",
+        "northwest": "Severozápadní dveře"
+      },
+      "flatRoof": "Plochá střecha",
+      "floor": "Podlaha"
+    }
   },
   "profile": {
     "title": "Hodinový profil zatížení",
@@ -194,7 +238,7 @@
     },
     "geometryFlat": "rovná · {area} m²",
     "overview": {
-      "title": "FV na této budově"
+      "title": "Fotovoltaická výroba"
     },
     "surfaces": {
       "toggle": "{name} ({installed} z {total} s FV)",
@@ -304,18 +348,13 @@
     "remove": "Odebrat {title}",
     "inFocus": "Vybraná",
     "product": "Produkt",
+    "investment": "Investice",
     "add": "Přidat technologii",
     "count": {
       "one": "{count} technologie",
       "few": "{count} technologie",
       "many": "{count} technologie",
       "other": "{count} technologií"
-    },
-    "pvSurfaces": {
-      "one": "{count} plocha",
-      "few": "{count} plochy",
-      "many": "{count} ploch",
-      "other": "{count} plochy"
     },
     "total": {
       "label": "Odhadované celkové náklady na technologie",
@@ -407,7 +446,7 @@
     "default": "Výchozí",
     "useDefault": "Použít výchozí",
     "capacity": {
-      "label": "Kapacita",
+      "label": "Počet osob",
       "placeholder": "Odvozeno z podlahové plochy.",
       "tip": "Počet osob. Prázdné pole použije typický počet pro velikost a typ budovy."
     },
@@ -768,12 +807,13 @@
     "roomHeightTip": "Výška každého podlaží, od podlahy k podlaze. Podlaží s vlastní výškou si ji ponechá.",
     "useRoomHeight": "Použít výšku místnosti",
     "limit": {
-      "storeys": "Další podlaží o výšce {room} m by bylo vyšší než 3D model, který měří {height} m k okapu.",
+      "storeys": "Při více podlažích by na každé zbylo méně než {min} m z {height} m k okapu.",
       "height": "Vyšší podlaží by udělalo podlaží vyšší než 3D model, který měří {height} m k okapu."
     },
     "heightConflict": "Podlaží jsou dohromady vysoká {total} m, více než 3D model, který měří {height} m k okapu. Snižte počet podlaží nebo některou výšku.",
     "attic": {
       "label": "Podkroví",
+      "notInModel": "Mimo model",
       "hint": "Prostor pod šikmou střechou, nad okapem. Při vynechání střecha nepatří k vytápěné budově a strop pod ní ztrácí teplo do studeného podkroví.",
       "floorArea": "Plocha podkroví",
       "noArea": "Nezapočteno",
