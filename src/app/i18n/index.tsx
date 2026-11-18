@@ -7,13 +7,14 @@ import en from './locales/en.json';
 import de from './locales/de.json';
 import es from './locales/es.json';
 import nl from './locales/nl.json';
+import cs from './locales/cs.json';
 
-/** The languages EnerPlanET offers. */
-export type Language = 'en' | 'de' | 'es' | 'nl';
+/** EnerPlanET's languages, plus Czech for the Czech demo site. */
+export type Language = 'en' | 'de' | 'es' | 'nl' | 'cs';
 
 type Messages = { [key: string]: string | Messages };
 
-export const MESSAGES: Record<Language, Messages> = { en, de, es, nl };
+export const MESSAGES: Record<Language, Messages> = { en, de, es, nl, cs };
 
 /**
  * The language for a host's code: a region tag counts as its language

@@ -100,7 +100,7 @@ export function BuildingView({ building, geometryBuilding, onExit }) {
 | `defaultMode` | Optional. `simple` (default) or `advanced`: the mode the view opens in when `mode` is not given. The user can still switch; the next opening starts in this mode again |
 | `mode` | Optional. `simple` or `advanced`, controlled by the host: given, it wins over `defaultMode`, and the user's switch is reported through `onModeChange` |
 | `onModeChange` | Optional. Called with the mode the user switches to, whether or not `mode` is given |
-| `language` | Optional. `en`, `de`, `es` or `nl`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
+| `language` | Optional. `en`, `de`, `es`, `nl` or `cs`: the language of the view's own text, for example i18next's `i18n.language`. A region tag counts as its language (`de-DE` is `de`); any other code, or none, is `en`. A change re-renders the open view and keeps its edits. Text the host passes in (the PV notice, technology cards, a TABULA variant description from ignis) is shown as given |
 | `tour` | Optional. `{ run, onFinish }`. With `run` true the guided tour starts as the view opens; `onFinish` is called when the user finishes or skips it, so the host can store that the user has seen it. The header's Tour button starts the tour either way |
 | `seriesCsvUrl` | Optional. The URL the load profile's Download link points at, a CSV of the building's stored series. Without it there is no download |
 
