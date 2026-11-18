@@ -38,7 +38,7 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   const [focusId, setFocusId] = useState<string | null>(pv ? PV_CARD : technologies?.items[0]?.id ?? null);
 
   const productFor = (id: string) => (pv ? surfaceProduct(pv, id) : undefined);
-  const summary = pv ? pvSummary(pv.surfaces, elements, layouts, productFor) : null;
+  const summary = pv ? pvSummary(pv.surfaces, elements, layouts, productFor, available) : null;
   const installed = pv ? installedByProduct(pv.surfaces, layouts, productFor) : [];
   const pvCurrency = pv ? productCurrency(installed.find((row) => row.product)?.product) : '';
   // Known only while every surface with PV has its layout.

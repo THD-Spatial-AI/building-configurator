@@ -76,6 +76,12 @@ describe('pvSummary', () => {
     expect(pvSummary({ r1: surface('installed') }, {}).investment).toBeUndefined();
   });
 
+  it('counts only the offered surfaces: those PV fits on, and any with PV on', () => {
+    const surfaces = { r1: surface('installed'), r2: surface('suggested'), w1: surface('available') };
+    expect(pvSummary(surfaces, {}, {}, undefined, new Set(['r2'])).total).toBe(2);
+    expect(pvSummary(surfaces, {}).total).toBe(3);
+  });
+
   it('leaves out the panel area of an installed surface without geometry', () => {
     expect(pvSummary({ x: surface('installed') }, {}).panelArea).toBe(0);
   });
