@@ -25,6 +25,36 @@ describe('the energy grade in Simple and Advanced', () => {
   });
 });
 
+describe('the state names of a type ignis describes by its standard', () => {
+  const minimum = 'national minimum requirements, gas boiler + thermal solar system';
+  const passive = 'passive house / gas CHP + thermal solar system + ventilation system with heat recovery';
+  const levels = [
+    { code: 'DE.N.SFH.12.Gen.ReEx.001.001', number: 1, label: minimum, data: {} },
+    { code: 'DE.N.SFH.12.Gen.ReEx.001.003', number: 3, label: passive, data: {} },
+  ] as InsulationProps['levels'];
+  const elements = { w1: { id: 'w1', label: 'Wall', type: 'wall', area: 30, uValue: 0.2, gValue: null, tilt: 90, azimuth: 180 } } as InsulationProps['elements'];
+  const view = (mode: 'simple' | 'advanced') => renderToStaticMarkup(
+    <InsulationSection {...insulation} elements={elements} levels={levels} general={{}} setGen={() => {}} mode={mode} />,
+  );
+
+  it('names each option by its TABULA state in Simple, with the description as its tooltip', () => {
+    const html = view('simple');
+    expect(html).toContain(`title="${minimum}"`);
+    expect(html).toContain('<span>Existing state</span>');
+    expect(html).toContain('<span>Advanced refurbishment</span>');
+    expect(html).not.toContain(`<span>${minimum}</span>`);
+  });
+
+  it('shows the description itself in Advanced', () => {
+    expect(view('advanced')).toContain(`<span>${minimum}</span>`);
+  });
+
+  it('names the state, not the description, in the header and the closed step', () => {
+    expect(insulationSummary(t, format, { ...insulation, elements, levels }, 'advanced')).toBe('Existing state · average U 0.27 W/m²K');
+    expect(gradeSummary(t, format, { ...insulation, elements, levels })).toEqual([{ label: 'State', value: 'Existing state' }]);
+  });
+});
+
 describe('the element types in Advanced', () => {
   const elements = {
     w1: { id: 'w1', label: 'Wall', type: 'wall', area: 30, uValue: 0.22, gValue: null, tilt: 90, azimuth: 180 },

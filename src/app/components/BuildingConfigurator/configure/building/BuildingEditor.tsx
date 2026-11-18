@@ -278,7 +278,7 @@ export function useBuildingSteps({
           title={t('editor.insulationTitle')}
           info={t('help.insulation')}
           emphasised
-          action={<span className="text-[11px] font-normal">{insulationSummary(t, format, insulation, mode)}</span>}
+          action={<span className="min-w-0 truncate text-[11px] font-normal">{insulationSummary(t, format, insulation, mode)}</span>}
         >
           <div className="flex flex-col gap-3 p-3">
             {insulation.levels.length === 0 && <IgnisStatusSection general={general} />}

@@ -83,7 +83,7 @@ export function insulationSummary(t: Translate, format: FormatNumber, { levels, 
   const custom = present.some((type) => customCount(elements, type, states[type], initial, levels) > 0);
   const uniform = present.every((type) => states[type] === states[present[0]]);
   const level = levels.find((l) => l.number === states[present[0]]);
-  const label = level && variantName(t, level.label, level.number);
+  const label = level && variantName(t, level.label, level.number, false);
   const state = levels.length === 0 ? null : custom || !uniform || !label ? t('insulation.summary.mixed') : label;
   const averageU = mode === 'advanced' ? t('insulation.summary.averageU', { value: format(avgUValue, 2) }) : null;
   return [state, averageU].filter(Boolean).join(' · ');
@@ -195,6 +195,7 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
               type="button"
               aria-pressed={selected === level.number}
               onClick={() => onSetState(REFURB_TYPES, level.number)}
+              title={mode === 'simple' && variantName(t, level.label, level.number) !== variantName(t, level.label, level.number, false) ? level.label : undefined}
               style={energyClass ? { '--class': energyClass.color, '--class-tint': `${energyClass.color}26` } as CSSProperties : undefined}
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-[6px] border px-2 py-1.5 text-left text-[11px] font-medium leading-snug transition-colors',
@@ -215,7 +216,7 @@ function BuildingPreset({ levels, states, initial, elements, variantCode, onSetS
                 </span>
               )}
               <span className="flex min-w-0 flex-col">
-                <span>{variantName(t, level.label, level.number)}</span>
+                <span>{variantName(t, level.label, level.number, mode === 'advanced')}</span>
                 {typeof perM2 === 'number' && (
                   <span className="text-[10px] font-normal">{t('insulation.classes.perM2', { value: format(perM2, 0) })}</span>
                 )}
