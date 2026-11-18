@@ -177,7 +177,7 @@ export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onF
   return (
     <section className={cn(
       'group overflow-hidden rounded-lg bg-card shadow-sm',
-      focused ? cn('border-2', topic.border) : 'border border-border transition-[border-color,box-shadow] duration-200 hover:border-primary/40 hover:shadow-md',
+      focused ? cn('border-2', topic.border) : 'border border-border transition-[border-color,box-shadow] duration-200 hover:border-primary/40 hover:shadow-md dark:hover:border-primary/60',
     )}>
       <div className={cn('flex items-center gap-2 px-3 py-2', topic.tile)}>
         <button
@@ -214,7 +214,7 @@ export function TechCardFrame({ topic, title, subtitle, facts = [], focused, onF
       {/* Closed, the whole body opens the card too; keyboard users open it by the header button. */}
       <div
         onClick={focused ? undefined : onFocus}
-        className={cn(!focused && 'cursor-pointer transition-colors duration-200 group-hover:bg-primary/[0.04]')}
+        className={cn(!focused && 'cursor-pointer transition-colors duration-200 group-hover:bg-primary/[0.04] dark:group-hover:bg-primary/[0.09]')}
       >
         {subtitle && <p className="m-0 truncate px-3 pt-1.5 text-[12px] text-muted-foreground">{subtitle}</p>}
         {!focused && facts.length > 0 && (
