@@ -748,7 +748,7 @@
     "roomHeightTip": "De hoogte van elke verdieping, van vloer tot vloer. Een verdieping met een eigen hoogte houdt die.",
     "useRoomHeight": "Kamerhoogte gebruiken",
     "limit": {
-      "storeys": "Nog een verdieping van {room} m zou hoger zijn dan het 3D-model, dat tot de dakgoot {height} m is.",
+      "storeys": "Met meer verdiepingen bleef er per verdieping minder dan {min} m over van de {height} m tot de dakgoot.",
       "height": "Een hogere verdieping zou de verdiepingen hoger maken dan het 3D-model, dat tot de dakgoot {height} m is."
     },
     "heightConflict": "De verdiepingen zijn samen {total} m hoog, hoger dan het 3D-model, dat tot de dakgoot {height} m is. Verlaag het aantal verdiepingen of een hoogte.",

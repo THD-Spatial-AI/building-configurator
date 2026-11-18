@@ -748,7 +748,7 @@
     "roomHeightTip": "The height of each storey, floor to floor. A storey given its own height keeps it.",
     "useRoomHeight": "Use room height",
     "limit": {
-      "storeys": "Another storey at {room} m would be taller than the 3D model, which is {height} m to the eaves.",
+      "storeys": "More storeys would leave each less than {min} m of the {height} m to the eaves.",
       "height": "A taller storey would make the storeys taller than the 3D model, which is {height} m to the eaves."
     },
     "heightConflict": "The storeys are {total} m tall together, taller than the 3D model, which is {height} m to the eaves. Lower the storey count or a height.",

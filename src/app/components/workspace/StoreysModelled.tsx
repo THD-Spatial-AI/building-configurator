@@ -141,7 +141,7 @@ export function StoreysModelled({
             onChange={(next) => onStoreysChange(Math.max(1, Math.round(next)))}
             min={1}
             max={limits?.maxStoreys}
-            maxReason={limits ? t('storeys.limit.storeys', { room: format(roomHeight, 1), height: eaves }) : undefined}
+            maxReason={limits ? t('storeys.limit.storeys', { min: format(MIN_STOREY_HEIGHT_M, 1), height: eaves }) : undefined}
             unit=""
             step={1}
             integer

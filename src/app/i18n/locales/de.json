@@ -748,7 +748,7 @@
     "roomHeightTip": "Die Höhe jedes Geschosses, von Boden zu Boden. Ein Geschoss mit eigener Höhe behält diese.",
     "useRoomHeight": "Raumhöhe verwenden",
     "limit": {
-      "storeys": "Ein weiteres Geschoss mit {room} m wäre höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist.",
+      "storeys": "Mit mehr Geschossen bliebe jedem weniger als {min} m der {height} m bis zur Traufe.",
       "height": "Ein höheres Geschoss würde die Geschosse höher als das 3D-Modell machen, das bis zur Traufe {height} m hoch ist."
     },
     "heightConflict": "Die Geschosse sind zusammen {total} m hoch, höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist. Verringern Sie die Geschosszahl oder eine Höhe.",

@@ -752,7 +752,7 @@
     "roomHeightTip": "La altura de cada planta, de suelo a suelo. Una planta con altura propia la conserva.",
     "useRoomHeight": "Usar la altura de sala",
     "limit": {
-      "storeys": "Otra planta de {room} m superaría el modelo 3D, que mide {height} m hasta el alero.",
+      "storeys": "Con más plantas, cada una tendría menos de {min} m de los {height} m hasta el alero.",
       "height": "Una planta más alta haría que las plantas superasen el modelo 3D, que mide {height} m hasta el alero."
     },
     "heightConflict": "Las plantas suman {total} m de altura, más que el modelo 3D, que mide {height} m hasta el alero. Reduzca el número de plantas o una altura.",

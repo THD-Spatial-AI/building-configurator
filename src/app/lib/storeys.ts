@@ -278,11 +278,27 @@ export function storeysTooTall(storeys: number, roomHeight: number, own: StoreyH
   return modelHeight !== undefined && tallerThanModel(modelHeight, storeyHeightList(storeys, roomHeight, own));
 }
 
+/** Down to the centimetre, so a height never exceeds the room it was cut from. */
+const floorToCm = (value: number) => Math.floor(value * 100 + 1e-6) / 100;
+
+/**
+ * The room height that fills the model to its eaves with this many storeys,
+ * the storeys with their own height keeping it; null where those leave no
+ * storey to share it or less than MIN_STOREY_HEIGHT_M each.
+ */
+export function eavesRoomHeight(modelHeight: number, storeys: number, own: StoreyHeights = {}): number | null {
+  const owned = Array.from({ length: Math.max(0, storeys) }, (_, i) => own[i + 1]).filter((h) => h > 0);
+  const shared = storeys - owned.length;
+  if (shared <= 0) return null;
+  const height = floorToCm((modelHeight - owned.reduce((a, b) => a + b, 0)) / shared);
+  return height >= MIN_STOREY_HEIGHT_M ? height : null;
+}
+
 /**
  * The most each input may reach before the storeys are taller than the model
- * to its eaves: the storey count at the room height, the room height of the
- * storeys without their own, and one storey's own height. Down to the
- * centimetre, so a limit reads as a height.
+ * to its eaves: the storey count while the room height filling the eaves stays
+ * at least MIN_STOREY_HEIGHT_M, the room height of the storeys without their
+ * own, and one storey's own height. Down to the centimetre.
  */
 export function heightLimits(modelHeight: number, storeys: number, roomHeight: number, own: StoreyHeights = {}): {
   maxStoreys: number;
@@ -294,11 +310,11 @@ export function heightLimits(modelHeight: number, storeys: number, roomHeight: n
   const room = modelHeight + HEIGHT_SLACK_M;
   const ownTotal = heights.reduce((sum, h, i) => sum + (own[i + 1] > 0 ? h : 0), 0);
   const shared = heights.filter((_, i) => !(own[i + 1] > 0)).length;
-  const cm = (value: number) => Math.floor(value * 100 + 1e-6) / 100;
+  const ownCount = heights.length - shared;
   return {
-    maxStoreys: storeys + Math.max(0, Math.floor((room - total) / Math.max(roomHeight, MIN_STOREY_HEIGHT_M))),
-    maxRoomHeight: shared > 0 ? cm((room - ownTotal) / shared) : roomHeight,
-    maxStoreyHeight: (storey) => cm(room - (total - (heights[storey - 1] ?? 0))),
+    maxStoreys: Math.max(storeys, ownCount + Math.floor((modelHeight - ownTotal) / MIN_STOREY_HEIGHT_M + 1e-6)),
+    maxRoomHeight: shared > 0 ? floorToCm((room - ownTotal) / shared) : roomHeight,
+    maxStoreyHeight: (storey) => floorToCm(room - (total - (heights[storey - 1] ?? 0))),
   };
 }
 
