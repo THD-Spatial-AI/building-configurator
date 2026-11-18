@@ -4,6 +4,19 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.18.1] - 2026-11-18
+
+### Changed
+
+- The Technologies tab opens with every card closed, each showing its summary. Clicking a header opens the card.
+- A closed PV card with no PV installed lists 0.0 kWp, 0 modules, 0 of the offered surfaces and an investment of 0.
+- `PvMode.onRemove` also fires after the `onToggle` that switches off the last surface with PV, so the host drops the PV technology and its card goes, as with other technologies. A building whose PV was just added, with no surface yet, keeps its card.
+- The energy grade options, each type's state in Advanced mode, the card header and the closed step name the refurbishment level by its variant number only: Existing state, Usual refurbishment, Advanced refurbishment. Descriptions ignis gives for some types, such as a construction standard with heating systems, are no longer shown; choosing a level changes only the envelope's U-values.
+
+### Fixed
+
+- The energy grade card's title is shown in full; a long summary beside it truncates instead.
+
 ## [0.18.0] - 2026-11-18
 
 Breaking: the view's own text is in English, German, Spanish, Dutch and Czech. French, Italian and Polish are gone, and `Language` is `'en' | 'de' | 'es' | 'nl' | 'cs'`. The `language` prop still takes any string; a removed code shows English.
