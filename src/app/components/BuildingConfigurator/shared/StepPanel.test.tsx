@@ -120,7 +120,7 @@ describe('a step worked through', () => {
       { label: 'Storeys', value: '4' },
       { label: 'Room height', value: '3.0 m' },
       { label: 'Attic', value: 'Not in the model' },
-      { label: 'Capacity', value: 'Default' },
+      { label: 'Occupants', value: 'Default' },
     ]);
     expect(occupancySummary(t, format, general).map((fact) => fact.label)).not.toContain('Attic');
   });
