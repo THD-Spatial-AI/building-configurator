@@ -110,7 +110,51 @@
     "hover": {
       "open": "Klik om dit vlak te openen"
     },
-    "uValueTip": "Hoeveel warmte per graad verschil tussen binnen en buiten door één m² van dit vlak gaat. De waarde komt uit TABULA voor het type, de bouwperiode en het renovatieniveau van dit gebouw; een lagere waarde verliest minder warmte, dus het gebouw heeft minder verwarming nodig."
+    "uValueTip": "Hoeveel warmte per graad verschil tussen binnen en buiten door één m² van dit vlak gaat. De waarde komt uit TABULA voor het type, de bouwperiode en het renovatieniveau van dit gebouw; een lagere waarde verliest minder warmte, dus het gebouw heeft minder verwarming nodig.",
+    "named": {
+      "wall": {
+        "north": "Noordwand",
+        "northeast": "Noordoostwand",
+        "east": "Oostwand",
+        "southeast": "Zuidoostwand",
+        "south": "Zuidwand",
+        "southwest": "Zuidwestwand",
+        "west": "Westwand",
+        "northwest": "Noordwestwand"
+      },
+      "roof": {
+        "north": "Noorddak",
+        "northeast": "Noordoostdak",
+        "east": "Oostdak",
+        "southeast": "Zuidoostdak",
+        "south": "Zuiddak",
+        "southwest": "Zuidwestdak",
+        "west": "Westdak",
+        "northwest": "Noordwestdak"
+      },
+      "window": {
+        "north": "Noordraam",
+        "northeast": "Noordoostraam",
+        "east": "Oostraam",
+        "southeast": "Zuidoostraam",
+        "south": "Zuidraam",
+        "southwest": "Zuidwestraam",
+        "west": "Westraam",
+        "northwest": "Noordwestraam"
+      },
+      "door": {
+        "north": "Noorddeur",
+        "northeast": "Noordoostdeur",
+        "east": "Oostdeur",
+        "southeast": "Zuidoostdeur",
+        "south": "Zuiddeur",
+        "southwest": "Zuidwestdeur",
+        "west": "Westdeur",
+        "northwest": "Noordwestdeur"
+      },
+      "flatRoof": "Plat dak",
+      "floor": "Vloer"
+    }
   },
   "profile": {
     "title": "Uurlijks belastingprofiel",

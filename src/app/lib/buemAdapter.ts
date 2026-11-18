@@ -22,6 +22,7 @@ import {
   type OutputLevel,
   type OutputProfile,
 } from '@/app/components/BuildingConfigurator/shared/buildingOptions';
+import type { Translate } from '@/app/i18n';
 import type { LoadDataPoint } from './loadProfile';
 import { meanStoreyHeight, modelledUnits, storeyHeightList, type StoreyDwellings, type StoreyHeights } from './storeys';
 import { REFURB_TYPES, type RefurbElementType, type Refurbishment } from './refurbishment';
@@ -179,6 +180,24 @@ export function readableSurfaceLabels(
     seen.set(name, n);
     return `${name} ${n}`;
   });
+}
+
+// The English names orientationLabel and readableSurfaceLabels write; keep the two in step.
+const GENERATED_LABEL = /^(?:(North|Northeast|East|Southeast|South|Southwest|West|Northwest) (wall|roof|window|door)|(Flat roof|Floor))(?: (\d+))?$/;
+
+/**
+ * A surface label in the user's language where readableSurfaceLabels wrote
+ * it, and as it is otherwise. The payload keeps the English name, so a
+ * building saved in one language reads in another.
+ */
+export function localSurfaceLabel(t: Translate, label: string): string {
+  const match = GENERATED_LABEL.exec(label);
+  if (!match) return label;
+  const [, face, type, plain, number] = match;
+  const name = face
+    ? t(`surface.named.${type}.${face.toLowerCase()}`)
+    : t(plain === 'Floor' ? 'surface.named.floor' : 'surface.named.flatRoof');
+  return number ? `${name} ${number}` : name;
 }
 
 /**

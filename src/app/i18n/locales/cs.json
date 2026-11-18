@@ -112,7 +112,51 @@
     "hover": {
       "open": "Kliknutím otevřete tuto plochu"
     },
-    "uValueTip": "Kolik tepla projde jedním m² této plochy na každý stupeň rozdílu mezi vnitřkem a venkem. Hodnota pochází z TABULA pro typ, stáří a úroveň renovace této budovy; nižší hodnota znamená menší ztráty tepla, takže budova potřebuje méně vytápění."
+    "uValueTip": "Kolik tepla projde jedním m² této plochy na každý stupeň rozdílu mezi vnitřkem a venkem. Hodnota pochází z TABULA pro typ, stáří a úroveň renovace této budovy; nižší hodnota znamená menší ztráty tepla, takže budova potřebuje méně vytápění.",
+    "named": {
+      "wall": {
+        "north": "Severní stěna",
+        "northeast": "Severovýchodní stěna",
+        "east": "Východní stěna",
+        "southeast": "Jihovýchodní stěna",
+        "south": "Jižní stěna",
+        "southwest": "Jihozápadní stěna",
+        "west": "Západní stěna",
+        "northwest": "Severozápadní stěna"
+      },
+      "roof": {
+        "north": "Severní střecha",
+        "northeast": "Severovýchodní střecha",
+        "east": "Východní střecha",
+        "southeast": "Jihovýchodní střecha",
+        "south": "Jižní střecha",
+        "southwest": "Jihozápadní střecha",
+        "west": "Západní střecha",
+        "northwest": "Severozápadní střecha"
+      },
+      "window": {
+        "north": "Severní okno",
+        "northeast": "Severovýchodní okno",
+        "east": "Východní okno",
+        "southeast": "Jihovýchodní okno",
+        "south": "Jižní okno",
+        "southwest": "Jihozápadní okno",
+        "west": "Západní okno",
+        "northwest": "Severozápadní okno"
+      },
+      "door": {
+        "north": "Severní dveře",
+        "northeast": "Severovýchodní dveře",
+        "east": "Východní dveře",
+        "southeast": "Jihovýchodní dveře",
+        "south": "Jižní dveře",
+        "southwest": "Jihozápadní dveře",
+        "west": "Západní dveře",
+        "northwest": "Severozápadní dveře"
+      },
+      "flatRoof": "Plochá střecha",
+      "floor": "Podlaha"
+    }
   },
   "profile": {
     "title": "Hodinový profil zatížení",
