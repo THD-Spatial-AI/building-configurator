@@ -111,7 +111,51 @@
     "hover": {
       "open": "Cliquez pour ouvrir cette surface"
     },
-    "uValueTip": "La chaleur qui traverse un m² de cette surface par degré d'écart entre l'intérieur et l'extérieur. Elle provient de TABULA pour le type, l'âge et le niveau de rénovation de ce bâtiment ; une valeur plus basse perd moins de chaleur, le bâtiment a donc besoin de moins de chauffage."
+    "uValueTip": "La chaleur qui traverse un m² de cette surface par degré d'écart entre l'intérieur et l'extérieur. Elle provient de TABULA pour le type, l'âge et le niveau de rénovation de ce bâtiment ; une valeur plus basse perd moins de chaleur, le bâtiment a donc besoin de moins de chauffage.",
+    "named": {
+      "wall": {
+        "north": "Mur nord",
+        "northeast": "Mur nord-est",
+        "east": "Mur est",
+        "southeast": "Mur sud-est",
+        "south": "Mur sud",
+        "southwest": "Mur sud-ouest",
+        "west": "Mur ouest",
+        "northwest": "Mur nord-ouest"
+      },
+      "roof": {
+        "north": "Toiture nord",
+        "northeast": "Toiture nord-est",
+        "east": "Toiture est",
+        "southeast": "Toiture sud-est",
+        "south": "Toiture sud",
+        "southwest": "Toiture sud-ouest",
+        "west": "Toiture ouest",
+        "northwest": "Toiture nord-ouest"
+      },
+      "window": {
+        "north": "Fenêtre nord",
+        "northeast": "Fenêtre nord-est",
+        "east": "Fenêtre est",
+        "southeast": "Fenêtre sud-est",
+        "south": "Fenêtre sud",
+        "southwest": "Fenêtre sud-ouest",
+        "west": "Fenêtre ouest",
+        "northwest": "Fenêtre nord-ouest"
+      },
+      "door": {
+        "north": "Porte nord",
+        "northeast": "Porte nord-est",
+        "east": "Porte est",
+        "southeast": "Porte sud-est",
+        "south": "Porte sud",
+        "southwest": "Porte sud-ouest",
+        "west": "Porte ouest",
+        "northwest": "Porte nord-ouest"
+      },
+      "flatRoof": "Toiture plate",
+      "floor": "Plancher"
+    }
   },
   "profile": {
     "title": "Profil de charge horaire",

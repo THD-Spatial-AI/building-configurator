@@ -110,7 +110,51 @@
     "hover": {
       "open": "Fai clic per aprire questa superficie"
     },
-    "uValueTip": "Quanto calore attraversa un m² di questa superficie per ogni grado di differenza tra interno ed esterno. Proviene da TABULA per tipo, età e livello di riqualificazione di questo edificio; un valore più basso disperde meno calore, quindi l'edificio richiede meno riscaldamento."
+    "uValueTip": "Quanto calore attraversa un m² di questa superficie per ogni grado di differenza tra interno ed esterno. Proviene da TABULA per tipo, età e livello di riqualificazione di questo edificio; un valore più basso disperde meno calore, quindi l'edificio richiede meno riscaldamento.",
+    "named": {
+      "wall": {
+        "north": "Parete nord",
+        "northeast": "Parete nord-est",
+        "east": "Parete est",
+        "southeast": "Parete sud-est",
+        "south": "Parete sud",
+        "southwest": "Parete sud-ovest",
+        "west": "Parete ovest",
+        "northwest": "Parete nord-ovest"
+      },
+      "roof": {
+        "north": "Tetto nord",
+        "northeast": "Tetto nord-est",
+        "east": "Tetto est",
+        "southeast": "Tetto sud-est",
+        "south": "Tetto sud",
+        "southwest": "Tetto sud-ovest",
+        "west": "Tetto ovest",
+        "northwest": "Tetto nord-ovest"
+      },
+      "window": {
+        "north": "Finestra nord",
+        "northeast": "Finestra nord-est",
+        "east": "Finestra est",
+        "southeast": "Finestra sud-est",
+        "south": "Finestra sud",
+        "southwest": "Finestra sud-ovest",
+        "west": "Finestra ovest",
+        "northwest": "Finestra nord-ovest"
+      },
+      "door": {
+        "north": "Porta nord",
+        "northeast": "Porta nord-est",
+        "east": "Porta est",
+        "southeast": "Porta sud-est",
+        "south": "Porta sud",
+        "southwest": "Porta sud-ovest",
+        "west": "Porta ovest",
+        "northwest": "Porta nord-ovest"
+      },
+      "flatRoof": "Tetto piano",
+      "floor": "Pavimento"
+    }
   },
   "profile": {
     "title": "Profilo di carico orario",

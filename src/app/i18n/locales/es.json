@@ -111,7 +111,51 @@
     "hover": {
       "open": "Haga clic para abrir esta superficie"
     },
-    "uValueTip": "Cuánto calor atraviesa un m² de esta superficie por cada grado de diferencia entre el interior y el exterior. Procede de TABULA para el tipo, la antigüedad y el nivel de rehabilitación de este edificio; un valor más bajo pierde menos calor, así que el edificio necesita menos calefacción."
+    "uValueTip": "Cuánto calor atraviesa un m² de esta superficie por cada grado de diferencia entre el interior y el exterior. Procede de TABULA para el tipo, la antigüedad y el nivel de rehabilitación de este edificio; un valor más bajo pierde menos calor, así que el edificio necesita menos calefacción.",
+    "named": {
+      "wall": {
+        "north": "Muro norte",
+        "northeast": "Muro noreste",
+        "east": "Muro este",
+        "southeast": "Muro sureste",
+        "south": "Muro sur",
+        "southwest": "Muro suroeste",
+        "west": "Muro oeste",
+        "northwest": "Muro noroeste"
+      },
+      "roof": {
+        "north": "Cubierta norte",
+        "northeast": "Cubierta noreste",
+        "east": "Cubierta este",
+        "southeast": "Cubierta sureste",
+        "south": "Cubierta sur",
+        "southwest": "Cubierta suroeste",
+        "west": "Cubierta oeste",
+        "northwest": "Cubierta noroeste"
+      },
+      "window": {
+        "north": "Ventana norte",
+        "northeast": "Ventana noreste",
+        "east": "Ventana este",
+        "southeast": "Ventana sureste",
+        "south": "Ventana sur",
+        "southwest": "Ventana suroeste",
+        "west": "Ventana oeste",
+        "northwest": "Ventana noroeste"
+      },
+      "door": {
+        "north": "Puerta norte",
+        "northeast": "Puerta noreste",
+        "east": "Puerta este",
+        "southeast": "Puerta sureste",
+        "south": "Puerta sur",
+        "southwest": "Puerta suroeste",
+        "west": "Puerta oeste",
+        "northwest": "Puerta noroeste"
+      },
+      "flatRoof": "Cubierta plana",
+      "floor": "Suelo"
+    }
   },
   "profile": {
     "title": "Perfil de carga horario",

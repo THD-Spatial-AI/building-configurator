@@ -8,7 +8,8 @@ import type { CSSProperties } from 'react';
 import { MousePointerClick } from '@/app/components/icons';
 import { cn } from '@/lib/utils';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { useFormatNumber, useT } from '../../i18n';
+import { useFormatNumber, useT, type Translate } from '../../i18n';
+import { localSurfaceLabel } from '../../lib/buemAdapter';
 import { pvGeometry } from '../../lib/pvSurfaces';
 import { SURFACE_COLOR } from '../../lib/surfaceMesh';
 import type { PvModule, PvMounting, PvOrientation } from '../../lib/pvLayout';
@@ -102,9 +103,10 @@ export function surfaceProduct(pv: PvMode, surfaceId: string): TechnologyProduct
   return pv.products?.[id] ?? pv.catalogue?.find((product) => product.id === id);
 }
 
-/** The element's own label, else the host's label, else the id. */
-export function surfaceName(id: string, elements: Record<string, BuildingElement>, surfaces: Record<string, PvSurface>): string {
-  return elements[id]?.label ?? surfaces[id]?.label ?? id;
+/** The element's own label in the user's language, else the host's label, else the id. */
+export function surfaceName(t: Translate, id: string, elements: Record<string, BuildingElement>, surfaces: Record<string, PvSurface>): string {
+  const own = elements[id]?.label;
+  return own ? localSurfaceLabel(t, own) : surfaces[id]?.label ?? id;
 }
 
 /** The compass point of an azimuth, as a message key under surface.compass. */
@@ -183,7 +185,7 @@ export function PvHoverCard({ surfaceId, surface, elements, at }: {
       className="pointer-events-none fixed z-30 flex flex-col gap-0.5 rounded-md border border-border bg-card px-2.5 py-2 text-[12px] shadow-md"
       style={{ left: at.x + 14, top: at.y + 14 }}
     >
-      <span className="font-semibold text-foreground">{surfaceName(surfaceId, elements, { [surfaceId]: surface })}</span>
+      <span className="font-semibold text-foreground">{surfaceName(t, surfaceId, elements, { [surfaceId]: surface })}</span>
       <span className="text-muted-foreground">
         <GeometryLine id={surfaceId} elements={elements} surface={surface} />
         {pvGeometry(surfaceId, elements, surface) ? ' · ' : ''}{t(`pv.state.${surface.state}`)}

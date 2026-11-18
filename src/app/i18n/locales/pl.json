@@ -112,7 +112,51 @@
     "hover": {
       "open": "Kliknij, aby otworzyć tę powierzchnię"
     },
-    "uValueTip": "Ile ciepła przechodzi przez jeden m² tej powierzchni na każdy stopień różnicy między wnętrzem a otoczeniem. Wartość pochodzi z TABULA dla typu, wieku i poziomu modernizacji tego budynku; niższa wartość oznacza mniejsze straty ciepła, więc budynek potrzebuje mniej ogrzewania."
+    "uValueTip": "Ile ciepła przechodzi przez jeden m² tej powierzchni na każdy stopień różnicy między wnętrzem a otoczeniem. Wartość pochodzi z TABULA dla typu, wieku i poziomu modernizacji tego budynku; niższa wartość oznacza mniejsze straty ciepła, więc budynek potrzebuje mniej ogrzewania.",
+    "named": {
+      "wall": {
+        "north": "Ściana północna",
+        "northeast": "Ściana północno-wschodnia",
+        "east": "Ściana wschodnia",
+        "southeast": "Ściana południowo-wschodnia",
+        "south": "Ściana południowa",
+        "southwest": "Ściana południowo-zachodnia",
+        "west": "Ściana zachodnia",
+        "northwest": "Ściana północno-zachodnia"
+      },
+      "roof": {
+        "north": "Dach północny",
+        "northeast": "Dach północno-wschodni",
+        "east": "Dach wschodni",
+        "southeast": "Dach południowo-wschodni",
+        "south": "Dach południowy",
+        "southwest": "Dach południowo-zachodni",
+        "west": "Dach zachodni",
+        "northwest": "Dach północno-zachodni"
+      },
+      "window": {
+        "north": "Okno północne",
+        "northeast": "Okno północno-wschodnie",
+        "east": "Okno wschodnie",
+        "southeast": "Okno południowo-wschodnie",
+        "south": "Okno południowe",
+        "southwest": "Okno południowo-zachodnie",
+        "west": "Okno zachodnie",
+        "northwest": "Okno północno-zachodnie"
+      },
+      "door": {
+        "north": "Drzwi północne",
+        "northeast": "Drzwi północno-wschodnie",
+        "east": "Drzwi wschodnie",
+        "southeast": "Drzwi południowo-wschodnie",
+        "south": "Drzwi południowe",
+        "southwest": "Drzwi południowo-zachodnie",
+        "west": "Drzwi zachodnie",
+        "northwest": "Drzwi północno-zachodnie"
+      },
+      "flatRoof": "Dach płaski",
+      "floor": "Podłoga"
+    }
   },
   "profile": {
     "title": "Godzinowy profil obciążenia",

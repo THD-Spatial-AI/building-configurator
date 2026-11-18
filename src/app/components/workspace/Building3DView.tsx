@@ -29,7 +29,7 @@ import { PvSurfaceSection } from './PvSurfaceSection';
 import type { Technologies } from './TechnologyCards';
 import { StoreysModelled, pickWithAttic } from './StoreysModelled';
 import { atticFloorArea, dwellingsTotal, eavesHeight, hasAttic, storeyHeightList, storeyShares } from '../../lib/storeys';
-import type { BuildingState } from '../../lib/buemAdapter';
+import { localSurfaceLabel, type BuildingState } from '../../lib/buemAdapter';
 import type { ConfiguratorServices } from '../../lib/services';
 import type { BuildingDemandProfile } from '../../lib/demandProfile';
 import type { RunContext } from '../../lib/buemRun';
@@ -408,7 +408,7 @@ function BuildingView({
     </div>
   ) : null;
   const pickable = useMemo(() => [
-    ...Object.values(elements).map((element) => ({ id: element.id, label: element.label, type: t(`surface.type.${element.type}`), group: element.type })),
+    ...Object.values(elements).map((element) => ({ id: element.id, label: localSurfaceLabel(t, element.label), type: t(`surface.type.${element.type}`), group: element.type })),
     ...Object.entries(pv?.surfaces ?? {})
       .filter(([id]) => !elements[id])
       .map(([id, surface]) => ({ id, label: surface.label ?? id })),
@@ -672,7 +672,7 @@ function BuildingView({
             {onTech && unfittedPv.length > 0 && (
               <div role="alert" className="flex max-w-[360px] items-start gap-1.5 rounded-md border border-destructive/30 bg-card/95 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-destructive shadow-sm">
                 <AlertTriangle className="mt-px size-3.5 shrink-0" />
-                {t('pv.noFitOn', { count: unfittedPv.length, surfaces: unfittedPv.map((id) => surfaceName(id, elements, pv?.surfaces ?? {})).join(', ') })}
+                {t('pv.noFitOn', { count: unfittedPv.length, surfaces: unfittedPv.map((id) => surfaceName(t, id, elements, pv?.surfaces ?? {})).join(', ') })}
               </div>
             )}
             {!onTech && surfaces.length > 0 && !detached && <ModelLegend pv={false} />}

@@ -80,7 +80,7 @@ function SurfaceList({ pv, available, elements, layouts, onSelect }: {
   const [held, setHeld] = useState<string[] | null>(null);
   const sorted = (group: [string, PvSurface][]) => STATE_ORDER.flatMap((state) => group
     .filter(([, surface]) => surface.state === state)
-    .sort(([a], [b]) => surfaceName(a, elements, pv.surfaces).localeCompare(surfaceName(b, elements, pv.surfaces), undefined, { numeric: true })));
+    .sort(([a], [b]) => surfaceName(t, a, elements, pv.surfaces).localeCompare(surfaceName(t, b, elements, pv.surfaces), undefined, { numeric: true })));
   const ordered = (group: [string, PvSurface][]) => {
     const byId = new Map(group);
     return heldOrder(sorted(group).map(([id]) => id), held).map((id) => [id, byId.get(id)!] as [string, PvSurface]);
@@ -129,7 +129,7 @@ function SurfaceRows({ entries, pv, elements, layouts, onSelect }: {
   return (
     <ul className="flex flex-col gap-1.5">
       {entries.map(([id, surface]) => {
-        const name = surfaceName(id, elements, pv.surfaces);
+        const name = surfaceName(t, id, elements, pv.surfaces);
         const installed = surface.state === 'installed';
         const kwp = layouts[id]?.kwp ?? surface.maxKwp;
         return (

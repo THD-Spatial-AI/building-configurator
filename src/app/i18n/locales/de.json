@@ -110,7 +110,51 @@
     "hover": {
       "open": "Klicken, um diese Fläche zu öffnen"
     },
-    "uValueTip": "Wie viel Wärme pro Grad Temperaturunterschied zwischen innen und außen durch einen m² dieser Fläche geht. Der Wert stammt aus TABULA für Typ, Baujahr und Sanierungsstufe dieses Gebäudes; ein niedrigerer Wert verliert weniger Wärme, das Gebäude braucht also weniger Heizung."
+    "uValueTip": "Wie viel Wärme pro Grad Temperaturunterschied zwischen innen und außen durch einen m² dieser Fläche geht. Der Wert stammt aus TABULA für Typ, Baujahr und Sanierungsstufe dieses Gebäudes; ein niedrigerer Wert verliert weniger Wärme, das Gebäude braucht also weniger Heizung.",
+    "named": {
+      "wall": {
+        "north": "Nordwand",
+        "northeast": "Nordostwand",
+        "east": "Ostwand",
+        "southeast": "Südostwand",
+        "south": "Südwand",
+        "southwest": "Südwestwand",
+        "west": "Westwand",
+        "northwest": "Nordwestwand"
+      },
+      "roof": {
+        "north": "Norddach",
+        "northeast": "Nordostdach",
+        "east": "Ostdach",
+        "southeast": "Südostdach",
+        "south": "Süddach",
+        "southwest": "Südwestdach",
+        "west": "Westdach",
+        "northwest": "Nordwestdach"
+      },
+      "window": {
+        "north": "Nordfenster",
+        "northeast": "Nordostfenster",
+        "east": "Ostfenster",
+        "southeast": "Südostfenster",
+        "south": "Südfenster",
+        "southwest": "Südwestfenster",
+        "west": "Westfenster",
+        "northwest": "Nordwestfenster"
+      },
+      "door": {
+        "north": "Nordtür",
+        "northeast": "Nordosttür",
+        "east": "Osttür",
+        "southeast": "Südosttür",
+        "south": "Südtür",
+        "southwest": "Südwesttür",
+        "west": "Westtür",
+        "northwest": "Nordwesttür"
+      },
+      "flatRoof": "Flachdach",
+      "floor": "Boden"
+    }
   },
   "profile": {
     "title": "Stündliches Lastprofil",

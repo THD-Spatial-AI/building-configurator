@@ -110,7 +110,51 @@
     "hover": {
       "open": "Click to open this surface"
     },
-    "uValueTip": "How much heat passes through one m² of this surface per degree of difference between inside and outside. It comes from TABULA for this building's type, age and refurbishment level; a lower value loses less heat, so the building needs less heating."
+    "uValueTip": "How much heat passes through one m² of this surface per degree of difference between inside and outside. It comes from TABULA for this building's type, age and refurbishment level; a lower value loses less heat, so the building needs less heating.",
+    "named": {
+      "wall": {
+        "north": "North wall",
+        "northeast": "Northeast wall",
+        "east": "East wall",
+        "southeast": "Southeast wall",
+        "south": "South wall",
+        "southwest": "Southwest wall",
+        "west": "West wall",
+        "northwest": "Northwest wall"
+      },
+      "roof": {
+        "north": "North roof",
+        "northeast": "Northeast roof",
+        "east": "East roof",
+        "southeast": "Southeast roof",
+        "south": "South roof",
+        "southwest": "Southwest roof",
+        "west": "West roof",
+        "northwest": "Northwest roof"
+      },
+      "window": {
+        "north": "North window",
+        "northeast": "Northeast window",
+        "east": "East window",
+        "southeast": "Southeast window",
+        "south": "South window",
+        "southwest": "Southwest window",
+        "west": "West window",
+        "northwest": "Northwest window"
+      },
+      "door": {
+        "north": "North door",
+        "northeast": "Northeast door",
+        "east": "East door",
+        "southeast": "Southeast door",
+        "south": "South door",
+        "southwest": "Southwest door",
+        "west": "West door",
+        "northwest": "Northwest door"
+      },
+      "flatRoof": "Flat roof",
+      "floor": "Floor"
+    }
   },
   "profile": {
     "title": "Hourly load profile",
