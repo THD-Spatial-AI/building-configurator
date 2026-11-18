@@ -30,14 +30,12 @@ export const TABULA_VARIANT_NAMES = ['Existing state', 'Usual refurbishment', 'A
 const VARIANT_KEYS = ['existing', 'usual', 'advanced'];
 
 /**
- * A variant's name in the view's language: TABULA's name for its number
- * translated, or, with `specific`, the description ignis gives (for example a
- * construction standard and heating system) as it is.
+ * A variant's name in the view's language: TABULA's name for its number, the
+ * code's last part, translated. A number past 3 keeps the label ignis gives.
  */
-export function variantName(t: Translate, label: string, number: number, specific = true): string {
+export function variantName(t: Translate, label: string, number: number): string {
   const key = VARIANT_KEYS[number - 1];
-  if (!key || (specific && TABULA_VARIANT_NAMES[number - 1] !== label)) return label;
-  return t(`insulation.variant.full.${key}`);
+  return key ? t(`insulation.variant.full.${key}`) : label;
 }
 
 /** U-values closer than this count as equal; TABULA gives two decimals. */

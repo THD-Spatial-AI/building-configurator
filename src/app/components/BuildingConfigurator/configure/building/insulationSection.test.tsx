@@ -37,16 +37,12 @@ describe('the state names of a type ignis describes by its standard', () => {
     <InsulationSection {...insulation} elements={elements} levels={levels} general={{}} setGen={() => {}} mode={mode} />,
   );
 
-  it('names each option by its TABULA state in Simple, with the description as its tooltip', () => {
-    const html = view('simple');
-    expect(html).toContain(`title="${minimum}"`);
+  it.each(['simple', 'advanced'] as const)('names each option by its TABULA state in %s, never by the description', (mode) => {
+    const html = view(mode);
     expect(html).toContain('<span>Existing state</span>');
     expect(html).toContain('<span>Advanced refurbishment</span>');
-    expect(html).not.toContain(`<span>${minimum}</span>`);
-  });
-
-  it('shows the description itself in Advanced', () => {
-    expect(view('advanced')).toContain(`<span>${minimum}</span>`);
+    expect(html).not.toContain(minimum);
+    expect(html).not.toContain(passive);
   });
 
   it('names the state, not the description, in the header and the closed step', () => {
