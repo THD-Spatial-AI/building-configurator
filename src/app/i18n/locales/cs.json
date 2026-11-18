@@ -238,7 +238,7 @@
     },
     "geometryFlat": "rovná · {area} m²",
     "overview": {
-      "title": "FV na této budově"
+      "title": "Fotovoltaická výroba"
     },
     "surfaces": {
       "toggle": "{name} ({installed} z {total} s FV)",
@@ -348,18 +348,13 @@
     "remove": "Odebrat {title}",
     "inFocus": "Vybraná",
     "product": "Produkt",
+    "investment": "Investice",
     "add": "Přidat technologii",
     "count": {
       "one": "{count} technologie",
       "few": "{count} technologie",
       "many": "{count} technologie",
       "other": "{count} technologií"
-    },
-    "pvSurfaces": {
-      "one": "{count} plocha",
-      "few": "{count} plochy",
-      "many": "{count} ploch",
-      "other": "{count} plochy"
     },
     "total": {
       "label": "Odhadované celkové náklady na technologie",
@@ -451,7 +446,7 @@
     "default": "Výchozí",
     "useDefault": "Použít výchozí",
     "capacity": {
-      "label": "Kapacita",
+      "label": "Počet osob",
       "placeholder": "Odvozeno z podlahové plochy.",
       "tip": "Počet osob. Prázdné pole použije typický počet pro velikost a typ budovy."
     },
@@ -812,12 +807,13 @@
     "roomHeightTip": "Výška každého podlaží, od podlahy k podlaze. Podlaží s vlastní výškou si ji ponechá.",
     "useRoomHeight": "Použít výšku místnosti",
     "limit": {
-      "storeys": "Další podlaží o výšce {room} m by bylo vyšší než 3D model, který měří {height} m k okapu.",
+      "storeys": "Při více podlažích by na každé zbylo méně než {min} m z {height} m k okapu.",
       "height": "Vyšší podlaží by udělalo podlaží vyšší než 3D model, který měří {height} m k okapu."
     },
     "heightConflict": "Podlaží jsou dohromady vysoká {total} m, více než 3D model, který měří {height} m k okapu. Snižte počet podlaží nebo některou výšku.",
     "attic": {
       "label": "Podkroví",
+      "notInModel": "Mimo model",
       "hint": "Prostor pod šikmou střechou, nad okapem. Při vynechání střecha nepatří k vytápěné budově a strop pod ní ztrácí teplo do studeného podkroví.",
       "floorArea": "Plocha podkroví",
       "noArea": "Nezapočteno",

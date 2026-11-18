@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { atticFloorArea, dwellingsTotal, hasAttic, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
+import { atticFloorArea, dwellingsTotal, hasAttic, eavesRoomHeight, heightLimits, meanStoreyHeight, modelledDwellings, storeyAt, storeyHeightList, tallerThanModel, storeyBands, storeyLines, storeyParts, storeyShares } from './storeys';
 import type { SurfacePolygon } from './surfaceMesh';
 import type { BuildingElement } from '../components/BuildingConfigurator/configure/model/buildingElements';
 
@@ -169,10 +169,18 @@ describe('dwellingsTotal', () => {
 });
 
 describe('the model\'s height binds storeys and their heights', () => {
-  it('allows another storey only while it fits at the room height, so a lower room height allows more', () => {
-    expect(heightLimits(4, 1, 2.5).maxStoreys).toBe(1);
-    expect(heightLimits(4, 1, 2).maxStoreys).toBe(2);
-    expect(heightLimits(10, 3, 2.5).maxStoreys).toBe(4);
+  it('allows storeys while the room height filling the eaves stays at least the lowest storey height', () => {
+    expect(heightLimits(4, 1, 2.5).maxStoreys).toBe(8);
+    expect(heightLimits(10, 3, 2.5, { 1: 4 }).maxStoreys).toBe(13);
+  });
+
+  it('fills the eaves with the storeys sharing the room height, those with their own keeping it', () => {
+    expect(eavesRoomHeight(7.5, 3)).toBe(2.5);
+    expect(eavesRoomHeight(7.5, 2)).toBe(3.75);
+    expect(eavesRoomHeight(10, 3)).toBe(3.33);
+    expect(eavesRoomHeight(10, 3, { 1: 4 })).toBe(3);
+    expect(eavesRoomHeight(10, 1, { 1: 4 })).toBeNull();
+    expect(eavesRoomHeight(1, 3)).toBeNull();
   });
 
   it('caps the shared room height and a storey\'s own height at what the rest leave', () => {

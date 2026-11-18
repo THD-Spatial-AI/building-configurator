@@ -236,7 +236,7 @@
     },
     "geometryFlat": "flach · {area} m²",
     "overview": {
-      "title": "PV auf diesem Gebäude"
+      "title": "PV-Versorgung"
     },
     "surfaces": {
       "toggle": "{name} ({installed} von {total} mit PV)",
@@ -340,14 +340,11 @@
     "remove": "{title} entfernen",
     "inFocus": "Im Fokus",
     "product": "Produkt",
+    "investment": "Investition",
     "add": "Technologie hinzufügen",
     "count": {
       "one": "{count} Technologie",
       "other": "{count} Technologien"
-    },
-    "pvSurfaces": {
-      "one": "{count} Fläche",
-      "other": "{count} Flächen"
     },
     "total": {
       "label": "Geschätzte Gesamtkosten der Technologien",
@@ -792,12 +789,13 @@
     "roomHeightTip": "Die Höhe jedes Geschosses, von Boden zu Boden. Ein Geschoss mit eigener Höhe behält diese.",
     "useRoomHeight": "Raumhöhe verwenden",
     "limit": {
-      "storeys": "Ein weiteres Geschoss mit {room} m wäre höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist.",
+      "storeys": "Mit mehr Geschossen bliebe jedem weniger als {min} m der {height} m bis zur Traufe.",
       "height": "Ein höheres Geschoss würde die Geschosse höher als das 3D-Modell machen, das bis zur Traufe {height} m hoch ist."
     },
     "heightConflict": "Die Geschosse sind zusammen {total} m hoch, höher als das 3D-Modell, das bis zur Traufe {height} m hoch ist. Verringern Sie die Geschosszahl oder eine Höhe.",
     "attic": {
       "label": "Dachgeschoss",
+      "notInModel": "Nicht im Modell",
       "hint": "Der Raum unter dem geneigten Dach, oberhalb der Traufe. Weggelassen gehört das Dach nicht mehr zum beheizten Gebäude, und die Decke darunter gibt Wärme an das kalte Dachgeschoss ab.",
       "floorArea": "Fläche im Dachgeschoss",
       "noArea": "Nicht gezählt",

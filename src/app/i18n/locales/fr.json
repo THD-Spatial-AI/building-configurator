@@ -237,7 +237,7 @@
     },
     "geometryFlat": "plat · {area} m²",
     "overview": {
-      "title": "PV sur ce bâtiment"
+      "title": "Production photovoltaïque"
     },
     "surfaces": {
       "toggle": "{name} ({installed} sur {total} avec PV)",
@@ -341,14 +341,11 @@
     "remove": "Supprimer {title}",
     "inFocus": "Sélectionné",
     "product": "Produit",
+    "investment": "Investissement",
     "add": "Ajouter une technologie",
     "count": {
       "one": "{count} technologie",
       "other": "{count} technologies"
-    },
-    "pvSurfaces": {
-      "one": "{count} surface",
-      "other": "{count} surfaces"
     },
     "total": {
       "label": "Coût total estimé des technologies",
@@ -438,7 +435,7 @@
     "default": "Par défaut",
     "useDefault": "Valeur par défaut",
     "capacity": {
-      "label": "Capacité",
+      "label": "Nombre d’occupants",
       "placeholder": "Déduite de la surface.",
       "tip": "Nombre de personnes. Laissé vide, un nombre typique pour la taille et le type du bâtiment est utilisé."
     },
@@ -796,12 +793,13 @@
     "roomHeightTip": "La hauteur de chaque étage, de plancher à plancher. Un étage doté de sa propre hauteur la conserve.",
     "useRoomHeight": "Utiliser la hauteur sous plafond",
     "limit": {
-      "storeys": "Un étage de plus à {room} m dépasserait le modèle 3D, qui mesure {height} m jusqu'à l'égout.",
+      "storeys": "Avec plus d'étages, chacun aurait moins de {min} m sur les {height} m jusqu'à l'égout.",
       "height": "Un étage plus haut rendrait les étages plus hauts que le modèle 3D, qui mesure {height} m jusqu'à l'égout."
     },
     "heightConflict": "Les étages mesurent ensemble {total} m, plus que le modèle 3D, qui mesure {height} m jusqu'à l'égout. Réduisez le nombre d'étages ou une hauteur.",
     "attic": {
       "label": "Combles",
+      "notInModel": "Hors du modèle",
       "hint": "L'espace sous le toit en pente, au-dessus de l'égout. Retirés, le toit quitte le bâtiment chauffé et le plafond en dessous perd de la chaleur vers les combles froids.",
       "floorArea": "Surface des combles",
       "noArea": "Non comptée",

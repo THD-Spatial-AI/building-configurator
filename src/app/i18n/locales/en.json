@@ -236,7 +236,7 @@
     },
     "geometryFlat": "flat · {area} m²",
     "overview": {
-      "title": "PV on this building"
+      "title": "Photovoltaic supply"
     },
     "surfaces": {
       "toggle": "{name} ({installed} of {total} with PV)",
@@ -340,14 +340,11 @@
     "remove": "Remove {title}",
     "inFocus": "In focus",
     "product": "Product",
+    "investment": "Investment",
     "add": "Add a technology",
     "count": {
       "one": "{count} technology",
       "other": "{count} technologies"
-    },
-    "pvSurfaces": {
-      "one": "{count} surface",
-      "other": "{count} surfaces"
     },
     "total": {
       "label": "Estimated total cost of technologies",
@@ -437,7 +434,7 @@
     "default": "Default",
     "useDefault": "Use default",
     "capacity": {
-      "label": "Capacity",
+      "label": "Occupants",
       "placeholder": "Derived from the floor area.",
       "tip": "Number of people. Left empty, a typical number for the building's size and type is used."
     },
@@ -792,12 +789,13 @@
     "roomHeightTip": "The height of each storey, floor to floor. A storey given its own height keeps it.",
     "useRoomHeight": "Use room height",
     "limit": {
-      "storeys": "Another storey at {room} m would be taller than the 3D model, which is {height} m to the eaves.",
+      "storeys": "More storeys would leave each less than {min} m of the {height} m to the eaves.",
       "height": "A taller storey would make the storeys taller than the 3D model, which is {height} m to the eaves."
     },
     "heightConflict": "The storeys are {total} m tall together, taller than the 3D model, which is {height} m to the eaves. Lower the storey count or a height.",
     "attic": {
       "label": "Attic",
+      "notInModel": "Not in the model",
       "hint": "The space under the pitched roof, above the eaves. Left out, the roof leaves the heated building and the ceiling below it loses heat to the cold attic.",
       "floorArea": "Attic floor area",
       "noArea": "Not counted",

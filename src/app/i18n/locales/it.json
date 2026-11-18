@@ -236,7 +236,7 @@
     },
     "geometryFlat": "piano · {area} m²",
     "overview": {
-      "title": "FV su questo edificio"
+      "title": "Produzione fotovoltaica"
     },
     "surfaces": {
       "toggle": "{name} ({installed} di {total} con FV)",
@@ -340,14 +340,11 @@
     "remove": "Rimuovi {title}",
     "inFocus": "In primo piano",
     "product": "Prodotto",
+    "investment": "Investimento",
     "add": "Aggiungi una tecnologia",
     "count": {
       "one": "{count} tecnologia",
       "other": "{count} tecnologie"
-    },
-    "pvSurfaces": {
-      "one": "{count} superficie",
-      "other": "{count} superfici"
     },
     "total": {
       "label": "Costo totale stimato delle tecnologie",
@@ -437,7 +434,7 @@
     "default": "Predefinito",
     "useDefault": "Usa predefinito",
     "capacity": {
-      "label": "Capienza",
+      "label": "Numero di occupanti",
       "placeholder": "Ricavata dalla superficie.",
       "tip": "Numero di persone. Se vuoto, si usa un numero tipico per dimensione e tipo dell'edificio."
     },
@@ -792,12 +789,13 @@
     "roomHeightTip": "L'altezza di ogni piano, da pavimento a pavimento. Un piano con un'altezza propria la mantiene.",
     "useRoomHeight": "Usa l'altezza dei locali",
     "limit": {
-      "storeys": "Un altro piano di {room} m sarebbe più alto del modello 3D, che misura {height} m fino alla gronda.",
+      "storeys": "Con più piani, ognuno avrebbe meno di {min} m dei {height} m fino alla gronda.",
       "height": "Un piano più alto renderebbe i piani più alti del modello 3D, che misura {height} m fino alla gronda."
     },
     "heightConflict": "I piani sono alti {total} m in tutto, più del modello 3D, che misura {height} m fino alla gronda. Riduci il numero di piani o un'altezza.",
     "attic": {
       "label": "Sottotetto",
+      "notInModel": "Fuori dal modello",
       "hint": "Lo spazio sotto il tetto a falde, sopra la gronda. Se escluso, il tetto esce dall'edificio riscaldato e il solaio sottostante disperde calore verso il sottotetto freddo.",
       "floorArea": "Superficie del sottotetto",
       "noArea": "Non contata",
