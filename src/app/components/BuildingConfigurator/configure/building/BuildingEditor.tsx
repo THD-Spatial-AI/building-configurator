@@ -59,6 +59,9 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
 
 // ─── HDCP status section (shown when ignis state is null) ─────────────────────
 
+/** A notice the user reads but has nothing to fix for, as when a building has no refurbishment levels. */
+const NOTICE = 'rounded-md border border-border bg-muted/50 px-2.5 py-1.5 text-[11px] leading-snug text-muted-foreground';
+
 function IgnisStatusSection({ general }: { general: Record<string, any> }) {
   const t = useT();
   const country = general.country as string | undefined;
@@ -66,7 +69,7 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
 
   if (!country) {
     return (
-      <p className="text-[11px] text-muted-foreground">
+      <p className={NOTICE}>
         {t('editor.ignis.noCountryBefore')} <strong>{t('editor.ignis.basicInfo')}</strong> {t('editor.ignis.noCountryAfter')}
       </p>
     );
@@ -75,14 +78,14 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
   if (type && !isBuildingTypeSupported(type)) {
     const supported = ['SFH', 'MFH', 'TH', 'AB'].map((code) => buildingTypeName(t, BUILDING_TYPE_LABELS[code])).join(', ');
     return (
-      <p className="text-[11px] text-muted-foreground">
+      <p className={NOTICE}>
         {t('editor.ignis.unsupportedBefore')} <strong>{buildingTypeName(t, type)}</strong> {t('editor.ignis.unsupportedAfter', { types: supported })}
       </p>
     );
   }
 
   return (
-    <p className="text-[11px] text-muted-foreground">
+    <p className={NOTICE}>
       {t('editor.ignis.noData')}
     </p>
   );
@@ -129,12 +132,14 @@ function SectionBody({
 
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
-/** An error once every level's grade failed; attention where TABULA has no levels, or only a residential type's, for the building. */
-export function energyGradeStatus(insulation: InsulationProps, buildingType?: string): StepStatus {
+/**
+ * An error once every level's grade failed, else complete. Missing levels and
+ * levels borrowed from a residential type are not the user's to change, so
+ * IgnisStatusSection and BorrowedGradeNote state them as information.
+ */
+export function energyGradeStatus(insulation: InsulationProps): StepStatus {
   const perM2 = insulation.classes?.perM2;
-  if (perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null)) return 'error';
-  if (insulation.levels.length === 0) return 'attention';
-  return buildingType && !isBuildingTypeSupported(buildingType) ? 'attention' : 'complete';
+  return perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null) ? 'error' : 'complete';
 }
 
 /** For a type TABULA lacks, the levels shown are a residential type's: says so, and which. */
@@ -144,7 +149,7 @@ function BorrowedGradeNote({ general, levels }: { general: Record<string, any>; 
   const from = BUILDING_TYPE_LABELS[variantType(levels[0]?.code) ?? ''];
   if (!type || isBuildingTypeSupported(type) || !from) return null;
   return (
-    <p className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+    <p className={NOTICE}>
       {t('editor.ignis.borrowed', { type: buildingTypeName(t, type), from: buildingTypeName(t, from) })}
     </p>
   );
@@ -270,7 +275,7 @@ export function useBuildingSteps({
       key: 'grade',
       label: t('editor.insulationTitle'),
       topic: TOPICS.building,
-      status: energyGradeStatus(insulation, general.buildingType),
+      status: energyGradeStatus(insulation),
       summary: gradeSummary(t, format, insulation),
       content: (
         <SectionCard
