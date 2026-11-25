@@ -208,6 +208,7 @@ const pv = useMemo<PvMode>(() => ({
 | `onAssignProduct(surfaceId, productId)` | Optional. A product was dropped on a surface or chosen for it. Store it as `surfaces[id].productId`. Without it products cannot be dropped or chosen |
 | `onConstraintChange(productId, key, value)` | Optional. A value of this building's copy of a product was changed; `value` is a number, an option or `"INF"`. Store it in `products[productId]`. Without it the values are not shown |
 | `onSaveAsTechnology(productId, name)` | Optional. Saves this building's copy of a product as a new product of the user's own; resolves to its id, rejects on failure |
+| `onSurfaceAnglesChange(surfaceId, { tilt, azimuth })` | Optional. The tilt or facing of a surface in `surfaces` was changed, with or without PV on it, by an edit, undo, redo, discard or reset, back to the 3D model's included. Lay out its array with them as `pvLayout`'s `tilt` and `azimuth`. Not called for the angles the view opens with: take those from the stored envelope element with the surface's id |
 
 Clicking a surface on the Technologies tab opens it in the surface panel: its
 geometry, the PV switch, and on a surface with PV its product, usable share,
@@ -239,7 +240,7 @@ host stores match what the user saw:
 ```ts
 import { pvLayout } from '@thd-spatial-ai/building-configurator';
 
-const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientation });
+const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientation, tilt, azimuth });
 // { count, kwp, area, capped, tilt, azimuth, mounting, orientation, modules }
 ```
 
@@ -249,6 +250,8 @@ const layout = pvLayout(polygon, module, { usableShare: 0.8, mounting, orientati
 | Gap between modules | 0.02 m |
 | Most modules on a surface | `floor(usableShare × surface area / module area)`, keeping those nearest the middle |
 | Racked row spacing | No row shades the next with the sun 20° above the horizon |
+| `tilt`, `azimuth` options | Optional. The surface's angles as the user edited them, in place of the polygon's. Modules are still placed on the polygon |
+| Mounting without one chosen | Racked at 15° facing south below 10° tilt (the `tilt` option where given), otherwise flush |
 | `tilt`, `azimuth` of the result | The modules' own angles: the surface's when flush, the rack's when racked |
 | Orientation without one chosen | Flush: the most modules of portrait only, landscape only, or either one with the room it leaves filled by the other (`orientation: 'mixed'`). Racked: portrait or landscape, one per surface |
 | `capped` | True when the usable share removed modules that would fit. False when the surface's space is the limit, as on most racked flat roofs, where a larger usable share adds no modules |

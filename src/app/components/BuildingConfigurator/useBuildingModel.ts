@@ -195,16 +195,17 @@ export function reclassifiedFloorArea(current: number, referenceArea: number | u
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
+  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvRun, pvProductFor }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
     demandProfile?: BuildingDemandProfile | null;
     /** The language the snapshot rows' numbers are written in. */
     language?: Language;
-    /** The host's PV surfaces; with any, a run also asks the host for PV generation. */
-    pvSurfaceIds?: readonly string[];
-    /** Module layouts of those surfaces, sent with the PV run. */
-    pvLayouts?: Readonly<Record<string, PvLayout>>;
+    /**
+     * The host's PV surfaces with their module layouts, for the elements a run
+     * sends, whose angles the layouts follow. With any, a run also asks the host for PV generation.
+     */
+    pvRun?: (elements: Record<string, BuildingElement>) => { surfaceIds: readonly string[]; layouts: Readonly<Record<string, PvLayout>> };
     /** Each PV surface's product id, sent with the PV run. */
     pvProductFor?: (surfaceId: string) => string | undefined;
   } = {},
@@ -624,7 +625,8 @@ export function useBuildingModel(
     try {
       // PV runs beside BuEM; its failure is reported on its own and does not
       // hold back the demand result.
-      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts, pvProductFor) : null;
+      const pv = pvRun?.(elements);
+      const pvRequest = services.runPvBuilding && pv ? pvRunRequest(identity.id, elements, pv.surfaceIds, pv.layouts, pvProductFor) : null;
       const [result, pvKwh] = await Promise.all([
         runBuildingSimulation(services, identity, elements, general, runContext),
         pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),

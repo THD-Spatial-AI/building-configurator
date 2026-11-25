@@ -210,7 +210,7 @@
       "suggested": "Navrženo pro FV"
     },
     "card": {
-      "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",
+      "fromModel": "Sklon a orientace podle nastavení této plochy; výměra z 3D modelu budovy.",
       "panels": "{kwp} kWp na {area} m² panelů",
       "remove": "Odebrat FV",
       "done": "Hotovo",
@@ -298,7 +298,6 @@
       "remove": "Odebrat {name} ze všech ploch",
       "removeConfirm": "Odebrat ze všech ploch"
     },
-    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
     "options": {
       "search": "Hledat ve fotovoltaických možnostech",
       "noMatch": "Hledání „{query}“ neodpovídá žádná fotovoltaická možnost.",

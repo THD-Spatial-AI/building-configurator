@@ -158,7 +158,8 @@ function FitsMore({ surfaceId, surface, pv, polygon, layout }: {
   const t = useT();
   const format = useFormatNumber();
   if (!pv.catalogue?.length || !pv.onAssignProduct) return null;
-  const options = { usableShare: surface.usableShare, mounting: surface.mounting, orientation: surface.orientation };
+  // The layout's mounting, which its default followed from the edited tilt.
+  const options = { usableShare: surface.usableShare, mounting: layout.mounting, orientation: surface.orientation };
   // Against what fits with this product, not the count chosen, so a lower count does not make every product look better.
   const fullKwp = layout.count > 0 ? (layout.kwp / layout.count) * layout.fits : layout.kwp;
   const better = fitsMore(polygon, options, pv.catalogue, surfaceProduct(pv, surfaceId)?.id, fullKwp, pv.module ?? DEFAULT_PV_MODULE);
@@ -216,20 +217,10 @@ export function PvSurfaceSection({ surfaceId, surface, pv, elements = {}, layout
   // The building's copy, which carries the values edited for it.
   const product = chosen && (pv.products?.[chosen.id] ?? chosen);
   const area = elements[surfaceId]?.area ?? surface.area;
-  const element = elements[surfaceId];
-  const orientationEdited = element !== undefined && (
-    (element.defaultTilt !== undefined && element.defaultTilt !== element.tilt)
-    || (element.defaultAzimuth !== undefined && element.defaultAzimuth !== element.azimuth)
-  );
 
   return (
     <div className="flex flex-col gap-3 p-3">
       {showGeometry && <GeometryTiles id={surfaceId} elements={elements} surface={surface} />}
-      {orientationEdited && geometry && (
-        <p className="text-[11px] leading-snug text-amber-700 dark:text-amber-300">
-          {t('pv.followsModel', { tilt: format(geometry.tilt, 0) })}
-        </p>
-      )}
 
       <div className="flex items-center justify-between gap-2">
         <span className="text-[12px] font-semibold text-foreground">{t('pv.thisSurface')}</span>

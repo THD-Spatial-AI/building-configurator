@@ -96,7 +96,7 @@ export interface ConfiguratorServices {
 
   /**
    * Optional. PV generation for the building's PV surfaces, run with Save &
-   * Simulate when the host passes pvSurfaceIds. Without it there is no PV run
+   * Simulate when the building has PV surfaces. Without it there is no PV run
    * and no PV row. Expected budget: 30 s.
    */
   runPvBuilding?(request: PvBuildingRunRequest): Promise<PvBuildingRunResponse>;

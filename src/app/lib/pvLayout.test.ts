@@ -147,6 +147,22 @@ describe('pvLayout default mounting', () => {
   });
 });
 
+describe('pvLayout with edited angles', () => {
+  it('reports the edited tilt and facing for a flush array, with the modules still on the polygon', () => {
+    const model = pvLayout(southRoof(30), module, { usableShare: 1 });
+    const edited = pvLayout(southRoof(30), module, { usableShare: 1, tilt: 40, azimuth: 200 });
+    expect(edited).toMatchObject({ tilt: 40, azimuth: 200, count: model.count, modules: model.modules });
+  });
+
+  it('picks the default mounting from the edited tilt, and keeps a rack\'s own angles', () => {
+    const flat: SurfacePolygon = { id: 'f', type: 'roof', coordinates: [[[0, 0, 3], [10, 0, 3], [10, 6, 3], [0, 6, 3], [0, 0, 3]]] };
+    expect(pvLayout(flat, module, { usableShare: 1, tilt: 30, azimuth: 180 }).mounting).toEqual({ kind: 'flush' });
+    expect(pvLayout(southRoof(30), module, { usableShare: 1, tilt: 5, azimuth: 90 }).mounting.kind).toBe('racked');
+    const rack = { kind: 'racked' as const, tilt: 20, azimuth: 170 };
+    expect(pvLayout(flat, module, { usableShare: 1, mounting: rack, tilt: 5, azimuth: 90 })).toMatchObject({ tilt: 20, azimuth: 170 });
+  });
+});
+
 describe('pvLayout reuse', () => {
   it('returns the earlier layout for the same polygon and settings, whatever else the surface carries', () => {
     const roof = southRoof(30);

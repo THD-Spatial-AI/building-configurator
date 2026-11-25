@@ -36,7 +36,7 @@ import type { RunContext } from '../../lib/buemRun';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
 import { productModule } from '../../lib/pvProducts';
-import { fittedPvIds, lastPvSwitchedOff, pvAvailableIds, pvLayouts, unfittedPvIds } from '../../lib/pvSurfaces';
+import { changedAngles, fittedPvIds, lastPvSwitchedOff, pvAvailableIds, pvLayouts, unfittedPvIds, withEditedAngles, type SurfaceAngles } from '../../lib/pvSurfaces';
 import { LanguageProvider, formatNumber, resolveLanguage, translate, type Translate } from '../../i18n';
 import { buildingTypeName, hasDwellingsPerStorey, isServiceBuildingType } from '../BuildingConfigurator/shared/buildingOptions';
 import type { ConfiguratorMode } from '@/app/lib/configuratorMode';
@@ -123,13 +123,30 @@ function BuildingView({
   // No rating is shown here, so the annual demand estimate behind it is not run.
   const language = resolveLanguage(languageCode);
   const t: Translate = useCallback((key, values) => translate(language, key, values), [language]);
-  // Every surface that takes PV is laid out, with its own product's module,
-  // for its capacity; only those with PV are drawn.
-  const layouts = useMemo(() => {
+  // Every surface that takes PV is laid out, with its own product's module and
+  // its element's tilt and facing as edited, for its capacity; only those with PV are drawn.
+  const layoutsFor = useCallback((current: Record<string, BuildingElement>) => {
     if (!pv) return {};
     const fallback = pv.module ?? DEFAULT_PV_MODULE;
-    return pvLayouts(geometry?.surfaces ?? [], pv.surfaces, (id) => productModule(surfaceProduct(pv, id), fallback));
+    return pvLayouts(geometry?.surfaces ?? [], withEditedAngles(pv.surfaces, current), (id) => productModule(surfaceProduct(pv, id), fallback));
   }, [pv, geometry]);
+  // Switching off the last PV removes the PV technology, as the PV card's bin does.
+  const lastPvSurfaces = useRef(pv?.surfaces);
+  useEffect(() => {
+    if (pv?.onRemove && lastPvSurfaces.current && lastPvSwitchedOff(lastPvSurfaces.current, pv.surfaces)) pv.onRemove();
+    lastPvSurfaces.current = pv?.surfaces;
+  }, [pv]);
+  const model = useBuildingModel(services, building, {
+    estimateHeatDemand: false, runContext, demandProfile, language,
+    // A surface with PV on that fits no whole module is not run.
+    pvRun: pv ? (current) => {
+      const layouts = layoutsFor(current);
+      return { surfaceIds: fittedPvIds(pv.surfaces, layouts), layouts };
+    } : undefined,
+    pvProductFor: pv ? (id) => surfaceProduct(pv, id)?.id : undefined,
+  });
+  const { elements } = model;
+  const layouts = useMemo(() => layoutsFor(elements), [layoutsFor, elements]);
   const pvModules = useMemo(
     () => Object.fromEntries(Object.entries(layouts).map(([id, layout]) => [id, layout.modules])),
     [layouts],
@@ -140,24 +157,22 @@ function BuildingView({
     if (!pv) return undefined;
     const fallback = pv.module ?? DEFAULT_PV_MODULE;
     const modules = pv.catalogue?.length ? pv.catalogue.map((product) => productModule(product, fallback)) : [fallback];
-    return pvAvailableIds(geometry?.surfaces ?? [], pv.surfaces, modules);
-  }, [pv, geometry]);
-  // A surface with PV on that fits no whole module is neither drawn as PV nor run.
+    return pvAvailableIds(geometry?.surfaces ?? [], withEditedAngles(pv.surfaces, elements), modules);
+  }, [pv, geometry, elements]);
+  // A surface with PV on that fits no whole module is not drawn as PV.
   const installedPvIds = useMemo(() => (pv ? fittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
   const installedPvSet = useMemo(() => new Set(installedPvIds), [installedPvIds]);
   const unfittedPv = useMemo(() => (pv ? unfittedPvIds(pv.surfaces, layouts) : []), [pv, layouts]);
-  // Switching off the last PV removes the PV technology, as the PV card's bin does.
-  const lastPvSurfaces = useRef(pv?.surfaces);
+  // The host lays out and stores each PV array itself, and the edits reach it
+  // only when the view is left, so every change to a PV surface's angles is reported as it happens.
+  const knownAngles = useRef<Record<string, SurfaceAngles>>({});
   useEffect(() => {
-    if (pv?.onRemove && lastPvSurfaces.current && lastPvSwitchedOff(lastPvSurfaces.current, pv.surfaces)) pv.onRemove();
-    lastPvSurfaces.current = pv?.surfaces;
-  }, [pv]);
-  const model = useBuildingModel(services, building, {
-    estimateHeatDemand: false, runContext, demandProfile, language,
-    pvSurfaceIds: installedPvIds, pvLayouts: layouts,
-    pvProductFor: pv ? (id) => surfaceProduct(pv, id)?.id : undefined,
-  });
-  const { elements } = model;
+    if (!pv) return;
+    const ids = Object.keys(pv.surfaces);
+    const changed = changedAngles(knownAngles.current, elements, ids);
+    knownAngles.current = Object.fromEntries(ids.filter((id) => elements[id]).map((id) => [id, { tilt: elements[id].tilt, azimuth: elements[id].azimuth }]));
+    for (const [id, angles] of Object.entries(changed)) pv.onSurfaceAnglesChange?.(id, angles);
+  }, [pv, elements]);
   // Below this the panel cannot sit beside the model, so it stacks under it and
   // the load profile moves inside it rather than taking a third band.
   const wide = useMediaQuery(WIDE_LAYOUT);
