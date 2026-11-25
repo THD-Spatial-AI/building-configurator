@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { TOPICS, type Topic } from '@/app/config/topics';
 import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
 import { InfoTip, SourceTag, EnergyComparisonNote } from '../shared/ui';
-import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import { useFormatNumber, useLanguage, useT, type Translate } from '@/app/i18n';
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
@@ -67,6 +67,7 @@ function LegendItem({ topic, label, value, unit, source, note }: {
 export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: BuildingSnapshotAsideProps) {
   const t = useT();
   const format = useFormatNumber();
+  const percent = new Intl.NumberFormat(useLanguage(), { style: 'percent', maximumFractionDigits: 0 });
   const total = DEMAND_ITEMS.reduce((sum, { key }) => sum + amount(energyTotals[key]), 0);
 
   return (
@@ -83,9 +84,11 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: Buil
 
       {total > 0 && (
         <div className="flex h-2.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={t('snapshot.annualDemand')}>
-          {DEMAND_ITEMS.map(({ key, topic }) => {
+          {DEMAND_ITEMS.map(({ key, labelKey, topic }) => {
             const share = amount(energyTotals[key]) / total;
-            return share > 0 ? <div key={key} className={topic.bar} style={{ width: `${share * 100}%` }} /> : null;
+            return share > 0 ? (
+              <div key={key} title={`${t(labelKey)}: ${percent.format(share)}`} className={topic.bar} style={{ width: `${share * 100}%` }} />
+            ) : null;
           })}
         </div>
       )}

@@ -11,4 +11,10 @@ describe('BuildingSnapshotAside', () => {
     expect(html).toContain('6,000');
     expect(html).not.toContain('Indicative heating demand class');
   });
+
+  it("names each bar segment's carrier and share of the total", () => {
+    const html = renderToStaticMarkup(<BuildingSnapshotAside energyTotals={totals} />);
+    expect(html).toContain('title="Heating: 52%"');
+    expect(html).toContain('title="Hot water: 17%"');
+  });
 });
