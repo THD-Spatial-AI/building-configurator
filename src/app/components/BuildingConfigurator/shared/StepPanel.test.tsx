@@ -55,6 +55,11 @@ describe('StepPanel', () => {
     expect(html).not.toContain('Ready for simulation');
   });
 
+  it('puts the badge centred below the step bar', () => {
+    const html = render('comfort');
+    expect(html).toMatch(/<\/ol><div class="[^"]*justify-center[^"]*"><button[^>]*>.*2 steps need attention<\/button><\/div><\/nav>/);
+  });
+
   it('says one step in the singular', () => {
     const html = renderToStaticMarkup(<StepPanel steps={[steps[0], steps[2]]} active="comfort" onActive={() => {}} />);
     expect(html).toContain('1 step needs attention');
