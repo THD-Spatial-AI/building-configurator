@@ -33,7 +33,7 @@
     "noGeometry": "City2TABULA enthält keine 3D-Geometrie für dieses Gebäude.",
     "run": {
       "working": "Energie wird berechnet…",
-      "start": "Speichern & Energiebedarf anzeigen"
+      "start": "Speichern & simulieren"
     },
     "surface": "Fläche",
     "discardSurface": {
@@ -163,7 +163,7 @@
     "download": "Herunterladen",
     "source": {
       "buem": "Simuliert",
-      "none": "Simuliert nach Speichern & Energiebedarf anzeigen",
+      "none": "Simuliert nach Speichern & simulieren",
       "file": "{name}",
       "aggregated": "{source} · aggregiert aus {from}"
     },
@@ -842,7 +842,7 @@
       "body": "PV, Speicher und Heizung dieses Gebäudes. Katalog öffnen und ein Produkt auf eine Fläche ziehen, um es zu installieren."
     },
     "run": {
-      "title": "Speichern und Vorschau",
+      "title": "Speichern und simulieren",
       "body": "Berechnet den Energiebedarf des Gebäudes im jetzigen Zustand und zeigt ihn Stunde für Stunde."
     }
   },
@@ -851,7 +851,7 @@
     "hide": "Hinweise ausblenden",
     "step1": "Wand, Dach oder Boden anklicken, um die Fläche zu öffnen.",
     "step2": "Fläche oder U-Wert im Bereich ändern.",
-    "step3": "Speichern und Vorschau zeigt den neuen Bedarf des Gebäudes."
+    "step3": "Speichern und simulieren zeigt den neuen Bedarf des Gebäudes."
   },
   "legend": {
     "roof": "Dach",

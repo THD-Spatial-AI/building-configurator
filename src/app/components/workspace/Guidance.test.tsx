@@ -10,7 +10,7 @@ describe('StepHints', () => {
   it('names the next step from what the user has done', () => {
     expect(render({})).toContain('Click a wall, roof or floor');
     expect(render({ surfaceOpened: true })).toContain('Step 2 of 3');
-    expect(render({ surfaceOpened: true, edited: true })).toContain('Save and preview');
+    expect(render({ surfaceOpened: true, edited: true })).toContain('Save and simulate');
   });
 
   it('is gone once a run was started', () => {
