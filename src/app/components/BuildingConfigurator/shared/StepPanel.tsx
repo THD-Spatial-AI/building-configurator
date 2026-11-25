@@ -31,6 +31,8 @@ export interface StepFact {
   muted?: boolean;
   /** A heading the fact sits under, drawn once above the first fact of each section. */
   section?: string;
+  /** A value behind its step's status: marked, so the user knows what to change. */
+  attention?: boolean;
 }
 
 /**
@@ -47,20 +49,17 @@ const NODE: Record<StepStatus, { Icon?: typeof Check; node: string }> = {
 const OPEN_NODE = 'border-primary bg-primary text-primary-foreground';
 
 /** A step's node: its status mark, or its number while it has none. */
-function NodeMark({ step, number, open, size }: { step: Step; number: number; open: boolean; size: 'bar' | 'card' }) {
+function NodeMark({ step, number, open }: { step: Step; number: number; open: boolean }) {
   const { Icon, node } = NODE[step.status];
   return (
     <span
       aria-hidden
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-full border font-semibold',
-        size === 'bar'
-          ? 'size-7 text-[11px] transition-shadow group-hover:shadow-md group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-ring'
-          : 'size-5 text-[10px]',
+        'flex size-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold transition-shadow group-hover:shadow-md group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-ring',
         open ? OPEN_NODE : node,
       )}
     >
-      {Icon ? <Icon className={size === 'bar' ? 'size-3.5' : 'size-3'} /> : number}
+      {Icon ? <Icon className="size-3.5" /> : number}
     </span>
   );
 }
@@ -156,7 +155,7 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
                   onClick={() => go(step.key)}
                   className="group relative z-10 flex min-w-0 cursor-pointer flex-col items-center gap-1 px-0.5 outline-none"
                 >
-                  <NodeMark step={step} number={i + 1} open={on} size="bar" />
+                  <NodeMark step={step} number={i + 1} open={on} />
                   <span className={cn(
                     'text-center text-[11px] leading-tight',
                     on ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground group-hover:text-foreground',
@@ -186,13 +185,12 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
   );
 }
 
-/** A step worked through: its number, name and status, its values, and Edit to show its fields again. */
+/** A step worked through: its number and name, its values with any needing attention marked, and Edit to show its fields again. */
 export function StepSummary({ step, number, onEdit }: { step: Step; number: number; onEdit: () => void }) {
   const t = useT();
   return (
     <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
       <header className="flex items-center gap-2 px-3 py-2">
-        <NodeMark step={step} number={number} open={false} size="card" />
         <h3 className="m-0 min-w-0 flex-1 truncate text-[12px] font-semibold text-foreground">{number}. {step.label}</h3>
         <button
           type="button"
@@ -215,7 +213,10 @@ export function StepSummary({ step, number, onEdit }: { step: Step; number: numb
                   </tr>
                 )}
                 <tr className="border-t border-border">
-                  <th scope="row" className="px-3 py-1.5 text-left font-normal text-muted-foreground">{fact.label}</th>
+                  <th scope="row" className={cn('px-3 py-1.5 text-left font-normal', fact.attention ? 'text-warning-foreground' : 'text-muted-foreground')}>
+                    {fact.attention && <AlertTriangle className="mr-1 inline size-3 align-[-2px] text-warning" aria-label={t('steps.status.attention')} />}
+                    {fact.label}
+                  </th>
                   <td className={cn('px-3 py-1.5 text-right tabular-nums', fact.muted ? 'text-muted-foreground' : 'font-semibold text-foreground')}>{fact.value}</td>
                 </tr>
               </Fragment>

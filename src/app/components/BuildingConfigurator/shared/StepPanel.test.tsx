@@ -125,6 +125,30 @@ describe('a step worked through', () => {
     expect(html).toMatch(/<td class="[^"]*font-semibold[^"]*">Existing state<\/td>/);
   });
 
+  it('marks the values behind its status, not the card itself', () => {
+    const html = renderToStaticMarkup(
+      <StepSummary step={{ ...steps[0], summary: [{ label: 'Storeys', value: '2', attention: true }, { label: 'Type', value: 'Terraced House' }] }} number={1} onEdit={() => {}} />,
+    );
+    expect(html).toMatch(/<header[^>]*><h3/);
+    expect(html).toMatch(/<th scope="row" class="[^"]*text-warning-foreground[^"]*"><svg[^>]*aria-label="needs attention"[^>]*>.*<\/svg>Storeys<\/th>/);
+    expect(html).toMatch(/<th scope="row" class="[^"]*text-muted-foreground[^"]*">Type<\/th>/);
+  });
+
+  it('marks storeys and room height while the storeys are taller than the model', () => {
+    const general = { buildingType: 'Terraced House', storeys: 2, storeysModelled: null, roomHeight: 2.5, residential_units: 1, num_persons: null };
+    const marked = (modelHeight: number) => occupancySummary(t, format, general, undefined, modelHeight).filter((fact) => fact.attention).map((fact) => fact.label);
+    expect(marked(2.5)).toEqual(['Storeys', 'Room height']);
+    expect(marked(6)).toEqual([]);
+  });
+
+  it('marks the setpoints while cooling is not above heating, cooling only where its field is', () => {
+    const general = { buildingType: 'Single-family House', comfortT_lb: 22, comfortT_ub: 20, include_dhw: true, setback_profile: 'none' };
+    const marked = (advanced: boolean) => comfortSummary(t, general, advanced).filter((fact) => fact.attention).map((fact) => fact.label);
+    expect(marked(false)).toEqual(['Heating setpoint']);
+    expect(marked(true)).toEqual(['Heating setpoint', 'Cooling setpoint']);
+    expect(comfortSummary(t, { ...general, comfortT_ub: 26 }, true).some((fact) => fact.attention)).toBe(false);
+  });
+
   it('sums up occupancy and comfort in their own labels, defaults named as such', () => {
     const general = { buildingType: 'Single-family House', storeys: 3, storeysModelled: [1, 2], roomHeight: 2.75, residential_units: 1, num_persons: null };
     expect(occupancySummary(t, format, general)).toEqual([
