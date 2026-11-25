@@ -371,7 +371,7 @@
       "noCountryAfter": "para activar el cálculo de la demanda de calor.",
       "unsupportedBefore": "El tipo de edificio",
       "unsupportedAfter": "no está en la base de datos TABULA. Tipos admitidos: {types}.",
-      "noData": "No hay datos TABULA para este edificio: el servicio TABULA no tiene ninguna variante para él o no se pudo contactar.",
+      "noData": "No hay niveles de rehabilitación predefinidos para este edificio. Indique abajo los valores U de los muros, la cubierta y el suelo.",
       "borrowed": "{type} no tiene clases energéticas propias. Se muestran las de un edificio del tipo {from} de la misma época y país."
     },
     "section": {

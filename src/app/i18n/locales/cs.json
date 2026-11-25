@@ -382,7 +382,7 @@
       "noCountryAfter": "pro výpočet potřeby tepla.",
       "unsupportedBefore": "Typ budovy",
       "unsupportedAfter": "není v databázi TABULA. Podporované typy: {types}.",
-      "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná.",
+      "noData": "Pro tuto budovu nejsou k dispozici předem nastavené úrovně renovace. Níže nastavte součinitel U stěn, střechy a podlahy.",
       "borrowed": "{type} nemá vlastní energetické třídy. Zobrazené třídy patří budově typu {from} stejného stáří a země."
     },
     "section": {

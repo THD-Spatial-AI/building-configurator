@@ -370,7 +370,7 @@
       "noCountryAfter": "to enable heat demand calculation.",
       "unsupportedBefore": "Building type",
       "unsupportedAfter": "is not in the TABULA database. Supported types: {types}.",
-      "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached.",
+      "noData": "No predefined refurbishment levels are available for this building. Set the U-values of the walls, roof and floor below.",
       "borrowed": "{type} has no energy grades of its own, so the grades shown are those of a {from} of the same age and country."
     },
     "section": {

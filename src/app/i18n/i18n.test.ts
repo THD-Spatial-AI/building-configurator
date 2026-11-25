@@ -145,4 +145,10 @@ describe('section info tips', () => {
       }
     }
   });
+  it('say a building without predefined levels has none, without naming the data source', () => {
+    for (const [language, messages] of Object.entries(MESSAGES)) {
+      const ignis = ((messages as Messages).editor as Messages).ignis as Messages;
+      expect(`${language} editor.ignis.noData: ${String(ignis.noData)}`).not.toMatch(/TABULA/);
+    }
+  });
 });
