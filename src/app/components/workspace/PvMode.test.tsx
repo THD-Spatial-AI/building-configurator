@@ -265,6 +265,11 @@ describe('PvOverview with a catalogue', () => {
     expect(advanced).toContain('System losses');
     expect(advanced).not.toContain('cont_export_cap');
   });
+
+  it('lists the values one per row at any window width, never in two columns', () => {
+    const advanced = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="advanced" />);
+    expect(advanced).not.toContain('grid-cols-2');
+  });
 });
 
 describe('PvSurfaceSection', () => {

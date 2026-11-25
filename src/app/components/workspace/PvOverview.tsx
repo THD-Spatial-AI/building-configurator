@@ -513,7 +513,7 @@ export function ProductValues({ pv, product, mode }: { pv: PvMode; product: Tech
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-[11px] leading-snug text-muted-foreground">{t('pv.values.buildingOnly', { name: productName(product) })}</p>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+      <div className="flex flex-col gap-2.5">
         {constraints.map((constraint) => (
           <ConstraintField
             key={constraint.key}
