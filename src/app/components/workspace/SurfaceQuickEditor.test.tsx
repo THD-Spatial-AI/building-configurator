@@ -38,6 +38,14 @@ describe('SurfaceQuickEditor', () => {
     expect(html).not.toContain('Existing');
   });
 
+  it('puts the R-value in the U-value column, under its field and before a window\'s g-value', () => {
+    const window: BuildingElement = { ...pitched, id: 'w1', type: 'window', uValue: 1.4, gValue: 0.6 };
+    const html = render(window);
+    expect(html).toMatch(/<div class="flex flex-col gap-1">.*aria-label="U-value \(W\/m²K\)".*<p class="[^"]*">R-value \(1\/U\): 0.71 m²K\/W<\/p><\/div>/);
+    expect(html.indexOf('R-value')).toBeLessThan(html.indexOf('Solar transmittance (g)'));
+    expect(render(window, 'simple')).not.toContain('R-value');
+  });
+
   it('shows tilt and facing read-only from the 3D model in Simple', () => {
     const html = render(pitched, 'simple');
     expect(html).not.toContain('S-facing');
