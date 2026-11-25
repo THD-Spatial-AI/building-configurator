@@ -866,6 +866,12 @@
     "nav": "Secciones del edificio",
     "previous": "Atrás: {step}",
     "next": "Siguiente: {step}",
+    "ready": "Listo para la simulación",
+    "pending": {
+      "one": "{count} paso requiere atención",
+      "many": "{count} pasos requieren atención",
+      "other": "{count} pasos requieren atención"
+    },
     "status": {
       "complete": "completo",
       "attention": "requiere atención",

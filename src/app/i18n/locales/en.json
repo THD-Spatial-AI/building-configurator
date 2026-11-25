@@ -862,6 +862,11 @@
     "nav": "Building sections",
     "previous": "Back: {step}",
     "next": "Next: {step}",
+    "ready": "Ready for simulation",
+    "pending": {
+      "one": "{count} step needs attention",
+      "other": "{count} steps need attention"
+    },
     "status": {
       "complete": "complete",
       "attention": "needs attention",

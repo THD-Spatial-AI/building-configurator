@@ -25,21 +25,46 @@ describe('StepPanel', () => {
     expect(html).not.toContain('data body');
   });
 
-  it('draws an incomplete step as an open node without a mark, the number in its label', () => {
+  it('draws an incomplete step as an outlined node with its number', () => {
     const html = renderToStaticMarkup(
-      <StepPanel steps={[{ ...steps[0], status: 'incomplete' }, steps[2]]} active="data" onActive={() => {}} />,
+      <StepPanel steps={[{ ...steps[0], status: 'incomplete' }, steps[2]]} active="comfort" onActive={() => {}} />,
     );
     expect(html).toContain('aria-label="1. Building data, not complete"');
-    expect(html).toMatch(/<span aria-hidden="true" class="[^"]*bg-background[^"]*"><\/span><span[^>]*>1. Building data<\/span>/);
+    expect(html).toMatch(/<span aria-hidden="true" class="[^"]*border-step-line bg-background[^"]*">1<\/span><span[^>]*>1. Building data<\/span>/);
   });
 
-  it('fills a node in its status whether its step is open or not, and rings the open one', () => {
+  it('tints a node in its status, and fills the open one in primary', () => {
     const node = (html: string, label: string) => html.match(new RegExp(`aria-label="${label}[^"]*"[^>]*><span aria-hidden="true" class="([^"]*)"`))?.[1] ?? '';
-    const open = render('comfort');
-    expect(node(open, '3. Heating')).toContain('bg-emerald-600');
-    expect(node(open, '3. Heating')).toContain('ring-offset-2');
-    expect(node(render('grade'), '3. Heating')).toContain('bg-emerald-600');
-    expect(node(render('grade'), '3. Heating')).not.toContain('ring-offset-2');
+    const html = render('grade');
+    expect(node(html, '3. Heating')).toContain('bg-primary-subtle');
+    expect(node(html, '1. Building data')).toContain('bg-warning-subtle');
+    expect(node(html, '2. Energy grade')).toContain('bg-primary text-primary-foreground');
+    expect(node(render('comfort'), '2. Energy grade')).toContain('bg-destructive');
+    expect(html).not.toContain('ring-offset');
+  });
+
+  it('draws every link in the one neutral colour', () => {
+    const links = render('comfort').match(/<span aria-hidden="true" class="absolute [^"]*"/g) ?? [];
+    expect(links).toHaveLength(4);
+    links.forEach((link) => expect(link).toContain('bg-step-line'));
+  });
+
+  it('counts the steps not complete in an amber badge that opens the first of them', () => {
+    const html = render('comfort');
+    expect(html).toMatch(/<button type="button" class="[^"]*bg-warning-subtle[^"]*">.*2 steps need attention<\/button>/);
+    expect(html).not.toContain('Ready for simulation');
+  });
+
+  it('says one step in the singular', () => {
+    const html = renderToStaticMarkup(<StepPanel steps={[steps[0], steps[2]]} active="comfort" onActive={() => {}} />);
+    expect(html).toContain('1 step needs attention');
+  });
+
+  it('shows Ready for simulation once every step is complete', () => {
+    const done = steps.map((step) => ({ ...step, status: 'complete' as const }));
+    const html = renderToStaticMarkup(<StepPanel steps={done} active="data" onActive={() => {}} />);
+    expect(html).toMatch(/<span role="status" class="[^"]*bg-success-subtle[^"]*">.*Ready for simulation<\/span>/);
+    expect(html).not.toContain('need attention');
   });
 
   it('offers the steps either side of the open one', () => {

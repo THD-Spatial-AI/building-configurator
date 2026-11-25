@@ -862,6 +862,11 @@
     "nav": "Gebäudeabschnitte",
     "previous": "Zurück: {step}",
     "next": "Weiter: {step}",
+    "ready": "Bereit für die Simulation",
+    "pending": {
+      "one": "{count} Schritt braucht Aufmerksamkeit",
+      "other": "{count} Schritte brauchen Aufmerksamkeit"
+    },
     "status": {
       "complete": "vollständig",
       "attention": "bitte prüfen",
