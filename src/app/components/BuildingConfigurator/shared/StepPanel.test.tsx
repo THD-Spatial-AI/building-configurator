@@ -59,10 +59,10 @@ describe('step status', () => {
     expect(comfortStatus({ comfortT_lb: 18, comfortT_ub: 18 })).toBe('attention');
   });
 
-  it('marks the energy grade an error once every grade failed, and for attention without levels', () => {
+  it('marks the energy grade an error once every grade failed, and complete without levels', () => {
     expect(energyGradeStatus(insulation)).toBe('complete');
     expect(energyGradeStatus({ ...insulation, classes: { ...insulation.classes!, perM2: { 1: null } } })).toBe('error');
-    expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('attention');
+    expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('complete');
   });
 
   it('marks the grades a school takes from a residential type complete, and says whose they are', () => {
