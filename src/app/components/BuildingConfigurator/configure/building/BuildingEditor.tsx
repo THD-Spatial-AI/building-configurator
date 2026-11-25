@@ -186,17 +186,20 @@ interface BuildingStepsProps {
 }
 
 /**
- * The facts a closed storeys and household step shows. `atticIn` is whether
- * the attic is modelled; undefined for a building without one.
+ * The facts a closed storeys and household step shows, those behind its
+ * status marked. `atticIn` is whether the attic is modelled; undefined for a
+ * building without one. `modelHeight` is as for storeysStatus.
  */
-export function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>, atticIn?: boolean): StepFact[] {
+export function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>, atticIn?: boolean, modelHeight?: number): StepFact[] {
   const modelled = general.storeysModelled as number[] | null;
+  const tooTall = storeysTooTall(general.storeys, general.roomHeight, general.storeyHeights ?? {}, modelHeight) || undefined;
   const storeys = [
     {
       label: t('snapshot.row.storeys'),
       value: modelled ? t('snapshot.storeysModelled', { modelled: modelled.length, total: general.storeys }) : String(general.storeys),
+      attention: tooTall,
     },
-    { label: t('snapshot.row.roomHeight'), value: `${format(general.roomHeight, 1)} m` },
+    { label: t('snapshot.row.roomHeight'), value: `${format(general.roomHeight, 1)} m`, attention: tooTall },
     ...(atticIn === undefined ? [] : [{ label: t('storeys.attic.label'), value: t(atticIn ? 'storeys.inModel' : 'storeys.attic.notInModel') }]),
   ];
   if (isServiceBuildingType(general.buildingType)) {
@@ -204,7 +207,11 @@ export function occupancySummary(t: Translate, format: FormatNumber, general: Re
   }
   return [
     ...storeys,
-    { label: t('household.dwellings.label'), value: String(general.residential_units ?? 1) },
+    {
+      label: t('household.dwellings.label'),
+      value: String(general.residential_units ?? 1),
+      attention: storeysStatus(general, modelHeight) === 'incomplete' || undefined,
+    },
     { label: t('household.persons.label'), value: general.num_persons ? String(general.num_persons) : t('household.default') },
   ];
 }
@@ -226,12 +233,13 @@ export function resultsSummary(t: Translate, general: Record<string, any>): Step
   ];
 }
 
-/** The facts a closed heating and comfort step shows. */
+/** The facts a closed heating and comfort step shows, setpoints marked while cooling is not above heating. */
 export function comfortSummary(t: Translate, general: Record<string, any>, advanced = false): StepFact[] {
   const setback = setbackOptions(t).find((option) => option.value === general.setback_profile);
+  const inverted = comfortStatus(general) === 'attention' || undefined;
   return [
-    { label: t('comfort.heating.label'), value: `${general.comfortT_lb} °C` },
-    ...(advanced ? [{ label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C` }] : []),
+    { label: t('comfort.heating.label'), value: `${general.comfortT_lb} °C`, attention: inverted },
+    ...(advanced ? [{ label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C`, attention: inverted }] : []),
     ...(isServiceBuildingType(general.buildingType) ? [] : [
       { label: t('comfort.hotWater.label'), value: t(general.include_dhw === false ? 'comfort.hotWater.off' : 'comfort.hotWater.on') },
     ]),
@@ -299,7 +307,7 @@ export function useBuildingSteps({
     label: SECTION_LABELS.occupancy(t),
     topic: SECTION_TOPICS.occupancy,
     status: storeysStatus(general, modelHeight),
-    summary: occupancySummary(t, format, general, atticIn),
+    summary: occupancySummary(t, format, general, atticIn, modelHeight),
     content: card('occupancy'),
     onLeave: onStoreysClosed,
   });
