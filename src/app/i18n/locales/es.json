@@ -34,7 +34,7 @@
     "noGeometry": "City2TABULA no tiene geometría 3D para este edificio.",
     "run": {
       "working": "Calculando la energía…",
-      "start": "Guardar y ver demanda energética"
+      "start": "Guardar y simular"
     },
     "surface": "Superficie",
     "discardSurface": {
@@ -164,7 +164,7 @@
     "download": "Descargar",
     "source": {
       "buem": "Simulado",
-      "none": "Simulado tras Guardar y ver demanda energética",
+      "none": "Simulado tras Guardar y simular",
       "file": "{name}",
       "aggregated": "{source} · agregado de datos {from}"
     },
@@ -209,7 +209,7 @@
       "suggested": "Sugerida para FV"
     },
     "card": {
-      "fromModel": "La inclinación, la orientación y el área proceden del modelo 3D del edificio.",
+      "fromModel": "Inclinación y orientación según lo ajustado para esta superficie; área del modelo 3D del edificio.",
       "panels": "{kwp} kWp en {area} m² de módulos",
       "remove": "Quitar FV",
       "done": "Listo",
@@ -277,7 +277,13 @@
       "save": "Guardar",
       "saved": "Guardado como {name}.",
       "saveFailed": "No se pudo guardar la tecnología. Inténtelo de nuevo.",
-      "edit": "Editar los valores de {name}"
+      "edit": "Editar los valores de {name}",
+      "range": {
+        "both": "{min} a {max}",
+        "min": "al menos {min}",
+        "max": "como máximo {max}"
+      },
+      "outOfRange": "Permitido: {range}"
     },
     "installed": {
       "title": "Instalado en este edificio",
@@ -293,7 +299,6 @@
       "remove": "Quitar {name} de todas las superficies",
       "removeConfirm": "Quitar de todas las superficies"
     },
-    "followsModel": "La FV sigue los {tilt}° del modelo 3D; la inclinación y la orientación editadas arriba solo van a BuEM.",
     "options": {
       "search": "Buscar en las opciones fotovoltaicas",
       "noMatch": "Ninguna opción fotovoltaica coincide con «{query}».",
@@ -371,8 +376,8 @@
       "noCountryAfter": "para activar el cálculo de la demanda de calor.",
       "unsupportedBefore": "El tipo de edificio",
       "unsupportedAfter": "no está en la base de datos TABULA. Tipos admitidos: {types}.",
-      "noData": "No hay datos TABULA para este edificio: el servicio TABULA no tiene ninguna variante para él o no se pudo contactar.",
-      "borrowed": "{type} no tiene clases energéticas propias. Estas son las de un edificio del tipo {from} de la misma época y país y no reflejan un edificio no residencial, por lo que los valores pueden diferir: compruebe que se ajustan al edificio."
+      "noData": "No hay niveles de rehabilitación predefinidos para este edificio. Indique abajo los valores U de los muros, la cubierta y el suelo.",
+      "borrowed": "{type} no tiene clases energéticas propias. Se muestran las de un edificio del tipo {from} de la misma época y país."
     },
     "section": {
       "occupancy": "Plantas y hogar",
@@ -846,7 +851,7 @@
       "body": "FV, almacenamiento y calefacción de este edificio. Abra el catálogo y arrastre un producto a una superficie para instalarlo."
     },
     "run": {
-      "title": "Guardar y previsualizar",
+      "title": "Guardar y simular",
       "body": "Calcula la demanda de energía del edificio tal como está ahora y la muestra hora a hora."
     }
   },
@@ -855,7 +860,7 @@
     "hide": "Ocultar sugerencias",
     "step1": "Haga clic en un muro, una cubierta o un suelo para abrirlo.",
     "step2": "Cambie su superficie o su valor U en el panel.",
-    "step3": "Guarde y previsualice para ver la nueva demanda del edificio."
+    "step3": "Guarde y simule para ver la nueva demanda del edificio."
   },
   "legend": {
     "roof": "Cubierta",
@@ -866,6 +871,12 @@
     "nav": "Secciones del edificio",
     "previous": "Atrás: {step}",
     "next": "Siguiente: {step}",
+    "ready": "Listo para la simulación",
+    "pending": {
+      "one": "{count} paso requiere atención",
+      "many": "{count} pasos requieren atención",
+      "other": "{count} pasos requieren atención"
+    },
     "status": {
       "complete": "completo",
       "attention": "requiere atención",

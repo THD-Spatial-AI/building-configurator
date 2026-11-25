@@ -84,6 +84,13 @@ export interface PvMode {
   onConstraintChange?: (productId: string, key: string, value: number | string) => void;
   /** Saves this building's copy of a product as a new product of the user's own; resolves to the new product's id. */
   onSaveAsTechnology?: (productId: string, name: string) => Promise<string>;
+  /**
+   * The tilt or facing of a surface in `surfaces` changed, by any edit, undo
+   * or reset, back to the 3D model's included. Not called for the angles the
+   * view opens with, which the building's stored envelope holds. Lay out the
+   * surface's array with these as pvLayout's tilt and azimuth.
+   */
+  onSurfaceAnglesChange?: (surfaceId: string, angles: { tilt: number; azimuth: number }) => void;
 }
 
 /** The surface ids to draw with modules and to highlight as suggested. */

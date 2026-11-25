@@ -31,35 +31,71 @@ export interface StepFact {
   muted?: boolean;
   /** A heading the fact sits under, drawn once above the first fact of each section. */
   section?: string;
+  /** A value behind its step's status: marked, so the user knows what to change. */
+  attention?: boolean;
 }
 
 /**
- * Each status as a node, the same whether its step is open or not: filled
- * with its mark, an incomplete step outlined without one. The open step adds
- * a ring in the status colour, so status and position never share a cue.
+ * Each status as a node: its mark on a tint of its colour, a step not yet
+ * complete its number in an outline. Only an error is a solid fill. The open
+ * step is solid primary whatever its status, its mark kept in white.
  */
-const NODE: Record<StepStatus, { Icon?: typeof Check; node: string; ring: string }> = {
-  complete: {
-    Icon: Check,
-    node: 'border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500',
-    ring: 'ring-emerald-600 dark:ring-emerald-500',
-  },
-  incomplete: { node: 'border-muted-foreground/40 bg-background', ring: 'ring-primary' },
-  attention: { Icon: AlertTriangle, node: 'border-amber-500 bg-amber-500 text-white', ring: 'ring-amber-500' },
-  error: { Icon: X, node: 'border-destructive bg-destructive text-white', ring: 'ring-destructive' },
+const NODE: Record<StepStatus, { Icon?: typeof Check; node: string }> = {
+  complete: { Icon: Check, node: 'border-transparent bg-primary-subtle text-primary' },
+  incomplete: { node: 'border-step-line bg-background text-muted-foreground' },
+  attention: { Icon: AlertTriangle, node: 'border-transparent bg-warning-subtle text-warning' },
+  error: { Icon: X, node: 'border-destructive bg-destructive text-white' },
 };
+const OPEN_NODE = 'border-primary bg-primary text-primary-foreground';
 
-/** The link from one node to the next: green once the step it leaves is complete. */
-function Link({ done, side }: { done: boolean; side: 'left' | 'right' }) {
+/** A step's node: its status mark, or its number while it has none. */
+function NodeMark({ step, number, open }: { step: Step; number: number; open: boolean }) {
+  const { Icon, node } = NODE[step.status];
   return (
     <span
       aria-hidden
       className={cn(
-        'absolute top-4 h-1 -translate-y-1/2',
-        side === 'left' ? 'left-0 right-1/2' : 'left-1/2 right-0',
-        done ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-border',
+        'flex size-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold transition-shadow group-hover:shadow-md group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-ring',
+        open ? OPEN_NODE : node,
       )}
+    >
+      {Icon ? <Icon className="size-3.5" /> : number}
+    </span>
+  );
+}
+
+/** The link from one node to the next. */
+function Link({ side }: { side: 'left' | 'right' }) {
+  return (
+    <span
+      aria-hidden
+      className={cn('absolute top-3.5 h-0.5 -translate-y-1/2 bg-step-line', side === 'left' ? 'left-0 right-1/2' : 'left-1/2 right-0')}
     />
+  );
+}
+
+/** Ready once every step is complete; otherwise how many are not, opening the first of them. */
+function Readiness({ steps, go }: { steps: Step[]; go: (key: string) => void }) {
+  const t = useT();
+  const pending = steps.filter((step) => step.status !== 'complete');
+  const badge = 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold';
+  if (pending.length === 0) {
+    return (
+      <span role="status" className={cn(badge, 'bg-success-subtle text-success-foreground')}>
+        <Check className="size-3" aria-hidden />
+        {t('steps.ready')}
+      </span>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => go(pending[0].key)}
+      className={cn(badge, 'cursor-pointer bg-warning-subtle text-warning-foreground hover:underline')}
+    >
+      <AlertTriangle className="size-3 text-warning" aria-hidden />
+      {t('steps.pending', { count: pending.length })}
+    </button>
   );
 }
 
@@ -105,11 +141,10 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
         <ol className="m-0 flex list-none items-start p-0">
           {steps.map((step, i) => {
             const on = step.key === current.key;
-            const { Icon, node, ring } = NODE[step.status];
             return (
               <li key={step.key} className="relative flex min-w-0 flex-1 flex-col items-center">
-                {i > 0 && <Link side="left" done={steps[i - 1].status === 'complete'} />}
-                {i < steps.length - 1 && <Link side="right" done={step.status === 'complete'} />}
+                {i > 0 && <Link side="left" />}
+                {i < steps.length - 1 && <Link side="right" />}
                 <button
                   type="button"
                   aria-current={on ? 'step' : undefined}
@@ -117,16 +152,7 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
                   onClick={() => go(step.key)}
                   className="group relative z-10 flex min-w-0 cursor-pointer flex-col items-center gap-1 px-0.5 outline-none"
                 >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'flex size-8 items-center justify-center rounded-full border-2 transition-shadow group-hover:shadow-md group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-ring',
-                      node,
-                      on && cn('ring-[3px] ring-offset-2 ring-offset-card', ring),
-                    )}
-                  >
-                    {Icon && <Icon className="size-4" />}
-                  </span>
+                  <NodeMark step={step} number={i + 1} open={on} />
                   <span className={cn(
                     'text-center text-[11px] leading-tight',
                     on ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground group-hover:text-foreground',
@@ -138,6 +164,9 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
             );
           })}
         </ol>
+        <div className="mt-2 flex justify-center">
+          <Readiness steps={steps} go={go} />
+        </div>
       </nav>
 
       <div ref={sectionRef} className="flex-1">
@@ -156,16 +185,12 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
   );
 }
 
-/** A step worked through: its number, name and status, its values, and Edit to show its fields again. */
+/** A step worked through: its number and name, its values with any needing attention marked, and Edit to show its fields again. */
 export function StepSummary({ step, number, onEdit }: { step: Step; number: number; onEdit: () => void }) {
   const t = useT();
-  const { Icon, node } = NODE[step.status];
   return (
     <section className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
       <header className="flex items-center gap-2 px-3 py-2">
-        <span aria-hidden className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', node)}>
-          {Icon && <Icon className="size-3" />}
-        </span>
         <h3 className="m-0 min-w-0 flex-1 truncate text-[12px] font-semibold text-foreground">{number}. {step.label}</h3>
         <button
           type="button"
@@ -188,7 +213,10 @@ export function StepSummary({ step, number, onEdit }: { step: Step; number: numb
                   </tr>
                 )}
                 <tr className="border-t border-border">
-                  <th scope="row" className="px-3 py-1.5 text-left font-normal text-muted-foreground">{fact.label}</th>
+                  <th scope="row" className={cn('px-3 py-1.5 text-left font-normal', fact.attention ? 'text-warning-foreground' : 'text-muted-foreground')}>
+                    {fact.attention && <AlertTriangle className="mr-1 inline size-3 align-[-2px] text-warning" aria-label={t('steps.status.attention')} />}
+                    {fact.label}
+                  </th>
                   <td className={cn('px-3 py-1.5 text-right tabular-nums', fact.muted ? 'text-muted-foreground' : 'font-semibold text-foreground')}>{fact.value}</td>
                 </tr>
               </Fragment>

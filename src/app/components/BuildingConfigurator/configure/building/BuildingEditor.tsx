@@ -59,6 +59,9 @@ function SolverSection({ general, setGen }: { general: Record<string, any>; setG
 
 // ─── HDCP status section (shown when ignis state is null) ─────────────────────
 
+/** A notice the user reads but has nothing to fix for, as when a building has no refurbishment levels. */
+const NOTICE = 'rounded-md border border-border bg-muted/50 px-2.5 py-1.5 text-[11px] leading-snug text-muted-foreground';
+
 function IgnisStatusSection({ general }: { general: Record<string, any> }) {
   const t = useT();
   const country = general.country as string | undefined;
@@ -66,7 +69,7 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
 
   if (!country) {
     return (
-      <p className="text-[11px] text-muted-foreground">
+      <p className={NOTICE}>
         {t('editor.ignis.noCountryBefore')} <strong>{t('editor.ignis.basicInfo')}</strong> {t('editor.ignis.noCountryAfter')}
       </p>
     );
@@ -75,14 +78,14 @@ function IgnisStatusSection({ general }: { general: Record<string, any> }) {
   if (type && !isBuildingTypeSupported(type)) {
     const supported = ['SFH', 'MFH', 'TH', 'AB'].map((code) => buildingTypeName(t, BUILDING_TYPE_LABELS[code])).join(', ');
     return (
-      <p className="text-[11px] text-muted-foreground">
+      <p className={NOTICE}>
         {t('editor.ignis.unsupportedBefore')} <strong>{buildingTypeName(t, type)}</strong> {t('editor.ignis.unsupportedAfter', { types: supported })}
       </p>
     );
   }
 
   return (
-    <p className="text-[11px] text-muted-foreground">
+    <p className={NOTICE}>
       {t('editor.ignis.noData')}
     </p>
   );
@@ -129,12 +132,14 @@ function SectionBody({
 
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
-/** An error once every level's grade failed; attention where TABULA has no levels, or only a residential type's, for the building. */
-export function energyGradeStatus(insulation: InsulationProps, buildingType?: string): StepStatus {
+/**
+ * An error once every level's grade failed, else complete. Missing levels and
+ * levels borrowed from a residential type are not the user's to change, so
+ * IgnisStatusSection and BorrowedGradeNote state them as information.
+ */
+export function energyGradeStatus(insulation: InsulationProps): StepStatus {
   const perM2 = insulation.classes?.perM2;
-  if (perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null)) return 'error';
-  if (insulation.levels.length === 0) return 'attention';
-  return buildingType && !isBuildingTypeSupported(buildingType) ? 'attention' : 'complete';
+  return perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null) ? 'error' : 'complete';
 }
 
 /** For a type TABULA lacks, the levels shown are a residential type's: says so, and which. */
@@ -144,7 +149,7 @@ function BorrowedGradeNote({ general, levels }: { general: Record<string, any>; 
   const from = BUILDING_TYPE_LABELS[variantType(levels[0]?.code) ?? ''];
   if (!type || isBuildingTypeSupported(type) || !from) return null;
   return (
-    <p className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+    <p className={NOTICE}>
       {t('editor.ignis.borrowed', { type: buildingTypeName(t, type), from: buildingTypeName(t, from) })}
     </p>
   );
@@ -181,17 +186,20 @@ interface BuildingStepsProps {
 }
 
 /**
- * The facts a closed storeys and household step shows. `atticIn` is whether
- * the attic is modelled; undefined for a building without one.
+ * The facts a closed storeys and household step shows, those behind its
+ * status marked. `atticIn` is whether the attic is modelled; undefined for a
+ * building without one. `modelHeight` is as for storeysStatus.
  */
-export function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>, atticIn?: boolean): StepFact[] {
+export function occupancySummary(t: Translate, format: FormatNumber, general: Record<string, any>, atticIn?: boolean, modelHeight?: number): StepFact[] {
   const modelled = general.storeysModelled as number[] | null;
+  const tooTall = storeysTooTall(general.storeys, general.roomHeight, general.storeyHeights ?? {}, modelHeight) || undefined;
   const storeys = [
     {
       label: t('snapshot.row.storeys'),
       value: modelled ? t('snapshot.storeysModelled', { modelled: modelled.length, total: general.storeys }) : String(general.storeys),
+      attention: tooTall,
     },
-    { label: t('snapshot.row.roomHeight'), value: `${format(general.roomHeight, 1)} m` },
+    { label: t('snapshot.row.roomHeight'), value: `${format(general.roomHeight, 1)} m`, attention: tooTall },
     ...(atticIn === undefined ? [] : [{ label: t('storeys.attic.label'), value: t(atticIn ? 'storeys.inModel' : 'storeys.attic.notInModel') }]),
   ];
   if (isServiceBuildingType(general.buildingType)) {
@@ -199,7 +207,11 @@ export function occupancySummary(t: Translate, format: FormatNumber, general: Re
   }
   return [
     ...storeys,
-    { label: t('household.dwellings.label'), value: String(general.residential_units ?? 1) },
+    {
+      label: t('household.dwellings.label'),
+      value: String(general.residential_units ?? 1),
+      attention: storeysStatus(general, modelHeight) === 'incomplete' || undefined,
+    },
     { label: t('household.persons.label'), value: general.num_persons ? String(general.num_persons) : t('household.default') },
   ];
 }
@@ -221,12 +233,13 @@ export function resultsSummary(t: Translate, general: Record<string, any>): Step
   ];
 }
 
-/** The facts a closed heating and comfort step shows. */
+/** The facts a closed heating and comfort step shows, setpoints marked while cooling is not above heating. */
 export function comfortSummary(t: Translate, general: Record<string, any>, advanced = false): StepFact[] {
   const setback = setbackOptions(t).find((option) => option.value === general.setback_profile);
+  const inverted = comfortStatus(general) === 'attention' || undefined;
   return [
-    { label: t('comfort.heating.label'), value: `${general.comfortT_lb} °C` },
-    ...(advanced ? [{ label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C` }] : []),
+    { label: t('comfort.heating.label'), value: `${general.comfortT_lb} °C`, attention: inverted },
+    ...(advanced ? [{ label: t('comfort.cooling.label'), value: `${general.comfortT_ub} °C`, attention: inverted }] : []),
     ...(isServiceBuildingType(general.buildingType) ? [] : [
       { label: t('comfort.hotWater.label'), value: t(general.include_dhw === false ? 'comfort.hotWater.off' : 'comfort.hotWater.on') },
     ]),
@@ -270,7 +283,7 @@ export function useBuildingSteps({
       key: 'grade',
       label: t('editor.insulationTitle'),
       topic: TOPICS.building,
-      status: energyGradeStatus(insulation, general.buildingType),
+      status: energyGradeStatus(insulation),
       summary: gradeSummary(t, format, insulation),
       content: (
         <SectionCard
@@ -294,7 +307,7 @@ export function useBuildingSteps({
     label: SECTION_LABELS.occupancy(t),
     topic: SECTION_TOPICS.occupancy,
     status: storeysStatus(general, modelHeight),
-    summary: occupancySummary(t, format, general, atticIn),
+    summary: occupancySummary(t, format, general, atticIn, modelHeight),
     content: card('occupancy'),
     onLeave: onStoreysClosed,
   });

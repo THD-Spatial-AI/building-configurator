@@ -33,7 +33,7 @@
     "noGeometry": "City2TABULA holds no 3D geometry for this building.",
     "run": {
       "working": "Working out the energy…",
-      "start": "Save & Preview Energy Demand"
+      "start": "Save & Simulate"
     },
     "surface": "Surface",
     "discardSurface": {
@@ -163,7 +163,7 @@
     "download": "Download",
     "source": {
       "buem": "Simulated",
-      "none": "Simulated after Save & Preview",
+      "none": "Simulated after Save & Simulate",
       "file": "{name}",
       "aggregated": "{source} · aggregated from {from}"
     },
@@ -208,7 +208,7 @@
       "suggested": "Suggested for PV"
     },
     "card": {
-      "fromModel": "Tilt, facing and area come from the building's 3D model.",
+      "fromModel": "Tilt and facing as set for this surface; area from the building's 3D model.",
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
@@ -276,7 +276,13 @@
       "save": "Save",
       "saved": "Saved as {name}.",
       "saveFailed": "Could not save the technology. Try again.",
-      "edit": "Edit the values of {name}"
+      "edit": "Edit the values of {name}",
+      "range": {
+        "both": "{min} to {max}",
+        "min": "at least {min}",
+        "max": "at most {max}"
+      },
+      "outOfRange": "Allowed: {range}"
     },
     "installed": {
       "title": "Installed on this building",
@@ -292,7 +298,6 @@
       "remove": "Remove {name} from every surface",
       "removeConfirm": "Remove from all surfaces"
     },
-    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
     "options": {
       "search": "Search the photovoltaic options",
       "noMatch": "No photovoltaic option matches “{query}”.",
@@ -370,8 +375,8 @@
       "noCountryAfter": "to enable heat demand calculation.",
       "unsupportedBefore": "Building type",
       "unsupportedAfter": "is not in the TABULA database. Supported types: {types}.",
-      "noData": "No TABULA data found for this building: the TABULA service holds no variant for it or could not be reached.",
-      "borrowed": "{type} has no energy grades of its own. Those shown belong to the {from} type of the same age and country and do not reflect a non-residential building, so the values can differ: check that they match the building."
+      "noData": "No predefined refurbishment levels are available for this building. Set the U-values of the walls, roof and floor below.",
+      "borrowed": "{type} has no energy grades of its own, so the grades shown are those of a {from} of the same age and country."
     },
     "section": {
       "occupancy": "Storeys and household",
@@ -842,7 +847,7 @@
       "body": "PV, storage and heating on this building. Open the catalogue and drag a product onto a surface to install it."
     },
     "run": {
-      "title": "Save and preview",
+      "title": "Save and simulate",
       "body": "Works out the building's energy demand as it is now and shows it hour by hour."
     }
   },
@@ -851,7 +856,7 @@
     "hide": "Hide hints",
     "step1": "Click a wall, roof or floor to open it.",
     "step2": "Change its area or U-value in the panel.",
-    "step3": "Save and preview to see the building's new demand."
+    "step3": "Save and simulate to see the building's new demand."
   },
   "legend": {
     "roof": "Roof",
@@ -862,6 +867,11 @@
     "nav": "Building sections",
     "previous": "Back: {step}",
     "next": "Next: {step}",
+    "ready": "Ready for simulation",
+    "pending": {
+      "one": "{count} step needs attention",
+      "other": "{count} steps need attention"
+    },
     "status": {
       "complete": "complete",
       "attention": "needs attention",

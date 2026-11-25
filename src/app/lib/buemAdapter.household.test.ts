@@ -108,6 +108,8 @@ describe('output selection', () => {
         peak_time: '1900-01-09T06:30:00Z', daily: [], weekly: [], monthly: [],
       }],
     });
-    expect(summary).toMatchObject({ heatingKwh: 0, coolingKwh: 0, electricityKwh: 3000, totalEnergyKwh: 3000 });
+    expect(summary.heatingKwh).toBeUndefined();
+    expect(summary.coolingKwh).toBeUndefined();
+    expect(summary).toMatchObject({ electricityKwh: 3000, totalEnergyKwh: 3000 });
   });
 });

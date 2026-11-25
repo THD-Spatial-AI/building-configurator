@@ -33,7 +33,7 @@
     "noGeometry": "City2TABULA enthält keine 3D-Geometrie für dieses Gebäude.",
     "run": {
       "working": "Energie wird berechnet…",
-      "start": "Speichern & Energiebedarf anzeigen"
+      "start": "Speichern & simulieren"
     },
     "surface": "Fläche",
     "discardSurface": {
@@ -163,7 +163,7 @@
     "download": "Herunterladen",
     "source": {
       "buem": "Simuliert",
-      "none": "Simuliert nach Speichern & Energiebedarf anzeigen",
+      "none": "Simuliert nach Speichern & simulieren",
       "file": "{name}",
       "aggregated": "{source} · aggregiert aus {from}"
     },
@@ -208,7 +208,7 @@
       "suggested": "Für PV vorgeschlagen"
     },
     "card": {
-      "fromModel": "Neigung, Ausrichtung und Fläche stammen aus dem 3D-Modell des Gebäudes.",
+      "fromModel": "Neigung und Ausrichtung wie für diese Fläche eingestellt; Fläche aus dem 3D-Modell des Gebäudes.",
       "panels": "{kwp} kWp auf {area} m² Modulfläche",
       "remove": "PV entfernen",
       "done": "Fertig",
@@ -276,7 +276,13 @@
       "save": "Speichern",
       "saved": "Gespeichert als {name}.",
       "saveFailed": "Die Technologie konnte nicht gespeichert werden. Versuchen Sie es erneut.",
-      "edit": "Werte von {name} bearbeiten"
+      "edit": "Werte von {name} bearbeiten",
+      "range": {
+        "both": "{min} bis {max}",
+        "min": "mindestens {min}",
+        "max": "höchstens {max}"
+      },
+      "outOfRange": "Erlaubt: {range}"
     },
     "installed": {
       "title": "Auf diesem Gebäude installiert",
@@ -292,7 +298,6 @@
       "remove": "{name} von allen Flächen entfernen",
       "removeConfirm": "Von allen Flächen entfernen"
     },
-    "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM.",
     "options": {
       "search": "Photovoltaik-Optionen durchsuchen",
       "noMatch": "Keine Photovoltaik-Option passt zu „{query}“.",
@@ -370,8 +375,8 @@
       "noCountryAfter": "ein Land fest, um den Heizwärmebedarf zu berechnen.",
       "unsupportedBefore": "Gebäudetyp",
       "unsupportedAfter": "ist nicht in der TABULA-Datenbank. Unterstützte Typen: {types}.",
-      "noData": "Keine TABULA-Daten für dieses Gebäude: Der TABULA-Dienst hat keine Variante dafür oder ist nicht erreichbar.",
-      "borrowed": "Für {type} gibt es keine eigenen Energieklassen. Diese stammen von einem {from} gleichen Alters und Landes und bilden kein Nichtwohngebäude ab; die Werte können daher abweichen. Prüfen Sie, ob sie zum Gebäude passen."
+      "noData": "Für dieses Gebäude sind keine vordefinierten Modernisierungsstufen verfügbar. Legen Sie unten die U-Werte von Wänden, Dach und Boden fest.",
+      "borrowed": "Für {type} gibt es keine eigenen Energieklassen. Angezeigt werden die von einem {from} gleichen Alters und Landes."
     },
     "section": {
       "occupancy": "Geschosse und Haushalt",
@@ -842,7 +847,7 @@
       "body": "PV, Speicher und Heizung dieses Gebäudes. Katalog öffnen und ein Produkt auf eine Fläche ziehen, um es zu installieren."
     },
     "run": {
-      "title": "Speichern und Vorschau",
+      "title": "Speichern und simulieren",
       "body": "Berechnet den Energiebedarf des Gebäudes im jetzigen Zustand und zeigt ihn Stunde für Stunde."
     }
   },
@@ -851,7 +856,7 @@
     "hide": "Hinweise ausblenden",
     "step1": "Wand, Dach oder Boden anklicken, um die Fläche zu öffnen.",
     "step2": "Fläche oder U-Wert im Bereich ändern.",
-    "step3": "Speichern und Vorschau zeigt den neuen Bedarf des Gebäudes."
+    "step3": "Speichern und simulieren zeigt den neuen Bedarf des Gebäudes."
   },
   "legend": {
     "roof": "Dach",
@@ -862,6 +867,11 @@
     "nav": "Gebäudeabschnitte",
     "previous": "Zurück: {step}",
     "next": "Weiter: {step}",
+    "ready": "Bereit für die Simulation",
+    "pending": {
+      "one": "{count} Schritt braucht Aufmerksamkeit",
+      "other": "{count} Schritte brauchen Aufmerksamkeit"
+    },
     "status": {
       "complete": "vollständig",
       "attention": "bitte prüfen",

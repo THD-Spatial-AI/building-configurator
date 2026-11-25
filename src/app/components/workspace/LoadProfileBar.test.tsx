@@ -12,7 +12,7 @@ describe('LoadProfileBar', () => {
   });
 
   it('says the profile is simulated before a run, and offers a download once there is one', () => {
-    expect(renderToStaticMarkup(<LoadProfileBar />)).toContain('Simulated after Save &amp; Preview');
+    expect(renderToStaticMarkup(<LoadProfileBar />)).toContain('Simulated after Save &amp; Simulate');
     expect(renderToStaticMarkup(<LoadProfileBar />)).not.toContain('Download');
     const hour = { timestamp: '2018-01-01T00:00', heating: 2, hotwater: 0.5, electricity: 0.4, dhw: 0.3, kitchen: 0.1 };
     expect(renderToStaticMarkup(<LoadProfileBar timeseries={[hour]} />)).toMatch(/<button[^>]*>.*Download<\/button>/);

@@ -102,16 +102,24 @@ export function SurfaceQuickEditor({
               <div className="flex shrink-0 select-none items-center border-l border-border bg-muted px-2.5 text-[11px] text-muted-foreground">m²</div>
             </div>
           </div>
-          <NumberInput
-            label={`${t('surface.uValue')} (W/m²K)`}
-            tip={t('surface.uValueTip')}
-            value={element.uValue}
-            min={0.1}
-            max={U_MAX}
-            step={0.01}
-            unit=""
-            onChange={(uValue) => onUpdate({ uValue })}
-          />
+          {/* The R-value is derived from the U-value, so it sits in the U-value's column. */}
+          <div className="flex flex-col gap-1">
+            <NumberInput
+              label={`${t('surface.uValue')} (W/m²K)`}
+              tip={t('surface.uValueTip')}
+              value={element.uValue}
+              min={0.1}
+              max={U_MAX}
+              step={0.01}
+              unit=""
+              onChange={(uValue) => onUpdate({ uValue })}
+            />
+            {mode === 'advanced' && (
+              <p className="m-0 text-[10px] text-muted-foreground">
+                {t('surface.rValue', { value: format(1 / Math.max(0.01, element.uValue), 2) })}
+              </p>
+            )}
+          </div>
           {element.type === 'window' && element.gValue !== null && (
             <NumberInput
               label={t('surface.gValue')}
@@ -139,11 +147,6 @@ export function SurfaceQuickEditor({
             <Ruler className="size-3.5" />
             {t('surface.useGeometryArea', { area: format(geometryArea!, 1) })}
           </button>
-        )}
-        {mode === 'advanced' && (
-          <p className="text-[10px] text-muted-foreground">
-            {t('surface.rValue', { value: format(1 / Math.max(0.01, element.uValue), 2) })}
-          </p>
         )}
       </div>
 

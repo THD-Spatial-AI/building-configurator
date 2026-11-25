@@ -21,11 +21,7 @@ export interface PvGeometry {
 /** Whether a surface is shown as flat, with no facing. */
 export const isFlat = (tilt: number, azimuth: number) => azimuth === -1 || tilt < FLAT_MAX_TILT_DEG;
 
-/**
- * A surface's tilt, facing and area as the 3D model has them: the values it
- * was imported with. An expert's edits change what BuEM receives, not the
- * geometry PV is placed on.
- */
+/** A surface's tilt, facing and area as the 3D model has them: the values it was imported with. */
 export function modelGeometry(element: BuildingElement): { tilt: number; azimuth: number; area: number } {
   return {
     tilt: element.defaultTilt ?? element.tilt,
@@ -35,8 +31,9 @@ export function modelGeometry(element: BuildingElement): { tilt: number; azimuth
 }
 
 /**
- * A PV surface's tilt, facing and area: the building's own element as the 3D
- * model has it where it is one, else the host's values, else null.
+ * A PV surface's tilt, facing and area where it is one of the building's own
+ * elements: its tilt and facing as edited, which demand uses too, and the 3D
+ * model's area, which the modules are placed on. Else the host's values, else null.
  */
 export function pvGeometry(
   id: string,
@@ -45,8 +42,8 @@ export function pvGeometry(
 ): PvGeometry | null {
   const element = elements[id];
   if (element) {
-    const { tilt, azimuth, area } = modelGeometry(element);
-    return { tilt, azimuth, area, flat: isFlat(tilt, azimuth) };
+    const { tilt, azimuth } = element;
+    return { tilt, azimuth, area: modelGeometry(element).area, flat: isFlat(tilt, azimuth) };
   }
   if (surface?.tilt === undefined || surface.azimuth === undefined || surface.area === undefined) return null;
   return { tilt: surface.tilt, azimuth: surface.azimuth, area: surface.area, flat: isFlat(surface.tilt, surface.azimuth) };
@@ -113,6 +110,42 @@ export function installedByProduct(
     rows.set(key, row);
   }
   return [...rows.values()];
+}
+
+/** Each surface's layout options with the tilt and facing of its element, as edited, where it is one. */
+export function withEditedAngles<T extends PvLayoutOptions>(
+  surfaces: Readonly<Record<string, T>>,
+  elements: Record<string, BuildingElement>,
+): Record<string, T> {
+  return Object.fromEntries(Object.entries(surfaces).map(([id, options]) => {
+    const element = elements[id];
+    return [id, element ? { ...options, tilt: element.tilt, azimuth: element.azimuth } : options];
+  }));
+}
+
+export interface SurfaceAngles {
+  tilt: number;
+  azimuth: number;
+}
+
+/**
+ * The PV surfaces among `ids` whose element's tilt or facing differs from
+ * `known`, with their angles now. A surface not yet in `known` is not a change.
+ */
+export function changedAngles(
+  known: Readonly<Record<string, SurfaceAngles>>,
+  elements: Record<string, BuildingElement>,
+  ids: readonly string[],
+): Record<string, SurfaceAngles> {
+  const changed: Record<string, SurfaceAngles> = {};
+  for (const id of ids) {
+    const element = elements[id];
+    const before = known[id];
+    if (element && before && (element.tilt !== before.tilt || element.azimuth !== before.azimuth)) {
+      changed[id] = { tilt: element.tilt, azimuth: element.azimuth };
+    }
+  }
+  return changed;
 }
 
 /** The module layout of each surface in `surfaces` that has a polygon among `polygons`, with one module for all or one per surface. */

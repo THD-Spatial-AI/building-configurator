@@ -18,9 +18,9 @@ describe('pvRunRequest', () => {
     });
   });
 
-  it('sends the geometry of the 3D model, not an expert\'s edits for BuEM', () => {
+  it('sends the tilt and facing as edited, as demand gets them, with the 3D model\'s area', () => {
     const edited = { ...roof('r1', 30, 5, 90), defaultArea: 40, defaultTilt: 35, defaultAzimuth: 180 };
-    expect(pvRunRequest('osm-1', { r1: edited }, ['r1'])?.surfaces).toEqual([{ id: 'r1', area: 40, tilt: 35, azimuth: 180 }]);
+    expect(pvRunRequest('osm-1', { r1: edited }, ['r1'])?.surfaces).toEqual([{ id: 'r1', area: 40, tilt: 5, azimuth: 90 }]);
   });
 
   it('adds the module count, capacity and panel angles of a surface with a layout', () => {

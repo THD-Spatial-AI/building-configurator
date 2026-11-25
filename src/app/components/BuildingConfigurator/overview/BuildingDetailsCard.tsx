@@ -179,7 +179,7 @@ export function BuildingDetailsCard({
     <div className={cn(CARD, 'flex shrink-0 grow flex-col')}>
       {/* Sticky so the tabs stay in reach while either tab scrolls; its fixed height is where the step bar sticks beneath it. */}
       <div className="sticky top-0 z-20 flex h-[60px] items-center border-b border-border bg-card px-4">
-        <div role="tablist" className="inline-flex h-9 items-center rounded-md bg-muted p-1 text-muted-foreground">
+        <div role="tablist" className="inline-flex gap-0.5 rounded-lg border border-border bg-muted/30 p-0.5">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -189,8 +189,8 @@ export function BuildingDetailsCard({
             data-tour={tab === 'technology' ? 'technologies' : undefined}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              'cursor-pointer whitespace-nowrap rounded-sm px-3 py-1 text-[13px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'hover:text-foreground',
+              'cursor-pointer select-none whitespace-nowrap rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              activeTab === tab ? 'border-border bg-card text-foreground shadow-sm' : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             {tab === 'building' ? t('panel.tab.building') : t('panel.title.technology')}

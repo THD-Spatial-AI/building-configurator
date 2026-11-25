@@ -2,11 +2,12 @@
 // colours, with each carrier's figure beneath. Cooking gas is a separate fuel
 // and PV is generation, so neither is part of the bar.
 
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { TOPICS, type Topic } from '@/app/config/topics';
 import { formatTotal, type EnergySource, type EnergyTotals } from '../../../lib/loadProfile';
-import { InfoTip, SourceTag, EnergyComparisonNote } from '../shared/ui';
-import { useFormatNumber, useT, type Translate } from '@/app/i18n';
+import { InfoTip, SourceTag, EnergyComparisonNote, TipBubble } from '../shared/ui';
+import { useFormatNumber, useLanguage, useT, type Translate } from '@/app/i18n';
 
 export interface BuildingSnapshotAsideProps {
   energyTotals: EnergyTotals;
@@ -35,6 +36,18 @@ const amount = (text: string | undefined) => {
   const value = Number(text);
   return text && Number.isFinite(value) && value > 0 ? value : 0;
 };
+
+/** One carrier's part of the demand bar; hovering or tapping it shows its share. */
+function BarSegment({ className, share, tip }: { className: string; share: number; tip: string }) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const show = (event: React.MouseEvent<HTMLDivElement>) => setRect(event.currentTarget.getBoundingClientRect());
+  return (
+    <div className={className} style={{ width: `${share * 100}%` }} onMouseEnter={show} onClick={show} onMouseLeave={() => setRect(null)}>
+      {/* Below the bar: above it the tip would cover the annual total. */}
+      {rect && <TipBubble rect={rect} below>{tip}</TipBubble>}
+    </div>
+  );
+}
 
 /** One carrier in the legend: a box framed in its bar colour, with its name and figure in that colour and its comparison. */
 function LegendItem({ topic, label, value, unit, source, note }: {
@@ -67,7 +80,14 @@ function LegendItem({ topic, label, value, unit, source, note }: {
 export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: BuildingSnapshotAsideProps) {
   const t = useT();
   const format = useFormatNumber();
+  const percent = new Intl.NumberFormat(useLanguage(), { style: 'percent', maximumFractionDigits: 0 });
   const total = DEMAND_ITEMS.reduce((sum, { key }) => sum + amount(energyTotals[key]), 0);
+  const shares = DEMAND_ITEMS
+    .map(({ key, labelKey, topic }) => {
+      const share = amount(energyTotals[key]) / total;
+      return { key, topic, share, tip: `${t(labelKey)}: ${percent.format(share)}` };
+    })
+    .filter(({ share }) => share > 0);
 
   return (
     <section className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm">
@@ -82,11 +102,15 @@ export function BuildingSnapshotAside({ energyTotals, pvAnnualKwh = null }: Buil
       </div>
 
       {total > 0 && (
-        <div className="flex h-2.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={t('snapshot.annualDemand')}>
-          {DEMAND_ITEMS.map(({ key, topic }) => {
-            const share = amount(energyTotals[key]) / total;
-            return share > 0 ? <div key={key} className={topic.bar} style={{ width: `${share * 100}%` }} /> : null;
-          })}
+        // The shares are in the label too, since the segments' tips show only on hover or tap.
+        <div
+          className="flex h-2.5 overflow-hidden rounded-full bg-muted"
+          role="img"
+          aria-label={`${t('snapshot.annualDemand')}: ${shares.map(({ tip }) => tip).join(', ')}`}
+        >
+          {shares.map(({ key, topic, share, tip }) => (
+            <BarSegment key={key} className={topic.bar} share={share} tip={tip} />
+          ))}
         </div>
       )}
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TOPICS } from '@/app/config/topics';
 import { StepPanel, StepSummary, type Step } from './StepPanel';
-import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, resultsSummary, storeysStatus } from '../configure/building/BuildingEditor';
+import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, resultsSummary, storeysStatus, useBuildingSteps } from '../configure/building/BuildingEditor';
 import { formatNumber, translate } from '@/app/i18n';
 import type { InsulationProps } from '../configure/building/insulationSection';
 import { missingDwellings } from '@/app/lib/storeys';
@@ -25,21 +25,51 @@ describe('StepPanel', () => {
     expect(html).not.toContain('data body');
   });
 
-  it('draws an incomplete step as an open node without a mark, the number in its label', () => {
+  it('draws an incomplete step as an outlined node with its number', () => {
     const html = renderToStaticMarkup(
-      <StepPanel steps={[{ ...steps[0], status: 'incomplete' }, steps[2]]} active="data" onActive={() => {}} />,
+      <StepPanel steps={[{ ...steps[0], status: 'incomplete' }, steps[2]]} active="comfort" onActive={() => {}} />,
     );
     expect(html).toContain('aria-label="1. Building data, not complete"');
-    expect(html).toMatch(/<span aria-hidden="true" class="[^"]*bg-background[^"]*"><\/span><span[^>]*>1. Building data<\/span>/);
+    expect(html).toMatch(/<span aria-hidden="true" class="[^"]*border-step-line bg-background[^"]*">1<\/span><span[^>]*>1. Building data<\/span>/);
   });
 
-  it('fills a node in its status whether its step is open or not, and rings the open one', () => {
+  it('tints a node in its status, and fills the open one in primary', () => {
     const node = (html: string, label: string) => html.match(new RegExp(`aria-label="${label}[^"]*"[^>]*><span aria-hidden="true" class="([^"]*)"`))?.[1] ?? '';
-    const open = render('comfort');
-    expect(node(open, '3. Heating')).toContain('bg-emerald-600');
-    expect(node(open, '3. Heating')).toContain('ring-offset-2');
-    expect(node(render('grade'), '3. Heating')).toContain('bg-emerald-600');
-    expect(node(render('grade'), '3. Heating')).not.toContain('ring-offset-2');
+    const html = render('grade');
+    expect(node(html, '3. Heating')).toContain('bg-primary-subtle');
+    expect(node(html, '1. Building data')).toContain('bg-warning-subtle');
+    expect(node(html, '2. Energy grade')).toContain('bg-primary text-primary-foreground');
+    expect(node(render('comfort'), '2. Energy grade')).toContain('bg-destructive');
+    expect(html).not.toContain('ring-offset');
+  });
+
+  it('draws every link in the one neutral colour', () => {
+    const links = render('comfort').match(/<span aria-hidden="true" class="absolute [^"]*"/g) ?? [];
+    expect(links).toHaveLength(4);
+    links.forEach((link) => expect(link).toContain('bg-step-line'));
+  });
+
+  it('counts the steps not complete in an amber badge that opens the first of them', () => {
+    const html = render('comfort');
+    expect(html).toMatch(/<button type="button" class="[^"]*bg-warning-subtle[^"]*">.*2 steps need attention<\/button>/);
+    expect(html).not.toContain('Ready for simulation');
+  });
+
+  it('puts the badge centred below the step bar', () => {
+    const html = render('comfort');
+    expect(html).toMatch(/<\/ol><div class="[^"]*justify-center[^"]*"><button[^>]*>.*2 steps need attention<\/button><\/div><\/nav>/);
+  });
+
+  it('says one step in the singular', () => {
+    const html = renderToStaticMarkup(<StepPanel steps={[steps[0], steps[2]]} active="comfort" onActive={() => {}} />);
+    expect(html).toContain('1 step needs attention');
+  });
+
+  it('shows Ready for simulation once every step is complete', () => {
+    const done = steps.map((step) => ({ ...step, status: 'complete' as const }));
+    const html = renderToStaticMarkup(<StepPanel steps={done} active="data" onActive={() => {}} />);
+    expect(html).toMatch(/<span role="status" class="[^"]*bg-success-subtle[^"]*">.*Ready for simulation<\/span>/);
+    expect(html).not.toContain('need attention');
   });
 
   it('offers the steps either side of the open one', () => {
@@ -59,15 +89,21 @@ describe('step status', () => {
     expect(comfortStatus({ comfortT_lb: 18, comfortT_ub: 18 })).toBe('attention');
   });
 
-  it('marks the energy grade an error once every grade failed, and for attention without levels', () => {
+  it('marks the energy grade an error once every grade failed, and complete without levels', () => {
     expect(energyGradeStatus(insulation)).toBe('complete');
     expect(energyGradeStatus({ ...insulation, classes: { ...insulation.classes!, perM2: { 1: null } } })).toBe('error');
-    expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('attention');
+    expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('complete');
   });
 
-  it('asks attention for grades a school takes from a residential type', () => {
-    expect(energyGradeStatus(insulation, 'School')).toBe('attention');
-    expect(energyGradeStatus(insulation, 'Single-family House')).toBe('complete');
+  it('marks the grades a school takes from a residential type complete, and says whose they are', () => {
+    const borrowed = { ...insulation, elements: {}, states: {}, initial: {}, levels: [{ number: 1, code: 'NL.N.SFH.01.Gen' }] } as unknown as InsulationProps;
+    function School() {
+      const steps = useBuildingSteps({ general: { buildingType: 'School' }, setGen: () => {}, mode: 'simple', insulation: borrowed });
+      return <StepPanel steps={steps} active="grade" openFields="grade" onActive={() => {}} />;
+    }
+    const html = renderToStaticMarkup(<School />);
+    expect(html).toContain('aria-label="1. Energy grade, complete"');
+    expect(html).toContain('School has no energy grades of its own, so the grades shown are those of a Single-family House');
   });
 
   it('marks storeys incomplete while an included storey of a multi-family house has no dwellings', () => {
@@ -98,6 +134,30 @@ describe('a step worked through', () => {
     );
     expect(html).toMatch(/<td class="[^"]*text-muted-foreground">Being worked out<\/td>/);
     expect(html).toMatch(/<td class="[^"]*font-semibold[^"]*">Existing state<\/td>/);
+  });
+
+  it('marks the values behind its status, not the card itself', () => {
+    const html = renderToStaticMarkup(
+      <StepSummary step={{ ...steps[0], summary: [{ label: 'Storeys', value: '2', attention: true }, { label: 'Type', value: 'Terraced House' }] }} number={1} onEdit={() => {}} />,
+    );
+    expect(html).toMatch(/<header[^>]*><h3/);
+    expect(html).toMatch(/<th scope="row" class="[^"]*text-warning-foreground[^"]*"><svg[^>]*aria-label="needs attention"[^>]*>.*<\/svg>Storeys<\/th>/);
+    expect(html).toMatch(/<th scope="row" class="[^"]*text-muted-foreground[^"]*">Type<\/th>/);
+  });
+
+  it('marks storeys and room height while the storeys are taller than the model', () => {
+    const general = { buildingType: 'Terraced House', storeys: 2, storeysModelled: null, roomHeight: 2.5, residential_units: 1, num_persons: null };
+    const marked = (modelHeight: number) => occupancySummary(t, format, general, undefined, modelHeight).filter((fact) => fact.attention).map((fact) => fact.label);
+    expect(marked(2.5)).toEqual(['Storeys', 'Room height']);
+    expect(marked(6)).toEqual([]);
+  });
+
+  it('marks the setpoints while cooling is not above heating, cooling only where its field is', () => {
+    const general = { buildingType: 'Single-family House', comfortT_lb: 22, comfortT_ub: 20, include_dhw: true, setback_profile: 'none' };
+    const marked = (advanced: boolean) => comfortSummary(t, general, advanced).filter((fact) => fact.attention).map((fact) => fact.label);
+    expect(marked(false)).toEqual(['Heating setpoint']);
+    expect(marked(true)).toEqual(['Heating setpoint', 'Cooling setpoint']);
+    expect(comfortSummary(t, { ...general, comfortT_ub: 26 }, true).some((fact) => fact.attention)).toBe(false);
   });
 
   it('sums up occupancy and comfort in their own labels, defaults named as such', () => {

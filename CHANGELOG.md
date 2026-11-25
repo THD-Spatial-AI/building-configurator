@@ -4,6 +4,37 @@ All notable changes to `@thd-spatial-ai/building-configurator`. The format follo
 
 Each version's GitHub release entry carries the full notes.
 
+## [0.19.0] - 2026-11-25
+
+Breaking: `ThermalSummary`'s `heatingKwh`, `coolingKwh`, `electricityKwh` and `dhwKwh` are optional. Each is absent when the run computed no series for that carrier, such as cooling switched off. Code that reads them as numbers needs a fallback.
+
+### Added
+
+- After a run with PV, the Photovoltaic supply card lists the annual PV generation in kWh/year.
+- Hovering or tapping a segment of the annual demand bar shows the carrier and its share of the total, such as "Heating: 55%", in the same tip as the info icons. The bar's accessible label lists every share.
+- A badge below the Building tab's step bar reads "Ready for simulation" once every step is complete. Otherwise it counts the steps that need attention and opens the first of them.
+- New colour tokens for step and readiness status: `--primary-subtle`, `--warning`, `--warning-foreground`, `--warning-subtle`, `--success-foreground`, `--success-subtle` and `--step-line`. A host that does not define them gets values mixed from its own `--card`, `--foreground` and `--primary`, in light and dark mode.
+- `PvMode.onSurfaceAnglesChange(surfaceId, { tilt, azimuth })`, called when the tilt or facing of a PV surface changes by any edit, undo, redo, discard or reset, so a host can lay out that surface's array again. `pvLayout` takes optional `tilt` and `azimuth` options in place of the polygon's.
+
+### Changed
+
+- The run button reads "Save & Simulate", in every language, and the load profile caption, the tour step and the hint name it so.
+- The Building and Technologies tabs look like the Simple/Advanced switch.
+- The step bar is calmer. A complete step is a navy tick on a pale circle, a step needing attention an amber triangle on pale amber, a step not yet complete its number in an outline, and the open step a solid circle. Only an error stays solid red. The lines between steps are one grey.
+- A closed step's card no longer repeats its status beside the title. Instead, the values behind a warning are marked in amber, such as storeys and room height while the storeys are taller than the 3D model.
+- A non-residential building, or one without predefined refurbishment levels, leaves the energy grade step complete. Neither is the user's to change. The notice explaining each is a grey box, and the no-levels notice no longer names a data source.
+- A PV product's values are listed one per row.
+- PV follows a surface's edited tilt and facing, as demand does: in the layout of a flush array, its default mounting and the PV yield request. The note saying PV keeps the 3D model's angles is gone. A racked array keeps its own panel angles.
+
+### Fixed
+
+- The Export menu opens above the Building and Technologies tabs; the tabs hid its first item. Clicking the tabs while the menu is open closes it.
+- A carrier switched off for a run shows a dash on the energy card, not "0 kWh/year".
+- The tip on the annual demand bar opens below the bar, so it no longer covers the total.
+- A PV product's values show their range beside the label. A value outside it is flagged and not passed to `onConstraintChange`.
+- A PV product value with a "%" unit, stored 0 to 1, shows as a percentage, so an interest rate of 0.02 reads 2 %, not 0.02 %. The typed value is passed on divided by 100.
+- The R-value line sits under the U-value field it is derived from, not under the area.
+
 ## [0.18.2] - 2026-11-18
 
 ### Changed

@@ -62,10 +62,40 @@ export function ConfiguratorStyles() {
 const TIP_HALF_WIDTH = 148;
 
 /**
- * An info icon whose tip shows on hover or keyboard focus. The tip is drawn
- * into document.body so a scrolling panel cannot clip it; it sits above the
- * icon, or below it near the top of the window. `href` makes the icon a
- * link, opened in a new tab, which the tip then names.
+ * The dark tip over a target whose box is `rect`. It is drawn into
+ * document.body so a scrolling panel cannot clip it; it sits above the
+ * target, or below it near the top of the window or when `below` is set.
+ */
+export function TipBubble({ id, rect, below: wantsBelow = false, children }: {
+  id?: string;
+  rect: DOMRect;
+  below?: boolean;
+  children: React.ReactNode;
+}) {
+  const below = wantsBelow || rect.top < 64;
+  return createPortal(
+    <span
+      id={id}
+      role="tooltip"
+      className={cn(
+        // A set width: near the window's edge a fixed element shrinks to the room left of its left edge.
+        'pointer-events-none fixed z-[9999] w-max max-w-[280px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
+        below ? 'translate-y-0' : '-translate-y-full',
+      )}
+      style={{
+        left: Math.min(window.innerWidth - TIP_HALF_WIDTH, Math.max(TIP_HALF_WIDTH, rect.left + rect.width / 2)),
+        top: below ? rect.bottom + 4 : rect.top - 4,
+      }}
+    >
+      {children}
+    </span>,
+    document.body,
+  );
+}
+
+/**
+ * An info icon whose tip shows on hover or keyboard focus. `href` makes the
+ * icon a link, opened in a new tab, which the tip then names.
  */
 export function InfoTip({ tip, href }: { tip: string; href?: string }) {
   const t = useT();
@@ -74,7 +104,6 @@ export function InfoTip({ tip, href }: { tip: string; href?: string }) {
   const [rect, setRect] = useState<DOMRect | null>(null);
   const show = () => setRect(ref.current?.getBoundingClientRect() ?? null);
   const hide = () => setRect(null);
-  const below = rect !== null && rect.top < 64;
   const icon = (
     <span
       ref={ref}
@@ -87,24 +116,11 @@ export function InfoTip({ tip, href }: { tip: string; href?: string }) {
       className="inline-flex shrink-0 cursor-help items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Info className="size-3 text-muted-foreground" />
-      {rect && createPortal(
-        <span
-          id={id}
-          role="tooltip"
-          className={cn(
-            // A set width: near the window's edge a fixed element shrinks to the room left of its left edge.
-            'pointer-events-none fixed z-[9999] w-max max-w-[280px] -translate-x-1/2 rounded-[6px] bg-foreground px-2.5 py-1.5 text-[11px] leading-snug text-background shadow-md',
-            below ? 'translate-y-0' : '-translate-y-full',
-          )}
-          style={{
-            left: Math.min(window.innerWidth - TIP_HALF_WIDTH, Math.max(TIP_HALF_WIDTH, rect.left + rect.width / 2)),
-            top: below ? rect.bottom + 4 : rect.top - 4,
-          }}
-        >
+      {rect && (
+        <TipBubble id={id} rect={rect}>
           {tip}
           {href && <span className="mt-1 block font-semibold">{t('tip.openDocs')}</span>}
-        </span>,
-        document.body,
+        </TipBubble>
       )}
     </span>
   );

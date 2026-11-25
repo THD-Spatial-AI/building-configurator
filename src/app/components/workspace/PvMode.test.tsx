@@ -24,7 +24,7 @@ function product(id: string, model: string, module: [number, number, number], co
       { key: 'module_width_m', default_value: module[0] }, { key: 'module_height_m', default_value: module[1] },
       { key: 'module_power_kwp', default_value: module[2] },
       { key: 'cost_energy_cap', default_value: cost, unit: 'EUR/kW' }, { key: 'cost_om_annual', default_value: 10, unit: 'EUR/kW' },
-      { key: 'cont_lifetime', default_value: 25, unit: 'years' }, { key: 'losses', default_value: 14, unit: '%', alias: 'System losses' },
+      { key: 'cont_lifetime', default_value: 25, unit: 'years' }, { key: 'losses', default_value: 0.14, unit: '%', alias: 'System losses', min: 0, max: 1 },
       { key: 'cont_export_cap', default_value: 'INF' },
     ],
   };
@@ -265,6 +265,17 @@ describe('PvOverview with a catalogue', () => {
     expect(advanced).toContain('System losses');
     expect(advanced).not.toContain('cont_export_cap');
   });
+
+  it('shows a percentage stored 0 to 1 as 0 to 100, with its range beside the label', () => {
+    const advanced = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="advanced" />);
+    expect(advanced).toMatch(/<span>System losses<\/span><span[^>]*>0 to 100<\/span>/);
+    expect(advanced).toMatch(/aria-label="System losses"[^>]*value="14"/);
+  });
+
+  it('lists the values one per row at any window width, never in two columns', () => {
+    const advanced = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="advanced" />);
+    expect(advanced).not.toContain('grid-cols-2');
+  });
 });
 
 describe('PvSurfaceSection', () => {
@@ -298,12 +309,13 @@ describe('PvSurfaceSection', () => {
     expect(html).not.toContain('Usable share');
   });
 
-  it('says PV follows the 3D model when the surface\'s tilt was edited for BuEM', () => {
-    const edited = { ...elements, r1: { ...elements.r1, tilt: 10, defaultTilt: 35, defaultAzimuth: 180 } };
-    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={edited} />))
-      .toContain('PV follows the 3D model&#x27;s 35°');
-    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} />))
-      .not.toContain('PV follows the 3D model');
+  it('shows the tilt as edited, which PV follows as demand does, with no note about the 3D model', () => {
+    const edited = { ...elements, r1: { ...elements.r1, tilt: 20, defaultTilt: 35, defaultAzimuth: 180 } };
+    const html = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={edited} />);
+    expect(html).toContain('20°');
+    expect(html).not.toContain('35°');
+    expect(html).not.toContain('PV follows');
+    expect(html).toContain('Tilt and facing as set for this surface');
   });
 
   it('calls a flat roof flat and gives it no facing', () => {
@@ -396,6 +408,14 @@ describe('removing PV from the building', () => {
     expect(html).toMatch(/<dt[^>]*>Modules<\/dt><dd[^>]*>0<\/dd>/);
     expect(html).toMatch(/<dt[^>]*>Surfaces with PV<\/dt><dd[^>]*>0 of 1<\/dd>/);
     expect(html).toMatch(/<dt[^>]*>Investment<\/dt><dd[^>]*>0 EUR<\/dd>/);
+  });
+
+  it("shows the last run's PV generation on the card, and nothing before a run", () => {
+    const run = renderToStaticMarkup(
+      <TechnologiesTab pv={{ ...withCatalogue, surfaces: pv.surfaces }} elements={elements} layouts={layouts} mode="simple" pvAnnualKwh={6543.4} onSelectSurface={() => {}} />,
+    );
+    expect(run).toMatch(/<dt[^>]*>PV generation<\/dt><dd[^>]*>6,543 kWh\/year<\/dd>/);
+    expect(tab(pv.surfaces)).not.toContain('PV generation');
   });
 
   it('offers a bin per installed product and one for all PV', () => {

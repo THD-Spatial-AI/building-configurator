@@ -35,7 +35,7 @@
     "noGeometry": "City2TABULA nemá pro tuto budovu žádnou 3D geometrii.",
     "run": {
       "working": "Výpočet energie…",
-      "start": "Uložit a zobrazit potřebu energie"
+      "start": "Uložit a simulovat"
     },
     "surface": "Plocha",
     "discardSurface": {
@@ -165,7 +165,7 @@
     "download": "Stáhnout",
     "source": {
       "buem": "Simulováno",
-      "none": "Simulováno po Uložit a zobrazit potřebu energie",
+      "none": "Simulováno po Uložit a simulovat",
       "file": "{name}",
       "aggregated": "{source} · agregováno z {from}"
     },
@@ -210,7 +210,7 @@
       "suggested": "Navrženo pro FV"
     },
     "card": {
-      "fromModel": "Sklon, orientace a výměra pocházejí z 3D modelu budovy.",
+      "fromModel": "Sklon a orientace podle nastavení této plochy; výměra z 3D modelu budovy.",
       "panels": "{kwp} kWp na {area} m² panelů",
       "remove": "Odebrat FV",
       "done": "Hotovo",
@@ -278,7 +278,13 @@
       "save": "Uložit",
       "saved": "Uloženo jako {name}.",
       "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu.",
-      "edit": "Upravit hodnoty {name}"
+      "edit": "Upravit hodnoty {name}",
+      "range": {
+        "both": "{min} až {max}",
+        "min": "alespoň {min}",
+        "max": "nejvýše {max}"
+      },
+      "outOfRange": "Povoleno: {range}"
     },
     "installed": {
       "title": "Instalováno na této budově",
@@ -298,7 +304,6 @@
       "remove": "Odebrat {name} ze všech ploch",
       "removeConfirm": "Odebrat ze všech ploch"
     },
-    "followsModel": "FV se řídí {tilt}° 3D modelu; sklon a orientace upravené výše jdou jen do BuEM.",
     "options": {
       "search": "Hledat ve fotovoltaických možnostech",
       "noMatch": "Hledání „{query}“ neodpovídá žádná fotovoltaická možnost.",
@@ -382,8 +387,8 @@
       "noCountryAfter": "pro výpočet potřeby tepla.",
       "unsupportedBefore": "Typ budovy",
       "unsupportedAfter": "není v databázi TABULA. Podporované typy: {types}.",
-      "noData": "Pro tuto budovu nebyla nalezena data TABULA: služba TABULA pro ni nemá variantu nebo není dostupná.",
-      "borrowed": "{type} nemá vlastní energetické třídy. Tyto patří budově typu {from} stejného stáří a země a neodrážejí nebytovou budovu, takže se hodnoty mohou lišit: ověřte, že odpovídají budově."
+      "noData": "Pro tuto budovu nejsou k dispozici předem nastavené úrovně renovace. Níže nastavte součinitel U stěn, střechy a podlahy.",
+      "borrowed": "{type} nemá vlastní energetické třídy. Zobrazené třídy patří budově typu {from} stejného stáří a země."
     },
     "section": {
       "occupancy": "Podlaží a domácnost",
@@ -860,7 +865,7 @@
       "body": "FV, úložiště a vytápění této budovy. Otevřete katalog a přetáhněte produkt na plochu, abyste ho nainstalovali."
     },
     "run": {
-      "title": "Uložit a náhled",
+      "title": "Uložit a simulovat",
       "body": "Spočítá energetickou potřebu budovy v současném stavu a ukáže ji hodinu po hodině."
     }
   },
@@ -869,7 +874,7 @@
     "hide": "Skrýt nápovědu",
     "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
     "step2": "Změňte plochu nebo hodnotu U v panelu.",
-    "step3": "Uložte a zobrazte náhled nové potřeby budovy."
+    "step3": "Uložte a spusťte simulaci, abyste viděli novou potřebu budovy."
   },
   "legend": {
     "roof": "Střecha",
@@ -880,6 +885,13 @@
     "nav": "Části budovy",
     "previous": "Zpět: {step}",
     "next": "Dále: {step}",
+    "ready": "Připraveno k simulaci",
+    "pending": {
+      "one": "{count} krok vyžaduje pozornost",
+      "few": "{count} kroky vyžadují pozornost",
+      "many": "{count} kroku vyžaduje pozornost",
+      "other": "{count} kroků vyžaduje pozornost"
+    },
     "status": {
       "complete": "hotovo",
       "attention": "vyžaduje pozornost",

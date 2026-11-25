@@ -53,18 +53,23 @@ function formatKwh(v: number): string {
   return abs.toFixed(2);
 }
 
+/** A carrier's annual kWh to the whole unit, or a dash when the run has none for it. */
+function wholeKwh(v: number | undefined): string {
+  return v === undefined ? '—' : v.toFixed(0);
+}
+
 /**
  * Computes fixed annual energy totals from the full hourly timeseries.
  * Falls back to the model thermal summary, then to placeholder dashes.
  * Unit is always kWh — independent of chart resolution.
  */
-function computeEnergyTotals(
+export function computeEnergyTotals(
   timeseries: LoadDataPoint[] | null,
   thermalSummary: ThermalSummary | null,
 ): EnergyTotals {
   // dhw, kitchen and the combined total come only from a summary. An uploaded
   // ground-truth CSV has no such columns and no summary, so they read '—'.
-  const dhw     = thermalSummary ? formatKwh(thermalSummary.dhwKwh) : '—';
+  const dhw     = thermalSummary?.dhwKwh !== undefined ? formatKwh(thermalSummary.dhwKwh) : '—';
   const kitchen = thermalSummary?.kitchenGasKwh !== undefined ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
   const total   = thermalSummary ? formatKwh(thermalSummary.totalEnergyKwh) : '—';
 
@@ -80,9 +85,9 @@ function computeEnergyTotals(
   }
   if (thermalSummary) {
     return {
-      heating:     thermalSummary.heatingKwh.toFixed(0),
-      electricity: thermalSummary.electricityKwh.toFixed(0),
-      hotwater:    thermalSummary.coolingKwh.toFixed(0),
+      heating:     wholeKwh(thermalSummary.heatingKwh),
+      electricity: wholeKwh(thermalSummary.electricityKwh),
+      hotwater:    wholeKwh(thermalSummary.coolingKwh),
       dhw, kitchen, total,
       unit: 'kWh/year',
       kitchenUnit: 'kWh_gas/year',
@@ -190,16 +195,17 @@ export function reclassifiedFloorArea(current: number, referenceArea: number | u
 export function useBuildingModel(
   services: ConfiguratorServices,
   buildingData?: BuildingState,
-  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvSurfaceIds = [], pvLayouts, pvProductFor }: {
+  { estimateHeatDemand = true, runContext, demandProfile, language = 'en', pvRun, pvProductFor }: {
     estimateHeatDemand?: boolean;
     runContext?: RunContext;
     demandProfile?: BuildingDemandProfile | null;
     /** The language the snapshot rows' numbers are written in. */
     language?: Language;
-    /** The host's PV surfaces; with any, a run also asks the host for PV generation. */
-    pvSurfaceIds?: readonly string[];
-    /** Module layouts of those surfaces, sent with the PV run. */
-    pvLayouts?: Readonly<Record<string, PvLayout>>;
+    /**
+     * The host's PV surfaces with their module layouts, for the elements a run
+     * sends, whose angles the layouts follow. With any, a run also asks the host for PV generation.
+     */
+    pvRun?: (elements: Record<string, BuildingElement>) => { surfaceIds: readonly string[]; layouts: Readonly<Record<string, PvLayout>> };
     /** Each PV surface's product id, sent with the PV run. */
     pvProductFor?: (surfaceId: string) => string | undefined;
   } = {},
@@ -619,7 +625,8 @@ export function useBuildingModel(
     try {
       // PV runs beside BuEM; its failure is reported on its own and does not
       // hold back the demand result.
-      const pvRequest = services.runPvBuilding ? pvRunRequest(identity.id, elements, pvSurfaceIds, pvLayouts, pvProductFor) : null;
+      const pv = pvRun?.(elements);
+      const pvRequest = services.runPvBuilding && pv ? pvRunRequest(identity.id, elements, pv.surfaceIds, pv.layouts, pvProductFor) : null;
       const [result, pvKwh] = await Promise.all([
         runBuildingSimulation(services, identity, elements, general, runContext),
         pvRequest ? runPvBuilding(services, pvRequest) : Promise.resolve(null),
