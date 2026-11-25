@@ -129,12 +129,15 @@ function SectionBody({
 
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
-/** An error once every level's grade failed; attention where TABULA has no levels, or only a residential type's, for the building. */
-export function energyGradeStatus(insulation: InsulationProps, buildingType?: string): StepStatus {
+/**
+ * An error once every level's grade failed; attention where TABULA has no
+ * levels. Grades borrowed from a residential type are complete: the user
+ * cannot change that, so BorrowedGradeNote states it as information.
+ */
+export function energyGradeStatus(insulation: InsulationProps): StepStatus {
   const perM2 = insulation.classes?.perM2;
   if (perM2 && Object.values(perM2).length > 0 && Object.values(perM2).every((value) => value === null)) return 'error';
-  if (insulation.levels.length === 0) return 'attention';
-  return buildingType && !isBuildingTypeSupported(buildingType) ? 'attention' : 'complete';
+  return insulation.levels.length === 0 ? 'attention' : 'complete';
 }
 
 /** For a type TABULA lacks, the levels shown are a residential type's: says so, and which. */
@@ -144,7 +147,7 @@ function BorrowedGradeNote({ general, levels }: { general: Record<string, any>; 
   const from = BUILDING_TYPE_LABELS[variantType(levels[0]?.code) ?? ''];
   if (!type || isBuildingTypeSupported(type) || !from) return null;
   return (
-    <p className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] leading-snug text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+    <p className="rounded-md border border-border bg-muted/50 px-2.5 py-1.5 text-[11px] leading-snug text-muted-foreground">
       {t('editor.ignis.borrowed', { type: buildingTypeName(t, type), from: buildingTypeName(t, from) })}
     </p>
   );
@@ -270,7 +273,7 @@ export function useBuildingSteps({
       key: 'grade',
       label: t('editor.insulationTitle'),
       topic: TOPICS.building,
-      status: energyGradeStatus(insulation, general.buildingType),
+      status: energyGradeStatus(insulation),
       summary: gradeSummary(t, format, insulation),
       content: (
         <SectionCard

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TOPICS } from '@/app/config/topics';
 import { StepPanel, StepSummary, type Step } from './StepPanel';
-import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, resultsSummary, storeysStatus } from '../configure/building/BuildingEditor';
+import { comfortStatus, comfortSummary, energyGradeStatus, occupancySummary, resultsSummary, storeysStatus, useBuildingSteps } from '../configure/building/BuildingEditor';
 import { formatNumber, translate } from '@/app/i18n';
 import type { InsulationProps } from '../configure/building/insulationSection';
 import { missingDwellings } from '@/app/lib/storeys';
@@ -65,9 +65,15 @@ describe('step status', () => {
     expect(energyGradeStatus({ ...insulation, levels: [], classes: undefined })).toBe('attention');
   });
 
-  it('asks attention for grades a school takes from a residential type', () => {
-    expect(energyGradeStatus(insulation, 'School')).toBe('attention');
-    expect(energyGradeStatus(insulation, 'Single-family House')).toBe('complete');
+  it('marks the grades a school takes from a residential type complete, and says whose they are', () => {
+    const borrowed = { ...insulation, elements: {}, states: {}, initial: {}, levels: [{ number: 1, code: 'NL.N.SFH.01.Gen' }] } as unknown as InsulationProps;
+    function School() {
+      const steps = useBuildingSteps({ general: { buildingType: 'School' }, setGen: () => {}, mode: 'simple', insulation: borrowed });
+      return <StepPanel steps={steps} active="grade" openFields="grade" onActive={() => {}} />;
+    }
+    const html = renderToStaticMarkup(<School />);
+    expect(html).toContain('aria-label="1. Energy grade, complete"');
+    expect(html).toContain('School has no energy grades of its own, so the grades shown are those of a Single-family House');
   });
 
   it('marks storeys incomplete while an included storey of a multi-family house has no dwellings', () => {
