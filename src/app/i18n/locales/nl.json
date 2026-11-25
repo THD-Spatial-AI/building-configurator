@@ -862,6 +862,11 @@
     "nav": "Onderdelen van het gebouw",
     "previous": "Terug: {step}",
     "next": "Volgende: {step}",
+    "ready": "Klaar voor simulatie",
+    "pending": {
+      "one": "{count} stap vraagt aandacht",
+      "other": "{count} stappen vragen aandacht"
+    },
     "status": {
       "complete": "volledig",
       "attention": "vraagt aandacht",

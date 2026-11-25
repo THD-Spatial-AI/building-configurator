@@ -880,6 +880,13 @@
     "nav": "Části budovy",
     "previous": "Zpět: {step}",
     "next": "Dále: {step}",
+    "ready": "Připraveno k simulaci",
+    "pending": {
+      "one": "{count} krok vyžaduje pozornost",
+      "few": "{count} kroky vyžadují pozornost",
+      "many": "{count} kroku vyžaduje pozornost",
+      "other": "{count} kroků vyžaduje pozornost"
+    },
     "status": {
       "complete": "hotovo",
       "attention": "vyžaduje pozornost",
