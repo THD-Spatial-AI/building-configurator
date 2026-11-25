@@ -12,9 +12,8 @@ describe('BuildingSnapshotAside', () => {
     expect(html).not.toContain('Indicative heating demand class');
   });
 
-  it("names each bar segment's carrier and share of the total", () => {
+  it("names each carrier's share of the total in the bar's label", () => {
     const html = renderToStaticMarkup(<BuildingSnapshotAside energyTotals={totals} />);
-    expect(html).toContain('title="Heating: 52%"');
-    expect(html).toContain('title="Hot water: 17%"');
+    expect(html).toContain('aria-label="Annual energy demand: Heating: 52%, Electricity: 26%, Cooling: 4%, Hot water: 17%"');
   });
 });
