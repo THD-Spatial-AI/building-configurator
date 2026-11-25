@@ -26,13 +26,15 @@
   --color-destructive: var(--destructive, #d4183d);
   --color-destructive-foreground: var(--destructive-foreground, #ffffff);
   --color-border: var(--border, rgba(0, 0, 0, 0.1));
-  --color-primary-subtle: var(--primary-subtle, #e8edf3);
-  --color-warning: var(--warning, #b45309);
-  --color-warning-foreground: var(--warning-foreground, #92400e);
-  --color-warning-subtle: var(--warning-subtle, #fef3c7);
-  --color-success-foreground: var(--success-foreground, #166534);
-  --color-success-subtle: var(--success-subtle, #dcfce7);
-  --color-step-line: var(--step-line, #94a3b8);
+  /* Status tokens few hosts define: each falls back to a mix of the host's own
+     card, foreground or primary, so it follows the host into dark mode. */
+  --color-primary-subtle: var(--primary-subtle, color-mix(in oklab, var(--primary, #2f5d8a) 12%, var(--card, #ffffff)));
+  --color-warning: var(--warning, color-mix(in oklab, #d97706 75%, var(--foreground, oklch(0.145 0 0))));
+  --color-warning-foreground: var(--warning-foreground, color-mix(in oklab, #d97706 55%, var(--foreground, oklch(0.145 0 0))));
+  --color-warning-subtle: var(--warning-subtle, color-mix(in oklab, #f59e0b 20%, var(--card, #ffffff)));
+  --color-success-foreground: var(--success-foreground, color-mix(in oklab, #16a34a 60%, var(--foreground, oklch(0.145 0 0))));
+  --color-success-subtle: var(--success-subtle, color-mix(in oklab, #22c55e 18%, var(--card, #ffffff)));
+  --color-step-line: var(--step-line, color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 40%, var(--card, #ffffff)));
   --color-input: var(--input, transparent);
   --color-input-background: var(--input-background, #f3f3f5);
   --color-switch-background: var(--switch-background, #cbced4);
