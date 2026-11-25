@@ -44,7 +44,7 @@ At 1024 px and wider (`WIDE_LAYOUT` in `src/app/lib/useMediaQuery.ts`) the view 
 | 3D model (centre) | `SurfaceGeometryViewer` | `BuildingConfigurator/configure/surfaces/` |
 | Building tab (right) | `LoadProfileBar`, `BuildingSnapshotAside`, `BuildingDetailsCard`, `StoreysModelled`, `BuildingEditor` | `workspace/`, `BuildingConfigurator/overview/`, `BuildingConfigurator/configure/building/` |
 | Technologies tab (right) | `TechnologiesTab`, `PvOverview`, `TechnologyCards` | `workspace/` |
-| Save & Preview button | `Building3DView` | `workspace/Building3DView.tsx` |
+| Save & Simulate button | `Building3DView` | `workspace/Building3DView.tsx` |
 | Tour and step hints | `Tour`, `StepHints` | `workspace/Guidance.tsx` |
 
 Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/shared/SectionCard.tsx`) in the colour of its topic. Topics, their icons and colours are defined once in `src/app/config/topics.ts`.
@@ -70,9 +70,9 @@ Every titled block in the panels is a `SectionCard` (`BuildingConfigurator/share
 | `fetchMatchingVariants` | The view opens, and the type, country or year changes | Yes |
 | `fetchVariantData` | Once per refurbishment level that `fetchMatchingVariants` returns | Yes |
 | `calculateHeatDemand` | An annual demand estimate is asked for (`estimateHeatDemand`); `Building3DView` does not ask for one | Yes |
-| `runBuemBuilding` | Save & Preview | Yes |
+| `runBuemBuilding` | Save & Simulate | Yes |
 | `previewBuemBuilding` | The refurbishment levels are compared by energy class | No |
-| `runPvBuilding` | Save & Preview, when the building has PV surfaces | No |
+| `runPvBuilding` | Save & Simulate, when the building has PV surfaces | No |
 
 ## Data formats
 

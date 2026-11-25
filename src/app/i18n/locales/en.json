@@ -33,7 +33,7 @@
     "noGeometry": "City2TABULA holds no 3D geometry for this building.",
     "run": {
       "working": "Working out the energy…",
-      "start": "Save & Preview Energy Demand"
+      "start": "Save & Simulate"
     },
     "surface": "Surface",
     "discardSurface": {
@@ -163,7 +163,7 @@
     "download": "Download",
     "source": {
       "buem": "Simulated",
-      "none": "Simulated after Save & Preview",
+      "none": "Simulated after Save & Simulate",
       "file": "{name}",
       "aggregated": "{source} · aggregated from {from}"
     },
@@ -842,7 +842,7 @@
       "body": "PV, storage and heating on this building. Open the catalogue and drag a product onto a surface to install it."
     },
     "run": {
-      "title": "Save and preview",
+      "title": "Save and simulate",
       "body": "Works out the building's energy demand as it is now and shows it hour by hour."
     }
   },
@@ -851,7 +851,7 @@
     "hide": "Hide hints",
     "step1": "Click a wall, roof or floor to open it.",
     "step2": "Change its area or U-value in the panel.",
-    "step3": "Save and preview to see the building's new demand."
+    "step3": "Save and simulate to see the building's new demand."
   },
   "legend": {
     "roof": "Roof",

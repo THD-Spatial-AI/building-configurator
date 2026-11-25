@@ -23,7 +23,7 @@ export function pvProductLine(installed: { product?: TechnologyProduct }[], repe
   return [...new Set(names)].filter((name) => !known.has(name.trim().toLowerCase())).join(' · ');
 }
 
-export function TechnologiesTab({ pv, available, technologies, elements, layouts, mode, onSelectSurface }: {
+export function TechnologiesTab({ pv, available, technologies, elements, layouts, mode, pvAnnualKwh = null, onSelectSurface }: {
   pv?: PvMode;
   /** The surfaces some PV option fits on; without it every surface the host offers. */
   available?: ReadonlySet<string>;
@@ -31,6 +31,8 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
   elements: Record<string, BuildingElement>;
   layouts: Readonly<Record<string, PvLayout>>;
   mode: ConfiguratorMode;
+  /** Annual PV generation (kWh) from the last run; the card shows it once it is a number. */
+  pvAnnualKwh?: number | null;
   onSelectSurface: (surfaceId: string) => void;
 }) {
   const t = useT();
@@ -71,6 +73,7 @@ export function TechnologiesTab({ pv, available, technologies, elements, layouts
             { label: t('pv.result.capacity'), value: `${format(summary.kwp, 1)} kWp` },
             ...(modules === undefined ? [] : [{ label: t('pv.result.modules'), value: format(modules, 0) }]),
             { label: t('pv.summary.surfaces'), value: t('pv.summary.count', { installed: summary.installed, total: summary.total }) },
+            ...(typeof pvAnnualKwh === 'number' ? [{ label: t('snapshot.pvGeneration'), value: `${format(pvAnnualKwh, 0)} ${t('snapshot.unit.kWhPerYear')}` }] : []),
             ...(pvInvestment === undefined ? [] : [{ label: t('tech.investment'), value: `${format(pvInvestment, 0)} ${pvCurrency || productCurrency(pv.catalogue?.[0])}`.trim(), cost: true }]),
           ]}
           focused={focusId === PV_CARD}

@@ -35,7 +35,7 @@
     "noGeometry": "City2TABULA nemá pro tuto budovu žádnou 3D geometrii.",
     "run": {
       "working": "Výpočet energie…",
-      "start": "Uložit a zobrazit potřebu energie"
+      "start": "Uložit a simulovat"
     },
     "surface": "Plocha",
     "discardSurface": {
@@ -165,7 +165,7 @@
     "download": "Stáhnout",
     "source": {
       "buem": "Simulováno",
-      "none": "Simulováno po Uložit a zobrazit potřebu energie",
+      "none": "Simulováno po Uložit a simulovat",
       "file": "{name}",
       "aggregated": "{source} · agregováno z {from}"
     },
@@ -860,7 +860,7 @@
       "body": "FV, úložiště a vytápění této budovy. Otevřete katalog a přetáhněte produkt na plochu, abyste ho nainstalovali."
     },
     "run": {
-      "title": "Uložit a náhled",
+      "title": "Uložit a simulovat",
       "body": "Spočítá energetickou potřebu budovy v současném stavu a ukáže ji hodinu po hodině."
     }
   },
@@ -869,7 +869,7 @@
     "hide": "Skrýt nápovědu",
     "step1": "Klikněte na stěnu, střechu nebo podlahu a otevřete ji.",
     "step2": "Změňte plochu nebo hodnotu U v panelu.",
-    "step3": "Uložte a zobrazte náhled nové potřeby budovy."
+    "step3": "Uložte a spusťte simulaci, abyste viděli novou potřebu budovy."
   },
   "legend": {
     "roof": "Střecha",

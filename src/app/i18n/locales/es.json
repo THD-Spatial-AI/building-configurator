@@ -34,7 +34,7 @@
     "noGeometry": "City2TABULA no tiene geometría 3D para este edificio.",
     "run": {
       "working": "Calculando la energía…",
-      "start": "Guardar y ver demanda energética"
+      "start": "Guardar y simular"
     },
     "surface": "Superficie",
     "discardSurface": {
@@ -164,7 +164,7 @@
     "download": "Descargar",
     "source": {
       "buem": "Simulado",
-      "none": "Simulado tras Guardar y ver demanda energética",
+      "none": "Simulado tras Guardar y simular",
       "file": "{name}",
       "aggregated": "{source} · agregado de datos {from}"
     },
@@ -846,7 +846,7 @@
       "body": "FV, almacenamiento y calefacción de este edificio. Abra el catálogo y arrastre un producto a una superficie para instalarlo."
     },
     "run": {
-      "title": "Guardar y previsualizar",
+      "title": "Guardar y simular",
       "body": "Calcula la demanda de energía del edificio tal como está ahora y la muestra hora a hora."
     }
   },
@@ -855,7 +855,7 @@
     "hide": "Ocultar sugerencias",
     "step1": "Haga clic en un muro, una cubierta o un suelo para abrirlo.",
     "step2": "Cambie su superficie o su valor U en el panel.",
-    "step3": "Guarde y previsualice para ver la nueva demanda del edificio."
+    "step3": "Guarde y simule para ver la nueva demanda del edificio."
   },
   "legend": {
     "roof": "Cubierta",

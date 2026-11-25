@@ -17,7 +17,7 @@ The names used for the regions and controls of the 3D view (`Building3DView`) in
 | Building panel | The column right of the model, with the Building and Technologies tabs | `BuildingDetailsCard` |
 | Building tab | Load profile, annual demand, building data, storeys modelled and the building sections | `BuildingDetailsCard` |
 | Technologies tab | PV and the host's technologies, one card each | `TechnologiesTab` |
-| Run button | "Save & Preview Energy Demand" under the building panel | `Building3DView` |
+| Run button | "Save & Simulate" under the building panel | `Building3DView` |
 
 ## Building blocks
 
