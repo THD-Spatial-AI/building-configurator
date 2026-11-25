@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LOOKUP_DELAY_MS, reclassifiedFloorArea, runBlocker, scheduleLookup, withEdits } from './useBuildingModel';
+import { computeEnergyTotals, LOOKUP_DELAY_MS, reclassifiedFloorArea, runBlocker, scheduleLookup, withEdits } from './useBuildingModel';
 import { DEFAULT_GENERAL } from './shared/buildingDefaults';
 import type { BuildingElement } from './configure/model/buildingElements';
 import type { BuildingState } from '../../lib/buemAdapter';
@@ -30,6 +30,18 @@ const building: BuildingState = {
 const elements: Record<string, BuildingElement> = {
   wall_south: { id: 'wall_south', label: 'South Wall', type: 'wall', area: 40, uValue: 0.24, gValue: null, tilt: 90, azimuth: 180 },
 };
+
+describe('computeEnergyTotals', () => {
+  it('shows a dash for a carrier the run has no figure for, and the others as numbers', () => {
+    const totals = computeEnergyTotals(null, {
+      heatingKwh: 11821, electricityKwh: 3334, peakHeatingKw: 0, peakCoolingKw: 0, totalEnergyKwh: 15155,
+    });
+    expect(totals.heating).toBe('11821');
+    expect(totals.electricity).toBe('3334');
+    expect(totals.hotwater).toBe('—');
+    expect(totals.dhw).toBe('—');
+  });
+});
 
 describe('withEdits', () => {
   it('writes the envelope and building parameters back, keeping the id', () => {

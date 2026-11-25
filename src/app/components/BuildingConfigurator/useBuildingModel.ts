@@ -53,18 +53,23 @@ function formatKwh(v: number): string {
   return abs.toFixed(2);
 }
 
+/** A carrier's annual kWh to the whole unit, or a dash when the run has none for it. */
+function wholeKwh(v: number | undefined): string {
+  return v === undefined ? '—' : v.toFixed(0);
+}
+
 /**
  * Computes fixed annual energy totals from the full hourly timeseries.
  * Falls back to the model thermal summary, then to placeholder dashes.
  * Unit is always kWh — independent of chart resolution.
  */
-function computeEnergyTotals(
+export function computeEnergyTotals(
   timeseries: LoadDataPoint[] | null,
   thermalSummary: ThermalSummary | null,
 ): EnergyTotals {
   // dhw, kitchen and the combined total come only from a summary. An uploaded
   // ground-truth CSV has no such columns and no summary, so they read '—'.
-  const dhw     = thermalSummary ? formatKwh(thermalSummary.dhwKwh) : '—';
+  const dhw     = thermalSummary?.dhwKwh !== undefined ? formatKwh(thermalSummary.dhwKwh) : '—';
   const kitchen = thermalSummary?.kitchenGasKwh !== undefined ? formatKwh(thermalSummary.kitchenGasKwh) : '—';
   const total   = thermalSummary ? formatKwh(thermalSummary.totalEnergyKwh) : '—';
 
@@ -80,9 +85,9 @@ function computeEnergyTotals(
   }
   if (thermalSummary) {
     return {
-      heating:     thermalSummary.heatingKwh.toFixed(0),
-      electricity: thermalSummary.electricityKwh.toFixed(0),
-      hotwater:    thermalSummary.coolingKwh.toFixed(0),
+      heating:     wholeKwh(thermalSummary.heatingKwh),
+      electricity: wholeKwh(thermalSummary.electricityKwh),
+      hotwater:    wholeKwh(thermalSummary.coolingKwh),
       dhw, kitchen, total,
       unit: 'kWh/year',
       kitchenUnit: 'kWh_gas/year',
