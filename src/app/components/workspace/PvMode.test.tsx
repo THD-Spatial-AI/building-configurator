@@ -398,6 +398,14 @@ describe('removing PV from the building', () => {
     expect(html).toMatch(/<dt[^>]*>Investment<\/dt><dd[^>]*>0 EUR<\/dd>/);
   });
 
+  it("shows the last run's PV generation on the card, and nothing before a run", () => {
+    const run = renderToStaticMarkup(
+      <TechnologiesTab pv={{ ...withCatalogue, surfaces: pv.surfaces }} elements={elements} layouts={layouts} mode="simple" pvAnnualKwh={6543.4} onSelectSurface={() => {}} />,
+    );
+    expect(run).toMatch(/<dt[^>]*>PV generation<\/dt><dd[^>]*>6,543 kWh\/year<\/dd>/);
+    expect(tab(pv.surfaces)).not.toContain('PV generation');
+  });
+
   it('offers a bin per installed product and one for all PV', () => {
     expect(tab(pv.surfaces)).toContain('aria-label="Remove all PV from this building"');
     expect(opened({ ...withCatalogue, surfaces: pv.surfaces })).toContain('aria-label="Remove Demo Mono 420 W from every surface"');

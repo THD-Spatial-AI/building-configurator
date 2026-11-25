@@ -744,6 +744,7 @@ function BuildingView({
                   elements={elements}
                   layouts={layouts}
                   mode={mode}
+                  pvAnnualKwh={model.pvAnnualKwh}
                   onSelectSurface={selectFromList}
                 />
               ) : undefined}
