@@ -547,8 +547,8 @@ function BuildingView({
           </button>
           {exportOpen && (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
-              <div className="absolute right-0 top-full z-20 mt-1 w-[248px] overflow-hidden rounded-lg border border-border bg-card py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]">
+              <div className="fixed inset-0 z-30" onClick={() => setExportOpen(false)} />
+              <div className="absolute right-0 top-full z-40 mt-1 w-[248px] overflow-hidden rounded-lg border border-border bg-card py-1 shadow-[0_12px_32px_rgba(15,23,42,0.18)]">
                 <button
                   type="button"
                   onClick={() => { model.download(); setExportOpen(false); }}
