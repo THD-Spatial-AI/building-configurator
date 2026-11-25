@@ -43,7 +43,8 @@ function BarSegment({ className, share, tip }: { className: string; share: numbe
   const show = (event: React.MouseEvent<HTMLDivElement>) => setRect(event.currentTarget.getBoundingClientRect());
   return (
     <div className={className} style={{ width: `${share * 100}%` }} onMouseEnter={show} onClick={show} onMouseLeave={() => setRect(null)}>
-      {rect && <TipBubble rect={rect}>{tip}</TipBubble>}
+      {/* Below the bar: above it the tip would cover the annual total. */}
+      {rect && <TipBubble rect={rect} below>{tip}</TipBubble>}
     </div>
   );
 }

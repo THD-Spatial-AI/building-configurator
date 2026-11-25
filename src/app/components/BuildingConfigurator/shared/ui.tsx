@@ -64,10 +64,15 @@ const TIP_HALF_WIDTH = 148;
 /**
  * The dark tip over a target whose box is `rect`. It is drawn into
  * document.body so a scrolling panel cannot clip it; it sits above the
- * target, or below it near the top of the window.
+ * target, or below it near the top of the window or when `below` is set.
  */
-export function TipBubble({ id, rect, children }: { id?: string; rect: DOMRect; children: React.ReactNode }) {
-  const below = rect.top < 64;
+export function TipBubble({ id, rect, below: wantsBelow = false, children }: {
+  id?: string;
+  rect: DOMRect;
+  below?: boolean;
+  children: React.ReactNode;
+}) {
+  const below = wantsBelow || rect.top < 64;
   return createPortal(
     <span
       id={id}
