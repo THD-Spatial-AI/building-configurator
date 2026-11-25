@@ -7,11 +7,11 @@ import { ArrowUpDown, ChevronDown, CircleHelp, GripVertical, Pencil, Plus, Searc
 import { cn } from '@/lib/utils';
 import { DecimalInput, Dropdown, DROPDOWN_LIST, FIELD_ACTION, OPTION_ROW, SearchField, Switch } from '../BuildingConfigurator/shared/ui';
 import type { BuildingElement } from '../BuildingConfigurator/configure/model/buildingElements';
-import { useFormatNumber, useT } from '../../i18n';
+import { useFormatNumber, useT, type FormatNumber, type Translate } from '../../i18n';
 import { fittedPvIds, installedByProduct, installedPvIds, offeredPvIds, pvSummary } from '../../lib/pvSurfaces';
 import type { PvLayout } from '../../lib/pvLayout';
 import {
-  constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints, sortProducts,
+  allowedValue, constraintNumber, productCurrency, productModule, productName, PV_PRODUCT_DRAG_TYPE, shownConstraints, shownRange, shownValue, sortProducts,
   type ProductOrder, type TechnologyConstraint, type TechnologyProduct,
 } from '../../lib/pvProducts';
 import { DEFAULT_PV_MODULE } from '../../lib/pvLayout';
@@ -428,12 +428,36 @@ function ToolButton({ label, active, open, onClick, children }: {
 }
 
 /** One constraint as a number field, an option list, or text for a value such as "INF". */
+/** A range as words: "0 to 100", "at least 0" or "at most 1"; empty without limits. */
+function rangeText(t: Translate, format: FormatNumber, { min, max }: { min?: number; max?: number }): string {
+  if (min !== undefined && max !== undefined) return t('pv.values.range.both', { min: format(min), max: format(max) });
+  if (min !== undefined) return t('pv.values.range.min', { min: format(min) });
+  if (max !== undefined) return t('pv.values.range.max', { max: format(max) });
+  return '';
+}
+
+/**
+ * One value of a product. A percentage is shown 0 to 100 and stored 0 to 1.
+ * A number outside the catalogue's range is flagged and not passed on.
+ */
 function ConstraintField({ constraint, label, onChange }: {
   constraint: TechnologyConstraint;
   label: string;
   onChange: (value: number | string) => void;
 }) {
+  const t = useT();
+  const format = useFormatNumber();
+  const [rejected, setRejected] = useState(false);
   const value = constraint.default_value;
+  const numeric = !constraint.options?.length && (typeof value === 'number' || value === 'INF' || value === null);
+  const range = numeric ? shownRange(constraint) : {};
+  const limits = rangeText(t, format, range);
+  const change = (next: number | null) => {
+    if (next === null) { setRejected(false); onChange('INF'); return; }
+    const stored = allowedValue(constraint, next);
+    setRejected(stored === null);
+    if (stored !== null) onChange(stored);
+  };
   const input = constraint.options?.length ? (
     <select
       aria-label={label}
@@ -443,25 +467,32 @@ function ConstraintField({ constraint, label, onChange }: {
     >
       {constraint.options.map((option) => <option key={option} value={option}>{option}</option>)}
     </select>
-  ) : typeof value === 'number' || value === 'INF' || value === null ? (
+  ) : numeric ? (
     <DecimalInput
       className="cfg-number"
       aria-label={label}
-      value={typeof value === 'number' ? value : null}
+      aria-invalid={rejected || undefined}
+      value={typeof value === 'number' ? shownValue(constraint, value) : null}
+      min={range.min}
+      max={range.max}
       placeholder="∞"
-      onChange={(next) => onChange(next ?? 'INF')}
+      onChange={change}
+      onBlur={() => setRejected(false)}
     />
   ) : (
     <input
       aria-label={label}
-      value={value}
+      value={String(value ?? '')}
       onChange={(e) => onChange(e.target.value)}
       className="h-8 min-w-0 flex-1 bg-card px-2 text-[12px] text-foreground outline-none"
     />
   );
   return (
     <div>
-      <span className="mb-1 block text-[11px] font-medium leading-tight text-muted-foreground">{label}</span>
+      <span className="mb-1 flex items-baseline justify-between gap-2 text-[11px] font-medium leading-tight text-muted-foreground">
+        <span>{label}</span>
+        {limits && <span className="shrink-0 font-normal tabular-nums">{limits}</span>}
+      </span>
       <div className="cfg-input-wrap">
         {input}
         {constraint.unit && (
@@ -470,6 +501,7 @@ function ConstraintField({ constraint, label, onChange }: {
           </div>
         )}
       </div>
+      {rejected && <p role="status" className="mt-1 text-[11px] leading-snug text-destructive">{t('pv.values.outOfRange', { range: limits })}</p>}
     </div>
   );
 }

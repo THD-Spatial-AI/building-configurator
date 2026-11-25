@@ -276,7 +276,13 @@
       "save": "Speichern",
       "saved": "Gespeichert als {name}.",
       "saveFailed": "Die Technologie konnte nicht gespeichert werden. Versuchen Sie es erneut.",
-      "edit": "Werte von {name} bearbeiten"
+      "edit": "Werte von {name} bearbeiten",
+      "range": {
+        "both": "{min} bis {max}",
+        "min": "mindestens {min}",
+        "max": "höchstens {max}"
+      },
+      "outOfRange": "Erlaubt: {range}"
     },
     "installed": {
       "title": "Auf diesem Gebäude installiert",

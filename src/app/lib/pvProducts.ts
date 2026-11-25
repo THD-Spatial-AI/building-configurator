@@ -18,6 +18,43 @@ export interface TechnologyConstraint {
   options?: string[];
 }
 
+/** Whether a constraint is a percentage: stored 0 to 1, shown 0 to 100. */
+export function isPercent(constraint: TechnologyConstraint): boolean {
+  return constraint.unit?.includes('%') ?? false;
+}
+
+/** A stored value as the field shows it, rounded so 0.07 shows as 7, not 7.000000000000001. */
+export function shownValue(constraint: TechnologyConstraint, value: number): number {
+  return isPercent(constraint) ? Number((value * 100).toPrecision(12)) : value;
+}
+
+/** A value typed into the field as it is stored. */
+function storedValue(constraint: TechnologyConstraint, shown: number): number {
+  return isPercent(constraint) ? Number((shown / 100).toPrecision(12)) : shown;
+}
+
+const finite = (limit: number | string | undefined): number | undefined => {
+  const value = typeof limit === 'number' ? limit : typeof limit === 'string' && limit.trim() !== '' ? Number(limit) : NaN;
+  return Number.isFinite(value) ? value : undefined;
+};
+
+/** The limits a constraint's shown value keeps to; a limit that is not a finite number is absent. */
+export function shownRange(constraint: TechnologyConstraint): { min?: number; max?: number } {
+  const min = finite(constraint.min);
+  const max = finite(constraint.max);
+  return {
+    min: min === undefined ? undefined : shownValue(constraint, min),
+    max: max === undefined ? undefined : shownValue(constraint, max),
+  };
+}
+
+/** A value typed into the field as it is stored, or null when it lies outside the constraint's range. */
+export function allowedValue(constraint: TechnologyConstraint, shown: number): number | null {
+  const { min, max } = shownRange(constraint);
+  const inside = (min === undefined || shown >= min) && (max === undefined || shown <= max);
+  return inside ? storedValue(constraint, shown) : null;
+}
+
 /** A technology product: the catalogue's own, or a building's copy of one. */
 export interface TechnologyProduct {
   id: string;

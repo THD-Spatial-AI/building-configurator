@@ -276,7 +276,13 @@
       "save": "Opslaan",
       "saved": "Opgeslagen als {name}.",
       "saveFailed": "De technologie kon niet worden opgeslagen. Probeer het opnieuw.",
-      "edit": "Waarden van {name} bewerken"
+      "edit": "Waarden van {name} bewerken",
+      "range": {
+        "both": "{min} tot {max}",
+        "min": "minimaal {min}",
+        "max": "maximaal {max}"
+      },
+      "outOfRange": "Toegestaan: {range}"
     },
     "installed": {
       "title": "Geïnstalleerd op dit gebouw",
