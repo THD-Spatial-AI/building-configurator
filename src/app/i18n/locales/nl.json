@@ -208,7 +208,7 @@
       "suggested": "Voorgesteld voor pv"
     },
     "card": {
-      "fromModel": "Helling, oriëntatie en oppervlakte komen uit het 3D-model van het gebouw.",
+      "fromModel": "Helling en oriëntatie zoals ingesteld voor dit vlak; oppervlakte uit het 3D-model van het gebouw.",
       "panels": "{kwp} kWp op {area} m² panelen",
       "remove": "PV verwijderen",
       "done": "Klaar",
@@ -298,7 +298,6 @@
       "remove": "{name} van alle vlakken verwijderen",
       "removeConfirm": "Van alle vlakken verwijderen"
     },
-    "followsModel": "PV volgt de {tilt}° van het 3D-model; de hierboven bewerkte helling en oriëntatie gaan alleen naar BuEM.",
     "options": {
       "search": "Fotovoltaïsche opties doorzoeken",
       "noMatch": "Geen pv-optie komt overeen met ‘{query}’.",

@@ -309,12 +309,13 @@ describe('PvSurfaceSection', () => {
     expect(html).not.toContain('Usable share');
   });
 
-  it('says PV follows the 3D model when the surface\'s tilt was edited for BuEM', () => {
-    const edited = { ...elements, r1: { ...elements.r1, tilt: 10, defaultTilt: 35, defaultAzimuth: 180 } };
-    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={edited} />))
-      .toContain('PV follows the 3D model&#x27;s 35°');
-    expect(renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={elements} />))
-      .not.toContain('PV follows the 3D model');
+  it('shows the tilt as edited, which PV follows as demand does, with no note about the 3D model', () => {
+    const edited = { ...elements, r1: { ...elements.r1, tilt: 20, defaultTilt: 35, defaultAzimuth: 180 } };
+    const html = renderToStaticMarkup(<PvSurfaceSection surfaceId="r1" surface={pv.surfaces.r1} pv={pv} elements={edited} />);
+    expect(html).toContain('20°');
+    expect(html).not.toContain('35°');
+    expect(html).not.toContain('PV follows');
+    expect(html).toContain('Tilt and facing as set for this surface');
   });
 
   it('calls a flat roof flat and gives it no facing', () => {

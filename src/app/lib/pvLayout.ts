@@ -33,6 +33,13 @@ export interface PvLayoutOptions {
   orientation?: PvOrientation;
   /** Places at most this many modules, those nearest the middle. Absent: as many as fit. */
   moduleCount?: number;
+  /**
+   * The surface's tilt and facing as the user edited them, in place of the
+   * polygon's: a flush layout reports them, and the tilt picks the default
+   * mounting. Modules are still placed on the polygon.
+   */
+  tilt?: number;
+  azimuth?: number;
 }
 
 export interface PvLayout {
@@ -301,8 +308,8 @@ const layouts = new WeakMap<SurfacePolygon, Map<string, PvLayout>>();
  * Remembered per polygon object and settings: change neither the polygon's coordinates nor the returned layout in place.
  */
 export function pvLayout(surface: SurfacePolygon, module: PvModule, options: PvLayoutOptions): PvLayout {
-  const { usableShare, mounting, orientation, moduleCount } = options;
-  const key = JSON.stringify([module.width, module.height, module.kwp, usableShare, mounting, orientation, moduleCount]);
+  const { usableShare, mounting, orientation, moduleCount, tilt, azimuth } = options;
+  const key = JSON.stringify([module.width, module.height, module.kwp, usableShare, mounting, orientation, moduleCount, tilt, azimuth]);
   let known = layouts.get(surface);
   if (!known) layouts.set(surface, known = new Map());
   let layout = known.get(key);
@@ -317,8 +324,8 @@ function layoutOn(surface: SurfacePolygon, module: PvModule, options: PvLayoutOp
   // Facing up, so a roof's normal points at the sky.
   const normal = norm(sum[2] < 0 ? [-sum[0], -sum[1], -sum[2]] : sum);
   const roof = {
-    tilt: deg(Math.acos(Math.min(1, Math.abs(normal[2])))),
-    azimuth: (deg(Math.atan2(normal[0], normal[1])) + 360) % 360,
+    tilt: options.tilt ?? deg(Math.acos(Math.min(1, Math.abs(normal[2])))),
+    azimuth: options.azimuth ?? (deg(Math.atan2(normal[0], normal[1])) + 360) % 360,
   };
   const mounting = options.mounting ?? (roof.tilt < FLAT_MAX_TILT_DEG ? DEFAULT_RACK : { kind: 'flush' });
   return layoutFor(ring, normal, area, module, options.usableShare, mounting, options.orientation, roof, options.moduleCount);

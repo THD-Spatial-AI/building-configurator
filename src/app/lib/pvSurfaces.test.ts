@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fittedPvIds, installedByProduct, installedPvIds, lastPvSwitchedOff, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds } from './pvSurfaces';
+import { changedAngles, fittedPvIds, installedByProduct, installedPvIds, lastPvSwitchedOff, pvAvailableIds, pvGeometry, pvLayouts, pvSummary, unfittedPvIds, withEditedAngles } from './pvSurfaces';
 import type { PvLayout } from './pvLayout';
 import type { TechnologyProduct } from './pvProducts';
 import type { SurfacePolygon } from './surfaceMesh';
@@ -18,9 +18,9 @@ describe('pvGeometry', () => {
       .toEqual({ tilt: 32, azimuth: 205, area: 50, flat: false });
   });
 
-  it('follows the 3D model, not an expert\'s edits, which go to BuEM only', () => {
+  it('follows the tilt and facing as edited, as demand does, on the 3D model\'s area', () => {
     const edited = { ...roof, tilt: 5, azimuth: 90, area: 30, defaultTilt: 32, defaultAzimuth: 205, defaultArea: 50 };
-    expect(pvGeometry('r1', { r1: edited }, undefined)).toEqual({ tilt: 32, azimuth: 205, area: 50, flat: false });
+    expect(pvGeometry('r1', { r1: edited }, undefined)).toEqual({ tilt: 5, azimuth: 90, area: 50, flat: true });
   });
 
   it('falls back to the host\'s values for a surface that is not an element', () => {
@@ -170,5 +170,23 @@ describe('lastPvSwitchedOff', () => {
     expect(lastPvSwitchedOff(off, off)).toBe(false);
     expect(lastPvSwitchedOff(on, { ...on, r2: surface('installed') })).toBe(false);
     expect(lastPvSwitchedOff({ ...on, r2: surface('installed') }, on)).toBe(false);
+  });
+});
+
+describe('edited angles', () => {
+  const edited = { ...roof, tilt: 40, azimuth: 190, defaultTilt: 32, defaultAzimuth: 205 };
+
+  it('gives each surface that is an element its tilt and facing as edited', () => {
+    expect(withEditedAngles({ r1: { usableShare: 0.8 }, garage: { usableShare: 1 } }, { r1: edited }))
+      .toEqual({ r1: { usableShare: 0.8, tilt: 40, azimuth: 190 }, garage: { usableShare: 1 } });
+  });
+
+  it('reports a PV surface whose angles changed, back to the model\'s included, and nothing new or unchanged', () => {
+    const known = { r1: { tilt: 32, azimuth: 205 } };
+    expect(changedAngles(known, { r1: edited }, ['r1'])).toEqual({ r1: { tilt: 40, azimuth: 190 } });
+    expect(changedAngles({ r1: { tilt: 40, azimuth: 190 } }, { r1: roof }, ['r1'])).toEqual({ r1: { tilt: 32, azimuth: 205 } });
+    expect(changedAngles(known, { r1: roof }, ['r1'])).toEqual({});
+    expect(changedAngles({}, { r1: edited }, ['r1'])).toEqual({});
+    expect(changedAngles(known, { r1: edited }, [])).toEqual({});
   });
 });

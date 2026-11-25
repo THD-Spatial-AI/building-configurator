@@ -208,7 +208,7 @@
       "suggested": "Für PV vorgeschlagen"
     },
     "card": {
-      "fromModel": "Neigung, Ausrichtung und Fläche stammen aus dem 3D-Modell des Gebäudes.",
+      "fromModel": "Neigung und Ausrichtung wie für diese Fläche eingestellt; Fläche aus dem 3D-Modell des Gebäudes.",
       "panels": "{kwp} kWp auf {area} m² Modulfläche",
       "remove": "PV entfernen",
       "done": "Fertig",
@@ -298,7 +298,6 @@
       "remove": "{name} von allen Flächen entfernen",
       "removeConfirm": "Von allen Flächen entfernen"
     },
-    "followsModel": "PV folgt den {tilt}° des 3D-Modells; die oben bearbeitete Neigung und Ausrichtung gehen nur an BuEM.",
     "options": {
       "search": "Photovoltaik-Optionen durchsuchen",
       "noMatch": "Keine Photovoltaik-Option passt zu „{query}“.",

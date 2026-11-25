@@ -209,7 +209,7 @@
       "suggested": "Sugerida para FV"
     },
     "card": {
-      "fromModel": "La inclinación, la orientación y el área proceden del modelo 3D del edificio.",
+      "fromModel": "Inclinación y orientación según lo ajustado para esta superficie; área del modelo 3D del edificio.",
       "panels": "{kwp} kWp en {area} m² de módulos",
       "remove": "Quitar FV",
       "done": "Listo",
@@ -299,7 +299,6 @@
       "remove": "Quitar {name} de todas las superficies",
       "removeConfirm": "Quitar de todas las superficies"
     },
-    "followsModel": "La FV sigue los {tilt}° del modelo 3D; la inclinación y la orientación editadas arriba solo van a BuEM.",
     "options": {
       "search": "Buscar en las opciones fotovoltaicas",
       "noMatch": "Ninguna opción fotovoltaica coincide con «{query}».",

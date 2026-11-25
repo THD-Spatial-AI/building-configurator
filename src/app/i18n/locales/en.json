@@ -208,7 +208,7 @@
       "suggested": "Suggested for PV"
     },
     "card": {
-      "fromModel": "Tilt, facing and area come from the building's 3D model.",
+      "fromModel": "Tilt and facing as set for this surface; area from the building's 3D model.",
       "panels": "{kwp} kWp on {area} m² of panels",
       "remove": "Remove PV",
       "done": "Done",
@@ -298,7 +298,6 @@
       "remove": "Remove {name} from every surface",
       "removeConfirm": "Remove from all surfaces"
     },
-    "followsModel": "PV follows the 3D model's {tilt}°; the tilt and facing edited above go to BuEM only.",
     "options": {
       "search": "Search the photovoltaic options",
       "noMatch": "No photovoltaic option matches “{query}”.",
