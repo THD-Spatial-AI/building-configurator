@@ -139,9 +139,6 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
     <div className="flex flex-1 flex-col gap-3">
       {/* Sticks at stickyTop while the section scrolls beneath it. */}
       <nav aria-label={t('steps.nav')} className={cn('sticky z-10 -mx-4 border-b border-border bg-card px-4 py-2', stickyTop)}>
-        <div className="mb-1.5 flex justify-end">
-          <Readiness steps={steps} go={go} />
-        </div>
         <ol className="m-0 flex list-none items-start p-0">
           {steps.map((step, i) => {
             const on = step.key === current.key;
@@ -168,6 +165,9 @@ export function StepPanel({ steps, active, onActive, stickyTop = 'top-0', openFi
             );
           })}
         </ol>
+        <div className="mt-2 flex justify-center">
+          <Readiness steps={steps} go={go} />
+        </div>
       </nav>
 
       <div ref={sectionRef} className="flex-1">
