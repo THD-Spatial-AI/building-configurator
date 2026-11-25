@@ -276,7 +276,13 @@
       "save": "Save",
       "saved": "Saved as {name}.",
       "saveFailed": "Could not save the technology. Try again.",
-      "edit": "Edit the values of {name}"
+      "edit": "Edit the values of {name}",
+      "range": {
+        "both": "{min} to {max}",
+        "min": "at least {min}",
+        "max": "at most {max}"
+      },
+      "outOfRange": "Allowed: {range}"
     },
     "installed": {
       "title": "Installed on this building",

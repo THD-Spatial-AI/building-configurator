@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fitsMore, productModule, pvCosts, shownConstraints, sortProducts, type TechnologyProduct } from './pvProducts';
+import { allowedValue, fitsMore, productModule, pvCosts, shownConstraints, shownRange, shownValue, sortProducts, type TechnologyConstraint, type TechnologyProduct } from './pvProducts';
 import { DEFAULT_PV_MODULE } from './pvLayout';
 import type { SurfacePolygon } from './surfaceMesh';
 
@@ -74,5 +74,25 @@ describe('fitsMore', () => {
 
   it('offers nothing when no other product reaches more', () => {
     expect(fitsMore(roof, options, [mono, compact], 'compact', 99, DEFAULT_PV_MODULE)).toEqual([]);
+  });
+});
+
+describe('constraint values', () => {
+  const rate: TechnologyConstraint = { key: 'cost_interest_rate', default_value: 0.07, unit: '%', min: 0, max: 1 };
+  const ratio: TechnologyConstraint = { key: 'dc_ac_ratio', default_value: 1.2, min: '1', max: 'INF' };
+
+  it('shows a percentage times 100 without float noise, and stores it divided by 100', () => {
+    expect(shownValue(rate, 0.07)).toBe(7);
+    expect(allowedValue(rate, 7)).toBe(0.07);
+    expect(shownValue(ratio, 1.2)).toBe(1.2);
+  });
+
+  it('keeps to the range as shown, and skips a limit that is not a finite number', () => {
+    expect(shownRange(rate)).toEqual({ min: 0, max: 100 });
+    expect(shownRange(ratio)).toEqual({ min: 1, max: undefined });
+    expect(allowedValue(rate, 101)).toBeNull();
+    expect(allowedValue(rate, -1)).toBeNull();
+    expect(allowedValue(ratio, 0.5)).toBeNull();
+    expect(allowedValue(ratio, 1000)).toBe(1000);
   });
 });

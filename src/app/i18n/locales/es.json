@@ -277,7 +277,13 @@
       "save": "Guardar",
       "saved": "Guardado como {name}.",
       "saveFailed": "No se pudo guardar la tecnología. Inténtelo de nuevo.",
-      "edit": "Editar los valores de {name}"
+      "edit": "Editar los valores de {name}",
+      "range": {
+        "both": "{min} a {max}",
+        "min": "al menos {min}",
+        "max": "como máximo {max}"
+      },
+      "outOfRange": "Permitido: {range}"
     },
     "installed": {
       "title": "Instalado en este edificio",

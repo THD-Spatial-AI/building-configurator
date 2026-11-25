@@ -24,7 +24,7 @@ function product(id: string, model: string, module: [number, number, number], co
       { key: 'module_width_m', default_value: module[0] }, { key: 'module_height_m', default_value: module[1] },
       { key: 'module_power_kwp', default_value: module[2] },
       { key: 'cost_energy_cap', default_value: cost, unit: 'EUR/kW' }, { key: 'cost_om_annual', default_value: 10, unit: 'EUR/kW' },
-      { key: 'cont_lifetime', default_value: 25, unit: 'years' }, { key: 'losses', default_value: 14, unit: '%', alias: 'System losses' },
+      { key: 'cont_lifetime', default_value: 25, unit: 'years' }, { key: 'losses', default_value: 0.14, unit: '%', alias: 'System losses', min: 0, max: 1 },
       { key: 'cont_export_cap', default_value: 'INF' },
     ],
   };
@@ -264,6 +264,12 @@ describe('PvOverview with a catalogue', () => {
     const advanced = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="advanced" />);
     expect(advanced).toContain('System losses');
     expect(advanced).not.toContain('cont_export_cap');
+  });
+
+  it('shows a percentage stored 0 to 1 as 0 to 100, with its range beside the label', () => {
+    const advanced = renderToStaticMarkup(<ProductValues pv={withCatalogue} product={product} mode="advanced" />);
+    expect(advanced).toMatch(/<span>System losses<\/span><span[^>]*>0 to 100<\/span>/);
+    expect(advanced).toMatch(/aria-label="System losses"[^>]*value="14"/);
   });
 
   it('lists the values one per row at any window width, never in two columns', () => {

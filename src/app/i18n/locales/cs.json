@@ -278,7 +278,13 @@
       "save": "Uložit",
       "saved": "Uloženo jako {name}.",
       "saveFailed": "Technologii se nepodařilo uložit. Zkuste to znovu.",
-      "edit": "Upravit hodnoty {name}"
+      "edit": "Upravit hodnoty {name}",
+      "range": {
+        "both": "{min} až {max}",
+        "min": "alespoň {min}",
+        "max": "nejvýše {max}"
+      },
+      "outOfRange": "Povoleno: {range}"
     },
     "installed": {
       "title": "Instalováno na této budově",

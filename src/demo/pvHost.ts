@@ -16,18 +16,18 @@ function capacity(area: number, usableShare: number): number {
   return Number((area * usableShare * KWP_PER_M2).toFixed(1));
 }
 
-/** A demo product with the constraint keys EnerPlanET's pv_supply carries, plus a module size. */
+/** A demo product with the constraint keys EnerPlanET's pv_supply carries, plus a module size. "%" values are stored 0 to 1, as there. */
 function demoProduct(id: string, model: string, module: [number, number, number], costPerKw: number): TechnologyProduct {
-  const values: [string, number | string, string?][] = [
+  const values: [string, number | string, string?, number?, number?][] = [
     ['module_width_m', module[0], 'm'], ['module_height_m', module[1], 'm'], ['module_power_kwp', module[2], 'kWp'],
     ['cost_energy_cap', costPerKw, 'EUR/kW'], ['cost_om_annual', 10, 'EUR/kW/year'], ['cont_lifetime', 25, 'years'],
-    ['cost_interest_rate', 0.05], ['cont_energy_cap_max_systemwide', 'INF', 'kW'],
-    ['losses', 14, '%'], ['dc_ac_ratio', 1.2], ['inv_eff', 96, '%'], ['module_type', 'standard'],
+    ['cost_interest_rate', 0.05, '%', 0, 1], ['cont_energy_cap_max_systemwide', 'INF', 'kW'],
+    ['losses', 0.14, '%', 0, 1], ['dc_ac_ratio', 1.2, undefined, 1, 2], ['inv_eff', 0.96, '%', 0, 1], ['module_type', 'standard'],
   ];
   return {
     id, key: `pv_supply_${id}`, type: 'pv_supply', manufacturer: 'Demo', model,
-    constraints: values.map(([key, default_value, unit]) => ({
-      key, default_value, unit,
+    constraints: values.map(([key, default_value, unit, min, max]) => ({
+      key, default_value, unit, min, max,
       ...(key === 'module_type' && { options: ['standard', 'premium', 'thin_film'] }),
     })),
   };
