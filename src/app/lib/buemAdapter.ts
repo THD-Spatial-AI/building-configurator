@@ -45,16 +45,17 @@ export interface BuildingIdentity {
   storeysModelled?: number[];
 }
 
+/** A carrier's annual kWh is absent when the run computed no series for it, as when it is switched off. */
 export interface ThermalSummary {
-  heatingKwh: number;
-  coolingKwh: number;
-  electricityKwh: number;
+  heatingKwh?: number;
+  coolingKwh?: number;
+  electricityKwh?: number;
   peakHeatingKw: number;
   peakCoolingKw: number;
   /** Absent when the source carries none, as the stored demand profile does not. */
   energyIntensityKwhM2?: number;
   /** Domestic hot water, kWh — absent (0) on results predating BuEM's v6-draft hot_water/kitchen fields. */
-  dhwKwh: number;
+  dhwKwh?: number;
   /** Cooking gas demand, a different fuel channel from the electric kWh above, kept in kWh_gas rather than summed with it. Absent when BuEM computed none. */
   kitchenGasKwh?: number;
   /** BuEM's own heating+cooling+electricity+hot_water total — gas deliberately excluded. */

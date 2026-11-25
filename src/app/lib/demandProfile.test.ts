@@ -40,9 +40,10 @@ describe('toThermalSummary', () => {
     expect(toThermalSummary({ building_ref: 'x', series: [heating] }).heatingKwh).toBe(10);
   });
 
-  it('reads an absent series as zero, and no kitchen series as none', () => {
+  it('reads an absent series, such as a switched-off carrier, as none, and leaves it out of the total', () => {
     const summary = toThermalSummary({ building_ref: 'x', series: [series('heating', 10)] });
-    expect(summary.coolingKwh).toBe(0);
+    expect(summary.coolingKwh).toBeUndefined();
+    expect(summary.dhwKwh).toBeUndefined();
     expect(summary.totalEnergyKwh).toBe(10);
     expect(summary.kitchenGasKwh).toBeUndefined();
   });

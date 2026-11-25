@@ -39,7 +39,7 @@ export interface BuildingDemandProfile {
 /** The annual totals and peaks the energy card reads, from the whole-building series. */
 export function toThermalSummary(profile: BuildingDemandProfile): ThermalSummary {
   const find = (name: string) => profile.series.find((s) => s.name === name && !s.part);
-  const total = (name: string) => find(name)?.total ?? 0;
+  const total = (name: string) => find(name)?.total;
   const heatingKwh = total('heating');
   const coolingKwh = total('cooling');
   const electricityKwh = total('electricity');
@@ -53,6 +53,6 @@ export function toThermalSummary(profile: BuildingDemandProfile): ThermalSummary
     peakHeatingKw: find('heating')?.peak ?? 0,
     peakCoolingKw: find('cooling')?.peak ?? 0,
     // Matches BuEM's total_energy_demand: kitchen is a gas channel and stays out.
-    totalEnergyKwh: heatingKwh + coolingKwh + electricityKwh + dhwKwh,
+    totalEnergyKwh: (heatingKwh ?? 0) + (coolingKwh ?? 0) + (electricityKwh ?? 0) + (dhwKwh ?? 0),
   };
 }
