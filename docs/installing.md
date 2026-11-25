@@ -230,6 +230,12 @@ default_value, min?, max?, options? }` with `"INF"` for an unbounded value.
 
 A key the product does not carry is not shown, and any other key is never shown.
 
+A number field shows its `min` and `max` beside its label. A value outside
+them is flagged and not passed to `onConstraintChange`; a limit that is not a
+finite number, such as `"INF"`, is ignored. A constraint whose `unit` contains
+`%` is stored 0 to 1: the field shows it times 100, applies `min` and `max` to
+the shown value, and passes `onConstraintChange` the typed value divided by 100.
+
 ### Module layout
 
 The view places whole modules on each surface from its polygon and draws them
